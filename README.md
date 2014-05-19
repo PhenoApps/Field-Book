@@ -9,7 +9,6 @@ Trevor Rife - trife@ksu.edu
 ### Libraries
 * [ActionBarSherlock](https://github.com/JakeWharton/ActionBarSherlock)
 
-
 ## License
     Licensed under the GNU General Public License version 2 (GPLv2)
     You may obtain a copy of the License at
