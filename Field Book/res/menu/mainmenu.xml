@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<menu xmlns:android="http://schemas.android.com/apk/res/android" >   
+	    <item android:id="@+id/help" android:title="@string/help" android:showAsAction="always" />  
+		<item android:id="@+id/settings" android:title="@string/settings" android:showAsAction="never" />"
+		<item android:id="@+id/search" android:title="@string/search" android:showAsAction="always" />"
+		<item android:id="@+id/map" android:title="@string/map" android:showAsAction="never" />"
+		<item android:id="@+id/resources" android:title="@string/resources" android:showAsAction="always" />"
+		<item android:id="@+id/quit" android:title="@string/quit" android:showAsAction="never" />"	
+	</menu>
+

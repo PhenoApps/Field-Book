@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+	android:orientation="vertical"  
+	android:background="#FFFFFF"
+ >
+
+        <LinearLayout
+            android:id="@+id/formatbox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp" >
+
+	        <TextView
+	            android:text="@string/format"
+	            android:layout_width="150dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+	            android:textStyle="bold" />
+            
+            <Spinner
+                android:id="@+id/format"
+                android:layout_width="400dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#FFFFFF"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+            
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/traitbox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp" >
+
+	        <TextView
+	            android:text="@string/trait"
+	            android:layout_width="150dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+	            android:textStyle="bold" />
+            
+	        <EditText
+	            android:id="@+id/trait"
+	            android:layout_width="400dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:imeOptions="actionNext"
+	            android:inputType="textCapWords"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+			/>
+            
+        </LinearLayout>
+    
+        <LinearLayout
+            android:id="@+id/defbox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp" >
+
+	        <TextView
+	            android:text="@string/def"
+	            android:layout_width="150dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+	            android:textStyle="bold" />
+            
+	        <EditText
+	            android:id="@+id/def"
+	            android:layout_width="400dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:imeOptions="actionNext"
+	            android:inputType="textCapWords"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+			/>
+            
+        	<Button
+                android:id="@+id/dDateBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"                
+                android:minWidth="130dp"
+                android:visibility="gone"
+                android:text="@string/pick"
+                android:textColor="#000000"
+                android:textSize="16dp"
+                android:textStyle="bold" />
+        		        
+        	<ToggleButton      
+        	    android:id="@+id/boolBtn"           
+        	    android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16dp"
+                android:textOn="@string/truevalue"                
+                android:textOff="@string/falsevalue"
+                android:visibility="gone"
+        	    />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/minbox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp" >
+
+	        <TextView
+	            android:text="@string/minimum"
+	            android:layout_width="150dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+	            android:textStyle="bold" />
+            
+	        <EditText
+	            android:id="@+id/minimum"
+	            android:layout_width="400dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:imeOptions="actionNext"
+	            android:inputType="textCapWords"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+			/>
+
+        	<Button
+                android:id="@+id/minDateBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"                
+                android:minWidth="130dp"
+                android:text="@string/pick"
+                android:visibility="gone"
+                android:textColor="#000000"
+                android:textSize="16dp"
+                android:textStyle="bold" />
+	        	        
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/maxbox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp" >
+
+	        <TextView
+	            android:text="@string/maximum"
+	            android:layout_width="150dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+	            android:textStyle="bold" />
+            
+	        <EditText
+	            android:id="@+id/maximum"
+	            android:layout_width="400dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:imeOptions="actionNext"
+	            android:inputType="textCapWords"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+			/>
+            
+        	<Button
+                android:id="@+id/maxDateBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"                
+                android:minWidth="130dp"
+                android:text="@string/pick"
+                android:visibility="gone"
+                android:textColor="#000000"
+                android:textSize="16dp"
+                android:textStyle="bold" />
+	        	        
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/detailsbox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp" >
+
+	        <TextView
+	            android:text="@string/details"
+	            android:layout_width="150dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+	            android:textStyle="bold" />
+            
+	        <EditText
+	            android:id="@+id/details"
+	            android:layout_width="400dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:imeOptions="actionNext"
+	            android:inputType="textCapWords"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+			/>
+            
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/categorybox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp" >
+
+	        <TextView
+	            android:text="@string/categories"
+	            android:layout_width="150dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+	            android:textStyle="bold" />
+            
+	        <EditText
+	            android:id="@+id/categories"
+	            android:layout_width="400dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:imeOptions="actionNext"
+	            android:inputType="textCapWords"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+	            android:hint="@string/catseparator"
+			/>
+            
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:gravity="center_horizontal"
+		>
+                    
+        	<Button
+                android:id="@+id/saveBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"                
+                android:minWidth="150dp"
+                android:text="@string/save"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+
+        	<Button
+                android:id="@+id/closeBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"                
+                android:minWidth="150dp"
+                android:text="@string/close"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+        		
+		</LinearLayout>
+	        	
+</LinearLayout>

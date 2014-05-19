@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/layout_border"  
+    android:padding="5dp"  
+    android:orientation="vertical" >
+
+
+	<TextView 
+	    android:id="@+id/header"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:textColor="#000000"
+		android:minWidth="130dp"
+		android:textStyle="bold"
+        android:layout_marginLeft="6dip"
+		android:textAppearance="?android:attr/textAppearanceMedium"
+	/>
+    
+	<TextView 
+	    android:id="@+id/text2"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:textColor="#000000"
+		android:text=""
+		android:minWidth="130dp"
+		android:layout_below="@+id/header"
+        android:layout_marginLeft="6dip"
+		android:textAppearance="?android:attr/textAppearanceMedium"
+	/>
+    
+    <Button
+        android:id="@+id/prev"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/text2"
+        android:layout_alignParentLeft="true"
+        android:text="@string/prev"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+	/>
+    <Button
+        android:id="@+id/close"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/text2"
+        android:layout_centerHorizontal="true"
+        android:text="@string/close"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+	/>
+    
+    <Button
+        android:id="@+id/next"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/text2"
+        android:layout_alignParentRight="true"
+        android:text="@string/next"
+        android:textColor="#000000"
+        android:textSize="16dp"
+        android:textStyle="bold" />
+    
+</RelativeLayout>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:padding="20dp" >
+
+    <TextView
+        android:id="@+id/version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Version"
+        android:textColor="@color/s_text"
+        android:textSize="25dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Developers"
+        android:textColor="#000000"
+        android:textSize="25dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerJesse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dip"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Jesse Poland, USDA-ARS"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerJesseEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dip"
+        android:autoLink="email"
+        android:paddingBottom="5dp"
+        android:paddingLeft="10dp"
+        android:text="Email: jpoland@ksu.edu"
+        android:textColor="#000000"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerJesseSite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dip"
+        android:autoLink="web"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Site: http://wheatgenetics.org"
+        android:textColor="#000000"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerTrevor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dip"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Trevor Rife, Kansas State University"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerTrevorEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dip"
+        android:autoLink="email"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Email: trife@ksu.edu"
+        android:textColor="#000000"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerTp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dip"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Technology Projects"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerTpMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dip"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Solutions for mobile clients (Android, iOS, Blackberry, Windows Phone), server (Microsoft / Enterprise Java) as well as cloud based computing (Google / Amazon)."
+        android:textColor="#000000"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerTpEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dip"
+        android:autoLink="email"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Email: technologyprojects@gmail.com"
+        android:textColor="#000000"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/translatorMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Translators"
+        android:textColor="#000000"
+        android:textSize="25dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/translatorIFB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dip"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Irazema Fuentes-Bueno (Spanish)"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/translatorSD"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dip"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Sandra Dunckel (German)"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="20dp"
+        android:layout_height="30dp"
+        android:text=""
+        android:textColor="@color/s_text"
+        android:textSize="48dp"
+        android:textStyle="bold"
+        android:visibility="invisible" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/closeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:minWidth="150dp"
+            android:text="@string/okay"
+            android:textColor="#000000"
+            android:textSize="30dp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:gridlayout="http://schemas.android.com/apk/res/com.fieldbook.tracker"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:background="#FFFFFF"
+    android:orientation="vertical" >
+
+		<LinearLayout
+			android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="right"
+		>
+
+                    <TextView
+                        android:id="@+id/segmenth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingLeft="5dp"
+                        android:layout_gravity="left|center_vertical"
+                        android:textColor="@color/s_text"
+                        android:textSize="16dp"
+                        android:textStyle="bold" />
+		    		    
+                    <TextView
+                        android:id="@+id/segment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingRight="5dp"
+                        android:layout_gravity="left|center_vertical"
+                        android:textColor="@color/s_text"
+                        android:textSize="16dp"
+                        android:textStyle="bold" />
+		    		    
+			<Button
+				android:id="@+id/mapClose"
+				android:layout_gravity="right"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"                
+		        android:text="@string/close"
+		        android:textColor="#000000"
+		        android:textSize="16dp"
+		        android:textStyle="bold" />
+		    		    
+			<Button
+				android:id="@+id/mapParameter"
+				android:layout_gravity="right"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"                
+		        android:text="@string/configure"
+		        android:textColor="#000000"
+		        android:textSize="16dp"
+		        android:textStyle="bold" />
+		    		    
+			<Button
+				android:id="@+id/mapAnalyze"	
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"                
+		        android:text="@string/mapanalyze"
+		        android:textColor="#000000"
+		        android:textSize="16dp"
+		        android:textStyle="bold" />
+
+			<Button
+				android:id="@+id/mapExport"	
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"                
+		        android:text="@string/mapexport"
+		        android:textColor="#000000"
+		        android:textSize="16dp"
+		        android:textStyle="bold" />
+						
+		</LinearLayout>
+		
+				<com.fieldbook.tracker.GridLayout 
+				    android:id="@+id/map"	    
+				    android:layout_gravity="center_horizontal"
+				    android:layout_width="520dp"
+				    android:layout_height="wrap_content"
+				    android:scrollbars="horizontal"				    
+				    android:background="#fffaf0"
+				    android:rowOrderPreserved="true"
+				    android:columnOrderPreserved="true"
+				/>
+				
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" >
+
+            <ImageView
+                android:id="@+id/traitLeft"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:paddingRight="5dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/l_arrow" />
+
+            <Spinner
+                android:id="@+id/mapTrait"
+                android:layout_width="360dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
+            />
+
+            <ImageView
+                android:id="@+id/traitRight"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="5dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/r_arrow" />
+        </LinearLayout>
+
+	    <RelativeLayout 
+		    android:layout_width="wrap_content"
+		    android:layout_height="200dp"	
+		    android:paddingLeft="5dp"
+	    >
+	        
+			<ImageView
+				android:id="@+id/upBtn"
+		        android:layout_width="136dp"
+		        android:layout_height="41dp"                
+		        android:src="@drawable/ups"
+		        android:focusable="false"
+		    />
+	        	        
+			<ImageView
+				android:id="@+id/leftBtn"
+		        android:layout_width="41dp"
+		        android:layout_height="55dp"                
+		        android:src="@drawable/lefts"
+		        android:focusable="false"
+		        android:layout_below="@+id/upBtn"
+		    />
+
+		<View
+		    android:id="@+id/center"
+	        android:layout_width="52dp"
+	        android:layout_height="wrap_content"
+	        android:layout_toRightOf="@+id/leftBtn"                
+		/>
+					
+			<ImageView
+				android:id="@+id/rightBtn"
+		        android:layout_width="41dp"
+		        android:layout_height="55dp"                
+		        android:src="@drawable/rights"
+		        android:focusable="false"
+		        android:layout_below="@+id/upBtn"
+		        android:layout_toRightOf="@+id/center"
+		    />
+			
+                <LinearLayout
+                    android:id="@+id/r1"
+                    android:layout_toRightOf="@+id/rightBtn"
+                    android:paddingLeft="50dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:id="@+id/rangeName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="100dp"
+                        android:paddingRight="5dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/range"
+                        android:textColor="@color/s_text"
+                        android:textSize="25dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/range"
+                        android:layout_width="120dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="   "
+                        android:singleLine="true"
+                        android:textColor="#000000"
+                        android:textSize="25dp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                	
+                <LinearLayout
+					android:id="@+id/r2"
+					android:paddingLeft="50dp"
+                    android:layout_toRightOf="@+id/rightBtn"
+                    android:layout_below="@+id/r1"                    
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="5dp" >
+
+                    <TextView
+                        android:id="@+id/plotName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="100dp"
+                        android:paddingRight="5dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/plot"
+                        android:textColor="@color/s_text"
+                        android:textSize="25dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/plot"
+                        android:layout_width="120dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="   "
+                        android:singleLine="true"
+                        android:textColor="#000000"
+                        android:textSize="25dp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+					android:id="@+id/r3"
+					android:paddingLeft="50dp"
+                    android:layout_toRightOf="@+id/rightBtn"
+                    android:layout_below="@+id/r2"                    
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="5dp" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="100dp"
+                        android:paddingRight="5dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/currentvalue"
+                        android:textColor="@color/s_text"
+                        android:textSize="18dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="100dp"
+                        android:paddingRight="5dp"
+                        android:layout_gravity="center_vertical"
+                        android:textColor="@color/s_text"
+                        android:textSize="25dp"
+                        android:textStyle="bold" />
+                    
+					<Button
+						android:id="@+id/mapSummary"	
+				        android:layout_width="wrap_content"
+				        android:layout_height="wrap_content"                
+				        android:text="@string/mapsummary"
+				        android:textColor="#000000"
+				        android:textSize="16dp"
+				        android:textStyle="bold" />
+                    
+                </LinearLayout>
+                		
+			<ImageView
+				android:id="@+id/downBtn"
+				android:scaleType="center"
+		        android:layout_width="136dp"
+		        android:layout_height="41dp"                
+		        android:src="@drawable/down2s"
+		        android:focusable="false"
+		        android:layout_below="@+id/rightBtn"
+		    />
+																			        
+	    </RelativeLayout>	                
+	    	    
+</LinearLayout>

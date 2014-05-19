@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Field Book</string>
+    <string name="settings">Settings</string>
+	<string name="search">Search</string>
+    <string name="resources">Resources</string>
+    <string name="audio">Audio</string>
+    <string name="language">Change language</string>
+    <string name="about">About</string>
+    <string name="quit">Quit</string>
+    
+	<string name="traitdetails">Trait Details:</string>
+	<string name="area">Area</string>
+	<string name="range">Range</string>
+	<string name="plot">Plot</string>
+	<string name="currentvalue">Current Value</string>
+	<string name="add">Add</string>
+	<string name="clear">Clear</string>
+	<string name="close">Close</string>
+	<string name="minusday">-1 Day</string>
+	<string name="enter">Enter</string>
+	<string name="plusday">+1 Day</string>
+	
+    <string name="record">Record</string>
+    <string name="discardrecording">Discard</string>
+    <string name="saveas">Save As</string>
+    <string name="okay">OK</string>
+    <string name="stop">Stop</string>
+	
+	<string name="deletefile">Delete file</string>
+	<string name="areyousure">Are you sure?</string>
+	
+	<string name="yes">Yes</string>
+	<string name="no">No</string>
+	
+	<string name="genericerror">Error</string>
+	<string name="valueless">Value cannot be less than</string>
+	<string name="valuemore">Value cannot be more than</string>
+	<string name="updatemsg">Change Log</string>
+	<string name="nomatches">No matching range</string>
+		
+	<string name="warning">Warning</string>
+
+	<string name="choosetraits">Choose Traits</string>	
+	<string name="exportas">Export As</string>
+	<string name="exporterror">Error during export</string>
+	<string name="exportcomplete">Export complete</string>
+	<string name="personsetup">Person Setup</string>
+	<string name="locationsetup">Location Setup</string>
+	<string name="about">About</string>
+	
+	<string name="currentsettings">Setup</string>
+	<string name="clearsettings">Clear All Settings</string>
+	<string name="settingsremoved">Settings have been cleared</string>
+	<string name="setup">Setup</string>
+	<string name="importdb">Import</string>
+	<string name="export">Export</string>
+	
+	<string name="firstname">First Name</string>
+	<string name="lastname">Last Name</string>
+	
+	<string name="person">Person</string>
+	<string name="location">Location</string>
+	<string name="fields">Fields</string>
+	<string name="fieldslist">List Imported Fields</string>
+	<string name="traits">Traits</string>
+	<string name="none">None</string>
+	<string name="current">Current</string>
+	
+	<string name="latitude">Latitude: </string>
+	<string name="longitude">Longitude: </string>
+	<string name="getlocation">Get Location</string>
+	
+	<string name="ignoreentries">Ignore entries with data</string>		
+	
+	<string name="dbformat">Database Format</string>
+	<string name="tableformat">Table Format</string>
+	<string name="filename">Filename</string>
+	
+	<string name="drop1">InfoBar 1</string>
+	<string name="drop2">InfoBar 2</string>
+	<string name="drop3">InfoBar 3</string>
+	
+	<string name="rate">Select Traits To Rate</string>
+	 
+	<string name="currentColumn">Current column</string>
+	
+	<string name="map">Toggle Map</string>
+	<string name="mapconfig">Configure Map</string>
+	<string name="configure">Configure</string>
+	
+	<string name="trait">Trait</string>
+	
+	<string name="direction">First Plot In</string>
+	
+	<string name="topleft">Top Left</string>
+	<string name="btmleft">Bottom Left</string>
+	<string name="topright">Top Right</string>
+	<string name="btmright">Bottom Right</string>
+	
+	<string name="mapanalyze">Analyze</string>
+	<string name="mapexport">Export</string>
+	<string name="serpentine">Serpentine</string>
+	<string name="zigzag">Zig Zag</string>
+	<string name="orientation">Orientation</string>
+			
+	<string name="addsearch">Add</string>
+	
+	<string name="equalsto">Is Equals To</string>
+	<string name="notequalsto">Is Not Equals To</string>
+	<string name="islike">Contains</string>
+	<string name="notislike">Does Not Contain</string>
+	<string name="morethan">Is More Than</string>
+	<string name="lessthan">Is Less Than</string>
+	
+	<string name="searchempty">Search did not return results</string>
+	
+	<string name="importunique">Unique ID</string>
+	<string name="importfirst">1st Level Division</string>
+	<string name="importsecond">2nd Level Division</string>
+	<string name="importextra">Extra Information</string>
+    
+	<string name="importcsv">Import Field File (CSV)</string>
+	<string name="importexcel">Import Field File (Excel)</string>
+	<string name="importtrait">Import Trait File</string>
+	<string name="importfields">Import Fields</string>
+	<string name="importmsg"><big><b>Importing..Please Wait</b></big></string>
+	<string name="importerror">Error importing</string>
+	<string name="importuniqueerror">Unique identifier has duplicates</string>
+	
+	<string name="choosefieldfile">Choose Field File</string>
+	<string name="choosetraitfile">Choose Trait File</string>
+	
+	<string name="addtrait">Add Trait</string>
+	<string name="traiteditor">Trait Editor</string>
+	<string name="language">Language</string>
+	
+	<string name="trait">Trait Name</string>
+	<string name="format">Format</string>
+	<string name="def">Default</string>
+	<string name="minimum">Minimum</string>
+	<string name="maximum">Maximum</string>
+	<string name="details">Details</string>
+	<string name="categories">Categories</string>
+	
+	<string name="save">Save</string>
+	<string name="pick">Pick</string>
+	
+	<string name="numeric">Numeric</string>
+	<string name="qualitative">Qualitative</string>
+	<string name="date">Date</string>
+	<string name="percent">Percent</string>
+	<string name="bool">Boolean</string>
+	<string name="text">Text</string>
+	
+	<string name="up">Up</string>
+	<string name="down">Down</string>
+	<string name="copy">Copy</string>
+	<string name="del">Del</string>
+	
+	<string name="mandatorytrait">Trait cannot be empty</string>
+	<string name="traitexists">Duplicate trait</string>
+	<string name="deletetrait">Delete trait</string>
+	<string name="deletealltraits">Delete All</string>
+	<string name="areyousure">Are you sure?</string>
+	<string name="resetcomplete">Database is now in a default state (empty)</string>
+	
+	<string name="notanumber">Default, Minimum and Maximum must be numeric</string>
+	<string name="notemptycategory">Category cannot be empty</string>
+	<string name="truevalue">True</string>
+	<string name="falsevalue">False</string>
+	
+	<string name="advanced">Advanced Settings</string>
+	<string name="listfieldimport">List Imported Fields</string>
+	
+	<string name="chooseunique">Choose only one unique identifier</string>
+	<string name="choosefirst">Choose only one First Order Organization</string>
+	<string name="choosesecond">Choose only one Second Order Organization</string>
+	
+	<string name="catseparator">Separate items using /</string>
+		
+	<string name="resetnext">Database will be loaded when the app is next started</string>
+	
+	<string name="nodata">No data</string>
+	<string name="nocolumns">No columns selected</string>
+	<string name="noexportcheck">Type of export not selected</string>
+	
+	<string name="results">Search Results</string>
+	
+	<string name="tips">Enable / Disable Tips</string>
+	<string name="cycle">Cycle Trait Advances Plot</string>
+	<string name="enablemap">Enable Map View</string>
+	<string name="useday">Use Day of Year instead of Date</string>
+	
+	<string name="help">Help</string>
+	<string name="analyzewait">Processing...</string>
+	<string name="mapexportwait">Processing...</string>
+	
+	<string name="columnfail">Column names have illegal characters</string>
+	<string name="prev">Previous</string>
+	<string name="next">Next</string>
+	
+	<string name="stored">Stored</string>
+	<string name="copy">Copy</string>
+	<string name="optional">Optional</string>
+	<string name="savetrait">Save Trait</string>
+	
+	<string name="exportmsg"><big><b>Exporting..Please Wait</b></big></string>
+	
+	<string name="english">English</string>
+	<string name="spanish">Español</string>
+	<string name="german">German</string>
+	
+	<string name="tutorial">Tutorial</string>
+	
+	<string name="tipshort">Tips</string>
+	
+	<string name="help1">Use the HELP menu items to learn about Field Book</string>
+	<string name="help2">Turn on Tips and Hints in the Advanced Settings</string>
+		
+	<string name="mhelp1">The InfoBars are at the top of the screen and show the data from each column that was chosen in the Setup menu.</string>
+	<string name="mhelp2">The black, large arrows allow movement between plots. The small, blue arrows change the active trait.</string>
+	<string name="mhelp3">Pressing the trait name shows all traits that are currently enabled.</string>
+	<string name="mhelp4">Both the plot and range text areas are “quick search” boxes that can be used to quickly migrate to a specific field location.</string>
+	<string name="mhelp5">The "Search" button on the top menu allows the internal database to be queried.</string>
+
+	<string name="shelp1">To import the sample field file, choose Fields. Both CSV and XLS files can be imported.</string>		
+	<string name="shelp2">Choose the sample file. In the Import Fields dialog, the columns of the file are listed on the left and their data type is on the right. A given file must contain three columns: a plot unique identifier, 1st level division, and 2nd level division. All other columns are considered Extra Information.</string>
+	<string name="shelp3">To set up traits to be measured, choose Traits.</string>
+	<string name="shelp4">To prepare the app for data collection, choose Setup.</string>
+	<string name="shelp5">In the Setup dialog, Person is the person collecting the data, Location are the coordinates associated with the field, Traits allows the user to show or hide traits on the main screen, and InfoBars allow the user to display three additional Extra Information columns on the main screen.</string>
+	<string name="shelp6">Now that the app is set up to collect data, press the back button in the top left corner to see the main screen. An additional tutorial is available there.</string>
+	
+	<string name="thelp1">To add a trait, press the Add Trait on the menu bar.</string>
+	<string name="thelp2">It is not possible to use the keyboard and tutorial at the same time. There are several different formats available for data collection.</string>
+	<string name="thelp3">To import premade trait files, press the menu bar and choose Import.</string>
+	<string name="thelp4">For additional information about trait construction, consult the app manual online.</string>
+	
+	<string name="mapsummary">Summary</string>
+	
+</resources>

@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Field Book</string>
+    <string name="settings">Ajustes</string>
+	<string name="search">Buscar</string>
+    <string name="resources">Recursos</string>
+    <string name="audio">Archivos de Audio</string>
+    <string name="language">Cambiar Idioma</string>
+    <string name="about">Acerca de</string>
+    <string name="quit">Salir</string>
+    
+	<string name="traitdetails">Detalle de características</string>
+	<string name="area">Área</string>
+	<string name="range">Rango</string>
+	<string name="plot">Lote</string>
+	<string name="currentvalue">Valor Actual</string>
+	<string name="add">Añadir</string>
+	<string name="clear">Borrar</string>
+	<string name="close">Cerrar</string>
+	<string name="minusday">-1 Día</string>
+	<string name="enter">Enter</string>
+	<string name="plusday">+1 Día</string>
+	
+    <string name="record">Grabar</string>
+    <string name="discardrecording">Eliminar</string>
+    <string name="saveas">Guardar Como</string>
+    <string name="okay">OK</string>
+    <string name="stop">Detener</string>
+	
+	<string name="deletefile">Borrar Archivo</string>
+	<string name="areyousure">Seguro(a)?</string>
+	
+	<string name="yes">Sí</string>
+	<string name="no">No</string>
+	
+	<string name="genericerror">Error</string>
+	<string name="valueless">Valor no puede ser menos que</string>
+	<string name="valuemore">Valor no puede ser mayor que</string>
+	<string name="updatemsg">Cambiar Bitácora</string>
+	<string name="nomatches">Rango no coincide</string>
+		
+	<string name="warning">Aviso</string>
+
+	<string name="choosetraits">Elegir características</string>	
+	<string name="exportas">Exportar como</string>
+	<string name="exporterror">Error durante exportación</string>
+	<string name="exportcomplete">Exportación completa</string>
+	<string name="personsetup">Determinar usuario</string>
+	<string name="locationsetup">Determinar ubicación</string>
+	<string name="about">Acerca de</string>
+	
+	<string name="currentsettings">Configuración actual</string>
+	<string name="clearsettings">Borrar todas las configuraciones</string>
+	<string name="settingsremoved">Configuraciones se han borrado</string>
+	<string name="setup">Configuración</string>
+	<string name="importdb">Importar</string>
+	<string name="export">Exportar</string>
+	
+	<string name="firstname">Nombre</string>
+	<string name="lastname">Apellido</string>
+	
+	<string name="person">Persona</string>
+	<string name="location">Ubicación</string>
+	<string name="fields">Campos</string>
+	<string name="fieldslist">Lista de Campos Importados</string>
+	<string name="traits">Características</string>
+	<string name="none">Ninguno(a)</string>
+	<string name="current">Actual</string>
+	
+	<string name="latitude">Latitud: </string>
+	<string name="longitude">Longitud: </string>
+	<string name="getlocation">Obtener ubicación</string>
+	
+	<string name="ignoreentries">Ignorar entradas con datos</string>		
+	
+	<string name="dbformat">Formato de base de datos</string>
+	<string name="tableformat">Formato de tabla</string>
+	<string name="filename">Nombre de archivo</string>
+	
+	<string name="drop1">Barra desplegable 1</string>
+	<string name="drop2">Barra desplegable 2</string>
+	<string name="drop3">Barra desplegable 3</string>
+	
+	<string name="rate">Selecionar características a evaluar</string>
+	 
+	<string name="currentColumn">Columna actual</string>
+	
+	<string name="map">Mostrar Mapa</string>
+	<string name="mapconfig">Configurar Mapa</string>
+	<string name="configure">Configurar</string>
+	
+	<string name="trait">Característica</string>
+	
+	<string name="direction">Primer Lote en</string>
+	
+	<string name="topleft">Superior izquierda</string>
+	<string name="btmleft">Inferior izquierda</string>
+	<string name="topright">Superior derecha</string>
+	<string name="btmright">Inferior derecha</string>
+	
+	<string name="mapanalyze">Analizar mapa</string>
+	<string name="mapexport">Exportar mapa</string>
+	<string name="serpentine">Serpentina</string>
+	<string name="zigzag">Zig Zag</string>
+	<string name="orientation">Orientacióm</string>
+			
+	<string name="addsearch">Añadir</string>
+	
+	<string name="equalsto">Es igual a</string>
+	<string name="notequalsto">No es igual a</string>
+	<string name="islike">Es como</string>
+	<string name="notislike">No es como</string>
+	<string name="morethan">Es mayor que</string>
+	<string name="lessthan">Es menor que</string>
+	
+	<string name="searchempty">Búsqueda no encontró resultados</string>
+	
+	<string name="importunique">Identificador</string>
+	<string name="importfirst">División de 1er Orden</string>
+	<string name="importsecond">Divisió de 2do Orden</string>
+	<string name="importextra">Información adicional</string>
+    
+	<string name="importcsv">Importar archivo de campos (CSV)</string>
+	<string name="importexcel">Importar archivo de campos (Excel)</string>
+	<string name="importtrait">Importar archivo de características</string>
+	<string name="importfields">Importar Campos</string>
+	<string name="importmsg"><big><b>Importando...</b></big></string>
+	<string name="importerror">Error durante importación</string>
+	<string name="importuniqueerror">Identificador tiene duplicados</string>
+	
+	<string name="choosefieldfile">Escoger archivo de campo</string>
+	<string name="choosetraitfile">Escoger archivo de características</string>
+	
+	<string name="addtrait">Agregar característica</string>
+	<string name="traiteditor">Editar característica</string>
+	<string name="language">Idioma</string>
+	
+	<string name="trait">Nombre de Característica</string>
+	<string name="format">Formato</string>
+	<string name="def">Default</string>
+	<string name="minimum">Mínimo</string>
+	<string name="maximum">Máximo</string>
+	<string name="details">Detalles</string>
+	<string name="categories">Categorías</string>
+	
+	<string name="save">Guardar</string>
+	<string name="pick">Escoger</string>
+	
+	<string name="numeric">Numérico</string>
+	<string name="qualitative">Qualitativo</string>
+	<string name="date">Fecha</string>
+	<string name="percent">Porcentaje</string>
+	<string name="bool">Lógico</string>
+	<string name="text">Texto</string>
+	
+	<string name="up">Arriba</string>
+	<string name="down">Abajo</string>
+	<string name="copy">Copiar</string>
+	<string name="del">Eliminar</string>
+	
+	<string name="mandatorytrait">Característica no puede estar en blanco</string>
+	<string name="traitexists">Duplicar característica</string>
+	<string name="deletetrait">Eliminar característica</string>
+	<string name="deletealltraits">Eliminar todo</string>
+	<string name="areyousure">Seguro(a)?</string>
+	<string name="resetcomplete">Base de datos está vacío</string>
+	
+	<string name="notanumber">Estándar, Mínimo y Máximo deben ser numéricos</string>
+	<string name="notemptycategory">Categorís no puede estar vacía</string>
+	<string name="truevalue">Verdadero</string>
+	<string name="falsevalue">Falso</string>
+	
+	<string name="advanced">Configuración Avanzada</string>
+	<string name="listfieldimport">Lista de Campos Importados</string>
+	
+	<string name="chooseunique">Escoja solo un identificador</string>
+	<string name="choosefirst">Escoja solo una Organización de Primer Orden</string>
+	<string name="choosesecond">Escoja solo una Organización de Segundo Orden</string>
+	
+	<string name="catseparator">Separar artículos usando /</string>
+		
+	<string name="resetnext">Base de datose será cargado cuando el app inicie la próxima vez</string>
+	
+	<string name="nodata">No hay datos</string>
+	<string name="nocolumns">No hay columnas seleccionadas</string>
+	<string name="noexportcheck">Tipo de exportación no fue seleccionado</string>
+	
+	<string name="results">Buscar Resultados</string>
+	
+	<string name="tips">Habiliar / Inhabilatar Tips</string>
+	<string name="cycle">Ciclo Característica Avanzar Lote</string>
+	<string name="enablemap">Habilitar vista del mapa</string>
+	<string name="useday">Usar día del año en lugar de fecha</string>
+	
+	<string name="help">Ayuda</string>
+	<string name="analyzewait">Procesando...</string>
+	<string name="mapexportwait">Procesando...</string>
+	
+	<string name="columnfail">Columna tiene nombres con caracteres no permitidos</string>
+	<string name="prev">Anterior</string>
+	<string name="next">Siguiente</string>
+	
+	<string name="stored">Guardado</string>
+	<string name="copy">Copiar</string>
+	<string name="optional">Opcional</string>
+	<string name="savetrait">Guardar Característica</string>
+	
+	<string name="exportmsg"><big><b>Exportando...</b></big></string>
+	
+	<string name="english">English</string>
+	<string name="spanish">Español</string>
+	<string name="german">Alemán</string>
+		
+	<string name="tutorial">Tutorial</string>
+	<string name="tipshort">Tips</string>
+	
+	<string name="help1">Use el menú "AYUDA" para conocer más acerca de Field Book</string>
+	<string name="help2">Active Tips y Sugerencias en Opciones Avanzadas</string>
+		
+	<string name="mhelp1">Las barras desplegables en la parte superior de la pantalla muestran los datos de la columna escogida o seleccionada.</string>
+	<string name="mhelp2">Las grandes flechas negras permiten la transición entre lotes, el orden aparecerá por fila. Las pequeñas flechas azules cambian la característica a evaluar o que ya fueron evaluadas.</string>
+	<string name="mhelp3">Presionando sobre el nombre de la característica muestra todas aquellas que hayan sido seleccionadas para evaluar.</string>
+	<string name="mhelp4">El texto "lote" y "rango" activan una búsqueda rápida. El uso de ellas facilita la transición a la ubicación específica en un campo.</string>
+	<string name="mhelp5">El botón de "Buscar" en el menu superior permite la búsqueda de cualquier dato guardado en el archivo a trabajar.</string>
+
+	<string name="shelp1">Para importar un ejemplo de archivo de campo escoja "Campos". Archivos con extesión CSV y XLS están permitidos, escoja la extensión adecuada.</string>		
+	<string name="shelp2">Ahora se muestra el cuadro para escoger el archivo de campo, presione en el ejemplo. En "Importar Campos", las columnas del archivo aparecerán a la izquierda. El tipo de dato se mostrará a la derecha. El archivo deberá contener tres columnas: identificador de lote, división de primer orden y división de segundo orden. Las demás columnas serán consideradas información adicional.</string>
+	<string name="shelp3">Para configurar las características a evaluar, escoja "Características".</string>
+	<string name="shelp4">Para finalizar la configuración de los datos a evaluar escoja "Configuración".</string>
+	<string name="shelp5">En el menú "Configuración": "Persona" es la persona que hará/registrará los datos evaluados, "Ubicación" son las coordenadas asociadas al campo, "Características" permite al usuario escoger las características a evaluar en la pantalla principal, "Barra desplegable" permite al usuario mostrar tres columnas de información adicional en la pantalla principal.</string>
+	<string name="shelp6">Ahora el app está configurado para registrar sus evaluaciones, presione "Atrás" para ver la pantalla principal. Un tutorial adicional estará disponible ahí. , press the back button in the top left corner to see the main screen. An additional tutorial is available there.</string>
+	
+	<string name="thelp1">Para agregar una característica, presione "Agregar característica" en la Barra de Menú.</string>
+	<string name="thelp2">No es posible usar el teclado y el tutorial al mismo tiempo. Dependiendo la característica a evaluar el tipo de dato registrado será distinto.</string>
+	<string name="thelp3">Para importar archivos de características previamente hechas, presione "Importar" en la barra de menú en la esquina superior derecha. Esta barra de menú es un cuadro muy pequeño.</string>
+	<string name="thelp4">Para demás información sobre construcción de características consulte el manual en línea.</string>
+	
+	<string name="mapsummary">Resumen</string>
+	
+</resources>

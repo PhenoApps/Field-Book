@@ -1,0 +1,8 @@
+Field Book v2.0 New Features
+-	New user interface
+-	Built-in tutorial
+-	Trait builder
+-	Import XLS
+-	Field map and analysis
+-	Translations: Spanish, German
+-	Bug fixes

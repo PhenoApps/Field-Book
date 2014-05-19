@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:padding="5dp" >
+
+    <CheckBox 
+    	android:id="@+id/formatDB"    	
+    	android:text="@string/dbformat"  
+    	android:textAppearance="?android:attr/textAppearanceLarge"
+    	android:textColor="#000000"  
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+    />
+
+    <CheckBox 
+    	android:id="@+id/formatExcel"
+    	android:textAppearance="?android:attr/textAppearanceLarge"
+    	android:textColor="#000000"
+    	android:text="@string/tableformat"    
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+    />
+    
+    <ListView
+        android:id="@+id/myList"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/filename"
+        android:textColor="@color/s_text"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/fileName"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="450dp"
+        android:layout_height="wrap_content"
+        android:maxLength="200"
+        android:singleLine="true"
+        android:textColor="#000000"
+	/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_height="wrap_content"
+        android:text="@string/filename"
+        android:textStyle="bold"
+        android:visibility="invisible" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingTop="10dp"
+        android:orientation="horizontal" >
+    
+		    <Button
+		        android:id="@+id/saveBtn"        
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_gravity="center"
+		        android:minWidth="100dp"
+		        android:text="@string/okay"
+		        android:textColor="#000000"
+		        android:textSize="30dp"
+		        android:textStyle="bold" />
+
+		    <Button
+		        android:id="@+id/closeBtn"        
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_gravity="center"
+		        android:minWidth="100dp"
+		        android:text="@string/close"
+		        android:textColor="#000000"
+		        android:textSize="30dp"
+		        android:textStyle="bold" />
+		    
+	   </LinearLayout>		    
+</LinearLayout>

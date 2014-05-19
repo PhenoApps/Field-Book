@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="240dp"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:padding="20dp" >
+    
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp" >
+
+	        <TextView
+	            android:text="@string/direction"
+	            android:layout_width="150dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+	            android:textStyle="bold" />
+            
+            <Spinner
+                android:id="@+id/direction"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:textSize="20dp"
+                android:textStyle="bold" />            
+            
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp" >
+
+	        <TextView
+	            android:text="@string/orientation"
+	            android:layout_width="150dp"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="right"
+	            android:paddingRight="10dp"
+	            android:textColor="#000000"
+	            android:textSize="20dp"
+	            android:textStyle="bold" />
+            
+            <Spinner
+                android:id="@+id/orientation"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:textSize="20dp"
+                android:textStyle="bold" />            
+            
+        </LinearLayout>
+        
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:paddingTop="20dp"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/saveBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:minWidth="100dp"
+            android:text="@string/okay"
+            android:textColor="#000000"
+            android:textSize="30dp"
+            android:textStyle="bold" />
+        
+        <View
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"                        
+        />
+        
+        <Button
+            android:id="@+id/clearBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:minWidth="100dp"
+            android:text="@string/clear"
+            android:textColor="#000000"
+            android:textSize="30dp"
+            android:textStyle="bold" />
+        
+    </LinearLayout>
+
+</LinearLayout>

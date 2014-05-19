@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Feldbuch</string>
+    <string name="settings">Einstellungen</string>
+	<string name="search">Suche</string>
+    <string name="resources">Resourcen</string>
+    <string name="audio">Audio</string>
+    <string name="language">Sprache</string>
+    <string name="about">Information</string>
+    <string name="quit">Verlassen</string>
+    
+	<string name="traitdetails">Details bezueglich Eigenschaften der Kulturpflanze:</string>
+	<string name="area">Flaeche</string>
+    <string name="range">Reihe</string>
+	<string name="plot">Parzelle</string>
+	<string name="currentvalue">Aktueller Wert</string>
+	<string name="add">Hinzufuegen</string>
+	<string name="clear">Loeschen</string>
+	<string name="close">Schliessen</string>
+	<string name="minusday">-1 Tag</string>
+	<string name="enter">Eingabe</string>
+	<string name="plusday">+1 Tag</string>
+	
+    <string name="record">Aufnahme</string>
+    <string name="discardrecording">Verwerfen</string>
+    <string name="saveas">Speichern als</string>
+    <string name="okay">OK</string>
+    <string name="stop">Stop</string>
+	
+	<string name="deletefile">Datei loeschen</string>
+	<string name="areyousure">Sind Sie sicher?</string>
+	
+	<string name="yes">Ja</string>
+	<string name="no">Nein</string>
+	
+	<string name="genericerror">Fehler</string>
+	<string name="valueless">Der Wert darf nicht kleiner sein als</string>
+	<string name="valuemore">Der Wert darf nicht groesser sein als</string>
+	<string name="updatemsg">Version erfolgreich aktualisiert</string>
+	<string name="nomatches">Reihen stimmen nicht ueberein</string>
+		
+	<string name="warning">Warnung</string>
+
+	<string name="choosetraits">Waehlen Sie Eigenschaften aus</string>	
+	<string name="exportas">Exportieren als</string>
+	<string name="exporterror">Fehler waehrend dem Exportieren</string>
+	<string name="exportcomplete">Export komplett</string>
+	<string name="personsetup">Einstellungen Person</string>
+	<string name="locationsetup">Einstellungen Standort </string>
+	<string name="about">Information</string>
+	
+	<string name="currentsettings">Einstellung</string>
+	<string name="clearsettings">Alle Einstellungen loeschen</string>
+	<string name="settingsremoved">Alle Einstellungen wurden geloescht</string>
+	<string name="setup">Einstellung</string>
+	<string name="importdb">Import</string>
+	<string name="export">Export</string>
+	
+	<string name="firstname">Vorname</string>
+	<string name="lastname">Nachname</string>
+	
+	<string name="person">Person</string>
+	<string name="location">Standort</string>
+	<string name="fields">Felder</string>
+	<string name="fieldslist">Liste importierter Felder</string>
+	<string name="traits">Eigenschaften</string>
+	<string name="none">Keine</string>
+	<string name="current">Aktuell</string>
+	
+	<string name="latitude">Breitengrad: </string>
+	<string name="longitude">Laengengrad: </string>
+	<string name="getlocation">Lokalisieren</string>
+	
+	<string name="ignoreentries">Ignoriere Parzellen die bereits Daten enthalten</string>		
+	
+	<string name="dbformat">Datenbank Format</string>
+	<string name="tableformat">Tabellen Format</string>
+	<string name="filename">Dateiname</string>
+	
+	<string name="drop1">InfoBar 1</string>
+	<string name="drop2">InfoBar 2</string>
+	<string name="drop3">InfoBar 3</string>
+	
+	<string name="rate">Waehlen Sie zu bewertende Eigenschaften</string>
+	 
+	<string name="currentColumn">Aktuelle Spalte</string>
+	
+	<string name="map">Karte aktivieren</string>
+	<string name="mapconfig">Karte konfigurieren</string>
+	<string name="configure">Konfigurieren</string>
+	
+	<string name="trait">Eigenschaft</string>
+	
+	<string name="direction">Erste Parzelle in</string>
+	
+	<string name="topleft">Oben links</string>
+	<string name="btmleft">Unten links</string>
+	<string name="topright">Oben rechts</string>
+	<string name="btmright">Unten rechts</string>
+	
+	<string name="mapanalyze">Analysieren</string>
+	<string name="mapexport">Exportieren</string>
+	<string name="serpentine">Serpentine</string>
+	<string name="zigzag">Zig Zag</string>
+	<string name="orientation">Orientation</string>
+			
+	<string name="addsearch">Hinzufuegen</string>
+	
+	<string name="equalsto">ist gleich wie</string>
+	<string name="notequalsto">ist nicht gleich wie</string>
+	<string name="islike">beinhaltet</string>
+	<string name="notislike">beinhaltet nicht</string>
+	<string name="morethan">Ist mehr als</string>
+	<string name="lessthan">Ist weniger als</string>
+	
+	<string name="searchempty">Die Suche hat kein Resultat ergeben</string>
+	
+	<string name="importunique">Einzigartige ID</string>
+	<string name="importfirst">Division der erster Ebene (Design)</string>
+	<string name="importsecond">Division der zweiter Ebene (Design)</string>
+	<string name="importextra">Extra Information</string>
+    
+	<string name="importcsv">Import der Felddatei (CSV)</string>
+	<string name="importexcel">Import der Felddatei (Excel)</string>
+	<string name="importtrait">Import der Eigenschftendatei</string>
+	<string name="importfields">Import Felder</string>
+	<string name="importmsg"><big><b>Am importieren..Bitte warten</b></big></string>
+	<string name="importerror">Fehler beim Importieren</string>
+	<string name="importuniqueerror">Duplikat fuer einzigartige ID gefunden</string>
+	
+	<string name="choosefieldfile">Wahlen Sie die Felddatei</string>
+	<string name="choosetraitfile">Wahlen Sie die Eigenschaftendatei</string>
+	
+	<string name="addtrait">Eigenschaft hinzufuegen</string>
+	<string name="traiteditor">Eigenschaften Editor</string>
+	<string name="language">Sprache</string>
+	
+	<string name="trait">Name der Eigenschaft</string>
+	<string name="format">Format</string>
+	<string name="def">Vorgabe</string>
+	<string name="minimum">Minimum</string>
+	<string name="maximum">Maximum</string>
+	<string name="details">Details</string>
+	<string name="categories">Kategorien</string>
+	
+	<string name="save">Speichern</string>
+	<string name="pick">Waehlen</string>
+	
+	<string name="numeric">Numerisch</string>
+	<string name="qualitative">Qualitativ</string>
+	<string name="date">Datum</string>
+	<string name="percent">Prozent</string>
+	<string name="bool">Boolean</string>
+	<string name="text">Text</string>
+	
+	<string name="up">Nach oben</string>
+	<string name="down">Nach unten</string>
+	<string name="copy">Kopieren</string>
+    <string name="del">Loeschen</string>
+	
+	<string name="mandatorytrait">Es muss ein Wert fuer diese Eigenschaft eingegeben werden</string>
+	<string name="traitexists">Eigenschaft existiert bereits</string>
+	<string name="deletetrait">Eigenschaft loeschen</string>
+	<string name="deletealltraits">Alles loeschen</string>
+	<string name="areyousure">Sind Sie sicher?</string>
+	<string name="resetcomplete">Die Datenbank ist nun in der Standardeinstallung (leer)</string>
+	
+	<string name="notanumber">Standard, Minimum und Maximum muessen numerisch sein</string>
+	<string name="notemptycategory">Kategorie muss einen Wert enthalten</string>
+	<string name="truevalue">Korrekt</string>
+	<string name="falsevalue">Falsch</string>
+	
+	<string name="advanced">Erweiterte Einstellungen</string>
+	<string name="listfieldimport">Auflistung importierter Felder</string>
+	
+	<string name="chooseunique">Es darf nur eines ausgewaehlt werden</string>
+	<string name="choosefirst">Es darf nur eine Division der erster Ebene (Design) ausgewaehlt werden</string>
+	<string name="choosesecond">Es darf nur eine Division der zweiten Ebene (Design) ausgewaehlt werdenn</string>
+	
+	<string name="catseparator">Separierung der Levels durch "/" notwendig</string>
+		
+	<string name="resetnext">Die Datenbank wird aktualisiert beim naechsten Start der Applikation</string>
+	
+	<string name="nodata">Keine Daten vorhanden</string>
+	<string name="nocolumns">Es wurden keine Spalten ausgewahelt</string>
+	<string name="noexportcheck">Format der Datei fuer Export wurde nicht ausgewahelt</string>
+	
+	<string name="results">Ergebnisse der Suche</string>
+	
+	<string name="tips">Aktivieren / Deaktivieren der Tips</string>
+	<string name="cycle">Cycle Trait Advances Plot</string>
+	<string name="enablemap">Kartenansicht aktivieren</string>
+	<string name="useday">Benutze Tag im Jahr anstelle Datum</string>
+	
+	<string name="help">Hilfe</string>
+	<string name="analyzewait">Am Arbeiten...</string>
+	<string name="mapexportwait">Am Arbeiten...</string>
+	
+	<string name="columnfail">Spaltenname enhaelt ein Zeichen welches nicht gebraucht werden darf</string>
+	<string name="prev">Vorangehend</string>
+	<string name="next">Folgend</string>
+	
+	<string name="stored">Gespeichert</string>
+	<string name="copy">Kopieren</string>
+	<string name="optional">Optional</string>
+	<string name="savetrait">Eigenschaft speichern</string>
+	
+	<string name="exportmsg"><big><b>Am exportieren..Bitte warten</b></big></string>
+	
+	<string name="english">English</string>
+	<string name="spanish">Español</string>
+    <string name="german">Deutsch</string>
+	
+	<string name="tutorial">Tutorial</string>
+	
+	<string name="tipshort">Tips</string>
+	
+	<string name="help1">Im Menu "Hilfe" finden sie hilfreiche Tips zum Feldbuch</string>
+	<string name="help2"> Aktiviere Tips und Tricks in den Erweiterten Einstellungen</string>
+		
+	<string name="mhelp1">Die InfoBars befinden sich oben im Bildschirm und zeigen Daten von jeder Spalte die im Menu Einstellungen gewahlt worden ist.</string>
+	<string name="mhelp2">Mit Hilfe der schwarzen, grossen Pfeile bewegt man sich von einer Parzelle zur naechsten. Die kleinen, blauen Pfeile erlauben zwischen verschiedenen Eigenschaften zu wechseln.</string>
+	<string name="mhelp3">Durch Druecken des Namen einer Eigenschaft werden alle momentan aktivierten Eigenschaften angezeigt.</string>
+	<string name="mhelp4">"Parzelle" und "Reihe" sind fuer die Schnellsuche aktiviert und ermoeglichen die schnelle Fortbewegung im Feld zu einer spezifischen Parzelle.</string>
+	<string name="mhelp5">"Suche" im Hauptmenu ermoeglicht eine Suche in der internen Datenbank der Appliaktion.</string>
+
+	<string name="shelp1">Um die Feldbeispielsdatei zu importieren, druecke "Felder". Es kann CSV oder XLS Datein importiert werden.</string>		
+	<string name="shelp2">Waehle die Beispielsdatei. Choose the sample file. In the Import Fields dialog, the columns of the file are listed on the left and their data type is on the right. A given file must contain three columns: a plot unique identifier, 1st level division, and 2nd level division. All other columns are considered Extra Information.</string>
+	<string name="shelp3">Um zu bewertende Eigenschaften zu aktivieren, waehle "Eigenschaften".</string>
+	<string name="shelp4">Um die Applikation fuer die Datenerfassung vorzubereiten, waehle "Einstellungen"</string>
+	<string name="shelp5">In den Einstellugnen bezieht sich "Person" auf die Person die die Daten erfaesst, "Standort" zeigt die mit dem Feld assoziierten Koordianten an, unter "Eigenschaften" kann man Eigenschaften der Kulturpflanze auswahlen die auf dem Bildschirm angezeigt werden sollen, und die InfoBars erlauben drei weitere, nutzerdefinierte Spalten mit information anzuzeigen.</string>
+	<string name="shelp6">Nun ist die Applikation bereit zur Datenerfassung. Durch druecekn des Rueckwaertspfeiles oben link gelangt man zum Hauptbildschirm der Applikation. Auf dem Hauptbildschirm kann ein weiteres Tutorial gefunden werden. </string>
+	
+	<string name="thelp1">Um eine Eigenschaft hinzuzufuegen, druecke "Eigenschaft hinzufuegen" oben im Menu.</string>
+	<string name="thelp2">Es ist nicht moeglich die Tastatur und das Tutorial zur gleichen Zeit zu benuetzen. Es koennen verschiedene Dateitypen zur Datenerfassung benuetzt werden.</string>
+	<string name="thelp3">Um bereits vorhandene Eigenschaftsendatein zu importieren, waehle "Import" oben im Menu.</string>
+	<string name="thelp4">Weitere Informationen bezueglich der Eigenschaftendatei und wie man sie zusammestellen kann, koennen im online Handbuch gefunden werden.</string>
+	
+	<string name="mapsummary">Inhalt</string>
+	
+</resources>
