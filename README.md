@@ -7,7 +7,9 @@ Trevor Rife - trife@ksu.edu
 
 ### Contributors
 Jesse Poland
+
 Irazema Fuentes-Bueno
+
 Sandra Dunckel
 
 ## License
