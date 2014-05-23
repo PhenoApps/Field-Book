@@ -2,7 +2,13 @@
 Field Book is an Android application that can be used to collect field data. It uses a novel collection system that only displays a single cell to be collected at a time.
 
 ## Acknowledgements
+### Developers
 Trevor Rife - trife@ksu.edu
+
+### Contributors
+Jesse Poland
+Irazema Fuentes-Bueno
+Sandra Dunckel
 
 ## License
     Licensed under the GNU General Public License version 2 (GPLv2)
