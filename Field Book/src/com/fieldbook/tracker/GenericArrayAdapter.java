@@ -17,11 +17,11 @@ import android.widget.TextView;
  */
 public class GenericArrayAdapter extends ArrayAdapter<String> {
 
-    Context context; 
-    int layoutResourceId;    
+    Context context;
+    int layoutResourceId;
     String data[] = null;
     OnItemClickListener listener;
-    
+
     public GenericArrayAdapter(Context context, int layoutResourceId, String[] data, OnItemClickListener listener) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
@@ -34,15 +34,25 @@ public class GenericArrayAdapter extends ArrayAdapter<String> {
     public View getView(final int position, View convertView, final ViewGroup parent) {
         View row = convertView;
         Holder holder = null;
-        
+
         if(row == null)
         {
             LayoutInflater inflater = ((Activity)context).getLayoutInflater();
             row = inflater.inflate(layoutResourceId, parent, false);
-            
+
             holder = new Holder();
             holder.txt = (TextView)row.findViewById(R.id.spinnerTarget);
-            
+
+            holder.txt.setOnClickListener(new OnClickListener(){
+
+                public void onClick(View v) {
+                    // bubble up touch events
+                    // This is necessary for controls such as the listview or spinner to work
+                    // with the tips / hints when it is visible
+                    listener.onItemClick((AdapterView) parent, v, position, v.getId());
+                }
+            });
+
             row.setTag(holder);
         }
         else
@@ -50,21 +60,11 @@ public class GenericArrayAdapter extends ArrayAdapter<String> {
             holder = (Holder)row.getTag();
         }
 
-        holder.txt.setOnClickListener(new OnClickListener(){
-
-			public void onClick(View v) {
-				// bubble up touch events
-				// This is necessary for controls such as the listview or spinner to work 
-				// with the tips / hints when it is visible					
-				listener.onItemClick((AdapterView) parent, v, position, v.getId());
-			}
-		});
-                
         holder.txt.setText(data[position]);
-        
+
         return row;
     }
-    
+
     static class Holder
     {
         TextView txt;

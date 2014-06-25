@@ -41,4 +41,15 @@
 	      <item name="android:textSize">16dp</item>
 	 </style>
 
+    <style name="Dialog.SectionTitles" parent="android:Theme.Dialog">
+        <item name="android:textSize">22dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#ff33b5e5</item>
+    </style>
+
+    <style name="Dialog.SectionSubtitles" parent="android:Theme.Dialog">
+        <item name="android:textSize">18dp</item>
+    </style>
+
+
 </resources>

@@ -874,29 +874,11 @@ public class ConfigActivity extends SherlockActivity {
 		
 		if (!ep.getBoolean("UpdateShown", false))
 		{
-			// Show latest updates
-			AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
-			
-		    builder.setTitle(getString(R.string.updatemsg));
-		    builder.setMessage(readRawTextFile(ConfigActivity.this, R.raw.changelog));
+            Intent intent = new Intent();
+            intent.setClass(ConfigActivity.this, ChangelogActivity.class);
 
-		    builder.setPositiveButton(getString(R.string.okay), new DialogInterface.OnClickListener() 
-		    {
-
-		        public void onClick(DialogInterface dialog, int which) 
-		        {
-		        	Editor ed = ep.edit();
-		        	ed.putBoolean("UpdateShown", true);				        	
-		        	ed.commit();
-		        	
-		        	dialog.dismiss();	
-		        }
-
-		    });
-	    
-		    AlertDialog alert = builder.create();
-		    alert.show();			
-		}		
+            startActivity(intent);
+		}
 	}
 	
 	// Only used for truncating lat long values

@@ -87,6 +87,11 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Dialog" />
+        <activity
+            android:name="ChangelogActivity"
+            android:theme="@style/Theme.Dialog"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"/>
     </application>
 
 </manifest>
