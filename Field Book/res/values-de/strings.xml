@@ -7,7 +7,6 @@
     <string name="resources">Resourcen</string>
     <string name="audio">Audio</string>
     <string name="language">Sprache</string>
-    <string name="about">Information</string>
     <string name="quit">Verlassen</string>
     
 	<string name="traitdetails">Details bezueglich Eigenschaften der Kulturpflanze:</string>
@@ -134,9 +133,7 @@
 	
 	<string name="addtrait">Eigenschaft hinzufuegen</string>
 	<string name="traiteditor">Eigenschaften Editor</string>
-	<string name="language">Sprache</string>
-	
-	<string name="trait">Name der Eigenschaft</string>
+
 	<string name="format">Format</string>
 	<string name="def">Vorgabe</string>
 	<string name="minimum">Minimum</string>
@@ -163,7 +160,6 @@
 	<string name="traitexists">Eigenschaft existiert bereits</string>
 	<string name="deletetrait">Eigenschaft loeschen</string>
 	<string name="deletealltraits">Alles loeschen</string>
-	<string name="areyousure">Sind Sie sicher?</string>
 	<string name="resetcomplete">Die Datenbank ist nun in der Standardeinstallung (leer)</string>
 	
 	<string name="notanumber">Standard, Minimum und Maximum muessen numerisch sein</string>
@@ -202,7 +198,6 @@
 	<string name="next">Folgend</string>
 	
 	<string name="stored">Gespeichert</string>
-	<string name="copy">Kopieren</string>
 	<string name="optional">Optional</string>
 	<string name="savetrait">Eigenschaft speichern</string>
 	

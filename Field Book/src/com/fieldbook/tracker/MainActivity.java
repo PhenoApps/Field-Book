@@ -1,35 +1,11 @@
 package com.fieldbook.tracker;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.nio.channels.FileChannel;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
-
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -54,27 +30,43 @@ import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnFocusChangeListener;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.LinearLayout.LayoutParams;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
+
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Main entry point. All main screen logic resides here
@@ -275,6 +267,9 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
 
     private EditText exportFile;
 
+    private final int TRIGGER_SERACH = 1;
+    private final long SEARCH_TRIGGER_DELAY_IN_MS = 750;
+
     private TextView dpi;
 
     private boolean[] init;
@@ -446,6 +441,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
             public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_DOWN) {
                     rangeRight.performClick();
+
                     return true;
                 }
 
@@ -456,24 +452,29 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         // Validates the text entered for numeric format
         eNumUpdate = new TextWatcher() {
 
-            public void afterTextChanged(Editable en) {
+            public void afterTextChanged(final Editable en) {
+                Timer timer=new Timer();
+                final long DELAY = 750; // in ms
+
                 try {
-                    int val = Integer.parseInt(eNum.getText().toString());
-
-                    if (currentTrait.minimum.length() > 0)
-                    {
-                        if (val < Integer.parseInt(currentTrait.minimum)) {
-                            Toast.makeText(
-                                    MainActivity.this,
-                                    getString(R.string.valueless) + " "
-                                            + currentTrait.minimum,
-                                    Toast.LENGTH_LONG).show();
-
-                            en.clear();
-                            removeTrait(currentTrait.trait);
-                            return;
+                    final int val = Integer.parseInt(eNum.getText().toString());
+                    timer.cancel();
+                    timer = new Timer();
+                    timer.schedule(new TimerTask() {
+                        public void run() {
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    if (currentTrait.minimum.length() > 0) {
+                                        if (val < Integer.parseInt(currentTrait.minimum)) {
+                                            en.clear();
+                                            removeTrait(currentTrait.trait);
+                                            return;
+                                        }
+                                    }
+                                }
+                            });
                         }
-                    }
+                    }, DELAY);
 
                     if (currentTrait.maximum.length() > 0)
                     {
@@ -520,7 +521,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
 
             public void afterTextChanged(Editable en) {
 
-                if (en.toString().length() > 0) {
+                if (en.toString().length() >= 0) {
                     if (newTraits != null & currentTrait != null)
                         updateTrait(currentTrait.trait, "text", en.toString());
                 }
@@ -528,6 +529,8 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
                     if (newTraits != null & currentTrait != null)
                         newTraits.remove(currentTrait.trait);
                 }
+                tNum.setSelection(tNum.getText().length());
+
             }
 
             public void beforeTextChanged(CharSequence arg0, int arg1,
@@ -645,9 +648,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
                 {
                     tNum.removeTextChangedListener(tNumUpdate);
                     tNum.setText("");
-
                     removeTrait(currentTrait.trait);
-
                     tNum.addTextChangedListener(tNumUpdate);
                 }
                 else
@@ -1348,6 +1349,9 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         rangeLeft.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
+
+
+
                 if (rangeID != null && rangeID.length > 0) {
                     //index.setEnabled(true);
 
@@ -2161,6 +2165,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
                         qPicker.setVisibility(LinearLayout.GONE);
 
                         tNum.setVisibility(EditText.VISIBLE);
+                        tNum.setSelection(tNum.getText().length());
                         tNum.setEnabled(true);
 
                         kb.setVisibility(View.GONE);
@@ -2188,6 +2193,8 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
                             tNum.setTextColor(Color.parseColor(displayColor));
 
                             tNum.addTextChangedListener(tNumUpdate);
+                            tNum.setSelection(tNum.getText().length());
+
 
                         } else {
                             tNum.removeTextChangedListener(tNumUpdate);
@@ -2200,11 +2207,12 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
                                 tNum.setText(currentTrait.defaultValue);
 
                             tNum.addTextChangedListener(tNumUpdate);
+                            tNum.setSelection(tNum.getText().length());
+
                         }
 
                         // This is needed to fix the keyboard bug
                         mHandler.postDelayed(new Runnable() {
-
                             public void run() {
                                 tNum.dispatchTouchEvent(MotionEvent.obtain(
                                         SystemClock.uptimeMillis(),
@@ -2214,10 +2222,9 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
                                         SystemClock.uptimeMillis(),
                                         SystemClock.uptimeMillis(),
                                         MotionEvent.ACTION_UP, 0, 0, 0));
+                                tNum.setSelection(tNum.getText().length());
                             }
-
                         }, 300);
-
                     }
                     else if (currentTrait.format.equals("numeric")) {
                         qPicker.setVisibility(LinearLayout.GONE);

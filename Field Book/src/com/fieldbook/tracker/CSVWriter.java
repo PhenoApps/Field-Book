@@ -1,12 +1,12 @@
 package com.fieldbook.tracker;
 
+import android.database.Cursor;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Calendar;
-
-import android.database.Cursor;
 
 /**
  * Custom CSV Writing Class

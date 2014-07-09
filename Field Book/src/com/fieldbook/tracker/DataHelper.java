@@ -1,5 +1,16 @@
 package com.fieldbook.tracker;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,21 +21,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.AssetManager;
-import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteStatement;
-import android.os.Environment;
-import android.util.Log;
 
 /**
  * All database related functions are here
@@ -135,15 +133,14 @@ public class DataHelper {
     }
 
 
-
     /**
      * Helper function to change visibility of a trait. Used in the ratings
      * screen
      */
     public void updateTraitVisibility(String trait, boolean val) {
         this.db.execSQL("update " + TRAITS
-                + " set isVisible = ? where trait like ?", new String[] {
-                String.valueOf(val), trait });
+                + " set isVisible = ? where trait like ?", new String[]{
+                String.valueOf(val), trait});
     }
 
     /**
@@ -217,7 +214,7 @@ public class DataHelper {
     public void deleteAllBoolean(String parent) {
         try {
             this.db.delete(USER_TRAITS, "parent like ? and trait like ?",
-                    new String[] { parent, "boolean" });
+                    new String[]{parent, "boolean"});
         } catch (Exception e) {
 
         }
@@ -226,18 +223,16 @@ public class DataHelper {
     /**
      * V2 - Convert array to String
      */
-    public String arrayToString(String table, String[] s)
-    {
+    public String arrayToString(String table, String[] s) {
         String value = "";
 
-        for (int i = 0; i < s.length; i++)
-        {
+        for (int i = 0; i < s.length; i++) {
             if (table.length() > 0)
                 value += table + "." + s[i];
             else
                 value += s[i];
 
-            if (i < s.length-1)
+            if (i < s.length - 1)
                 value += ",";
         }
 
@@ -258,7 +253,8 @@ public class DataHelper {
                                 "user_traits.rid = range." + ep.getString("ImportUniqueName", "") +
                                 " and user_traits.parent = traits.trait and " +
                                 "user_traits.trait = traits.format and user_traits.userValue is not null",
-                        null);
+                        null
+                );
 
         return cursor;
     }
@@ -281,14 +277,14 @@ public class DataHelper {
      * Used when exporting to Excel format by matching column and trait
      * v1.6 - Amended to consider both trait and format
      */
-    public String getSingleValue(String col, String trait)
-    {
+    public String getSingleValue(String col, String trait) {
         Cursor cursor = this.db
                 .rawQuery(
                         "select user_traits.rid, traits.trait, user_traits.userValue from user_traits, " +
                                 "traits where user_traits.parent = traits.trait and user_traits.trait = traits.format " +
                                 "and user_traits.userValue is not null and rid = '" + col + "' " +
-                                "and traits.trait = '" + trait + "'", null);
+                                "and traits.trait = '" + trait + "'", null
+                );
 
         String val = "";
 
@@ -311,7 +307,7 @@ public class DataHelper {
         String[] data = null;
 
         Cursor cursor = this.db.query(RANGE,
-                new String[] { ep.getString("ImportUniqueName", "") }, null, null, null, null,
+                new String[]{ep.getString("ImportUniqueName", "")}, null, null, null, null,
                 ep.getString("ImportUniqueName", ""));
 
         int count = 0;
@@ -340,8 +336,8 @@ public class DataHelper {
     public String[] getVisibleTrait() {
         String[] data = null;
 
-        Cursor cursor = this.db.query(TRAITS, new String[] { "id", "trait", "realPosition" },
-                "isVisible like ?", new String[] { "true" }, null, null, "realPosition");
+        Cursor cursor = this.db.query(TRAITS, new String[]{"id", "trait", "realPosition"},
+                "isVisible like ?", new String[]{"true"}, null, null, "realPosition");
 
         int count = 0;
 
@@ -369,8 +365,8 @@ public class DataHelper {
     public String[] getFormat() {
         String[] data = null;
 
-        Cursor cursor = this.db.query(TRAITS, new String[] { "id", "format", "realPosition" },
-                "isVisible like ?", new String[] { "true" }, null, null, "realPosition");
+        Cursor cursor = this.db.query(TRAITS, new String[]{"id", "format", "realPosition"},
+                "isVisible like ?", new String[]{"true"}, null, null, "realPosition");
 
         int count = 0;
 
@@ -398,7 +394,7 @@ public class DataHelper {
     public String[] getAllTraits() {
         String[] data = null;
 
-        Cursor cursor = this.db.query(TRAITS, new String[] { "id", "trait", "realPosition" },
+        Cursor cursor = this.db.query(TRAITS, new String[]{"id", "trait", "realPosition"},
                 null, null, null, null, "realPosition");
 
         int count = 0;
@@ -468,9 +464,10 @@ public class DataHelper {
 
         ArrayList<TraitObject> list = new ArrayList<TraitObject>();
 
-        Cursor cursor = this.db.query(TRAITS, new String[] { "id", "trait", "format", "defaultValue",
-                        "minimum", "maximum", "details", "categories", "isVisible", "realPosition" },
-                null, null, null, null, "realPosition");
+        Cursor cursor = this.db.query(TRAITS, new String[]{"id", "trait", "format", "defaultValue",
+                        "minimum", "maximum", "details", "categories", "isVisible", "realPosition"},
+                null, null, null, null, "realPosition"
+        );
 
         if (cursor.moveToFirst()) {
             do {
@@ -504,8 +501,8 @@ public class DataHelper {
     public HashMap getTraitVisibility() {
         HashMap data = new HashMap();
 
-        Cursor cursor = this.db.query(TRAITS, new String[] { "id", "trait",
-                "isVisible", "realPosition" }, null, null, null, null, "realPosition");
+        Cursor cursor = this.db.query(TRAITS, new String[]{"id", "trait",
+                "isVisible", "realPosition"}, null, null, null, null, "realPosition");
 
         if (cursor.moveToFirst()) {
             do {
@@ -535,9 +532,10 @@ public class DataHelper {
         data.details = "";
         data.categories = "";
 
-        Cursor cursor = this.db.query(TRAITS, new String[] { "trait", "format", "defaultValue", "minimum",
-                        "maximum", "details", "categories", "id" }, "trait like ? and isVisible like ?",
-                new String[] { trait, "true" }, null, null, null);
+        Cursor cursor = this.db.query(TRAITS, new String[]{"trait", "format", "defaultValue", "minimum",
+                        "maximum", "details", "categories", "id"}, "trait like ? and isVisible like ?",
+                new String[]{trait, "true"}, null, null, null
+        );
 
         if (cursor.moveToFirst()) {
             data.trait = cursor.getString(0);
@@ -564,9 +562,10 @@ public class DataHelper {
     public HashMap getUserDetail(String plotId) {
         HashMap data = new HashMap();
 
-        Cursor cursor = this.db.query(USER_TRAITS, new String[] { "parent", "trait",
-                        "userValue", "rid" }, "rid like ?", new String[] { plotId },
-                null, null, null);
+        Cursor cursor = this.db.query(USER_TRAITS, new String[]{"parent", "trait",
+                        "userValue", "rid"}, "rid like ?", new String[]{plotId},
+                null, null, null
+        );
 
         if (cursor.moveToFirst()) {
             do {
@@ -593,7 +592,8 @@ public class DataHelper {
                         "select range.id, user_traits.userValue from user_traits, range where " +
                                 "user_traits.rid = range." + ep.getString("ImportUniqueName", "") +
                                 " and range.id = ? and user_traits.parent like ? and user_traits.trait like ?",
-                        new String[] { String.valueOf(id), parent, trait });
+                        new String[]{String.valueOf(id), parent, trait}
+                );
 
         if (cursor.moveToFirst()) {
             if (cursor.getString(1) != null) {
@@ -612,7 +612,7 @@ public class DataHelper {
      * Returns the primary key for all ranges
      */
     public int[] getAllRangeID() {
-        Cursor cursor = this.db.query(RANGE, new String[] { "id" }, null, null,
+        Cursor cursor = this.db.query(RANGE, new String[]{"id"}, null, null,
                 null, null, "id");
 
         int[] data = null;
@@ -640,7 +640,7 @@ public class DataHelper {
      * V2 - Used for mapping, returns all plot_id in order
      */
     public String[] getAllPlotID() {
-        Cursor cursor = this.db.query(RANGE, new String[] { ep.getString("ImportUniqueName", "") }, null, null,
+        Cursor cursor = this.db.query(RANGE, new String[]{ep.getString("ImportUniqueName", "")}, null, null,
                 null, null, "id");
 
         String[] data = null;
@@ -670,8 +670,7 @@ public class DataHelper {
      */
     public SearchData[] getRangeBySql2(String sql) {
 
-        try
-        {
+        try {
             Cursor cursor = this.db.rawQuery(sql, null);
 
             SearchData[] data = null;
@@ -700,9 +699,7 @@ public class DataHelper {
             }
 
             return data;
-        }
-        catch (Exception n)
-        {
+        } catch (Exception n) {
             return null;
         }
     }
@@ -713,8 +710,7 @@ public class DataHelper {
      */
     public int[] getRangeBySql(String sql) {
 
-        try
-        {
+        try {
             Cursor cursor = this.db.rawQuery(sql, null);
 
             int[] data = null;
@@ -736,9 +732,7 @@ public class DataHelper {
             }
 
             return data;
-        }
-        catch (Exception n)
-        {
+        } catch (Exception n) {
             return null;
         }
     }
@@ -752,12 +746,12 @@ public class DataHelper {
         if (trait.length() == 0)
             return null;
 
-        try
-        {
-            Cursor cursor = this.db.query(RANGE, new String[] { trait },
+        try {
+            Cursor cursor = this.db.query(RANGE, new String[]{trait},
                     ep.getString("ImportFirstName", "") + " like ? and " +
-                            ep.getString("ImportSecondName", "") + " like ?", new String[] { range, plot },
-                    null, null, null);
+                            ep.getString("ImportSecondName", "") + " like ?", new String[]{range, plot},
+                    null, null, null
+            );
 
             String[] myList = null;
 
@@ -778,9 +772,7 @@ public class DataHelper {
             }
 
             return myList;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -796,10 +788,11 @@ public class DataHelper {
         data.plot_id = "";
         data.range = "";
 
-        Cursor cursor = this.db.query(RANGE, new String[] { ep.getString("ImportFirstName", ""),
+        Cursor cursor = this.db.query(RANGE, new String[]{ep.getString("ImportFirstName", ""),
                         ep.getString("ImportSecondName", ""),
-                        ep.getString("ImportUniqueName", ""), "id" }, "id = ?",
-                new String[] { String.valueOf(id) }, null, null, null);
+                        ep.getString("ImportUniqueName", ""), "id"}, "id = ?",
+                new String[]{String.valueOf(id)}, null, null, null
+        );
 
         if (cursor.moveToFirst()) {
             //data.entry = cursor.getString(0);
@@ -821,10 +814,9 @@ public class DataHelper {
      */
     public int[] getAllRange(String range, String plot) {
 
-        try
-        {
-            Cursor cursor = this.db.query(RANGE, new String[] { "id" },
-                    ep.getString("ImportFirstName", "") + " like ? and " + ep.getString("ImportSecondName", "") + " like ?", new String[] { range, plot },
+        try {
+            Cursor cursor = this.db.query(RANGE, new String[]{"id"},
+                    ep.getString("ImportFirstName", "") + " like ? and " + ep.getString("ImportSecondName", "") + " like ?", new String[]{range, plot},
                     null, null, null);
 
             int[] myList = null;
@@ -846,9 +838,7 @@ public class DataHelper {
             }
 
             return myList;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -860,7 +850,7 @@ public class DataHelper {
     public void deleteTrait(String rid, String parent) {
         try {
             this.db.delete(USER_TRAITS, "rid like ? and parent like ?",
-                    new String[] { rid, parent });
+                    new String[]{rid, parent});
         } catch (Exception e) {
 
         }
@@ -873,7 +863,7 @@ public class DataHelper {
     public void deleteTrait(String id) {
         try {
             this.db.delete(TRAITS, "id = ?",
-                    new String[] { id});
+                    new String[]{id});
         } catch (Exception e) {
 
         }
@@ -917,26 +907,21 @@ public class DataHelper {
     /**
      * V2 - Returns titles of all range columns as a comma delimited string
      */
-    public String getRangeColumnsAsString()
-    {
-        try
-        {
+    public String getRangeColumnsAsString() {
+        try {
             String[] s = getRangeColumns();
 
             String value = "";
 
-            for (int i = 0; i < s.length; i++)
-            {
+            for (int i = 0; i < s.length; i++) {
                 value += s[i];
 
-                if (i < s.length-1)
+                if (i < s.length - 1)
                     value += ",";
             }
 
             return value;
-        }
-        catch (Exception b)
-        {
+        } catch (Exception b) {
             return null;
         }
     }
@@ -944,26 +929,21 @@ public class DataHelper {
     /**
      * V2 - Returns titles of all trait columns as a comma delimited string
      */
-    public String getTraitColumnsAsString()
-    {
-        try
-        {
+    public String getTraitColumnsAsString() {
+        try {
             String[] s = getAllTraits();
 
             String value = "";
 
-            for (int i = 0; i < s.length; i++)
-            {
+            for (int i = 0; i < s.length; i++) {
                 value += s[i];
 
-                if (i < s.length-1)
+                if (i < s.length - 1)
                     value += ",";
             }
 
             return value;
-        }
-        catch (Exception b)
-        {
+        } catch (Exception b) {
             return null;
         }
 
@@ -974,26 +954,21 @@ public class DataHelper {
      * with an additional " " in between each comma
      * This function is used to assist with paragaphing
      */
-    public String getTraitColumnsAsString2()
-    {
-        try
-        {
+    public String getTraitColumnsAsString2() {
+        try {
             String[] s = getAllTraits();
 
             String value = "";
 
-            for (int i = 0; i < s.length; i++)
-            {
+            for (int i = 0; i < s.length; i++) {
                 value += s[i];
 
-                if (i < s.length-1)
+                if (i < s.length - 1)
                     value += ", ";
             }
 
             return value;
-        }
-        catch (Exception b)
-        {
+        } catch (Exception b) {
             return null;
         }
 
@@ -1093,7 +1068,8 @@ public class DataHelper {
                                 "traits where user_traits.rid = range." + ep.getString("ImportUniqueName", "") +
                                 " and user_traits.parent = traits.trait and user_traits.trait = traits.format " +
                                 "and user_traits.userValue is not null and user_traits.parent like '" + trait + "'",
-                        null);
+                        null
+                );
 
         HashMap<Integer, String> data = null;
 
@@ -1120,10 +1096,9 @@ public class DataHelper {
      * V2 - Get the smallest value for a trait
      * Used in analysis only
      */
-    public String getTraitMinimum(String trait)
-    {
+    public String getTraitMinimum(String trait) {
         Cursor cursor = this.db
-                .rawQuery("select minimum from traits where trait = ?", new String[] {trait});
+                .rawQuery("select minimum from traits where trait = ?", new String[]{trait});
 
         String val = "";
 
@@ -1171,7 +1146,7 @@ public class DataHelper {
             ContentValues c = new ContentValues();
             c.put("realPosition", realPosition);
 
-            this.db.update(TRAITS, c, "id = ?", new String[] {id});
+            this.db.update(TRAITS, c, "id = ?", new String[]{id});
 
         } catch (Exception e) {
 
@@ -1193,7 +1168,7 @@ public class DataHelper {
             c.put("details", details);
             c.put("categories", categories);
 
-            return this.db.update(TRAITS, c, "id = ?", new String[] {id});
+            return this.db.update(TRAITS, c, "id = ?", new String[]{id});
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
@@ -1203,12 +1178,11 @@ public class DataHelper {
     /**
      * V2 - Check if trait exists (non case sensitive)
      */
-    public boolean hasTrait(String name)
-    {
+    public boolean hasTrait(String name) {
         boolean exist;
 
         Cursor cursor = this.db.rawQuery("select id from traits where " +
-                "trait = ? COLLATE NOCASE", new String[] {name});
+                "trait = ? COLLATE NOCASE", new String[]{name});
 
         if (cursor.moveToFirst())
             exist = true;
@@ -1226,8 +1200,7 @@ public class DataHelper {
      * V2 - Returns plots for a particular range
      * This is a logical mapping created from database data
      */
-    public SearchData[] getRowForMapPlot(String rid, boolean forward)
-    {
+    public SearchData[] getRowForMapPlot(String rid, boolean forward) {
         String range = ep.getString("ImportFirstName", "");
         String plot = ep.getString("ImportSecondName", "");
 
@@ -1243,8 +1216,7 @@ public class DataHelper {
         else
             count = cursor.getCount() - 1;
 
-        if (cursor.moveToFirst())
-        {
+        if (cursor.moveToFirst()) {
             data = new SearchData[cursor.getCount()];
 
             do {
@@ -1277,8 +1249,7 @@ public class DataHelper {
      * V2 - After generating plots by range, return the data forward (from the first plot)
      * or backwards.
      */
-    public MapData[] arrangePlotByRow(boolean ascending)
-    {
+    public MapData[] arrangePlotByRow(boolean ascending) {
         String range = ep.getString("ImportFirstName", "");
 
         String sql = "select count(" + range + "), " + range + " from range group by " + range +
@@ -1295,8 +1266,7 @@ public class DataHelper {
 
         int count = 0;
 
-        if (cursor.moveToFirst())
-        {
+        if (cursor.moveToFirst()) {
             data = new MapData[cursor.getCount()];
 
             do {
@@ -1324,8 +1294,7 @@ public class DataHelper {
     /**
      * V2 - Check if a string has any special characters
      */
-    public static boolean hasSpecialChars(String s)
-    {
+    public static boolean hasSpecialChars(String s) {
         final Pattern p = Pattern.compile("[()<>/;\\*%$]");
 
         final Matcher m = p.matcher(s);
@@ -1339,8 +1308,7 @@ public class DataHelper {
     /**
      * V2 - Helper function to recreate default table
      */
-    public void defaultFieldTable()
-    {
+    public void defaultFieldTable() {
         db.execSQL("DROP TABLE IF EXISTS " + RANGE);
 
         db.execSQL("CREATE TABLE "

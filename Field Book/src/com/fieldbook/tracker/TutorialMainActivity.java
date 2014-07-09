@@ -1,7 +1,5 @@
 package com.fieldbook.tracker;
 
-import java.util.Locale;
-
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -15,6 +13,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+
+import java.util.Locale;
 
 public class TutorialMainActivity extends Activity
 {	

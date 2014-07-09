@@ -1,26 +1,5 @@
 package com.fieldbook.tracker;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Locale;
-
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -33,38 +12,53 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CheckedTextView;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.Spinner;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
+
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.FilenameFilter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Locale;
+
+import jxl.Workbook;
+import jxl.WorkbookSettings;
 
 /**
  * Settings Screen
@@ -1092,7 +1086,7 @@ public class ConfigActivity extends SherlockActivity {
 						csvWriter.writeFile(newRange, ep.getString("FirstName", "") + "_"
 						+ ep.getString("LastName", ""), ep.getString("Latitude", "") + ";" + 
 						ep.getString("Longitude", ""), ep.getBoolean("UseDay", false));
-
+                        shareFile(file);
 					} catch (Exception e) {
 						fail = true;
 					}
@@ -1126,7 +1120,7 @@ public class ConfigActivity extends SherlockActivity {
 						csvWriter.writeFile2(concat(range, traits), range.length, 
 						MainActivity.dt.findRangeColumns(ep.getString("ImportUniqueName", ""), range), 
 						traits, ep.getBoolean("UseDay", false));
-
+                        shareFile(file);
 					} catch (Exception e) {
 						fail = true;
 					}
@@ -1154,7 +1148,7 @@ public class ConfigActivity extends SherlockActivity {
 						csvWriter.writeFile(newRange, ep.getString("FirstName", "") + "_"
 						+ ep.getString("LastName", ""), ep.getString("Latitude", "") + ";" + 
 						ep.getString("Longitude", ""), ep.getBoolean("UseDay", false));
-
+                        shareFile(file);
 					} catch (Exception e) {
 						fail = true;
 					}
@@ -1189,7 +1183,7 @@ public class ConfigActivity extends SherlockActivity {
 						csvWriter.writeFile2(concat(range, traits), range.length, 
 						MainActivity.dt.findRangeColumns(ep.getString("ImportUniqueName", ""), range), 
 						traits, ep.getBoolean("UseDay", false));
-
+                        shareFile(file);
 					} catch (Exception e) {
 						fail = true;
 					}
@@ -1217,32 +1211,22 @@ public class ConfigActivity extends SherlockActivity {
 						
 		}
 	}
-	
-	// Helper function to read changelog file
-	public static String readRawTextFile(Context contex, int resId)
-	{
-	    InputStream inputStream = contex.getResources().openRawResource(resId);
 
-	    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    /**
+     * Scan file to update file list and share exported file
+     */
+    private void shareFile(File filePath) {
+        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
+        try {
+            startActivity(Intent.createChooser(intent, "Sending File..."));
+        } finally {
+        }
+    }
 
-	    int i;
-	    
-	    try {
-	        i = inputStream.read();
-	        while (i != -1)
-	        {
-	            byteArrayOutputStream.write(i);
-	            i = inputStream.read();
-	        }
-	        inputStream.close();
-	    } 
-	    catch (IOException e) {
-	        return "";
-	    }
-	    
-	    return byteArrayOutputStream.toString();
-	}
-	
 	/**
 	 * Creates a list of all files in directory by type 
 	 */

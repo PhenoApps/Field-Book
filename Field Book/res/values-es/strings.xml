@@ -6,8 +6,6 @@
 	<string name="search">Buscar</string>
     <string name="resources">Recursos</string>
     <string name="audio">Archivos de Audio</string>
-    <string name="language">Cambiar Idioma</string>
-    <string name="about">Acerca de</string>
     <string name="quit">Salir</string>
     
 	<string name="traitdetails">Detalle de características</string>
@@ -29,7 +27,6 @@
     <string name="stop">Detener</string>
 	
 	<string name="deletefile">Borrar Archivo</string>
-	<string name="areyousure">Seguro(a)?</string>
 	
 	<string name="yes">Sí</string>
 	<string name="no">No</string>
@@ -135,8 +132,7 @@
 	<string name="addtrait">Agregar característica</string>
 	<string name="traiteditor">Editar característica</string>
 	<string name="language">Idioma</string>
-	
-	<string name="trait">Nombre de Característica</string>
+
 	<string name="format">Formato</string>
 	<string name="def">Default</string>
 	<string name="minimum">Mínimo</string>
@@ -202,7 +198,6 @@
 	<string name="next">Siguiente</string>
 	
 	<string name="stored">Guardado</string>
-	<string name="copy">Copiar</string>
 	<string name="optional">Opcional</string>
 	<string name="savetrait">Guardar Característica</string>
 	

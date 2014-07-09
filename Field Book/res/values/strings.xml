@@ -6,7 +6,6 @@
 	<string name="search">Search</string>
     <string name="resources">Resources</string>
     <string name="audio">Audio</string>
-    <string name="language">Change language</string>
     <string name="about">About</string>
     <string name="quit">Quit</string>
     
@@ -48,7 +47,6 @@
 	<string name="exportcomplete">Export complete</string>
 	<string name="personsetup">Person Setup</string>
 	<string name="locationsetup">Location Setup</string>
-	<string name="about">About</string>
 	
 	<string name="currentsettings">Setup</string>
 	<string name="clearsettings">Clear All Settings</string>
@@ -135,8 +133,7 @@
 	<string name="addtrait">Add Trait</string>
 	<string name="traiteditor">Trait Editor</string>
 	<string name="language">Language</string>
-	
-	<string name="trait">Trait Name</string>
+
 	<string name="format">Format</string>
 	<string name="def">Default</string>
 	<string name="minimum">Minimum</string>
@@ -156,14 +153,12 @@
 	
 	<string name="up">Up</string>
 	<string name="down">Down</string>
-	<string name="copy">Copy</string>
 	<string name="del">Del</string>
 	
 	<string name="mandatorytrait">Trait cannot be empty</string>
 	<string name="traitexists">Duplicate trait</string>
 	<string name="deletetrait">Delete trait</string>
 	<string name="deletealltraits">Delete All</string>
-	<string name="areyousure">Are you sure?</string>
 	<string name="resetcomplete">Database is now in a default state (empty)</string>
 	
 	<string name="notanumber">Default, Minimum and Maximum must be numeric</string>
