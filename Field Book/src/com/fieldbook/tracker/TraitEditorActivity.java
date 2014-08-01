@@ -88,6 +88,7 @@ public class TraitEditorActivity extends SherlockActivity {
     int currentPosition;
 
     private String local;
+    private String region;
 
     private TraitObject o;
 
@@ -127,30 +128,14 @@ public class TraitEditorActivity extends SherlockActivity {
         ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
-        local = "en";
-
-        switch (ep.getInt("languages", 0)) {
-            case 0:
-                local = "en";
-                break;
-
-            case 1:
-                local = "es";
-                break;
-
-            case 2:
-                local = "de";
-                break;
-
-        }
-
-        // This allows dynamic language change without exiting the app
-        Locale locale2 = new Locale(local);
+        local = ep.getString("language", "en");
+        region = ep.getString("region","");
+        Locale locale2 = new Locale(local,region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
         config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2,
-                getBaseContext().getResources().getDisplayMetrics());
+        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
+                .getDisplayMetrics());
 
         setContentView(R.layout.list);
 

@@ -5,7 +5,6 @@
 	</style>
     
 	<style name="Theme.CustomDialog" parent="Theme.Sherlock.Light.Dialog">
-	    <item name="android:windowFullscreen">true</item>
 	    	    
 	    <item name="android:actionBarStyle">@style/Custom.ActionBar</item>
 	    <item name="actionBarStyle">@style/Custom.ActionBar</item>
@@ -16,7 +15,6 @@
 	</style>
     
 	<style name="Theme.Custom" parent="Theme.Sherlock.Light">
-	    <item name="android:windowFullscreen">true</item>
 	    	    
 	    <item name="android:actionBarStyle">@style/Custom.ActionBar</item>
 	    <item name="actionBarStyle">@style/Custom.ActionBar</item>

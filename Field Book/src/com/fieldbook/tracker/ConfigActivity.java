@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.Html;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,6 +30,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -38,6 +40,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,6 +58,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import jxl.Workbook;
@@ -139,6 +143,7 @@ public class ConfigActivity extends SherlockActivity {
 	private ArrayList<String> newRange;
 	
 	private String local;
+    private String region;
 		
     private FrameLayout mFrame;
         
@@ -158,7 +163,7 @@ public class ConfigActivity extends SherlockActivity {
 		{
 			
 		}
-		
+
 		super.onDestroy();
 	}
 	
@@ -178,66 +183,19 @@ public class ConfigActivity extends SherlockActivity {
 				systemMenu.findItem(R.id.help).setVisible(false);
 			}
 		}
-		
+		//Device default language : Locale.getDefault().getLanguage()
 		// This allows dynamic language change without exiting the app
-        switch (ep.getInt("languages", 0))
-        {
-    	    case 0:
-    	    	if (!local.equals("en"))
-    	    	{
-    	    		local = "en";
-    	    		
-    	            Locale locale2 = new Locale(local);  
-    	            Locale.setDefault(locale2); 
-    	            Configuration config2 = new Configuration(); 
-    	            config2.locale = locale2; 
-    	            getBaseContext().getResources().updateConfiguration(config2, 
-    	            getBaseContext().getResources().getDisplayMetrics()); 
-    	    		
-    	            invalidateOptionsMenu();
-    	            
-    	    		loadScreen();
-    	    	}
-    	    	break;
-    	    	
-    	    case 1:
-    	    	if (!local.equals("es"))
-    	    	{
-    	    		local = "es";
-    	    		
-    	            Locale locale2 = new Locale(local);  
-    	            Locale.setDefault(locale2); 
-    	            Configuration config2 = new Configuration(); 
-    	            config2.locale = locale2; 
-    	            getBaseContext().getResources().updateConfiguration(config2, 
-    	            getBaseContext().getResources().getDisplayMetrics()); 
-    	    		
-    	            invalidateOptionsMenu();
-    	            
-    	    		loadScreen();
-    	    	}
-    	    	break;
+        local = ep.getString("language",Locale.getDefault().toString());
+        region = ep.getString("region","");
+        Locale locale2 = new Locale(local,region);
+        Locale.setDefault(locale2);
+        Configuration config2 = new Configuration();
+        config2.locale = locale2;
+        getBaseContext().getResources().updateConfiguration(config2,
+                getBaseContext().getResources().getDisplayMetrics());
 
-    	    case 2:
-    	    	if (!local.equals("de"))
-    	    	{
-    	    		local = "de";
-    	    		
-    	            Locale locale2 = new Locale(local);  
-    	            Locale.setDefault(locale2); 
-    	            Configuration config2 = new Configuration(); 
-    	            config2.locale = locale2; 
-    	            getBaseContext().getResources().updateConfiguration(config2, 
-    	            getBaseContext().getResources().getDisplayMetrics()); 
-    	    		
-    	            invalidateOptionsMenu();
-    	            
-    	    		loadScreen();
-    	    	}
-    	    	break;
-    	    	
-        }        
-				
+        invalidateOptionsMenu();
+        loadScreen();
 	}
 	
 	@Override
@@ -248,32 +206,17 @@ public class ConfigActivity extends SherlockActivity {
 
         // Enforce internal language change
         local = "en";
-        
         thisActivity = this;
-        
-        switch (ep.getInt("languages", 0))
-        {
-    	    case 0:
-    	    	local = "en";
-    	    	break;
-    	    	
-    	    case 1:
-    	    	local = "es";
-    	    	break;
 
-    	    case 2:
-    	    	local = "de";
-    	    	break;
-    	    	
-        }
-        
-        Locale locale2 = new Locale(local);  
-        Locale.setDefault(locale2); 
-        Configuration config2 = new Configuration(); 
-        config2.locale = locale2; 
-        getBaseContext().getResources().updateConfiguration(config2, 
-        getBaseContext().getResources().getDisplayMetrics()); 
-        
+        local = ep.getString("language",Locale.getDefault().toString());
+        Locale locale2 = new Locale(local);
+        Locale.setDefault(locale2);
+        Configuration config2 = new Configuration();
+        config2.locale = locale2;
+        getBaseContext().getResources().updateConfiguration(config2,
+                getBaseContext().getResources().getDisplayMetrics());
+
+        invalidateOptionsMenu();
         loadScreen();
         
         helpActive = false;
@@ -285,16 +228,6 @@ public class ConfigActivity extends SherlockActivity {
 
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		
-		float brightness = 100;
-
-		// Set brightness to maximum
-		Settings.System.putFloat(this.getContentResolver(),
-				Settings.System.SCREEN_BRIGHTNESS, brightness);
-
-		WindowManager.LayoutParams lp = getWindow().getAttributes();
-		lp.screenBrightness = brightness;
-		getWindow().setAttributes(lp);
 
 		mFrame = new FrameLayout(this);
 
@@ -816,65 +749,66 @@ public class ConfigActivity extends SherlockActivity {
 		getString(R.string.traits), getString(R.string.export), getString(R.string.advanced), 
 		getString(R.string.language), getString(R.string.tutorial)};
 
-		mainSettingsListener = new OnItemClickListener() {
+        settingsList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
+                switch (position) {
+                    case 0:
+                        showSetupDialog();
+                        break;
 
-			public void onItemClick(AdapterView<?> arg0, View arg1,
-					int position, long arg3) {
-				// Determines the action to perform based on list selection
-				switch (position) {
-				case 0:
-					showSetupDialog();
-					break;
-					
-				case 1:
-					fieldDialog2.show();	
-					break;
+                    case 1:
+                        fieldDialog2.show();
+                        break;
 
-				case 2:
-					Intent intent = new Intent(); 
-					intent.setClassName(ConfigActivity.this,
-							TraitEditorActivity.class.getName());
-					startActivity(intent);												
-					break;
-					
-				case 3:
-					if (!ep.getBoolean("ImportFieldFinished", false))
-						return;
-					
-					showSaveDialog();
-					break;
+                    case 2:
+                        if (!ep.getBoolean("ImportFieldFinished", false)) {
+                            Toast toast = Toast.makeText(ConfigActivity.this, getString(R.string.importtraitwarning), Toast.LENGTH_LONG);
+                            toast.show();
+                            return;
+                        }
 
-				case 4:
-					advancedDialog.show();
-					break;
-				
-				case 5:
-					showLanguageDialog();
-					break;
-					
-				case 6:
-					showTutorialDialog();
-					break;
-					
-				}
-				
-			}
-		};
+                        Intent intent = new Intent();
+                        intent.setClassName(ConfigActivity.this,
+                                TraitEditorActivity.class.getName());
+                        startActivity(intent);
+                        break;
 
-		settingsList.setAdapter(new GenericArrayAdapter(this, R.layout.listitemhighlight,
-				items2, mainSettingsListener));
-		
-		settingsList.setOnItemClickListener(mainSettingsListener);
-		
+                    case 3:
+                        if (!ep.getBoolean("ImportFieldFinished", false)) {
+                            showNoFieldDialog();
+                            return;
+                        }
+
+                        showSaveDialog();
+                        break;
+
+                    case 4:
+                        advancedDialog.show();
+                        break;
+
+                    case 5:
+                        showLanguageDialog();
+                        break;
+
+                    case 6:
+                        showTutorialDialog();
+                        break;
+                }
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.listitemhighlight, items2);
+        settingsList.setAdapter(adapter);
+
 		if (!ep.getBoolean("UpdateShown", false))
 		{
             Intent intent = new Intent();
             intent.setClass(ConfigActivity.this, ChangelogActivity.class);
-
             startActivity(intent);
 		}
+
 	}
-	
+
 	// Only used for truncating lat long values
 	private String truncateDecimalString(String v)
 	{
@@ -1441,8 +1375,11 @@ public class ConfigActivity extends SherlockActivity {
 		}
 
 	}
+    public void makeToast(String message) {
 
-	private void showLanguageDialog()
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+    private void showLanguageDialog()
 	{
 		final Dialog languageDialog = new Dialog(ConfigActivity.this,
 				android.R.style.Theme_Holo_Light_Dialog);
@@ -1450,7 +1387,8 @@ public class ConfigActivity extends SherlockActivity {
 		languageDialog.setContentView(R.layout.genericdialog);
 
 		android.view.WindowManager.LayoutParams params = languageDialog.getWindow().getAttributes();
-        params.width = LayoutParams.FILL_PARENT;
+        params.width = LayoutParams.WRAP_CONTENT;
+        params.height = LayoutParams.WRAP_CONTENT;
         languageDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
 		
         languageDialog.setCancelable(true);
@@ -1458,101 +1396,99 @@ public class ConfigActivity extends SherlockActivity {
 
 		ListView myList = (ListView) languageDialog
 				.findViewById(R.id.myList);
-		
-		String[] langArray = new String[3];
-		
-		langArray[0] = getString(R.string.english);
+
+        region = "";
+		String[] langArray = new String[12];
+
+        langArray[0] = getString(R.string.english);
 		langArray[1] = getString(R.string.spanish);
-		langArray[2] = getString(R.string.german);
-		
-		OnItemClickListener listener = new OnItemClickListener() {
+		langArray[2] = getString(R.string.french);
+        langArray[3] = getString(R.string.hindi);
+        langArray[4] = getString(R.string.german);
+        langArray[5] = getString(R.string.japanese);
+        langArray[6] = getString(R.string.arabic);
+        langArray[7] = getString(R.string.chinese);
+        langArray[8] = getString(R.string.portuguesebr);
+        langArray[9] = getString(R.string.russian);
+        langArray[10] = getString(R.string.oromo);
+        langArray[11] = getString(R.string.amharic);
 
-			public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-				
-				Editor ed = ep.edit();
-				ed.putInt("languages", which);
-				ed.commit();
-				
-		        switch (ep.getInt("languages", 0))
-		        {
-		    	    case 0:
-		    	    	if (!local.equals("en"))
-		    	    	{
-		    	    		local = "en";
-		    	    		
-		    	            Locale locale2 = new Locale(local);  
-		    	            Locale.setDefault(locale2); 
-		    	            Configuration config2 = new Configuration(); 
-		    	            config2.locale = locale2; 
-		    	            getBaseContext().getResources().
-		    	            updateConfiguration(config2, getBaseContext().getResources()
-		    	            .getDisplayMetrics()); 
-		    	    		
-		    	            invalidateOptionsMenu();
-		    	            
-		    	    		loadScreen();
-		    	    	}
-		    	    	break;
-		    	    	
-		    	    case 1:
-		    	    	if (!local.equals("es"))
-		    	    	{
-		    	    		local = "es";
-		    	    		
-		    	            Locale locale2 = new Locale(local);  
-		    	            Locale.setDefault(locale2); 
-		    	            Configuration config2 = new Configuration(); 
-		    	            config2.locale = locale2; 
-		    	            getBaseContext().getResources().
-		    	            updateConfiguration(config2, getBaseContext().getResources()
-		    	            .getDisplayMetrics()); 
-		    	    		
-		    	            invalidateOptionsMenu();
-		    	            
-		    	    		loadScreen();
-		    	    	}
-		    	    	break;
+        myList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                switch (which)
+                {
+                    case 0:
+                        local = "en";
+                        break;
+                    case 1:
+                        local = "es";
+                        break;
+                    case 2:
+                        local = "fr";
+                        break;
+                    case 3:
+                        local = "hi";
+                        break;
+                    case 4:
+                        local = "de";
+                        break;
+                    case 5:
+                        local = "ja";
+                        break;
+                    case 6:
+                        local = "ar";
+                        break;
+                    case 7:
+                        local = "zh";
+                        region = "CN";
+                        break;
+                    case 8:
+                        local = "pt";
+                        region = "BR";
+                        break;
+                    case 9:
+                        local = "ru";
+                        break;
+                    case 10:
+                        local = "om";
+                        region = "ET";
+                        break;
+                    case 11:
+                        local = "am";
+                        break;
+                }
+                Editor ed = ep.edit();
+                makeToast(local);
+                ed.putString("language", local);
+                ed.putString("region",region);
+                ed.commit();
 
-		    	    case 2:
-		    	    	if (!local.equals("de"))
-		    	    	{
-		    	    		local = "de";
-		    	    		
-		    	            Locale locale2 = new Locale(local);  
-		    	            Locale.setDefault(locale2); 
-		    	            Configuration config2 = new Configuration(); 
-		    	            config2.locale = locale2; 
-		    	            getBaseContext().getResources().
-		    	            updateConfiguration(config2, getBaseContext().getResources()
-		    	            .getDisplayMetrics()); 
-		    	    		
-		    	            invalidateOptionsMenu();
-		    	            
-		    	    		loadScreen();
-		    	    	}
-		    	    	break;
-		    	    	
-		        }        
-										
-				languageDialog.dismiss();
-			}
-		};
-						
-		GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(ConfigActivity.this, 
-		R.layout.listitem_a, langArray, listener);
-		
-		myList.setAdapter(itemsAdapter);	
-		
+                Locale locale2 = new Locale(local, region);
+                Locale.setDefault(locale2);
+                Configuration config2 = new Configuration();
+                config2.locale = locale2;
+                getBaseContext().getResources().
+                        updateConfiguration(config2, getBaseContext().getResources()
+                                .getDisplayMetrics());
+
+                invalidateOptionsMenu();
+
+                loadScreen();
+                languageDialog.dismiss();
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.listitem_a, langArray);
+		myList.setAdapter(adapter);
 		Button langCloseBtn = (Button) languageDialog
 				.findViewById(R.id.closeBtn);
 
 		langCloseBtn.setOnClickListener(new OnClickListener() {
-
 			public void onClick(View arg0) {
 				languageDialog.dismiss();
 			}
-		});		
-		
+		});
+
 		languageDialog.show();		
 	}
 	
@@ -2004,7 +1940,83 @@ public class ConfigActivity extends SherlockActivity {
 	
 		dialog.show();
 	}
-	
+    private void showFieldFileDialog()
+    {
+        final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+
+        dialog.setTitle(getString(R.string.choosefieldfile));
+        dialog.setContentView(R.layout.genericdialog);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+
+        ListView csvList = (ListView) dialog.findViewById(R.id.myList);
+        Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
+
+        csvButton.setOnClickListener(new OnClickListener(){
+
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+
+        OnItemClickListener listener = new OnItemClickListener() {
+
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                dialog.dismiss();
+
+                mChosenFile = mFileList[which];
+
+                Editor e = ep.edit();
+
+                e.putString("FieldFile", mChosenFile);
+
+                e.commit();
+
+                action = DIALOG_LOAD_FIELDFILECSV;
+
+                try
+                {
+                    importMain.removeAllViews();
+
+                    FileReader fr = new FileReader(MainActivity.fieldImportPath + "/"
+                            + mChosenFile);
+                    CSVReader cr = new CSVReader(fr);
+
+                    importColumns = cr.readNext();
+
+                    for (String s : importColumns)
+                    {
+                        if (DataHelper.hasSpecialChars(s))
+                        {
+                            columnFail = true;
+                            break;
+                        }
+                        else
+                            addRow(importMain, s);
+                    }
+                }
+                catch (Exception n)
+                {
+
+                }
+
+                if (columnFail)
+                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail), Toast.LENGTH_LONG).show();
+                else
+                    importFieldMapDialog.show();
+
+                //mHandler.post(importCSV);
+            }
+        };
+
+        GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(ConfigActivity.this,
+                R.layout.listitem_a, mFileList, listener);
+
+        csvList.setAdapter(itemsAdapter);
+
+        dialog.show();
+    }
 	private void showFieldFileCSVDialog()
 	{
 		final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
@@ -2380,6 +2392,50 @@ public class ConfigActivity extends SherlockActivity {
 		}
 	}
 
+    private void showNoFieldDialog()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+
+        builder.setTitle(getString(R.string.warning));
+        builder.setMessage(getString(R.string.nofieldloaded));
+
+        builder.setPositiveButton(getString(R.string.okay), new DialogInterface.OnClickListener()
+        {
+
+            public void onClick(DialogInterface dialog, int which)
+            {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
+    }
+
+    private void showNoTraitDialog()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+
+        builder.setTitle(getString(R.string.warning));
+        builder.setMessage(getString(R.string.notraitloaded));
+
+        builder.setPositiveButton(getString(R.string.okay), new DialogInterface.OnClickListener()
+        {
+
+            public void onClick(DialogInterface dialog, int which)
+            {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
+    }
+
 	private Runnable importExcel = new Runnable() {
 		public void run() {
 			new ImportExcelTask().execute(0);
@@ -2566,7 +2622,8 @@ public class ConfigActivity extends SherlockActivity {
 		
 		return true;
 	}
-		
+
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -2601,8 +2658,18 @@ public class ConfigActivity extends SherlockActivity {
 				break;
 			
 			case android.R.id.home:
-				finish();
-				break;
+                if (!ep.getBoolean("ImportFieldFinished", false))
+                {
+                    showNoFieldDialog();
+                }
+                else
+                if (MainActivity.dt.getTraitColumnsAsString()==null)
+                {
+                    showNoTraitDialog();
+                }
+                else
+                    finish();
+                break;
 		}
 		
 		return super.onOptionsItemSelected(item);

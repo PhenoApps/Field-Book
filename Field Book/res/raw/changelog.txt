@@ -2,16 +2,18 @@
 Added this change log
 Changed tutorial setup
 Language dialog updated
-Dialog displays to share exported files
-App no longer jumps to the first plot when external hardware added
+Exported files are shared
+App does not move to first plot when external hardware added
 Items are disabled if not available
 Option to reset, export, or import app database
-Added support for Amharic, Arabic, Brazilian Portuguese, Chinese, Filipino, French, Hindi, Italian, Japanese, Oromo, Russian, and Swahili.
+Added support for Amharic, Arabic, Brazilian Portuguese, Chinese, French, Hindi, Japanese, Oromo, and Russian
 Advanced feature option to play a sound when the first level changes
 Advanced feature option to move to next empty plot via button
 Advanced feature option to move to specific unique identifier
-Bugfix: minimum in numeric traits is enforced properly
-Bugfix: all text in text traits is deletable with the keyboard
+Bugfix: minimum in numeric traits is enforced
+Bugfix: all text in text traits is deletable with the keyboard (previously one letter remained)
+Bugfix: cursor now appears at end of text in text traits
+Bugfix: files are now visible via computer after export
 
 12/2.0.0
 Updated user interface

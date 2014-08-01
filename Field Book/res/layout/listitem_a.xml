@@ -9,6 +9,7 @@
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
     android:paddingTop="20dp"
+    android:focusable="false"
     android:ellipsize="end"
     android:textSize="30dp"
     android:textStyle="bold" />

@@ -65,6 +65,7 @@ public class GenericArrayAdapter extends ArrayAdapter<String> {
         return row;
     }
 
+
     static class Holder
     {
         TextView txt;

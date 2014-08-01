@@ -21,6 +21,7 @@ public class TutorialTraitsActivity extends Activity
     public static Activity thisActivity;
     
     private String local;
+    private String region;
     private int screen;
     
     private final int max = 4;
@@ -41,31 +42,14 @@ public class TutorialTraitsActivity extends Activity
     	SharedPreferences ep = getSharedPreferences("Settings", 0);
         
         // Enforce internal language change
-        local = "en";
-        
-        switch (ep.getInt("languages", 0))
-        {
-    	    case 0:
-    	    	local = "en";
-    	    	break;
-    	    	
-    	    case 1:
-    	    	local = "es";
-    	    	break;
-
-    	    case 2:
-    	    	local = "de";
-    	    	break;
-    	    	
-        }
-        
-        // This allows dynamic language change without exiting the app
-        Locale locale2 = new Locale(local);  
-        Locale.setDefault(locale2); 
-        Configuration config2 = new Configuration(); 
-        config2.locale = locale2; 
-        getBaseContext().getResources().updateConfiguration(config2, 
-        getBaseContext().getResources().getDisplayMetrics()); 
+        local = ep.getString("language", "en");
+        region = ep.getString("region","");
+        Locale locale2 = new Locale(local,region);
+        Locale.setDefault(locale2);
+        Configuration config2 = new Configuration();
+        config2.locale = locale2;
+        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
+                .getDisplayMetrics());
         
         thisActivity = this;
         
@@ -94,7 +78,6 @@ public class TutorialTraitsActivity extends Activity
         array[0] = getString(R.string.thelp1);
         array[1] = getString(R.string.thelp2);
         array[2] = getString(R.string.thelp3);
-        array[3] = getString(R.string.thelp4);
         
         header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
         content.setText(array[screen-1]);

@@ -3,6 +3,7 @@ package com.fieldbook.tracker;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -20,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Trevor on 6/24/2014.
@@ -33,6 +35,8 @@ public class ChangelogActivity extends Activity {
 
     private String currentTable;
     private String importId;
+    private String local;
+    private String region;
     WindowManager.LayoutParams params;
     private LinearLayout parent;
 
@@ -47,6 +51,17 @@ public class ChangelogActivity extends Activity {
 
         ep = getSharedPreferences("Settings", 0);
 
+        // Enforce language
+        local = ep.getString("language", "en");
+        region = ep.getString("region",region);
+        Locale locale2 = new Locale(local,"");
+        Locale.setDefault(locale2);
+        Configuration config2 = new Configuration();
+        config2.locale = locale2;
+        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
+                .getDisplayMetrics());
+
+
         setContentView(R.layout.changelog);
 
         setTitle(R.string.updatemsg);
@@ -56,7 +71,6 @@ public class ChangelogActivity extends Activity {
         //params.width = 600;
 
         this.getWindow().setAttributes(params);
-
 
         parent = (LinearLayout) findViewById(R.id.data);
 
@@ -75,12 +89,6 @@ public class ChangelogActivity extends Activity {
 
         parseLog(R.raw.changelog);
     }
-
-    public static float dipToPixels(Context context, float dipValue) {
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
-    }
-
 
     // Helper function to add row
     public void parseLog(int resId) {

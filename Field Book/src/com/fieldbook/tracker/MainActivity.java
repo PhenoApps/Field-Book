@@ -215,6 +215,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
     private boolean analyze;
 
     private String local;
+    private String region;
 
     private HashMap<Integer, String> analyzeRange;
 
@@ -280,24 +281,8 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
-        local = "en";
-
-        switch (ep.getInt("languages", 0))
-        {
-            case 0:
-                local = "en";
-                break;
-
-            case 1:
-                local = "es";
-                break;
-
-            case 2:
-                local = "de";
-                break;
-
-        }
-
+        local = ep.getString("language", "en");
+        region = ep.getString("region","");
         Locale locale2 = new Locale(local);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
@@ -331,18 +316,6 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         reloadData = true;
 
         lock = new Object();
-
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        float brightness = 100;
-
-        // Set brightness to maximum
-        Settings.System.putFloat(this.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS, brightness);
-
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.screenBrightness = brightness;
-        getWindow().setAttributes(lp);
 
         dt = new DataHelper(this);
 
@@ -518,7 +491,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
 
         // Validates the text entered for text format
         tNumUpdate = new TextWatcher() {
-
+        //TODO parse barcode and go to plot
             public void afterTextChanged(Editable en) {
 
                 if (en.toString().length() >= 0) {
@@ -3167,63 +3140,17 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         }
 
         // This allows dynamic language change without exiting the app
-        switch (ep.getInt("languages", 0))
-        {
-            case 0:
-                if (!local.equals("en"))
-                {
-                    local = "en";
+            local = ep.getString("language", "en");
+            region = ep.getString("region","");
+            Locale locale2 = new Locale(local,region);
+            Locale.setDefault(locale2);
+            Configuration config2 = new Configuration();
+            config2.locale = locale2;
+            getBaseContext().getResources().updateConfiguration(config2,
+                    getBaseContext().getResources().getDisplayMetrics());
+            invalidateOptionsMenu();
+            loadScreen();
 
-                    Locale locale2 = new Locale(local);
-                    Locale.setDefault(locale2);
-                    Configuration config2 = new Configuration();
-                    config2.locale = locale2;
-                    getBaseContext().getResources().updateConfiguration(config2,
-                            getBaseContext().getResources().getDisplayMetrics());
-
-                    invalidateOptionsMenu();
-
-                    loadScreen();
-                }
-                break;
-
-            case 1:
-                if (!local.equals("es"))
-                {
-                    local = "es";
-
-                    Locale locale2 = new Locale(local);
-                    Locale.setDefault(locale2);
-                    Configuration config2 = new Configuration();
-                    config2.locale = locale2;
-                    getBaseContext().getResources().updateConfiguration(config2,
-                            getBaseContext().getResources().getDisplayMetrics());
-
-                    invalidateOptionsMenu();
-
-                    loadScreen();
-                }
-                break;
-
-            case 2:
-                if (!local.equals("de"))
-                {
-                    local = "de";
-
-                    Locale locale2 = new Locale(local);
-                    Locale.setDefault(locale2);
-                    Configuration config2 = new Configuration();
-                    config2.locale = locale2;
-                    getBaseContext().getResources().updateConfiguration(config2,
-                            getBaseContext().getResources().getDisplayMetrics());
-
-                    invalidateOptionsMenu();
-
-                    loadScreen();
-                }
-                break;
-
-        }
 
         // If reload data is true, it means there was an import operation, and
         // the screen
