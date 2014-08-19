@@ -247,9 +247,7 @@ public class TraitEditorActivity extends SherlockActivity {
                                        int position, long arg3) {
 
                 // Change the layout of the dialog based on the trait
-
                 if (position != currentPosition) {
-                    trait.setText("");
                     def.setText("");
                     minimum.setText("");
                     maximum.setText("");

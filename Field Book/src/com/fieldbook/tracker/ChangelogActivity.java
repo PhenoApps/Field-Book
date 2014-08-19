@@ -3,6 +3,7 @@ package com.fieldbook.tracker;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,9 +25,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by Trevor on 6/24/2014.
+ * Created by trife on 6/24/2014.
  */
-
 
 public class ChangelogActivity extends Activity {
     Handler mHandler = new Handler();
@@ -61,33 +61,37 @@ public class ChangelogActivity extends Activity {
         getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
                 .getDisplayMetrics());
 
+        SharedPreferences.Editor ed = ep.edit();
+        ed.putInt("UpdateVersion", getVersion());
+        ed.commit();
+
 
         setContentView(R.layout.changelog);
-
         setTitle(R.string.updatemsg);
-
         params = getWindow().getAttributes();
-        // params.height = LinearLayout.LayoutParams.MATCH_PARENT;
-        //params.width = 600;
 
         this.getWindow().setAttributes(params);
-
         parent = (LinearLayout) findViewById(R.id.data);
 
         Button close = (Button) findViewById(R.id.closeBtn);
 
         close.setOnClickListener(new View.OnClickListener() {
-
             public void onClick(View arg0) {
-
-                SharedPreferences.Editor ed = ep.edit();
-                ed.putBoolean("UpdateShown", true);
-                ed.commit();
                 finish();
             }
         });
 
         parseLog(R.raw.changelog);
+    }
+
+    public int getVersion() {
+        int v = 0;
+        try {
+            v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            // Huh? Really?
+        }
+        return v;
     }
 
     // Helper function to add row

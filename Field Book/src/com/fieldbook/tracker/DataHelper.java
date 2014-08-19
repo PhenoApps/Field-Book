@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1357,6 +1358,83 @@ public class DataHelper {
 
             onCreate(db);
         }
+    }
+
+    /**
+     * Delete all tables
+     */
+
+    public void deleteDatabase() {
+        context.deleteDatabase(DATABASE_NAME);
+    }
+
+    /**
+     * Import database
+     */
+    public boolean importDatabase(String filename) throws IOException
+    {
+        String internalPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
+
+        // Close the SQLiteOpenHelper so it will commit the created empty
+        // database to internal storage.
+        close();
+
+        Log.w("File to copy", MainActivity.backupPath + "/" + filename);
+
+        File newDb = new File(MainActivity.backupPath + "/" + filename);
+        File oldDb = new File(internalPath);
+
+        if (newDb.exists()) {
+            FileUtils.copyFile(new FileInputStream(newDb), new FileOutputStream(oldDb));
+
+            // Access the copied database so SQLiteHelper will cache it and mark
+            // it as created.
+
+            openHelper = new OpenHelper(this.context);
+
+            open();
+
+            return true;
+        }
+
+        throw new IOException("System database in backup directory can't be loaded. Unable to copy.");
+    }
+
+
+    /**
+     * Export database
+     */
+    public boolean exportDatabase(String filename) throws IOException
+    {
+        String internalPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
+
+        // Close the SQLiteOpenHelper so it will commit the created empty
+        // database to internal storage.
+        close();
+
+        File newDb = new File(MainActivity.backupPath + "/" + filename + ".db");
+        File oldDb = new File(internalPath);
+
+        if (oldDb.exists()) {
+            FileUtils.copyFile(new FileInputStream(oldDb), new FileOutputStream(newDb));
+
+            // Access the copied database so SQLiteHelper will cache it and mark
+            // it as created.
+
+            openHelper = new OpenHelper(this.context);
+            open();
+            return true;
+        }
+
+        throw new IOException("Original system database in app does not exist. Unable to copy.");
+    }
+
+    /**
+     * Drop specified table
+     */
+    public void dropTable(String table) {
+
+        db.execSQL("DROP TABLE IF EXISTS " + table);
     }
 
     /**

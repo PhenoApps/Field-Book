@@ -9,6 +9,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -19,6 +21,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.Html;
@@ -56,7 +59,9 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -78,7 +83,7 @@ public class ConfigActivity extends SherlockActivity {
 	private static final String CSV = ".csv";
 	private static final String XLS = ".xls";
 	private static final int DIALOG_LOAD_FIELDFILECSV = 1000;
-	private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
+    private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
 	
     public static boolean helpActive;
     public static Activity thisActivity;
@@ -100,11 +105,15 @@ public class ConfigActivity extends SherlockActivity {
 	private Dialog setupDialog;
 	
 	private Dialog importFieldMapDialog;
-	
+
+    private Dialog dbSaveDialog;
+
 	private String[] mFileList;
 	private String[] importColumns;
 
-	private String mChosenFile;
+    private String mUserChoice = "";
+	private String mChosenFile = "";
+    private String importDirectory = "";
 		
 	private ListView rateList;
 	private ListView saveList;
@@ -747,17 +756,22 @@ public class ConfigActivity extends SherlockActivity {
 		
 		String[] items2 = new String[] { getString(R.string.setup), getString(R.string.fields), 
 		getString(R.string.traits), getString(R.string.export), getString(R.string.advanced), 
-		getString(R.string.language), getString(R.string.tutorial)};
+		getString(R.string.language)};
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
                 switch (position) {
                     case 0:
+                        if (!ep.getBoolean("ImportFieldFinished", false)) {
+                            showNoFieldDialog();
+                            return;
+                        }
+
                         showSetupDialog();
                         break;
 
                     case 1:
-                        fieldDialog2.show();
+                        createDialog(DIALOG_LOAD_FIELDFILECSV);
                         break;
 
                     case 2:
@@ -789,10 +803,6 @@ public class ConfigActivity extends SherlockActivity {
                     case 5:
                         showLanguageDialog();
                         break;
-
-                    case 6:
-                        showTutorialDialog();
-                        break;
                 }
             }
         });
@@ -800,16 +810,88 @@ public class ConfigActivity extends SherlockActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.listitemhighlight, items2);
         settingsList.setAdapter(adapter);
 
-		if (!ep.getBoolean("UpdateShown", false))
-		{
+        SharedPreferences.Editor ed = ep.edit();
+
+        if (ep.getInt("UpdateVersion",-1) < getVersion()) {
+            ed.putInt("UpdateVersion", getVersion());
+            ed.commit();
             Intent intent = new Intent();
             intent.setClass(ConfigActivity.this, ChangelogActivity.class);
             startActivity(intent);
-		}
-
+        }
+        if (!ep.getBoolean("TipsConfigured", false)) {
+            ed.putBoolean("TipsConfigured", true);
+            ed.commit();
+            showTipsDialog();
+        }
 	}
 
-	// Only used for truncating lat long values
+    public int getVersion() {
+        int v = 0;
+        try {
+            v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+        return v;
+    }
+
+    private void showTipsDialog()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+
+        builder.setTitle(getString(R.string.tipshort));
+        builder.setMessage(getString(R.string.tipsdesc));
+
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener()
+        {
+
+            public void onClick(DialogInterface dialog, int which)
+            {
+                Editor ed = ep.edit();
+                ed.putBoolean("Tips", true);
+                ed.putBoolean("TipsConfigured", true);
+                ed.commit();
+
+                dialog.dismiss();
+
+                invalidateOptionsMenu();
+
+                Intent intent = new Intent();
+                intent.setClassName(ConfigActivity.this,
+                        ConfigActivity.class.getName());
+                startActivity(intent);
+
+            }
+
+        });
+
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener()
+        {
+
+            public void onClick(DialogInterface dialog, int which)
+            {
+                Editor ed = ep.edit();
+                ed.putBoolean("TipsConfigured", true);
+                ed.commit();
+
+                dialog.dismiss();
+
+                Intent intent = new Intent();
+                intent.setClassName(ConfigActivity.this,
+                        ConfigActivity.class.getName());
+                startActivity(intent);
+            }
+
+        });
+
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
+    }
+
+
+    // Only used for truncating lat long values
 	private String truncateDecimalString(String v)
 	{
 		int count = 0;
@@ -839,11 +921,19 @@ public class ConfigActivity extends SherlockActivity {
 		return truncated;
 	}
 	
-	private void showAboutDialog()
-	{
+	private void showAboutDialog()	{
+        String versionName;
+        final PackageManager packageManager = this.getPackageManager();
+
+        try {
+            PackageInfo packageInfo = packageManager.getPackageInfo(this.getPackageName(), 0);
+            versionName = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            versionName = null;
+        }
 		final Dialog aboutDialog = new Dialog(ConfigActivity.this,
 				android.R.style.Theme_Holo_Light_Dialog);
-		aboutDialog.setTitle(getString(R.string.about));
+		aboutDialog.setTitle(getString(R.string.version) + " " + versionName);
 		aboutDialog.setContentView(R.layout.about);
 
 		android.view.WindowManager.LayoutParams langParams = aboutDialog.getWindow().getAttributes();
@@ -853,8 +943,6 @@ public class ConfigActivity extends SherlockActivity {
 		aboutDialog.setCancelable(true);
 		aboutDialog.setCanceledOnTouchOutside(true);
 
-		TextView version = (TextView) aboutDialog
-				.findViewById(R.id.version);
 		Button closeBtn = (Button) aboutDialog
 				.findViewById(R.id.closeBtn);
 
@@ -865,70 +953,9 @@ public class ConfigActivity extends SherlockActivity {
 			}
 		});
 
-		try {
-			version.setText("Version: "
-					+ getPackageManager().getPackageInfo(
-							getPackageName(), 0).versionName);
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
-
 		aboutDialog.show();						
 	}
-	
-	private void showTutorialDialog()
-	{		
-		// Do not show tutorial when tips / hints is open
-		if (helpActive)
-			return;
-			
-        if (ep.getBoolean("Tips", false))
-        {
-        	try
-        	{
-        		settingsList.setVisibility(View.INVISIBLE);
-        		
-		        final View tutView = LayoutInflater.from(getBaseContext()).inflate(R.layout.help, null);
-		        mFrame.addView(tutView);
-		        
-		        Button button = (Button) findViewById(R.id.completeButton);
-	            
-	            button.setOnClickListener(new View.OnClickListener() {
-	            	
-	            	public void onClick(final View v) {
-	                    mFrame.removeView(tutView);
-	                    settingsList.setVisibility(View.VISIBLE);
-	            	}
-	            });
-        	}
-        	catch (Exception e)
-        	{
-        		e.printStackTrace();
-        	}
-        }
-        else
-        {
-        	try
-        	{
-		        final View tutView = LayoutInflater.from(getBaseContext()).inflate(R.layout.help2, null);
-		        mFrame.addView(tutView);
-		        
-		        Button button = (Button) findViewById(R.id.completeButton);
-	            
-	            button.setOnClickListener(new View.OnClickListener() {
-	            	
-	            	public void onClick(final View v) {
-	                    mFrame.removeView(tutView);
-	            	}
-	            });
-        	}
-        	catch (Exception e)
-        	{
-        		e.printStackTrace();
-        	}        	
-        }
-	}
-	
+
 	// Validate that columns are unique
 	private boolean checkImportColumnNames()
 	{
@@ -1164,25 +1191,58 @@ public class ConfigActivity extends SherlockActivity {
 	/**
 	 * Creates a list of all files in directory by type 
 	 */
-	private void loadFileList(final String type) {
+	private void loadFileList(final String type, final String directory) {
 		
-		File importPath = new File(MainActivity.fieldImportPath);
+		File importPath = new File(directory);
 		
 		if (importPath.exists()) {
-			FilenameFilter filter = new FilenameFilter() {
+            File[] files = importPath.listFiles( new FilenameFilter() {
 				public boolean accept(File dir, String filename) {
 					File sel = new File(dir, filename);
-					return filename.contains(type);
+					return filename.contains(type) || sel.isDirectory();
 				}
-			};
-			mFileList = importPath.list(filter);
-		} 
+                });
+
+            Arrays.sort(files, comp);
+
+            String[] sortedFileList = new String[files.length];
+            for (int i = 0; i < files.length; ++i){
+
+                if(files[i].isDirectory()) {
+                    sortedFileList[i] = "/" + files[i].getName() + "/";
+                } else {
+                    sortedFileList[i] = files[i].getName();
+                }
+
+
+            }
+
+            mFileList = sortedFileList;
+		}
 		else {
 			mFileList = new String[0];
 		}
 	}
-	
-	// Because the import dialog layout is created dynamically, this function
+
+    Comparator comp = new Comparator() {
+        public int compare(Object o1, Object o2) {
+            File f1 = (File) o1;
+            File f2 = (File) o2;
+            if (f1.isDirectory() && !f2.isDirectory()) {
+                // Directory before non-directory
+                return -1;
+            } else if (!f1.isDirectory() && f2.isDirectory()) {
+                // Non-directory after directory
+                return 1;
+            } else {
+                // Alphabetic order otherwise
+                return f1.toString().compareToIgnoreCase(f2.toString());
+            }
+        }
+    };
+
+
+    // Because the import dialog layout is created dynamically, this function
 	// loops through child views and checks spinner values for duplicate values
 	private int findColValue(LinearLayout parent, int value, boolean allowDuplicate)
 	{
@@ -1333,11 +1393,11 @@ public class ConfigActivity extends SherlockActivity {
 		switch (id) {
 			case DIALOG_LOAD_FIELDFILECSV:
 			case DIALOG_LOAD_TRAITFILE:
-				loadFileList(CSV);
+				loadFileList(CSV,MainActivity.fieldImportPath);
 				break;
 			
 			case DIALOG_LOAD_FIELDFILEEXCEL:
-				loadFileList(XLS);
+				loadFileList(XLS,MainActivity.fieldImportPath);
 				break;
 		}
 	
@@ -1539,9 +1599,20 @@ public class ConfigActivity extends SherlockActivity {
 	
 	private void updateSetupList()
 	{
-		GenericArrayAdapter ga = (GenericArrayAdapter) setupList.getAdapter();
-		
-		ga.data = prepareSetup();
+		//GenericArrayAdapter ga = (GenericArrayAdapter) setupList.getAdapter();
+
+        ArrayAdapter<String> ga = (ArrayAdapter) setupList.getAdapter();
+
+        ga.clear();
+
+        String[] arrayData = prepareSetup();
+
+        if (arrayData != null){
+            for (String string : arrayData) {
+                ga.insert(string, ga.getCount());
+            }
+        }
+
 		ga.notifyDataSetChanged();
 	}
 		
@@ -1605,59 +1676,58 @@ public class ConfigActivity extends SherlockActivity {
 	
 	private void showSetupDialog()
 	{
-		String[] items = prepareSetup();
-		
-		final OnItemClickListener setupListener = new OnItemClickListener(){
+        String[] array = prepareSetup();
+        ArrayList<String> lst = new ArrayList<String>();
+        lst.addAll(Arrays.asList(array));
 
-			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
-					long arg3) {
-				
-				switch (position)
-				{
-				case 0:
-					showPersonDialog();
-					break;
-					
-				case 1:
-					showLocationDialog();
-					break;
-					
-				case 2:
-					showRateDialog();
-					break;		
-					
-				case 3:
-					if (MainActivity.dt.getRangeColumns() == null)
-						return;
-					
-					createDialog(DIALOG_LOAD_TRAITS1);
-					break;
-					
-				case 4:
-					if (MainActivity.dt.getRangeColumns() == null)
-						return;
-					
-					createDialog(DIALOG_LOAD_TRAITS2);
-					break;
-					
-				case 5:
-					if (MainActivity.dt.getRangeColumns() == null)
-						return;
-					
-					createDialog(DIALOG_LOAD_TRAITS3);
-					break;	
-					
-				case 6:
-					showClearSettingsDialog();
-					break;
-					
-				}
-			}
-		};		
-		
-		setupList.setAdapter(new GenericArrayAdapter(ConfigActivity.this, R.layout.listitem_a,
-				items, setupListener));
-		
+        setupList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                switch (which)
+                {
+                    case 0:
+                        showPersonDialog();
+                        break;
+
+                    case 1:
+                        showLocationDialog();
+                        break;
+
+                    case 2:
+                        showRateDialog();
+                        break;
+
+                    case 3:
+                        if (MainActivity.dt.getRangeColumns() == null)
+                            return;
+
+                        createDialog(DIALOG_LOAD_TRAITS1);
+                        break;
+
+                    case 4:
+                        if (MainActivity.dt.getRangeColumns() == null)
+                            return;
+
+                        createDialog(DIALOG_LOAD_TRAITS2);
+                        break;
+
+                    case 5:
+                        if (MainActivity.dt.getRangeColumns() == null)
+                            return;
+
+                        createDialog(DIALOG_LOAD_TRAITS3);
+                        break;
+
+                    case 6:
+                        showClearSettingsDialog();
+                        break;
+
+                }
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.listitem_a, lst);
+
+        setupList.setAdapter(adapter);
 		setupDialog.show();		
 	}
 	
@@ -1792,27 +1862,23 @@ public class ConfigActivity extends SherlockActivity {
 			}
 		});
 
-		OnItemClickListener listener = new OnItemClickListener() {
+        csvList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                dialog.dismiss();
 
-			public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-				dialog.dismiss();
-				
-				Editor e = ep.edit();
+                Editor e = ep.edit();
 
-				e.putString("DROP3", traits[which]);
-				e.commit();
-				
-				MainActivity.partialReload = true;
-				
-				updateSetupList();
-			}
-		};
-						
-		GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(ConfigActivity.this, 
-		R.layout.listitem_a, traits, listener);
-		
-		csvList.setAdapter(itemsAdapter);				
-	
+                e.putString("DROP3", traits[which]);
+                e.commit();
+
+                MainActivity.partialReload = true;
+
+                updateSetupList();
+            }
+        });
+
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, traits);
+        csvList.setAdapter(itemsAdapter);
 		dialog.show();
 	}
 	
@@ -1835,27 +1901,23 @@ public class ConfigActivity extends SherlockActivity {
 			}
 		});
 
-		OnItemClickListener listener = new OnItemClickListener() {
+        csvList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                dialog.dismiss();
 
-			public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-				dialog.dismiss();
-				
-				Editor e = ep.edit();
+                Editor e = ep.edit();
 
-				e.putString("DROP2", traits[which]);
-				e.commit();
-				
-				MainActivity.partialReload = true;
-				
-				updateSetupList();
-			}
-		};
-						
-		GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(ConfigActivity.this, 
-		R.layout.listitem_a, traits, listener);
-		
-		csvList.setAdapter(itemsAdapter);				
-	
+                e.putString("DROP2", traits[which]);
+                e.commit();
+
+                MainActivity.partialReload = true;
+
+                updateSetupList();
+            }
+        });
+
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, traits);
+        csvList.setAdapter(itemsAdapter);
 		dialog.show();
 	}
 		
@@ -1870,35 +1932,30 @@ public class ConfigActivity extends SherlockActivity {
 
 		ListView csvList = (ListView) dialog.findViewById(R.id.myList);
 		Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
-		
-		csvButton.setOnClickListener(new OnClickListener(){
 
-			public void onClick(View v) {
-				dialog.dismiss();
-			}
-		});
+		csvButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
 
-		OnItemClickListener listener = new OnItemClickListener() {
+        csvList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                dialog.dismiss();
 
-			public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-				dialog.dismiss();
-				
-				Editor e = ep.edit();
+                Editor e = ep.edit();
 
-				e.putString("DROP1", traits[which]);
-				e.commit();
-				
-				MainActivity.partialReload = true;
-				
-				updateSetupList();
-			}
-		};
-						
-		GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(ConfigActivity.this, 
-		R.layout.listitem_a, traits, listener);
-		
-		csvList.setAdapter(itemsAdapter);				
-	
+                e.putString("DROP1", traits[which]);
+                e.commit();
+
+                MainActivity.partialReload = true;
+
+                updateSetupList();
+            }
+        });
+
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, traits);
+		csvList.setAdapter(itemsAdapter);
 		dialog.show();
 	}
 	
@@ -1940,6 +1997,7 @@ public class ConfigActivity extends SherlockActivity {
 	
 		dialog.show();
 	}
+
     private void showFieldFileDialog()
     {
         final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
@@ -2017,39 +2075,49 @@ public class ConfigActivity extends SherlockActivity {
 
         dialog.show();
     }
+
 	private void showFieldFileCSVDialog()
 	{
 		final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
 
-		dialog.setTitle(getString(R.string.choosefieldfile));
+		dialog.setTitle(getString(R.string.choosefieldfile) + ": " + mUserChoice);
 		dialog.setContentView(R.layout.genericdialog);
-		dialog.setCancelable(true);
-		dialog.setCanceledOnTouchOutside(true);
 
 		ListView csvList = (ListView) dialog.findViewById(R.id.myList);
 		Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
 		
-		csvButton.setOnClickListener(new OnClickListener(){
+		csvButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                dialog.dismiss();
+                importDirectory = "";
+            }
+        });
 
-			public void onClick(View v) {
-				dialog.dismiss();
-			}
-		});
-
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                mUserChoice = "";
+            }
+        });
 
 		OnItemClickListener listener = new OnItemClickListener() {
 
 			public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
 				dialog.dismiss();
-				
-				mChosenFile = mFileList[which];
+
+                mUserChoice = mFileList[which];
+				mChosenFile = mUserChoice;
+
+                if(mUserChoice.contains("/")){
+                    loadFileList(CSV,MainActivity.fieldImportPath + importDirectory + "/" + mUserChoice);
+                    importDirectory = importDirectory + "/" + mUserChoice;
+                    showFieldFileCSVDialog();
+                    return;
+                }
 
 				Editor e = ep.edit();
-
 				e.putString("FieldFile", mChosenFile);
-
 				e.commit();
-
 				action = DIALOG_LOAD_FIELDFILECSV;
 
 				try
@@ -2090,8 +2158,8 @@ public class ConfigActivity extends SherlockActivity {
 		GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(ConfigActivity.this, 
 		R.layout.listitem_a, mFileList, listener);
 		
-		csvList.setAdapter(itemsAdapter);				
-	
+		csvList.setAdapter(itemsAdapter);
+
 		dialog.show();
 	}
 
@@ -2601,7 +2669,148 @@ public class ConfigActivity extends SherlockActivity {
 		}
 	}
 
-	@Override
+    private void showDatabaseDialog()
+    {
+        String[] items = new String[3];
+
+        items[0] = getString(R.string.dbreset);
+
+        final Dialog chooseBackupDialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+        chooseBackupDialog.setTitle(getString(R.string.dbbackup));
+        chooseBackupDialog.setContentView(R.layout.config);
+
+        chooseBackupDialog.setCancelable(true);
+        chooseBackupDialog.setCanceledOnTouchOutside(true);
+
+        setupList = (ListView) chooseBackupDialog.findViewById(R.id.myList);
+
+        Button setupCloseBtn = (Button) chooseBackupDialog.findViewById(R.id.closeBtn);
+
+        setupCloseBtn.setOnClickListener(new OnClickListener(){
+
+            public void onClick(View v) {
+                chooseBackupDialog.dismiss();
+            }
+        });
+
+        final OnItemClickListener setupListener = new OnItemClickListener(){
+
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+                                    long arg3) {
+
+                chooseBackupDialog.dismiss();
+
+                switch (position)
+                {
+                    case 0:
+                        showDatabaseResetDialog1();
+                        break;
+                }
+            }
+        };
+
+        setupList.setAdapter(new GenericArrayAdapter(ConfigActivity.this, R.layout.listitem_a2,
+                items, setupListener));
+
+        chooseBackupDialog.show();
+    }
+
+    // First confirmation
+    private void showDatabaseResetDialog1()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+
+        builder.setTitle(getString(R.string.warning));
+        builder.setMessage(getString(R.string.resetwarning1));
+
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener()
+        {
+
+            public void onClick(DialogInterface dialog, int which)
+            {
+                dialog.dismiss();
+                showDatabaseResetDialog2();
+            }
+
+        });
+
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener()
+        {
+
+            public void onClick(DialogInterface dialog, int which)
+            {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
+    }
+
+    // Second confirmation
+    private void showDatabaseResetDialog2()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+
+        builder.setTitle(getString(R.string.warning));
+        builder.setMessage(getString(R.string.resetwarning2));
+
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener()
+        {
+
+            public void onClick(DialogInterface dialog, int which)
+            {
+                // Delete database
+                MainActivity.dt.deleteDatabase();
+
+                // Clear all existing settings
+                Editor ed = ep.edit();
+                ed.clear();
+                ed.commit();
+
+                dialog.dismiss();
+
+                Toast toast = Toast.makeText(ConfigActivity.this, getString(R.string.resetcomplete), Toast.LENGTH_LONG);
+                toast.show();
+
+                try
+                {
+                    ConfigActivity.thisActivity.finish();
+                }
+                catch (Exception e)
+                {
+
+                }
+
+                try
+                {
+                    MainActivity.thisActivity.finish();
+                }
+                catch (Exception f)
+                {
+
+                }
+            }
+
+        });
+
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener()
+        {
+
+            public void onClick(DialogInterface dialog, int which)
+            {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		new MenuInflater(ConfigActivity.this).inflate(R.menu.configmenu, menu);
 						
@@ -2623,7 +2832,15 @@ public class ConfigActivity extends SherlockActivity {
 		return true;
 	}
 
-
+/*
+Editor e = ep.edit();
+				e.putString("Latitude", "");
+				e.putString("Longitude", "");
+				e.putString("FirstName", "");
+				e.putString("LastName", "");
+				e.commit();
+				finish();
+ */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -2647,16 +2864,10 @@ public class ConfigActivity extends SherlockActivity {
 				showAboutDialog();
 				break;
 
-			case R.id.quit:
-				Editor e = ep.edit();
-				e.putString("Latitude", "");
-				e.putString("Longitude", "");
-				e.putString("FirstName", "");
-				e.putString("LastName", "");
-				e.commit();
-				finish();				
-				break;
-			
+            case R.id.database:
+                showDatabaseDialog();
+                break;
+
 			case android.R.id.home:
                 if (!ep.getBoolean("ImportFieldFinished", false))
                 {

@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 	<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-	    <item android:id="@+id/help" android:title="@string/help" android:showAsAction="always" />			   	    	  	   	    
-	    <item android:id="@+id/addTrait" android:title="@string/addtrait" android:showAsAction="always" />
-	    <item android:id="@+id/deleteTrait" android:title="@string/deletealltraits" android:showAsAction="always" />
-	    <item android:id="@+id/importdb" android:title="@string/importdb" android:showAsAction="never" />
-	    <item android:id="@+id/exportdb" android:title="@string/export" android:showAsAction="never" />	
+	    <item
+            android:id="@+id/help"
+            android:title="@string/help"
+            android:icon="@drawable/ic_action_help"
+            android:showAsAction="always" />
+	    <item
+            android:id="@+id/addTrait"
+            android:title="@string/addtrait"
+            android:icon="@drawable/ic_action_new"
+            android:showAsAction="always" />
+	    <item
+            android:id="@+id/deleteTrait"
+            android:title="@string/deletealltraits"
+            android:icon="@drawable/ic_action_discard"
+            android:showAsAction="always" />
+	    <item
+            android:id="@+id/importdb"
+            android:title="@string/importdb"
+            android:icon="@drawable/ic_action_download"
+            android:showAsAction="always" />
+	    <item
+            android:id="@+id/exportdb"
+            android:title="@string/export"
+            android:icon="@drawable/ic_action_upload"
+            android:showAsAction="always" />
 	</menu>
 

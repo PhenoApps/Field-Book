@@ -7,63 +7,14 @@
     android:padding="20dp" >
 
     <TextView
-        android:id="@+id/version"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="10dp"
-        android:paddingLeft="10dp"
-        android:text="Version"
-        android:textColor="@color/s_text"
-        android:textSize="25dp"
-        android:textStyle="bold" />
-
-    <TextView
         android:id="@+id/developerMsg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="Developers"
+        android:text="@string/developers"
         android:textColor="#000000"
         android:textSize="25dp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/developerJesse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dip"
-        android:paddingBottom="10dp"
-        android:paddingLeft="10dp"
-        android:text="Jesse Poland, USDA-ARS"
-        android:textColor="#000000"
-        android:textSize="20dp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/developerJesseEmail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="25dip"
-        android:autoLink="email"
-        android:paddingBottom="5dp"
-        android:paddingLeft="10dp"
-        android:text="Email: jpoland@ksu.edu"
-        android:textColor="#000000"
-        android:textSize="15dp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/developerJesseSite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="25dip"
-        android:autoLink="web"
-        android:paddingBottom="10dp"
-        android:paddingLeft="10dp"
-        android:text="Site: http://wheatgenetics.org"
-        android:textColor="#000000"
-        android:textSize="15dp"
         android:textStyle="bold" />
 
     <TextView
@@ -86,7 +37,58 @@
         android:autoLink="email"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="Email: trife@ksu.edu"
+        android:text="trife@ksu.edu"
+        android:textColor="#000000"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerTrevorSite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dip"
+        android:autoLink="web"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="https://github.com/trife/Field-Book"
+        android:textColor="#000000"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerJesse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dip"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="Jesse Poland, Kansas State University"
+        android:textColor="#000000"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerJesseEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dip"
+        android:autoLink="email"
+        android:paddingBottom="5dp"
+        android:paddingLeft="10dp"
+        android:text="jpoland@ksu.edu"
+        android:textColor="#000000"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/developerJesseSite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dip"
+        android:autoLink="web"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:text="http://wheatgenetics.org"
         android:textColor="#000000"
         android:textSize="15dp"
         android:textStyle="bold" />
@@ -96,7 +98,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dip"
-        android:paddingBottom="10dp"
+        android:paddingBottom="5dp"
         android:paddingLeft="10dp"
         android:text="Technology Projects"
         android:textColor="#000000"
@@ -110,7 +112,7 @@
         android:layout_marginLeft="25dip"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="Solutions for mobile clients (Android, iOS, Blackberry, Windows Phone), server (Microsoft / Enterprise Java) as well as cloud based computing (Google / Amazon)."
+        android:text="Solutions for mobile clients, server, and cloud-based computing."
         android:textColor="#000000"
         android:textSize="15dp"
         android:textStyle="bold" />
@@ -123,7 +125,7 @@
         android:autoLink="email"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="Email: technologyprojects@gmail.com"
+        android:text="technologyprojects@gmail.com"
         android:textColor="#000000"
         android:textSize="15dp"
         android:textStyle="bold" />
@@ -134,31 +136,19 @@
         android:layout_height="wrap_content"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="Translators"
+        android:text="@string/translators"
         android:textColor="#000000"
         android:textSize="25dp"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/translatorIFB"
+        android:id="@+id/translatorList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dip"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="Irazema Fuentes-Bueno (Spanish)"
-        android:textColor="#000000"
-        android:textSize="20dp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/translatorSD"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dip"
-        android:paddingBottom="10dp"
-        android:paddingLeft="10dp"
-        android:text="Sandra Dunckel (German)"
+        android:text="Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa"
         android:textColor="#000000"
         android:textSize="20dp"
         android:textStyle="bold" />

@@ -6,7 +6,6 @@
     <string name="resources">Resources</string>
     <string name="audio">Audio</string>
     <string name="language">Language</string>
-    <string name="about">About</string>
     <string name="quit">Quit</string>
     <string name="traitdetails">Trait details</string>
     <string name="area">Area</string>
@@ -73,10 +72,6 @@
     <string name="configure">Configure</string>
     <string name="trait">Trait</string>
     <string name="direction">Field starts in...</string>
-    <string name="topleft">Top left</string>
-    <string name="btmleft">Bottom left</string>
-    <string name="topright">Top right</string>
-    <string name="btmright">Bottom right</string>
     <string name="mapanalyze">Analyze</string>
     <string name="mapexport">Export</string>
     <string name="serpentine">Serpentine</string>
@@ -105,8 +100,6 @@
     <string name="choosetraitfile">Choose trait file</string>
     <string name="addtrait">Add trait</string>
     <string name="traiteditor">Trait editor</string>
-    <string name="language">Language</string>
-    <string name="trait">Trait</string>
     <string name="format">Format</string>
     <string name="def">Default</string>
     <string name="minimum">Minimum</string>
@@ -129,8 +122,6 @@
     <string name="traitexists">Trait already exists</string>
     <string name="deletetrait">Delete trait</string>
     <string name="deletealltraits">Delete all traits</string>
-    <string name="areyousure">Are you sure?</string>
-    <string name="resetcomplete">Database has been deleted</string>
     <string name="notanumber">Default, minimum, and maximum must be numeric</string>
     <string name="notemptycategory">Category cannot be empty</string>
     <string name="truevalue">True</string>
@@ -157,7 +148,6 @@
     <string name="prev">Previous</string>
     <string name="next">Next</string>
     <string name="stored">Data has been saved</string>
-    <string name="copy">Copy</string>
     <string name="optional">Optional</string>
     <string name="savetrait">Save trait</string>
     <string name="exportmsg">Exporting...</string>
@@ -182,7 +172,6 @@
     <string name="thelp1">Add Trait on the menu creates a new trait. It is not possible to use the keyboard and tutorial at the same time. Different trait formats are available for data collection.</string>
     <string name="thelp2">To import trait files, press the menu button and choose Import.</string>
     <string name="thelp3">Consult the app manual for additional information about trait creation.</string>
-    <string name="mapsummary">Summary</string>
     <string name="mapsummary">Summary</string>
     <string name="importtraitwarning">A field must be imported before traits can be created.</string>
     <string name="datasetwarning">No data set exists</string>

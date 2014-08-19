@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -114,6 +115,9 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
 
     private File mPath = new File(Environment.getExternalStorageDirectory()
             + "/fieldBook");
+
+    public static String backupPath = Environment.getExternalStorageDirectory()
+            + "/fieldbook/database";
 
     public static Activity thisActivity;
 
@@ -302,6 +306,16 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
             Intent intent = new Intent();
             intent.setClassName(MainActivity.this,
                     ConfigActivity.class.getName());
+            startActivity(intent);
+        }
+
+        SharedPreferences.Editor ed = ep.edit();
+
+        if (ep.getInt("UpdateVersion",-1) < getVersion()) {
+            ed.putInt("UpdateVersion", getVersion());
+            ed.commit();
+            Intent intent = new Intent();
+            intent.setClass(MainActivity.this, ChangelogActivity.class);
             startActivity(intent);
         }
 
@@ -1580,6 +1594,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         createDir(traitPath);
         createDir(fieldImportPath);
         createDir(fieldExportPath);
+        createDir(backupPath);
     }
 
     // Helper function to create a single directory
@@ -4409,10 +4424,6 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
                 startActivity(intent);
                 break;
 
-            case R.id.quit:
-                showQuitDialog();
-                break;
-
             case R.id.help:
                 Intent helpIntent = new Intent();
                 helpIntent.setClassName(MainActivity.this,
@@ -5240,38 +5251,13 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         }
     }
 
-    private void showQuitDialog()
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-        builder.setTitle(getString(R.string.quit));
-        builder.setMessage(getString(R.string.areyousure));
-
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener()
-        {
-
-            public void onClick(DialogInterface dialog, int which)
-            {
-                dialog.dismiss();
-
-                finish();
-            }
-
-        });
-
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener()
-        {
-
-            public void onClick(DialogInterface dialog, int which)
-            {
-                dialog.dismiss();
-            }
-
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-
+    public int getVersion() {
+        int v = 0;
+        try {
+            v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+        return v;
     }
 
     @Override
@@ -5279,7 +5265,6 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
     {
         if ((keyCode == KeyEvent.KEYCODE_BACK))
         {
-            showQuitDialog();
             return true;
         }
         return super.onKeyDown(keyCode, event);

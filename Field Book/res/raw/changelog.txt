@@ -1,17 +1,16 @@
 13/2.1.0
-Added this change log
+Added this changelog
 Changed tutorial setup
 Language dialog updated
-Exported files are shared
+Exported files are shared to other installed apps
 App does not move to first plot when external hardware added
 Items are disabled if not available
-Option to reset, export, or import app database
+Replace text on ActionBar with appropriate icons
+Removed XLS support due to performance issues
+Added support for folders in the Fields dialog
 Added support for Amharic, Arabic, Brazilian Portuguese, Chinese, French, Hindi, Japanese, Oromo, and Russian
-Advanced feature option to play a sound when the first level changes
-Advanced feature option to move to next empty plot via button
-Advanced feature option to move to specific unique identifier
 Bugfix: minimum in numeric traits is enforced
-Bugfix: all text in text traits is deletable with the keyboard (previously one letter remained)
+Bugfix: all text in text traits is deletable with the keyboard
 Bugfix: cursor now appears at end of text in text traits
 Bugfix: files are now visible via computer after export
 
