@@ -1,5 +1,6 @@
 package com.fieldbook.tracker;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -27,6 +28,9 @@ import android.provider.Settings;
 import android.text.Html;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -48,11 +52,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -72,7 +71,7 @@ import jxl.WorkbookSettings;
 /**
  * Settings Screen
  */
-public class ConfigActivity extends SherlockActivity {
+public class ConfigActivity extends Activity {
 	Handler mHandler = new Handler();
 
 	private static final int DIALOG_LOAD_TRAITFILE = 1002;
@@ -233,10 +232,8 @@ public class ConfigActivity extends SherlockActivity {
 
 	private void loadScreen()
 	{
-		//requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		getSupportActionBar().setHomeButtonEnabled(true);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setHomeButtonEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 
 		mFrame = new FrameLayout(this);
 

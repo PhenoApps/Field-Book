@@ -2,7 +2,7 @@
 <TextView 
     android:id="@+id/spinnerTarget"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@drawable/listmimic"	
+    android:background="@drawable/listmimic"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:paddingBottom="20dp"

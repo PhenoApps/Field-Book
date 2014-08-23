@@ -5,8 +5,6 @@
     <string name="search">Buscar</string>
     <string name="resources">Recursos</string>
     <string name="audio">Audio</string>
-    <string name="language">Cambiar Idioma</string>
-    <string name="about">Acerca de</string>
     <string name="quit">Salir</string>
     <string name="traitdetails">Detalles de la variable</string>
     <string name="area">Área</string>
@@ -25,7 +23,6 @@
     <string name="okay">OK</string>
     <string name="stop">Detener</string>
     <string name="deletefile">Eliminar archivo</string>
-    <string name="areyousure">Seguro(a)?</string>
     <string name="yes">Sí</string>
     <string name="no">No</string>
     <string name="genericerror">Error</string>
@@ -71,12 +68,7 @@
     <string name="map">Mostrar mapa</string>
     <string name="mapconfig">Configurar mapa</string>
     <string name="configure">Configurar</string>
-    <string name="trait">Variable</string>
     <string name="direction">Campo comienza en la...</string>
-    <string name="topleft">Superior izquierda</string>
-    <string name="btmleft">Inferior izquierda</string>
-    <string name="topright">Superior derecha</string>
-    <string name="btmright">Inferior derecha</string>
     <string name="mapanalyze">Analizar</string>
     <string name="mapexport">Exportar</string>
     <string name="serpentine">Serpentina</string>
@@ -123,14 +115,12 @@
     <string name="text">Texto</string>
     <string name="up">Arriba</string>
     <string name="down">Abajo</string>
-    <string name="copy">Copiar</string>
     <string name="del">Eliminar</string>
     <string name="mandatorytrait">Nombre de la variable no puede estar vacío</string>
     <string name="traitexists">Variable ya existe</string>
     <string name="deletetrait">Eliminar variable</string>
     <string name="deletealltraits">Eliminar todo</string>
     <string name="areyousure">Seguro(a)?</string>
-    <string name="resetcomplete">Base de Datos ha sido eliminada</string>
     <string name="notanumber">El valor predeterminado, mínimo y máximo deben ser numéricos</string>
     <string name="notemptycategory">La categoría no puede permanecer vacía</string>
     <string name="truevalue">Verdadero</string>
@@ -181,7 +171,6 @@
     <string name="thelp1">Agregar Variable en el menú creará un nueva variable. No podrá usar el teclado y el tutorial al mismo tiempo, desactive el tutorial si desea agregar una nueva variable. Hay diferentes tipos de formatos disponibles para las variables que deseé usted evaluar.</string>
     <string name="thelp2">Para importar archivos de variables, presione el botón Menú y escoja la opción Importar.</string>
     <string name="thelp3">Consulte el manual del app para leer sobre información adicional con respecto a la creación de variables.</string>
-    <string name="mapsummary">Resumen</string>
     <string name="mapsummary">Resumen</string>
     <string name="importtraitwarning">Un archivo de campo debe ser importado antes de elaborar la lista de variables a evaluar.</string>
     <string name="datasetwarning">Conjunto de datos no existe</string>

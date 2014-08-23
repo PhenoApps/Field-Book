@@ -40,7 +40,6 @@
     <string name="exportcomplete">Export komplett</string>
     <string name="personsetup">Person bestimmen</string>
     <string name="locationsetup">Standort (Koordinaten) bestimmen</string>
-    <string name="about">Information</string>
     <string name="currentsettings">Zusätzliche Einstellungen</string>
     <string name="clearsettings">Alle Einstellungen löschen</string>
     <string name="settingsremoved">Einstellungen wurden gelöscht</string>
@@ -71,12 +70,7 @@
     <string name="map">Karte</string>
     <string name="mapconfig">Karte konfigurieren</string>
     <string name="configure">Konfigurieren</string>
-    <string name="trait">Merkmal</string>
     <string name="direction">Erste Parzelle des Feldes startet...</string>
-    <string name="topleft">Oben links</string>
-    <string name="btmleft">Unten links</string>
-    <string name="topright">Unten rechts</string>
-    <string name="btmright">Oben rechts</string>
     <string name="mapanalyze">Analysieren</string>
     <string name="mapexport">Exportieren</string>
     <string name="serpentine">Serpentine</string>
@@ -105,7 +99,6 @@
     <string name="choosetraitfile">Waehlen Sie die Datei mit den Merkmalen</string>
     <string name="addtrait">Merkmal hinzufügen</string>
     <string name="traiteditor">Hier können die Merkmale bearbeitet werden</string>
-    <string name="language">Sprache</string>
     <string name="trait">Merkmal</string>
     <string name="format">Format</string>
     <string name="def">Vorgegeben</string>
@@ -123,14 +116,11 @@
     <string name="text">Text</string>
     <string name="up">Aufwärts </string>
     <string name="down">Abwärts</string>
-    <string name="copy">Kopieren</string>
     <string name="del">Löschen</string>
     <string name="mandatorytrait">Merkmalsname muss definiert sein</string>
     <string name="traitexists">Merkmal ist bereits vorhanden</string>
     <string name="deletetrait">Merkmal löschen</string>
     <string name="deletealltraits">Alle Merkmale löschen</string>
-    <string name="areyousure">Sind Sie sicher?</string>
-    <string name="resetcomplete">Datenbank wurde gelöscht</string>
     <string name="notanumber">Vorgegeben, Minimum und Maximum muessen numerisch sein</string>
     <string name="notemptycategory">Kategorie kann nicht leergelassen werden</string>
     <string name="truevalue">Wahr</string>
@@ -182,7 +172,6 @@
     <string name="thelp1">Neue Merkmale können kreiert werden indem man Merkmal Hinzufügen im Menü anwählt.</string>
     <string name="thelp2">Um Dateien mit Merkmalen zu importieren, drücken Sie Menu und wählen Sie Import</string>
     <string name="thelp3">Konsultieren Sie die Applikationsanleitungen um mehr über die Erstellung von Merkmalen in der Applikation zu erfahren</string>
-    <string name="mapsummary">Zusammenfassung</string>
     <string name="mapsummary">Zusammenfassung</string>
     <string name="importtraitwarning">Eine Felddatei muss importiert werden bevor Merkmal erstellt werden können.</string>
     <string name="datasetwarning">Es existiert kein Datensatz</string>

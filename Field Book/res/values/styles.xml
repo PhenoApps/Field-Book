@@ -1,51 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<style name="Theme.Dialog" parent="android:Theme.Dialog">
-	</style>
-    
-	<style name="Theme.CustomDialog" parent="Theme.Sherlock.Light.Dialog">
-	    	    
-	    <item name="android:actionBarStyle">@style/Custom.ActionBar</item>
-	    <item name="actionBarStyle">@style/Custom.ActionBar</item>
-	    
-	    <item name="android:actionMenuTextAppearance">@style/Custom.MenuTextStyle</item>
-	    <item name="actionMenuTextAppearance">@style/Custom.MenuTextStyle</item>
-	            	    	    
-	</style>
-    
-	<style name="Theme.Custom" parent="Theme.Sherlock.Light">
-	    	    
-	    <item name="android:actionBarStyle">@style/Custom.ActionBar</item>
-	    <item name="actionBarStyle">@style/Custom.ActionBar</item>
-	    
-	    <item name="android:actionMenuTextAppearance">@style/Custom.MenuTextStyle</item>
-	    <item name="actionMenuTextAppearance">@style/Custom.MenuTextStyle</item>
-	            	    	    
-	</style>
-	
-	<style name="Custom.MenuTextStyle"
-	    parent="android:style/TextAppearance.Holo.Widget.ActionBar.Menu">
-	    <item name="android:textStyle">bold</item>
-	    <item name="android:textSize">16dp</item>
-	</style>
-		
-	<style name="Custom.ActionBar" parent="Widget.Sherlock.Light.ActionBar.Solid">
-	    <item name="android:displayOptions">showHome|useLogo</item>
-	    <item name="displayOptions">showHome|useLogo</item>	    
-	</style>
-	
-	<style name="Custom.MenuTextStyle" parent="@style/TextAppearance.Sherlock.Widget.ActionBar.Menu">
-	      <item name="android:textSize">16dp</item>
-	 </style>
+    <style name="Theme.CustomDialog" parent="@android:style/Theme.Holo.Light.Dialog">
+        <item name="android:actionBarStyle">@style/Custom.ActionBar</item>
+        <item name="android:actionMenuTextAppearance">@style/Custom.MenuTextStyle</item>
+    </style>
 
-    <style name="Dialog.SectionTitles" parent="android:Theme.Dialog">
+    <style name="Theme.Custom" parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/Custom.ActionBar</item>
+        <item name="android:actionMenuTextAppearance">@style/Custom.MenuTextStyle</item>
+    </style>
+
+    <style name="Custom.MenuTextStyle" parent="android:style/TextAppearance.Holo.Widget.ActionBar.Menu">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16dp</item>
+    </style>
+
+    <style name="Custom.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:displayOptions">showHome|useLogo</item>
+        <item name="android:background">#d0e1c7</item>
+    </style>
+
+    <style name="Dialog.SectionTitles" parent="@android:style/Theme.Holo.Light.Dialog">
         <item name="android:textSize">22dp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">#ff33b5e5</item>
     </style>
 
-    <style name="Dialog.SectionSubtitles" parent="android:Theme.Dialog">
+    <style name="Dialog.SectionSubtitles" parent="@android:style/Theme.Holo.Light.Dialog">
         <item name="android:textSize">18dp</item>
     </style>
 

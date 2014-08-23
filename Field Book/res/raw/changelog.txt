@@ -1,3 +1,8 @@
+14/2.1.1
+Renamed "Qualitative" trait format "Categorical"
+Removed support for Android 3.0
+Removed ActionBarSherlock library
+
 13/2.1.0
 Added this changelog
 Changed tutorial setup

@@ -51,11 +51,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
-
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -76,7 +74,7 @@ import java.util.TimerTask;
  *
  * v2.0 - The actionbar is not backward compatible, this is why we're using a 3rd party library
  */
-public class MainActivity extends SherlockActivity implements OnClickListener {
+public class MainActivity extends Activity implements OnClickListener {
 
     public static DataHelper dt;
 
@@ -886,7 +884,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q1.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q1.getText().toString());
+                updateTrait(currentTrait.trait, currentTrait.format, q1.getText().toString());
                 q1.setTextColor(Color.parseColor(displayColor));
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.BLACK);
@@ -919,7 +917,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q2.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q2.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q2.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.parseColor(displayColor));
                 q3.setTextColor(Color.BLACK);
@@ -952,7 +950,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q3.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q3.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q3.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.parseColor(displayColor));
@@ -985,7 +983,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q4.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q4.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q4.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.BLACK);
@@ -1018,7 +1016,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q5.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q5.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q5.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.BLACK);
@@ -1051,7 +1049,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q6.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q6.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q6.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.BLACK);
@@ -1084,7 +1082,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q7.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q7.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q7.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.BLACK);
@@ -1117,7 +1115,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q8.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q8.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q8.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.BLACK);
@@ -1150,7 +1148,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q9.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q9.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q9.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.BLACK);
@@ -1183,7 +1181,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q10.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q10.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q10.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.BLACK);
@@ -1216,7 +1214,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q11.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q11.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q11.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.BLACK);
@@ -1249,7 +1247,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
         q12.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "qualitative", q12.getText().toString());
+                updateTrait(currentTrait.trait, "currentTrait.format", q12.getText().toString());
                 q1.setTextColor(Color.BLACK);
                 q2.setTextColor(Color.BLACK);
                 q3.setTextColor(Color.BLACK);
@@ -2413,7 +2411,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
                                         .get(Calendar.DAY_OF_MONTH)));
                             }
                         }
-                    } else if (currentTrait.format.equals("qualitative")) {
+                    } else if (currentTrait.format.equals("qualitative")|currentTrait.format.equals("categorical")) {
                         qPicker.setVisibility(LinearLayout.VISIBLE);
 
                         kb.setVisibility(View.GONE);
@@ -3940,7 +3938,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
             map.addView(createSquare(id, interpolateColor(v)));
         }
         else
-        if (colorTrait.format.equals("qualitative"))
+        if (colorTrait.format.equals("categorical"))
         {
             String[] d = colorTrait.categories.split("/");
 
@@ -3998,7 +3996,7 @@ public class MainActivity extends SherlockActivity implements OnClickListener {
             exportSquare(cv, x, y, interpolateColor(v));
         }
         else
-        if (colorTrait.format.equals("qualitative"))
+        if (colorTrait.format.equals("qualitative")|colorTrait.format.equals("categorical"))
         {
             String[] d = colorTrait.categories.split("/");
 

@@ -29,11 +29,9 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import java.io.File;
 import java.io.FileReader;
@@ -43,7 +41,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class TraitEditorActivity extends SherlockActivity {
+public class TraitEditorActivity extends Activity {
 
     private static Handler mHandler = new Handler();
 
@@ -139,8 +137,8 @@ public class TraitEditorActivity extends SherlockActivity {
 
         setContentView(R.layout.list);
 
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         thisActivity = this;
 

@@ -1,5 +1,6 @@
 package com.fieldbook.tracker;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -14,17 +15,17 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
-
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.actionbarsherlock.view.MenuItem;
+import android.app.ListActivity;
+import android.view.MenuItem;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class FileExploreActivity extends SherlockListActivity {
+public class FileExploreActivity extends ListActivity {
 
 	// Stores names of traversed directories
 	ArrayList<String> str = new ArrayList<String>();
@@ -60,14 +61,13 @@ public class FileExploreActivity extends SherlockListActivity {
         getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
                 .getDisplayMetrics());
 		
-		getSupportActionBar().setHomeButtonEnabled(true);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setHomeButtonEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		loadFileList();
+        getListView().setAdapter(adapter);
 
-		getListView().setAdapter(adapter);
-		
-		getListView().setOnItemClickListener(new OnItemClickListener()
+        getListView().setOnItemClickListener(new OnItemClickListener()
 		{
 
 			public void onItemClick(AdapterView<?> arg0, View arg1, int which, long arg3) 
@@ -85,7 +85,7 @@ public class FileExploreActivity extends SherlockListActivity {
 
 					loadFileList();
 
-					getListView().setAdapter(adapter);
+                    getListView().setAdapter(adapter);
 				}
 
 				// Checks if 'up' was clicked
@@ -106,7 +106,7 @@ public class FileExploreActivity extends SherlockListActivity {
 					}
 					loadFileList();
 
-					getListView().setAdapter(adapter);
+                    getListView().setAdapter(adapter);
 				}
 				// File picked
 				else {
