@@ -1,14 +1,14 @@
 # Field Book [![Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_45.png)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
 Field Book is an Android application that can be used to collect field data. It uses a novel collection system that only displays a single cell to be collected at a time.
 
-## Acknowledgements
+### Acknowledgements
+## Developers
 Trevor Rife - trife@ksu.edu
 
 Jesse Poland
 
-Irazema Fuentes-Bueno
-
-Sandra Dunckel
+## Translators
+Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa
 
 ## License
     Licensed under the GNU General Public License version 2 (GPLv2)
