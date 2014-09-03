@@ -21,6 +21,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -239,10 +240,8 @@ public class TraitEditorActivity extends Activity {
             }
         };
 
-        OnItemSelectedListener formatListener = new OnItemSelectedListener() {
-
-            public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                       int position, long arg3) {
+        format.setOnItemSelectedListener(new OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> av, View arg1, int position, long arg3) {
 
                 // Change the layout of the dialog based on the trait
                 if (position != currentPosition) {
@@ -264,9 +263,10 @@ public class TraitEditorActivity extends Activity {
             public void onNothingSelected(AdapterView<?> arg0) {
 
             }
-        };
+        });
 
-        setSpinner(format, data, formatListener);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.smallspinnerlayout2, data);
+        format.setAdapter(itemsAdapter);
 
         closeBtn.setOnClickListener(new OnClickListener() {
 
@@ -595,14 +595,6 @@ public class TraitEditorActivity extends Activity {
             return true;
     }
 
-    // Helper function set spinner adapter and listener
-    private void setSpinner(Spinner spinner, String[] data, OnItemSelectedListener listener) {
-        GenericSpinnerAdapter adapter = new GenericSpinnerAdapter(
-                this, R.layout.smallspinnerlayout4, R.layout.smallspinnerlayout2, data, listener);
-        spinner.setAdapter(adapter);
-
-    }
-
     // Helper function to load data
     public static void loadData() {
         mAdapter = new TraitAdapter(thisActivity, MainActivity.dt.getAllTraitObjects(), traitListener);
@@ -790,23 +782,16 @@ public class TraitEditorActivity extends Activity {
             }
         });
 
-
-        OnItemClickListener listener = new OnItemClickListener() {
-
+        csvList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 mChosenFile = mFileList[which];
-
                 mHandler.post(importCSV);
-
                 importDialog.dismiss();
             }
-        };
+        });
 
-        GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(thisActivity,
-                R.layout.listitem_a, mFileList, listener);
-
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(thisActivity, R.layout.listitem_a, mFileList);
         csvList.setAdapter(itemsAdapter);
-
         importDialog.show();
     }
 

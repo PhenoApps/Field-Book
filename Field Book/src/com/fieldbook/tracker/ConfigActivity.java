@@ -581,31 +581,8 @@ public class ConfigActivity extends Activity {
 				fieldDialog2.dismiss();				
 			}
 		});
-		
-		String[] items6 = new String[] { getString(R.string.importcsv), 
-		getString(R.string.importexcel)};
 
-		OnItemClickListener csvListener = new OnItemClickListener() {
 
-			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-
-				fieldDialog2.dismiss();
-				
-				switch (position) {
-					case 0:
-						createDialog(DIALOG_LOAD_FIELDFILECSV);
-						break;
-						
-					case 1:
-						createDialog(DIALOG_LOAD_FIELDFILEEXCEL);
-						break;
-				}
-
-			}
-		};
-
-		fieldList2.setAdapter(new GenericArrayAdapter(this, R.layout.listitem_a, items6, csvListener));
-		
 		// list current field values
 		fieldCurrentDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
 		fieldCurrentDialog.setTitle(getString(R.string.fields));
@@ -647,14 +624,12 @@ public class ConfigActivity extends Activity {
 
 		String[] items5 = new String[] { getString(R.string.importfields), 
 		getString(R.string.listfieldimport)};
-
-		OnItemClickListener fieldListener = new OnItemClickListener() {
-
-			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+        fieldList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
 
 				fieldDialog.dismiss();
 
-				switch (position) {
+				switch (which) {
 					case 0:
 						fieldDialog2.show();						
 						break;
@@ -670,10 +645,9 @@ public class ConfigActivity extends Activity {
 				}
 
 			}
-		};
-		
-		fieldList.setAdapter(new GenericArrayAdapter(this, R.layout.listitem_a,
-				items5, fieldListener));
+		});
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, items5);
+        fieldList.setAdapter(itemsAdapter);
 
 		// To configure location
 		locationDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
@@ -1569,9 +1543,9 @@ public class ConfigActivity extends Activity {
 			+ "," + ep.getString("Longitude", "");
 		else
 			tagLocation += getString(R.string.location) + ": " + getString(R.string.none);
-																					
+
 		if (MainActivity.dt.getTraitColumnsAsString() != null)
-			tagTraits = getString(R.string.traits) + ": " + MainActivity.dt.getTraitColumnsAsString2();
+			tagTraits = getString(R.string.traits) + "";
 		else
 			tagTraits = getString(R.string.traits) + ": " + getString(R.string.none);
 		
@@ -1596,8 +1570,6 @@ public class ConfigActivity extends Activity {
 	
 	private void updateSetupList()
 	{
-		//GenericArrayAdapter ga = (GenericArrayAdapter) setupList.getAdapter();
-
         ArrayAdapter<String> ga = (ArrayAdapter) setupList.getAdapter();
 
         ga.clear();
@@ -1658,16 +1630,15 @@ public class ConfigActivity extends Activity {
 			fFile = fFile.substring(0, fFile.length() -4);
 		}
 		
-		exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile);			
-		
-		saveList.setAdapter(new GenericCheckedArrayAdapter(ConfigActivity.this, 
-		R.layout.listitem3_a, MainActivity.dt.getRangeColumns(), saveListener));
-		
+		exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile);
+
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem3_a, MainActivity.dt.getRangeColumns());
+        saveList.setAdapter(itemsAdapter);
+
 		for (int i = 0; i < saveList.getAdapter().getCount(); i++) {
-			
 			saveList.setItemChecked(i, true);
 		}
-		
+
 		saveDialog.show();		
 	}
 	
@@ -1742,8 +1713,8 @@ public class ConfigActivity extends Activity {
 		// Check or uncheck the list items based on existing
 		// visibility
 		if (traits != null) {
-			rateList.setAdapter(new GenericCheckedArrayAdapter(
-					ConfigActivity.this, R.layout.listitem2_a, traits, null));
+            ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem2_a, traits);
+            rateList.setAdapter(itemsAdapter);
 
 			int count = rateList.getAdapter().getCount();
 
@@ -1756,6 +1727,28 @@ public class ConfigActivity extends Activity {
 				}
 			}
 		}
+
+        /*
+                csvList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                dialog.dismiss();
+
+                Editor e = ep.edit();
+
+                e.putString("DROP3", traits[which]);
+                e.commit();
+
+                MainActivity.partialReload = true;
+
+                updateSetupList();
+            }
+        });
+
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, traits);
+        csvList.setAdapter(itemsAdapter);
+		dialog.show();
+         */
+
 
 		rateDialog.show();		
 	}
@@ -2004,7 +1997,7 @@ public class ConfigActivity extends Activity {
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
 
-        ListView csvList = (ListView) dialog.findViewById(R.id.myList);
+        final ListView csvList = (ListView) dialog.findViewById(R.id.myList);
         Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
 
         csvButton.setOnClickListener(new OnClickListener(){
@@ -2014,13 +2007,11 @@ public class ConfigActivity extends Activity {
             }
         });
 
-
-        OnItemClickListener listener = new OnItemClickListener() {
-
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+        csvList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 dialog.dismiss();
 
-                mChosenFile = mFileList[which];
+                mChosenFile = mFileList[position];
 
                 Editor e = ep.edit();
 
@@ -2061,14 +2052,11 @@ public class ConfigActivity extends Activity {
                 else
                     importFieldMapDialog.show();
 
-                //mHandler.post(importCSV);
             }
-        };
+        });
 
-        GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(ConfigActivity.this,
-                R.layout.listitem_a, mFileList, listener);
-
-        csvList.setAdapter(itemsAdapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.listitem_a, mFileList);
+        csvList.setAdapter(adapter);
 
         dialog.show();
     }
@@ -2076,6 +2064,9 @@ public class ConfigActivity extends Activity {
 	private void showFieldFileCSVDialog()
 	{
 		final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
 
 		dialog.setTitle(getString(R.string.choosefieldfile) + ": " + mUserChoice);
 		dialog.setContentView(R.layout.genericdialog);
@@ -2091,72 +2082,64 @@ public class ConfigActivity extends Activity {
         });
 
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
             public void onDismiss(DialogInterface dialog) {
                 mUserChoice = "";
             }
         });
 
-		OnItemClickListener listener = new OnItemClickListener() {
-
-			public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-				dialog.dismiss();
+        csvList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                dialog.dismiss();
 
                 mUserChoice = mFileList[which];
-				mChosenFile = mUserChoice;
+                mChosenFile = mUserChoice;
 
-                if(mUserChoice.contains("/")){
-                    loadFileList(CSV,MainActivity.fieldImportPath + importDirectory + "/" + mUserChoice);
+                if (mUserChoice.contains("/")) {
+                    loadFileList(CSV, MainActivity.fieldImportPath + importDirectory + "/" + mUserChoice);
                     importDirectory = importDirectory + "/" + mUserChoice;
                     showFieldFileCSVDialog();
                     return;
                 }
 
-				Editor e = ep.edit();
-				e.putString("FieldFile", mChosenFile);
-				e.commit();
-				action = DIALOG_LOAD_FIELDFILECSV;
+                Editor e = ep.edit();
+                e.putString("FieldFile", mChosenFile);
+                e.commit();
+                action = DIALOG_LOAD_FIELDFILECSV;
 
-				try
-				{
-					importMain.removeAllViews();
-					
-					FileReader fr = new FileReader(MainActivity.fieldImportPath + "/"
-							+ mChosenFile);
-					CSVReader cr = new CSVReader(fr);
+                try {
+                    importMain.removeAllViews();
 
-					importColumns = cr.readNext();
-					
-					for (String s : importColumns)
-					{
-						if (DataHelper.hasSpecialChars(s))
-						{
-							columnFail = true;
-							break;
-						}
-						else
-							addRow(importMain, s);									
-					}
-				}
-				catch (Exception n)
-				{
-					
-				}
-				
-				if (columnFail)
-					Toast.makeText(ConfigActivity.this, getString(R.string.columnfail), Toast.LENGTH_LONG).show();
-				else
-					importFieldMapDialog.show();
-				
-				//mHandler.post(importCSV);				
-			}
-		};
-						
-		GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(ConfigActivity.this, 
-		R.layout.listitem_a, mFileList, listener);
-		
-		csvList.setAdapter(itemsAdapter);
+                    FileReader fr = new FileReader(MainActivity.fieldImportPath +  "/" + importDirectory +  "/"
+                            + mChosenFile);
+                    CSVReader cr = new CSVReader(fr);
 
+                    importColumns = cr.readNext();
+
+                    for (String s : importColumns) {
+                        if (DataHelper.hasSpecialChars(s)) {
+                            columnFail = true;
+                            break;
+                        } else
+                            addRow(importMain, s);
+                    }
+                } catch (Exception n) {
+
+                }
+
+                mUserChoice = "";
+                importDirectory = "";
+
+                if (columnFail)
+                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail), Toast.LENGTH_LONG).show();
+                else
+                    importFieldMapDialog.show();
+
+                //mHandler.post(importCSV);
+            }
+		});
+
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, mFileList);
+        csvList.setAdapter(itemsAdapter);
 		dialog.show();
 	}
 
@@ -2179,11 +2162,9 @@ public class ConfigActivity extends Activity {
 			}
 		});
 
-
-		OnItemClickListener listener = new OnItemClickListener() {
-
-			public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-				dialog.dismiss();
+        csvList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                dialog.dismiss();
 				
 				mChosenFile = mFileList[which];
 
@@ -2234,14 +2215,13 @@ public class ConfigActivity extends Activity {
 				else							
 					importFieldMapDialog.show();
 			}
-		};
-						
-		GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(ConfigActivity.this, 
-		R.layout.listitem_a, mFileList, listener);
-		
-		csvList.setAdapter(itemsAdapter);				
-	
-		dialog.show();
+		});
+
+
+
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, mFileList);
+        csvList.setAdapter(itemsAdapter);
+        dialog.show();
 	}
 	
 	// Helper function to add rows to import dialog
@@ -2690,24 +2670,22 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        final OnItemClickListener setupListener = new OnItemClickListener(){
 
-            public void onItemClick(AdapterView<?> arg0, View arg1, int position,
-                                    long arg3) {
-
+        setupList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 chooseBackupDialog.dismiss();
-
-                switch (position)
+                switch (which)
                 {
                     case 0:
                         showDatabaseResetDialog1();
                         break;
                 }
             }
-        };
+        });
 
-        setupList.setAdapter(new GenericArrayAdapter(ConfigActivity.this, R.layout.listitem_a2,
-                items, setupListener));
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a2, items);
+        setupList.setAdapter(itemsAdapter);
+        chooseBackupDialog.show();
 
         chooseBackupDialog.show();
     }
