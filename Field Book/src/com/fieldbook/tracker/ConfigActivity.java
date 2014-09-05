@@ -31,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -902,10 +903,13 @@ public class ConfigActivity extends Activity {
         } catch (PackageManager.NameNotFoundException e) {
             versionName = null;
         }
+
 		final Dialog aboutDialog = new Dialog(ConfigActivity.this,
 				android.R.style.Theme_Holo_Light_Dialog);
-		aboutDialog.setTitle(getString(R.string.version) + " " + versionName);
-		aboutDialog.setContentView(R.layout.about);
+
+        aboutDialog.setTitle(R.string.about);
+
+    	aboutDialog.setContentView(R.layout.about);
 
 		android.view.WindowManager.LayoutParams langParams = aboutDialog.getWindow().getAttributes();
 		langParams.width = LayoutParams.FILL_PARENT;
@@ -914,11 +918,22 @@ public class ConfigActivity extends Activity {
 		aboutDialog.setCancelable(true);
 		aboutDialog.setCanceledOnTouchOutside(true);
 
+        TextView versionText = (TextView) aboutDialog.findViewById(R.id.tvVersion);
+        versionText.setText(getString(R.string.updatemsg) + " " + versionName);
+
+        versionText.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(ConfigActivity.this, ChangelogActivity.class);
+                startActivity(intent);
+            }
+        });
+
 		Button closeBtn = (Button) aboutDialog
 				.findViewById(R.id.closeBtn);
 
 		closeBtn.setOnClickListener(new OnClickListener() {
-
 			public void onClick(View arg0) {
 				aboutDialog.dismiss();
 			}
@@ -2648,13 +2663,38 @@ public class ConfigActivity extends Activity {
 
     private void showDatabaseDialog()
     {
-        String[] items = new String[3];
 
+        /*
+        final Dialog languageDialog = new Dialog(ConfigActivity.this,
+				android.R.style.Theme_Holo_Light_Dialog);
+		languageDialog.setTitle(getString(R.string.language));
+		languageDialog.setContentView(R.layout.genericdialog);
+
+		android.view.WindowManager.LayoutParams params = languageDialog.getWindow().getAttributes();
+        params.width = LayoutParams.WRAP_CONTENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        languageDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+
+        languageDialog.setCancelable(true);
+        languageDialog.setCanceledOnTouchOutside(true);
+
+		ListView myList = (ListView) languageDialog
+				.findViewById(R.id.myList);
+
+         */
+
+
+        String[] items = new String[1];
         items[0] = getString(R.string.dbreset);
 
         final Dialog chooseBackupDialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
         chooseBackupDialog.setTitle(getString(R.string.dbbackup));
         chooseBackupDialog.setContentView(R.layout.config);
+
+        android.view.WindowManager.LayoutParams params = chooseBackupDialog.getWindow().getAttributes();
+        params.width = LayoutParams.WRAP_CONTENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        chooseBackupDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
 
         chooseBackupDialog.setCancelable(true);
         chooseBackupDialog.setCanceledOnTouchOutside(true);
@@ -2670,7 +2710,6 @@ public class ConfigActivity extends Activity {
             }
         });
 
-
         setupList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 chooseBackupDialog.dismiss();
@@ -2683,10 +2722,8 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a2, items);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, items);
         setupList.setAdapter(itemsAdapter);
-        chooseBackupDialog.show();
-
         chooseBackupDialog.show();
     }
 

@@ -1,11 +1,13 @@
+15/2.1.3
+Traits can now be made in other languages
+Changelog can be accessed from the About dialog
+
 15/2.1.2
 Fixed issue with field folders
 Fixed issue with field file selection
 
 14/2.1.1
 Renamed "Qualitative" trait format "Categorical"
-Fixed issue with Field folders
-Fixed selection issue with fields
 Removed support for Android 3.0
 Removed ActionBarSherlock library
 

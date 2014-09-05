@@ -144,6 +144,7 @@ public class TraitEditorActivity extends Activity {
         thisActivity = this;
 
         final String[] data = new String[7];
+        final String[] enData = new String[7];
 
         data[0] = getString(R.string.numeric);
         data[1] = getString(R.string.qualitative);
@@ -152,6 +153,14 @@ public class TraitEditorActivity extends Activity {
         data[4] = getString(R.string.bool);
         data[5] = getString(R.string.text);
         data[6] = getString(R.string.audio);
+
+        enData[0] = "Numeric";
+        enData[1] = "Categorical";
+        enData[2] = "Date";
+        enData[3] = "Percent";
+        enData[4] = "Boolean";
+        enData[5] = "Text";
+        enData[6] = "Audio";
 
         traitList = (ListView) findViewById(R.id.myList);
 
@@ -251,11 +260,8 @@ public class TraitEditorActivity extends Activity {
                     details.setText("");
                     categories.setText("");
                     bool.setChecked(false);
-
                     currentPosition = position;
-
                     format.setSelection(currentPosition);
-
                     prepareFields(currentPosition);
                 }
             }
@@ -397,7 +403,7 @@ public class TraitEditorActivity extends Activity {
 
                 if (!edit)
                     MainActivity.dt.insertTraits(trait.getText().toString().trim(),
-                            format.getSelectedItem().toString().toLowerCase(), def.getText().toString(),
+                            enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
                             minimum.getText().toString(), maximum.getText().toString(),
                             details.getText().toString(), categories.getText().toString(),
                             "true", String.valueOf(pos));
