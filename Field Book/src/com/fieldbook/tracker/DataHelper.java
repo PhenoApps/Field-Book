@@ -845,6 +845,56 @@ public class DataHelper {
     }
 
     /**
+     * Returns the range for items that match the specified id
+     */
+    public String getRangeFromId(String plot_id) {
+        try {
+            Cursor cursor = this.db.query(RANGE, new String[]{ep.getString("ImportFirstName", "")},
+                    ep.getString("ImportUniqueName", "") + " like ? ", new String[]{plot_id},
+                    null, null, null);
+
+            String myList = null;
+
+            if (cursor.moveToFirst()) {
+                myList = cursor.getString(0);
+            }
+
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+
+            return myList;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the plot for items that match the specified id
+     */
+    public String getPlotFromId(String plot_id) {
+        try {
+            Cursor cursor = this.db.query(RANGE, new String[]{ep.getString("ImportSecondName", "")},
+                    ep.getString("ImportUniqueName", "") + " like ?", new String[]{plot_id},
+                    null, null, null);
+
+            String myList = null;
+
+            if (cursor.moveToFirst()) {
+                myList = cursor.getString(0);
+            }
+
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+
+            return myList;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Helper function
      * v1.6 - Amended to consider trait
      */

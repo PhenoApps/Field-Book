@@ -10,12 +10,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,6 +27,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
@@ -71,7 +74,7 @@ import java.util.TimerTask;
  * Main entry point. All main screen logic resides here
  * v1.6 - We have retained all existing data structures to minimize code breakage, but functions have new parameters
  * added to allow for multiple traits. All affected functions are documented in Datahelper.java
- *
+ * <p/>
  * v2.0 - The actionbar is not backward compatible, this is why we're using a 3rd party library
  */
 public class MainActivity extends Activity implements OnClickListener {
@@ -92,6 +95,7 @@ public class MainActivity extends Activity implements OnClickListener {
     public static String searchPlot;
 
     public static RangeObject cRange;
+    private String lastRange = "";
 
     public static boolean reloadData;
     public static boolean partialReload;
@@ -136,6 +140,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private String[] traits;
 
     public int[] rangeID;
+    String inputPlotId = "";
 
     private int paging;
 
@@ -284,7 +289,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         // Enforce internal language change
         local = ep.getString("language", "en");
-        region = ep.getString("region","");
+        region = ep.getString("region", "");
         Locale locale2 = new Locale(local);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
@@ -295,8 +300,7 @@ public class MainActivity extends Activity implements OnClickListener {
         loadScreen();
 
         // If the user hasn't configured range and traits, open settings screen
-        if (!ep.getBoolean("ImportFieldFinished", false) | !ep.getBoolean("CreateTraitFinished", false))
-        {
+        if (!ep.getBoolean("ImportFieldFinished", false) | !ep.getBoolean("CreateTraitFinished", false)) {
             dt.copyFileOrDir(mPath.getAbsolutePath(), "field_import");
             dt.copyFileOrDir(mPath.getAbsolutePath(), "resources");
             dt.copyFileOrDir(mPath.getAbsolutePath(), "trait");
@@ -309,7 +313,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         SharedPreferences.Editor ed = ep.edit();
 
-        if (ep.getInt("UpdateVersion",-1) < getVersion()) {
+        if (ep.getInt("UpdateVersion", -1) < getVersion()) {
             ed.putInt("UpdateVersion", getVersion());
             ed.commit();
             Intent intent = new Intent();
@@ -319,8 +323,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     }
 
-    private void loadScreen()
-    {
+    private void loadScreen() {
         setContentView(R.layout.main);
 
         // If the app is just starting up, we must always allow refreshing of
@@ -373,13 +376,10 @@ public class MainActivity extends Activity implements OnClickListener {
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 // do not do bit check on event, crashes keyboard
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    try
-                    {
+                    try {
                         moveRangeTo(rangeID, range.getText().toString(), false);
                         imm.hideSoftInputFromWindow(range.getWindowToken(), 0);
-                    }
-                    catch (Exception e)
-                    {
+                    } catch (Exception e) {
                     }
                     return true;
                 }
@@ -392,13 +392,10 @@ public class MainActivity extends Activity implements OnClickListener {
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 // do not do bit check on event, crashes keyboard
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    try
-                    {
+                    try {
                         movePlotTo(rangeID, plot.getText().toString(), false);
                         imm.hideSoftInputFromWindow(plot.getWindowToken(), 0);
-                    }
-                    catch (Exception e)
-                    {
+                    } catch (Exception e) {
                     }
                     return true;
                 }
@@ -438,7 +435,7 @@ public class MainActivity extends Activity implements OnClickListener {
         eNumUpdate = new TextWatcher() {
 
             public void afterTextChanged(final Editable en) {
-                Timer timer=new Timer();
+                Timer timer = new Timer();
                 final long DELAY = 750; // in ms
 
                 try {
@@ -461,8 +458,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         }
                     }, DELAY);
 
-                    if (currentTrait.maximum.length() > 0)
-                    {
+                    if (currentTrait.maximum.length() > 0) {
                         if (val > Integer.parseInt(currentTrait.maximum)) {
                             Toast.makeText(
                                     MainActivity.this,
@@ -482,8 +478,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 if (en.toString().length() > 0) {
                     if (newTraits != null & currentTrait != null)
                         updateTrait(currentTrait.trait, "numeric", en.toString());
-                }
-                else {
+                } else {
                     if (newTraits != null & currentTrait != null)
                         newTraits.remove(currentTrait.trait);
                 }
@@ -503,14 +498,13 @@ public class MainActivity extends Activity implements OnClickListener {
 
         // Validates the text entered for text format
         tNumUpdate = new TextWatcher() {
-        //TODO parse barcode and go to plot
+            //TODO parse barcode and go to plot
             public void afterTextChanged(Editable en) {
 
                 if (en.toString().length() >= 0) {
                     if (newTraits != null & currentTrait != null)
                         updateTrait(currentTrait.trait, "text", en.toString());
-                }
-                else {
+                } else {
                     if (newTraits != null & currentTrait != null)
                         newTraits.remove(currentTrait.trait);
                 }
@@ -555,11 +549,12 @@ public class MainActivity extends Activity implements OnClickListener {
         };
 
 
-        eNum.setOnTouchListener(new OnTouchListener(){
+        eNum.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View arg0, MotionEvent arg1) {
                 return true;
-            }});
+            }
+        });
 
         // Updates the progressbar value on screen and in memory hashmap
         seekBar.setOnSeekBarChangeListener(seekListener);
@@ -624,21 +619,15 @@ public class MainActivity extends Activity implements OnClickListener {
         plotName.setText(ep.getString("ImportSecondName", getString(R.string.plot)) + ":");
 
         // Clear function for text, numeric and percent
-        clearGeneric.setOnClickListener(new OnClickListener()
-        {
+        clearGeneric.setOnClickListener(new OnClickListener() {
 
-            public void onClick(View arg0)
-            {
-                if (currentTrait.format.equals("text"))
-                {
+            public void onClick(View arg0) {
+                if (currentTrait.format.equals("text")) {
                     tNum.removeTextChangedListener(tNumUpdate);
                     tNum.setText("");
                     removeTrait(currentTrait.trait);
                     tNum.addTextChangedListener(tNumUpdate);
-                }
-                else
-                if (currentTrait.format.equals("numeric"))
-                {
+                } else if (currentTrait.format.equals("numeric")) {
                     eNum.removeTextChangedListener(eNumUpdate);
                     eNum.setText("");
 
@@ -649,10 +638,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         eNum.setText(currentTrait.defaultValue);
 
                     eNum.addTextChangedListener(eNumUpdate);
-                }
-                else
-                if (currentTrait.format.equals("percent"))
-                {
+                } else if (currentTrait.format.equals("percent")) {
                     seekBar.setOnSeekBarChangeListener(null);
 
                     pNum.setText("");
@@ -675,11 +661,9 @@ public class MainActivity extends Activity implements OnClickListener {
         });
 
         // Clear function for date
-        clearDate.setOnClickListener(new OnClickListener()
-        {
+        clearDate.setOnClickListener(new OnClickListener() {
 
-            public void onClick(View arg0)
-            {
+            public void onClick(View arg0) {
                 removeTrait(currentTrait.trait);
 
                 final Calendar c = Calendar.getInstance();
@@ -695,9 +679,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     month.setText(getMonthForInt(Integer.parseInt(d[1]) - 1));
                     day.setText(d[2]);
-                }
-                else
-                {
+                } else {
                     //This is used to persist moving between months
                     tempMonth = c.get(Calendar.MONTH);
 
@@ -710,11 +692,9 @@ public class MainActivity extends Activity implements OnClickListener {
         });
 
         // Clear function for boolean
-        clearBoolean.setOnClickListener(new OnClickListener()
-        {
+        clearBoolean.setOnClickListener(new OnClickListener() {
 
-            public void onClick(View arg0)
-            {
+            public void onClick(View arg0) {
                 if (currentTrait.defaultValue.trim().toLowerCase()
                         .equals("true")) {
                     updateTrait(currentTrait.trait, "boolean", "true");
@@ -738,8 +718,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 Integer i = Integer.parseInt(day.getText().toString());
 
-                if (i + 1 > max)
-                {
+                if (i + 1 > max) {
                     tempMonth += 1;
 
                     if (tempMonth > 11)
@@ -747,8 +726,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     day.setText("1");
                     month.setText(getMonthForInt(tempMonth));
-                }
-                else {
+                } else {
                     day.setText(String.valueOf(i + 1));
                 }
 
@@ -771,8 +749,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 Integer i = Integer.parseInt(day.getText().toString());
 
-                if (i - 1 <= 0)
-                {
+                if (i - 1 <= 0) {
                     tempMonth -= 1;
 
                     if (tempMonth <= 0)
@@ -786,8 +763,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     day.setText(String.valueOf(max));
                     month.setText(getMonthForInt(tempMonth));
-                }
-                else {
+                } else {
                     day.setText(String.valueOf(i - 1));
                 }
 
@@ -1299,7 +1275,7 @@ public class MainActivity extends Activity implements OnClickListener {
         rangeLeft = (ImageView) findViewById(R.id.rangeLeft);
         rangeRight = (ImageView) findViewById(R.id.rangeRight);
 
-        rangeLeft.setOnTouchListener(new OnTouchListener(){
+        rangeLeft.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -1336,7 +1312,6 @@ public class MainActivity extends Activity implements OnClickListener {
             public void onClick(View arg0) {
 
 
-
                 if (rangeID != null && rangeID.length > 0) {
                     //index.setEnabled(true);
 
@@ -1368,6 +1343,27 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     displayRange(cRange);
 
+                    if (ep.getBoolean("RangeSound", false)) {
+                        if (!cRange.range.equals(lastRange)) {
+                            lastRange = cRange.range;
+
+                            try {
+                                int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+                                MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                                chimePlayer.start();
+
+                                chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    public void onCompletion(MediaPlayer mp) {
+                                        mp.release();
+                                    }
+
+                                    ;
+                                });
+                            } catch (Exception e) {
+                            }
+                        }
+                    }
+
                     newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                             .clone();
 
@@ -1376,7 +1372,7 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        rangeRight.setOnTouchListener(new OnTouchListener(){
+        rangeRight.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -1418,8 +1414,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     if (ep.getBoolean("IgnoreExisting", false)) {
                         int pos = paging;
 
-                        if (pos == rangeID.length)
-                        {
+                        if (pos == rangeID.length) {
                             pos = 1;
                             return;
                         }
@@ -1427,8 +1422,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         while (pos <= rangeID.length) {
                             pos += 1;
 
-                            if (pos > rangeID.length)
-                            {
+                            if (pos > rangeID.length) {
                                 pos = 1;
                                 return;
                             }
@@ -1450,7 +1444,26 @@ public class MainActivity extends Activity implements OnClickListener {
                     cRange = dt.getRange(rangeID[paging - 1]);
 
                     displayRange(cRange);
+                    if (ep.getBoolean("RangeSound", false)) {
+                        if (!cRange.range.equals(lastRange)) {
+                            lastRange = cRange.range;
 
+                            try {
+                                int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+                                MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                                chimePlayer.start();
+
+                                chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    public void onCompletion(MediaPlayer mp) {
+                                        mp.release();
+                                    }
+
+                                    ;
+                                });
+                            } catch (Exception e) {
+                            }
+                        }
+                    }
                     newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                             .clone();
 
@@ -1462,7 +1475,7 @@ public class MainActivity extends Activity implements OnClickListener {
         traitLeft = (ImageView) findViewById(R.id.traitLeft);
         traitRight = (ImageView) findViewById(R.id.traitRight);
 
-        traitLeft.setOnTouchListener(new OnTouchListener(){
+        traitLeft.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -1503,8 +1516,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 int pos = traitType.getSelectedItemPosition() - 1;
 
-                if (pos < 0)
-                {
+                if (pos < 0) {
                     pos = traitType.getCount() - 1;
 
                     if (ep.getBoolean("CycleTraits", false))
@@ -1515,7 +1527,7 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        traitRight.setOnTouchListener(new OnTouchListener(){
+        traitRight.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -1556,8 +1568,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 int pos = traitType.getSelectedItemPosition() + 1;
 
-                if (pos > traitType.getCount() - 1)
-                {
+                if (pos > traitType.getCount() - 1) {
                     pos = 0;
 
                     if (ep.getBoolean("CycleTraits", false))
@@ -1573,8 +1584,7 @@ public class MainActivity extends Activity implements OnClickListener {
     // The reported resolution and the layout the device picks mismatch on some devices
     // So what we do is embed the sizing we want into the layout file itself
     // And follow the layout instead of using screenMetrics.density
-    private int getPixelSize()
-    {
+    private int getPixelSize() {
         if (dpi.getText().toString().equals("high"))
             return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 30,
                     getResources().getDisplayMetrics());
@@ -1584,8 +1594,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Create all necessary directories and subdirectories	
-    private void createDirs()
-    {
+    private void createDirs() {
         createDir(mPath.getAbsolutePath());
         createDir(resourcePath);
         createDir(audioPath);
@@ -1596,8 +1605,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Helper function to create a single directory
-    private void createDir(String path)
-    {
+    private void createDir(String path) {
         File dir = new File(path);
 
         if (!dir.exists())
@@ -1605,8 +1613,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Simulate range left key press
-    private void repeatLeft()
-    {
+    private void repeatLeft() {
         if (rangeID != null && rangeID.length > 0) {
 
             // If ignore existing data is enabled, then skip accordingly
@@ -1638,14 +1645,34 @@ public class MainActivity extends Activity implements OnClickListener {
             if (cRange.plot_id.length() == 0)
                 return;
 
+            if (ep.getBoolean("RangeSound", false)) {
+                if (!cRange.range.equals(lastRange)) {
+                    lastRange = cRange.range;
+
+                    try {
+                        int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+                        MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                        chimePlayer.start();
+
+                        chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            public void onCompletion(MediaPlayer mp) {
+                                mp.release();
+                            }
+
+                            ;
+                        });
+                    } catch (Exception e) {
+                    }
+                }
+            }
+
             displayRange(cRange);
 
         }
     }
 
     // Simulate range right key press
-    private void repeatRight()
-    {
+    private void repeatRight() {
         if (rangeID != null && rangeID.length > 0) {
             //index.setEnabled(true);
 
@@ -1653,8 +1680,7 @@ public class MainActivity extends Activity implements OnClickListener {
             if (ep.getBoolean("IgnoreExisting", false)) {
                 int pos = paging;
 
-                if (pos == rangeID.length)
-                {
+                if (pos == rangeID.length) {
                     pos = 1;
                     return;
                 }
@@ -1662,8 +1688,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 while (pos <= rangeID.length) {
                     pos += 1;
 
-                    if (pos > rangeID.length)
-                    {
+                    if (pos > rangeID.length) {
                         pos = 1;
                         return;
                     }
@@ -1687,14 +1712,34 @@ public class MainActivity extends Activity implements OnClickListener {
             if (cRange.plot_id.length() == 0)
                 return;
 
+            if (ep.getBoolean("RangeSound", false)) {
+                if (!cRange.range.equals(lastRange)) {
+                    lastRange = cRange.range;
+
+                    try {
+                        int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+                        MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                        chimePlayer.start();
+
+                        chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            public void onCompletion(MediaPlayer mp) {
+                                mp.release();
+                            }
+
+                            ;
+                        });
+                    } catch (Exception e) {
+                    }
+                }
+            }
+
             displayRange(cRange);
 
         }
     }
 
     // This update should only be called after repeating keypress ends
-    private void repeatUpdate()
-    {
+    private void repeatUpdate() {
         if (rangeID == null)
             return;
 
@@ -1707,8 +1752,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     // For space that appears on screen, but isn't part of the grid we're drawing
     // Think of it as the background
-    private ImageView createBoundarySpace()
-    {
+    private ImageView createBoundarySpace() {
         ImageView image;
         image = new ImageView(MainActivity.this);
         image.setImageResource(R.drawable.emptysquare);
@@ -1717,8 +1761,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Create a square on grid with specific color
-    private ImageView createSquare(final int id, final String mapColor)
-    {
+    private ImageView createSquare(final int id, final String mapColor) {
         final ImageView image;
         image = new ImageView(MainActivity.this);
 
@@ -1727,12 +1770,11 @@ public class MainActivity extends Activity implements OnClickListener {
         image.setBackgroundColor(Color.parseColor(mapColor));
         image.setTag(id + "-" + mapColor);
 
-        image.setOnClickListener(new OnClickListener(){
+        image.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
 
-                try
-                {
+                try {
                     // On click display the plot's values
                     String[] d = v.getTag().toString().split("-");
 
@@ -1754,8 +1796,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     // Now that the user has selected a new plot, change the look
                     // of the previous plot back to original
-                    if (prevCell != null)
-                    {
+                    if (prevCell != null) {
                         String[] d2 = prevCell.getTag().toString().split("-");
                         prevCell.setBackgroundColor(Color.parseColor(d2[1]));
                         prevCell.setImageResource(R.drawable.nosquare);
@@ -1766,9 +1807,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     //((ImageView) v).setBackgroundColor(Color.GREEN);
                     ((ImageView) v).setImageResource(R.drawable.selectedsquare);
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -1779,12 +1818,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
     // Initialize the toggle states of the map
     // Only used for serpentine
-    private void initMap(boolean start, int length)
-    {
+    private void initMap(boolean start, int length) {
         init = new boolean[length];
 
-        for (int i = 0; i < length; i++)
-        {
+        for (int i = 0; i < length; i++) {
             init[i] = start;
 
             start = !start;
@@ -1792,10 +1829,8 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Create data for serpentine map
-    private void processSerpentineMap(HashMap<Integer, String> compare, int mapType)
-    {
-        switch (mapType)
-        {
+    private void processSerpentineMap(HashMap<Integer, String> compare, int mapType) {
+        switch (mapType) {
             //top left
             case 0:
                 mapData = dt.arrangePlotByRow(true);
@@ -1829,10 +1864,8 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Create data for Zig Zag map
-    private void processZigZagMap(HashMap<Integer, String> compare, int mapType)
-    {
-        switch (mapType)
-        {
+    private void processZigZagMap(HashMap<Integer, String> compare, int mapType) {
+        switch (mapType) {
             //top left
             case 0:
                 mapData = dt.arrangePlotByRow(true);
@@ -1861,10 +1894,8 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Display the map accordingly
-    private void loadSerpentineMap(HashMap<Integer, String> compare, int mapType, String mapColor)
-    {
-        switch (mapType)
-        {
+    private void loadSerpentineMap(HashMap<Integer, String> compare, int mapType, String mapColor) {
+        switch (mapType) {
             // top left
             case 0:
                 serpentineGridLeft(compare, mapIndex, mapColor, false);
@@ -1893,11 +1924,9 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Export data accordingly
-    private void loadSerpentineMapExport(HashMap<Integer, String> compare, int mapType, int mapColor, Canvas c)
-    {
+    private void loadSerpentineMapExport(HashMap<Integer, String> compare, int mapType, int mapColor, Canvas c) {
 
-        switch (mapType)
-        {
+        switch (mapType) {
             // top left
             case 0:
                 serpentineGridLeftExport(compare, 0, mapColor, c);
@@ -1926,10 +1955,8 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Display the map accordingly	
-    private void loadZigZagMap(HashMap<Integer, String> compare, int mapType, String mapColor)
-    {
-        switch (mapType)
-        {
+    private void loadZigZagMap(HashMap<Integer, String> compare, int mapType, String mapColor) {
+        switch (mapType) {
             //top left
             case 0:
                 zigZagGridLeft(compare, mapIndex, mapColor, false);
@@ -1958,10 +1985,8 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Export data accordingly
-    private void loadZigZagMapExport(HashMap<Integer, String> compare, int mapType, int mapColor, Canvas c)
-    {
-        switch (mapType)
-        {
+    private void loadZigZagMapExport(HashMap<Integer, String> compare, int mapType, int mapColor, Canvas c) {
+        switch (mapType) {
             //top left
             case 0:
                 zigZagGridLeftExport(compare, 0, mapColor, c);
@@ -2031,20 +2056,17 @@ public class MainActivity extends Activity implements OnClickListener {
 
         if (myList1 == null | ep.getString("DROP1", "").length() == 0) {
             drop1.setText(getString(R.string.nodata));
-        }
-        else
+        } else
             drop1.setText(myList1[0]);
 
         if (myList2 == null | ep.getString("DROP2", "").length() == 0) {
             drop2.setText(getString(R.string.nodata));
-        }
-        else
+        } else
             drop2.setText(myList2[0]);
 
         if (myList3 == null | ep.getString("DROP3", "").length() == 0) {
             drop3.setText(getString(R.string.nodata));
-        }
-        else
+        } else
             drop3.setText(myList3[0]);
 
     }
@@ -2087,20 +2109,17 @@ public class MainActivity extends Activity implements OnClickListener {
 
         if (myList1 == null | ep.getString("DROP1", "").length() == 0) {
             drop1.setText(getString(R.string.nodata));
-        }
-        else
+        } else
             drop1.setText(myList1[0]);
 
         if (myList2 == null | ep.getString("DROP2", "").length() == 0) {
             drop2.setText(getString(R.string.nodata));
-        }
-        else
+        } else
             drop2.setText(myList2[0]);
 
         if (myList3 == null | ep.getString("DROP3", "").length() == 0) {
             drop3.setText(getString(R.string.nodata));
-        }
-        else
+        } else
             drop3.setText(myList3[0]);
 
         // trait is unique, format is not
@@ -2133,8 +2152,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     traitDetails.setText(currentTrait.details);
 
-                    if (!rangeSuppress | !currentTrait.format.equals("numeric"))
-                    {
+                    if (!rangeSuppress | !currentTrait.format.equals("numeric")) {
                         if (eNum.getVisibility() == TextView.VISIBLE) {
                             eNum.setVisibility(EditText.GONE);
                             eNum.setEnabled(false);
@@ -2211,8 +2229,7 @@ public class MainActivity extends Activity implements OnClickListener {
                                 tNum.setSelection(tNum.getText().length());
                             }
                         }, 300);
-                    }
-                    else if (currentTrait.format.equals("numeric")) {
+                    } else if (currentTrait.format.equals("numeric")) {
                         qPicker.setVisibility(LinearLayout.GONE);
 
                         kb.setVisibility(View.VISIBLE);
@@ -2308,17 +2325,13 @@ public class MainActivity extends Activity implements OnClickListener {
                                         pNum.setTextColor(Color.BLACK);
                                     else
                                         pNum.setTextColor(Color.parseColor(displayColor));
-                                }
-                                else
-                                {
+                                } else {
                                     if (newTraits.get(currentTrait.trait).toString().equals("0"))
                                         pNum.setTextColor(Color.BLACK);
                                     else
                                         pNum.setTextColor(Color.parseColor(displayColor));
                                 }
-                            }
-                            else
-                            {
+                            } else {
                                 if (newTraits.get(currentTrait.trait).toString().equals("0"))
                                     pNum.setTextColor(Color.BLACK);
                                 else
@@ -2400,9 +2413,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                                 month.setText(getMonthForInt(Integer.parseInt(d[1]) - 1));
                                 day.setText(d[2]);
-                            }
-                            else
-                            {
+                            } else {
                                 //This is used to persist moving between months
                                 tempMonth = c.get(Calendar.MONTH);
 
@@ -2411,7 +2422,7 @@ public class MainActivity extends Activity implements OnClickListener {
                                         .get(Calendar.DAY_OF_MONTH)));
                             }
                         }
-                    } else if (currentTrait.format.equals("qualitative")|currentTrait.format.equals("categorical")) {
+                    } else if (currentTrait.format.equals("qualitative") | currentTrait.format.equals("categorical")) {
                         qPicker.setVisibility(LinearLayout.VISIBLE);
 
                         kb.setVisibility(View.GONE);
@@ -2761,9 +2772,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             doRecord.setText(getString(R.string.record));
                             tNum.setText("");
                             //tNum.setText(R.string.nodata);
-                        }
-                        else
-                        {
+                        } else {
                             mRecordingLocation = new File(newTraits.get(currentTrait.trait).toString());
 
                             doRecord.setText(getString(R.string.record));
@@ -2836,12 +2845,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         Calendar c = Calendar.getInstance();
 
-        try
-        {
+        try {
             mGeneratedName = MainActivity.cRange.plot_id + " " + timeStamp.format(c.getTime());
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             mGeneratedName = "error " + timeStamp.format(c.getTime());
         }
 
@@ -2851,11 +2857,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         try {
             mRecorder.prepare();
-        }
-        catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             e.printStackTrace();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -2878,8 +2882,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     // Moving to a plot/range will obey the usual settings, such as ignore existing
     // For search results, this is bypassed e.g. always show result regardless
-    private void moveTo(int[] rangeID, String range, String plot, boolean alwaysShow)
-    {
+    private void moveTo(int[] rangeID, String range, String plot, boolean alwaysShow) {
         if (rangeID == null | range == null)
             return;
 
@@ -2894,8 +2897,7 @@ public class MainActivity extends Activity implements OnClickListener {
             cRange = dt.getRange(rangeID[j - 1]);
 
             if (cRange.range.equals(range) & cRange.plot.equals(plot)) {
-                if (alwaysShow)
-                {
+                if (alwaysShow) {
                     paging = j;
 
                     // Reload traits based on the selected plot
@@ -2909,9 +2911,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     haveData = true;
 
                     break;
-                }
-                else
-                if (ep.getBoolean("IgnoreExisting", false)) {
+                } else if (ep.getBoolean("IgnoreExisting", false)) {
                     if (!dt.getTraitExists(rangeID[j - 1], currentTrait.trait,
                             currentTrait.format)) {
                         paging = j;
@@ -2955,8 +2955,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     // Moving to a range will obey the usual settings, such as ignore existing
     // For search results, this is bypassed e.g. always show result regardless	
-    private void moveRangeTo(int[] rangeID, String range, boolean alwaysShow)
-    {
+    private void moveRangeTo(int[] rangeID, String range, boolean alwaysShow) {
         if (rangeID == null | range == null)
             return;
 
@@ -2971,8 +2970,7 @@ public class MainActivity extends Activity implements OnClickListener {
             cRange = dt.getRange(rangeID[j - 1]);
 
             if (cRange.range.equals(range)) {
-                if (alwaysShow)
-                {
+                if (alwaysShow) {
                     paging = j;
 
                     // Reload traits based on the selected plot
@@ -2986,9 +2984,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     haveData = true;
 
                     break;
-                }
-                else
-                if (ep.getBoolean("IgnoreExisting", false)) {
+                } else if (ep.getBoolean("IgnoreExisting", false)) {
                     if (!dt.getTraitExists(rangeID[j - 1], currentTrait.trait,
                             currentTrait.format)) {
                         paging = j;
@@ -3032,8 +3028,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     // Moving to a plot will obey the usual settings, such as ignore existing
     // For search results, this is bypassed e.g. always show result regardless	
-    private void movePlotTo(int[] rangeID, String plot, boolean alwaysShow)
-    {
+    private void movePlotTo(int[] rangeID, String plot, boolean alwaysShow) {
         if (rangeID == null | range == null)
             return;
 
@@ -3048,8 +3043,7 @@ public class MainActivity extends Activity implements OnClickListener {
             cRange = dt.getRange(rangeID[j - 1]);
 
             if (cRange.plot.equals(plot)) {
-                if (alwaysShow)
-                {
+                if (alwaysShow) {
                     paging = j;
 
                     // Reload traits based on the selected plot
@@ -3063,9 +3057,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     haveData = true;
 
                     break;
-                }
-                else
-                if (ep.getBoolean("IgnoreExisting", false)) {
+                } else if (ep.getBoolean("IgnoreExisting", false)) {
                     if (!dt.getTraitExists(rangeID[j - 1], currentTrait.trait,
                             currentTrait.format)) {
                         paging = j;
@@ -3110,13 +3102,10 @@ public class MainActivity extends Activity implements OnClickListener {
     @Override
     public void onDestroy() {
 
-        try
-        {
+        try {
             // Always close tips / hints along with the main activity
             TutorialMainActivity.thisActivity.finish();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
 
         }
 
@@ -3131,38 +3120,42 @@ public class MainActivity extends Activity implements OnClickListener {
         super.onResume();
 
         // Update menu item visibility
-        if (systemMenu != null)
-        {
-            if (ep.getBoolean("EnableMap", false))
-            {
+        if (systemMenu != null) {
+            if (ep.getBoolean("EnableMap", false)) {
                 systemMenu.findItem(R.id.map).setVisible(true);
-            }
-            else
-            {
+            } else {
                 systemMenu.findItem(R.id.map).setVisible(false);
             }
 
-            if (ep.getBoolean("Tips", false))
-            {
+            if (ep.getBoolean("Tips", false)) {
                 systemMenu.findItem(R.id.help).setVisible(true);
-            }
-            else
-            {
+            } else {
                 systemMenu.findItem(R.id.help).setVisible(false);
+            }
+            if (ep.getBoolean("JumpToPlot", false)) {
+                systemMenu.findItem(R.id.jumpToPlot).setVisible(true);
+            } else {
+                systemMenu.findItem(R.id.jumpToPlot).setVisible(false);
+            }
+
+            if (ep.getBoolean("NextEmptyPlot", false)) {
+                systemMenu.findItem(R.id.nextEmptyPlot).setVisible(true);
+            } else {
+                systemMenu.findItem(R.id.nextEmptyPlot).setVisible(false);
             }
         }
 
         // This allows dynamic language change without exiting the app
-            local = ep.getString("language", "en");
-            region = ep.getString("region","");
-            Locale locale2 = new Locale(local,region);
-            Locale.setDefault(locale2);
-            Configuration config2 = new Configuration();
-            config2.locale = locale2;
-            getBaseContext().getResources().updateConfiguration(config2,
-                    getBaseContext().getResources().getDisplayMetrics());
-            invalidateOptionsMenu();
-            loadScreen();
+        local = ep.getString("language", "en");
+        region = ep.getString("region", "");
+        Locale locale2 = new Locale(local, region);
+        Locale.setDefault(locale2);
+        Configuration config2 = new Configuration();
+        config2.locale = locale2;
+        getBaseContext().getResources().updateConfiguration(config2,
+                getBaseContext().getResources().getDisplayMetrics());
+        invalidateOptionsMenu();
+        loadScreen();
 
 
         // If reload data is true, it means there was an import operation, and
@@ -3190,19 +3183,13 @@ public class MainActivity extends Activity implements OnClickListener {
             initWidgets(false);
 
             traitType.setSelection(0);
-        }
-        else
-        if (partialReload)
-        {
+        } else if (partialReload) {
             partialReload = false;
 
             displayRange(cRange);
 
             initWidgets(false);
-        }
-        else
-        if (searchReload)
-        {
+        } else if (searchReload) {
             searchReload = false;
 
             paging = 1;
@@ -3214,15 +3201,13 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Get size of a row in a map 
-    private int getMapRangeRowSize()
-    {
+    private int getMapRangeRowSize() {
         if (mapData == null)
             return 0;
 
         int large = 0;
 
-        for(int i = 0; i < mapData.length; i++)
-        {
+        for (int i = 0; i < mapData.length; i++) {
             if (mapData[i].plotCount > large)
                 large = mapData[i].plotCount;
         }
@@ -3233,8 +3218,7 @@ public class MainActivity extends Activity implements OnClickListener {
     // Helper function to draw grid
     // Simply loop through data, and perform action depending on whether it is doing analyze
     // or just map
-    private void zigZagGridLeft(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing)
-    {
+    private void zigZagGridLeft(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing) {
         map.removeAllViews();
 
         if (mapData == null)
@@ -3248,12 +3232,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int actualRows = 0;
 
-        if (max - start < GRIDSIZE)
-        {
+        if (max - start < GRIDSIZE) {
             actualRows = max - start;
-        }
-        else
-        {
+        } else {
             actualRows = GRIDSIZE;
         }
 
@@ -3264,47 +3245,33 @@ public class MainActivity extends Activity implements OnClickListener {
         if (!ignoreSizing)
             segmentValue = start + actualRows;
 
-        for (int i = start; i < segmentValue; i++)
-        {
+        for (int i = start; i < segmentValue; i++) {
             rowData = dt.getRowForMapPlot(mapData[i].plot, true);
 
-            for (int j = 0; j < rowSize; j++)
-            {
-                if (j < rowData.length)
-                {
-                    if (compare == null)
-                    {
+            for (int j = 0; j < rowSize; j++) {
+                if (j < rowData.length) {
+                    if (compare == null) {
                         map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                    }
-                    else
-                    {
-                        if (!analyze)
-                        {
+                    } else {
+                        if (!analyze) {
                             if (compare.containsKey(rowData[j].id))
                                 map.addView(createSquare(rowData[j].id, mapColor));
                             else
                                 map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                        }
-                        else
-                        {
-                            if (compare.containsKey(rowData[j].id))
-                            {
+                        } else {
+                            if (compare.containsKey(rowData[j].id)) {
                                 if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
                                     map.addView(createSquare(rowData[j].id, mapColor));
                                 else
                                     colorGradient(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric);
-                            }
-                            else
-                            {
+                            } else {
                                 map.addView(createSquare(rowData[j].id, "#FFFFFF"));
 
                             }
 
                         }
                     }
-                }
-                else
-                {
+                } else {
                     map.addView(createBoundarySpace());
                 }
             }
@@ -3315,8 +3282,7 @@ public class MainActivity extends Activity implements OnClickListener {
     // Helper function to export grid
     // Simply loop through data, and perform action depending on whether it is doing analyze
     // or just map	
-    private void zigZagGridLeftExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c)
-    {
+    private void zigZagGridLeftExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c) {
         if (mapData == null)
             return;
 
@@ -3326,12 +3292,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int actualRows = 0;
 
-        if (max - start < GRIDSIZE)
-        {
+        if (max - start < GRIDSIZE) {
             actualRows = max - start;
-        }
-        else
-        {
+        } else {
             actualRows = GRIDSIZE;
         }
 
@@ -3339,46 +3302,32 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int segmentValue = max;
 
-        for (int i = start; i < segmentValue; i++)
-        {
+        for (int i = start; i < segmentValue; i++) {
             rowData = dt.getRowForMapPlot(mapData[i].plot, true);
 
-            for (int j = 0; j < rowSize; j++)
-            {
-                if (j < rowData.length)
-                {
-                    if (compare == null)
-                    {
+            for (int j = 0; j < rowSize; j++) {
+                if (j < rowData.length) {
+                    if (compare == null) {
                         exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                    }
-                    else
-                    {
-                        if (!analyze)
-                        {
+                    } else {
+                        if (!analyze) {
                             if (compare.containsKey(rowData[j].id))
                                 exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, mapColor);
                             else
                                 exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                        }
-                        else
-                        {
-                            if (compare.containsKey(rowData[j].id))
-                            {
+                        } else {
+                            if (compare.containsKey(rowData[j].id)) {
                                 if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
                                     exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, mapColor);
                                 else
                                     colorGradientExport(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric, c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE);
-                            }
-                            else
-                            {
+                            } else {
                                 exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
                             }
 
                         }
                     }
-                }
-                else
-                {
+                } else {
                     exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
                 }
             }
@@ -3389,8 +3338,7 @@ public class MainActivity extends Activity implements OnClickListener {
     // Helper function to draw grid
     // Simply loop through data, and perform action depending on whether it is doing analyze
     // or just map	
-    private void zigZagGridRight(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing)
-    {
+    private void zigZagGridRight(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing) {
         map.removeAllViews();
 
         if (mapData == null)
@@ -3404,12 +3352,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int actualRows = 0;
 
-        if (max - start < GRIDSIZE)
-        {
+        if (max - start < GRIDSIZE) {
             actualRows = max - start;
-        }
-        else
-        {
+        } else {
             actualRows = GRIDSIZE;
         }
 
@@ -3420,46 +3365,32 @@ public class MainActivity extends Activity implements OnClickListener {
         if (!ignoreSizing)
             segmentValue = start + actualRows;
 
-        for (int i = start; i < segmentValue; i++)
-        {
+        for (int i = start; i < segmentValue; i++) {
             rowData = dt.getRowForMapPlot(mapData[i].plot, false);
 
-            for (int j = 0; j < rowSize; j++)
-            {
-                if (j < rowData.length)
-                {
-                    if (compare == null)
-                    {
+            for (int j = 0; j < rowSize; j++) {
+                if (j < rowData.length) {
+                    if (compare == null) {
                         map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                    }
-                    else
-                    {
-                        if (!analyze)
-                        {
+                    } else {
+                        if (!analyze) {
                             if (compare.containsKey(rowData[j].id))
                                 map.addView(createSquare(rowData[j].id, mapColor));
                             else
                                 map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                        }
-                        else
-                        {
-                            if (compare.containsKey(rowData[j].id))
-                            {
+                        } else {
+                            if (compare.containsKey(rowData[j].id)) {
                                 if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
                                     map.addView(createSquare(rowData[j].id, mapColor));
                                 else
                                     colorGradient(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric);
-                            }
-                            else
-                            {
+                            } else {
                                 map.addView(createSquare(rowData[j].id, "#FFFFFF"));
 
                             }
                         }
                     }
-                }
-                else
-                {
+                } else {
                     map.addView(createBoundarySpace());
                 }
             }
@@ -3469,8 +3400,7 @@ public class MainActivity extends Activity implements OnClickListener {
     // Helper function to export grid
     // Simply loop through data, and perform action depending on whether it is doing analyze
     // or just map	
-    private void zigZagGridRightExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c)
-    {
+    private void zigZagGridRightExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c) {
         if (mapData == null)
             return;
 
@@ -3480,12 +3410,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int actualRows = 0;
 
-        if (max - start < GRIDSIZE)
-        {
+        if (max - start < GRIDSIZE) {
             actualRows = max - start;
-        }
-        else
-        {
+        } else {
             actualRows = GRIDSIZE;
         }
 
@@ -3493,46 +3420,32 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int segmentValue = max;
 
-        for (int i = start; i < segmentValue; i++)
-        {
+        for (int i = start; i < segmentValue; i++) {
             rowData = dt.getRowForMapPlot(mapData[i].plot, true);
 
-            for (int j = 0; j < rowSize; j++)
-            {
-                if (j < rowData.length)
-                {
-                    if (compare == null)
-                    {
-                        exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                    }
-                    else
-                    {
-                        if (!analyze)
-                        {
+            for (int j = 0; j < rowSize; j++) {
+                if (j < rowData.length) {
+                    if (compare == null) {
+                        exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
+                    } else {
+                        if (!analyze) {
                             if (compare.containsKey(rowData[j].id))
-                                exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
+                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
                             else
-                                exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                        }
-                        else
-                        {
-                            if (compare.containsKey(rowData[j].id))
-                            {
+                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
+                        } else {
+                            if (compare.containsKey(rowData[j].id)) {
                                 if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
-                                    exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
+                                    exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
                                 else
-                                    colorGradientExport(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric, c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE);
-                            }
-                            else
-                            {
-                                exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
+                                    colorGradientExport(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric, c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE);
+                            } else {
+                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
                             }
                         }
                     }
-                }
-                else
-                {
-                    exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
+                } else {
+                    exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
                 }
             }
         }
@@ -3541,8 +3454,7 @@ public class MainActivity extends Activity implements OnClickListener {
     // Helper function to draw grid
     // Simply loop through data, and perform action depending on whether it is doing analyze
     // or just map	
-    private void serpentineGridLeft(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing)
-    {
+    private void serpentineGridLeft(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing) {
         map.removeAllViews();
 
         if (mapData == null)
@@ -3556,12 +3468,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int actualRows = 0;
 
-        if (max - start < GRIDSIZE)
-        {
+        if (max - start < GRIDSIZE) {
             actualRows = max - start;
-        }
-        else
-        {
+        } else {
             actualRows = GRIDSIZE;
         }
 
@@ -3572,47 +3481,33 @@ public class MainActivity extends Activity implements OnClickListener {
         if (!ignoreSizing)
             segmentValue = start + actualRows;
 
-        for (int i = start; i < segmentValue; i++)
-        {
+        for (int i = start; i < segmentValue; i++) {
             rowData = dt.getRowForMapPlot(mapData[i].plot, init[i]);
 
-            for (int j = 0; j < rowSize; j++)
-            {
-                if (j < rowData.length)
-                {
-                    if (compare == null)
-                    {
+            for (int j = 0; j < rowSize; j++) {
+                if (j < rowData.length) {
+                    if (compare == null) {
                         map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                    }
-                    else
-                    {
-                        if (!analyze)
-                        {
+                    } else {
+                        if (!analyze) {
                             if (compare.containsKey(rowData[j].id))
                                 map.addView(createSquare(rowData[j].id, mapColor));
                             else
                                 map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                        }
-                        else
-                        {
-                            if (compare.containsKey(rowData[j].id))
-                            {
+                        } else {
+                            if (compare.containsKey(rowData[j].id)) {
                                 if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
                                     map.addView(createSquare(rowData[j].id, mapColor));
                                 else
                                     colorGradient(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric);
-                            }
-                            else
-                            {
+                            } else {
                                 map.addView(createSquare(rowData[j].id, "#FFFFFF"));
 
                             }
 
                         }
                     }
-                }
-                else
-                {
+                } else {
                     map.addView(createBoundarySpace());
                 }
             }
@@ -3623,8 +3518,7 @@ public class MainActivity extends Activity implements OnClickListener {
     // Helper function to export grid
     // Simply loop through data, and perform action depending on whether it is doing analyze
     // or just map	
-    private void serpentineGridLeftExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c)
-    {
+    private void serpentineGridLeftExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c) {
         if (mapData == null)
             return;
 
@@ -3634,12 +3528,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int actualRows = 0;
 
-        if (max - start < GRIDSIZE)
-        {
+        if (max - start < GRIDSIZE) {
             actualRows = max - start;
-        }
-        else
-        {
+        } else {
             actualRows = GRIDSIZE;
         }
 
@@ -3647,46 +3538,32 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int segmentValue = max;
 
-        for (int i = start; i < segmentValue; i++)
-        {
+        for (int i = start; i < segmentValue; i++) {
             rowData = dt.getRowForMapPlot(mapData[i].plot, init[i]);
 
-            for (int j = 0; j < rowSize; j++)
-            {
-                if (j < rowData.length)
-                {
-                    if (compare == null)
-                    {
+            for (int j = 0; j < rowSize; j++) {
+                if (j < rowData.length) {
+                    if (compare == null) {
                         exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                    }
-                    else
-                    {
-                        if (!analyze)
-                        {
+                    } else {
+                        if (!analyze) {
                             if (compare.containsKey(rowData[j].id))
                                 exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, mapColor);
                             else
                                 exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                        }
-                        else
-                        {
-                            if (compare.containsKey(rowData[j].id))
-                            {
+                        } else {
+                            if (compare.containsKey(rowData[j].id)) {
                                 if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
                                     exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, mapColor);
                                 else
                                     colorGradientExport(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric, c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE);
-                            }
-                            else
-                            {
+                            } else {
                                 exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
                             }
 
                         }
                     }
-                }
-                else
-                {
+                } else {
                     exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
                 }
             }
@@ -3696,8 +3573,7 @@ public class MainActivity extends Activity implements OnClickListener {
     // Helper function to export grid
     // Simply loop through data, and perform action depending on whether it is doing analyze
     // or just map	
-    private void serpentineGridRightExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c)
-    {
+    private void serpentineGridRightExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c) {
         if (mapData == null)
             return;
 
@@ -3707,12 +3583,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int actualRows = 0;
 
-        if (max - start < GRIDSIZE)
-        {
+        if (max - start < GRIDSIZE) {
             actualRows = max - start;
-        }
-        else
-        {
+        } else {
             actualRows = GRIDSIZE;
         }
 
@@ -3720,46 +3593,32 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int segmentValue = max;
 
-        for (int i = start; i < segmentValue; i++)
-        {
+        for (int i = start; i < segmentValue; i++) {
             rowData = dt.getRowForMapPlot(mapData[i].plot, !init[i]);
 
-            for (int j = 0; j < rowSize; j++)
-            {
-                if (j < rowData.length)
-                {
-                    if (compare == null)
-                    {
-                        exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                    }
-                    else
-                    {
-                        if (!analyze)
-                        {
+            for (int j = 0; j < rowSize; j++) {
+                if (j < rowData.length) {
+                    if (compare == null) {
+                        exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
+                    } else {
+                        if (!analyze) {
                             if (compare.containsKey(rowData[j].id))
-                                exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
+                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
                             else
-                                exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                        }
-                        else
-                        {
-                            if (compare.containsKey(rowData[j].id))
-                            {
+                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
+                        } else {
+                            if (compare.containsKey(rowData[j].id)) {
                                 if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
-                                    exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
+                                    exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
                                 else
-                                    colorGradientExport(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric, c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE);
-                            }
-                            else
-                            {
-                                exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
+                                    colorGradientExport(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric, c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE);
+                            } else {
+                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
                             }
                         }
                     }
-                }
-                else
-                {
-                    exportSquare(c, ((rowSize-1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
+                } else {
+                    exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
                 }
             }
         }
@@ -3768,8 +3627,7 @@ public class MainActivity extends Activity implements OnClickListener {
     // Helper function to draw grid
     // Simply loop through data, and perform action depending on whether it is doing analyze
     // or just map	
-    private void serpentineGridRight(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing)
-    {
+    private void serpentineGridRight(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing) {
         map.removeAllViews();
 
         if (mapData == null)
@@ -3783,12 +3641,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         int actualRows = 0;
 
-        if (max - start < GRIDSIZE)
-        {
+        if (max - start < GRIDSIZE) {
             actualRows = max - start;
-        }
-        else
-        {
+        } else {
             actualRows = GRIDSIZE;
         }
 
@@ -3799,46 +3654,32 @@ public class MainActivity extends Activity implements OnClickListener {
         if (!ignoreSizing)
             segmentValue = start + actualRows;
 
-        for (int i = start; i < segmentValue; i++)
-        {
+        for (int i = start; i < segmentValue; i++) {
             rowData = dt.getRowForMapPlot(mapData[i].plot, init[i]);
 
-            for (int j = 0; j < rowSize; j++)
-            {
-                if (j < rowData.length)
-                {
-                    if (compare == null)
-                    {
+            for (int j = 0; j < rowSize; j++) {
+                if (j < rowData.length) {
+                    if (compare == null) {
                         map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                    }
-                    else
-                    {
-                        if (!analyze)
-                        {
+                    } else {
+                        if (!analyze) {
                             if (compare.containsKey(rowData[j].id))
                                 map.addView(createSquare(rowData[j].id, mapColor));
                             else
                                 map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                        }
-                        else
-                        {
-                            if (compare.containsKey(rowData[j].id))
-                            {
+                        } else {
+                            if (compare.containsKey(rowData[j].id)) {
                                 if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
                                     map.addView(createSquare(rowData[j].id, mapColor));
                                 else
                                     colorGradient(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric);
-                            }
-                            else
-                            {
+                            } else {
                                 map.addView(createSquare(rowData[j].id, "#FFFFFF"));
 
                             }
                         }
                     }
-                }
-                else
-                {
+                } else {
                     map.addView(createBoundarySpace());
                 }
             }
@@ -3846,20 +3687,15 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Find largest number for a trait; used in map analysis
-    private float largestNumeric(String[] plots, String trait)
-    {
+    private float largestNumeric(String[] plots, String trait) {
         float v = 0;
 
-        for (String i : plots)
-        {
+        for (String i : plots) {
             float g;
 
-            try
-            {
+            try {
                 g = Float.parseFloat(dt.getSingleValue(i, trait));
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 g = 0;
             }
 
@@ -3871,20 +3707,15 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Find smallest number for a trait; used in map analysis
-    private float smallestNumeric(String[] plots, String trait)
-    {
+    private float smallestNumeric(String[] plots, String trait) {
         float v = -1;
 
-        for (String i : plots)
-        {
+        for (String i : plots) {
             float g;
 
-            try
-            {
+            try {
                 g = Float.parseFloat(dt.getSingleValue(i, trait));
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 g = 0;
             }
 
@@ -3899,35 +3730,24 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Function colors analysis depending on trait type
-    private void colorGradient(int id, String value, float sNumeric, float bNumeric)
-    {
+    private void colorGradient(int id, String value, float sNumeric, float bNumeric) {
         TraitObject colorTrait = dt.getDetail(mapTrait.getSelectedItem().toString());
 
-        if (colorTrait.format.equals("numeric"))
-        {
-            map.addView(createSquare(id, interpolateColor(Double.parseDouble(value) / bNumeric )));
-        }
-        else
-        if (colorTrait.format.equals("percent"))
-        {
-            map.addView(createSquare(id, interpolateColor(Double.parseDouble(value) / Double.parseDouble(colorTrait.maximum) )));
-        }
-        else
-        if (colorTrait.format.equals("date"))
-        {
+        if (colorTrait.format.equals("numeric")) {
+            map.addView(createSquare(id, interpolateColor(Double.parseDouble(value) / bNumeric)));
+        } else if (colorTrait.format.equals("percent")) {
+            map.addView(createSquare(id, interpolateColor(Double.parseDouble(value) / Double.parseDouble(colorTrait.maximum))));
+        } else if (colorTrait.format.equals("date")) {
             Calendar c = Calendar.getInstance();
 
-            String[]d = value.split("\\.");
+            String[] d = value.split("\\.");
 
-            c.set(Integer.parseInt(d[0]), Integer.parseInt(d[1])-1, Integer.parseInt(d[2]));
+            c.set(Integer.parseInt(d[0]), Integer.parseInt(d[1]) - 1, Integer.parseInt(d[2]));
 
             Double v = (double) c.get(Calendar.DAY_OF_YEAR);
 
             map.addView(createSquare(id, interpolateColor(v / 365)));
-        }
-        else
-        if (colorTrait.format.equals("boolean"))
-        {
+        } else if (colorTrait.format.equals("boolean")) {
             int v = 0;
 
             if (value.equals("false"))
@@ -3936,56 +3756,39 @@ public class MainActivity extends Activity implements OnClickListener {
                 v = 1;
 
             map.addView(createSquare(id, interpolateColor(v)));
-        }
-        else
-        if (colorTrait.format.equals("categorical"))
-        {
+        } else if (colorTrait.format.equals("categorical")) {
             String[] d = colorTrait.categories.split("/");
 
-            for (int i = 0; i < d.length; i++)
-            {
-                if (value.equals(d[i]))
-                {
-                    map.addView(createSquare(id, getColor(i+1)));
+            for (int i = 0; i < d.length; i++) {
+                if (value.equals(d[i])) {
+                    map.addView(createSquare(id, getColor(i + 1)));
                     break;
                 }
             }
-        }
-        else
+        } else
             map.addView(createSquare(id, "#FFFFFF"));
 
     }
 
     // Function exports grid square based on trait type
-    private void colorGradientExport(int id, String value, float sNumeric, float bNumeric, Canvas cv, int x, int y)
-    {
+    private void colorGradientExport(int id, String value, float sNumeric, float bNumeric, Canvas cv, int x, int y) {
         TraitObject colorTrait = dt.getDetail(mapTrait.getSelectedItem().toString());
 
-        if (colorTrait.format.equals("numeric"))
-        {
-            exportSquare(cv, x, y, interpolateColor(Double.parseDouble(value) / bNumeric ));
-        }
-        else
-        if (colorTrait.format.equals("percent"))
-        {
+        if (colorTrait.format.equals("numeric")) {
+            exportSquare(cv, x, y, interpolateColor(Double.parseDouble(value) / bNumeric));
+        } else if (colorTrait.format.equals("percent")) {
             exportSquare(cv, x, y, interpolateColor(Double.parseDouble(value) / Double.parseDouble(colorTrait.maximum)));
-        }
-        else
-        if (colorTrait.format.equals("date"))
-        {
+        } else if (colorTrait.format.equals("date")) {
             Calendar c = Calendar.getInstance();
 
-            String[]d = value.split("\\.");
+            String[] d = value.split("\\.");
 
-            c.set(Integer.parseInt(d[0]), Integer.parseInt(d[1])-1, Integer.parseInt(d[2]));
+            c.set(Integer.parseInt(d[0]), Integer.parseInt(d[1]) - 1, Integer.parseInt(d[2]));
 
             Double v = (double) c.get(Calendar.DAY_OF_YEAR);
 
-            exportSquare(cv, x, y, interpolateColor(v / 365 ));
-        }
-        else
-        if (colorTrait.format.equals("boolean"))
-        {
+            exportSquare(cv, x, y, interpolateColor(v / 365));
+        } else if (colorTrait.format.equals("boolean")) {
             int v = 0;
 
             if (value.equals("false"))
@@ -3994,47 +3797,39 @@ public class MainActivity extends Activity implements OnClickListener {
                 v = 1;
 
             exportSquare(cv, x, y, interpolateColor(v));
-        }
-        else
-        if (colorTrait.format.equals("qualitative")|colorTrait.format.equals("categorical"))
-        {
+        } else if (colorTrait.format.equals("qualitative") | colorTrait.format.equals("categorical")) {
             String[] d = colorTrait.categories.split("/");
 
-            for (int i = 0; i < d.length; i++)
-            {
-                if (value.equals(d[i]))
-                {
-                    if (x >= exportRowSize)
-                    {
+            for (int i = 0; i < d.length; i++) {
+                if (value.equals(d[i])) {
+                    if (x >= exportRowSize) {
                         x = 0;
                         y += EXPORTGRIDSIZE;
                     }
 
-                    exportSquare(cv, x, y, getColor(i+1));
+                    exportSquare(cv, x, y, getColor(i + 1));
 
                     x += EXPORTGRIDSIZE;
 
                     break;
                 }
             }
-        }
-        else
+        } else
             exportSquare(cv, x, y, "#FFFFFF");
 
     }
 
     // This is used to generate range from green to red
-    public static String interpolateColor(double power)
-    {
+    public static String interpolateColor(double power) {
         double H = (1 - power) * 120f; // base green
         double S = 0.9; // Saturation
         double B = 0.9; // Brightness
 
         float[] hsv = new float[3];
 
-        hsv[0] = (float)H;
-        hsv[1] = (float)S;
-        hsv[2] = (float)B;
+        hsv[0] = (float) H;
+        hsv[1] = (float) S;
+        hsv[2] = (float) B;
 
         String hexColor = String.format("#%06X", (0xFFFFFF & Color.HSVToColor(hsv)));
 
@@ -4072,10 +3867,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
     // As above	
     public static int[] getPattern(int index) {
-        int n = (int)Math.cbrt(index);
-        index -= (n*n*n);
+        int n = (int) Math.cbrt(index);
+        index -= (n * n * n);
         int[] p = new int[3];
-        Arrays.fill(p,n);
+        Arrays.fill(p, n);
         if (index == 0) {
             return p;
         }
@@ -4087,26 +3882,22 @@ public class MainActivity extends Activity implements OnClickListener {
             return p;
         }
         index -= n;
-        p[v      ] = index / n;
+        p[v] = index / n;
         p[++v % 3] = index % n;
         return p;
     }
 
-    private Runnable doAnalyze = new Runnable()
-    {
-        public void run()
-        {
+    private Runnable doAnalyze = new Runnable() {
+        public void run() {
             new AnalyzeTask().execute(0);
         }
     };
 
-    private class AnalyzeTask extends AsyncTask<Integer, Integer, Integer>
-    {
+    private class AnalyzeTask extends AsyncTask<Integer, Integer, Integer> {
         ProgressDialog dialog;
 
         @Override
-        protected void onPreExecute()
-        {
+        protected void onPreExecute() {
             super.onPreExecute();
 
             dialog = new ProgressDialog(MainActivity.this);
@@ -4119,11 +3910,9 @@ public class MainActivity extends Activity implements OnClickListener {
         }
 
         @Override
-        protected Integer doInBackground(Integer... params)
-        {
+        protected Integer doInBackground(Integer... params) {
             // redraw is only called if you want to regenerate all the data
-            if (redraw)
-            {
+            if (redraw) {
                 analyzeRange = dt.analyze(mapTrait.getSelectedItem().toString());
 
                 mapIndex = 0;
@@ -4133,12 +3922,9 @@ public class MainActivity extends Activity implements OnClickListener {
                 bNumeric = largestNumeric(plots, mapTrait.getSelectedItem().toString());
                 sNumeric = smallestNumeric(plots, mapTrait.getSelectedItem().toString());
 
-                if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0)
-                {
+                if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0) {
                     processSerpentineMap(analyzeRange, ep.getInt("GRIDPOSITION", 0));
-                }
-                else
-                {
+                } else {
                     processZigZagMap(analyzeRange, ep.getInt("GRIDPOSITION", 0));
                 }
 
@@ -4148,34 +3934,24 @@ public class MainActivity extends Activity implements OnClickListener {
         }
 
         @Override
-        protected void onPostExecute(Integer result)
-        {
+        protected void onPostExecute(Integer result) {
             // Move the map the way the user will so all the variables are constant
-            if (redraw)
-            {
+            if (redraw) {
                 map.scrollTo(0, 0);
 
-                switch (ep.getInt("GRIDPOSITION", 0))
-                {
+                switch (ep.getInt("GRIDPOSITION", 0)) {
                     case 1:
                     case 3:
                         // Simulate user moving to the plot
-                        do
-                        {
-                            if (mapIndex + GRIDSIZE >= mapData.length)
-                            {
+                        do {
+                            if (mapIndex + GRIDSIZE >= mapData.length) {
                                 break;
-                            }
-                            else
-                            {
+                            } else {
                                 mapIndex += GRIDSIZE;
 
-                                if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0)
-                                {
+                                if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0) {
                                     loadSerpentineMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
-                                }
-                                else
-                                {
+                                } else {
                                     loadZigZagMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
                                 }
                             }
@@ -4186,12 +3962,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     case 0:
                     case 2:
-                        if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0)
-                        {
+                        if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0) {
                             loadSerpentineMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
-                        }
-                        else
-                        {
+                        } else {
                             loadZigZagMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
                         }
                         break;
@@ -4208,8 +3981,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 currentMapScrollSegment = scrollSegmentSize;
 
-                switch (ep.getInt("GRIDPOSITION", 0))
-                {
+                switch (ep.getInt("GRIDPOSITION", 0)) {
                     case 0:
                     case 1:
                         mapSegmenth.setText("W: " + currentMapScrollSegment + "/" + mapScrollSegment);
@@ -4217,12 +3989,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     case 2:
                     case 3:
-                        do
-                        {
+                        do {
                             currentMapScrollSegment += scrollSegmentSize;
 
-                            if (currentMapScrollSegment > mapScrollSegment)
-                            {
+                            if (currentMapScrollSegment > mapScrollSegment) {
                                 currentMapScrollSegment = mapScrollSegment;
                             }
 
@@ -4236,15 +4006,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 }
 
-            }
-            else
-            {
-                if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0)
-                {
+            } else {
+                if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0) {
                     loadSerpentineMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
-                }
-                else
-                {
+                } else {
                     loadZigZagMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
                 }
 
@@ -4269,8 +4034,7 @@ public class MainActivity extends Activity implements OnClickListener {
      */
     private void updateTrait(String parent, String trait, String value) {
 
-        if (cRange == null || cRange.plot_id.length() == 0)
-        {
+        if (cRange == null || cRange.plot_id.length() == 0) {
             return;
         }
 
@@ -4291,8 +4055,7 @@ public class MainActivity extends Activity implements OnClickListener {
     // Delete trait, including from database
     private void removeTrait(String parent) {
 
-        if (cRange == null || cRange.plot_id.length() == 0)
-        {
+        if (cRange == null || cRange.plot_id.length() == 0) {
             return;
         }
 
@@ -4322,20 +4085,16 @@ public class MainActivity extends Activity implements OnClickListener {
     public final Handler myGuiHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            synchronized (lock)
-            {
+            synchronized (lock) {
                 switch (msg.what) {
                     case MESSAGE_CHECK_BTN_STILL_PRESSED:
                         ImageView btn = (ImageView) findViewById(msg.arg1);
                         if (btn.getTag() != null) { // button is still pressed	                
                             Message msg1 = new Message(); // schedule next btn pressed check
                             msg1.copyFrom(msg);
-                            if (msg.arg1 == R.id.rangeLeft)
-                            {
+                            if (msg.arg1 == R.id.rangeLeft) {
                                 repeatLeft();
-                            }
-                            else
-                            {
+                            } else {
                                 repeatRight();
                             }
                             myGuiHandler.removeMessages(MESSAGE_CHECK_BTN_STILL_PRESSED);
@@ -4354,23 +4113,30 @@ public class MainActivity extends Activity implements OnClickListener {
 
         systemMenu = menu;
 
-        if (ep.getBoolean("EnableMap", false))
-        {
+        if (ep.getBoolean("EnableMap", false)) {
             systemMenu.findItem(R.id.map).setVisible(true);
-        }
-        else
-        {
+        } else {
             systemMenu.findItem(R.id.map).setVisible(false);
         }
 
-        if (ep.getBoolean("Tips", false))
-        {
+        if (ep.getBoolean("Tips", false)) {
             systemMenu.findItem(R.id.help).setVisible(true);
-        }
-        else
-        {
+        } else {
             systemMenu.findItem(R.id.help).setVisible(false);
         }
+
+        if (ep.getBoolean("JumpToPlot", false)) {
+            systemMenu.findItem(R.id.jumpToPlot).setVisible(true);
+        } else {
+            systemMenu.findItem(R.id.jumpToPlot).setVisible(false);
+        }
+
+        if (ep.getBoolean("NextEmptyPlot", false)) {
+            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(true);
+        } else {
+            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(false);
+        }
+
 
         return true;
     }
@@ -4380,15 +4146,11 @@ public class MainActivity extends Activity implements OnClickListener {
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        switch (item.getItemId())
-        {
+        switch (item.getItemId()) {
             case R.id.settings:
-                try
-                {
+                try {
                     TutorialMainActivity.thisActivity.finish();
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
 
                 }
 
@@ -4398,12 +4160,9 @@ public class MainActivity extends Activity implements OnClickListener {
                 break;
 
             case R.id.search:
-                try
-                {
+                try {
                     TutorialMainActivity.thisActivity.finish();
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
 
                 }
 
@@ -4428,27 +4187,89 @@ public class MainActivity extends Activity implements OnClickListener {
                         TutorialMainActivity.class.getName());
                 startActivity(helpIntent);
                 break;
+            case R.id.nextEmptyPlot:
+                nextEmptyPlot();
+                break;
+            case R.id.jumpToPlot:
+                moveToPlotID();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void moveToPlotID() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.jumptoplotidbutton);
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                inputPlotId = input.getText().toString();
+                String plot = dt.getPlotFromId(inputPlotId);
+                String range = dt.getRangeFromId(inputPlotId);
+                rangeID = dt.getAllRangeID();
+                moveTo(rangeID,range,plot,true);
+            }
+        });
+
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    public void makeToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    public void nextEmptyPlot() {
+        int pos = paging;
+
+        if (pos == rangeID.length) {
+            pos = 1;
+            return;
         }
 
-        return super.onOptionsItemSelected(item);
+        while (pos <= rangeID.length) {
+            pos += 1;
+
+            if (pos > rangeID.length) {
+                pos = 1;
+                return;
+            }
+
+            if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                    currentTrait.format)) {
+                paging = pos;
+                break;
+            }
+        }
+        cRange = dt.getRange(rangeID[paging - 1]);
+        displayRange(cRange);
+        lastRange = cRange.range;
+        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                .clone();
+        initWidgets(true);
     }
 
     public void onClick(View b) {
 
         String v = "";
 
-        switch (b.getId())
-        {
+        switch (b.getId()) {
             case R.id.record:
                 if (mRecording) {
 
                     // Stop recording
-                    try
-                    {
+                    try {
                         mRecorder.stop();
-                    }
-                    catch (Exception e)
-                    {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -4467,8 +4288,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     traitLeft.setEnabled(true);
                     traitRight.setEnabled(true);
 
-                }
-                else {
+                } else {
                     if (!newTraits.containsKey(currentTrait.trait)) {
 
                         // start recording
@@ -4553,8 +4373,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 break;
         }
 
-        if (b.getId() == R.id.k16)
-        {
+        if (b.getId() == R.id.k16) {
             //eNum.setText(eNum.getText().toString().substring(0, eNum.getText().toString().length()-1));
 
             eNum.removeTextChangedListener(eNumUpdate);
@@ -4562,15 +4381,12 @@ public class MainActivity extends Activity implements OnClickListener {
             removeTrait(currentTrait.trait);
             eNum.addTextChangedListener(eNumUpdate);
 
-        }
-        else
-        {
+        } else {
             eNum.setText(eNum.getText().toString() + v);
         }
     }
 
-    private void showMapDialog()
-    {
+    private void showMapDialog() {
         final Dialog configDialog = new Dialog(MainActivity.this, android.R.style.Theme_Holo_Light_Dialog);
         configDialog.setTitle(getString(R.string.mapconfig));
         configDialog.setContentView(R.layout.parameter);
@@ -4600,7 +4416,7 @@ public class MainActivity extends Activity implements OnClickListener {
         final Spinner dir = (Spinner) configDialog.findViewById(R.id.direction);
         final Spinner orientation = (Spinner) configDialog.findViewById(R.id.orientation);
 
-        orientation.setOnItemSelectedListener(new OnItemSelectedListener(){
+        orientation.setOnItemSelectedListener(new OnItemSelectedListener() {
 
             public void onItemSelected(AdapterView<?> arg0, View arg1,
                                        int position, long arg3) {
@@ -4612,7 +4428,7 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        dir.setOnItemSelectedListener(new OnItemSelectedListener(){
+        dir.setOnItemSelectedListener(new OnItemSelectedListener() {
 
             public void onItemSelected(AdapterView<?> arg0, View arg1,
                                        int position, long arg3) {
@@ -4644,7 +4460,7 @@ public class MainActivity extends Activity implements OnClickListener {
         Button clearBtn = (Button) configDialog.findViewById(R.id.clearBtn);
 
         // Map configure, save
-        saveBtn.setOnClickListener(new OnClickListener(){
+        saveBtn.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
 
@@ -4655,15 +4471,12 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 configDialog.dismiss();
 
-                if (!ep.getBoolean("MAPCONFIGURED", false))
-                {
+                if (!ep.getBoolean("MAPCONFIGURED", false)) {
                     ed.putBoolean("MAPCONFIGURED", true);
                     ed.commit();
 
                     mapDialog.show();
-                }
-                else
-                {
+                } else {
                     redraw = true;
 
                     mHandler.post(doAnalyze);
@@ -4672,7 +4485,7 @@ public class MainActivity extends Activity implements OnClickListener {
         });
 
         // Map configure, clear
-        clearBtn.setOnClickListener(new OnClickListener(){
+        clearBtn.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
 
@@ -4713,7 +4526,7 @@ public class MainActivity extends Activity implements OnClickListener {
         mapTrait = (Spinner) mapDialog.findViewById(R.id.mapTrait);
 
         // Map Summary 
-        mapSummary.setOnClickListener(new OnClickListener(){
+        mapSummary.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
 
@@ -4732,7 +4545,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 TextView summaryText = (TextView) summaryDialog.findViewById(R.id.text1);
 
-                closeBtn.setOnClickListener(new OnClickListener(){
+                closeBtn.setOnClickListener(new OnClickListener() {
 
                     public void onClick(View v) {
                         summaryDialog.dismiss();
@@ -4743,16 +4556,13 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 String data = "";
 
-                if (cRange != null)
-                {
+                if (cRange != null) {
                     data = getString(R.string.range) + ": " + cRange.range + "\n";
                     data += getString(R.string.plot) + ": " + cRange.plot + "\n";
                 }
 
-                for (String s : traitList)
-                {
-                    if (newTraits.containsKey(s))
-                    {
+                for (String s : traitList) {
+                    if (newTraits.containsKey(s)) {
                         data += s + ": " + newTraits.get(s).toString() + "\n";
                     }
                 }
@@ -4764,7 +4574,7 @@ public class MainActivity extends Activity implements OnClickListener {
         });
 
         // Export bitmap to disk
-        mapExport.setOnClickListener(new OnClickListener(){
+        mapExport.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
 
@@ -4790,12 +4600,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 mapExportfilename = "";
 
-                try
-                {
+                try {
                     mapExportfilename = mapTrait.getSelectedItem().toString();
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     mapExportfilename = "map_error";
                 }
 
@@ -4803,7 +4610,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         timeStamp.format(Calendar.getInstance().getTime())
                         + ".jpg");
 
-                saveBtn.setOnClickListener(new OnClickListener(){
+                saveBtn.setOnClickListener(new OnClickListener() {
 
                     public void onClick(View v) {
                         mapExportDialog.dismiss();
@@ -4812,7 +4619,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     }
                 });
 
-                closeBtn.setOnClickListener(new OnClickListener(){
+                closeBtn.setOnClickListener(new OnClickListener() {
 
                     public void onClick(View v) {
                         mapExportDialog.dismiss();
@@ -4823,14 +4630,14 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        mapClose.setOnClickListener(new OnClickListener(){
+        mapClose.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
                 mapDialog.dismiss();
             }
         });
 
-        mapParameter.setOnClickListener(new OnClickListener(){
+        mapParameter.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
                 orientation.setSelection(ep.getInt("GRIDPOSITIONORIENTATION", 0));
@@ -4840,7 +4647,7 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        mapAnalyze.setOnClickListener(new OnClickListener(){
+        mapAnalyze.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
 
@@ -4849,12 +4656,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 analyze = !analyze;
 
-                if (analyze)
-                {
+                if (analyze) {
                     mapAnalyze.setText(getString(R.string.clear));
-                }
-                else
-                {
+                } else {
                     mapAnalyze.setText(getString(R.string.mapanalyze));
                 }
 
@@ -4863,7 +4667,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         });
 
-        mapLeft.setOnTouchListener(new OnTouchListener(){
+        mapLeft.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -4884,7 +4688,7 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        mapLeft.setOnClickListener(new OnClickListener(){
+        mapLeft.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
 
@@ -4893,8 +4697,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 currentMapScrollSegment -= scrollSegmentSize;
 
-                if (currentMapScrollSegment < scrollSegmentSize)
-                {
+                if (currentMapScrollSegment < scrollSegmentSize) {
                     currentMapScrollSegment = scrollSegmentSize;
                 }
 
@@ -4904,7 +4707,7 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        mapRight.setOnTouchListener(new OnTouchListener(){
+        mapRight.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -4925,7 +4728,7 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        mapRight.setOnClickListener(new OnClickListener(){
+        mapRight.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
 
@@ -4934,8 +4737,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 currentMapScrollSegment += scrollSegmentSize;
 
-                if (currentMapScrollSegment > mapScrollSegment)
-                {
+                if (currentMapScrollSegment > mapScrollSegment) {
                     currentMapScrollSegment = mapScrollSegment;
                 }
 
@@ -4946,7 +4748,7 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        mapUp.setOnTouchListener(new OnTouchListener(){
+        mapUp.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -4967,14 +4769,13 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        mapUp.setOnClickListener(new OnClickListener(){
+        mapUp.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
 
                 mapIndex -= GRIDSIZE;
 
-                if (mapIndex <= 0)
-                {
+                if (mapIndex <= 0) {
                     mapIndex = 0;
                 }
 
@@ -4983,7 +4784,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         });
 
-        mapDown.setOnTouchListener(new OnTouchListener(){
+        mapDown.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -5004,14 +4805,12 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        mapDown.setOnClickListener(new OnClickListener(){
+        mapDown.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                if (mapIndex + GRIDSIZE >= mapData.length)
-                {
+                if (mapIndex + GRIDSIZE >= mapData.length) {
                     return;
-                }
-                else
+                } else
                     mapIndex += GRIDSIZE;
 
                 mHandler.post(doAnalyze);
@@ -5031,7 +4830,7 @@ public class MainActivity extends Activity implements OnClickListener {
         final ImageView mapTraitLeft = (ImageView) mapDialog.findViewById(R.id.traitLeft);
         final ImageView mapTraitRight = (ImageView) mapDialog.findViewById(R.id.traitRight);
 
-        mapTraitLeft.setOnTouchListener(new OnTouchListener(){
+        mapTraitLeft.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -5066,7 +4865,7 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        mapTraitRight.setOnTouchListener(new OnTouchListener(){
+        mapTraitRight.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -5101,12 +4900,11 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        if (dt.getVisibleTrait() != null)
-        {
+        if (dt.getVisibleTrait() != null) {
             ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, R.layout.spinnerlayout2, dt.getVisibleTrait());
             mapTrait.setAdapter(adapter);
 
-            mapTrait.setOnItemSelectedListener(new OnItemSelectedListener(){
+            mapTrait.setOnItemSelectedListener(new OnItemSelectedListener() {
 
                 public void onItemSelected(AdapterView<?> arg0, View arg1,
                                            int arg2, long arg3) {
@@ -5128,20 +4926,16 @@ public class MainActivity extends Activity implements OnClickListener {
         redraw = true;
         analyze = false;
 
-        if (!ep.getBoolean("MAPCONFIGURED", false))
-        {
+        if (!ep.getBoolean("MAPCONFIGURED", false)) {
             configDialog.show();
-        }
-        else
-        {
+        } else {
             mapDialog.show();
         }
 
     }
 
     // This is used for exporting a grid square
-    private void exportSquare(Canvas c, int x, int y, String color)
-    {
+    private void exportSquare(Canvas c, int x, int y, String color) {
         Paint paint = new Paint();
         paint.setAlpha(0);
         paint.setAntiAlias(true);
@@ -5151,12 +4945,11 @@ public class MainActivity extends Activity implements OnClickListener {
 
         paint.setColor(Color.parseColor(color));
 
-        c.drawRect(x+1, y+1, x + EXPORTGRIDSIZE -1, y + EXPORTGRIDSIZE -1, paint);
+        c.drawRect(x + 1, y + 1, x + EXPORTGRIDSIZE - 1, y + EXPORTGRIDSIZE - 1, paint);
     }
 
     // This is used for exporting a grid square
-    private void exportSquare(Canvas c, int x, int y, int color)
-    {
+    private void exportSquare(Canvas c, int x, int y, int color) {
         Paint paint = new Paint();
         paint.setAlpha(0);
         paint.setAntiAlias(true);
@@ -5166,24 +4959,20 @@ public class MainActivity extends Activity implements OnClickListener {
 
         paint.setColor(color);
 
-        c.drawRect(x+1, y+1, x + EXPORTGRIDSIZE -1, y + EXPORTGRIDSIZE -1, paint);
+        c.drawRect(x + 1, y + 1, x + EXPORTGRIDSIZE - 1, y + EXPORTGRIDSIZE - 1, paint);
     }
 
-    private Runnable exportMap = new Runnable()
-    {
-        public void run()
-        {
+    private Runnable exportMap = new Runnable() {
+        public void run() {
             new ExportMapTask().execute(0);
         }
     };
 
-    private class ExportMapTask extends AsyncTask<Integer, Integer, Integer>
-    {
+    private class ExportMapTask extends AsyncTask<Integer, Integer, Integer> {
         ProgressDialog dialog;
 
         @Override
-        protected void onPreExecute()
-        {
+        protected void onPreExecute() {
             super.onPreExecute();
 
             dialog = new ProgressDialog(MainActivity.this);
@@ -5196,8 +4985,7 @@ public class MainActivity extends Activity implements OnClickListener {
         }
 
         @Override
-        protected Integer doInBackground(Integer... params)
-        {
+        protected Integer doInBackground(Integer... params) {
             Bitmap b = null;
 
             // serpentine
@@ -5215,12 +5003,9 @@ public class MainActivity extends Activity implements OnClickListener {
             c.drawRect(0, 0, exportRowSize * EXPORTGRIDSIZE, mapData.length * EXPORTGRIDSIZE, paint);
             c.save();
 
-            if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0)
-            {
+            if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0) {
                 loadSerpentineMapExport(analyzeRange, ep.getInt("GRIDPOSITION", 0), Color.GREEN, c);
-            }
-            else
-            {
+            } else {
                 loadZigZagMapExport(analyzeRange, ep.getInt("GRIDPOSITION", 0), Color.GREEN, c);
             }
 
@@ -5232,8 +5017,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 out.flush();
                 out.close();
                 b.recycle();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -5241,8 +5025,7 @@ public class MainActivity extends Activity implements OnClickListener {
         }
 
         @Override
-        protected void onPostExecute(Integer result)
-        {
+        protected void onPostExecute(Integer result) {
             if (dialog.isShowing())
                 dialog.dismiss();
 
@@ -5259,10 +5042,8 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        if ((keyCode == KeyEvent.KEYCODE_BACK))
-        {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             return true;
         }
         return super.onKeyDown(keyCode, event);

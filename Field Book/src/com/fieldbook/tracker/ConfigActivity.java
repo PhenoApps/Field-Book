@@ -285,9 +285,12 @@ public class ConfigActivity extends Activity {
         CheckBox enableMap = (CheckBox) advancedDialog.findViewById(R.id.enableMap);
         CheckBox ignoreEntries = (CheckBox) advancedDialog.findViewById(R.id.ignoreExisting);
         CheckBox useDay = (CheckBox) advancedDialog.findViewById(R.id.useDay);
-                
+        CheckBox rangeSound = (CheckBox) advancedDialog.findViewById(R.id.rangeSound);
+        CheckBox jumpToPlot = (CheckBox) advancedDialog.findViewById(R.id.jumpToPlot);
+        CheckBox nextEmptyPlot = (CheckBox) advancedDialog.findViewById(R.id.nextEmptyPlot);
+
         Button advCloseBtn = (Button)  advancedDialog.findViewById(R.id.closeBtn);
-        
+
         advCloseBtn.setOnClickListener(new OnClickListener(){
 
 			public void onClick(View v) {
@@ -301,6 +304,9 @@ public class ConfigActivity extends Activity {
         enableMap.setChecked(ep.getBoolean("EnableMap", false));
 		ignoreEntries.setChecked(ep.getBoolean("IgnoreExisting", false));
 		useDay.setChecked(ep.getBoolean("UseDay", false));
+        rangeSound.setChecked(ep.getBoolean("RangeSound", false));
+        jumpToPlot.setChecked(ep.getBoolean("JumpToPlot", false));
+        nextEmptyPlot.setChecked(ep.getBoolean("NextEmptyPlot", false));
 
 		tips
 		.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -360,7 +366,40 @@ public class ConfigActivity extends Activity {
 				e.commit();
 			}
 		});
-        
+
+        rangeSound
+            .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+                public void onCheckedChanged(CompoundButton arg0,
+                                             boolean checked) {
+                    Editor e = ep.edit();
+                    e.putBoolean("RangeSound", checked);
+                    e.commit();
+                }
+            });
+
+        jumpToPlot
+                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+                    public void onCheckedChanged(CompoundButton arg0,
+                                                 boolean checked) {
+                        Editor e = ep.edit();
+                        e.putBoolean("JumpToPlot", checked);
+                        e.commit();
+                    }
+                });
+
+        nextEmptyPlot
+                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+                    public void onCheckedChanged(CompoundButton arg0,
+                                                 boolean checked) {
+                        Editor e = ep.edit();
+                        e.putBoolean("NextEmptyPlot", checked);
+                        e.commit();
+                    }
+                });
+
 		// Dialog for choosing which traits to rate
 		rateDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
 		rateDialog.setTitle(getString(R.string.choosetraits));
@@ -1177,7 +1216,7 @@ public class ConfigActivity extends Activity {
 	/**
 	 * Creates a list of all files in directory by type 
 	 */
-	private void loadFileList(final String type, final String directory) {
+	private void loadFileList(final String directory) {
 		
 		File importPath = new File(directory);
 		
@@ -1185,7 +1224,7 @@ public class ConfigActivity extends Activity {
             File[] files = importPath.listFiles( new FilenameFilter() {
 				public boolean accept(File dir, String filename) {
 					File sel = new File(dir, filename);
-					return filename.contains(type) || sel.isDirectory();
+					return filename.contains(CSV) || filename.contains(XLS) || sel.isDirectory();
 				}
                 });
 
@@ -1199,10 +1238,7 @@ public class ConfigActivity extends Activity {
                 } else {
                     sortedFileList[i] = files[i].getName();
                 }
-
-
             }
-
             mFileList = sortedFileList;
 		}
 		else {
@@ -1379,11 +1415,7 @@ public class ConfigActivity extends Activity {
 		switch (id) {
 			case DIALOG_LOAD_FIELDFILECSV:
 			case DIALOG_LOAD_TRAITFILE:
-				loadFileList(CSV,MainActivity.fieldImportPath);
-				break;
-			
-			case DIALOG_LOAD_FIELDFILEEXCEL:
-				loadFileList(XLS,MainActivity.fieldImportPath);
+				loadFileList(MainActivity.fieldImportPath);
 				break;
 		}
 	
@@ -2110,7 +2142,7 @@ public class ConfigActivity extends Activity {
                 mChosenFile = mUserChoice;
 
                 if (mUserChoice.contains("/")) {
-                    loadFileList(CSV, MainActivity.fieldImportPath + importDirectory + "/" + mUserChoice);
+                    loadFileList(MainActivity.fieldImportPath + importDirectory + "/" + mUserChoice);
                     importDirectory = importDirectory + "/" + mUserChoice;
                     showFieldFileCSVDialog();
                     return;
@@ -2119,44 +2151,99 @@ public class ConfigActivity extends Activity {
                 Editor e = ep.edit();
                 e.putString("FieldFile", mChosenFile);
                 e.commit();
-                action = DIALOG_LOAD_FIELDFILECSV;
 
-                try {
-                    importMain.removeAllViews();
-
-                    FileReader fr = new FileReader(MainActivity.fieldImportPath +  "/" + importDirectory +  "/"
-                            + mChosenFile);
-                    CSVReader cr = new CSVReader(fr);
-
-                    importColumns = cr.readNext();
-
-                    for (String s : importColumns) {
-                        if (DataHelper.hasSpecialChars(s)) {
-                            columnFail = true;
-                            break;
-                        } else
-                            addRow(importMain, s);
-                    }
-                } catch (Exception n) {
-
+                if(mChosenFile.toLowerCase().contains("xls")) {
+                    isCSV = false;
+                    loadXLSFile();
                 }
 
-                mUserChoice = "";
-                importDirectory = "";
-
-                if (columnFail)
-                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail), Toast.LENGTH_LONG).show();
-                else
-                    importFieldMapDialog.show();
-
-                //mHandler.post(importCSV);
-            }
-		});
+                if(mChosenFile.toLowerCase().contains("csv")) {
+                    isCSV = true;
+                    loadCSVFile();
+                }
+                }
+		    });
 
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, mFileList);
         csvList.setAdapter(itemsAdapter);
 		dialog.show();
 	}
+
+
+    private void loadCSVFile() {
+        action = DIALOG_LOAD_FIELDFILECSV;
+
+        try {
+            importMain.removeAllViews();
+
+            FileReader fr = new FileReader(MainActivity.fieldImportPath +  "/" + importDirectory +  "/"
+                    + mChosenFile);
+            CSVReader cr = new CSVReader(fr);
+
+            importColumns = cr.readNext();
+
+            for (String s : importColumns) {
+                if (DataHelper.hasSpecialChars(s)) {
+                    columnFail = true;
+                    break;
+                } else
+                    addRow(importMain, s);
+            }
+        } catch (Exception n) {
+
+        }
+
+        mUserChoice = "";
+        importDirectory = "";
+
+        if (columnFail)
+            Toast.makeText(ConfigActivity.this, getString(R.string.columnfail), Toast.LENGTH_LONG).show();
+        else
+            importFieldMapDialog.show();
+    }
+
+    private void loadXLSFile() {
+        action = DIALOG_LOAD_FIELDFILEEXCEL;
+
+        WorkbookSettings wbSettings = new WorkbookSettings();
+        wbSettings.setUseTemporaryFileDuringWrite(true);
+
+        try
+        {
+            importMain.removeAllViews();
+
+            wb = Workbook.getWorkbook(new File (MainActivity.fieldImportPath + "/"
+                    + mChosenFile),wbSettings);
+
+            importColumns = new String[wb.getSheet(0).getColumns()];
+
+            for(int s = 0; s < wb.getSheet(0).getColumns(); s++)
+            {
+                importColumns[s] = wb.getSheet(0).getCell(s,0).getContents();
+            }
+
+            for (String s : importColumns)
+            {
+                if (DataHelper.hasSpecialChars(s))
+                {
+                    columnFail = true;
+                    break;
+                }
+                else
+                    addRow(importMain, s);
+            }
+        }
+        catch (Exception n)
+        {
+
+        }
+
+        if (columnFail)
+            Toast.makeText(ConfigActivity.this, getString(R.string.columnfail),
+                    Toast.LENGTH_LONG).show();
+        else
+            importFieldMapDialog.show();
+    }
 
 	private void showFieldFileExcelDialog()
 	{
@@ -2189,50 +2276,9 @@ public class ConfigActivity extends Activity {
 
 				e.commit();
 
-				action = DIALOG_LOAD_FIELDFILEEXCEL;
 
-				WorkbookSettings wbSettings = new WorkbookSettings();
-				wbSettings.setUseTemporaryFileDuringWrite(true);  
-				
-				try
-				{
-					importMain.removeAllViews();
-					
-					wb = Workbook.getWorkbook(new File (MainActivity.fieldImportPath + "/"
-							+ mChosenFile),wbSettings);
-					
-					importColumns = new String[wb.getSheet(0).getColumns()];
-					
-					for(int s = 0; s < wb.getSheet(0).getColumns(); s++)
-					{
-						importColumns[s] = wb.getSheet(0).getCell(s,0).getContents();
-					}
-					
-					for (String s : importColumns)
-					{
-						if (DataHelper.hasSpecialChars(s))
-						{
-							columnFail = true;
-							break;
-						}
-						else									
-							addRow(importMain, s);									
-					}
-				}
-				catch (Exception n)
-				{
-					
-				}
-
-				if (columnFail)
-					Toast.makeText(ConfigActivity.this, getString(R.string.columnfail), 
-					Toast.LENGTH_LONG).show();
-				else							
-					importFieldMapDialog.show();
 			}
 		});
-
-
 
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, mFileList);
         csvList.setAdapter(itemsAdapter);
@@ -2663,27 +2709,6 @@ public class ConfigActivity extends Activity {
 
     private void showDatabaseDialog()
     {
-
-        /*
-        final Dialog languageDialog = new Dialog(ConfigActivity.this,
-				android.R.style.Theme_Holo_Light_Dialog);
-		languageDialog.setTitle(getString(R.string.language));
-		languageDialog.setContentView(R.layout.genericdialog);
-
-		android.view.WindowManager.LayoutParams params = languageDialog.getWindow().getAttributes();
-        params.width = LayoutParams.WRAP_CONTENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        languageDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
-
-        languageDialog.setCancelable(true);
-        languageDialog.setCanceledOnTouchOutside(true);
-
-		ListView myList = (ListView) languageDialog
-				.findViewById(R.id.myList);
-
-         */
-
-
         String[] items = new String[1];
         items[0] = getString(R.string.dbreset);
 
