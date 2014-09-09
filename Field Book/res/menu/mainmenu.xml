@@ -2,12 +2,12 @@
 	<menu xmlns:android="http://schemas.android.com/apk/res/android" >
         <item
             android:id="@+id/nextEmptyPlot"
-            android:title="@string/help"
+            android:title="@string/nextmissingbutton"
             android:icon="@drawable/ic_action_forward"
             android:showAsAction="always" />
         <item
             android:id="@+id/jumpToPlot"
-            android:title="@string/help"
+            android:title="@string/jumptoplotidbutton"
             android:icon="@drawable/ic_action_barcode"
             android:showAsAction="always" />
         <item

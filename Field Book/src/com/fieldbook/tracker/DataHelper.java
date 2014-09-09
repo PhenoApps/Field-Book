@@ -1347,7 +1347,6 @@ public class DataHelper {
      */
     public static boolean hasSpecialChars(String s) {
         final Pattern p = Pattern.compile("[()<>/;\\*%$]");
-
         final Matcher m = p.matcher(s);
 
         if (m.find())

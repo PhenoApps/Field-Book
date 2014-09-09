@@ -4,9 +4,9 @@
         <clip>            
             <shape>                
                 <gradient                    
-                    android:startColor="#FF5e8ea3"                   
+                     android:startColor="#FF5e8ea3"                   
                      android:centerColor="#FF32a0d2"                    
-                     android:centerY="0.1"                    
+                     android:centerY="0.5"                    
                      android:endColor="#FF13729e"                    
                      android:angle="270"                
                 />            

@@ -15,9 +15,9 @@
     <string name="add">Add</string>
     <string name="clear">Clear</string>
     <string name="close">Close</string>
-    <string name="minusday">-1 Day</string>
+    <string name="minusday">-1</string>
     <string name="enter">Enter</string>
-    <string name="plusday">+1 Day</string>
+    <string name="plusday">+1</string>
     <string name="record">Record</string>
     <string name="discardrecording">Discard</string>
     <string name="saveas">Save as</string>
@@ -144,7 +144,7 @@
     <string name="help">Help</string>
     <string name="analyzewait">Processing...</string>
     <string name="mapexportwait">Processing...</string>
-    <string name="columnfail">Column names contain illegal characters</string>
+    <string name="columnfail">Column names contain illegal characters or words</string>
     <string name="prev">Previous</string>
     <string name="next">Next</string>
     <string name="stored">Data has been saved</string>

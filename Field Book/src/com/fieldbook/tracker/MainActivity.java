@@ -2,6 +2,7 @@ package com.fieldbook.tracker;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -186,18 +187,8 @@ public class MainActivity extends Activity implements OnClickListener {
     private TextView rangeName;
     private TextView plotName;
 
-    private Button q1;
-    private Button q2;
-    private Button q3;
-    private Button q4;
-    private Button q5;
-    private Button q6;
-    private Button q7;
-    private Button q8;
-    private Button q9;
-    private Button q10;
-    private Button q11;
-    private Button q12;
+    final Button buttonArray[] = new Button[12];
+    String curCat = "";
 
     private Button clearGeneric;
     private Button clearBoolean;
@@ -498,7 +489,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
         // Validates the text entered for text format
         tNumUpdate = new TextWatcher() {
-            //TODO parse barcode and go to plot
             public void afterTextChanged(Editable en) {
 
                 if (en.toString().length() >= 0) {
@@ -547,7 +537,6 @@ public class MainActivity extends Activity implements OnClickListener {
                 updateTrait(currentTrait.trait, "percent", String.valueOf(seekBar.getProgress()));
             }
         };
-
 
         eNum.setOnTouchListener(new OnTouchListener() {
 
@@ -662,7 +651,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
         // Clear function for date
         clearDate.setOnClickListener(new OnClickListener() {
-
             public void onClick(View arg0) {
                 removeTrait(currentTrait.trait);
 
@@ -684,7 +672,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     tempMonth = c.get(Calendar.MONTH);
 
                     month.setText(getMonthForInt(c.get(Calendar.MONTH)));
-                    day.setText(String.valueOf(c
+                    day.setText(String.format("%02d",c
                             .get(Calendar.DAY_OF_MONTH)));
                 }
 
@@ -708,12 +696,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         // Add day
         addDayBtn.setOnClickListener(new OnClickListener() {
-
             public void onClick(View arg0) {
                 Calendar calendar = Calendar.getInstance();
-
                 calendar.set(Calendar.MONTH, tempMonth);
-
                 int max = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 
                 Integer i = Integer.parseInt(day.getText().toString());
@@ -724,10 +709,10 @@ public class MainActivity extends Activity implements OnClickListener {
                     if (tempMonth > 11)
                         tempMonth = 0;
 
-                    day.setText("1");
+                    day.setText(String.format("%02d",1));
                     month.setText(getMonthForInt(tempMonth));
                 } else {
-                    day.setText(String.valueOf(i + 1));
+                    day.setText(String.format("%02d", i+1));
                 }
 
                 // Change the text color accordingly
@@ -738,17 +723,13 @@ public class MainActivity extends Activity implements OnClickListener {
                     month.setTextColor(Color.BLACK);
                     day.setTextColor(Color.BLACK);
                 }
-
             }
         });
 
         // Minus day
         minusDayBtn.setOnClickListener(new OnClickListener() {
-
             public void onClick(View arg0) {
-
                 Integer i = Integer.parseInt(day.getText().toString());
-
                 if (i - 1 <= 0) {
                     tempMonth -= 1;
 
@@ -756,15 +737,13 @@ public class MainActivity extends Activity implements OnClickListener {
                         tempMonth = 11;
 
                     Calendar calendar = Calendar.getInstance();
-
                     calendar.set(Calendar.MONTH, tempMonth);
-
                     int max = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-                    day.setText(String.valueOf(max));
+                    day.setText(String.format("%02d", max));
                     month.setText(getMonthForInt(tempMonth));
                 } else {
-                    day.setText(String.valueOf(i - 1));
+                    day.setText(String.format("%02d",i - 1));
                 }
 
                 // Change the text color accordingly
@@ -775,20 +754,15 @@ public class MainActivity extends Activity implements OnClickListener {
                     month.setTextColor(Color.BLACK);
                     day.setTextColor(Color.BLACK);
                 }
-
             }
         });
 
         // Saving date data
         saveDayBtn.setOnClickListener(new OnClickListener() {
-
             public void onClick(View arg0) {
                 Calendar calendar = Calendar.getInstance();
-
                 calendar.set(Calendar.MONTH, tempMonth);
-
                 Integer i = Integer.parseInt(day.getText().toString());
-
                 calendar.set(Calendar.DAY_OF_MONTH, i);
 
                 updateTrait(currentTrait.trait,
@@ -800,455 +774,154 @@ public class MainActivity extends Activity implements OnClickListener {
                 // Change the text color accordingly
                 month.setTextColor(Color.parseColor(displayColor));
                 day.setTextColor(Color.parseColor(displayColor));
-
             }
         });
 
         // Datapicker is an area onscreen representing qualitative controls
         qPicker = (LinearLayout) findViewById(R.id.qPick);
 
-        q1 = (Button) findViewById(R.id.q1);
-        q2 = (Button) findViewById(R.id.q2);
-        q3 = (Button) findViewById(R.id.q3);
-        q4 = (Button) findViewById(R.id.q4);
-        q5 = (Button) findViewById(R.id.q5);
-        q6 = (Button) findViewById(R.id.q6);
-        q7 = (Button) findViewById(R.id.q7);
-        q8 = (Button) findViewById(R.id.q8);
-        q9 = (Button) findViewById(R.id.q9);
-        q10 = (Button) findViewById(R.id.q10);
-        q11 = (Button) findViewById(R.id.q11);
-        q12 = (Button) findViewById(R.id.q12);
+        buttonArray[0] = (Button) findViewById(R.id.q1);
+        buttonArray[1] = (Button) findViewById(R.id.q2);
+        buttonArray[2] = (Button) findViewById(R.id.q3);
+        buttonArray[3] = (Button) findViewById(R.id.q4);
+        buttonArray[4] = (Button) findViewById(R.id.q5);
+        buttonArray[5] = (Button) findViewById(R.id.q6);
+        buttonArray[6] = (Button) findViewById(R.id.q7);
+        buttonArray[7] = (Button) findViewById(R.id.q8);
+        buttonArray[8] = (Button) findViewById(R.id.q9);
+        buttonArray[9] = (Button) findViewById(R.id.q10);
+        buttonArray[10] = (Button) findViewById(R.id.q11);
+        buttonArray[11] = (Button) findViewById(R.id.q12);
+
+        curCat = "";
 
         // Clear button for qualitative
         clearBtn2.setOnClickListener(new OnClickListener() {
-
             public void onClick(View arg0) {
                 newTraits.remove(currentTrait.trait);
                 dt.deleteTrait(cRange.plot_id, currentTrait.trait);
-
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
-
+                setCategoricalButtons(buttonArray, null);
             }
         });
 
         // Functions to clear all other color except this button's
-        q1.setOnClickListener(new OnClickListener() {
-
+        buttonArray[0].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, currentTrait.format, q1.getText().toString());
-                q1.setTextColor(Color.parseColor(displayColor));
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q1.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[0])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[0].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[0]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q2.setOnClickListener(new OnClickListener() {
-
+        buttonArray[1].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q2.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.parseColor(displayColor));
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q2.setBackgroundResource(R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[1])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[1].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[1]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q3.setOnClickListener(new OnClickListener() {
-
+        buttonArray[2].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q3.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.parseColor(displayColor));
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q3.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[2])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[2].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[2]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q4.setOnClickListener(new OnClickListener() {
-
+        buttonArray[3].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q4.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.parseColor(displayColor));
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q4.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[3])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[3].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[3]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q5.setOnClickListener(new OnClickListener() {
-
+        buttonArray[4].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q5.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.parseColor(displayColor));
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q5.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[4])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[4].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[4]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q6.setOnClickListener(new OnClickListener() {
-
+        buttonArray[5].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q6.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.parseColor(displayColor));
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q6.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[5])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[5].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[5]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q7.setOnClickListener(new OnClickListener() {
-
+        buttonArray[6].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q7.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.parseColor(displayColor));
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q7.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[6])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[6].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[6]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q8.setOnClickListener(new OnClickListener() {
-
+        buttonArray[7].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q8.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.parseColor(displayColor));
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q8.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[7])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[7].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[7]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q9.setOnClickListener(new OnClickListener() {
-
+        buttonArray[8].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q9.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.parseColor(displayColor));
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q9.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[8])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[8].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[8]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q10.setOnClickListener(new OnClickListener() {
-
+        buttonArray[9].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q10.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.parseColor(displayColor));
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.BLACK);
-
-                q10.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[9])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[9].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[9]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q11.setOnClickListener(new OnClickListener() {
-
+        buttonArray[10].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q11.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.parseColor(displayColor));
-                q12.setTextColor(Color.BLACK);
-
-                q11.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
-                q12.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[10])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[10].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[10]);
             }
         });
 
-        // Functions to clear all other color except this button's
-        q12.setOnClickListener(new OnClickListener() {
-
+        buttonArray[11].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                updateTrait(currentTrait.trait, "currentTrait.format", q12.getText().toString());
-                q1.setTextColor(Color.BLACK);
-                q2.setTextColor(Color.BLACK);
-                q3.setTextColor(Color.BLACK);
-                q4.setTextColor(Color.BLACK);
-                q5.setTextColor(Color.BLACK);
-                q6.setTextColor(Color.BLACK);
-                q7.setTextColor(Color.BLACK);
-                q8.setTextColor(Color.BLACK);
-                q9.setTextColor(Color.BLACK);
-                q10.setTextColor(Color.BLACK);
-                q11.setTextColor(Color.BLACK);
-                q12.setTextColor(Color.parseColor(displayColor));
-
-                q12.setBackgroundResource(R.drawable.btn_default);
-                q2.setBackgroundResource(android.R.drawable.btn_default);
-                q3.setBackgroundResource(android.R.drawable.btn_default);
-                q4.setBackgroundResource(android.R.drawable.btn_default);
-                q5.setBackgroundResource(android.R.drawable.btn_default);
-                q6.setBackgroundResource(android.R.drawable.btn_default);
-                q7.setBackgroundResource(android.R.drawable.btn_default);
-                q8.setBackgroundResource(android.R.drawable.btn_default);
-                q9.setBackgroundResource(android.R.drawable.btn_default);
-                q10.setBackgroundResource(android.R.drawable.btn_default);
-                q11.setBackgroundResource(android.R.drawable.btn_default);
-                q1.setBackgroundResource(android.R.drawable.btn_default);
+                if(checkButton(buttonArray[11])) {
+                    return;
+                }
+                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[11].getText().toString());
+                setCategoricalButtons(buttonArray, buttonArray[11]);
             }
         });
 
@@ -1344,7 +1017,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     displayRange(cRange);
 
                     if (ep.getBoolean("RangeSound", false)) {
-                        if (!cRange.range.equals(lastRange)) {
+                        if (!cRange.range.equals(lastRange)&&!lastRange.equals("")) {
                             lastRange = cRange.range;
 
                             try {
@@ -1445,7 +1118,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     displayRange(cRange);
                     if (ep.getBoolean("RangeSound", false)) {
-                        if (!cRange.range.equals(lastRange)) {
+                        if (!cRange.range.equals(lastRange)&&!lastRange.equals("")) {
                             lastRange = cRange.range;
 
                             try {
@@ -1580,6 +1253,33 @@ public class MainActivity extends Activity implements OnClickListener {
         });
     }
 
+    private void setCategoricalButtons(Button[] buttonList, Button choice) {
+        for (int i = 0; i < buttonList.length; i++) {
+            if (buttonList[i] == choice) {
+                buttonList[i].setTextColor(Color.parseColor(displayColor));
+                buttonList[i].setBackgroundResource(R.drawable.btn_default);
+            } else {
+                buttonList[i].setTextColor(Color.BLACK);
+                buttonList[i].setBackgroundResource(android.R.drawable.btn_default);
+            }
+        }
+    }
+
+    private Boolean checkButton(Button button) {
+        if (newTraits.containsKey(currentTrait.trait)) {
+            curCat = newTraits.get(currentTrait.trait)
+                    .toString();
+        }
+        if(button.getText().toString().equals(curCat)) {
+            newTraits.remove(currentTrait.trait);
+            dt.deleteTrait(cRange.plot_id, currentTrait.trait);
+            setCategoricalButtons(buttonArray, null);
+            curCat = "";
+            return true;
+        }
+        return false;
+    }
+
     // Auto Sizing TextView defaults change with resolution
     // The reported resolution and the layout the device picks mismatch on some devices
     // So what we do is embed the sizing we want into the layout file itself
@@ -1646,7 +1346,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 return;
 
             if (ep.getBoolean("RangeSound", false)) {
-                if (!cRange.range.equals(lastRange)) {
+                if (!cRange.range.equals(lastRange)&&!lastRange.equals("")) {
                     lastRange = cRange.range;
 
                     try {
@@ -1713,7 +1413,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 return;
 
             if (ep.getBoolean("RangeSound", false)) {
-                if (!cRange.range.equals(lastRange)) {
+                if (!cRange.range.equals(lastRange)&&!lastRange.equals("")) {
                     lastRange = cRange.range;
 
                     try {
@@ -2174,7 +1874,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                         kb.setVisibility(View.GONE);
 
-                        clearGeneric.setVisibility(View.VISIBLE);
+                        clearGeneric.setVisibility(View.GONE);
                         clearBoolean.setVisibility(View.GONE);
 
                         eNum.setVisibility(EditText.GONE);
@@ -2418,8 +2118,7 @@ public class MainActivity extends Activity implements OnClickListener {
                                 tempMonth = c.get(Calendar.MONTH);
 
                                 month.setText(getMonthForInt(c.get(Calendar.MONTH)));
-                                day.setText(String.valueOf(c
-                                        .get(Calendar.DAY_OF_MONTH)));
+                                day.setText(String.format("%02d",c.get(Calendar.DAY_OF_MONTH)));
                             }
                         }
                     } else if (currentTrait.format.equals("qualitative") | currentTrait.format.equals("categorical")) {
@@ -2458,40 +2157,40 @@ public class MainActivity extends Activity implements OnClickListener {
                         for (i = cat.length; i < 12; i++) {
                             switch (i) {
                                 case 0:
-                                    q1.setVisibility(Button.GONE);
+                                    buttonArray[0].setVisibility(Button.GONE);
                                     break;
                                 case 1:
-                                    q2.setVisibility(Button.GONE);
+                                    buttonArray[1].setVisibility(Button.GONE);
                                     break;
                                 case 2:
-                                    q3.setVisibility(Button.GONE);
+                                    buttonArray[2].setVisibility(Button.GONE);
                                     break;
                                 case 3:
-                                    q4.setVisibility(Button.GONE);
+                                    buttonArray[3].setVisibility(Button.GONE);
                                     break;
                                 case 4:
-                                    q5.setVisibility(Button.GONE);
+                                    buttonArray[4].setVisibility(Button.GONE);
                                     break;
                                 case 5:
-                                    q6.setVisibility(Button.GONE);
+                                    buttonArray[5].setVisibility(Button.GONE);
                                     break;
                                 case 6:
-                                    q7.setVisibility(Button.GONE);
+                                    buttonArray[6].setVisibility(Button.GONE);
                                     break;
                                 case 7:
-                                    q8.setVisibility(Button.GONE);
+                                    buttonArray[7].setVisibility(Button.GONE);
                                     break;
                                 case 8:
-                                    q9.setVisibility(Button.GONE);
+                                    buttonArray[8].setVisibility(Button.GONE);
                                     break;
                                 case 9:
-                                    q10.setVisibility(Button.GONE);
+                                    buttonArray[9].setVisibility(Button.GONE);
                                     break;
                                 case 10:
-                                    q11.setVisibility(Button.GONE);
+                                    buttonArray[10].setVisibility(Button.GONE);
                                     break;
                                 case 11:
-                                    q12.setVisibility(Button.GONE);
+                                    buttonArray[11].setVisibility(Button.GONE);
                                     break;
 
                             }
@@ -2504,45 +2203,44 @@ public class MainActivity extends Activity implements OnClickListener {
                             for (i = 11; i >= cat.length; i--) {
                                 switch (i) {
                                     case 0:
-                                        q1.setVisibility(Button.INVISIBLE);
+                                        buttonArray[0].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 1:
-                                        q2.setVisibility(Button.INVISIBLE);
+                                        buttonArray[1].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 2:
-                                        q3.setVisibility(Button.INVISIBLE);
+                                        buttonArray[2].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 3:
-                                        q4.setVisibility(Button.INVISIBLE);
+                                        buttonArray[3].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 4:
-                                        q5.setVisibility(Button.INVISIBLE);
+                                        buttonArray[4].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 5:
-                                        q6.setVisibility(Button.INVISIBLE);
+                                        buttonArray[5].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 6:
-                                        q7.setVisibility(Button.INVISIBLE);
+                                        buttonArray[6].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 7:
-                                        q8.setVisibility(Button.INVISIBLE);
+                                        buttonArray[7].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 8:
-                                        q9.setVisibility(Button.INVISIBLE);
+                                        buttonArray[8].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 9:
-                                        q10.setVisibility(Button.INVISIBLE);
+                                        buttonArray[9].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 10:
-                                        q11.setVisibility(Button.INVISIBLE);
+                                        buttonArray[10].setVisibility(Button.INVISIBLE);
                                         break;
                                     case 11:
-                                        q12.setVisibility(Button.INVISIBLE);
+                                        buttonArray[11].setVisibility(Button.INVISIBLE);
                                         break;
 
                                 }
                             }
-
                         }
 
                         // Set the textcolor and visibility for the right
@@ -2551,158 +2249,156 @@ public class MainActivity extends Activity implements OnClickListener {
                             if (cat[i].equals(lastQualitative)) {
                                 switch (i) {
                                     case 0:
-                                        q1.setVisibility(Button.VISIBLE);
-                                        q1.setText(cat[i]);
-                                        q1.setTextColor(Color.parseColor(displayColor));
-                                        q1.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[0].setVisibility(Button.VISIBLE);
+                                        buttonArray[0].setText(cat[i]);
+                                        buttonArray[0].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[0].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 1:
-                                        q2.setVisibility(Button.VISIBLE);
-                                        q2.setText(cat[i]);
-                                        q2.setTextColor(Color.parseColor(displayColor));
-                                        q2.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[1].setVisibility(Button.VISIBLE);
+                                        buttonArray[1].setText(cat[i]);
+                                        buttonArray[1].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[1].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 2:
-                                        q3.setVisibility(Button.VISIBLE);
-                                        q3.setText(cat[i]);
-                                        q3.setTextColor(Color.parseColor(displayColor));
-                                        q3.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[2].setVisibility(Button.VISIBLE);
+                                        buttonArray[2].setText(cat[i]);
+                                        buttonArray[2].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[2].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 3:
-                                        q4.setVisibility(Button.VISIBLE);
-                                        q4.setText(cat[i]);
-                                        q4.setTextColor(Color.parseColor(displayColor));
-                                        q4.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[3].setVisibility(Button.VISIBLE);
+                                        buttonArray[3].setText(cat[i]);
+                                        buttonArray[3].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[3].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 4:
-                                        q5.setVisibility(Button.VISIBLE);
-                                        q5.setText(cat[i]);
-                                        q5.setTextColor(Color.parseColor(displayColor));
-                                        q5.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[4].setVisibility(Button.VISIBLE);
+                                        buttonArray[4].setText(cat[i]);
+                                        buttonArray[4].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[4].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 5:
-                                        q6.setVisibility(Button.VISIBLE);
-                                        q6.setText(cat[i]);
-                                        q6.setTextColor(Color.parseColor(displayColor));
-                                        q6.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[5].setVisibility(Button.VISIBLE);
+                                        buttonArray[5].setText(cat[i]);
+                                        buttonArray[5].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[5].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 6:
-                                        q7.setVisibility(Button.VISIBLE);
-                                        q7.setText(cat[i]);
-                                        q7.setTextColor(Color.parseColor(displayColor));
-                                        q7.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[6].setVisibility(Button.VISIBLE);
+                                        buttonArray[6].setText(cat[i]);
+                                        buttonArray[6].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[6].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 7:
-                                        q8.setVisibility(Button.VISIBLE);
-                                        q8.setText(cat[i]);
-                                        q8.setTextColor(Color.parseColor(displayColor));
-                                        q8.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[7].setVisibility(Button.VISIBLE);
+                                        buttonArray[7].setText(cat[i]);
+                                        buttonArray[7].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[7].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 8:
-                                        q9.setVisibility(Button.VISIBLE);
-                                        q9.setText(cat[i]);
-                                        q9.setTextColor(Color.parseColor(displayColor));
-                                        q9.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[8].setVisibility(Button.VISIBLE);
+                                        buttonArray[8].setText(cat[i]);
+                                        buttonArray[8].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[8].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 9:
-                                        q10.setVisibility(Button.VISIBLE);
-                                        q10.setText(cat[i]);
-                                        q10.setTextColor(Color.parseColor(displayColor));
-                                        q10.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[9].setVisibility(Button.VISIBLE);
+                                        buttonArray[9].setText(cat[i]);
+                                        buttonArray[9].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[9].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 10:
-                                        q11.setVisibility(Button.VISIBLE);
-                                        q11.setText(cat[i]);
-                                        q11.setTextColor(Color.parseColor(displayColor));
-                                        q11.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[10].setVisibility(Button.VISIBLE);
+                                        buttonArray[10].setText(cat[i]);
+                                        buttonArray[10].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[10].setBackgroundResource(R.drawable.btn_default);
                                         break;
                                     case 11:
-                                        q12.setVisibility(Button.VISIBLE);
-                                        q12.setText(cat[i]);
-                                        q12.setTextColor(Color.parseColor(displayColor));
-                                        q12.setBackgroundResource(R.drawable.btn_default);
+                                        buttonArray[11].setVisibility(Button.VISIBLE);
+                                        buttonArray[11].setText(cat[i]);
+                                        buttonArray[11].setTextColor(Color.parseColor(displayColor));
+                                        buttonArray[11].setBackgroundResource(R.drawable.btn_default);
                                         break;
 
                                 }
                             } else {
                                 switch (i) {
                                     case 0:
-                                        q1.setVisibility(Button.VISIBLE);
-                                        q1.setText(cat[i]);
-                                        q1.setTextColor(Color.BLACK);
-                                        q1.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[0].setVisibility(Button.VISIBLE);
+                                        buttonArray[0].setText(cat[i]);
+                                        buttonArray[0].setTextColor(Color.BLACK);
+                                        buttonArray[0].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 1:
-                                        q2.setVisibility(Button.VISIBLE);
-                                        q2.setText(cat[i]);
-                                        q2.setTextColor(Color.BLACK);
-                                        q2.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[1].setVisibility(Button.VISIBLE);
+                                        buttonArray[1].setText(cat[i]);
+                                        buttonArray[1].setTextColor(Color.BLACK);
+                                        buttonArray[1].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 2:
-                                        q3.setVisibility(Button.VISIBLE);
-                                        q3.setText(cat[i]);
-                                        q3.setTextColor(Color.BLACK);
-                                        q3.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[2].setVisibility(Button.VISIBLE);
+                                        buttonArray[2].setText(cat[i]);
+                                        buttonArray[2].setTextColor(Color.BLACK);
+                                        buttonArray[2].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 3:
-                                        q4.setVisibility(Button.VISIBLE);
-                                        q4.setText(cat[i]);
-                                        q4.setTextColor(Color.BLACK);
-                                        q4.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[3].setVisibility(Button.VISIBLE);
+                                        buttonArray[3].setText(cat[i]);
+                                        buttonArray[3].setTextColor(Color.BLACK);
+                                        buttonArray[3].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 4:
-                                        q5.setVisibility(Button.VISIBLE);
-                                        q5.setText(cat[i]);
-                                        q5.setTextColor(Color.BLACK);
-                                        q5.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[4].setVisibility(Button.VISIBLE);
+                                        buttonArray[4].setText(cat[i]);
+                                        buttonArray[4].setTextColor(Color.BLACK);
+                                        buttonArray[4].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 5:
-                                        q6.setVisibility(Button.VISIBLE);
-                                        q6.setText(cat[i]);
-                                        q6.setTextColor(Color.BLACK);
-                                        q6.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[5].setVisibility(Button.VISIBLE);
+                                        buttonArray[5].setText(cat[i]);
+                                        buttonArray[5].setTextColor(Color.BLACK);
+                                        buttonArray[5].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 6:
-                                        q7.setVisibility(Button.VISIBLE);
-                                        q7.setText(cat[i]);
-                                        q7.setTextColor(Color.BLACK);
-                                        q7.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[6].setVisibility(Button.VISIBLE);
+                                        buttonArray[6].setText(cat[i]);
+                                        buttonArray[6].setTextColor(Color.BLACK);
+                                        buttonArray[6].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 7:
-                                        q8.setVisibility(Button.VISIBLE);
-                                        q8.setText(cat[i]);
-                                        q8.setTextColor(Color.BLACK);
-                                        q8.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[7].setVisibility(Button.VISIBLE);
+                                        buttonArray[7].setText(cat[i]);
+                                        buttonArray[7].setTextColor(Color.BLACK);
+                                        buttonArray[7].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 8:
-                                        q9.setVisibility(Button.VISIBLE);
-                                        q9.setText(cat[i]);
-                                        q9.setTextColor(Color.BLACK);
-                                        q9.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[8].setVisibility(Button.VISIBLE);
+                                        buttonArray[8].setText(cat[i]);
+                                        buttonArray[8].setTextColor(Color.BLACK);
+                                        buttonArray[8].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 9:
-                                        q10.setVisibility(Button.VISIBLE);
-                                        q10.setText(cat[i]);
-                                        q10.setTextColor(Color.BLACK);
-                                        q10.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[9].setVisibility(Button.VISIBLE);
+                                        buttonArray[9].setText(cat[i]);
+                                        buttonArray[9].setTextColor(Color.BLACK);
+                                        buttonArray[9].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 10:
-                                        q11.setVisibility(Button.VISIBLE);
-                                        q11.setText(cat[i]);
-                                        q11.setTextColor(Color.BLACK);
-                                        q11.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[10].setVisibility(Button.VISIBLE);
+                                        buttonArray[10].setText(cat[i]);
+                                        buttonArray[10].setTextColor(Color.BLACK);
+                                        buttonArray[10].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
                                     case 11:
-                                        q12.setVisibility(Button.VISIBLE);
-                                        q12.setText(cat[i]);
-                                        q12.setTextColor(Color.BLACK);
-                                        q12.setBackgroundResource(android.R.drawable.btn_default);
+                                        buttonArray[11].setVisibility(Button.VISIBLE);
+                                        buttonArray[11].setText(cat[i]);
+                                        buttonArray[11].setTextColor(Color.BLACK);
+                                        buttonArray[11].setBackgroundResource(android.R.drawable.btn_default);
                                         break;
-
                                 }
                             }
                         }
-
                     } else if (currentTrait.format.equals("boolean")) {
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -3155,12 +2851,9 @@ public class MainActivity extends Activity implements OnClickListener {
         getBaseContext().getResources().updateConfiguration(config2,
                 getBaseContext().getResources().getDisplayMetrics());
         invalidateOptionsMenu();
-        loadScreen();
-
 
         // If reload data is true, it means there was an import operation, and
-        // the screen
-        // should refresh
+        // the screen should refresh
         if (reloadData) {
 
             reloadData = false;
@@ -3172,7 +2865,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
             if (rangeID != null) {
                 cRange = dt.getRange(rangeID[0]);
-
+                lastRange = cRange.range;
                 displayRange(cRange);
 
                 newTraits = (HashMap) dt.getUserDetail(cRange.plot_id).clone();
@@ -4198,26 +3891,41 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     private void moveToPlotID() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.jumptoplotidbutton);
-
         final EditText input = new EditText(this);
+
+        final AlertDialog builder = new AlertDialog.Builder(this)
+                .setTitle(R.string.jumptoplotidbutton)
+                .setView(input)
+                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        inputPlotId = input.getText().toString();
+                        String plot = dt.getPlotFromId(inputPlotId);
+                        String range = dt.getRangeFromId(inputPlotId);
+                        rangeID = dt.getAllRangeID();
+                        moveTo(rangeID, range, plot, true);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .create();
+
         input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-
-        builder.setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                inputPlotId = input.getText().toString();
-                String plot = dt.getPlotFromId(inputPlotId);
-                String range = dt.getRangeFromId(inputPlotId);
-                rangeID = dt.getAllRangeID();
-                moveTo(rangeID,range,plot,true);
-            }
-        });
-
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
+        input.setOnEditorActionListener(new OnEditorActionListener() {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+                    inputPlotId = input.getText().toString();
+                    String plot = dt.getPlotFromId(inputPlotId);
+                    String range = dt.getRangeFromId(inputPlotId);
+                    rangeID = dt.getAllRangeID();
+                    moveTo(rangeID, range, plot, true);
+                    builder.dismiss();
+                }
+                return false;
             }
         });
 
