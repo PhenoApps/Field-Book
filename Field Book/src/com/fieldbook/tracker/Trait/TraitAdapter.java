@@ -11,6 +11,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,11 +22,10 @@ import com.fieldbook.tracker.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 
 /**
  * Loads data on trait editor screen
- * There are 2 different layouts for large and smaller screens
- * Loading is transparent
  */
 public class TraitAdapter extends BaseAdapter {
 
@@ -32,12 +33,14 @@ public class TraitAdapter extends BaseAdapter {
     ArrayList<TraitObject> list;
     Context context;
     OnItemClickListener listener;
-    
-    public TraitAdapter(Context context, ArrayList<TraitObject> list, OnItemClickListener listener) {
+    HashMap visibility;
+
+    public TraitAdapter(Context context, ArrayList<TraitObject> list, OnItemClickListener listener, HashMap visibility) {
     	this.context = context;
         mLayoutInflater = LayoutInflater.from(context);
         this.list = list;
         this.listener = listener;
+        this.visibility = visibility;
     }
 
     public int getCount() {
@@ -55,6 +58,7 @@ public class TraitAdapter extends BaseAdapter {
     private class ViewHolder {
         TextView name;
         TextView format;
+        CheckBox visible;
         ImageView up;
         ImageView down;
         Button copy;
@@ -71,6 +75,7 @@ public class TraitAdapter extends BaseAdapter {
             convertView = mLayoutInflater.inflate(R.layout.traitline, null);
             holder.name = (TextView) convertView.findViewById(R.id.text1);
             holder.format = (TextView) convertView.findViewById(R.id.text2);
+            holder.visible = (CheckBox) convertView.findViewById(R.id.visible);
             holder.up = (ImageView) convertView.findViewById(R.id.upBtn);
             holder.down = (ImageView) convertView.findViewById(R.id.downBtn);
             holder.copy = (Button) convertView.findViewById(R.id.copyBtn);
@@ -98,7 +103,36 @@ public class TraitAdapter extends BaseAdapter {
         
         holder.name.setText(getItem(position).trait);
         holder.format.setText(getItem(position).format);
-        
+
+        // Check or uncheck the list items based on existing
+        // visibility
+        if (visibility != null) {
+            if (visibility.get(holder.name.getText().toString()) != null)
+            {
+                if (visibility.get(holder.name.getText().toString()).equals("true")) {
+                    holder.visible.setChecked(true);
+                }
+                else
+                    holder.visible.setChecked(false);
+            }
+        }
+
+        holder.visible.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton arg0, boolean position) {
+
+                if (holder.visible.isChecked()) {
+                    MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(),true);
+                } else
+                {
+                    MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(),false);
+                }
+
+                MainActivity.reloadData = true;
+            }
+        });
+
         holder.del.setOnClickListener(new OnClickListener(){
 
 			public void onClick(View v) {

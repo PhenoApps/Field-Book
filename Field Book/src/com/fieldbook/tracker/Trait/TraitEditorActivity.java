@@ -47,6 +47,7 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class TraitEditorActivity extends Activity {
@@ -102,7 +103,6 @@ public class TraitEditorActivity extends Activity {
 
     @Override
     public void onDestroy() {
-
         try {
             TutorialTraitsActivity.thisActivity.finish();
         } catch (Exception e) {
@@ -123,7 +123,6 @@ public class TraitEditorActivity extends Activity {
                 systemMenu.findItem(R.id.help).setVisible(false);
             }
         }
-
         loadData();
     }
 
@@ -181,14 +180,12 @@ public class TraitEditorActivity extends Activity {
         params.width = LayoutParams.FILL_PARENT;
 
         createDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
-
         createDialog.setOnCancelListener(new OnCancelListener() {
 
             public void onCancel(DialogInterface arg0) {
                 createVisible = false;
             }
         });
-
         createDialog.setOnDismissListener(new OnDismissListener() {
 
             public void onDismiss(DialogInterface arg0) {
@@ -249,9 +246,8 @@ public class TraitEditorActivity extends Activity {
                 categories.setText(o.categories);
 
                 edit = true;
-
                 createVisible = true;
-
+                loadData();
                 createDialog.show();
             }
         };
@@ -284,7 +280,6 @@ public class TraitEditorActivity extends Activity {
         closeBtn.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-
                 // Prompt the user if fields have been edited
 
                 if (dataChanged()) {
@@ -322,7 +317,6 @@ public class TraitEditorActivity extends Activity {
         saveBtn.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-
                 // Trait name is mandatory
                 if (trait.getText().toString().length() == 0) {
                     Toast.makeText(TraitEditorActivity.this, getString(R.string.mandatorytrait),
@@ -610,9 +604,24 @@ public class TraitEditorActivity extends Activity {
 
     // Helper function to load data
     public static void loadData() {
-        mAdapter = new TraitAdapter(thisActivity, MainActivity.dt.getAllTraitObjects(), traitListener);
+        try
+        {
+        if (MainActivity.dt.getAllTraits() == null)
+            return;
+
+        HashMap visibility = MainActivity.dt.getTraitVisibility();
+
+        if (!traitList.isShown())
+            traitList.setVisibility(ListView.VISIBLE);
+
+        mAdapter = new TraitAdapter(thisActivity, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
 
         traitList.setAdapter(mAdapter);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -975,5 +984,10 @@ public class TraitEditorActivity extends Activity {
                 Toast.makeText(thisActivity, thisActivity.getString(R.string.importerror),
                         Toast.LENGTH_LONG).show();
         }
+    }
+
+    public static void makeToast(String message) {
+
+        Toast.makeText(TraitEditorActivity.thisActivity, message, Toast.LENGTH_SHORT).show();
     }
 }

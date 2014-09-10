@@ -1498,7 +1498,6 @@ public class ConfigActivity extends Activity {
     private String[] prepareSetup() {
         String tagName = "";
         String tagLocation = "";
-        String tagTraits = "";
         String tagDrop1 = "";
         String tagDrop2 = "";
         String tagDrop3 = "";
@@ -1515,11 +1514,6 @@ public class ConfigActivity extends Activity {
         else
             tagLocation += getString(R.string.location) + ": " + getString(R.string.none);
 
-        if (MainActivity.dt.getTraitColumnsAsString() != null)
-            tagTraits = getString(R.string.traits) + "";
-        else
-            tagTraits = getString(R.string.traits) + ": " + getString(R.string.none);
-
         if (ep.getString("DROP1", "").length() > 0)
             tagDrop1 = getString(R.string.drop1) + ": " + ep.getString("DROP1", "");
         else
@@ -1535,8 +1529,7 @@ public class ConfigActivity extends Activity {
         else
             tagDrop3 = getString(R.string.drop3) + ": " + getString(R.string.none);
 
-        return new String[]{tagName, tagLocation, tagTraits,
-                tagDrop1, tagDrop2, tagDrop3, getString(R.string.clearsettings)};
+        return new String[]{tagName, tagLocation, tagDrop1, tagDrop2, tagDrop3, getString(R.string.clearsettings)};
     }
 
     private void updateSetupList() {
@@ -1625,31 +1618,27 @@ public class ConfigActivity extends Activity {
                         break;
 
                     case 2:
-                        showRateDialog();
-                        break;
-
-                    case 3:
                         if (MainActivity.dt.getRangeColumns() == null)
                             return;
 
                         createDialog(DIALOG_LOAD_TRAITS1);
                         break;
 
-                    case 4:
+                    case 3:
                         if (MainActivity.dt.getRangeColumns() == null)
                             return;
 
                         createDialog(DIALOG_LOAD_TRAITS2);
                         break;
 
-                    case 5:
+                    case 4:
                         if (MainActivity.dt.getRangeColumns() == null)
                             return;
 
                         createDialog(DIALOG_LOAD_TRAITS3);
                         break;
 
-                    case 6:
+                    case 5:
                         showClearSettingsDialog();
                         break;
 
@@ -1663,7 +1652,7 @@ public class ConfigActivity extends Activity {
         setupDialog.show();
     }
 
-    private void showRateDialog() {
+/*    private void showRateDialog() {
         // Gets all traits from database
 
         if (MainActivity.dt.getAllTraits() == null)
@@ -1691,7 +1680,7 @@ public class ConfigActivity extends Activity {
 
         rateDialog.show();
     }
-
+*/
     private void showPersonDialog() {
         if (ep.getString("FirstName", "").length() > 0
                 || ep.getString("LastName", "").length() > 0)

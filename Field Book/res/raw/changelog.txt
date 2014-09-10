@@ -1,3 +1,6 @@
+18/2.1.5
+Visibility of traits is now modified in the Traits screen instead of Setup
+
 17/2.1.4
 Fixed bug that moved current plot to first plot when screen turned off
 Deselect categorical traits by clicking the current selection

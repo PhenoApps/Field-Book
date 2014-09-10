@@ -8,6 +8,12 @@
     android:paddingBottom="2dip"
     android:paddingTop="2dip">
 
+
+
+    <View
+        android:layout_width="10dp"
+        android:layout_height="wrap_content" />
+
     <ImageView
         android:id="@+id/upBtn"
         android:layout_width="40dp"
@@ -25,9 +31,20 @@
         android:layout_height="66dp"
         android:focusable="false"
         android:src="@drawable/down" />
-
     <View
-        android:layout_width="10dp"
+        android:layout_width="15dp"
+        android:layout_height="wrap_content" />
+
+    <CheckBox
+        android:id="@+id/visible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:scaleX="1.55"
+        android:scaleY="1.55"
+        android:text="" />
+    <View
+        android:layout_width="15dp"
         android:layout_height="wrap_content" />
 
     <Button
