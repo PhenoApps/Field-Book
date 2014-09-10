@@ -43,7 +43,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="SearchActivity"
+            android:name=".Search.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -61,7 +61,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Custom" />
         <activity
-            android:name="TraitEditorActivity"
+            android:name=".Trait.TraitEditorActivity"
             android:alwaysRetainTaskState="false"
             android:configChanges="keyboardHidden|orientation"
             android:finishOnTaskLaunch="true"
@@ -69,19 +69,19 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Custom" />
         <activity
-            android:name="TutorialMainActivity"
+            android:name=".Tutorial.TutorialMainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Dialog" />
         <activity
-            android:name="TutorialSettingsActivity"
+            android:name=".Tutorial.TutorialSettingsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Dialog" />
         <activity
-            android:name="TutorialTraitsActivity"
+            android:name=".Tutorial.TutorialTraitsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"

@@ -3,9 +3,9 @@
     android:id="@+id/spinnerTarget"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:ellipsize="end"
-    android:gravity="center_vertical"
     android:background="#FFFFFF"
+    android:ellipsize="end"
+    android:gravity="center"
     android:textColor="#000000"
-    android:textSize="30dp"
+    android:textSize="28dp"
     android:textStyle="bold" />

@@ -11,6 +11,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
+import com.fieldbook.tracker.Map.MapData;
+import com.fieldbook.tracker.Search.SearchData;
+import com.fieldbook.tracker.Trait.TraitObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -1428,9 +1432,9 @@ public class DataHelper {
         // database to internal storage.
         close();
 
-        Log.w("File to copy", MainActivity.backupPath + "/" + filename);
+        Log.w("File to copy", Constants.BACKUPPATH + "/" + filename);
 
-        File newDb = new File(MainActivity.backupPath + "/" + filename);
+        File newDb = new File(Constants.BACKUPPATH + "/" + filename);
         File oldDb = new File(internalPath);
 
         if (newDb.exists()) {
@@ -1461,7 +1465,7 @@ public class DataHelper {
         // database to internal storage.
         close();
 
-        File newDb = new File(MainActivity.backupPath + "/" + filename + ".db");
+        File newDb = new File(Constants.BACKUPPATH + "/" + filename + ".db");
         File oldDb = new File(internalPath);
 
         if (oldDb.exists()) {

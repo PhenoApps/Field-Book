@@ -1,6 +1,5 @@
 package com.fieldbook.tracker;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -12,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
@@ -22,19 +20,15 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.Html;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -48,10 +42,12 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.fieldbook.tracker.Trait.TraitEditorActivity;
+import com.fieldbook.tracker.Tutorial.TutorialSettingsActivity;
 
 import java.io.File;
 import java.io.FileReader;
@@ -394,7 +390,7 @@ public class ConfigActivity extends Activity {
         // Dialog for choosing which traits to rate
         rateDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
         rateDialog.setTitle(getString(R.string.choosetraits));
-        rateDialog.setContentView(R.layout.rate);
+        rateDialog.setContentView(R.layout.genericdialog);
 
         android.view.WindowManager.LayoutParams params5 = rateDialog.getWindow().getAttributes();
         params5.width = LayoutParams.FILL_PARENT;
@@ -412,7 +408,7 @@ public class ConfigActivity extends Activity {
 
         // When you save your changes for choosing traits, this function is
         // called
-        Button rateButton = (Button) rateDialog.findViewById(R.id.saveBtn);
+        Button rateButton = (Button) rateDialog.findViewById(R.id.closeBtn);
 
         rateButton.setOnClickListener(new OnClickListener() {
 
@@ -670,7 +666,7 @@ public class ConfigActivity extends Activity {
 
             }
         });
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, items5);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, items5);
         fieldList.setAdapter(itemsAdapter);
 
         // To configure location
@@ -802,7 +798,7 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitemhighlight, items2);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, items2);
         settingsList.setAdapter(adapter);
 
         SharedPreferences.Editor ed = ep.edit();
@@ -1024,7 +1020,7 @@ public class ConfigActivity extends Activity {
                 // So it will not override existing files
                 if (exportData.getCount() > 0) {
                     try {
-                        File file = new File(MainActivity.fieldExportPath,
+                        File file = new File(Constants.FIELDEXPORTPATH,
                                 exportFile.getText().toString() + "_database.csv");
 
                         if (file.exists())
@@ -1050,7 +1046,7 @@ public class ConfigActivity extends Activity {
                 // So it will not override existing files
                 if (exportData.getCount() > 0) {
                     try {
-                        File file = new File(MainActivity.fieldExportPath,
+                        File file = new File(Constants.FIELDEXPORTPATH,
                                 exportFile.getText().toString() + "_table.csv");
 
                         if (file.exists())
@@ -1081,7 +1077,7 @@ public class ConfigActivity extends Activity {
                 // So it will not override existing files
                 if (exportData.getCount() > 0) {
                     try {
-                        File file = new File(MainActivity.fieldExportPath,
+                        File file = new File(Constants.FIELDEXPORTPATH,
                                 exportFile.getText().toString() + "_database.csv");
 
                         if (file.exists())
@@ -1110,7 +1106,7 @@ public class ConfigActivity extends Activity {
                 // So it will not override existing files
                 if (exportData.getCount() > 0) {
                     try {
-                        File file = new File(MainActivity.fieldExportPath,
+                        File file = new File(Constants.FIELDEXPORTPATH,
                                 exportFile.getText().toString() + "_table.csv");
 
                         if (file.exists())
@@ -1325,10 +1321,9 @@ public class ConfigActivity extends Activity {
     }
 
     // Helper function to set spinner adapter and listener
-    private void setSpinner(Spinner spinner, String[] data, OnItemSelectedListener listener) {
-        GenericSpinnerAdapter adapter = new GenericSpinnerAdapter(
-                ConfigActivity.this, R.layout.smallspinnerlayout3, R.layout.spinnerlayout4, data, listener);
-        spinner.setAdapter(adapter);
+    private void setSpinner(Spinner spinner, String[] data) {
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.spinnerlayout, data);
+        spinner.setAdapter(itemsAdapter);
     }
 
     public String getLocation() {
@@ -1349,7 +1344,7 @@ public class ConfigActivity extends Activity {
         switch (id) {
             case DIALOG_LOAD_FIELDFILECSV:
             case DIALOG_LOAD_TRAITFILE:
-                loadFileList(MainActivity.fieldImportPath);
+                loadFileList(Constants.FIELDIMPORTPATH);
                 break;
         }
 
@@ -1363,10 +1358,6 @@ public class ConfigActivity extends Activity {
             case DIALOG_LOAD_FIELDFILEEXCEL:
                 isCSV = false;
                 showFieldFileExcelDialog();
-                break;
-
-            case DIALOG_LOAD_TRAITFILE:
-                showTraitFileDialog();
                 break;
 
             case DIALOG_LOAD_TRAITS1:
@@ -1490,7 +1481,7 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem_a, langArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, langArray);
         myList.setAdapter(adapter);
         Button langCloseBtn = (Button) languageDialog
                 .findViewById(R.id.closeBtn);
@@ -1607,7 +1598,7 @@ public class ConfigActivity extends Activity {
 
         exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile);
 
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem3_a, MainActivity.dt.getRangeColumns());
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_checked, MainActivity.dt.getRangeColumns());
         saveList.setAdapter(itemsAdapter);
 
         for (int i = 0; i < saveList.getAdapter().getCount(); i++) {
@@ -1666,7 +1657,7 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem_a, lst);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, lst);
 
         setupList.setAdapter(adapter);
         setupDialog.show();
@@ -1679,13 +1670,11 @@ public class ConfigActivity extends Activity {
             return;
 
         String[] traits = MainActivity.dt.getAllTraits();
-
         HashMap visibility = MainActivity.dt.getTraitVisibility();
 
-        // Check or uncheck the list items based on existing
-        // visibility
+        // Check or uncheck the list items based on existing visibility
         if (traits != null) {
-            ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem2_a, traits);
+            ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_checked, traits);
             rateList.setAdapter(itemsAdapter);
 
             int count = rateList.getAdapter().getCount();
@@ -1699,28 +1688,6 @@ public class ConfigActivity extends Activity {
                 }
             }
         }
-
-        /*
-                csvList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                dialog.dismiss();
-
-                Editor e = ep.edit();
-
-                e.putString("DROP3", traits[which]);
-                e.commit();
-
-                MainActivity.partialReload = true;
-
-                updateSetupList();
-            }
-        });
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, traits);
-        csvList.setAdapter(itemsAdapter);
-		dialog.show();
-         */
-
 
         rateDialog.show();
     }
@@ -1831,7 +1798,7 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, traits);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, traits);
         csvList.setAdapter(itemsAdapter);
         dialog.show();
     }
@@ -1869,7 +1836,7 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, traits);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, traits);
         csvList.setAdapter(itemsAdapter);
         dialog.show();
     }
@@ -1906,134 +1873,8 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, traits);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, traits);
         csvList.setAdapter(itemsAdapter);
-        dialog.show();
-    }
-
-    private void showTraitFileDialog() {
-        final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
-
-        dialog.setTitle(getString(R.string.choosetraitfile));
-        dialog.setContentView(R.layout.genericdialog);
-        dialog.setCancelable(true);
-        dialog.setCanceledOnTouchOutside(true);
-
-        ListView csvList = (ListView) dialog.findViewById(R.id.myList);
-        Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
-
-        csvButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        OnItemClickListener listener = new OnItemClickListener() {
-
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                dialog.dismiss();
-
-                mChosenFile = mFileList[which];
-                action = DIALOG_LOAD_TRAITFILE;
-
-                mHandler.post(importCSV);
-            }
-        };
-
-        GenericArrayAdapter itemsAdapter = new GenericArrayAdapter(ConfigActivity.this,
-                R.layout.listitem_a, mFileList, listener);
-
-        csvList.setAdapter(itemsAdapter);
-
-        dialog.show();
-    }
-
-    private void showFieldFileDialog() {
-        final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
-
-        dialog.setTitle(getString(R.string.choosefieldfile));
-        dialog.setContentView(R.layout.genericdialog);
-        dialog.setCancelable(true);
-        dialog.setCanceledOnTouchOutside(true);
-
-        final ListView csvList = (ListView) dialog.findViewById(R.id.myList);
-        Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
-
-        csvButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        csvList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                dialog.dismiss();
-
-                mChosenFile = mFileList[position];
-
-                Editor e = ep.edit();
-
-                e.putString("FieldFile", mChosenFile);
-
-                e.commit();
-
-                action = DIALOG_LOAD_FIELDFILECSV;
-
-                try {
-                    importMain.removeAllViews();
-
-                    FileReader fr = new FileReader(MainActivity.fieldImportPath + "/"
-                            + mChosenFile);
-                    CSVReader cr = new CSVReader(fr);
-
-                    importColumns = cr.readNext();
-                    String[] reservedNames = new String[]{"abort", "action", "add", "after", "all", "alter",
-                            "analyze", "and", "as", "asc", "attach", "autoincrement", "before", "begin",
-                            "between", "by", "cascade", "case", "cast", "check", "collate", "column", "commit",
-                            "conflict", "constraint", "create", "cross", "current_date", "current_time",
-                            "current_timestamp", "database", "default", "deferrable", "deferred", "delete",
-                            "desc", "detach", "distinct", "drop", "each", "else", "end", "escape", "except",
-                            "exclusive", "exists", "explain", "fail", "for", "foreign", "from", "full", "glob",
-                            "group", "having", "if", "ignore", "immediate", "in", "index", "indexed", "initially",
-                            "inner", "insert", "instead", "intersect", "into", "is", "isnull", "join", "key",
-                            "left", "like", "limit", "match", "natural", "no", "not", "notnull", "null", "of",
-                            "offset", "on", "or", "order", "outer", "plan", "pragma", "primary", "query", "raise",
-                            "recursive", "references", "regexp", "reindex", "release", "rename", "replace",
-                            "restrict", "right", "rollback", "row", "savepoint", "select", "set", "table",
-                            "temp", "temporary", "then", "to", "transaction", "trigger", "union", "unique", "update",
-                            "using", "vacuum", "values", "view", "virtual", "when", "where", "with", "without"};
-
-                    List <String> list = Arrays.asList(reservedNames);
-
-                    for (String s : importColumns) {
-                        if (DataHelper.hasSpecialChars(s)) {
-                            columnFail = true;
-                            break;
-                        }
-
-                        if (list.contains(s.toLowerCase())) {
-                            columnFail = true;
-                            break;
-                        }
-                        addRow(importMain, s);
-                    }
-                } catch (Exception n) {
-
-                }
-
-                if (columnFail)
-                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail), Toast.LENGTH_LONG).show();
-                else
-                    importFieldMapDialog.show();
-
-            }
-        });
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem_a, mFileList);
-        csvList.setAdapter(adapter);
-
         dialog.show();
     }
 
@@ -2070,7 +1911,7 @@ public class ConfigActivity extends Activity {
                 mChosenFile = mUserChoice;
 
                 if (mUserChoice.contains("/")) {
-                    loadFileList(MainActivity.fieldImportPath + importDirectory + "/" + mUserChoice);
+                    loadFileList(Constants.FIELDIMPORTPATH + importDirectory + "/" + mUserChoice);
                     importDirectory = importDirectory + "/" + mUserChoice;
                     showFieldFileCSVDialog();
                     return;
@@ -2092,11 +1933,10 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, mFileList);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, mFileList);
         csvList.setAdapter(itemsAdapter);
         dialog.show();
     }
-
 
     private void loadCSVFile() {
         action = DIALOG_LOAD_FIELDFILECSV;
@@ -2104,18 +1944,43 @@ public class ConfigActivity extends Activity {
         try {
             importMain.removeAllViews();
 
-            FileReader fr = new FileReader(MainActivity.fieldImportPath + "/" + importDirectory + "/"
+            FileReader fr = new FileReader(Constants.FIELDIMPORTPATH + "/" + importDirectory + "/"
                     + mChosenFile);
             CSVReader cr = new CSVReader(fr);
 
             importColumns = cr.readNext();
 
+            String[] reservedNames = new String[]{"abort", "action", "add", "after", "all", "alter",
+                    "analyze", "and", "as", "asc", "attach", "autoincrement", "before", "begin",
+                    "between", "by", "cascade", "case", "cast", "check", "collate", "column", "commit",
+                    "conflict", "constraint", "create", "cross", "current_date", "current_time",
+                    "current_timestamp", "database", "default", "deferrable", "deferred", "delete",
+                    "desc", "detach", "distinct", "drop", "each", "else", "end", "escape", "except",
+                    "exclusive", "exists", "explain", "fail", "for", "foreign", "from", "full", "glob",
+                    "group", "having", "if", "ignore", "immediate", "in", "index", "indexed", "initially",
+                    "inner", "insert", "instead", "intersect", "into", "is", "isnull", "join", "key",
+                    "left", "like", "limit", "match", "natural", "no", "not", "notnull", "null", "of",
+                    "offset", "on", "or", "order", "outer", "plan", "pragma", "primary", "query", "raise",
+                    "recursive", "references", "regexp", "reindex", "release", "rename", "replace",
+                    "restrict", "right", "rollback", "row", "savepoint", "select", "set", "table",
+                    "temp", "temporary", "then", "to", "transaction", "trigger", "union", "unique", "update",
+                    "using", "vacuum", "values", "view", "virtual", "when", "where", "with", "without"};
+
+            List<String> list = Arrays.asList(reservedNames);
+
             for (String s : importColumns) {
                 if (DataHelper.hasSpecialChars(s)) {
                     columnFail = true;
                     break;
-                } else
+
+                }
+                if (list.contains(s.toLowerCase())) {
+                    columnFail = true;
+                    break;
+
+                } else {
                     addRow(importMain, s);
+                }
             }
         } catch (Exception n) {
 
@@ -2139,7 +2004,7 @@ public class ConfigActivity extends Activity {
         try {
             importMain.removeAllViews();
 
-            wb = Workbook.getWorkbook(new File(MainActivity.fieldImportPath + "/"
+            wb = Workbook.getWorkbook(new File(Constants.FIELDIMPORTPATH + "/"
                     + mChosenFile), wbSettings);
 
             importColumns = new String[wb.getSheet(0).getColumns()];
@@ -2148,12 +2013,35 @@ public class ConfigActivity extends Activity {
                 importColumns[s] = wb.getSheet(0).getCell(s, 0).getContents();
             }
 
+            String[] reservedNames = new String[]{"abort", "action", "add", "after", "all", "alter",
+                    "analyze", "and", "as", "asc", "attach", "autoincrement", "before", "begin",
+                    "between", "by", "cascade", "case", "cast", "check", "collate", "column", "commit",
+                    "conflict", "constraint", "create", "cross", "current_date", "current_time",
+                    "current_timestamp", "database", "default", "deferrable", "deferred", "delete",
+                    "desc", "detach", "distinct", "drop", "each", "else", "end", "escape", "except",
+                    "exclusive", "exists", "explain", "fail", "for", "foreign", "from", "full", "glob",
+                    "group", "having", "if", "ignore", "immediate", "in", "index", "indexed", "initially",
+                    "inner", "insert", "instead", "intersect", "into", "is", "isnull", "join", "key",
+                    "left", "like", "limit", "match", "natural", "no", "not", "notnull", "null", "of",
+                    "offset", "on", "or", "order", "outer", "plan", "pragma", "primary", "query", "raise",
+                    "recursive", "references", "regexp", "reindex", "release", "rename", "replace",
+                    "restrict", "right", "rollback", "row", "savepoint", "select", "set", "table",
+                    "temp", "temporary", "then", "to", "transaction", "trigger", "union", "unique", "update",
+                    "using", "vacuum", "values", "view", "virtual", "when", "where", "with", "without"};
+
+            List<String> list = Arrays.asList(reservedNames);
+
             for (String s : importColumns) {
                 if (DataHelper.hasSpecialChars(s)) {
                     columnFail = true;
                     break;
-                } else
+                }
+                if (list.contains(s.toLowerCase())) {
+                    columnFail = true;
+                    break;
+                } else {
                     addRow(importMain, s);
+                }
             }
         } catch (Exception n) {
 
@@ -2200,7 +2088,7 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, mFileList);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, mFileList);
         csvList.setAdapter(itemsAdapter);
         dialog.show();
     }
@@ -2224,26 +2112,22 @@ public class ConfigActivity extends Activity {
         likes[2] = getString(R.string.importsecond);
         likes[3] = getString(R.string.importextra);
 
-        OnItemSelectedListener listener = new OnItemSelectedListener() {
-
-            public void onItemSelected(AdapterView<?> av, View view,
-                                       int position, long id) {
-
+        s.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 s.setSelection(position);
-
                 checkImportColumnNames();
             }
 
-            public void onNothingSelected(AdapterView<?> arg0) {
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
-        };
+        });
 
-        setSpinner(s, likes, listener);
-
+        setSpinner(s, likes);
         findMatchingColumn(s, text);
-
         parent.addView(v);
-
     }
 
     // Creates a new thread to do importing
@@ -2280,13 +2164,13 @@ public class ConfigActivity extends Activity {
                 String[] columns;
 
                 //verify unique
-                if (!verifyUniqueColumnCSV(MainActivity.fieldImportPath + "/" + mChosenFile)) {
+                if (!verifyUniqueColumnCSV(Constants.FIELDIMPORTPATH + "/" + mChosenFile)) {
                     uniqueFail = true;
 
                     return 0;
                 }
 
-                FileReader fr = new FileReader(MainActivity.fieldImportPath + "/"
+                FileReader fr = new FileReader(Constants.FIELDIMPORTPATH + "/"
                         + mChosenFile);
 
                 CSVReader cr = new CSVReader(fr);
@@ -2363,7 +2247,7 @@ public class ConfigActivity extends Activity {
                 MainActivity.dt.close();
                 MainActivity.dt.open();
 
-                File newDir = new File(MainActivity.fieldImportPath + "/"
+                File newDir = new File(Constants.FIELDIMPORTPATH + "/"
                         + mChosenFile);
 
                 newDir.mkdirs();
@@ -2561,7 +2445,7 @@ public class ConfigActivity extends Activity {
                 MainActivity.dt.close();
                 MainActivity.dt.open();
 
-                File newDir = new File(MainActivity.fieldImportPath + "/"
+                File newDir = new File(Constants.FIELDIMPORTPATH + "/"
                         + mChosenFile);
 
                 newDir.mkdirs();
@@ -2650,7 +2534,7 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_a, items);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, items);
         setupList.setAdapter(itemsAdapter);
         chooseBackupDialog.show();
     }

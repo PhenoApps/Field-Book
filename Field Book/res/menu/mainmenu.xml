@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-	<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-        <item
-            android:id="@+id/nextEmptyPlot"
-            android:title="@string/nextmissingbutton"
-            android:icon="@drawable/ic_action_forward"
-            android:showAsAction="always" />
-        <item
-            android:id="@+id/jumpToPlot"
-            android:title="@string/jumptoplotidbutton"
-            android:icon="@drawable/ic_action_barcode"
-            android:showAsAction="always" />
-        <item
-            android:id="@+id/help"
-            android:title="@string/help"
-            android:icon="@drawable/ic_action_help"
-            android:showAsAction="always" />
-		<item
-            android:id="@+id/search"
-            android:title="@string/search"
-            android:icon="@drawable/ic_action_search"
-            android:showAsAction="always" />"
-		<item
-            android:id="@+id/map"
-            android:title="@string/map"
-            android:icon="@drawable/ic_action_map"
-            android:showAsAction="ifRoom|withText" />"
-		<item
-            android:id="@+id/resources"
-            android:title="@string/resources"
-            android:icon="@drawable/ic_action_collection"
-            android:showAsAction="always" />"
-        <item
-            android:id="@+id/settings"
-            android:title="@string/settings"
-            android:icon="@drawable/ic_action_settings"
-            android:showAsAction="always" />"
-	</menu>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/map"
+        android:icon="@drawable/ic_action_map"
+        android:showAsAction="ifRoom"
+        android:title="@string/map" />"
+    <item
+        android:id="@+id/nextEmptyPlot"
+        android:icon="@drawable/ic_action_forward"
+        android:showAsAction="always"
+        android:title="@string/nextmissingbutton" />
+    <item
+        android:id="@+id/jumpToPlot"
+        android:icon="@drawable/ic_action_barcode"
+        android:showAsAction="always"
+        android:title="@string/jumptoplotidbutton" />
+    <item
+        android:id="@+id/help"
+        android:icon="@drawable/ic_action_help"
+        android:showAsAction="always"
+        android:title="@string/help" />
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_action_search"
+        android:showAsAction="always"
+        android:title="@string/search" />"
+    <item
+        android:id="@+id/resources"
+        android:icon="@drawable/ic_action_collection"
+        android:showAsAction="always"
+        android:title="@string/resources" />"
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_action_settings"
+        android:showAsAction="always"
+        android:title="@string/settings" />"
+</menu>
 

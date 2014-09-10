@@ -2,6 +2,8 @@ package com.fieldbook.tracker;
 
 import android.database.Cursor;
 
+import com.fieldbook.tracker.Trait.TraitObject;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;

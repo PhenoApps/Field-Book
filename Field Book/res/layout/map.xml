@@ -75,7 +75,7 @@
 						
 		</LinearLayout>
 		
-				<com.fieldbook.tracker.GridLayout 
+				<com.fieldbook.tracker.Map.GridLayout
 				    android:id="@+id/map"	    
 				    android:layout_gravity="center_horizontal"
 				    android:layout_width="520dp"

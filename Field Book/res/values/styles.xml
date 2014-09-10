@@ -18,7 +18,7 @@
 
     <style name="Custom.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:displayOptions">showHome|useLogo</item>
-        <item name="android:background">#d0e1c7</item>
+        <item name="android:background">#ffffff</item>
     </style>
 
     <style name="Dialog.SectionTitles" parent="@android:style/Theme.Holo.Light.Dialog">

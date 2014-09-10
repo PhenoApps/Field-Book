@@ -1,85 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout 
-    xmlns:android="http://schemas.android.com/apk/res/android" 
-	android:paddingTop="2dip"
-	android:paddingBottom="2dip"
-	android:orientation="horizontal"
-	android:gravity="center_vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"    
-    android:background="@drawable/listmimic"		 
->
- 
-	<ImageView
-		android:id="@+id/upBtn"
-        android:layout_width="40dp"
-        android:layout_height="66dp"                
-        android:src="@drawable/up"
-        android:focusable="false"
-    />
+    android:layout_height="wrap_content"
+    android:background="@drawable/listmimic"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingBottom="2dip"
+    android:paddingTop="2dip">
 
-	<View
-        android:layout_width="10dp"
-        android:layout_height="wrap_content"                
-	/>
-		
-	<ImageView
-		android:id="@+id/downBtn"
+    <ImageView
+        android:id="@+id/upBtn"
         android:layout_width="40dp"
-        android:layout_height="66dp"                
-        android:src="@drawable/down"
+        android:layout_height="66dp"
         android:focusable="false"
-	/>
-	
-	<View
+        android:src="@drawable/up" />
+
+    <View
         android:layout_width="10dp"
-        android:layout_height="wrap_content"                
-	/>
-	
-	<Button
-		android:id="@+id/copyBtn"
-		android:focusable="false"
+        android:layout_height="wrap_content" />
+
+    <ImageView
+        android:id="@+id/downBtn"
+        android:layout_width="40dp"
+        android:layout_height="66dp"
+        android:focusable="false"
+        android:src="@drawable/down" />
+
+    <View
+        android:layout_width="10dp"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/copyBtn"
         android:layout_width="wrap_content"
         android:layout_height="45dp"
-        android:minWidth="30dp"
-        android:text=""
-        android:textColor="#000000"
-        android:textSize="16dp"
+        android:background="@android:drawable/btn_default"
         android:drawableTop="@drawable/ic_action_copy"
-        android:textStyle="bold" />
-
-	<Button
-		android:id="@+id/delBtn"
-		android:focusable="false"
-        android:layout_width="wrap_content"
-        android:layout_height="45dp"
+        android:focusable="false"
         android:minWidth="30dp"
         android:text=""
         android:textColor="#000000"
         android:textSize="16dp"
-        android:drawableTop="@drawable/ic_action_discard"
         android:textStyle="bold" />
 
-	<TextView android:id="@+id/text2"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:singleLine="true"
-		android:ellipsize="end"		
-		android:textColor="#000000"
-		android:minWidth="120dp"
+    <Button
+        android:id="@+id/delBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:background="@android:drawable/btn_default"
+        android:drawableTop="@drawable/ic_action_discard"
+        android:focusable="false"
+        android:minWidth="30dp"
+        android:text=""
+        android:textColor="#000000"
+        android:textSize="16dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/text2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="6dip"
-		android:textAppearance="?android:attr/textAppearanceMedium"
-	/>
-				
-	<TextView android:id="@+id/text1"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:singleLine="true"
-		android:ellipsize="end"
-		android:textColor="#000000"
+        android:ellipsize="end"
+        android:minWidth="120dp"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#000000" />
+
+    <TextView
+        android:id="@+id/text1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="6dip"
         android:layout_marginRight="20dip"
-		android:textAppearance="?android:attr/textAppearanceMedium"
-	/>
-			
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#000000" />
+
 </LinearLayout>

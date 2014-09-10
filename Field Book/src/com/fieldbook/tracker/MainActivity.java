@@ -2,7 +2,6 @@ package com.fieldbook.tracker;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -11,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -22,11 +20,9 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -38,7 +34,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -58,6 +53,11 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import com.fieldbook.tracker.Map.*;
+import com.fieldbook.tracker.Search.*;
+import com.fieldbook.tracker.Trait.*;
+import com.fieldbook.tracker.Tutorial.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -100,27 +100,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
     public static boolean reloadData;
     public static boolean partialReload;
-
-    public static String resourcePath = Environment.getExternalStorageDirectory()
-            + "/fieldBook/resources";
-
-    public static String audioPath = Environment.getExternalStorageDirectory()
-            + "/fieldBook/plot_data/audio";
-
-    public static String traitPath = Environment.getExternalStorageDirectory()
-            + "/fieldbook/trait";
-
-    public static String fieldImportPath = Environment.getExternalStorageDirectory()
-            + "/fieldbook/field_import";
-
-    public static String fieldExportPath = Environment.getExternalStorageDirectory()
-            + "/fieldbook/field_export";
-
-    private File mPath = new File(Environment.getExternalStorageDirectory()
-            + "/fieldBook");
-
-    public static String backupPath = Environment.getExternalStorageDirectory()
-            + "/fieldbook/database";
 
     public static Activity thisActivity;
 
@@ -263,6 +242,8 @@ public class MainActivity extends Activity implements OnClickListener {
     private int mapScrollSegment;
     private int currentMapScrollSegment;
     private int scrollSegmentSize;
+
+    private File mPath = Constants.MPATH;
 
     private EditText exportFile;
 
@@ -672,7 +653,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     tempMonth = c.get(Calendar.MONTH);
 
                     month.setText(getMonthForInt(c.get(Calendar.MONTH)));
-                    day.setText(String.format("%02d",c
+                    day.setText(String.format("%02d", c
                             .get(Calendar.DAY_OF_MONTH)));
                 }
 
@@ -709,10 +690,10 @@ public class MainActivity extends Activity implements OnClickListener {
                     if (tempMonth > 11)
                         tempMonth = 0;
 
-                    day.setText(String.format("%02d",1));
+                    day.setText(String.format("%02d", 1));
                     month.setText(getMonthForInt(tempMonth));
                 } else {
-                    day.setText(String.format("%02d", i+1));
+                    day.setText(String.format("%02d", i + 1));
                 }
 
                 // Change the text color accordingly
@@ -743,7 +724,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     day.setText(String.format("%02d", max));
                     month.setText(getMonthForInt(tempMonth));
                 } else {
-                    day.setText(String.format("%02d",i - 1));
+                    day.setText(String.format("%02d", i - 1));
                 }
 
                 // Change the text color accordingly
@@ -807,7 +788,7 @@ public class MainActivity extends Activity implements OnClickListener {
         // Functions to clear all other color except this button's
         buttonArray[0].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[0])) {
+                if (checkButton(buttonArray[0])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[0].getText().toString());
@@ -817,7 +798,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[1].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[1])) {
+                if (checkButton(buttonArray[1])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[1].getText().toString());
@@ -827,7 +808,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[2].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[2])) {
+                if (checkButton(buttonArray[2])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[2].getText().toString());
@@ -837,7 +818,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[3].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[3])) {
+                if (checkButton(buttonArray[3])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[3].getText().toString());
@@ -847,7 +828,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[4].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[4])) {
+                if (checkButton(buttonArray[4])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[4].getText().toString());
@@ -857,7 +838,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[5].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[5])) {
+                if (checkButton(buttonArray[5])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[5].getText().toString());
@@ -867,7 +848,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[6].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[6])) {
+                if (checkButton(buttonArray[6])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[6].getText().toString());
@@ -877,7 +858,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[7].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[7])) {
+                if (checkButton(buttonArray[7])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[7].getText().toString());
@@ -887,7 +868,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[8].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[8])) {
+                if (checkButton(buttonArray[8])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[8].getText().toString());
@@ -897,7 +878,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[9].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[9])) {
+                if (checkButton(buttonArray[9])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[9].getText().toString());
@@ -907,7 +888,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[10].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[10])) {
+                if (checkButton(buttonArray[10])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[10].getText().toString());
@@ -917,7 +898,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         buttonArray[11].setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(checkButton(buttonArray[11])) {
+                if (checkButton(buttonArray[11])) {
                     return;
                 }
                 updateTrait(currentTrait.trait, currentTrait.format, buttonArray[11].getText().toString());
@@ -1017,7 +998,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     displayRange(cRange);
 
                     if (ep.getBoolean("RangeSound", false)) {
-                        if (!cRange.range.equals(lastRange)&&!lastRange.equals("")) {
+                        if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                             lastRange = cRange.range;
 
                             try {
@@ -1118,7 +1099,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     displayRange(cRange);
                     if (ep.getBoolean("RangeSound", false)) {
-                        if (!cRange.range.equals(lastRange)&&!lastRange.equals("")) {
+                        if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                             lastRange = cRange.range;
 
                             try {
@@ -1270,7 +1251,7 @@ public class MainActivity extends Activity implements OnClickListener {
             curCat = newTraits.get(currentTrait.trait)
                     .toString();
         }
-        if(button.getText().toString().equals(curCat)) {
+        if (button.getText().toString().equals(curCat)) {
             newTraits.remove(currentTrait.trait);
             dt.deleteTrait(cRange.plot_id, currentTrait.trait);
             setCategoricalButtons(buttonArray, null);
@@ -1296,12 +1277,12 @@ public class MainActivity extends Activity implements OnClickListener {
     // Create all necessary directories and subdirectories	
     private void createDirs() {
         createDir(mPath.getAbsolutePath());
-        createDir(resourcePath);
-        createDir(audioPath);
-        createDir(traitPath);
-        createDir(fieldImportPath);
-        createDir(fieldExportPath);
-        createDir(backupPath);
+        createDir(Constants.RESOURCEPATH);
+        createDir(Constants.AUDIOPATH);
+        createDir(Constants.TRAITPATH);
+        createDir(Constants.FIELDIMPORTPATH);
+        createDir(Constants.FIELDEXPORTPATH);
+        createDir(Constants.BACKUPPATH);
     }
 
     // Helper function to create a single directory
@@ -1346,7 +1327,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 return;
 
             if (ep.getBoolean("RangeSound", false)) {
-                if (!cRange.range.equals(lastRange)&&!lastRange.equals("")) {
+                if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                     lastRange = cRange.range;
 
                     try {
@@ -1413,7 +1394,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 return;
 
             if (ep.getBoolean("RangeSound", false)) {
-                if (!cRange.range.equals(lastRange)&&!lastRange.equals("")) {
+                if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                     lastRange = cRange.range;
 
                     try {
@@ -1836,9 +1817,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         if (traits != null) {
             ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<String>(
-                    this, R.layout.smallspinnerlayout, traits);
+                    this, R.layout.spinnerlayout, traits);
             directionArrayAdapter
-                    .setDropDownViewResource(R.layout.smallspinnerlayout2);
+                    .setDropDownViewResource(R.layout.spinnerlayout);
             traitType.setAdapter(directionArrayAdapter);
 
             traitType.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -2118,7 +2099,7 @@ public class MainActivity extends Activity implements OnClickListener {
                                 tempMonth = c.get(Calendar.MONTH);
 
                                 month.setText(getMonthForInt(c.get(Calendar.MONTH)));
-                                day.setText(String.format("%02d",c.get(Calendar.DAY_OF_MONTH)));
+                                day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
                             }
                         }
                     } else if (currentTrait.format.equals("qualitative") | currentTrait.format.equals("categorical")) {
@@ -2512,7 +2493,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     // For audio trait type
     private void setRecordingLocation(String recordingName) {
-        mRecordingLocation = new File(MainActivity.audioPath,
+        mRecordingLocation = new File(Constants.AUDIOPATH,
                 recordingName + ".mp4");
     }
 
@@ -4154,14 +4135,14 @@ public class MainActivity extends Activity implements OnClickListener {
         directions[2] = getString(R.string.topright);
         directions[3] = getString(R.string.btmright);
 
-        ArrayAdapter adapter2 = new ArrayAdapter(MainActivity.this, R.layout.spinnerlayout5, directions);
+        ArrayAdapter adapter2 = new ArrayAdapter(MainActivity.this, R.layout.spinnerlayout, directions);
         dir.setAdapter(adapter2);
 
         String[] orientations = new String[2];
         orientations[0] = getString(R.string.serpentine);
         orientations[1] = getString(R.string.zigzag);
 
-        ArrayAdapter adapter3 = new ArrayAdapter(MainActivity.this, R.layout.spinnerlayout5, orientations);
+        ArrayAdapter adapter3 = new ArrayAdapter(MainActivity.this, R.layout.spinnerlayout, orientations);
         orientation.setAdapter(adapter3);
 
         Button saveBtn = (Button) configDialog.findViewById(R.id.saveBtn);
@@ -4528,9 +4509,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         if (traits != null) {
             ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<String>(
-                    this, R.layout.smallspinnerlayout, traits);
+                    this, R.layout.spinnerlayout, traits);
             directionArrayAdapter
-                    .setDropDownViewResource(R.layout.smallspinnerlayout2);
+                    .setDropDownViewResource(R.layout.spinnerlayout);
             mapTrait.setAdapter(directionArrayAdapter);
 
         }
@@ -4609,7 +4590,7 @@ public class MainActivity extends Activity implements OnClickListener {
         });
 
         if (dt.getVisibleTrait() != null) {
-            ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, R.layout.spinnerlayout2, dt.getVisibleTrait());
+            ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, R.layout.spinnerlayout, dt.getVisibleTrait());
             mapTrait.setAdapter(adapter);
 
             mapTrait.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -4720,7 +4701,7 @@ public class MainActivity extends Activity implements OnClickListener {
             c.save();
 
             try {
-                FileOutputStream out = new FileOutputStream(resourcePath + "/" + exportFile.getText().toString());
+                FileOutputStream out = new FileOutputStream(Constants.RESOURCEPATH + "/" + exportFile.getText().toString());
                 b.compress(CompressFormat.JPEG, 100, out);
                 out.flush();
                 out.close();
