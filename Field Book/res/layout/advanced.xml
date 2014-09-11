@@ -10,121 +10,121 @@
         android:layout_width="fill_parent"
         android:layout_height="500dp">
 
-            <LinearLayout
-                android:layout_width="fill_parent"
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:orientation="vertical">
+
+            <CheckBox
+                android:id="@+id/tips"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="vertical">
+                android:checked="true"
+                android:text="@string/tips"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/tips"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="@string/tips"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
 
-                <View
-                    android:layout_width="wrap_content"
-                    android:layout_height="25dp" />
+            <CheckBox
+                android:id="@+id/cycle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/cycle"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/cycle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:text="@string/cycle"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
 
-                <View
-                    android:layout_width="wrap_content"
-                    android:layout_height="25dp" />
+            <CheckBox
+                android:id="@+id/enableMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/enablemap"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/enableMap"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:text="@string/enablemap"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
 
-                <View
-                    android:layout_width="wrap_content"
-                    android:layout_height="25dp" />
+            <CheckBox
+                android:id="@+id/ignoreExisting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/ignoreentries"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/ignoreExisting"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:text="@string/ignoreentries"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
 
-                <View
-                    android:layout_width="wrap_content"
-                    android:layout_height="25dp" />
+            <CheckBox
+                android:id="@+id/useDay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/useday"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/useDay"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:text="@string/useday"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
 
-                <View
-                    android:layout_width="wrap_content"
-                    android:layout_height="25dp" />
+            <CheckBox
+                android:id="@+id/rangeSound"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/rangechime"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/rangeSound"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:text="@string/rangechime"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
 
-                <View
-                    android:layout_width="wrap_content"
-                    android:layout_height="25dp" />
+            <CheckBox
+                android:id="@+id/jumpToPlot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/jumptoplotid"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/jumpToPlot"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:text="@string/jumptoplotid"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
 
-                <View
-                    android:layout_width="wrap_content"
-                    android:layout_height="25dp" />
+            <CheckBox
+                android:id="@+id/nextEmptyPlot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/nextmissingenable"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/nextEmptyPlot"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:text="@string/nextmissingenable"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
+        </LinearLayout>
     </ScrollView>
 
     <LinearLayout
@@ -137,9 +137,10 @@
         <Button
             android:id="@+id/closeBtn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_gravity="center"
-            android:minWidth="100dp"
+            android:background="@android:drawable/btn_default"
+            android:minWidth="150dp"
             android:text="@string/okay"
             android:textColor="#000000"
             android:textSize="30dp"

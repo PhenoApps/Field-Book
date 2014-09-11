@@ -9,7 +9,6 @@
     android:paddingTop="2dip">
 
 
-
     <View
         android:layout_width="10dp"
         android:layout_height="wrap_content" />
@@ -31,6 +30,7 @@
         android:layout_height="66dp"
         android:focusable="false"
         android:src="@drawable/down" />
+
     <View
         android:layout_width="15dp"
         android:layout_height="wrap_content" />
@@ -43,6 +43,7 @@
         android:scaleX="1.55"
         android:scaleY="1.55"
         android:text="" />
+
     <View
         android:layout_width="15dp"
         android:layout_height="wrap_content" />

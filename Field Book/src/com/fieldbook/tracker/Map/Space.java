@@ -22,8 +22,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * Space is a lightweight View subclass that may be used to create gaps between components
- * in general purpose layouts.
+ * Space is a lightweight View subclass that may be used to create gaps between components in general purpose layouts.
  */
 public final class Space extends View {
     /**

@@ -36,7 +36,7 @@ public class TraitAdapter extends BaseAdapter {
     HashMap visibility;
 
     public TraitAdapter(Context context, ArrayList<TraitObject> list, OnItemClickListener listener, HashMap visibility) {
-    	this.context = context;
+        this.context = context;
         mLayoutInflater = LayoutInflater.from(context);
         this.list = list;
         this.listener = listener;
@@ -44,11 +44,11 @@ public class TraitAdapter extends BaseAdapter {
     }
 
     public int getCount() {
-    	return list.size();
+        return list.size();
     }
 
     public TraitObject getItem(int position) {
-    	return list.get(position);
+        return list.get(position);
     }
 
     public long getItemId(int position) {
@@ -69,7 +69,7 @@ public class TraitAdapter extends BaseAdapter {
 
     public View getView(final int position, View convertView, final ViewGroup parent) {
         final ViewHolder holder;
-        
+
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = mLayoutInflater.inflate(R.layout.traitline, null);
@@ -80,39 +80,36 @@ public class TraitAdapter extends BaseAdapter {
             holder.down = (ImageView) convertView.findViewById(R.id.downBtn);
             holder.copy = (Button) convertView.findViewById(R.id.copyBtn);
             holder.del = (Button) convertView.findViewById(R.id.delBtn);
-            
+
             convertView.setTag(holder);
-        }
-        else {
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        
-        convertView.setOnClickListener(new OnClickListener(){
 
-			public void onClick(View v) {
-				// bubble up touch events
-				// This is necessary for controls such as the listview or spinner to work 
-				// with the tips / hints when it is visible
-				listener.onItemClick((AdapterView) parent, v, position, v.getId());
-			}
-		});
+        convertView.setOnClickListener(new OnClickListener() {
 
-        
+            public void onClick(View v) {
+                // bubble up touch events
+                // This is necessary for controls such as the listview or spinner to work
+                // with the tips / hints when it is visible
+                listener.onItemClick((AdapterView) parent, v, position, v.getId());
+            }
+        });
+
+
         holder.id = getItem(position).id;
         holder.realPosition = getItem(position).realPosition;
-        
+
         holder.name.setText(getItem(position).trait);
         holder.format.setText(getItem(position).format);
 
         // Check or uncheck the list items based on existing
         // visibility
         if (visibility != null) {
-            if (visibility.get(holder.name.getText().toString()) != null)
-            {
+            if (visibility.get(holder.name.getText().toString()) != null) {
                 if (visibility.get(holder.name.getText().toString()).equals("true")) {
                     holder.visible.setChecked(true);
-                }
-                else
+                } else
                     holder.visible.setChecked(false);
             }
         }
@@ -123,103 +120,96 @@ public class TraitAdapter extends BaseAdapter {
             public void onCheckedChanged(CompoundButton arg0, boolean position) {
 
                 if (holder.visible.isChecked()) {
-                    MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(),true);
-                } else
-                {
-                    MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(),false);
+                    MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(), true);
+                } else {
+                    MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(), false);
                 }
 
                 MainActivity.reloadData = true;
             }
         });
 
-        holder.del.setOnClickListener(new OnClickListener(){
+        holder.del.setOnClickListener(new OnClickListener() {
 
-			public void onClick(View v) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				
-			    builder.setTitle(context.getString(R.string.deletetrait));
-			    builder.setMessage(context.getString(R.string.areyousure));
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-			    builder.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() 
-			    {
+                builder.setTitle(context.getString(R.string.deletetrait));
+                builder.setMessage(context.getString(R.string.areyousure));
 
-			        public void onClick(DialogInterface dialog, int which) 
-			        {
-			        	dialog.dismiss();
-			        	
-						MainActivity.dt.deleteTrait(holder.id);
-						TraitEditorActivity.loadData();
-			        }
+                builder.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() {
 
-			    });
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
 
-			    builder.setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener() 
-			    {
+                        MainActivity.dt.deleteTrait(holder.id);
+                        TraitEditorActivity.loadData();
+                    }
 
-			        public void onClick(DialogInterface dialog, int which) 
-			        {		        	
-			            dialog.dismiss();
-			        }
+                });
 
-			    });
-			    
-			    AlertDialog alert = builder.create();
-			    alert.show();
-				
-			}
-		});
+                builder.setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener() {
 
-        holder.up.setOnClickListener(new OnClickListener(){
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
 
-			public void onClick(View v) {
-				if (position > 0)
-				{
-					String prevID = getItem(position-1).id;
-					String prevPosition = getItem(position-1).realPosition;
-					
-					String currentID = holder.id;
-					String currentPosition = holder.realPosition;
-					
-					MainActivity.dt.updateTraitPosition(prevID, currentPosition);
-					MainActivity.dt.updateTraitPosition(currentID, prevPosition);
-					TraitEditorActivity.loadData();
-				}
-				
-			}
-		});
+                });
 
-        holder.down.setOnClickListener(new OnClickListener(){
+                AlertDialog alert = builder.create();
+                alert.show();
 
-			public void onClick(View v) {
-				if (position < getCount() -1)
-				{
-					String nextID = getItem(position+1).id;
-					String nextPosition = getItem(position+1).realPosition;
-					
-					String currentID = holder.id;
-					String currentPosition = holder.realPosition;
-					
-					MainActivity.dt.updateTraitPosition(nextID, currentPosition);
-					MainActivity.dt.updateTraitPosition(currentID, nextPosition);		
-					TraitEditorActivity.loadData();
-				}
-			}
-		});
+            }
+        });
 
-        holder.copy.setOnClickListener(new OnClickListener(){
+        holder.up.setOnClickListener(new OnClickListener() {
 
-			public void onClick(View v) {
-				int pos = MainActivity.dt.getMaxPositionFromTraits() + 1;
-				
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-				String postfix = "-" + context.getString(R.string.copy) + "-" + dateFormat.format(Calendar.getInstance().getTime());
-				
-				MainActivity.dt.insertTraits(getItem(position).trait + postfix, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
-				TraitEditorActivity.loadData();
-			}
-		});
-        
+            public void onClick(View v) {
+                if (position > 0) {
+                    String prevID = getItem(position - 1).id;
+                    String prevPosition = getItem(position - 1).realPosition;
+
+                    String currentID = holder.id;
+                    String currentPosition = holder.realPosition;
+
+                    MainActivity.dt.updateTraitPosition(prevID, currentPosition);
+                    MainActivity.dt.updateTraitPosition(currentID, prevPosition);
+                    TraitEditorActivity.loadData();
+                }
+
+            }
+        });
+
+        holder.down.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View v) {
+                if (position < getCount() - 1) {
+                    String nextID = getItem(position + 1).id;
+                    String nextPosition = getItem(position + 1).realPosition;
+
+                    String currentID = holder.id;
+                    String currentPosition = holder.realPosition;
+
+                    MainActivity.dt.updateTraitPosition(nextID, currentPosition);
+                    MainActivity.dt.updateTraitPosition(currentID, nextPosition);
+                    TraitEditorActivity.loadData();
+                }
+            }
+        });
+
+        holder.copy.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View v) {
+                int pos = MainActivity.dt.getMaxPositionFromTraits() + 1;
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                String postfix = "-" + context.getString(R.string.copy) + "-" + dateFormat.format(Calendar.getInstance().getTime());
+
+                MainActivity.dt.insertTraits(getItem(position).trait + postfix, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
+                TraitEditorActivity.loadData();
+            }
+        });
+
         return convertView;
     }
 

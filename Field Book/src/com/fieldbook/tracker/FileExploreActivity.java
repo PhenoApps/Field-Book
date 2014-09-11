@@ -19,10 +19,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.app.ListActivity;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Locale;
 
 public class FileExploreActivity extends ListActivity {
@@ -34,9 +37,9 @@ public class FileExploreActivity extends ListActivity {
     private Boolean firstLvl = true;
 
     private Item[] fileList;
-    private File path = new File(Constants.RESOURCEPATH);
-    private String chosenFile;
+    private File path;
 
+    private String chosenFile;
     private ListAdapter adapter;
 
     private String local;
@@ -46,9 +49,10 @@ public class FileExploreActivity extends ListActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        String data = getIntent().getExtras().getString("path");
+        path = new File(data);
 
         super.onCreate(savedInstanceState);
-
         ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
@@ -60,9 +64,6 @@ public class FileExploreActivity extends ListActivity {
         config2.locale = locale2;
         getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
                 .getDisplayMetrics());
-
-        getActionBar().setHomeButtonEnabled(true);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         loadFileList();
         getListView().setAdapter(adapter);
@@ -103,24 +104,15 @@ public class FileExploreActivity extends ListActivity {
                         firstLvl = true;
                     }
                     loadFileList();
-
                     getListView().setAdapter(adapter);
                 }
                 // File picked
                 else {
-                    // Perform action with file picked
                     try {
-                        //launch intent
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        Uri uri = Uri.fromFile(sel);
-                        String url = uri.toString();
-
-                        //grab mime
-                        String newMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                                MimeTypeMap.getFileExtensionFromUrl(url));
-
-                        i.setDataAndType(uri, newMimeType);
-                        startActivity(i);
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra("result", sel.toString());
+                        setResult(RESULT_OK, returnIntent);
+                        finish();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -137,18 +129,20 @@ public class FileExploreActivity extends ListActivity {
 
         // Checks whether path exists
         if (path.exists()) {
-            FilenameFilter filter = new FilenameFilter() {
-
+            File[] filesList = path.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String filename) {
                     File sel = new File(dir, filename);
-                    // Filters based on whether the file is hidden or not
-                    return (sel.isFile() || sel.isDirectory())
-                            && !sel.isHidden();
-
+                    return sel.isFile() || sel.isDirectory();
                 }
-            };
+            });
 
-            String[] fList = path.list(filter);
+            Arrays.sort(filesList, comp);
+            String[] fList = new String[filesList.length];
+
+            for (int i = 0; i < filesList.length; ++i) {
+                fList[i] = filesList[i].getName();
+            }
+
             fileList = new Item[fList.length];
 
             for (int i = 0; i < fList.length; i++) {
@@ -161,6 +155,13 @@ public class FileExploreActivity extends ListActivity {
                 if (sel.isDirectory()) {
                     fileList[i].icon = R.drawable.directory_icon;
                     Log.d("DIRECTORY", fileList[i].file);
+                }
+                if (sel.toString().toLowerCase().contains(".csv")) {
+                    fileList[i].icon = R.drawable.csv;
+                }
+
+                if (sel.toString().toLowerCase().contains(".xls")) {
+                    fileList[i].icon = R.drawable.xls;
                 } else {
                     Log.d("FILE", fileList[i].file);
                 }
@@ -198,6 +199,27 @@ public class FileExploreActivity extends ListActivity {
                 return view;
             }
         };
+    }
+
+    Comparator comp = new Comparator() {
+        public int compare(Object o1, Object o2) {
+            File f1 = (File) o1;
+            File f2 = (File) o2;
+            if (f1.isDirectory() && !f2.isDirectory()) {
+                // Directory before non-directory
+                return -1;
+            } else if (!f1.isDirectory() && f2.isDirectory()) {
+                // Non-directory after directory
+                return 1;
+            } else {
+                // Alphabetic order otherwise
+                return f1.toString().compareToIgnoreCase(f2.toString());
+            }
+        }
+    };
+
+    public void makeToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     // Wrapper class to hold file data

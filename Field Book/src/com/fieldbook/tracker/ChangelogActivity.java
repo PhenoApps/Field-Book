@@ -53,8 +53,8 @@ public class ChangelogActivity extends Activity {
 
         // Enforce language
         local = ep.getString("language", "en");
-        region = ep.getString("region",region);
-        Locale locale2 = new Locale(local,"");
+        region = ep.getString("region", region);
+        Locale locale2 = new Locale(local, "");
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
         config2.locale = locale2;
@@ -89,7 +89,7 @@ public class ChangelogActivity extends Activity {
         try {
             v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
-            // Huh? Really?
+
         }
         return v;
     }
@@ -111,6 +111,7 @@ public class ChangelogActivity extends Activity {
                 TextView header = (TextView) new TextView(this);
                 TextView content = (TextView) new TextView(this);
                 TextView spacer = (TextView) new TextView(this);
+                spacer.setTextSize(5);
                 View ruler = new View(this);
 
                 ruler.setBackgroundColor(0xff33b5e5);

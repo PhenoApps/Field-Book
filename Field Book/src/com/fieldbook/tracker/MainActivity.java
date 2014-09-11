@@ -18,6 +18,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +37,7 @@ import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -3852,7 +3854,8 @@ public class MainActivity extends Activity implements OnClickListener {
             case R.id.resources:
                 intent.setClassName(MainActivity.this,
                         FileExploreActivity.class.getName());
-                startActivity(intent);
+                intent.putExtra("path", Constants.RESOURCEPATH);
+                startActivityForResult(intent, 1);
                 break;
 
             case R.id.help:
@@ -4363,12 +4366,12 @@ public class MainActivity extends Activity implements OnClickListener {
                 switch (event.getAction()) {
 
                     case MotionEvent.ACTION_DOWN:
-                        mapLeft.setImageResource(R.drawable.left);
+                        mapLeft.setImageResource(R.drawable.lefts);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
-                        mapLeft.setImageResource(R.drawable.lefts);
+                        mapLeft.setImageResource(R.drawable.left);
                     case MotionEvent.ACTION_CANCEL:
                         break;
                 }
@@ -4403,12 +4406,12 @@ public class MainActivity extends Activity implements OnClickListener {
                 switch (event.getAction()) {
 
                     case MotionEvent.ACTION_DOWN:
-                        mapRight.setImageResource(R.drawable.right);
+                        mapRight.setImageResource(R.drawable.rights);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
-                        mapRight.setImageResource(R.drawable.rights);
+                        mapRight.setImageResource(R.drawable.right);
                     case MotionEvent.ACTION_CANCEL:
                         break;
                 }
@@ -4444,12 +4447,12 @@ public class MainActivity extends Activity implements OnClickListener {
                 switch (event.getAction()) {
 
                     case MotionEvent.ACTION_DOWN:
-                        mapUp.setImageResource(R.drawable.up);
+                        mapUp.setImageResource(R.drawable.ups);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
-                        mapUp.setImageResource(R.drawable.ups);
+                        mapUp.setImageResource(R.drawable.up);
                     case MotionEvent.ACTION_CANCEL:
                         break;
                 }
@@ -4480,12 +4483,12 @@ public class MainActivity extends Activity implements OnClickListener {
                 switch (event.getAction()) {
 
                     case MotionEvent.ACTION_DOWN:
-                        mapDown.setImageResource(R.drawable.down2);
+                        mapDown.setImageResource(R.drawable.downs);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
-                        mapDown.setImageResource(R.drawable.down2s);
+                        mapDown.setImageResource(R.drawable.down);
                     case MotionEvent.ACTION_CANCEL:
                         break;
                 }
@@ -4738,4 +4741,26 @@ public class MainActivity extends Activity implements OnClickListener {
         return super.onKeyDown(keyCode, event);
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                String mChosenFileString = data.getStringExtra("result");
+                File mChosenFile = new File(mChosenFileString);
+
+                //launch intent
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                Uri uri = Uri.fromFile(mChosenFile);
+                String url = uri.toString();
+
+                //grab mime
+                String newMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                        MimeTypeMap.getFileExtensionFromUrl(url));
+
+                i.setDataAndType(uri, newMimeType);
+                startActivity(i);
+            }
+            if (resultCode == RESULT_CANCELED) {
+            }
+        }
+    }
 }

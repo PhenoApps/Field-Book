@@ -61,7 +61,7 @@
     <string name="ignoreentries">Hide entries with collected data</string>
     <string name="dbformat">Database</string>
     <string name="tableformat">Table</string>
-    <string name="filename">File name</string>
+    <string name="filename">Filename</string>
     <string name="drop1">InfoBar 1</string>
     <string name="drop2">InfoBar 2</string>
     <string name="drop3">InfoBar 3</string>
@@ -159,7 +159,7 @@
     <string name="help1">Use HELP on the menu to learn about Field Book</string>
     <string name="help2">Turn on Tutorial in the Advanced Settings</string>
     <string name="mhelp1">The InfoBars at the top of the screen show extra data for each entry. These can be changed in the Setup menu.</string>
-    <string name="mhelp2">The large, black arrows move between entries. The small, blue arrows move between traits.</string>
+    <string name="mhelp2">The large, black arrows move between entries. The small, green arrows move between traits.</string>
     <string name="mhelp3">A list of enabled traits is displayed when the active trait is pressed.</string>
     <string name="mhelp4">The primary and secondary order text areas can be used to move to the first occurrence of a specific value.</string>
     <string name="mhelp5">"Search" at the top of screen allows database queries.</string>
@@ -190,7 +190,7 @@
     <string name="datasetselected">A valid data set has been loaded</string>
     <string name="headerformat">Format</string>
     <string name="headercontent">Content</string>
-    <string name="allcolumns">All field columns</string>
+    <string name="allcolumns">Field columns</string>
     <string name="alltraits">All traits</string>
     <string name="notraits">No traits selected</string>
     <string name="photo">Photo</string>

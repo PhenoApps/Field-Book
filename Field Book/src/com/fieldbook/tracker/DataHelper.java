@@ -1424,8 +1424,7 @@ public class DataHelper {
     /**
      * Import database
      */
-    public boolean importDatabase(String filename) throws IOException
-    {
+    public boolean importDatabase(String filename) throws IOException {
         String internalPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
 
         // Close the SQLiteOpenHelper so it will commit the created empty
@@ -1457,8 +1456,7 @@ public class DataHelper {
     /**
      * Export database
      */
-    public boolean exportDatabase(String filename) throws IOException
-    {
+    public boolean exportDatabase(String filename) throws IOException {
         String internalPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
 
         // Close the SQLiteOpenHelper so it will commit the created empty

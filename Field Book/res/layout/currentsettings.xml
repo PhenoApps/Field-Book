@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:background="#FFFFFF"
     android:orientation="vertical"
-    android:padding="20dp" >
+    android:padding="20dp">
 
     <TextView
         android:id="@+id/text"
@@ -22,12 +22,13 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:paddingTop="10dp"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/closeBtn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
+            android:background="@android:drawable/btn_default"
             android:layout_gravity="center_horizontal"
             android:minWidth="150dp"
             android:text="@string/close"
@@ -35,6 +36,6 @@
             android:textSize="30dp"
             android:textStyle="bold" />
     </LinearLayout>
-    
-    
+
+
 </LinearLayout>

@@ -4,7 +4,7 @@ package com.fieldbook.tracker.Trait;
  * Simple wrapper class for trait data
  */
 public class TraitObject {
-	public String trait;
+    public String trait;
     public String format;
     public String defaultValue;
     public String minimum;

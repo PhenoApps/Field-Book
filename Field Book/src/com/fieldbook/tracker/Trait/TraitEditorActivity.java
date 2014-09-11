@@ -37,6 +37,7 @@ import android.view.MenuItem;
 import com.fieldbook.tracker.CSVReader;
 import com.fieldbook.tracker.CSVWriter;
 import com.fieldbook.tracker.Constants;
+import com.fieldbook.tracker.FileExploreActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.Tutorial.TutorialTraitsActivity;
@@ -134,8 +135,8 @@ public class TraitEditorActivity extends Activity {
 
         // Enforce internal language change
         local = ep.getString("language", "en");
-        region = ep.getString("region","");
-        Locale locale2 = new Locale(local,region);
+        region = ep.getString("region", "");
+        Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
         config2.locale = locale2;
@@ -604,22 +605,19 @@ public class TraitEditorActivity extends Activity {
 
     // Helper function to load data
     public static void loadData() {
-        try
-        {
-        if (MainActivity.dt.getAllTraits() == null)
-            return;
+        try {
+            if (MainActivity.dt.getAllTraits() == null)
+                return;
 
-        HashMap visibility = MainActivity.dt.getTraitVisibility();
+            HashMap visibility = MainActivity.dt.getTraitVisibility();
 
-        if (!traitList.isShown())
-            traitList.setVisibility(ListView.VISIBLE);
+            if (!traitList.isShown())
+                traitList.setVisibility(ListView.VISIBLE);
 
-        mAdapter = new TraitAdapter(thisActivity, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
+            mAdapter = new TraitAdapter(thisActivity, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
 
-        traitList.setAdapter(mAdapter);
-        }
-        catch (Exception e)
-        {
+            traitList.setAdapter(mAdapter);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -784,37 +782,25 @@ public class TraitEditorActivity extends Activity {
         prepareFields(0);
     }
 
-    public static void showImportDialog() {
+    public void showImportDialog() {
         loadFileList(TRT);
+        Intent intent = new Intent();
 
-        importDialog = new Dialog(thisActivity, android.R.style.Theme_Holo_Light_Dialog);
+        intent.setClassName(thisActivity,
+                FileExploreActivity.class.getName());
+        intent.putExtra("path", Constants.TRAITPATH);
+        startActivityForResult(intent, 1);
+    }
 
-        importDialog.setTitle(thisActivity.getString(R.string.importdb));
-        importDialog.setContentView(R.layout.genericdialog);
-        importDialog.setCancelable(true);
-        importDialog.setCanceledOnTouchOutside(true);
-
-        ListView csvList = (ListView) importDialog.findViewById(R.id.myList);
-        Button csvButton = (Button) importDialog.findViewById(R.id.closeBtn);
-
-        csvButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                importDialog.dismiss();
-            }
-        });
-
-        csvList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                mChosenFile = mFileList[which];
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                mChosenFile = data.getStringExtra("result");
                 mHandler.post(importCSV);
-                importDialog.dismiss();
             }
-        });
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(thisActivity, R.layout.listitem, mFileList);
-        csvList.setAdapter(itemsAdapter);
-        importDialog.show();
+            if (resultCode == RESULT_CANCELED) {
+            }
+        }
     }
 
     public static void hideImportDialog() {
@@ -895,8 +881,7 @@ public class TraitEditorActivity extends Activity {
                 String[] data;
                 String[] columns;
 
-                FileReader fr = new FileReader(Constants.TRAITPATH + "/"
-                        + mChosenFile);
+                FileReader fr = new FileReader(mChosenFile);
 
                 CSVReader cr = new CSVReader(fr);
 
@@ -951,8 +936,7 @@ public class TraitEditorActivity extends Activity {
                 MainActivity.dt.close();
                 MainActivity.dt.open();
 
-                File newDir = new File(Constants.TRAITPATH + "/"
-                        + mChosenFile);
+                File newDir = new File(mChosenFile);
 
                 newDir.mkdirs();
 

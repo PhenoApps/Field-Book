@@ -191,7 +191,6 @@ public class ConfigActivity extends Activity {
         config2.locale = locale2;
         getBaseContext().getResources().updateConfiguration(config2,
                 getBaseContext().getResources().getDisplayMetrics());
-
         invalidateOptionsMenu();
         loadScreen();
     }
@@ -214,6 +213,15 @@ public class ConfigActivity extends Activity {
         getBaseContext().getResources().updateConfiguration(config2,
                 getBaseContext().getResources().getDisplayMetrics());
 
+        importFieldMapDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        importFieldMapDialog.setContentView(R.layout.importchoose);
+        importFieldMapDialog.setTitle(getString(R.string.importfields));
+        importFieldMapDialog.setCancelable(true);
+        importFieldMapDialog.setCanceledOnTouchOutside(true);
+
+        importMain = (LinearLayout) importFieldMapDialog.findViewById(R.id.main);
+
+
         invalidateOptionsMenu();
         loadScreen();
 
@@ -230,13 +238,7 @@ public class ConfigActivity extends Activity {
         setContentView(mFrame);
 
         // Import Field book
-        importFieldMapDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
-        importFieldMapDialog.setContentView(R.layout.importchoose);
-        importFieldMapDialog.setTitle(getString(R.string.importfields));
-        importFieldMapDialog.setCancelable(true);
-        importFieldMapDialog.setCanceledOnTouchOutside(true);
 
-        importMain = (LinearLayout) importFieldMapDialog.findViewById(R.id.main);
 
         Button startImport = (Button) importFieldMapDialog.findViewById(R.id.okBtn);
 
@@ -387,61 +389,6 @@ public class ConfigActivity extends Activity {
                     }
                 });
 
-        // Dialog for choosing which traits to rate
-        rateDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
-        rateDialog.setTitle(getString(R.string.choosetraits));
-        rateDialog.setContentView(R.layout.genericdialog);
-
-        android.view.WindowManager.LayoutParams params5 = rateDialog.getWindow().getAttributes();
-        params5.width = LayoutParams.FILL_PARENT;
-        rateDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params5);
-
-        rateDialog.setCancelable(true);
-        rateDialog.setCanceledOnTouchOutside(true);
-
-        // This is the list displayed on the choose traits screen
-        rateList = (ListView) rateDialog.findViewById(R.id.myList);
-
-        // Allow multiple selection
-        rateList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        rateList.setItemsCanFocus(false);
-
-        // When you save your changes for choosing traits, this function is
-        // called
-        Button rateButton = (Button) rateDialog.findViewById(R.id.closeBtn);
-
-        rateButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-                try {
-                    // Go through every item in list, and reset the trait
-                    // visibility accordingly
-                    int count = rateList.getAdapter().getCount();
-
-                    for (int i = 0; i < count; i++) {
-
-                        String currentItem = (String) rateList.getAdapter()
-                                .getItem(i);
-
-                        if (rateList.isItemChecked(i)) {
-                            MainActivity.dt.updateTraitVisibility(currentItem,
-                                    true);
-                        } else {
-                            MainActivity.dt.updateTraitVisibility(currentItem,
-                                    false);
-                        }
-                    }
-                } catch (Exception e) {
-
-                }
-
-                MainActivity.reloadData = true;
-
-                updateSetupList();
-
-                rateDialog.dismiss();
-            }
-        });
 
         // Export Field book
         saveDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
@@ -751,6 +698,7 @@ public class ConfigActivity extends Activity {
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
+                Intent intent = new Intent();
                 switch (position) {
                     case 0:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
@@ -762,7 +710,10 @@ public class ConfigActivity extends Activity {
                         break;
 
                     case 1:
-                        createDialog(DIALOG_LOAD_FIELDFILECSV);
+                        intent.setClassName(ConfigActivity.this,
+                                FileExploreActivity.class.getName());
+                        intent.putExtra("path", Constants.FIELDIMPORTPATH);
+                        startActivityForResult(intent, 1);
                         break;
 
                     case 2:
@@ -772,7 +723,6 @@ public class ConfigActivity extends Activity {
                             return;
                         }
 
-                        Intent intent = new Intent();
                         intent.setClassName(ConfigActivity.this,
                                 TraitEditorActivity.class.getName());
                         startActivity(intent);
@@ -814,6 +764,17 @@ public class ConfigActivity extends Activity {
             ed.putBoolean("TipsConfigured", true);
             ed.commit();
             showTipsDialog();
+        }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                mChosenFile = data.getStringExtra("result");
+                showFieldFileDialog();
+            }
+            if (resultCode == RESULT_CANCELED) {
+            }
         }
     }
 
@@ -1167,56 +1128,6 @@ public class ConfigActivity extends Activity {
         }
     }
 
-    /**
-     * Creates a list of all files in directory by type
-     */
-    private void loadFileList(final String directory) {
-
-        File importPath = new File(directory);
-
-        if (importPath.exists()) {
-            File[] files = importPath.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String filename) {
-                    File sel = new File(dir, filename);
-                    return filename.contains(CSV) || filename.contains(XLS) || sel.isDirectory();
-                }
-            });
-
-            Arrays.sort(files, comp);
-
-            String[] sortedFileList = new String[files.length];
-            for (int i = 0; i < files.length; ++i) {
-
-                if (files[i].isDirectory()) {
-                    sortedFileList[i] = "/" + files[i].getName() + "/";
-                } else {
-                    sortedFileList[i] = files[i].getName();
-                }
-            }
-            mFileList = sortedFileList;
-        } else {
-            mFileList = new String[0];
-        }
-    }
-
-    Comparator comp = new Comparator() {
-        public int compare(Object o1, Object o2) {
-            File f1 = (File) o1;
-            File f2 = (File) o2;
-            if (f1.isDirectory() && !f2.isDirectory()) {
-                // Directory before non-directory
-                return -1;
-            } else if (!f1.isDirectory() && f2.isDirectory()) {
-                // Non-directory after directory
-                return 1;
-            } else {
-                // Alphabetic order otherwise
-                return f1.toString().compareToIgnoreCase(f2.toString());
-            }
-        }
-    };
-
-
     // Because the import dialog layout is created dynamically, this function
     // loops through child views and checks spinner values for duplicate values
     private int findColValue(LinearLayout parent, int value, boolean allowDuplicate) {
@@ -1342,17 +1253,10 @@ public class ConfigActivity extends Activity {
         columnFail = false;
 
         switch (id) {
-            case DIALOG_LOAD_FIELDFILECSV:
-            case DIALOG_LOAD_TRAITFILE:
-                loadFileList(Constants.FIELDIMPORTPATH);
-                break;
-        }
-
-        switch (id) {
 
             case DIALOG_LOAD_FIELDFILECSV:
                 isCSV = true;
-                showFieldFileCSVDialog();
+                showFieldFileDialog();
                 break;
 
             case DIALOG_LOAD_FIELDFILEEXCEL:
@@ -1652,35 +1556,6 @@ public class ConfigActivity extends Activity {
         setupDialog.show();
     }
 
-/*    private void showRateDialog() {
-        // Gets all traits from database
-
-        if (MainActivity.dt.getAllTraits() == null)
-            return;
-
-        String[] traits = MainActivity.dt.getAllTraits();
-        HashMap visibility = MainActivity.dt.getTraitVisibility();
-
-        // Check or uncheck the list items based on existing visibility
-        if (traits != null) {
-            ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_checked, traits);
-            rateList.setAdapter(itemsAdapter);
-
-            int count = rateList.getAdapter().getCount();
-
-            for (int i = 0; i < count; i++) {
-                String currentItem = (String) rateList.getAdapter()
-                        .getItem(i);
-
-                if (visibility.get(currentItem).equals("true")) {
-                    rateList.setItemChecked(i, true);
-                }
-            }
-        }
-
-        rateDialog.show();
-    }
-*/
     private void showPersonDialog() {
         if (ep.getString("FirstName", "").length() > 0
                 || ep.getString("LastName", "").length() > 0)
@@ -1867,64 +1742,21 @@ public class ConfigActivity extends Activity {
         dialog.show();
     }
 
-    private void showFieldFileCSVDialog() {
-        final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+    private void showFieldFileDialog() {
+        Editor e = ep.edit();
+        e.putString("FieldFile", mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.length()));
+        e.commit();
+        columnFail = false;
 
-        dialog.setCancelable(false);
-        dialog.setCanceledOnTouchOutside(false);
+        if (mChosenFile.toLowerCase().contains("xls")) {
+            isCSV = false;
+            loadXLSFile();
+        }
 
-        dialog.setTitle(getString(R.string.choosefieldfile) + ": " + mUserChoice);
-        dialog.setContentView(R.layout.genericdialog);
-
-        ListView csvList = (ListView) dialog.findViewById(R.id.myList);
-        Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
-
-        csvButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                dialog.dismiss();
-                importDirectory = "";
-            }
-        });
-
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            public void onDismiss(DialogInterface dialog) {
-                mUserChoice = "";
-            }
-        });
-
-        csvList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                dialog.dismiss();
-
-                mUserChoice = mFileList[which];
-                mChosenFile = mUserChoice;
-
-                if (mUserChoice.contains("/")) {
-                    loadFileList(Constants.FIELDIMPORTPATH + importDirectory + "/" + mUserChoice);
-                    importDirectory = importDirectory + "/" + mUserChoice;
-                    showFieldFileCSVDialog();
-                    return;
-                }
-
-                Editor e = ep.edit();
-                e.putString("FieldFile", mChosenFile);
-                e.commit();
-
-                if (mChosenFile.toLowerCase().contains("xls")) {
-                    isCSV = false;
-                    loadXLSFile();
-                }
-
-                if (mChosenFile.toLowerCase().contains("csv")) {
-                    isCSV = true;
-                    loadCSVFile();
-                }
-            }
-        });
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, mFileList);
-        csvList.setAdapter(itemsAdapter);
-        dialog.show();
+        if (mChosenFile.toLowerCase().contains("csv")) {
+            isCSV = true;
+            loadCSVFile();
+        }
     }
 
     private void loadCSVFile() {
@@ -1933,15 +1765,14 @@ public class ConfigActivity extends Activity {
         try {
             importMain.removeAllViews();
 
-            FileReader fr = new FileReader(Constants.FIELDIMPORTPATH + "/" + importDirectory + "/"
-                    + mChosenFile);
+            FileReader fr = new FileReader(mChosenFile);
             CSVReader cr = new CSVReader(fr);
 
             importColumns = cr.readNext();
 
             String[] reservedNames = new String[]{"abort", "action", "add", "after", "all", "alter",
                     "analyze", "and", "as", "asc", "attach", "autoincrement", "before", "begin",
-                    "between", "by", "cascade", "case", "cast", "check", "collate", "column", "commit",
+                    "between", "by", "cascade", "case", "cast", "check", "collate", "commit",
                     "conflict", "constraint", "create", "cross", "current_date", "current_time",
                     "current_timestamp", "database", "default", "deferrable", "deferred", "delete",
                     "desc", "detach", "distinct", "drop", "each", "else", "end", "escape", "except",
@@ -1951,20 +1782,22 @@ public class ConfigActivity extends Activity {
                     "left", "like", "limit", "match", "natural", "no", "not", "notnull", "null", "of",
                     "offset", "on", "or", "order", "outer", "plan", "pragma", "primary", "query", "raise",
                     "recursive", "references", "regexp", "reindex", "release", "rename", "replace",
-                    "restrict", "right", "rollback", "row", "savepoint", "select", "set", "table",
-                    "temp", "temporary", "then", "to", "transaction", "trigger", "union", "unique", "update",
-                    "using", "vacuum", "values", "view", "virtual", "when", "where", "with", "without"};
+                    "restrict", "right", "rollback", "savepoint", "select", "set", "table", "then", "to",
+                    "transaction", "trigger", "union", "update", "using", "vacuum", "virtual", "when",
+                    "where", "with", "without"};
 
             List<String> list = Arrays.asList(reservedNames);
 
             for (String s : importColumns) {
                 if (DataHelper.hasSpecialChars(s)) {
                     columnFail = true;
+                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
                     break;
 
                 }
                 if (list.contains(s.toLowerCase())) {
                     columnFail = true;
+                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
                     break;
 
                 } else {
@@ -1978,9 +1811,8 @@ public class ConfigActivity extends Activity {
         mUserChoice = "";
         importDirectory = "";
 
-        if (columnFail)
-            Toast.makeText(ConfigActivity.this, getString(R.string.columnfail), Toast.LENGTH_LONG).show();
-        else
+        if (!columnFail)
+
             importFieldMapDialog.show();
     }
 
@@ -1993,8 +1825,7 @@ public class ConfigActivity extends Activity {
         try {
             importMain.removeAllViews();
 
-            wb = Workbook.getWorkbook(new File(Constants.FIELDIMPORTPATH + "/"
-                    + mChosenFile), wbSettings);
+            wb = Workbook.getWorkbook(new File(mChosenFile), wbSettings);
 
             importColumns = new String[wb.getSheet(0).getColumns()];
 
@@ -2004,7 +1835,7 @@ public class ConfigActivity extends Activity {
 
             String[] reservedNames = new String[]{"abort", "action", "add", "after", "all", "alter",
                     "analyze", "and", "as", "asc", "attach", "autoincrement", "before", "begin",
-                    "between", "by", "cascade", "case", "cast", "check", "collate", "column", "commit",
+                    "between", "by", "cascade", "case", "cast", "check", "collate", "commit",
                     "conflict", "constraint", "create", "cross", "current_date", "current_time",
                     "current_timestamp", "database", "default", "deferrable", "deferred", "delete",
                     "desc", "detach", "distinct", "drop", "each", "else", "end", "escape", "except",
@@ -2014,19 +1845,21 @@ public class ConfigActivity extends Activity {
                     "left", "like", "limit", "match", "natural", "no", "not", "notnull", "null", "of",
                     "offset", "on", "or", "order", "outer", "plan", "pragma", "primary", "query", "raise",
                     "recursive", "references", "regexp", "reindex", "release", "rename", "replace",
-                    "restrict", "right", "rollback", "row", "savepoint", "select", "set", "table",
-                    "temp", "temporary", "then", "to", "transaction", "trigger", "union", "unique", "update",
-                    "using", "vacuum", "values", "view", "virtual", "when", "where", "with", "without"};
+                    "restrict", "right", "rollback", "savepoint", "select", "set", "table", "then", "to",
+                    "transaction", "trigger", "union", "update", "using", "vacuum", "virtual", "when",
+                    "where", "with", "without"};
 
             List<String> list = Arrays.asList(reservedNames);
 
             for (String s : importColumns) {
                 if (DataHelper.hasSpecialChars(s)) {
                     columnFail = true;
+                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
                     break;
                 }
                 if (list.contains(s.toLowerCase())) {
                     columnFail = true;
+                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
                     break;
                 } else {
                     addRow(importMain, s);
@@ -2036,10 +1869,7 @@ public class ConfigActivity extends Activity {
 
         }
 
-        if (columnFail)
-            Toast.makeText(ConfigActivity.this, getString(R.string.columnfail),
-                    Toast.LENGTH_LONG).show();
-        else
+        if (!columnFail)
             importFieldMapDialog.show();
     }
 
@@ -2153,14 +1983,13 @@ public class ConfigActivity extends Activity {
                 String[] columns;
 
                 //verify unique
-                if (!verifyUniqueColumnCSV(Constants.FIELDIMPORTPATH + "/" + mChosenFile)) {
+                if (!verifyUniqueColumnCSV(mChosenFile)) {
                     uniqueFail = true;
 
                     return 0;
                 }
 
-                FileReader fr = new FileReader(Constants.FIELDIMPORTPATH + "/"
-                        + mChosenFile);
+                FileReader fr = new FileReader(mChosenFile);
 
                 CSVReader cr = new CSVReader(fr);
 
@@ -2236,8 +2065,7 @@ public class ConfigActivity extends Activity {
                 MainActivity.dt.close();
                 MainActivity.dt.open();
 
-                File newDir = new File(Constants.FIELDIMPORTPATH + "/"
-                        + mChosenFile);
+                File newDir = new File(mChosenFile);
 
                 newDir.mkdirs();
 
@@ -2434,8 +2262,7 @@ public class ConfigActivity extends Activity {
                 MainActivity.dt.close();
                 MainActivity.dt.open();
 
-                File newDir = new File(Constants.FIELDIMPORTPATH + "/"
-                        + mChosenFile);
+                File newDir = new File(mChosenFile);
 
                 newDir.mkdirs();
 

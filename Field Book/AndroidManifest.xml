@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fieldbook.tracker"
-    android:versionCode="214"
-    android:versionName="2.1.4" >
+    android:versionCode="220"
+    android:versionName="2.2" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -59,7 +59,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Custom" />
+            android:theme="@style/Theme.Dialog" />
         <activity
             android:name=".Trait.TraitEditorActivity"
             android:alwaysRetainTaskState="false"

@@ -29,8 +29,7 @@ public class SearchAdapter extends BaseAdapter {
     public SearchData getItem(int position) {
         if (position >= 0 && position < data.length) {
             return data[position];
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -46,15 +45,14 @@ public class SearchAdapter extends BaseAdapter {
 
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
-        
+
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = mLayoutInflater.inflate(R.layout.twocolumn, null);
             holder.range = (TextView) convertView.findViewById(R.id.range);
             holder.plot = (TextView) convertView.findViewById(R.id.plot);
             convertView.setTag(holder);
-        }
-        else {
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
