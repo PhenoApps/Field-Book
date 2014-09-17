@@ -3870,6 +3870,9 @@ public class MainActivity extends Activity implements OnClickListener {
             case R.id.jumpToPlot:
                 moveToPlotID();
                 break;
+            case R.id.summary:
+                showSummary();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -4222,46 +4225,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
             public void onClick(View arg0) {
 
-                final Dialog summaryDialog = new Dialog(MainActivity.this, android.R.style.Theme_Holo_Light_Dialog);
-                summaryDialog.setTitle(getString(R.string.mapsummary));
-                summaryDialog.setContentView(R.layout.summary);
-
-                android.view.WindowManager.LayoutParams params2 = summaryDialog.getWindow().getAttributes();
-                params2.width = LayoutParams.FILL_PARENT;
-                summaryDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params2);
-
-                summaryDialog.setCancelable(true);
-                summaryDialog.setCanceledOnTouchOutside(true);
-
-                Button closeBtn = (Button) summaryDialog.findViewById(R.id.closeBtn);
-
-                TextView summaryText = (TextView) summaryDialog.findViewById(R.id.text1);
-
-                closeBtn.setOnClickListener(new OnClickListener() {
-
-                    public void onClick(View v) {
-                        summaryDialog.dismiss();
-                    }
-                });
-
-                String[] traitList = dt.getAllTraits();
-
-                String data = "";
-
-                if (cRange != null) {
-                    data = getString(R.string.range) + ": " + cRange.range + "\n";
-                    data += getString(R.string.plot) + ": " + cRange.plot + "\n";
-                }
-
-                for (String s : traitList) {
-                    if (newTraits.containsKey(s)) {
-                        data += s + ": " + newTraits.get(s).toString() + "\n";
-                    }
-                }
-
-                summaryText.setText(data);
-
-                summaryDialog.show();
+                showSummary();
             }
         });
 
@@ -4624,6 +4588,49 @@ public class MainActivity extends Activity implements OnClickListener {
             mapDialog.show();
         }
 
+    }
+
+    private void showSummary() {
+        final Dialog summaryDialog = new Dialog(MainActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+        summaryDialog.setTitle(getString(R.string.mapsummary));
+        summaryDialog.setContentView(R.layout.summary);
+
+        android.view.WindowManager.LayoutParams params2 = summaryDialog.getWindow().getAttributes();
+        params2.width = LayoutParams.FILL_PARENT;
+        summaryDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params2);
+
+        summaryDialog.setCancelable(true);
+        summaryDialog.setCanceledOnTouchOutside(true);
+
+        Button closeBtn = (Button) summaryDialog.findViewById(R.id.closeBtn);
+
+        TextView summaryText = (TextView) summaryDialog.findViewById(R.id.text1);
+
+        closeBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                summaryDialog.dismiss();
+            }
+        });
+
+        String[] traitList = dt.getAllTraits();
+
+        String data = "";
+
+        if (cRange != null) {
+            //TODO get all data for the plot and present it cleaner
+
+            data = getString(R.string.range) + ": " + cRange.range + "\n";
+            data += getString(R.string.plot) + ": " + cRange.plot + "\n";
+        }
+
+        for (String s : traitList) {
+            if (newTraits.containsKey(s)) {
+                data += s + ": " + newTraits.get(s).toString() + "\n";
+            }
+        }
+
+        summaryText.setText(data);
+        summaryDialog.show();
     }
 
     // This is used for exporting a grid square

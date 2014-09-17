@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-	<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-	    <item
-            android:id="@+id/help"
-            android:title="@string/help"
-            android:icon="@drawable/ic_action_help"
-            android:showAsAction="always" />
-	    <item
-            android:id="@+id/addTrait"
-            android:title="@string/addtrait"
-            android:icon="@drawable/ic_action_new"
-            android:showAsAction="always" />
-	    <item
-            android:id="@+id/deleteTrait"
-            android:title="@string/deletealltraits"
-            android:icon="@drawable/ic_action_discard"
-            android:showAsAction="always" />
-	    <item
-            android:id="@+id/importdb"
-            android:title="@string/importdb"
-            android:icon="@drawable/ic_action_download"
-            android:showAsAction="always" />
-	    <item
-            android:id="@+id/exportdb"
-            android:title="@string/export"
-            android:icon="@drawable/ic_action_upload"
-            android:showAsAction="always" />
-	</menu>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/help"
+        android:icon="@drawable/ic_action_help"
+        android:showAsAction="always"
+        android:title="@string/help" />
+    <item
+        android:id="@+id/addTrait"
+        android:icon="@drawable/ic_action_new"
+        android:showAsAction="always"
+        android:title="@string/addtrait" />
+    <item
+        android:id="@+id/sortTrait"
+        android:icon="@drawable/ic_action_sort_by_size"
+        android:showAsAction="always"
+        android:title="@string/sort" />
+    <item
+        android:id="@+id/deleteTrait"
+        android:icon="@drawable/ic_action_discard"
+        android:showAsAction="always"
+        android:title="@string/deletealltraits" />
+    <item
+        android:id="@+id/importexport"
+        android:icon="@drawable/ic_action_import_export"
+        android:showAsAction="always"
+        android:title="@string/export" />
+</menu>
 

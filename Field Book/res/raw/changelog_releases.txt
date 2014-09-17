@@ -1,0 +1,62 @@
+16/2.2.0
+New Advanced Settings option to make sound when primary organizer changes
+New Advanced Settings option to go to specific unique ID (for barcodes)
+New Advanced Settings option to go to next plot without data
+Visibility of traits is now changed in the Traits screen instead of Setup
+New file chooser added
+Support for XLS readded
+Clear categorical traits by reclicking the current choice
+Miscellaneous interface improvements
+Long press ActionBar icons to get labels
+Changelog can be accessed from the About dialog
+BUGFIX: Traits can now be made in other languages
+BUGFIX: App doesn't move to first plot when screen is turned off
+
+15/2.1.2
+Fixed issue with field folders
+Fixed issue with field file selection
+
+14/2.1.1
+Renamed "Qualitative" trait format "Categorical"
+Removed support for Android 3.0
+Removed ActionBarSherlock library
+
+13/2.1.0
+Added this changelog
+Changed tutorial setup
+Language dialog updated
+Exported files are shared to other installed apps
+App does not move to first plot when external hardware added
+Items are disabled if not available
+Replace text on ActionBar with appropriate icons
+Removed XLS support due to performance issues
+Added support for folders in the Fields dialog
+Added support for Amharic, Arabic, Brazilian Portuguese, Chinese, French, Hindi, Japanese, Oromo, and Russian
+Bugfix: minimum in numeric traits is enforced
+Bugfix: all text in text traits is deletable with the keyboard
+Bugfix: cursor now appears at end of text in text traits
+Bugfix: files are now visible via computer after export
+
+12/2.0.0
+Updated user interface
+Create traits from within the app
+Export and load trait lists
+Added an audio trait format
+Lots of bug fixes
+Added support for Spanish and German
+Map feature added to visualize and analyze plots (beta)
+
+5/1.6.0
+Added support for multiple instances of the same trait format
+
+4/1.5.0
+Added text input trait format
+Added table export option
+Lots of bug fixes
+
+2/1.1.0
+Added location recording and exporting via device GPS. Accessible via settings. Tablet GPS has a high resolution and should only be used for field location.
+“Quit” option now resets Person and Location fields.
+
+1/1.0.0
+Initial release

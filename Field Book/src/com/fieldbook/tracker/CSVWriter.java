@@ -1,6 +1,7 @@
 package com.fieldbook.tracker;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import com.fieldbook.tracker.Trait.TraitObject;
 
@@ -197,6 +198,8 @@ public class CSVWriter {
 
                 // Get matching values for every row in the Range table
                 for (int k = rangeTotal; k < labels.length; k++) {
+                    Log.e("FIELD BOOK", String.valueOf(m));
+
                     String d2 = MainActivity.dt.getSingleValue(curCSV.getString(pid), traits[m]);
 
                     TraitObject temp = MainActivity.dt.getDetail(traits[m]);

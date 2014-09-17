@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -37,6 +38,7 @@ import android.view.MenuItem;
 import com.fieldbook.tracker.CSVReader;
 import com.fieldbook.tracker.CSVWriter;
 import com.fieldbook.tracker.Constants;
+import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
@@ -47,7 +49,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -646,7 +652,7 @@ public class TraitEditorActivity extends Activity {
 
         switch (item.getItemId()) {
             case R.id.help:
-                // Open tips / hints
+                // Open tips
                 Intent intent = new Intent();
                 intent.setClassName(TraitEditorActivity.this,
                         TutorialTraitsActivity.class.getName());
@@ -654,23 +660,19 @@ public class TraitEditorActivity extends Activity {
                 break;
 
             case R.id.deleteTrait:
-                // Delete trait
                 showDeleteTraitDialog();
                 break;
 
             case R.id.addTrait:
-                // Add Trait
                 showCreateTraitDialog();
                 break;
 
-            case R.id.exportdb:
-                // Export Field book
-                showExportDialog();
+            case R.id.sortTrait:
+                sortDialog();
                 break;
 
-            case R.id.importdb:
-                // Import Field book
-                showImportDialog();
+            case R.id.importexport:
+                importExportDialog();
                 break;
 
             case android.R.id.home:
@@ -679,6 +681,149 @@ public class TraitEditorActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void importExportDialog() {
+        final Dialog importExport = new Dialog(TraitEditorActivity.this,
+                android.R.style.Theme_Holo_Light_Dialog);
+        importExport.setTitle(getString(R.string.importdb));
+        importExport.setContentView(R.layout.genericdialog);
+
+        android.view.WindowManager.LayoutParams params = importExport.getWindow().getAttributes();
+        params.width = LayoutParams.WRAP_CONTENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        importExport.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+
+        importExport.setCancelable(true);
+        importExport.setCanceledOnTouchOutside(true);
+
+        ListView myList = (ListView) importExport
+                .findViewById(R.id.myList);
+
+        String[] sortOptions = new String[2];
+
+        sortOptions[0] = getString(R.string.importdb);
+        sortOptions[1] = getString(R.string.export);
+
+        myList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                switch (which) {
+                    case 0:
+                        showImportDialog();
+                        break;
+                    case 1:
+                        showExportDialog();
+                        break;
+                }
+                importExport.dismiss();
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, sortOptions);
+        myList.setAdapter(adapter);
+        Button sortCloseBtn = (Button) importExport
+                .findViewById(R.id.closeBtn);
+
+        sortCloseBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                importExport.dismiss();
+            }
+        });
+        importExport.show();
+    }
+
+    private void sortDialog() {
+        final Dialog sortDialog = new Dialog(TraitEditorActivity.this,
+                android.R.style.Theme_Holo_Light_Dialog);
+        sortDialog.setTitle(getString(R.string.sort));
+        sortDialog.setContentView(R.layout.genericdialog);
+
+        android.view.WindowManager.LayoutParams params = sortDialog.getWindow().getAttributes();
+        params.width = LayoutParams.WRAP_CONTENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        sortDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+
+        sortDialog.setCancelable(true);
+        sortDialog.setCanceledOnTouchOutside(true);
+
+        ListView myList = (ListView) sortDialog
+                .findViewById(R.id.myList);
+
+        String[] sortOptions = new String[3];
+
+        sortOptions[0] = getString(R.string.traitname);
+        sortOptions[1] = getString(R.string.format);
+        sortOptions[2] = getString(R.string.visibility);
+
+        myList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                switch (which) {
+                    case 0:
+                        sortTraitList("trait");
+                        break;
+                    case 1:
+                        sortTraitList("format");
+                        break;
+                    case 2:
+                        sortTraitList("isVisible");
+                        break;
+                }
+                sortDialog.dismiss();
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, sortOptions);
+        myList.setAdapter(adapter);
+        Button sortCloseBtn = (Button) sortDialog
+                .findViewById(R.id.closeBtn);
+
+        sortCloseBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                sortDialog.dismiss();
+            }
+        });
+        sortDialog.show();
+    }
+
+    private void sortTraitList(String colName) {
+        String[] sortList = MainActivity.dt.getTraitColumnData(colName);
+
+        ArrayIndexComparator comparator = new ArrayIndexComparator(sortList);
+        Integer[] indexes = comparator.createIndexArray();
+        Arrays.sort(indexes, comparator);
+
+        if (colName.equals("isVisible")) {
+            Arrays.sort(indexes, Collections.reverseOrder());
+        }
+
+        for (int j = 0; j < indexes.length; j++) {
+            MainActivity.dt.writeNewPosition(colName, sortList[j], Integer.toString(indexes[j]));
+            Log.e("TRAIT", sortList[j] + " " + indexes[j].toString());
+        }
+
+        loadData();
+    }
+
+    public class ArrayIndexComparator implements Comparator<Integer> {
+        private final String[] array;
+
+        public ArrayIndexComparator(String[] array) {
+            this.array = array;
+        }
+
+        public Integer[] createIndexArray() {
+            Arrays.sort(array);
+            Integer[] indexes = new Integer[array.length];
+            for (int i = 0; i < array.length; i++) {
+                indexes[i] = i;
+            }
+            return indexes;
+        }
+
+        @Override
+        public int compare(Integer index1, Integer index2) {
+            return array[index1].compareTo(array[index2]);
+        }
     }
 
     private void showExportDialog() {
@@ -736,14 +881,11 @@ public class TraitEditorActivity extends Activity {
         builder.setMessage(getString(R.string.areyousure));
 
         builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
                 ed.remove("MAPCONFIGURED");
                 ed.commit();
-
                 dialog.dismiss();
-
                 MainActivity.dt.deleteTable(MainActivity.dt.TRAITS);
                 loadData();
             }

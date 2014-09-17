@@ -8,6 +8,7 @@
     <string name="language">Language</string>
     <string name="quit">Quit</string>
     <string name="traitdetails">Trait details</string>
+    <string name="traitname">Trait name</string>
     <string name="area">Area</string>
     <string name="range">Range</string>
     <string name="plot">Plot</string>
@@ -220,6 +221,7 @@
     <string name="fieldsummary">Field summary</string>
     <string name="options">Options</string>
     <string name="walkingorder">Sort entries by:</string>
+    <string name="sort">Sort</string>
     <string name="load">Load</string>
     <string name="delete">Delete</string>
     <string name="dateimported">Date imported</string>
@@ -238,6 +240,7 @@
     <string name="languagesettings">Language</string>
     <string name="fieldexists">This field name already exists. Please choose a different name.</string>
     <string name="cancel">Cancel</string>
+    <string name="visibility">Visibility</string>
     <string name="rangechime">Notification sound when primary order changes</string>
     <string name="explainsend">Selecting a device will begin the data transfer process.</string>
     <string name="autodetectDevices">Discovering devices...</string>

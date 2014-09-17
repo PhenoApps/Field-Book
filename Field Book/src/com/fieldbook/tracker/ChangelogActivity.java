@@ -1,14 +1,11 @@
 package com.fieldbook.tracker;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -81,7 +78,7 @@ public class ChangelogActivity extends Activity {
             }
         });
 
-        parseLog(R.raw.changelog);
+        parseLog(R.raw.changelog_releases);
     }
 
     public int getVersion() {

@@ -63,6 +63,7 @@ public class TraitAdapter extends BaseAdapter {
         ImageView down;
         Button copy;
         Button del;
+        Button edt;
         String id;
         String realPosition;
     }
@@ -80,6 +81,7 @@ public class TraitAdapter extends BaseAdapter {
             holder.down = (ImageView) convertView.findViewById(R.id.downBtn);
             holder.copy = (Button) convertView.findViewById(R.id.copyBtn);
             holder.del = (Button) convertView.findViewById(R.id.delBtn);
+            holder.edt = (Button) convertView.findViewById(R.id.edtBtn);
 
             convertView.setTag(holder);
         } else {
@@ -87,12 +89,7 @@ public class TraitAdapter extends BaseAdapter {
         }
 
         convertView.setOnClickListener(new OnClickListener() {
-
             public void onClick(View v) {
-                // bubble up touch events
-                // This is necessary for controls such as the listview or spinner to work
-                // with the tips / hints when it is visible
-                listener.onItemClick((AdapterView) parent, v, position, v.getId());
             }
         });
 
@@ -130,7 +127,6 @@ public class TraitAdapter extends BaseAdapter {
         });
 
         holder.del.setOnClickListener(new OnClickListener() {
-
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
@@ -163,7 +159,6 @@ public class TraitAdapter extends BaseAdapter {
         });
 
         holder.up.setOnClickListener(new OnClickListener() {
-
             public void onClick(View v) {
                 if (position > 0) {
                     String prevID = getItem(position - 1).id;
@@ -176,12 +171,10 @@ public class TraitAdapter extends BaseAdapter {
                     MainActivity.dt.updateTraitPosition(currentID, prevPosition);
                     TraitEditorActivity.loadData();
                 }
-
             }
         });
 
         holder.down.setOnClickListener(new OnClickListener() {
-
             public void onClick(View v) {
                 if (position < getCount() - 1) {
                     String nextID = getItem(position + 1).id;
@@ -198,7 +191,6 @@ public class TraitAdapter extends BaseAdapter {
         });
 
         holder.copy.setOnClickListener(new OnClickListener() {
-
             public void onClick(View v) {
                 int pos = MainActivity.dt.getMaxPositionFromTraits() + 1;
 
@@ -207,6 +199,12 @@ public class TraitAdapter extends BaseAdapter {
 
                 MainActivity.dt.insertTraits(getItem(position).trait + postfix, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
                 TraitEditorActivity.loadData();
+            }
+        });
+
+        holder.edt.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                listener.onItemClick((AdapterView) parent, v, position, v.getId());
             }
         });
 

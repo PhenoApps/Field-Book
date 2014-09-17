@@ -31,6 +31,11 @@
         android:showAsAction="always"
         android:title="@string/resources" />"
     <item
+        android:id="@+id/summary"
+        android:icon="@drawable/ic_action_icon_summary"
+        android:showAsAction="always"
+        android:title="@string/mapsummary" />"
+    <item
         android:id="@+id/settings"
         android:icon="@drawable/ic_action_settings"
         android:showAsAction="always"

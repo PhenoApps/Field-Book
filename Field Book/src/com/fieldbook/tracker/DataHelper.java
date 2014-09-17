@@ -137,7 +137,6 @@ public class DataHelper {
         }
     }
 
-
     /**
      * Helper function to change visibility of a trait. Used in the ratings
      * screen
@@ -420,6 +419,44 @@ public class DataHelper {
         }
 
         return data;
+    }
+
+    /**
+     * Get data from specific column of trait table to reorder
+     */
+    public String[] getTraitColumnData(String column) {
+        String[] data = null;
+
+        Cursor cursor = this.db.query(TRAITS, new String[]{column},
+                null, null, null, null, null);
+
+        int count = 0;
+
+        if (cursor.moveToFirst()) {
+            data = new String[cursor.getCount()];
+
+            do {
+                data[count] = cursor.getString(0);
+
+                count += 1;
+
+            } while (cursor.moveToNext());
+        }
+
+        if (cursor != null && !cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return data;
+    }
+
+    /**
+     * Write new realPosition
+     */
+    public void writeNewPosition(String column, String id, String position) {
+        ContentValues cv = new ContentValues();
+        cv.put("realPosition", position);
+        this.db.update(TRAITS, cv, column + "= ?", new String[] {id});
     }
 
     /**
