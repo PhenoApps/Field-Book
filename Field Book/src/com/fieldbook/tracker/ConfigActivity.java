@@ -17,6 +17,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaScannerConnection;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -50,10 +52,16 @@ import android.widget.Toast;
 import com.fieldbook.tracker.Trait.TraitEditorActivity;
 import com.fieldbook.tracker.Tutorial.TutorialSettingsActivity;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,6 +125,9 @@ public class ConfigActivity extends Activity {
     private ListView setupList;
 
     private Location fieldLocation;
+
+    private String currentServerVersion;
+    String versionName;
 
     private double lat;
     private double lng;
@@ -863,7 +874,7 @@ public class ConfigActivity extends Activity {
     }
 
     private void showAboutDialog() {
-        String versionName;
+
         final PackageManager packageManager = this.getPackageManager();
 
         try {
@@ -908,7 +919,13 @@ public class ConfigActivity extends Activity {
             }
         });
 
+        checkNewVersion();
+
         aboutDialog.show();
+    }
+
+    private void checkNewVersion() {
+        new Version().execute();
     }
 
     // Validate that columns are unique
@@ -1719,9 +1736,9 @@ public class ConfigActivity extends Activity {
         e.putString("FieldFile", mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.lastIndexOf(".")));
         e.commit();
 
-        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile",""));
-        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile","")+"/audio");
-        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile","")+"/photo");
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", ""));
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/audio");
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photo");
 
         columnFail = false;
 
@@ -2475,4 +2492,41 @@ public class ConfigActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    private class Version extends AsyncTask<Void, Void, Void> {
+        String title = "";
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            ConnectivityManager connectivityManager
+                    = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+
+            if(activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+                try {
+                    Document doc = Jsoup
+                            .connect("http://play.google.com/store/apps/details?id=com.fieldbook.tracker"
+                            )
+                            .get();
+                    Elements spans = doc.select("div[itemprop=softwareVersion]");
+                    title = spans.first().ownText();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            currentServerVersion = title;
+            if(currentServerVersion!=""&&!currentServerVersion.equals(versionName)) {
+                makeToast("You do not have the most recent version of Field Book!");
+            }
+        }
+    }
 }
