@@ -3,6 +3,7 @@ Added edit button to trait items
 Reorder traits by name, format, or visibility
 Combined import/export icons in Traits screen
 Added summary button to main collection screen (in progress)
+Audio stored in plot_data/<field_name>/audio/
 
 19/2.2.0
 New file chooser added

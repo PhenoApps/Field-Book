@@ -18,6 +18,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -1280,7 +1281,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private void createDirs() {
         createDir(mPath.getAbsolutePath());
         createDir(Constants.RESOURCEPATH);
-        createDir(Constants.AUDIOPATH);
+        createDir(Constants.PLOTDATAPATH);
         createDir(Constants.TRAITPATH);
         createDir(Constants.FIELDIMPORTPATH);
         createDir(Constants.FIELDEXPORTPATH);
@@ -2495,14 +2496,13 @@ public class MainActivity extends Activity implements OnClickListener {
 
     // For audio trait type
     private void setRecordingLocation(String recordingName) {
-        mRecordingLocation = new File(Constants.AUDIOPATH,
+        mRecordingLocation = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/audio/",
                 recordingName + ".mp4");
     }
 
     // Make sure we're not recording music playing in the background; ask the 
     // MediaPlaybackService to pause playback
     private void stopAudioPlayback() {
-
         Intent i = new Intent("com.android.music.musicservicecommand");
         i.putExtra("command", "pause");
 
@@ -3964,6 +3964,8 @@ public class MainActivity extends Activity implements OnClickListener {
                     // Stop recording
                     try {
                         mRecorder.stop();
+                        File storedAudio = new File(mRecordingLocation.getAbsolutePath());
+                        scanFile(storedAudio);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -4769,5 +4771,9 @@ public class MainActivity extends Activity implements OnClickListener {
             if (resultCode == RESULT_CANCELED) {
             }
         }
+    }
+
+    private void scanFile(File filePath) {
+        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
     }
 }

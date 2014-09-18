@@ -116,9 +116,7 @@ public class ConfigActivity extends Activity {
     private ListView saveList;
     private ListView setupList;
 
-    private TextView currentPerson;
-    private TextView currentLocation;
-    private Location location;
+    private Location fieldLocation;
 
     private double lat;
     private double lng;
@@ -505,9 +503,6 @@ public class ConfigActivity extends Activity {
         personDialog.setCancelable(true);
         personDialog.setCanceledOnTouchOutside(true);
 
-        currentPerson = (TextView) personDialog
-                .findViewById(R.id.currentPerson);
-
         final EditText firstName = (EditText) personDialog
                 .findViewById(R.id.firstName);
         final EditText lastName = (EditText) personDialog
@@ -629,62 +624,64 @@ public class ConfigActivity extends Activity {
         locationDialog.setCancelable(true);
         locationDialog.setCanceledOnTouchOutside(true);
 
-        currentLocation = (TextView) locationDialog
-                .findViewById(R.id.currentLocation);
-
         Button findLocation = (Button) locationDialog
                 .findViewById(R.id.getLctnBtn);
         Button yesLocation = (Button) locationDialog.findViewById(R.id.saveBtn);
 
-        final TextView longitude = (TextView) locationDialog
+        final EditText longitude = (EditText) locationDialog
                 .findViewById(R.id.longitude);
-        final TextView latitude = (TextView) locationDialog
+        final EditText latitude = (EditText) locationDialog
                 .findViewById(R.id.latitude);
 
-        yesLocation.setOnClickListener(new OnClickListener() {
+        final LocationListener locationListener = new LocationListener() {
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
 
+            @Override
+            public void onProviderEnabled(String provider) {
+                Toast.makeText(ConfigActivity.this,
+                        "Provider enabled: " + provider, Toast.LENGTH_SHORT)
+                        .show();
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                Toast.makeText(ConfigActivity.this,
+                        "Provider disabled: " + provider, Toast.LENGTH_SHORT)
+                        .show();
+            }
+
+            @Override
+            public void onLocationChanged(Location location) {
+                fieldLocation = location;
+            }
+        };
+
+        findLocation.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                LocationManager locationManager = (LocationManager) thisActivity.getSystemService(Context.LOCATION_SERVICE);
+                fieldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                lat = fieldLocation.getLatitude();
+                lng = fieldLocation.getLongitude();
+
+                latitude.setText(truncateDecimalString(String.valueOf(lat)));
+                longitude.setText(truncateDecimalString(String.valueOf(lng)));
+                locationManager.removeUpdates(locationListener);
+            }
+        });
+
+        yesLocation.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 Editor e = ep.edit();
-
-                e.putString("Latitude", latitude.getText().toString());
-                e.putString("Longitude", longitude.getText().toString());
-
+                e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
                 e.commit();
-
                 updateSetupList();
-
                 locationDialog.dismiss();
             }
         });
 
-        final LocationListener locationListener = new LocationListener() {
-            public void onLocationChanged(Location location) {
-                lat = location.getLatitude();
-                lng = location.getLongitude();
-            }
-
-            public void onProviderDisabled(String provider) {
-            }
-
-            public void onProviderEnabled(String provider) {
-            }
-
-            public void onStatusChanged(String provider, int status,
-                                        Bundle extras) {
-            }
-        };
-
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 100,
-                locationListener);
-
-        findLocation.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-
-                latitude.setText(truncateDecimalString(String.valueOf(lat)));
-                longitude.setText(truncateDecimalString(String.valueOf(lng)));
-            }
-        });
 
         // This is the list of items shown on the settings screen itself
         settingsList = (ListView) findViewById(R.id.myList);
@@ -993,8 +990,7 @@ public class ConfigActivity extends Activity {
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         csvWriter.writeFile(newRange, ep.getString("FirstName", "") + "_"
-                                + ep.getString("LastName", ""), ep.getString("Latitude", "") + ";" +
-                                ep.getString("Longitude", ""), ep.getBoolean("UseDay", false));
+                                + ep.getString("LastName", ""), ep.getString("Location", ""), ep.getBoolean("UseDay", false));
                         shareFile(file);
                     } catch (Exception e) {
                         fail = true;
@@ -1050,8 +1046,7 @@ public class ConfigActivity extends Activity {
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         csvWriter.writeFile(newRange, ep.getString("FirstName", "") + "_"
-                                + ep.getString("LastName", ""), ep.getString("Latitude", "") + ";" +
-                                ep.getString("Longitude", ""), ep.getBoolean("UseDay", false));
+                                + ep.getString("LastName", ""), ep.getString("Location", ""), ep.getBoolean("UseDay", false));
                         shareFile(file);
                     } catch (Exception e) {
                         fail = true;
@@ -1238,12 +1233,6 @@ public class ConfigActivity extends Activity {
         spinner.setAdapter(itemsAdapter);
     }
 
-    public String getLocation() {
-        String latStr = Double.toString(lat);
-        String lngStr = Double.toString(lng);
-        return "latStr" + ";" + "lngStr";
-    }
-
     /*
      * Helper function to create the necessary dialog screens. This is only
      * useful for simple dialogs. Complex dialogs such as choosing traits to
@@ -1413,9 +1402,8 @@ public class ConfigActivity extends Activity {
         else
             tagName += getString(R.string.person) + ": " + getString(R.string.none);
 
-        if (ep.getString("Latitude", "").length() > 0 | ep.getString("Longitude", "").length() > 0)
-            tagLocation += getString(R.string.location) + ": " + ep.getString("Latitude", "")
-                    + "," + ep.getString("Longitude", "");
+        if (ep.getString("Location", "").length() > 0)
+            tagLocation += getString(R.string.location) + ": " + ep.getString("Location", "");
         else
             tagLocation += getString(R.string.location) + ": " + getString(R.string.none);
 
@@ -1558,14 +1546,6 @@ public class ConfigActivity extends Activity {
     }
 
     private void showPersonDialog() {
-        if (ep.getString("FirstName", "").length() > 0
-                || ep.getString("LastName", "").length() > 0)
-            currentPerson.setText("Current: "
-                    + ep.getString("FirstName", "") + " "
-                    + ep.getString("LastName", ""));
-        else
-            currentPerson.setText(getString(R.string.current) + ": " + getString(R.string.none));
-
         personDialog.show();
     }
 
@@ -1580,14 +1560,6 @@ public class ConfigActivity extends Activity {
                     Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivity(intent);
         }
-        if (ep.getString("Latitude", "").length() > 0
-                || ep.getString("Longitude", "").length() > 0)
-            currentLocation.setText("Current:\n" + " Latitude: "
-                    + ep.getString("Latitude", "")
-                    + "\n Longitude: "
-                    + ep.getString("Longitude", ""));
-        else
-            currentLocation.setText(getString(R.string.current) + ": " + getString(R.string.none));
 
         locationDialog.show();
     }
@@ -1608,8 +1580,7 @@ public class ConfigActivity extends Activity {
                 Editor ed = ep.edit();
                 ed.putString("FirstName", "");
                 ed.putString("LastName", "");
-                ed.putString("Latitude", "");
-                ed.putString("Longitude", "");
+                ed.putString("Location", "");
                 ed.putString("DROP1", "");
                 ed.putString("DROP2", "");
                 ed.putString("DROP3", "");
@@ -1745,19 +1716,31 @@ public class ConfigActivity extends Activity {
 
     private void showFieldFileDialog() {
         Editor e = ep.edit();
-        e.putString("FieldFile", mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.length()));
+        e.putString("FieldFile", mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.lastIndexOf(".")));
         e.commit();
+
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile",""));
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile","")+"/audio");
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile","")+"/photo");
+
         columnFail = false;
 
-        if (mChosenFile.toLowerCase().contains("xls")) {
+        if (mChosenFile.toLowerCase().contains(".xls")) {
             isCSV = false;
             loadXLSFile();
         }
 
-        if (mChosenFile.toLowerCase().contains("csv")) {
+        if (mChosenFile.toLowerCase().contains(".csv")) {
             isCSV = true;
             loadCSVFile();
         }
+    }
+
+    private void createDir(String path) {
+        File dir = new File(path);
+        makeToast(path);
+        if (!dir.exists())
+            dir.mkdirs();
     }
 
     private void loadCSVFile() {
@@ -2453,15 +2436,6 @@ public class ConfigActivity extends Activity {
         return true;
     }
 
-    /*
-    Editor e = ep.edit();
-                    e.putString("Latitude", "");
-                    e.putString("Longitude", "");
-                    e.putString("FirstName", "");
-                    e.putString("LastName", "");
-                    e.commit();
-                    finish();
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 

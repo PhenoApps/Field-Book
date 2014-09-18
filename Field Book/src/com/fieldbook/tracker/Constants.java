@@ -11,8 +11,8 @@ public class Constants {
     public static final String RESOURCEPATH = Environment.getExternalStorageDirectory()
             + "/fieldBook/resources";
 
-    public static String AUDIOPATH = Environment.getExternalStorageDirectory()
-            + "/fieldBook/plot_data/audio";
+    public static String PLOTDATAPATH = Environment.getExternalStorageDirectory()
+            + "/fieldBook/plot_data";
 
     public static String TRAITPATH = Environment.getExternalStorageDirectory()
             + "/fieldbook/trait";
