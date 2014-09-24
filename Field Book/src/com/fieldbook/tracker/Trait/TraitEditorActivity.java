@@ -612,8 +612,6 @@ public class TraitEditorActivity extends Activity {
     // Helper function to load data
     public static void loadData() {
         try {
-            if (MainActivity.dt.getAllTraits() == null)
-                return;
 
             HashMap visibility = MainActivity.dt.getTraitVisibility();
 
@@ -687,7 +685,7 @@ public class TraitEditorActivity extends Activity {
         final Dialog importExport = new Dialog(TraitEditorActivity.this,
                 android.R.style.Theme_Holo_Light_Dialog);
         importExport.setTitle(getString(R.string.importdb));
-        importExport.setContentView(R.layout.genericdialog);
+        importExport.setContentView(R.layout.config);
 
         android.view.WindowManager.LayoutParams params = importExport.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
@@ -736,7 +734,7 @@ public class TraitEditorActivity extends Activity {
         final Dialog sortDialog = new Dialog(TraitEditorActivity.this,
                 android.R.style.Theme_Holo_Light_Dialog);
         sortDialog.setTitle(getString(R.string.sort));
-        sortDialog.setContentView(R.layout.genericdialog);
+        sortDialog.setContentView(R.layout.config);
 
         android.view.WindowManager.LayoutParams params = sortDialog.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
@@ -885,9 +883,9 @@ public class TraitEditorActivity extends Activity {
                 Editor ed = ep.edit();
                 ed.remove("MAPCONFIGURED");
                 ed.commit();
-                dialog.dismiss();
                 MainActivity.dt.deleteTable(MainActivity.dt.TRAITS);
                 loadData();
+                dialog.dismiss();
             }
 
         });

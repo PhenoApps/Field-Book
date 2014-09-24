@@ -176,6 +176,35 @@ public class CSVWriter {
         close();
     }
 
+
+    public void writeFile3(String[] labels, int rangeTotal, int pid, String[] traits) throws Exception {
+        // Simply loop through all items
+        if (curCSV.getCount() > 0) {
+
+            writeNext(labels);
+
+            curCSV.moveToPosition(-1);
+
+            while (curCSV.moveToNext()) {
+
+                String arrStr[] = new String[labels.length];
+
+                for (int k = 0; k < rangeTotal; k++)
+                    arrStr[k] = curCSV.getString(k);
+
+                // Get matching values for every row in the Range table
+                for (int k = rangeTotal; k < labels.length; k++) {
+                    arrStr[k] = curCSV.getString(k);
+                }
+
+                writeNext(arrStr);
+            }
+        }
+
+        curCSV.close();
+        close();
+    }
+
     /**
      * Generates data in an Excel style format
      */

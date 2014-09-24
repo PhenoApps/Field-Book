@@ -540,7 +540,7 @@ public class ConfigActivity extends Activity {
         // choose type of field import
         fieldDialog2 = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
         fieldDialog2.setTitle(getString(R.string.fields));
-        fieldDialog2.setContentView(R.layout.genericdialog);
+        fieldDialog2.setContentView(R.layout.config);
 
         fieldDialog2.setCancelable(true);
         fieldDialog2.setCanceledOnTouchOutside(true);
@@ -580,7 +580,7 @@ public class ConfigActivity extends Activity {
 
         fieldDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
         fieldDialog.setTitle(getString(R.string.fields));
-        fieldDialog.setContentView(R.layout.genericdialog);
+        fieldDialog.setContentView(R.layout.config);
 
         fieldDialog.setCancelable(true);
         fieldDialog.setCanceledOnTouchOutside(true);
@@ -643,6 +643,8 @@ public class ConfigActivity extends Activity {
                 .findViewById(R.id.longitude);
         final EditText latitude = (EditText) locationDialog
                 .findViewById(R.id.latitude);
+
+        //TODO force location update
 
         final LocationListener locationListener = new LocationListener() {
             @Override
@@ -1029,16 +1031,16 @@ public class ConfigActivity extends Activity {
 
                         FileWriter fw = new FileWriter(file);
 
-                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
-
                         // Total number of columns to write
                         String[] range = newRanges;
-
                         String[] traits = MainActivity.dt.getAllTraits();
 
-                        csvWriter.writeFile2(concat(range, traits), range.length,
+                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges,traits);
+                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
+
+                        csvWriter.writeFile3(concat(range, traits), range.length,
                                 MainActivity.dt.findRangeColumns(ep.getString("ImportUniqueName", ""), range),
-                                traits, ep.getBoolean("UseDay", false));
+                                traits);
                         shareFile(file);
                     } catch (Exception e) {
                         fail = true;
@@ -1372,7 +1374,6 @@ public class ConfigActivity extends Activity {
                         break;
                 }
                 Editor ed = ep.edit();
-                makeToast(local);
                 ed.putString("language", local);
                 ed.putString("region", region);
                 ed.commit();
@@ -1755,7 +1756,6 @@ public class ConfigActivity extends Activity {
 
     private void createDir(String path) {
         File dir = new File(path);
-        makeToast(path);
         if (!dir.exists())
             dir.mkdirs();
     }
@@ -2494,6 +2494,9 @@ public class ConfigActivity extends Activity {
 
     private class Version extends AsyncTask<Void, Void, Void> {
         String title = "";
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
 
         @Override
         protected void onPreExecute() {
@@ -2502,10 +2505,6 @@ public class ConfigActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            ConnectivityManager connectivityManager
-                    = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-
             if(activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
                 try {
                     Document doc = Jsoup
@@ -2524,8 +2523,8 @@ public class ConfigActivity extends Activity {
         @Override
         protected void onPostExecute(Void result) {
             currentServerVersion = title;
-            if(currentServerVersion!=""&&!currentServerVersion.equals(versionName)) {
-                makeToast("You do not have the most recent version of Field Book!");
+            if(activeNetworkInfo != null && activeNetworkInfo.isConnected()&&!currentServerVersion.equals(versionName)) {
+                makeToast(getString(R.string.notmostrecent));
             }
         }
     }

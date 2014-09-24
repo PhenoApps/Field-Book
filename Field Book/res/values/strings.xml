@@ -28,6 +28,7 @@
     <string name="areyousure">Are you sure?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="notmostrecent">You do not have the most recent version of Field Book!</string>
     <string name="genericerror">Error</string>
     <string name="valueless">Value is less than set minimum</string>
     <string name="valuemore">Value is larger than set maximum</string>

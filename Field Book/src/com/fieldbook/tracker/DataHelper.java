@@ -304,6 +304,36 @@ public class DataHelper {
     }
 
     /**
+     * Convert EAV database to relational //TODO add where statement for repeated values
+     */
+
+    public Cursor convertDatabaseToTable(String[] col, String[] traits) {
+        String query = "";
+        String[] rangeArgs = new String[col.length];
+        String[] traitArgs = new String[traits.length];
+        String joinArgs = "";
+
+        for(int i = 0 ; i < col.length ; i++ ) {
+            rangeArgs[i] = "range." + col[i];
+        }
+
+        for(int i = 0 ; i < traits.length ; i++ ) {
+            traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
+            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + ep.getString("ImportUniqueName", "")
+            + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
+        }
+
+        query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
+        " FROM range range " + joinArgs;
+
+        Log.e("DH",query);
+
+        Cursor cursor = this.db.rawQuery(query,null);
+
+        return cursor;
+    }
+
+    /**
      * Used by the application when moving between ranges (to uniquely identify
      * them)
      */
@@ -1583,4 +1613,19 @@ public class DataHelper {
         }
 
     }
+
+    /**
+     * Helper function to convert array to csv format
+     */
+    public static String convertToCommaDelimited(String[] list) {
+        StringBuffer ret = new StringBuffer("");
+        for (int i = 0; list != null && i < list.length; i++) {
+            ret.append(list[i]);
+            if (i < list.length - 1) {
+                ret.append(',');
+            }
+        }
+        return ret.toString();
+    }
+
 }
