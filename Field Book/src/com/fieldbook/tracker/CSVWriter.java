@@ -83,7 +83,7 @@ public class CSVWriter {
      * database, and so is passed in as a parameter
      * V2 - Range added, columns selectable
      */
-    public void writeFile(ArrayList<String> range, String person, String location, boolean useDay) throws Exception {
+    public void writeDatabaseFormat(ArrayList<String> range, String person, String location, boolean useDay) throws Exception {
         // Simply loop through all items
         if (curCSV.getCount() > 0) {
 
@@ -121,11 +121,8 @@ public class CSVWriter {
                         if (useDay) {
                             if (temp.format.equals("date")) {
                                 Calendar c = Calendar.getInstance();
-
                                 String[] d = curCSV.getString(i).split("\\.");
-
                                 c.set(Integer.parseInt(d[0]), Integer.parseInt(d[1]) - 1, Integer.parseInt(d[2]));
-
                                 arrStr[i] = String.valueOf(c.get(Calendar.DAY_OF_YEAR));
                             } else
                                 arrStr[i] = curCSV.getString(i);
@@ -176,39 +173,10 @@ public class CSVWriter {
         close();
     }
 
-
-    public void writeFile3(String[] labels, int rangeTotal, int pid, String[] traits) throws Exception {
-        // Simply loop through all items
-        if (curCSV.getCount() > 0) {
-
-            writeNext(labels);
-
-            curCSV.moveToPosition(-1);
-
-            while (curCSV.moveToNext()) {
-
-                String arrStr[] = new String[labels.length];
-
-                for (int k = 0; k < rangeTotal; k++)
-                    arrStr[k] = curCSV.getString(k);
-
-                // Get matching values for every row in the Range table
-                for (int k = rangeTotal; k < labels.length; k++) {
-                    arrStr[k] = curCSV.getString(k);
-                }
-
-                writeNext(arrStr);
-            }
-        }
-
-        curCSV.close();
-        close();
-    }
-
     /**
-     * Generates data in an Excel style format
+     * Generates data in an table style format
      */
-    public void writeFile2(String[] labels, int rangeTotal, int pid, String[] traits, boolean useDay) throws Exception {
+    public void writeTableFormat(String[] labels, int rangeTotal, int pid, String[] traits) throws Exception {
         // Simply loop through all items
         if (curCSV.getCount() > 0) {
 
@@ -223,31 +191,9 @@ public class CSVWriter {
                 for (int k = 0; k < rangeTotal; k++)
                     arrStr[k] = curCSV.getString(k);
 
-                int m = 0;
-
                 // Get matching values for every row in the Range table
                 for (int k = rangeTotal; k < labels.length; k++) {
-                    Log.e("FIELD BOOK", String.valueOf(m));
-
-                    String d2 = MainActivity.dt.getSingleValue(curCSV.getString(pid), traits[m]);
-
-                    TraitObject temp = MainActivity.dt.getDetail(traits[m]);
-
-                    if (useDay) {
-                        if (temp.format.equals("date") & d2.length() > 0) {
-                            Calendar c = Calendar.getInstance();
-
-                            String[] d = d2.split("\\.");
-
-                            c.set(Integer.parseInt(d[0]), Integer.parseInt(d[1]) - 1, Integer.parseInt(d[2]));
-
-                            arrStr[k] = String.valueOf(c.get(Calendar.DAY_OF_YEAR));
-                        } else
-                            arrStr[k] = d2;
-                    } else
-                        arrStr[k] = d2;
-
-                    m += 1;
+                    arrStr[k] = curCSV.getString(k);
                 }
 
                 writeNext(arrStr);

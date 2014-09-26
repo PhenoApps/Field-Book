@@ -990,12 +990,11 @@ public class ConfigActivity extends Activity {
         protected Integer doInBackground(Integer... params) {
             String[] newRanges = newRange.toArray(new String[newRange.size()]);
 
-            if (checkDB.isChecked() & !checkExcel.isChecked()) {
-                // Retrieves the data needed for export
-                Cursor exportData = MainActivity.dt.getExportDBData(newRanges);
+            // Retrieves the data needed for export
+            Cursor exportData = MainActivity.dt.getExportDBData(newRanges);
 
+            if (checkDB.isChecked() & !checkExcel.isChecked()) {
                 // Do not proceed if there is no data
-                // So it will not override existing files
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
@@ -1008,7 +1007,7 @@ public class ConfigActivity extends Activity {
 
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        csvWriter.writeFile(newRange, ep.getString("FirstName", "") + "_"
+                        csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
                                 + ep.getString("LastName", ""), ep.getString("Location", ""), ep.getBoolean("UseDay", false));
                         shareFile(file);
                     } catch (Exception e) {
@@ -1016,11 +1015,7 @@ public class ConfigActivity extends Activity {
                     }
                 }
             } else if (checkExcel.isChecked() & !checkDB.isChecked()) {
-                // Retrieves the data needed for export
-                Cursor exportData = MainActivity.dt.getExportExcelData(newRanges);
-
                 // Do not proceed if there is no data
-                // So it will not override existing files
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
@@ -1035,10 +1030,10 @@ public class ConfigActivity extends Activity {
                         String[] range = newRanges;
                         String[] traits = MainActivity.dt.getAllTraits();
 
-                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges,traits);
+                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, traits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        csvWriter.writeFile3(concat(range, traits), range.length,
+                        csvWriter.writeTableFormat(concat(range, traits), range.length,
                                 MainActivity.dt.findRangeColumns(ep.getString("ImportUniqueName", ""), range),
                                 traits);
                         shareFile(file);
@@ -1047,11 +1042,7 @@ public class ConfigActivity extends Activity {
                     }
                 }
             } else {
-                // Retrieves the data needed for export
-                Cursor exportData = MainActivity.dt.getExportDBData(newRanges);
-
                 // Do not proceed if there is no data
-                // So it will not override existing files
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
@@ -1064,7 +1055,7 @@ public class ConfigActivity extends Activity {
 
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        csvWriter.writeFile(newRange, ep.getString("FirstName", "") + "_"
+                        csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
                                 + ep.getString("LastName", ""), ep.getString("Location", ""), ep.getBoolean("UseDay", false));
                         shareFile(file);
                     } catch (Exception e) {
@@ -1075,11 +1066,6 @@ public class ConfigActivity extends Activity {
                 if (fail)
                     return 0;
 
-                // Retrieves the data needed for export
-                exportData = MainActivity.dt.getExportExcelData(newRanges);
-
-                // Do not proceed if there is no data
-                // So it will not override existing files
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
@@ -1090,17 +1076,16 @@ public class ConfigActivity extends Activity {
 
                         FileWriter fw = new FileWriter(file);
 
-                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
-
                         // Total number of columns to write
-                        //String[] range = MainActivity.dt.getRangeColumns();
                         String[] range = newRanges;
-
                         String[] traits = MainActivity.dt.getAllTraits();
 
-                        csvWriter.writeFile2(concat(range, traits), range.length,
+                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, traits);
+                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
+
+                        csvWriter.writeTableFormat(concat(range, traits), range.length,
                                 MainActivity.dt.findRangeColumns(ep.getString("ImportUniqueName", ""), range),
-                                traits, ep.getBoolean("UseDay", false));
+                                traits);
                         shareFile(file);
                     } catch (Exception e) {
                         fail = true;
@@ -1108,7 +1093,6 @@ public class ConfigActivity extends Activity {
                 }
 
             }
-
             return 0;
         }
 
@@ -2505,7 +2489,7 @@ public class ConfigActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            if(activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+            if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
                 try {
                     Document doc = Jsoup
                             .connect("http://play.google.com/store/apps/details?id=com.fieldbook.tracker"
@@ -2523,7 +2507,7 @@ public class ConfigActivity extends Activity {
         @Override
         protected void onPostExecute(Void result) {
             currentServerVersion = title;
-            if(activeNetworkInfo != null && activeNetworkInfo.isConnected()&&!currentServerVersion.equals(versionName)) {
+            if (activeNetworkInfo != null && activeNetworkInfo.isConnected() && !currentServerVersion.equals(versionName)) {
                 makeToast(getString(R.string.notmostrecent));
             }
         }

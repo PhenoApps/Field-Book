@@ -313,22 +313,52 @@ public class DataHelper {
         String[] traitArgs = new String[traits.length];
         String joinArgs = "";
 
-        for(int i = 0 ; i < col.length ; i++ ) {
+        for (int i = 0; i < col.length; i++) {
             rangeArgs[i] = "range." + col[i];
         }
 
-        for(int i = 0 ; i < traits.length ; i++ ) {
+        for (int i = 0; i < traits.length; i++) {
             traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
             joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + ep.getString("ImportUniqueName", "")
-            + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
+                    + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
         }
 
         query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
-        " FROM range range " + joinArgs;
+                " FROM range range " + joinArgs;
 
-        Log.e("DH",query);
+        Log.e("DH", query);
 
-        Cursor cursor = this.db.rawQuery(query,null);
+        Cursor cursor = this.db.rawQuery(query, null);
+
+        return cursor;
+    }
+
+    /**
+     * Convert EAV database to relational //TODO add where statement for repeated values
+     */
+
+    public Cursor exportDatabaseFormat(String[] col, String[] traits) {
+        String query = "";
+        String[] rangeArgs = new String[col.length];
+        String[] traitArgs = new String[traits.length];
+        String joinArgs = "";
+
+        for (int i = 0; i < col.length; i++) {
+            rangeArgs[i] = "range." + col[i];
+        }
+
+        for (int i = 0; i < traits.length; i++) {
+            traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
+            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + ep.getString("ImportUniqueName", "")
+                    + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
+        }
+
+        query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
+                " FROM range range " + joinArgs;
+
+        Log.e("DH", query);
+
+        Cursor cursor = this.db.rawQuery(query, null);
 
         return cursor;
     }
@@ -486,7 +516,7 @@ public class DataHelper {
     public void writeNewPosition(String column, String id, String position) {
         ContentValues cv = new ContentValues();
         cv.put("realPosition", position);
-        this.db.update(TRAITS, cv, column + "= ?", new String[] {id});
+        this.db.update(TRAITS, cv, column + "= ?", new String[]{id});
     }
 
     /**
