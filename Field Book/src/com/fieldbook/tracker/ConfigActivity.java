@@ -2479,6 +2479,7 @@ public class ConfigActivity extends Activity {
 
     private class Version extends AsyncTask<Void, Void, Void> {
         String title = "";
+
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
