@@ -1717,6 +1717,7 @@ public class ConfigActivity extends Activity {
     }
 
     private void showFieldFileDialog() {
+        //todo get URI instead of string
         Editor e = ep.edit();
         e.putString("FieldFile", mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.lastIndexOf(".")));
         e.commit();
