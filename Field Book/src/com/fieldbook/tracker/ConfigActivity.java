@@ -1701,6 +1701,7 @@ public class ConfigActivity extends Activity {
                 dialog.dismiss();
 
                 Editor e = ep.edit();
+
                 e.putString("DROP1", traits[which]);
                 e.commit();
 
