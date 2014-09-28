@@ -14,7 +14,7 @@
     <orderEntry type="jdk" jdkName="Android API 17 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jxl" level="project" />
-    <orderEntry type="library" name="jsoup-1.7.3" level="project" />
+    <orderEntry type="library" name="jsoup-1.8.1" level="project" />
   </component>
 </module>
 
