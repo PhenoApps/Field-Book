@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.MainActivity;
@@ -196,6 +197,12 @@ public class SearchActivity extends Activity {
                     resultDialog.setTitle(getString(R.string.results));
                     resultDialog.setCancelable(true);
                     resultDialog.setCanceledOnTouchOutside(true);
+
+                    TextView primaryTitle = (TextView) resultDialog.findViewById(R.id.range);
+                    TextView secondaryTitle = (TextView) resultDialog.findViewById(R.id.plot);
+
+                    primaryTitle.setText(ep.getString("ImportFirstName", getString(R.string.range)));
+                    secondaryTitle.setText(ep.getString("ImportSecondName", getString(R.string.plot)));
 
                     WindowManager.LayoutParams params = resultDialog.getWindow().getAttributes();
                     params.height = WindowManager.LayoutParams.WRAP_CONTENT;

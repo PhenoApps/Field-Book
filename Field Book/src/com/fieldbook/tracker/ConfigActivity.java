@@ -231,7 +231,6 @@ public class ConfigActivity extends Activity {
 
         importMain = (LinearLayout) importFieldMapDialog.findViewById(R.id.main);
 
-
         invalidateOptionsMenu();
         loadScreen();
 
