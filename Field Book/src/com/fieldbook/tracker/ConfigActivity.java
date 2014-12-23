@@ -110,6 +110,8 @@ public class ConfigActivity extends Activity {
     private Dialog setupDialog;
 
     private Dialog importFieldMapDialog;
+    private Dialog importFieldDialog;
+
 
     private Dialog dbSaveDialog;
 
@@ -146,6 +148,10 @@ public class ConfigActivity extends Activity {
     private int fPosition;
     private int sPosition;
     private int ePosition;
+
+    Spinner unique;
+    Spinner primary;
+    Spinner secondary;
 
     private int action;
 
@@ -1798,7 +1804,8 @@ public class ConfigActivity extends Activity {
 
         if (!columnFail)
 
-            importFieldMapDialog.show();
+            importDialog(importColumns);
+        //importFieldMapDialog.show();
     }
 
     private void loadXLSFile() {
@@ -1855,7 +1862,8 @@ public class ConfigActivity extends Activity {
         }
 
         if (!columnFail)
-            importFieldMapDialog.show();
+            importDialog(importColumns);
+        //importFieldMapDialog.show();
     }
 
     private void showFieldFileExcelDialog() {
@@ -1879,7 +1887,6 @@ public class ConfigActivity extends Activity {
         csvList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 dialog.dismiss();
-
                 mChosenFile = mFileList[which];
 
                 Editor e = ep.edit();
@@ -1895,6 +1902,40 @@ public class ConfigActivity extends Activity {
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, mFileList);
         csvList.setAdapter(itemsAdapter);
         dialog.show();
+    }
+
+    private void importDialog(String[] columns) {
+        importFieldDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        importFieldDialog.setContentView(R.layout.importdialog);
+        importFieldDialog.setTitle(getString(R.string.importfields));
+        importFieldDialog.setCancelable(true);
+        importFieldDialog.setCanceledOnTouchOutside(true);
+
+        Button startImport = (Button) importFieldDialog.findViewById(R.id.okBtn);
+
+        startImport.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View arg0) {
+
+                if (checkImportColumnNames()) {
+                    importFieldDialog.dismiss();
+                    if (isCSV)
+                        mHandler.post(importCSV);
+                    else
+                        mHandler.post(importExcel);
+                }
+            }
+        });
+
+        unique = (Spinner) importFieldDialog.findViewById(R.id.uniqueSpin);
+        primary = (Spinner) importFieldDialog.findViewById(R.id.primarySpin);
+        secondary = (Spinner) importFieldDialog.findViewById(R.id.secondarySpin);
+
+        setSpinner(unique, columns);
+        setSpinner(primary, columns);
+        setSpinner(secondary, columns);
+
+        importFieldDialog.show();
     }
 
     // Helper function to add rows to import dialog
@@ -2081,15 +2122,9 @@ public class ConfigActivity extends Activity {
                         Toast.LENGTH_LONG).show();
             else {
                 Editor ed = ep.edit();
-                ed.putString("ImportUniquePosition", String.valueOf(uPosition));
-                ed.putString("ImportFirstPosition", String.valueOf(fPosition));
-                ed.putString("ImportSecondPosition", String.valueOf(sPosition));
-                ed.putString("ImportExtraPosition", String.valueOf(ePosition));
-
-                ed.putString("ImportUniqueName", importColumns[uPosition]);
-                ed.putString("ImportFirstName", importColumns[fPosition]);
-                ed.putString("ImportSecondName", importColumns[sPosition]);
-                //ed.putString("ImportExtraName", importColumns[ePosition]);
+                ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
+                ed.putString("ImportFirstName", primary.getSelectedItem().toString());
+                ed.putString("ImportSecondName", secondary.getSelectedItem().toString());
 
                 ed.putBoolean("ImportFieldFinished", true);
 
@@ -2278,15 +2313,10 @@ public class ConfigActivity extends Activity {
                         Toast.LENGTH_LONG).show();
             else {
                 Editor ed = ep.edit();
-                ed.putString("ImportUniquePosition", String.valueOf(uPosition));
-                ed.putString("ImportFirstPosition", String.valueOf(fPosition));
-                ed.putString("ImportSecondPosition", String.valueOf(sPosition));
-                ed.putString("ImportExtraPosition", String.valueOf(ePosition));
 
-                ed.putString("ImportUniqueName", importColumns[uPosition]);
-                ed.putString("ImportFirstName", importColumns[fPosition]);
-                ed.putString("ImportSecondName", importColumns[sPosition]);
-                //ed.putString("ImportExtraName", importColumns[ePosition]);
+                ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
+                ed.putString("ImportFirstName", primary.getSelectedItem().toString());
+                ed.putString("ImportSecondName", secondary.getSelectedItem().toString());
 
                 ed.putBoolean("ImportFieldFinished", true);
 
