@@ -32,6 +32,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -42,6 +43,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
@@ -560,73 +562,6 @@ public class ConfigActivity extends Activity {
                 fieldDialog2.dismiss();
             }
         });
-
-
-        // list current field values
-        fieldCurrentDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
-        fieldCurrentDialog.setTitle(getString(R.string.fields));
-        fieldCurrentDialog.setContentView(R.layout.currentsettings);
-
-        fieldCurrentDialog.setCancelable(true);
-        fieldCurrentDialog.setCanceledOnTouchOutside(true);
-
-        Button fdCloseBtn3 = (Button) fieldCurrentDialog.findViewById(R.id.closeBtn);
-
-        fdCloseBtn3.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                fieldCurrentDialog.dismiss();
-            }
-        });
-
-        final TextView fieldColumns = (TextView) fieldCurrentDialog.findViewById(R.id.text);
-
-        // field dialog
-
-        fieldDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
-        fieldDialog.setTitle(getString(R.string.fields));
-        fieldDialog.setContentView(R.layout.config);
-
-        fieldDialog.setCancelable(true);
-        fieldDialog.setCanceledOnTouchOutside(true);
-
-        Button fdCloseBtn = (Button) fieldDialog.findViewById(R.id.closeBtn);
-
-        fdCloseBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                fieldDialog.dismiss();
-            }
-        });
-
-        ListView fieldList = (ListView) fieldDialog.findViewById(R.id.myList);
-
-        String[] items5 = new String[]{getString(R.string.importfields),
-                getString(R.string.listfieldimport)};
-        fieldList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-
-                fieldDialog.dismiss();
-
-                switch (which) {
-                    case 0:
-                        fieldDialog2.show();
-                        break;
-
-                    case 1:
-                        if (MainActivity.dt.getRangeColumnsAsString() != null)
-                            fieldColumns.setText(MainActivity.dt.getRangeColumnsAsString());
-                        else
-                            fieldColumns.setText(getString(R.string.none));
-
-                        fieldCurrentDialog.show();
-                        break;
-                }
-
-            }
-        });
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, items5);
-        fieldList.setAdapter(itemsAdapter);
 
         // To configure location
         locationDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
@@ -1319,6 +1254,10 @@ public class ConfigActivity extends Activity {
         langArray[10] = getString(R.string.oromo);
         langArray[11] = getString(R.string.amharic);
 
+        Integer image_id[] = {R.drawable.ic_us, R.drawable.ic_mx, R.drawable.ic_fr, R.drawable.ic_in,
+                R.drawable.ic_de, R.drawable.ic_jp, R.drawable.ic_ar, R.drawable.ic_cn, R.drawable.ic_br,
+                R.drawable.ic_ru, R.drawable.ic_et, R.drawable.ic_et};
+
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 switch (which) {
@@ -1382,8 +1321,13 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, langArray);
-        myList.setAdapter(adapter);
+
+        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, langArray);
+        //myList.setAdapter(adapter);
+
+        Customlistadapter adapterImg = new Customlistadapter(this, image_id, langArray);
+        myList.setAdapter(adapterImg);
+
         Button langCloseBtn = (Button) languageDialog
                 .findViewById(R.id.closeBtn);
 
@@ -1394,6 +1338,32 @@ public class ConfigActivity extends Activity {
         });
 
         languageDialog.show();
+    }
+
+    public class Customlistadapter extends ArrayAdapter<String> {
+        String[] color_names;
+        Integer[] image_id;
+        Context context;
+
+        public Customlistadapter(Activity context, Integer[] image_id, String[] text) {
+            super(context, R.layout.languageline, text);
+            this.color_names = text;
+            this.image_id = image_id;
+            this.context = context;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View single_row = inflater.inflate(R.layout.languageline, null,
+                    true);
+            TextView textView = (TextView) single_row.findViewById(R.id.txt);
+            ImageView imageView = (ImageView) single_row.findViewById(R.id.img);
+            textView.setText(color_names[position]);
+            imageView.setImageResource(image_id[position]);
+            return single_row;
+        }
     }
 
     private String[] prepareSetup() {

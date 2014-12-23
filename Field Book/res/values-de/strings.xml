@@ -6,10 +6,9 @@
     <string name="resources">Resourcen</string>
     <string name="audio">Audio</string>
     <string name="language">Sprache</string>
-    <string name="about">Information</string>
     <string name="quit">Verlassen</string>
     <string name="traitdetails">Details eines Merkmales</string>
-    <string name="area">Fläche </string>
+    <string name="area">Fläche</string>
     <string name="range">Reihe</string>
     <string name="plot">Parzelle</string>
     <string name="currentvalue">Aktueller Wert</string>
@@ -40,6 +39,7 @@
     <string name="exportcomplete">Export komplett</string>
     <string name="personsetup">Person bestimmen</string>
     <string name="locationsetup">Standort (Koordinaten) bestimmen</string>
+    <string name="about">Information</string>
     <string name="currentsettings">Zusätzliche Einstellungen</string>
     <string name="clearsettings">Alle Einstellungen löschen</string>
     <string name="settingsremoved">Einstellungen wurden gelöscht</string>
@@ -70,6 +70,7 @@
     <string name="map">Karte</string>
     <string name="mapconfig">Karte konfigurieren</string>
     <string name="configure">Konfigurieren</string>
+    <string name="trait">Merkmal</string>
     <string name="direction">Erste Parzelle des Feldes startet...</string>
     <string name="mapanalyze">Analysieren</string>
     <string name="mapexport">Exportieren</string>
@@ -99,7 +100,6 @@
     <string name="choosetraitfile">Waehlen Sie die Datei mit den Merkmalen</string>
     <string name="addtrait">Merkmal hinzufügen</string>
     <string name="traiteditor">Hier können die Merkmale bearbeitet werden</string>
-    <string name="trait">Merkmal</string>
     <string name="format">Format</string>
     <string name="def">Vorgegeben</string>
     <string name="minimum">Minimum</string>
@@ -114,8 +114,9 @@
     <string name="percent">Prozent</string>
     <string name="bool">Boolesch</string>
     <string name="text">Text</string>
-    <string name="up">Aufwärts </string>
+    <string name="up">Aufwärts</string>
     <string name="down">Abwärts</string>
+    <string name="copy">Kopieren</string>
     <string name="del">Löschen</string>
     <string name="mandatorytrait">Merkmalsname muss definiert sein</string>
     <string name="traitexists">Merkmal ist bereits vorhanden</string>
@@ -131,9 +132,9 @@
     <string name="choosefirst">Es kann eine Spalte erster Ordnung gewählt werden</string>
     <string name="choosesecond">Es kann nur eine Spalte zweiter Ordnung gewählt werden</string>
     <string name="catseparator">Separieren Sie Begriffe mit /</string>
-    <string name="resetnext">Datenbank wird geladen wenn die Applikation neu gestartet wird </string>
+    <string name="resetnext">Datenbank wird geladen wenn die Applikation neu gestartet wird</string>
     <string name="nodata">Keine Daten vorhanden</string>
-    <string name="nocolumns">Keine Spalten ausgewählt </string>
+    <string name="nocolumns">Keine Spalten ausgewählt</string>
     <string name="noexportcheck">Exportformat muss ausgewählt werden</string>
     <string name="results">Suchresultat</string>
     <string name="tips">Anzeigen des Tutorials aktivieren</string>
@@ -147,7 +148,6 @@
     <string name="prev">Vorangehend</string>
     <string name="next">Nächste(r)</string>
     <string name="stored">Daten wurden gespeichert</string>
-    <string name="copy">Kopieren</string>
     <string name="optional">Optional</string>
     <string name="savetrait">Merkmal speichern</string>
     <string name="exportmsg">Exportieren...</string>
@@ -162,7 +162,7 @@
     <string name="mhelp2">Die grossen schwarzen Pfeile werden gebraucht um von einer Versuchsparzelle zur nächsten zu gelangen. Die kleinen blauen Pfeile dienen zur Navigation zwischen verschiedenen Merkmale.</string>
     <string name="mhelp3">Eine Liste aller ausgewählten Merkmale erscheint wenn man auf das angezeigte Merkmal drückt.</string>
     <string name="mhelp4">Die zwei Textboxen in der Mitte des Bildschirmes (erste und zweite Ordnung) können benutzt werden um zu einer spezifischen Versuchsparzelle zu navigieren. Sollte die Versuchsparzelle mehr als einmal im Experiment enthalten sein, navigiert die Applikation zum ersten Vorkommen.</string>
-    <string name="mhelp5">"Suchen" erlaubt die Durchsuchung der Datenbank.</string>
+    <string name="mhelp5">Suchen erlaubt die Durchsuchung der Datenbank.</string>
     <string name="shelp1">Um eine CSV oder XLS Datei zu importieren, wählen Sie Felder.</string>
     <string name="shelp2">Nachdem eine Datei für den Import gewählt wurde sind die Spalten der Datei links ersichtlich. Der Datentyp kann rechts konfiguriert werden. Dateien müssen mindestens drei Spalten enthalten: eindeutiges Zuordnungsmerkmal, erste Ordnung und sekundäre Ordnung.</string>
     <string name="shelp3">Um neue Merkmale hinzuzufügen, drücken Sie Merkmale.</string>
@@ -236,7 +236,7 @@
     <string name="tipsdesc">Wollen sie das Tutorial aktivieren? Diese Einstellung kann unter Weiteren Einstellungen geändert werden.</string>
     <string name="sync">Synchronisieren</string>
     <string name="languagesettings">Sprache</string>
-    <string name="fieldexists">Der Name dieses Versuchsfeldes existiert bereits. Bitte wählen Sie einen anderen Namen. </string>
+    <string name="fieldexists">Der Name dieses Versuchsfeldes existiert bereits. Bitte wählen Sie einen anderen Namen.</string>
     <string name="cancel">Abbrechen</string>
     <string name="rangechime">Notifikationsgeräusch ein beim Wechsel der ersten Ordnung (ein Geräusch macht den Nutzer darauf aufmerksam, dass die letzte Versuchsparzelle in einer Reihe (erste Ordnung) erreicht wurde und die nächste Parzelle in der nächsten Reihe liegt.)</string>
     <string name="explainsend">Das Auswählen eines Geräts started then Datentransfer</string>

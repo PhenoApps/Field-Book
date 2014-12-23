@@ -161,9 +161,6 @@
     <string name="optional">Optional</string>
     <string name="savetrait">Save trait</string>
     <string name="exportmsg">Exporting...</string>
-    <string name="english">English (US)</string>
-    <string name="spanish">Español (México)</string>
-    <string name="german">Deutsch</string>
     <string name="tutorial">Tutorial</string>
     <string name="tipshort">Tutorial</string>
     <string name="mapsummary">Summary</string>
@@ -305,6 +302,10 @@
 
     <string name="languagesettings">Language</string>
     <string name="devicedefaultlanguage">Device default</string>
+
+    <string name="english">English (US)</string>
+    <string name="spanish">Español (México)</string>
+    <string name="german">Deutsch</string>
     <string name="chinese">汉语</string>
     <string name="japanese">日本語</string>
     <string name="french">Français</string>
