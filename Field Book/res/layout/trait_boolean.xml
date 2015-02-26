@@ -10,8 +10,8 @@
         android:id="@+id/eImg"
         android:layout_width="160dp"
         android:layout_height="160dp"
-        android:layout_gravity="center_horizontal"
         android:scaleType="fitXY"
+        android:layout_gravity="center_horizontal"
         android:src="@drawable/keep" />
 
     <Button

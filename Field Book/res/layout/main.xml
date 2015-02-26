@@ -108,7 +108,6 @@
                     android:textStyle="bold" />
 
             </LinearLayout>
-
         </LinearLayout>
 
         <LinearLayout
@@ -362,23 +361,54 @@
             android:textStyle="bold"
             android:visibility="gone" />
 
+        <LinearLayout
+            android:id="@+id/traitHolder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
 
+            <include
+                layout="@layout/trait_audio"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
 
-        <SeekBar
-            android:id="@+id/seekbar"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="35dp"
-            android:maxHeight="18dip"
-            android:minHeight="18dip"
-            android:paddingBottom="10px"
-            android:paddingLeft="30px"
-            android:paddingRight="30px"
-            android:paddingTop="10px"
-            android:progressDrawable="@drawable/custom_seek_bar"
-            android:thumb="@drawable/custom_seek_bar_thumb"
-            android:thumbOffset="0dp"
-            android:visibility="gone" />
+            <include
+                layout="@layout/trait_boolean"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" />
+
+            <include
+                layout="@layout/trait_categorical"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_date"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_numeric"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_percent"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_photo"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/clearBtn4"
@@ -394,401 +424,33 @@
             android:textStyle="bold"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:id="@+id/qPick"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingTop="15dp"
-            android:visibility="gone">
+        <Button
+            android:id="@+id/clearBtn2"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:background="@android:drawable/btn_default"
+            android:gravity="center"
+            android:minWidth="150dp"
+            android:text="@string/clear"
+            android:textColor="#000000"
+            android:visibility="gone"
+            android:textSize="30dp"
+            android:textStyle="bold" />
 
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/q1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/q2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/q3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:paddingTop="10dp">
-
-                <Button
-                    android:id="@+id/q4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/q5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/q6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:paddingTop="10dp">
-
-                <Button
-                    android:id="@+id/q7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/q8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/q9"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:paddingBottom="20dp"
-                android:paddingTop="10dp">
-
-                <Button
-                    android:id="@+id/q10"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/q11"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/q12"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="150dp"
-                    android:text="@string/add"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/clearBtn2"
-                android:layout_width="wrap_content"
-                android:layout_height="60dp"
-                android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
-                android:gravity="center"
-                android:minWidth="150dp"
-                android:text="@string/clear"
-                android:textColor="#000000"
-                android:textSize="30dp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/datePick"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingTop="15dp"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/mth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:text="1"
-                    android:textColor="#000000"
-                    android:textSize="70dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="5px"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp"
-                    android:background="#000000" />
-
-                <TextView
-                    android:id="@+id/day"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:text="1"
-                    android:textColor="#000000"
-                    android:textSize="70dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="horizontal"
-                    android:paddingTop="30dp">
-
-                    <Button
-                        android:id="@+id/minusDateBtn"
-                        android:layout_width="130dp"
-                        android:layout_height="60dp"
-                        android:background="@android:drawable/btn_default"
-                        android:gravity="center|center_vertical"
-                        android:text="@string/minusday"
-                        android:textColor="#000000"
-                        android:textSize="30dp"
-                        android:textStyle="bold" />
-
-                    <View
-                        android:layout_width="10dp"
-                        android:layout_height="wrap_content" />
-
-                    <Button
-                        android:id="@+id/enterBtn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="60dp"
-                        android:background="@android:drawable/btn_default"
-                        android:gravity="center|center_vertical"
-                        android:minWidth="130dp"
-                        android:text="@string/enter"
-                        android:textColor="#000000"
-                        android:textSize="30dp"
-                        android:textStyle="bold" />
-
-                    <View
-                        android:layout_width="10dp"
-                        android:layout_height="wrap_content" />
-
-                    <Button
-                        android:id="@+id/addDateBtn"
-                        android:layout_width="130dp"
-                        android:layout_height="60dp"
-                        android:background="@android:drawable/btn_default"
-                        android:gravity="center"
-                        android:minWidth="130dp"
-                        android:text="@string/plusday"
-                        android:textColor="#000000"
-                        android:textSize="30dp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="horizontal"
-                    android:paddingTop="10dp">
-
-                    <Button
-                        android:id="@+id/clearDateBtn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="60dp"
-                        android:background="@android:drawable/btn_default"
-                        android:gravity="center"
-                        android:minWidth="130dp"
-                        android:text="@string/clear"
-                        android:textColor="#000000"
-                        android:textSize="30dp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:text=""
-                android:textColor="@color/s_text"
-                android:textSize="30dp"
-                android:textStyle="bold"
-                android:visibility="invisible" />
-
-            <Button
-                android:id="@+id/clearBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="60dp"
-                android:layout_gravity="center_horizontal"
-                android:background="@android:drawable/btn_default"
-                android:gravity="center"
-                android:minWidth="130dp"
-                android:text="@string/clear"
-                android:textColor="#000000"
-                android:textSize="30dp"
-                android:textStyle="bold"
-                android:visibility="gone" />
-
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/eImg"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
+        <Button
+            android:id="@+id/clearBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
             android:layout_gravity="center_horizontal"
-            android:scaleType="fitXY"
-            android:src="@drawable/keep"
+            android:background="@android:drawable/btn_default"
+            android:gravity="center"
+            android:minWidth="130dp"
+            android:text="@string/clear"
+            android:textColor="#000000"
+            android:textSize="30dp"
+            android:textStyle="bold"
             android:visibility="gone" />
 
         <Button
@@ -805,370 +467,17 @@
             android:textStyle="bold"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:id="@+id/kb"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:paddingTop="20dp"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/k1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text=";"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="1"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="2"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="3"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:paddingTop="10dp">
-
-                <Button
-                    android:id="@+id/k5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="+"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="4"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="5"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k8"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="6"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:paddingTop="10dp">
-
-                <Button
-                    android:id="@+id/k9"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="-"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k10"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="7"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k11"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="8"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k12"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="9"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:paddingBottom="20dp"
-                android:paddingTop="10dp">
-
-                <Button
-                    android:id="@+id/k13"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="*"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k14"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="."
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k15"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="0"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="10dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <Button
-                    android:id="@+id/k16"
-                    android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center"
-                    android:background="@android:drawable/btn_default"
-                    android:gravity="center"
-                    android:minWidth="120dp"
-                    android:text="@string/clear"
-                    android:textColor="#000000"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/traitHolder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <Button
+            android:id="@+id/clearDateBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:background="@android:drawable/btn_default"
             android:gravity="center"
-            android:orientation="vertical">
-
-            <include
-                layout="@layout/trait_audio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_boolean"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_categorical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_numeric"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_percent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <include
-                layout="@layout/trait_photo"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
+            android:minWidth="130dp"
+            android:text="@string/clear"
+            android:textColor="#000000"
+            android:visibility="gone"
+            android:textSize="30dp"
+            android:textStyle="bold" />
     </LinearLayout>
-
 </ScrollView>

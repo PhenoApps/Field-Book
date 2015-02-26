@@ -6,21 +6,6 @@
     android:visibility="gone"
     android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/pNum"
-        android:layout_width="500dp"
-        android:layout_height="65dp"
-        android:layout_gravity="center_horizontal"
-        android:enabled="false"
-        android:gravity="center"
-        android:inputType="text"
-        android:singleLine="true"
-        android:state_enabled="false"
-        android:text=""
-        android:textColor="#000000"
-        android:textSize="40dp"
-        android:textStyle="bold" />
-
     <SeekBar
         android:id="@+id/seekbar"
         android:layout_width="fill_parent"

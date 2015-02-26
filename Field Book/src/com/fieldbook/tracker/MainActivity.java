@@ -50,6 +50,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -226,17 +227,21 @@ public class MainActivity extends Activity implements OnClickListener {
     private Button mapSummary;
 
     private Button doRecord;
+    private Button doPlay;
     private Button clearRecord;
+
     private Button capture;
     private Button captureClear;
 
     private String mGeneratedName;
 
     private MediaRecorder mRecorder;
+    private MediaPlayer mPlayer;
 
     private File mRecordingLocation;
 
     private boolean mRecording;
+    private boolean mListening = false;
 
     private TextView mapSegment;
     private TextView mapSegmenth;
@@ -428,6 +433,7 @@ public class MainActivity extends Activity implements OnClickListener {
         // pNum is the text area reflecting the progress bar value
         pNum = (EditText) findViewById(R.id.pNum);
 
+        // Clear button for most traits
         doRecord = (Button) traitAudio.findViewById(R.id.record);
         doRecord.setOnClickListener(this);
 
@@ -439,6 +445,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
         captureClear = (Button) traitPhoto.findViewById(R.id.clearPhoto);
         captureClear.setOnClickListener(this);
+
+
 
         photo = (Gallery) traitPhoto.findViewById(R.id.photo);
 
@@ -547,7 +555,7 @@ public class MainActivity extends Activity implements OnClickListener {
         //tNum.addTextChangedListener(tNumUpdate);
 
         // Progress bar
-        seekBar = (SeekBar) findViewById(R.id.seekbar);
+        seekBar = (SeekBar) traitPercent.findViewById(R.id.seekbar);
         seekBar.setMax(100);
 
         seekListener = new OnSeekBarChangeListener() {
@@ -580,44 +588,43 @@ public class MainActivity extends Activity implements OnClickListener {
         // Updates the progressbar value on screen and in memory hashmap
         seekBar.setOnSeekBarChangeListener(seekListener);
 
-        // Datapicker is an area onscreen representing the date controls (month,
-        // year, plus / minus buttons, save, clear)
-        datePicker = (LinearLayout) findViewById(R.id.datePick);
+        datePicker = (LinearLayout) traitDate.findViewById(R.id.datePick);
 
-        kb = (LinearLayout) findViewById(R.id.kb);
+        kb = (LinearLayout) traitNumeric.findViewById(R.id.kb);
 
-        month = (TextView) findViewById(R.id.mth);
-        day = (TextView) findViewById(R.id.day);
+        month = (TextView) traitDate.findViewById(R.id.mth);
+        day = (TextView) traitDate.findViewById(R.id.day);
 
         rangeName = (TextView) findViewById(R.id.rangeName);
         plotName = (TextView) findViewById(R.id.plotName);
 
         clearGeneric = (Button) findViewById(R.id.clearBtn4);
-        clearBoolean = (Button) traitBoolean.findViewById(R.id.clearBtn5);
-        clearDate = (Button) findViewById(R.id.clearDateBtn);
+        clearBoolean = (Button) findViewById(R.id.clearBtn5);
+        clearDate = (Button) traitDate.findViewById(R.id.clearDateBtn);
 
-        Button addDayBtn = (Button) findViewById(R.id.addDateBtn);
-        Button minusDayBtn = (Button) findViewById(R.id.minusDateBtn);
-        Button saveDayBtn = (Button) findViewById(R.id.enterBtn);
+        Button addDayBtn = (Button) traitDate.findViewById(R.id.addDateBtn);
+        Button minusDayBtn = (Button) traitDate.findViewById(R.id.minusDateBtn);
+        Button saveDayBtn = (Button) traitDate.findViewById(R.id.enterBtn);
+
         //Button clearBtn = (Button) findViewById(R.id.clearBtn);
-        Button clearBtn2 = (Button) findViewById(R.id.clearBtn2);
+        Button clearBtn2 = (Button) traitCategorical.findViewById(R.id.clearBtn2);
 
-        Button k1 = (Button) findViewById(R.id.k1);
-        Button k2 = (Button) findViewById(R.id.k2);
-        Button k3 = (Button) findViewById(R.id.k3);
-        Button k4 = (Button) findViewById(R.id.k4);
-        Button k5 = (Button) findViewById(R.id.k5);
-        Button k6 = (Button) findViewById(R.id.k6);
-        Button k7 = (Button) findViewById(R.id.k7);
-        Button k8 = (Button) findViewById(R.id.k8);
-        Button k9 = (Button) findViewById(R.id.k9);
-        Button k10 = (Button) findViewById(R.id.k10);
-        Button k11 = (Button) findViewById(R.id.k11);
-        Button k12 = (Button) findViewById(R.id.k12);
-        Button k13 = (Button) findViewById(R.id.k13);
-        Button k14 = (Button) findViewById(R.id.k14);
-        Button k15 = (Button) findViewById(R.id.k15);
-        Button k16 = (Button) findViewById(R.id.k16);
+        Button k1 = (Button) traitNumeric.findViewById(R.id.k1);
+        Button k2 = (Button) traitNumeric.findViewById(R.id.k2);
+        Button k3 = (Button) traitNumeric.findViewById(R.id.k3);
+        Button k4 = (Button) traitNumeric.findViewById(R.id.k4);
+        Button k5 = (Button) traitNumeric.findViewById(R.id.k5);
+        Button k6 = (Button) traitNumeric.findViewById(R.id.k6);
+        Button k7 = (Button) traitNumeric.findViewById(R.id.k7);
+        Button k8 = (Button) traitNumeric.findViewById(R.id.k8);
+        Button k9 = (Button) traitNumeric.findViewById(R.id.k9);
+        Button k10 = (Button) traitNumeric.findViewById(R.id.k10);
+        Button k11 = (Button) traitNumeric.findViewById(R.id.k11);
+        Button k12 = (Button) traitNumeric.findViewById(R.id.k12);
+        Button k13 = (Button) traitNumeric.findViewById(R.id.k13);
+        Button k14 = (Button) traitNumeric.findViewById(R.id.k14);
+        Button k15 = (Button) traitNumeric.findViewById(R.id.k15);
+        Button k16 = (Button) traitNumeric.findViewById(R.id.k16);
 
         k1.setOnClickListener(this);
         k2.setOnClickListener(this);
@@ -810,20 +817,20 @@ public class MainActivity extends Activity implements OnClickListener {
         });
 
         // Datapicker is an area onscreen representing qualitative controls
-        qPicker = (LinearLayout) findViewById(R.id.qPick);
+        qPicker = (LinearLayout) traitCategorical.findViewById(R.id.qPick);
 
-        buttonArray[0] = (Button) findViewById(R.id.q1);
-        buttonArray[1] = (Button) findViewById(R.id.q2);
-        buttonArray[2] = (Button) findViewById(R.id.q3);
-        buttonArray[3] = (Button) findViewById(R.id.q4);
-        buttonArray[4] = (Button) findViewById(R.id.q5);
-        buttonArray[5] = (Button) findViewById(R.id.q6);
-        buttonArray[6] = (Button) findViewById(R.id.q7);
-        buttonArray[7] = (Button) findViewById(R.id.q8);
-        buttonArray[8] = (Button) findViewById(R.id.q9);
-        buttonArray[9] = (Button) findViewById(R.id.q10);
-        buttonArray[10] = (Button) findViewById(R.id.q11);
-        buttonArray[11] = (Button) findViewById(R.id.q12);
+        buttonArray[0] = (Button) traitCategorical.findViewById(R.id.q1);
+        buttonArray[1] = (Button) traitCategorical.findViewById(R.id.q2);
+        buttonArray[2] = (Button) traitCategorical.findViewById(R.id.q3);
+        buttonArray[3] = (Button) traitCategorical.findViewById(R.id.q4);
+        buttonArray[4] = (Button) traitCategorical.findViewById(R.id.q5);
+        buttonArray[5] = (Button) traitCategorical.findViewById(R.id.q6);
+        buttonArray[6] = (Button) traitCategorical.findViewById(R.id.q7);
+        buttonArray[7] = (Button) traitCategorical.findViewById(R.id.q8);
+        buttonArray[8] = (Button) traitCategorical.findViewById(R.id.q9);
+        buttonArray[9] = (Button) traitCategorical.findViewById(R.id.q10);
+        buttonArray[10] = (Button) traitCategorical.findViewById(R.id.q11);
+        buttonArray[11] = (Button) traitCategorical.findViewById(R.id.q12);
 
         curCat = "";
 
@@ -961,9 +968,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         // Boolean
         eImg.setOnClickListener(new OnClickListener() {
-
             public void onClick(View arg0) {
                 String val = newTraits.get(currentTrait.trait).toString();
+                Log.d("Field",val);
 
                 if (val.equals("false")) {
                     val = "true";
@@ -1899,6 +1906,15 @@ public class MainActivity extends Activity implements OnClickListener {
                     // If there is existing data, then populate the control with
                     // the data
                     if (currentTrait.format.equals("text")) {
+                        traitText.setVisibility(View.VISIBLE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+
                         qPicker.setVisibility(LinearLayout.GONE);
 
                         tNum.setVisibility(EditText.VISIBLE);
@@ -1919,15 +1935,6 @@ public class MainActivity extends Activity implements OnClickListener {
                         seekBar.setVisibility(EditText.GONE);
                         datePicker.setVisibility(LinearLayout.GONE);
                         eImg.setVisibility(EditText.GONE);
-
-                        traitText.setVisibility(View.VISIBLE);
-                        traitNumeric.setVisibility(View.GONE);
-                        traitPercent.setVisibility(View.GONE);
-                        traitDate.setVisibility(View.GONE);
-                        traitCategorical.setVisibility(View.GONE);
-                        traitBoolean.setVisibility(View.GONE);
-                        traitAudio.setVisibility(View.GONE);
-                        traitPhoto.setVisibility(View.GONE);
 
                         if (newTraits.containsKey(currentTrait.trait)) {
                             tNum.removeTextChangedListener(tNumUpdate);
@@ -1970,6 +1977,15 @@ public class MainActivity extends Activity implements OnClickListener {
                             }
                         }, 300);
                     } else if (currentTrait.format.equals("numeric")) {
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.VISIBLE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+
                         qPicker.setVisibility(LinearLayout.GONE);
 
                         kb.setVisibility(View.VISIBLE);
@@ -2027,6 +2043,15 @@ public class MainActivity extends Activity implements OnClickListener {
                         }, 300);
 
                     } else if (currentTrait.format.equals("percent")) {
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.VISIBLE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+
                         qPicker.setVisibility(LinearLayout.GONE);
 
                         kb.setVisibility(View.GONE);
@@ -2111,6 +2136,15 @@ public class MainActivity extends Activity implements OnClickListener {
                         }
 
                     } else if (currentTrait.format.equals("date")) {
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.VISIBLE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+
                         qPicker.setVisibility(LinearLayout.GONE);
                         traitPhoto.setVisibility(View.GONE);
 
@@ -2165,6 +2199,15 @@ public class MainActivity extends Activity implements OnClickListener {
                             }
                         }
                     } else if (currentTrait.format.equals("qualitative") | currentTrait.format.equals("categorical")) {
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.VISIBLE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+
                         qPicker.setVisibility(LinearLayout.VISIBLE);
                         traitPhoto.setVisibility(View.GONE);
 
@@ -2444,17 +2487,24 @@ public class MainActivity extends Activity implements OnClickListener {
                             }
                         }
                     } else if (currentTrait.format.equals("boolean")) {
-                        qPicker.setVisibility(LinearLayout.GONE);
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.VISIBLE);
+                        traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
+
+                        qPicker.setVisibility(LinearLayout.GONE);
+
+                        clearBoolean.setVisibility(View.VISIBLE);
 
                         kb.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
-
-                        traitBoolean.setVisibility(View.VISIBLE);
-                        traitAudio.setVisibility(View.GONE);
-
+                        eImg.setVisibility(EditText.VISIBLE);
                         clearGeneric.setVisibility(View.GONE);
 
                         pNum.setVisibility(EditText.GONE);
@@ -2482,8 +2532,13 @@ public class MainActivity extends Activity implements OnClickListener {
 
                         }
                     } else if (currentTrait.format.equals("audio")) {
-                        traitAudio.setVisibility(View.VISIBLE);
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
                         traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.VISIBLE);
                         traitPhoto.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
@@ -2514,15 +2569,19 @@ public class MainActivity extends Activity implements OnClickListener {
                             //tNum.setText(R.string.nodata);
                         } else {
                             mRecordingLocation = new File(newTraits.get(currentTrait.trait).toString());
-
-                            doRecord.setText(getString(R.string.record));
+                            doRecord.setText(getString(R.string.play));
                             tNum.setText(getString(R.string.stored));
                         }
 
                     } else if (currentTrait.format.equals("photo")) {
-
-                        traitPhoto.setVisibility(View.VISIBLE);
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
                         traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.VISIBLE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2680,6 +2739,30 @@ public class MainActivity extends Activity implements OnClickListener {
         }
 
         mRecording = false;
+    }
+
+    private void beginPlayback()
+    {
+        mListening = true;
+        doRecord.setText(R.string.stop);
+        mPlayer = new MediaPlayer();
+        mPlayer = MediaPlayer.create(MainActivity.this, Uri.parse(mRecordingLocation.getAbsolutePath()));
+
+        try {
+            mPlayer.prepare();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mPlayer.start();
+        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            public void onCompletion(MediaPlayer mp) {
+                mListening = false;
+                doRecord.setText(R.string.play);
+                clearRecord.setEnabled(true);
+            }
+        });
     }
 
     // Delete recording
@@ -4164,8 +4247,18 @@ public class MainActivity extends Activity implements OnClickListener {
 
 
             case R.id.record:
-                if (mRecording) {
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                        .clone();
 
+                if (mListening) {
+                    mPlayer.stop();
+                    doRecord.setText(R.string.play);
+                    mListening = false;
+                    clearRecord.setEnabled(true);
+                    break;
+                }
+
+                if (mRecording) {
                     // Stop recording
                     try {
                         mRecorder.stop();
@@ -4182,20 +4275,23 @@ public class MainActivity extends Activity implements OnClickListener {
                     tNum.setText(getString(R.string.stored));
 
                     mRecording = false;
-                    doRecord.setText(R.string.record);
+                    doRecord.setText(R.string.play);
 
                     rangeLeft.setEnabled(true);
                     rangeRight.setEnabled(true);
 
                     traitLeft.setEnabled(true);
                     traitRight.setEnabled(true);
+                    clearRecord.setEnabled(true);
+                } else if (newTraits.containsKey(currentTrait.trait)) {
+                    beginPlayback();
+                    clearRecord.setEnabled(false);
 
-                } else {
-                    if (!newTraits.containsKey(currentTrait.trait)) {
+                } else if (!newTraits.containsKey(currentTrait.trait)) {
 
                         // start recording
                         deleteRecording();
-
+                        clearRecord.setEnabled(false);
                         removeTrait(currentTrait.trait);
                         tNum.setText("");
 
@@ -4212,18 +4308,16 @@ public class MainActivity extends Activity implements OnClickListener {
 
                         doRecord.setText(R.string.stop);
                     }
-                }
                 break;
 
             case R.id.clearRecord:
-
-                // Delete recording
-
                 deleteRecording();
                 removeTrait(currentTrait.trait);
                 tNum.setText("");
                 mRecording = false;
                 doRecord.setText(R.string.record);
+                mListening = false;
+                mRecording = false;
                 break;
 
             // Below this point are for the custom keypad
@@ -4277,20 +4371,16 @@ public class MainActivity extends Activity implements OnClickListener {
 
         if (b.getId() == R.id.k16) {
             //eNum.setText(eNum.getText().toString().substring(0, eNum.getText().toString().length()-1));
-
             eNum.removeTextChangedListener(eNumUpdate);
             eNum.setText("");
             removeTrait(currentTrait.trait);
             eNum.addTextChangedListener(eNumUpdate);
-
         } else {
             eNum.setText(eNum.getText().toString() + v);
         }
     }
 
     private void takePicture() {
-
-
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
@@ -4347,7 +4437,6 @@ public class MainActivity extends Activity implements OnClickListener {
         photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
 
         photo.setAdapter(photoAdapter);
-
         photo.setSelection(photoAdapter.getCount() - 1);
     }
 
