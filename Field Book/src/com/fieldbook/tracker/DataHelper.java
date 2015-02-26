@@ -154,6 +154,7 @@ public class DataHelper {
      * v1.6 - Amended to consider both trait and user data
      */
     public long insertUserTraits(String rid, String parent, String trait, String userValue) {
+
         try {
             this.insertUserTraits.bindString(1, rid);
             this.insertUserTraits.bindString(2, parent);
@@ -969,6 +970,49 @@ public class DataHelper {
             return null;
         }
     }
+
+    /**
+     * Helper function
+     * v2.5
+     */
+    public void deleteTraitByValue(String rid, String parent, String value) {
+
+        try {
+            this.db.delete(USER_TRAITS, "rid like ? and parent like ? and userValue = ?",
+                    new String[] { rid, parent, value });
+        } catch (Exception e) {
+
+        }
+    }
+
+    /**
+     * Returns list of files associated with a specific plot
+     */
+
+    public ArrayList<String> getPlotPhotos(String plot) {
+        try {
+            Cursor cursor = this.db.query(USER_TRAITS, new String[]{"userValue"},"rid like ? and trait like ?", new String[]{plot,"photo"},
+                    null, null, null);
+
+            ArrayList<String> photoList = new ArrayList<String>();
+
+            if(cursor.moveToFirst()) {
+                do {
+                    photoList.add(cursor.getString(0));
+                }
+                while (cursor.moveToNext());
+            }
+
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+
+            return photoList;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 
     /**
      * Returns the plot for items that match the specified id

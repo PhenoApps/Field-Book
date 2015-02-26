@@ -29,4 +29,7 @@ public class Constants {
     public static String BACKUPPATH = Environment.getExternalStorageDirectory()
             + "/fieldbook/database";
 
+    public static String ERRORPATH = Environment.getExternalStorageDirectory()
+            + "/fieldbook/errors";
+
 }

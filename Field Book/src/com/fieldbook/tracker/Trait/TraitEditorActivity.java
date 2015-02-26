@@ -156,8 +156,8 @@ public class TraitEditorActivity extends Activity {
 
         thisActivity = this;
 
-        final String[] data = new String[7];
-        final String[] enData = new String[7];
+        final String[] data = new String[8];
+        final String[] enData = new String[8];
 
         data[0] = getString(R.string.numeric);
         data[1] = getString(R.string.qualitative);
@@ -165,7 +165,8 @@ public class TraitEditorActivity extends Activity {
         data[3] = getString(R.string.percent);
         data[4] = getString(R.string.bool);
         data[5] = getString(R.string.text);
-        data[6] = getString(R.string.audio);
+        data[6] = getString(R.string.photo);
+        data[7] = getString(R.string.audio);
 
         enData[0] = "Numeric";
         enData[1] = "Categorical";
@@ -173,7 +174,8 @@ public class TraitEditorActivity extends Activity {
         enData[3] = "Percent";
         enData[4] = "Boolean";
         enData[5] = "Text";
-        enData[6] = "Audio";
+        enData[6] = "Photo";
+        enData[7] = "Audio";
 
         traitList = (ListView) findViewById(R.id.myList);
 

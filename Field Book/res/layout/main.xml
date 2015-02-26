@@ -362,6 +362,8 @@
             android:textStyle="bold"
             android:visibility="gone" />
 
+
+
         <SeekBar
             android:id="@+id/seekbar"
             android:layout_width="fill_parent"
@@ -1119,42 +1121,51 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/audio"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal"
-            android:paddingTop="20dp">
+            android:id="@+id/traitHolder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
 
-            <Button
-                android:id="@+id/record"
+            <include
+                layout="@layout/trait_audio"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
-                android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
-                android:gravity="center"
-                android:minWidth="150dp"
-                android:text="@string/record"
-                android:textColor="#000000"
-                android:textSize="30dp"
-                android:textStyle="bold" />
+                android:layout_height="wrap_content" />
 
-            <View
-                android:layout_width="20dp"
-                android:layout_height="match_parent" />
-
-            <Button
-                android:id="@+id/clearRecord"
+            <include
+                layout="@layout/trait_boolean"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
-                android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
-                android:gravity="center"
-                android:minWidth="150dp"
-                android:text="@string/clear"
-                android:textColor="#000000"
-                android:textSize="30dp"
-                android:textStyle="bold" />
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_categorical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_numeric"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_photo"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 

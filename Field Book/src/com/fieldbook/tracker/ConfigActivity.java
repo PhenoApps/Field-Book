@@ -1699,7 +1699,7 @@ public class ConfigActivity extends Activity {
 
         createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", ""));
         createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/audio");
-        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photo");
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos");
 
         columnFail = false;
 
@@ -1718,6 +1718,7 @@ public class ConfigActivity extends Activity {
         File dir = new File(path);
         if (!dir.exists())
             dir.mkdirs();
+        MediaScannerConnection.scanFile(this, new String[] {dir.toString()}, null, null);
     }
 
     private void loadCSVFile() {
@@ -1876,8 +1877,13 @@ public class ConfigActivity extends Activity {
 
     private void importDialog(String[] columns) {
         importFieldDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
-        importFieldDialog.setContentView(R.layout.importdialog);
         importFieldDialog.setTitle(getString(R.string.importfields));
+        importFieldDialog.setContentView(R.layout.importdialog);
+
+        android.view.WindowManager.LayoutParams params2 = importFieldDialog.getWindow().getAttributes();
+        params2.width = LayoutParams.FILL_PARENT;
+        importFieldDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params2);
+
         importFieldDialog.setCancelable(true);
         importFieldDialog.setCanceledOnTouchOutside(true);
 

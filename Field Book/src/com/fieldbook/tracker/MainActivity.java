@@ -13,23 +13,29 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -44,6 +50,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -62,15 +69,19 @@ import com.fieldbook.tracker.Search.*;
 import com.fieldbook.tracker.Trait.*;
 import com.fieldbook.tracker.Tutorial.*;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -107,8 +118,11 @@ public class MainActivity extends Activity implements OnClickListener {
     public static Activity thisActivity;
 
     private TextView traitDetails;
+    private ArrayList<String> photoLocation;
 
     private TraitObject currentTrait;
+
+    String mCurrentPhotoPath;
 
     private EditText eNum;
     private EditText pNum;
@@ -117,6 +131,7 @@ public class MainActivity extends Activity implements OnClickListener {
     private SeekBar seekBar;
 
     private Spinner traitType;
+    private boolean gridCreated;
 
     private ImageView eImg;
 
@@ -147,11 +162,11 @@ public class MainActivity extends Activity implements OnClickListener {
     private InputMethodManager imm;
 
     private Handler mHandler = new Handler();
+    private GalleryImageAdapter photoAdapter;
 
     private LinearLayout datePicker;
     private LinearLayout qPicker;
     private LinearLayout kb;
-    private LinearLayout audio;
 
     private TextView month;
     private TextView day;
@@ -192,6 +207,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private int mapIndex;
 
+    private ArrayList<Drawable> drawables;
+
     private boolean analyze;
 
     private String local;
@@ -210,6 +227,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private Button doRecord;
     private Button clearRecord;
+    private Button capture;
+    private Button captureClear;
 
     private String mGeneratedName;
 
@@ -257,6 +276,18 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private boolean[] init;
 
+    private Gallery photo;
+
+
+    LinearLayout traitBoolean;
+    LinearLayout traitAudio;
+    LinearLayout traitCategorical;
+    LinearLayout traitDate;
+    LinearLayout traitNumeric;
+    LinearLayout traitPercent;
+    LinearLayout traitText;
+    LinearLayout traitPhoto;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -273,6 +304,8 @@ public class MainActivity extends Activity implements OnClickListener {
                 .getDisplayMetrics());
 
         loadScreen();
+
+
 
         // If the user hasn't configured range and traits, open settings screen
         if (!ep.getBoolean("ImportFieldFinished", false) | !ep.getBoolean("CreateTraitFinished", false)) {
@@ -316,8 +349,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
         createDirs();
 
-        audio = (LinearLayout) findViewById(R.id.audio);
-
         range = (EditText) findViewById(R.id.range);
         plot = (EditText) findViewById(R.id.plot);
 
@@ -340,6 +371,15 @@ public class MainActivity extends Activity implements OnClickListener {
         drop1.setAddEllipsis(true);
         drop2.setAddEllipsis(true);
         drop3.setAddEllipsis(true);
+
+        traitBoolean = (LinearLayout) findViewById(R.id.booleanLayout);
+        traitAudio = (LinearLayout) findViewById(R.id.audioLayout);
+        traitCategorical = (LinearLayout) findViewById(R.id.categoricalLayout);
+        traitDate = (LinearLayout) findViewById(R.id.dateLayout);
+        traitNumeric = (LinearLayout) findViewById(R.id.numericLayout);
+        traitPercent = (LinearLayout) findViewById(R.id.percentLayout);
+        traitText = (LinearLayout) findViewById(R.id.textLayout);
+        traitPhoto = (LinearLayout) findViewById(R.id.photoLayout);
 
         traitType = (Spinner) findViewById(R.id.traitType);
 
@@ -388,11 +428,19 @@ public class MainActivity extends Activity implements OnClickListener {
         // pNum is the text area reflecting the progress bar value
         pNum = (EditText) findViewById(R.id.pNum);
 
-        doRecord = (Button) findViewById(R.id.record);
+        doRecord = (Button) traitAudio.findViewById(R.id.record);
         doRecord.setOnClickListener(this);
 
-        clearRecord = (Button) findViewById(R.id.clearRecord);
+        clearRecord = (Button) traitAudio.findViewById(R.id.clearRecord);
         clearRecord.setOnClickListener(this);
+
+        capture = (Button) traitPhoto.findViewById(R.id.capture);
+        capture.setOnClickListener(this);
+
+        captureClear = (Button) traitPhoto.findViewById(R.id.clearPhoto);
+        captureClear.setOnClickListener(this);
+
+        photo = (Gallery) traitPhoto.findViewById(R.id.photo);
 
         tNum.setOnEditorActionListener(new OnEditorActionListener() {
             public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
@@ -545,7 +593,7 @@ public class MainActivity extends Activity implements OnClickListener {
         plotName = (TextView) findViewById(R.id.plotName);
 
         clearGeneric = (Button) findViewById(R.id.clearBtn4);
-        clearBoolean = (Button) findViewById(R.id.clearBtn5);
+        clearBoolean = (Button) traitBoolean.findViewById(R.id.clearBtn5);
         clearDate = (Button) findViewById(R.id.clearDateBtn);
 
         Button addDayBtn = (Button) findViewById(R.id.addDateBtn);
@@ -909,7 +957,7 @@ public class MainActivity extends Activity implements OnClickListener {
             }
         });
 
-        eImg = (ImageView) findViewById(R.id.eImg);
+        eImg = (ImageView) traitBoolean.findViewById(R.id.eImg);
 
         // Boolean
         eImg.setOnClickListener(new OnClickListener() {
@@ -1286,6 +1334,7 @@ public class MainActivity extends Activity implements OnClickListener {
         createDir(Constants.FIELDIMPORTPATH);
         createDir(Constants.FIELDEXPORTPATH);
         createDir(Constants.BACKUPPATH);
+        createDir(Constants.ERRORPATH);
     }
 
     // Helper function to create a single directory
@@ -1871,7 +1920,14 @@ public class MainActivity extends Activity implements OnClickListener {
                         datePicker.setVisibility(LinearLayout.GONE);
                         eImg.setVisibility(EditText.GONE);
 
-                        audio.setVisibility(EditText.GONE);
+                        traitText.setVisibility(View.VISIBLE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
 
                         if (newTraits.containsKey(currentTrait.trait)) {
                             tNum.removeTextChangedListener(tNumUpdate);
@@ -1933,7 +1989,8 @@ public class MainActivity extends Activity implements OnClickListener {
                         datePicker.setVisibility(LinearLayout.GONE);
                         eImg.setVisibility(EditText.GONE);
 
-                        audio.setVisibility(EditText.GONE);
+                        traitAudio.setVisibility(EditText.GONE);
+                        traitPhoto.setVisibility(View.GONE);
 
                         if (newTraits.containsKey(currentTrait.trait)) {
                             eNum.removeTextChangedListener(eNumUpdate);
@@ -1990,7 +2047,8 @@ public class MainActivity extends Activity implements OnClickListener {
                         datePicker.setVisibility(LinearLayout.GONE);
                         eImg.setVisibility(EditText.GONE);
 
-                        audio.setVisibility(EditText.GONE);
+                        traitAudio.setVisibility(EditText.GONE);
+                        traitPhoto.setVisibility(View.GONE);
 
                         if (newTraits.containsKey(currentTrait.trait)) {
 
@@ -2054,6 +2112,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                     } else if (currentTrait.format.equals("date")) {
                         qPicker.setVisibility(LinearLayout.GONE);
+                        traitPhoto.setVisibility(View.GONE);
 
                         kb.setVisibility(View.GONE);
 
@@ -2069,7 +2128,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         datePicker.setVisibility(LinearLayout.VISIBLE);
                         eImg.setVisibility(EditText.GONE);
 
-                        audio.setVisibility(EditText.GONE);
+                        traitAudio.setVisibility(EditText.GONE);
 
                         final Calendar c = Calendar.getInstance();
 
@@ -2107,6 +2166,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         }
                     } else if (currentTrait.format.equals("qualitative") | currentTrait.format.equals("categorical")) {
                         qPicker.setVisibility(LinearLayout.VISIBLE);
+                        traitPhoto.setVisibility(View.GONE);
 
                         kb.setVisibility(View.GONE);
 
@@ -2122,7 +2182,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         datePicker.setVisibility(LinearLayout.GONE);
                         eImg.setVisibility(EditText.GONE);
 
-                        audio.setVisibility(EditText.GONE);
+                        traitAudio.setVisibility(EditText.GONE);
 
                         String lastQualitative = "";
 
@@ -2385,22 +2445,22 @@ public class MainActivity extends Activity implements OnClickListener {
                         }
                     } else if (currentTrait.format.equals("boolean")) {
                         qPicker.setVisibility(LinearLayout.GONE);
+                        traitPhoto.setVisibility(View.GONE);
 
                         kb.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
 
+                        traitBoolean.setVisibility(View.VISIBLE);
+                        traitAudio.setVisibility(View.GONE);
+
                         clearGeneric.setVisibility(View.GONE);
-                        clearBoolean.setVisibility(View.VISIBLE);
 
                         pNum.setVisibility(EditText.GONE);
                         eNum.setVisibility(EditText.GONE);
                         seekBar.setVisibility(EditText.GONE);
                         datePicker.setVisibility(LinearLayout.GONE);
-                        eImg.setVisibility(EditText.VISIBLE);
-
-                        audio.setVisibility(EditText.GONE);
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
                             if (currentTrait.defaultValue.trim().toLowerCase()
@@ -2422,6 +2482,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
                         }
                     } else if (currentTrait.format.equals("audio")) {
+                        traitAudio.setVisibility(View.VISIBLE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+
                         qPicker.setVisibility(LinearLayout.GONE);
 
                         kb.setVisibility(View.GONE);
@@ -2432,15 +2496,11 @@ public class MainActivity extends Activity implements OnClickListener {
                         tNum.setEnabled(false);
 
                         clearGeneric.setVisibility(View.GONE);
-                        clearBoolean.setVisibility(View.GONE);
 
                         pNum.setVisibility(EditText.GONE);
                         eNum.setVisibility(EditText.GONE);
                         seekBar.setVisibility(EditText.GONE);
                         datePicker.setVisibility(LinearLayout.GONE);
-                        eImg.setVisibility(EditText.GONE);
-
-                        audio.setVisibility(EditText.VISIBLE);
 
                         rangeLeft.setEnabled(true);
                         rangeRight.setEnabled(true);
@@ -2459,6 +2519,76 @@ public class MainActivity extends Activity implements OnClickListener {
                             tNum.setText(getString(R.string.stored));
                         }
 
+                    } else if (currentTrait.format.equals("photo")) {
+
+                        traitPhoto.setVisibility(View.VISIBLE);
+                        traitAudio.setVisibility(View.GONE);
+
+                        qPicker.setVisibility(LinearLayout.GONE);
+
+                        kb.setVisibility(View.GONE);
+
+                        tNum.removeTextChangedListener(tNumUpdate);
+
+                        tNum.setVisibility(EditText.GONE);
+                        tNum.setEnabled(false);
+
+                        clearGeneric.setVisibility(View.GONE);
+                        clearBoolean.setVisibility(View.GONE);
+
+                        pNum.setVisibility(EditText.GONE);
+                        eNum.setVisibility(EditText.GONE);
+                        seekBar.setVisibility(EditText.GONE);
+                        datePicker.setVisibility(LinearLayout.GONE);
+                        eImg.setVisibility(EditText.GONE);
+
+                        rangeLeft.setEnabled(true);
+                        rangeRight.setEnabled(true);
+
+                        traitLeft.setEnabled(true);
+                        traitRight.setEnabled(true);
+
+                        // Always set to null as default, then fill in with trait value
+                        photoLocation = new ArrayList<String>();
+                        drawables = new ArrayList<Drawable>();
+
+                        File img = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/" + "/photos/");
+
+                        if (img.listFiles() != null) {
+                            photoLocation = dt.getPlotPhotos(cRange.plot_id);
+                            Log.d("Field",Integer.toString(photoLocation.size()));
+
+                            for (int i = 0; i < photoLocation.size(); i++) {
+                                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
+                            }
+
+                            photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
+
+                            photo.setAdapter(photoAdapter);
+                            photo.setSelection(photo.getCount()-1);
+                            photo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                                @Override
+                                public void onItemClick(AdapterView<?> arg0,
+                                                        View arg1, int pos, long arg3) {
+
+                                    displayPlotImage(photoLocation.get(photo.getSelectedItemPosition()));
+                                }
+                            });
+
+                        } else
+                        {
+                            photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
+                            photo.setAdapter(photoAdapter);
+                        }
+
+                        if (!newTraits.containsKey(currentTrait.trait)) {
+
+                            tNum.setText("");
+
+                            if (!img.exists())
+                                img.mkdirs();
+                        }
                     } else {
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2481,7 +2611,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         datePicker.setVisibility(LinearLayout.GONE);
                         eImg.setVisibility(EditText.GONE);
 
-                        audio.setVisibility(EditText.GONE);
+                        traitAudio.setVisibility(EditText.GONE);
                     }
 
                 }
@@ -3735,6 +3865,8 @@ public class MainActivity extends Activity implements OnClickListener {
             return;
         }
 
+        gridCreated = false;
+
         if (newTraits.containsKey(parent))
             newTraits.remove(parent);
 
@@ -3957,7 +4089,80 @@ public class MainActivity extends Activity implements OnClickListener {
 
         String v = "";
 
-        switch (b.getId()) {
+            switch (b.getId())
+            {
+                // Photo capture
+                case R.id.capture:
+                    try
+                    {
+                        int m = 0;
+
+                        try
+                        {
+                            m = Integer.parseInt(currentTrait.details);
+                        }
+                        catch (Exception n)
+                        {
+                            m = 0;
+                        }
+
+                        // Do not take photos if limit is reached
+                        if (m == 0 || photoLocation.size() < m)
+                        {
+                            takePicture();
+                        }
+                        else
+                            Toast.makeText(MainActivity.this, getString(R.string.maxphotos), Toast.LENGTH_LONG).show();
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+
+                        ErrorLog("CameraError.txt", e.getMessage());
+
+                        Toast toast = Toast.makeText(MainActivity.this, getString(R.string.hardwaremissing), Toast.LENGTH_LONG);
+                        toast.show();
+
+                    }
+                    break;
+
+                // Clear Photo
+                case R.id.clearPhoto:
+
+                    if (photo.getCount() > 0)
+                    {
+                        String item = photoLocation.get(photo.getSelectedItemPosition());
+                        photoLocation.remove(photo.getSelectedItemPosition());
+                        drawables.remove(photo.getSelectedItemPosition());
+
+                        File f = new File(item);
+                        f.delete();
+                        scanFile(f);
+
+                        // Remove individual images
+                        dt.deleteTraitByValue(cRange.plot_id, currentTrait.trait, item);
+
+                        // Only do a purge by trait when there are no more images left
+                        if (photoLocation.size() == 0)
+                            removeTrait(currentTrait.trait);
+
+                        tNum.setText("");
+
+                        photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
+
+                        photo.setAdapter(photoAdapter);
+                    }
+                    else
+                    {
+                        ArrayList<Drawable> emptyList = new ArrayList<Drawable>();
+
+                        photoAdapter = new GalleryImageAdapter(MainActivity.this, emptyList);
+
+                        photo.setAdapter(photoAdapter);
+                    }
+                    break;
+
+
             case R.id.record:
                 if (mRecording) {
 
@@ -4081,6 +4286,69 @@ public class MainActivity extends Activity implements OnClickListener {
         } else {
             eNum.setText(eNum.getText().toString() + v);
         }
+    }
+
+    private void takePicture() {
+
+
+        SimpleDateFormat timeStamp = new SimpleDateFormat(
+                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
+
+        File dir = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/");
+
+        dir.mkdirs();
+
+        String generatedName = MainActivity.cRange.plot_id + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
+        mCurrentPhotoPath = generatedName;
+
+        Log.w("File", Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/" + generatedName);
+
+        // Save photo capture with timestamp as filename
+        File file = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/",
+                generatedName);
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            photoFile = file;
+
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, 252);
+            }
+
+        }
+    }
+
+    private void makeImage(String photoName) {
+
+        File file = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/",
+                photoName);
+
+        scanFile(file.getAbsoluteFile());
+
+        photoLocation.add(file.getAbsolutePath());
+
+        drawables.add(new BitmapDrawable(displayScaledSavedPhoto(file.getAbsolutePath())));
+
+        // Force Gallery to update
+
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri contentUri = Uri.fromFile(file);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
+
+        updateTraitAllowDuplicates(currentTrait.trait, "photo", file.getAbsolutePath());
+
+        photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
+
+        photo.setAdapter(photoAdapter);
+
+        photo.setSelection(photoAdapter.getCount() - 1);
     }
 
     private void showMapDialog() {
@@ -4750,26 +5018,208 @@ public class MainActivity extends Activity implements OnClickListener {
         return super.onKeyDown(keyCode, event);
     }
 
+    private void capturePhoto(Intent intent) {
+        Bundle extras = intent.getExtras();
+        Bitmap bitmap = (Bitmap) extras.get("data");
+
+        if (bitmap == null)
+            return;
+
+        SimpleDateFormat timeStamp = new SimpleDateFormat(
+                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
+
+        File dir = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/");
+
+        dir.mkdirs();
+
+        String generatedName = MainActivity.cRange.plot_id + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
+
+        Log.w("File", Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/" + generatedName);
+
+        // Save photo capture with timestamp as filename
+        File file = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/",
+                generatedName);
+
+        try {
+            file.createNewFile();
+            FileOutputStream ostream = new FileOutputStream(file);
+            bitmap.compress(CompressFormat.JPEG, 100, ostream);
+            ostream.close();
+
+            photoLocation.add(file.getAbsolutePath());
+
+            drawables.add(new BitmapDrawable(displayScaledSavedPhoto(file.getAbsolutePath())));
+
+            // Force Gallery to update
+
+            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+
+            Uri contentUri = Uri.fromFile(file);
+            mediaScanIntent.setData(contentUri);
+
+            this.sendBroadcast(mediaScanIntent);
+
+            updateTraitAllowDuplicates(currentTrait.trait, "photo", file.getAbsolutePath());
+
+            photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
+
+            photo.setAdapter(photoAdapter);
+
+            photo.setSelection(photoAdapter.getCount() - 1);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void updateTraitAllowDuplicates(String parent, String trait, String value) {
+
+        if (cRange == null || cRange.plot_id.length() == 0)
+        {
+            return;
+        }
+
+        Log.w(trait, value);
+
+        if (newTraits.containsKey(parent))
+            newTraits.remove(parent);
+
+        newTraits.put(parent, value);
+
+        dt.deleteTraitByValue(cRange.plot_id, parent, value);
+
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value);
+
+        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss",
+                Locale.getDefault());
+
+        Editor ed = ep.edit();
+        ed.putString("Dataset_" + ep.getString("FieldFile", "") + "_" + cRange.range + "_" + cRange.plot, timeStamp.format(Calendar.getInstance().getTime()));
+        ed.commit();
+    }
+
+    private void displayPlotImage(String path) {
+        try {
+            Log.w("Display path", path);
+
+            File f = new File(path);
+
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.fromFile(f), "image/*");
+            startActivity(intent);
+        } catch (Exception e) {
+
+        }
+    }
+
+    private Bitmap displayScaledSavedPhoto(String path) {
+
+        if (path == null) {
+            Toast toast = Toast.makeText(MainActivity.this, getString(R.string.photomissing), Toast.LENGTH_LONG);
+
+            toast.setGravity(Gravity.TOP, 0, 0);
+            toast.show();
+
+            return null;
+        }
+
+        try {
+
+            // Get the dimensions of the bitmap
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inJustDecodeBounds = true;
+
+            BitmapFactory.decodeFile(path, bmOptions);
+            int photoW = bmOptions.outWidth;
+            int photoH = bmOptions.outHeight;
+
+            int targetW = 0;
+            int targetH = 0;
+
+            // landscape photo
+            if (photoW > photoH) {
+                // Get the dimensions of the View
+                targetW = 800;
+                targetH = 600;
+            } else {
+                // portrait
+                targetW = 600;
+                targetH = 800;
+            }
+
+            int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+            // Decode the image file into a Bitmap sized to fill the View
+            bmOptions.inJustDecodeBounds = false;
+            bmOptions.inSampleSize = scaleFactor;
+            bmOptions.inPurgeable = true;
+
+            Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
+            return bitmap;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast toast = Toast.makeText(MainActivity.this, getString(R.string.photodecodefail), Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.TOP, 0, 0);
+            toast.show();
+
+            return null;
+        }
+    }
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
-                String mChosenFileString = data.getStringExtra("result");
-                File mChosenFile = new File(mChosenFileString);
+        switch (requestCode) {
+            case 1:
+                if (resultCode == RESULT_OK) {
+                    String mChosenFileString = data.getStringExtra("result");
+                    File mChosenFile = new File(mChosenFileString);
 
-                //launch intent
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                Uri uri = Uri.fromFile(mChosenFile);
-                String url = uri.toString();
+                    //launch intent
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    Uri uri = Uri.fromFile(mChosenFile);
+                    String url = uri.toString();
 
-                //grab mime
-                String newMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                        MimeTypeMap.getFileExtensionFromUrl(url));
+                    //grab mime
+                    String newMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                            MimeTypeMap.getFileExtensionFromUrl(url));
 
-                i.setDataAndType(uri, newMimeType);
-                startActivity(i);
-            }
-            if (resultCode == RESULT_CANCELED) {
-            }
+                    i.setDataAndType(uri, newMimeType);
+                    startActivity(i);
+                }
+                if (resultCode == RESULT_CANCELED) {
+                }
+                break;
+
+            case 252:
+                if (resultCode == RESULT_OK) {
+                    makeImage(mCurrentPhotoPath);
+                }
+                break;
+        }
+
+    }
+
+    public void ErrorLog(String sFileName, String sErrMsg)
+    {
+        try
+        {
+            SimpleDateFormat lv_parser = new SimpleDateFormat("dd-MM-yyyy h:mm:ss a");
+            lv_parser.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            File file = new File(Constants.ERRORPATH, sFileName);
+
+            FileWriter filewriter = new FileWriter(file, true);
+            BufferedWriter out = new BufferedWriter(filewriter);
+
+            out.write(lv_parser.format(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime()) + " " + sErrMsg + "\n");
+            out.flush();
+            out.close();
+        }
+        catch (Exception e)
+        {
+
         }
     }
 
