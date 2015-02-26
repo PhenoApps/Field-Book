@@ -72,6 +72,7 @@ public class FileExploreActivity extends ListActivity {
 
             public void onItemClick(AdapterView<?> arg0, View arg1, int which, long arg3) {
                 chosenFile = fileList[which].file;
+
                 File sel = new File(path + "/" + chosenFile);
 
                 if (sel.isDirectory()) {
@@ -217,10 +218,6 @@ public class FileExploreActivity extends ListActivity {
             }
         }
     };
-
-    public void makeToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
 
     // Wrapper class to hold file data
     private class Item {

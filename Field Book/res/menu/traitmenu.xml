@@ -21,6 +21,11 @@
         android:showAsAction="always"
         android:title="@string/deletealltraits" />
     <item
+        android:id="@+id/toggleTrait"
+        android:icon="@drawable/ic_action_checkbox"
+        android:showAsAction="always"
+        android:title="@string/visibility" />
+    <item
         android:id="@+id/importexport"
         android:icon="@drawable/ic_action_import_export"
         android:showAsAction="always"

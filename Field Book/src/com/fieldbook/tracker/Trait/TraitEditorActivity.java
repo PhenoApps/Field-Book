@@ -675,12 +675,33 @@ public class TraitEditorActivity extends Activity {
                 importExportDialog();
                 break;
 
+            case R.id.toggleTrait:
+                changeAllVisibility();
+                break;
+
             case android.R.id.home:
                 finish();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void changeAllVisibility() {
+        Boolean globalVis = ep.getBoolean("allTraitsVisible",false);
+        String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
+
+        for (int j = 0; j < allTraits.length; j++) {
+            MainActivity.dt.updateTraitVisibility(allTraits[j],globalVis);
+            Log.d("Field",allTraits[j]);
+        }
+
+        globalVis = !globalVis;
+
+        Editor ed = ep.edit();
+        ed.putBoolean("allTraitsVisible",globalVis);
+        ed.commit();
+        loadData();
     }
 
     private void importExportDialog() {

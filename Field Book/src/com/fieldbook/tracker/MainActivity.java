@@ -5265,17 +5265,13 @@ public class MainActivity extends Activity implements OnClickListener {
                     String mChosenFileString = data.getStringExtra("result");
                     File mChosenFile = new File(mChosenFileString);
 
-                    //launch intent
-                    Intent i = new Intent(Intent.ACTION_VIEW);
-                    Uri uri = Uri.fromFile(mChosenFile);
-                    String url = uri.toString();
+                    String suffix = mChosenFileString.substring(mChosenFileString.lastIndexOf('.') + 1).toLowerCase();
 
-                    //grab mime
-                    String newMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                            MimeTypeMap.getFileExtensionFromUrl(url));
+                    String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+                    Intent open = new Intent(Intent.ACTION_VIEW);
+                    open.setDataAndType((Uri.fromFile(mChosenFile)), mime);
 
-                    i.setDataAndType(uri, newMimeType);
-                    startActivity(i);
+                    startActivity(open);
                 }
                 if (resultCode == RESULT_CANCELED) {
                 }
