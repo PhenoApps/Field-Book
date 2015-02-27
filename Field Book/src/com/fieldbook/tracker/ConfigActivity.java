@@ -59,6 +59,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -72,6 +73,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import jxl.Workbook;
 import jxl.WorkbookSettings;
@@ -727,6 +729,16 @@ public class ConfigActivity extends Activity {
             if (resultCode == RESULT_CANCELED) {
             }
         }
+
+        if (requestCode == 2) {
+            if (resultCode == RESULT_OK) {
+                mChosenFile = data.getStringExtra("result");
+                mChosenFile = mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.length());
+                mHandler.post(importDB);
+            }
+            if (resultCode == RESULT_CANCELED) {
+            }
+        }
     }
 
     public int getVersion() {
@@ -1052,6 +1064,142 @@ public class ConfigActivity extends Activity {
         }
     }
 
+    private Runnable exportDB = new Runnable() {
+        public void run() {
+            new ExportDBTask().execute(0);
+        }
+    };
+
+    private class ExportDBTask extends AsyncTask<Integer, Integer, Integer>
+    {
+        boolean fail;
+        ProgressDialog dialog;
+        String error;
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            fail = false;
+
+            dialog = new ProgressDialog(ConfigActivity.this);
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(false);
+            dialog.setMessage(Html
+                    .fromHtml(getString(R.string.exportmsg)));
+            dialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... params)
+        {
+            try {
+                MainActivity.dt.exportDatabase(exportFile.getText().toString());
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                error = e.getMessage();
+                fail = true;
+            }
+
+            File exportedDb = new File(Constants.BACKUPPATH + "/" + exportFile.getText().toString() + ".db");
+            shareFile(exportedDb);
+
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result)
+        {
+            if (dialog.isShowing())
+                dialog.dismiss();
+
+            if (fail)
+            {
+                ErrorLog("DBBackupError.txt", error);
+
+                Toast toast = Toast.makeText(ConfigActivity.this,
+                        getString(R.string.exporterror), Toast.LENGTH_LONG);
+                toast.show();
+
+            }
+            else
+            {
+                Toast toast = Toast.makeText(ConfigActivity.this,
+                        getString(R.string.exportcomplete), Toast.LENGTH_LONG);
+
+
+            }
+
+        }
+    }
+
+    private Runnable importDB = new Runnable() {
+        public void run() {
+            new ImportDBTask().execute(0);
+        }
+    };
+
+    private class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {
+        boolean fail;
+        ProgressDialog dialog;
+        String error;
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            fail = false;
+
+            dialog = new ProgressDialog(ConfigActivity.this);
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(false);
+            dialog.setMessage(Html
+                    .fromHtml(getString(R.string.importmsg)));
+            dialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... params) {
+            try {
+                MainActivity.dt.importDatabase(mChosenFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                error = e.getMessage();
+
+                fail = true;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result)
+        {
+            if (dialog.isShowing())
+                dialog.dismiss();
+
+            Editor ed = ep.edit();
+
+            if (fail) {
+                ErrorLog("DBImportError.txt", error);
+
+                Toast toast = Toast.makeText(ConfigActivity.this,
+                        getString(R.string.importerror), Toast.LENGTH_LONG);
+
+                toast.show();
+
+            } else {
+                ed.putBoolean("ImportFieldFinished", true);
+            }
+
+            ed.commit();
+
+            MainActivity.reloadData = true;
+        }
+    }
+
     /**
      * Scan file to update file list and share exported file
      */
@@ -1065,6 +1213,11 @@ public class ConfigActivity extends Activity {
             startActivity(Intent.createChooser(intent, "Sending File..."));
         } finally {
         }
+    }
+
+
+    private void scanFile(File filePath) {
+        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
     }
 
     // Because the import dialog layout is created dynamically, this function
@@ -1981,7 +2134,6 @@ public class ConfigActivity extends Activity {
         protected Integer doInBackground(Integer... params) {
             try {
                 String[] data;
-
                 String[] columns;
 
                 //verify unique
@@ -2149,6 +2301,30 @@ public class ConfigActivity extends Activity {
 
     }
 
+    public void ErrorLog(String sFileName, String sErrMsg)
+    {
+        try
+        {
+            SimpleDateFormat lv_parser = new SimpleDateFormat("dd-MM-yyyy h:mm:ss a");
+            lv_parser.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            File file = new File(Constants.ERRORPATH, sFileName);
+
+            FileWriter filewriter = new FileWriter(file, true);
+            BufferedWriter out = new BufferedWriter(filewriter);
+
+            out.write(lv_parser.format(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime()) + " " + sErrMsg + "\n");
+            out.flush();
+            out.close();
+
+            scanFile(file);
+        }
+        catch (Exception e)
+        {
+
+        }
+    }
+
     private Runnable importExcel = new Runnable() {
         public void run() {
             new ImportExcelTask().execute(0);
@@ -2304,8 +2480,10 @@ public class ConfigActivity extends Activity {
     }
 
     private void showDatabaseDialog() {
-        String[] items = new String[1];
-        items[0] = getString(R.string.dbreset);
+        String[] items = new String[3];
+        items[0] = getString(R.string.dbexport);
+        items[1] = getString(R.string.dbimport);
+        items[2] = getString(R.string.dbreset);
 
         final Dialog chooseBackupDialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
         chooseBackupDialog.setTitle(getString(R.string.dbbackup));
@@ -2335,15 +2513,73 @@ public class ConfigActivity extends Activity {
                 chooseBackupDialog.dismiss();
                 switch (which) {
                     case 0:
+                        showDatabaseExportDialog();
+                        break;
+                    case 1:
+                        showDatabaseImportDialog();
+                        break;
+                    case 2:
                         showDatabaseResetDialog1();
                         break;
                 }
             }
+
+
         });
 
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, items);
         setupList.setAdapter(itemsAdapter);
         chooseBackupDialog.show();
+    }
+
+    private void showDatabaseImportDialog() {
+        Intent intent = new Intent();
+
+        intent.setClassName(ConfigActivity.this,
+                FileExploreActivity.class.getName());
+        intent.putExtra("path", Constants.BACKUPPATH);
+        startActivityForResult(intent, 2);
+    }
+
+    private void showDatabaseExportDialog() {
+        dbSaveDialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+        dbSaveDialog.setTitle(getString(R.string.dbbackup));
+        dbSaveDialog.setContentView(R.layout.savedb);
+
+        android.view.WindowManager.LayoutParams params2 = dbSaveDialog.getWindow().getAttributes();
+        params2.width = LayoutParams.FILL_PARENT;
+        dbSaveDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params2);
+
+        dbSaveDialog.setCancelable(true);
+        dbSaveDialog.setCanceledOnTouchOutside(true);
+
+        exportFile = (EditText) dbSaveDialog.findViewById(R.id.fileName);
+
+        Button closeBtn = (Button) dbSaveDialog.findViewById(R.id.closeBtn);
+
+        closeBtn.setOnClickListener(new OnClickListener(){
+
+            public void onClick(View v) {
+                dbSaveDialog.dismiss();
+            }
+        });
+
+        Button exportButton = (Button) dbSaveDialog.findViewById(R.id.saveBtn);
+
+        exportButton.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View arg0) {
+                dbSaveDialog.dismiss();
+                mHandler.post(exportDB);
+            }
+        });
+
+        SimpleDateFormat timeStamp = new SimpleDateFormat(
+                "yyyy.MM.dd", Locale.getDefault());
+
+        exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + MainActivity.dt.DATABASE_VERSION + ".db");
+
+        dbSaveDialog.show();
     }
 
     // First confirmation

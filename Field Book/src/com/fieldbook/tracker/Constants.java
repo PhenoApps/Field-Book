@@ -15,21 +15,21 @@ public class Constants {
             + "/fieldBook/plot_data";
 
     public static String TRAITPATH = Environment.getExternalStorageDirectory()
-            + "/fieldbook/trait";
+            + "/fieldBook/trait";
 
     public static String FIELDIMPORTPATH = Environment.getExternalStorageDirectory()
-            + "/fieldbook/field_import";
+            + "/fieldBook/field_import";
 
     public static String FIELDEXPORTPATH = Environment.getExternalStorageDirectory()
-            + "/fieldbook/field_export";
+            + "/fieldBook/field_export";
 
     public static final File MPATH = new File(Environment.getExternalStorageDirectory()
             + "/fieldBook");
 
     public static String BACKUPPATH = Environment.getExternalStorageDirectory()
-            + "/fieldbook/database";
+            + "/fieldBook/database";
 
     public static String ERRORPATH = Environment.getExternalStorageDirectory()
-            + "/fieldbook/errors";
+            + "/fieldBook/errors";
 
 }

@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  */
 public class DataHelper {
     private static final String DATABASE_NAME = "fieldbook.db";
-    private static final int DATABASE_VERSION = 5;
+    public static final int DATABASE_VERSION = 5;
 
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
