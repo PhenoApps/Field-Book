@@ -41,6 +41,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -88,10 +89,6 @@ import java.util.TimerTask;
 
 /**
  * Main entry point. All main screen logic resides here
- * v1.6 - We have retained all existing data structures to minimize code breakage, but functions have new parameters
- * added to allow for multiple traits. All affected functions are documented in Datahelper.java
- * <p/>
- * v2.0 - The actionbar is not backward compatible, this is why we're using a 3rd party library
  */
 public class MainActivity extends Activity implements OnClickListener {
 
@@ -178,9 +175,16 @@ public class MainActivity extends Activity implements OnClickListener {
     private AutoResizeTextView drop2;
     private AutoResizeTextView drop1;
 
-    private TextView drop3prefix;
-    private TextView drop2prefix;
-    private TextView drop1prefix;
+
+    private Spinner drop1prefix;
+    private Spinner drop2prefix;
+    private Spinner drop3prefix;
+
+    private int drop1Selection;
+    private int drop2Selection;
+    private int drop3Selection;
+
+    private boolean savePrefix;
 
     private TextView rangeName;
     private TextView plotName;
@@ -283,6 +287,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private Gallery photo;
 
+    private String[] prefixTraits;
 
     LinearLayout traitBoolean;
     LinearLayout traitAudio;
@@ -361,9 +366,9 @@ public class MainActivity extends Activity implements OnClickListener {
         drop2 = (AutoResizeTextView) findViewById(R.id.drop2);
         drop1 = (AutoResizeTextView) findViewById(R.id.drop1);
 
-        drop3prefix = (TextView) findViewById(R.id.drop3prefix);
-        drop2prefix = (TextView) findViewById(R.id.drop2prefix);
-        drop1prefix = (TextView) findViewById(R.id.drop1prefix);
+        drop1prefix = (Spinner) findViewById(R.id.drop1prefix);
+        drop2prefix = (Spinner) findViewById(R.id.drop2prefix);
+        drop3prefix = (Spinner) findViewById(R.id.drop3prefix);
 
         dpi = (TextView) findViewById(R.id.dpi);
 
@@ -988,11 +993,8 @@ public class MainActivity extends Activity implements OnClickListener {
         rangeRight = (ImageView) findViewById(R.id.rangeRight);
 
         rangeLeft.setOnTouchListener(new OnTouchListener() {
-
             public boolean onTouch(View v, MotionEvent event) {
-
                 switch (event.getAction()) {
-
                     case MotionEvent.ACTION_DOWN:
                         rangeLeft.setImageResource(R.drawable.ml_arrows);
                         rangeLeft.performClick();
@@ -1020,10 +1022,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         // Go to previous range
         rangeLeft.setOnClickListener(new OnClickListener() {
-
             public void onClick(View arg0) {
-
-
                 if (rangeID != null && rangeID.length > 0) {
                     //index.setEnabled(true);
 
@@ -1085,9 +1084,7 @@ public class MainActivity extends Activity implements OnClickListener {
         });
 
         rangeRight.setOnTouchListener(new OnTouchListener() {
-
             public boolean onTouch(View v, MotionEvent event) {
-
                 switch (event.getAction()) {
 
                     case MotionEvent.ACTION_DOWN:
@@ -1117,7 +1114,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
         // Go to next range
         rangeRight.setOnClickListener(new OnClickListener() {
-
             public void onClick(View arg0) {
                 if (rangeID != null && rangeID.length > 0) {
                     //index.setEnabled(true);
@@ -1486,6 +1482,11 @@ public class MainActivity extends Activity implements OnClickListener {
         newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                 .clone();
 
+
+        drop1Selection = drop1prefix.getSelectedItemPosition();
+        drop2Selection = drop2prefix.getSelectedItemPosition();
+        drop3Selection = drop3prefix.getSelectedItemPosition();
+
         initWidgets(true);
 
     }
@@ -1763,13 +1764,15 @@ public class MainActivity extends Activity implements OnClickListener {
         range.setText(cRange.range);
         plot.setText(cRange.plot);
 
+
+        //TODO change to dp
         int pixelSize = getPixelSize();
 
         drop1.setTextSize(pixelSize);
         drop2.setTextSize(pixelSize);
         drop3.setTextSize(pixelSize);
 
-        if (ep.getString("DROP1", "").length() == 0)
+        /*if (ep.getString("DROP1", "").length() == 0)
             drop1prefix.setText(getString(R.string.drop1) + ": ");
         else
             drop1prefix.setText(ep.getString("DROP1", "") + ": ");
@@ -1783,6 +1786,7 @@ public class MainActivity extends Activity implements OnClickListener {
             drop3prefix.setText(getString(R.string.drop3) + ": ");
         else
             drop3prefix.setText(ep.getString("DROP3", "") + ": ");
+
 
 
         myList1 = dt.getAllRange(ep.getString("DROP1", ""), range
@@ -1808,7 +1812,7 @@ public class MainActivity extends Activity implements OnClickListener {
             drop3.setText(getString(R.string.nodata));
         } else
             drop3.setText(myList3[0]);
-
+*/
     }
 
     // This is central to the application
@@ -1823,7 +1827,136 @@ public class MainActivity extends Activity implements OnClickListener {
         drop2.setTextSize(pixelSize);
         drop3.setTextSize(pixelSize);
 
-        if (ep.getString("DROP1", "").length() == 0)
+        if (prefixTraits != null) {
+            savePrefix = false;
+
+            ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<String>(
+                    this, R.layout.spinnerlayout, prefixTraits);
+
+            drop1prefix.setAdapter(prefixArrayAdapter);
+            drop1prefix.setSelection(drop1Selection);
+
+            if (!drop1prefix.equals(null)) {
+                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP1", ""));
+                drop1prefix.setSelection(spinnerPostion);
+                spinnerPostion = 0;
+            }
+
+            drop2prefix.setAdapter(prefixArrayAdapter);
+            drop2prefix.setSelection(drop2Selection);
+
+            if (!drop2prefix.equals(null)) {
+                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP2", ""));
+                drop2prefix.setSelection(spinnerPostion);
+                spinnerPostion = 0;
+            }
+
+            drop3prefix.setAdapter(prefixArrayAdapter);
+            drop3prefix.setSelection(drop3Selection);
+
+            if (!drop3prefix.equals(null)) {
+                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP3", ""));
+                drop3prefix.setSelection(spinnerPostion);
+                spinnerPostion = 0;
+            }
+
+            drop1prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+                @Override
+                public void onItemSelected(AdapterView<?> arg0, View arg1,
+                                           int pos, long arg3) {
+                    try {
+
+                        if (savePrefix)
+                            drop1Selection = pos;
+
+                        myList1 = dt.getDropDownRange(prefixTraits[pos], cRange.plot_id);
+
+                        if (myList1 == null) {
+                            drop1.setText(getString(R.string.nodata));
+                        } else
+                            drop1.setText(myList1[0]);
+                            Editor e = ep.edit();
+                            e.putString("DROP1", prefixTraits[pos]);
+                            e.commit();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    drop1prefix.requestFocus();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> arg0) {
+
+                }
+            });
+
+            drop2prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+                @Override
+                public void onItemSelected(AdapterView<?> arg0, View arg1,
+                                           int pos, long arg3) {
+
+                    try {
+                        if (savePrefix)
+                            drop2Selection = pos;
+
+                        myList2 = dt.getDropDownRange(prefixTraits[pos], cRange.plot_id);
+
+                        if (myList2 == null) {
+                            drop2.setText(getString(R.string.nodata));
+                        } else
+                            drop2.setText(myList2[0]);
+                            Editor e = ep.edit();
+                            e.putString("DROP2", prefixTraits[pos]);
+                            e.commit();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> arg0) {
+
+                }
+            });
+
+            drop3prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+                @Override
+                public void onItemSelected(AdapterView<?> arg0, View arg1,
+                                           int pos, long arg3) {
+
+                    try {
+                        if (savePrefix)
+                            drop3Selection = pos;
+
+                        myList3 = dt.getDropDownRange(prefixTraits[pos], cRange.plot_id);
+
+                        if (myList3 == null) {
+                            drop3.setText(getString(R.string.nodata));
+                        } else
+                            drop3.setText(myList3[0]);
+                            Editor e = ep.edit();
+                            e.putString("DROP3", prefixTraits[pos]);
+                            e.commit();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> arg0) {
+
+                }
+            });
+
+            savePrefix = true;
+        }
+
+        /*if (ep.getString("DROP1", "").length() == 0)
             drop1prefix.setText(getString(R.string.drop1) + ": ");
         else
             drop1prefix.setText(ep.getString("DROP1", "") + ": ");
@@ -1837,6 +1970,8 @@ public class MainActivity extends Activity implements OnClickListener {
             drop3prefix.setText(getString(R.string.drop3) + ": ");
         else
             drop3prefix.setText(ep.getString("DROP3", "") + ": ");
+
+
 
         myList1 = dt.getAllRange(ep.getString("DROP1", ""), range
                 .getText().toString(), plot.getText().toString());
@@ -1861,7 +1996,7 @@ public class MainActivity extends Activity implements OnClickListener {
             drop3.setText(getString(R.string.nodata));
         } else
             drop3.setText(myList3[0]);
-
+*/
         // trait is unique, format is not
 
         traits = dt.getVisibleTrait();
@@ -3069,15 +3204,18 @@ public class MainActivity extends Activity implements OnClickListener {
 
             mapIndex = 0;
 
-            initWidgets(false);
+            prefixTraits = MainActivity.dt.getRangeColumnsWithoutOrganizer();
 
+            initWidgets(false);
             traitType.setSelection(0);
+
         } else if (partialReload) {
             partialReload = false;
 
             displayRange(cRange);
-
+            prefixTraits = MainActivity.dt.getRangeColumnsWithoutOrganizer();
             initWidgets(false);
+
         } else if (searchReload) {
             searchReload = false;
 
@@ -5101,9 +5239,50 @@ public class MainActivity extends Activity implements OnClickListener {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            return true;
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                return true;
+
+            case 92:
+                if (rangeID != null && rangeID.length > 0) {
+
+                    paging -= 1;
+
+                    if (paging < 1)
+                        paging = rangeID.length;
+
+                    cRange = dt.getRange(rangeID[paging - 1]);
+
+                    displayRange(cRange);
+
+                    newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                            .clone();
+
+                    initWidgets(true);
+                }
+
+                break;
+
+            case 93:
+                if (rangeID != null && rangeID.length > 0) {
+                    paging += 1;
+
+                    if (paging > rangeID.length)
+                        paging = 1;
+
+                    cRange = dt.getRange(rangeID[paging - 1]);
+
+                    displayRange(cRange);
+
+                    newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                            .clone();
+
+                    initWidgets(true);
+                }
+                break;
         }
+
         return super.onKeyDown(keyCode, event);
     }
 

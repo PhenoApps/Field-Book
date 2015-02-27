@@ -995,6 +995,7 @@ public class DataHelper {
                     null, null, null);
 
             ArrayList<String> photoList = new ArrayList<String>();
+            Log.d("Field",Integer.toString(cursor.getCount()));
 
             if(cursor.moveToFirst()) {
                 do {
@@ -1013,6 +1014,86 @@ public class DataHelper {
         }
     }
 
+    /**
+     * Returns saved data based on trait, range and plot Meant for the on screen
+     * drop downs
+     */
+    public String[] getDropDownRange(String trait, String plotId) {
+
+        if (trait.length() == 0)
+            return null;
+
+        //String tableName = getRangeTableById(importId);
+
+        try
+        {
+            Cursor cursor = this.db.query(RANGE, new String[] { trait },
+                    ep.getString("ImportUniqueName", "") + " like ? ", new String[] { plotId },
+                    null, null, null);
+
+            String[] myList = null;
+
+            if (cursor.moveToFirst()) {
+                myList = new String[cursor.getCount()];
+
+                int count = 0;
+
+                do {
+                    myList[count] = cursor.getString(0);
+
+                    count += 1;
+                } while (cursor.moveToNext());
+            }
+
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+
+            return myList;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the column names for the range table
+     */
+    public String[] getRangeColumnsWithoutOrganizer() {
+        Cursor cursor = this.db.rawQuery("SELECT * from " + RANGE + " limit 1", null);
+
+        String[] data = null;
+
+        if (cursor.moveToFirst()) {
+            int i = cursor.getColumnCount() - 1;
+
+            data = new String[i];
+
+            int k = 0;
+
+            String first = ep.getString("ImportFirstName", "");
+            String second = ep.getString("ImportSecondName", "");
+
+            for (int j = 0; j < cursor.getColumnCount(); j++) {
+
+                // need to hide importId and organizers
+                if (!cursor.getColumnName(j).equals("id")) { // & !cursor.getColumnName(j).equals("importId") & !cursor.getColumnName(j).equals(first) & !cursor.getColumnName(j).equals(second)) {
+
+                    data[k] = cursor.getColumnName(j).replace("//", "/");
+                    k += 1;
+
+                    //Log.w("data " + k, cursor.getColumnName(j));
+                }
+            }
+        }
+
+        if (cursor != null && !cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return data;
+    }
 
     /**
      * Returns the plot for items that match the specified id

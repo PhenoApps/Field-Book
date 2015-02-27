@@ -22,57 +22,23 @@
             android:text="high"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+        <TableLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
-            <LinearLayout
+            <TableRow
+                android:id="@+id/tableRow1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
-                <TextView
+                <Spinner
                     android:id="@+id/drop1prefix"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:minWidth="50dp"
-                    android:paddingRight="5dp"
                     android:text="@string/drop1"
                     android:textColor="@color/s_text"
                     android:textSize="30dp"
                     android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/drop2prefix"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:minWidth="50dp"
-                    android:paddingRight="5dp"
-                    android:text="@string/drop2"
-                    android:textColor="@color/s_text"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/drop3prefix"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:minWidth="50dp"
-                    android:paddingRight="5dp"
-                    android:text="@string/drop3"
-                    android:textColor="@color/s_text"
-                    android:textSize="30dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
 
                 <com.fieldbook.tracker.AutoResizeTextView
                     android:id="@+id/drop1"
@@ -80,8 +46,24 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
                     android:ellipsize="none"
+                    android:paddingLeft="10dp"
                     android:singleLine="true"
                     android:textColor="#000000"
+                    android:textSize="30dp"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <Spinner
+                    android:id="@+id/drop2prefix"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/drop2"
+                    android:textColor="@color/s_text"
                     android:textSize="30dp"
                     android:textStyle="bold" />
 
@@ -91,24 +73,41 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
                     android:ellipsize="none"
+                    android:paddingLeft="10dp"
                     android:singleLine="true"
                     android:textColor="#000000"
+                    android:textSize="30dp"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <Spinner
+                    android:id="@+id/drop3prefix"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/drop3"
+                    android:textColor="@color/s_text"
                     android:textSize="30dp"
                     android:textStyle="bold" />
 
                 <com.fieldbook.tracker.AutoResizeTextView
                     android:id="@+id/drop3"
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
                     android:ellipsize="none"
+                    android:paddingLeft="10dp"
                     android:singleLine="true"
                     android:textColor="#000000"
                     android:textSize="30dp"
                     android:textStyle="bold" />
 
-            </LinearLayout>
-        </LinearLayout>
+            </TableRow>
+        </TableLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -434,9 +433,9 @@
             android:minWidth="150dp"
             android:text="@string/clear"
             android:textColor="#000000"
-            android:visibility="gone"
             android:textSize="30dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="gone" />
 
 
         <Button
@@ -476,8 +475,8 @@
             android:minWidth="130dp"
             android:text="@string/clear"
             android:textColor="#000000"
-            android:visibility="gone"
             android:textSize="30dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="gone" />
     </LinearLayout>
 </ScrollView>
