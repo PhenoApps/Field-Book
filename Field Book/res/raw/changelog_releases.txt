@@ -1,3 +1,12 @@
+17/2.3.0
+New Import layout
+New Photo trait
+Audio trait updates and fixes
+InfoBars can be changed from main screen
+Table export speed drastically improved
+Import and export the internal database
+Toggle all trait visibility at once
+
 16/2.2.0
 New Advanced Settings option to make sound when primary organizer changes
 New Advanced Settings option to go to specific unique ID (for barcodes)
