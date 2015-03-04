@@ -140,6 +140,7 @@
     <string name="listfieldimport">List imported fields</string>
     <string name="chooseunique">Only one unique identifier can be selected</string>
     <string name="choosefirst">Only one primary order can be selected</string>
+    <string name="colnamesdif">Columns cannot be used for the same assignment</string>
     <string name="choosesecond">Only one secondary order can be selected</string>
     <string name="catseparator">Separate items with a /</string>
     <string name="resetnext">Database will be loaded when the app restarted</string>

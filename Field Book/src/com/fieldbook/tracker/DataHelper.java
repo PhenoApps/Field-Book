@@ -1646,8 +1646,10 @@ public class DataHelper {
     /**
      * Import database
      */
+
     public boolean importDatabase(String filename) throws IOException {
-        String internalPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
+        String internalDbPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
+        String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
 
         // Close the SQLiteOpenHelper so it will commit the created empty
         // database to internal storage.
@@ -1656,57 +1658,55 @@ public class DataHelper {
         Log.w("File to copy", Constants.BACKUPPATH + "/" + filename);
 
         File newDb = new File(Constants.BACKUPPATH + "/" + filename);
-        File oldDb = new File(internalPath);
+        File oldDb = new File(internalDbPath);
 
-        if (newDb.exists()) {
-            FileUtils.copyFile(new FileInputStream(newDb), new FileOutputStream(oldDb));
+        File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
+        File oldSp = new File(internalSpPath);
 
-            // Access the copied database so SQLiteHelper will cache it and mark
-            // it as created.
-
-            openHelper = new OpenHelper(this.context);
-
-            open();
-
-            return true;
-        }
+        copyFile(newDb,oldDb);
+        copyFile(newSp,oldSp);
 
         throw new IOException("System database in backup directory can't be loaded. Unable to copy.");
     }
 
-
     /**
      * Export database
      */
-    public boolean exportDatabase(String filename) throws IOException {
-        String internalPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
+    public void exportDatabase(String filename) throws IOException {
+        String internalDbPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
+        String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
 
-        // Close the SQLiteOpenHelper so it will commit the created empty
-        // database to internal storage.
         close();
 
         File newDb = new File(Constants.BACKUPPATH + "/" + filename + ".db");
-        File oldDb = new File(internalPath);
+        File oldDb = new File(internalDbPath);
 
-        if (oldDb.exists()) {
-            FileUtils.copyFile(new FileInputStream(oldDb), new FileOutputStream(newDb));
+        File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
+        File oldSp = new File(internalSpPath);
 
-            // Access the copied database so SQLiteHelper will cache it and mark
-            // it as created.
+        copyFile(oldDb,newDb);
+        copyFile(oldSp,newSp);
 
+        throw new IOException("Original system database in app does not exist. Unable to copy.");
+    }
+
+    /**
+     * Copy old file to new file
+     */
+    private Boolean copyFile(File oldFile, File newFile) throws IOException {
+        if (oldFile.exists()) {
+            FileUtils.copyFile(new FileInputStream(oldFile), new FileOutputStream(newFile));
             openHelper = new OpenHelper(this.context);
             open();
             return true;
         }
-
-        throw new IOException("Original system database in app does not exist. Unable to copy.");
+        throw new IOException("Unable to copy database.");
     }
 
     /**
      * Drop specified table
      */
     public void dropTable(String table) {
-
         db.execSQL("DROP TABLE IF EXISTS " + table);
     }
 

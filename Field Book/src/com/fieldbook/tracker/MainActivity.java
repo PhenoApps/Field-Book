@@ -1837,7 +1837,7 @@ public class MainActivity extends Activity implements OnClickListener {
             drop1prefix.setSelection(drop1Selection);
 
             if (!drop1prefix.equals(null)) {
-                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP1", ""));
+                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP1", ep.getString("ImportUniqueName","")));
                 drop1prefix.setSelection(spinnerPostion);
                 spinnerPostion = 0;
             }
@@ -1846,7 +1846,7 @@ public class MainActivity extends Activity implements OnClickListener {
             drop2prefix.setSelection(drop2Selection);
 
             if (!drop2prefix.equals(null)) {
-                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP2", ""));
+                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP2", ep.getString("ImportUniqueName","")));
                 drop2prefix.setSelection(spinnerPostion);
                 spinnerPostion = 0;
             }
@@ -1855,7 +1855,7 @@ public class MainActivity extends Activity implements OnClickListener {
             drop3prefix.setSelection(drop3Selection);
 
             if (!drop3prefix.equals(null)) {
-                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP3", ""));
+                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP3", ep.getString("ImportUniqueName","")));
                 drop3prefix.setSelection(spinnerPostion);
                 spinnerPostion = 0;
             }

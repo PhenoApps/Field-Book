@@ -5,9 +5,10 @@ lodging,percent,,0,100,,,TRUE,3
 flowering,date,,,,,,TRUE,4
 keep/trash,boolean,FALSE,,,,,TRUE,5
 notes,text,,,,,,TRUE,6
-plants,numeric,,,,,,TRUE,7
-class,categorical,,,,,HRW/HWW/SRW/SWW,TRUE,8
-flowered,percent,,0,100,,,TRUE,9
-heading,date,,,,,,TRUE,10
-insect damage,boolean,,,,,,TRUE,11
-audio,audio,,,,,,TRUE,12
+picture,photo,,,,,,TRUE,7
+plants,numeric,,,,,,TRUE,8
+class,categorical,,,,,HRW/HWW/SRW/SWW,TRUE,9
+flowered,percent,,0,100,,,TRUE,10
+heading,date,,,,,,TRUE,11
+insect damage,boolean,,,,,,TRUE,12
+audio,audio,,,,,,TRUE,13

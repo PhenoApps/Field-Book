@@ -882,34 +882,17 @@ public class ConfigActivity extends Activity {
         new Version().execute();
     }
 
-    // Validate that columns are unique
+    // Validate that column choices are different from one another
     private boolean checkImportColumnNames() {
-        idColPosition = findColValue(importMain, 0, false);
+        String idCol = unique.getSelectedItem().toString();
+        String priCol = primary.getSelectedItem().toString();
+        String secCol = secondary.getSelectedItem().toString();
 
-        if (idColPosition == -1) {
-            Toast.makeText(ConfigActivity.this, getString(R.string.chooseunique),
+        if (idCol.equals(priCol) || idCol.equals(secCol) || priCol.equals(secCol)) {
+            Toast.makeText(ConfigActivity.this, getString(R.string.colnamesdif),
                     Toast.LENGTH_LONG).show();
             return false;
         }
-
-        uPosition = findColValue(importMain, 0, false);
-        fPosition = findColValue(importMain, 1, false);
-
-        if (fPosition == -1) {
-            Toast.makeText(ConfigActivity.this, getString(R.string.choosefirst),
-                    Toast.LENGTH_LONG).show();
-            return false;
-        }
-
-        sPosition = findColValue(importMain, 2, false);
-
-        if (sPosition == -1) {
-            Toast.makeText(ConfigActivity.this, getString(R.string.choosesecond),
-                    Toast.LENGTH_LONG).show();
-            return false;
-        }
-
-        ePosition = findColValue(importMain, 3, false);
 
         return true;
     }
@@ -1104,7 +1087,10 @@ public class ConfigActivity extends Activity {
             }
 
             File exportedDb = new File(Constants.BACKUPPATH + "/" + exportFile.getText().toString() + ".db");
+            File exportedSp = new File(Constants.BACKUPPATH + "/" + exportFile.getText().toString() + "_sharedpref.xml");
+
             shareFile(exportedDb);
+            shareFile(exportedSp);
 
             return 0;
         }
@@ -1915,8 +1901,6 @@ public class ConfigActivity extends Activity {
                     Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
                     break;
 
-                } else {
-                    addRow(importMain, s);
                 }
             }
         } catch (Exception n) {
@@ -1928,7 +1912,7 @@ public class ConfigActivity extends Activity {
 
         if (!columnFail)
 
-            importDialog(importColumns);
+        importDialog(importColumns);
         //importFieldMapDialog.show();
     }
 
@@ -1977,8 +1961,6 @@ public class ConfigActivity extends Activity {
                     columnFail = true;
                     Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
                     break;
-                } else {
-                    addRow(importMain, s);
                 }
             }
         } catch (Exception n) {
@@ -2045,7 +2027,6 @@ public class ConfigActivity extends Activity {
         startImport.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-
                 if (checkImportColumnNames()) {
                     importFieldDialog.dismiss();
                     if (isCSV)
@@ -2067,42 +2048,6 @@ public class ConfigActivity extends Activity {
         importFieldDialog.show();
     }
 
-    // Helper function to add rows to import dialog
-    public void addRow(LinearLayout parent, String text) {
-        LayoutInflater vi = (LayoutInflater) getApplicationContext().
-                getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        View v = vi.inflate(R.layout.importrow, null);
-
-        TextView c = (TextView) v.findViewById(R.id.column);
-        final Spinner s = (Spinner) v.findViewById(R.id.map);
-
-        c.setText(text);
-
-        String[] likes = new String[4];
-
-        likes[0] = getString(R.string.importunique);
-        likes[1] = getString(R.string.importfirst);
-        likes[2] = getString(R.string.importsecond);
-        likes[3] = getString(R.string.importextra);
-
-        s.setOnItemSelectedListener(new OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                s.setSelection(position);
-                checkImportColumnNames();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        setSpinner(s, likes);
-        findMatchingColumn(s, text);
-        parent.addView(v);
-    }
 
     // Creates a new thread to do importing
     private Runnable importCSV = new Runnable() {

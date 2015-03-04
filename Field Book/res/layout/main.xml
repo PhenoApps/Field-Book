@@ -10,17 +10,17 @@
         android:layout_height="fill_parent"
         android:orientation="vertical">
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:background="#000000" />
-
         <TextView
             android:id="@+id/dpi"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="high"
             android:visibility="gone" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="#000000" />
 
         <TableLayout
             android:layout_width="fill_parent"
