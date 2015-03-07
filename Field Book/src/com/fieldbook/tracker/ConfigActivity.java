@@ -113,7 +113,6 @@ public class ConfigActivity extends Activity {
 
     private Dialog setupDialog;
 
-    private Dialog importFieldMapDialog;
     private Dialog importFieldDialog;
 
 
@@ -158,8 +157,6 @@ public class ConfigActivity extends Activity {
     Spinner secondary;
 
     private int action;
-
-    private LinearLayout importMain;
 
     private OnItemClickListener mainSettingsListener;
 
@@ -233,14 +230,6 @@ public class ConfigActivity extends Activity {
         getBaseContext().getResources().updateConfiguration(config2,
                 getBaseContext().getResources().getDisplayMetrics());
 
-        importFieldMapDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
-        importFieldMapDialog.setContentView(R.layout.importchoose);
-        importFieldMapDialog.setTitle(getString(R.string.importfields));
-        importFieldMapDialog.setCancelable(true);
-        importFieldMapDialog.setCanceledOnTouchOutside(true);
-
-        importMain = (LinearLayout) importFieldMapDialog.findViewById(R.id.main);
-
         invalidateOptionsMenu();
         loadScreen();
 
@@ -255,26 +244,6 @@ public class ConfigActivity extends Activity {
 
         mFrame.addView(LayoutInflater.from(getBaseContext()).inflate(R.layout.config, null));
         setContentView(mFrame);
-
-        // Import Field book
-
-
-        Button startImport = (Button) importFieldMapDialog.findViewById(R.id.okBtn);
-
-        startImport.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-
-                if (checkImportColumnNames()) {
-                    importFieldMapDialog.dismiss();
-
-                    if (isCSV)
-                        mHandler.post(importCSV);
-                    else
-                        mHandler.post(importExcel);
-                }
-            }
-        });
 
         // Advanced Settings
         advancedDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
@@ -645,8 +614,8 @@ public class ConfigActivity extends Activity {
 
         mainCloseBtn.setVisibility(View.GONE);
 
-        String[] items2 = new String[]{getString(R.string.setup), getString(R.string.fields),
-                getString(R.string.traits), getString(R.string.export), getString(R.string.advanced),
+        String[] items2 = new String[]{ getString(R.string.fields),
+                getString(R.string.traits), getString(R.string.setup),getString(R.string.export), getString(R.string.advanced),
                 getString(R.string.language)};
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
@@ -654,22 +623,13 @@ public class ConfigActivity extends Activity {
                 Intent intent = new Intent();
                 switch (position) {
                     case 0:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            showNoFieldDialog();
-                            return;
-                        }
-
-                        showSetupDialog();
-                        break;
-
-                    case 1:
                         intent.setClassName(ConfigActivity.this,
                                 FileExploreActivity.class.getName());
                         intent.putExtra("path", Constants.FIELDIMPORTPATH);
                         startActivityForResult(intent, 1);
                         break;
 
-                    case 2:
+                    case 1:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
                             Toast toast = Toast.makeText(ConfigActivity.this, getString(R.string.importtraitwarning), Toast.LENGTH_LONG);
                             toast.show();
@@ -680,7 +640,14 @@ public class ConfigActivity extends Activity {
                                 TraitEditorActivity.class.getName());
                         startActivity(intent);
                         break;
+                    case 2:
+                        if (!ep.getBoolean("ImportFieldFinished", false)) {
+                            showNoFieldDialog();
+                            return;
+                        }
 
+                        showSetupDialog();
+                        break;
                     case 3:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
                             showNoFieldDialog();
@@ -1241,19 +1208,6 @@ public class ConfigActivity extends Activity {
         }
     }
 
-    // Helper function to see if the import column matches any of the spinner values
-    // If it does, set it to the appropriate value
-    private void findMatchingColumn(Spinner s, String col) {
-        if (col.toLowerCase().trim().contains("plot_id"))
-            s.setSelection(0);
-        else if (col.toLowerCase().trim().contains("range"))
-            s.setSelection(1);
-        else if (col.toLowerCase().trim().contains("plot"))
-            s.setSelection(2);
-        else
-            s.setSelection(3);
-    }
-
     // Ensure the values in the key column are unique for Excel workbooks
     private boolean verifyUniqueColumnExcel(Workbook wb) {
         HashMap<String, String> check = new HashMap<String, String>();
@@ -1310,9 +1264,12 @@ public class ConfigActivity extends Activity {
     }
 
     // Helper function to set spinner adapter and listener
-    private void setSpinner(Spinner spinner, String[] data) {
+    private void setSpinner(Spinner spinner, String[] data, String pref) {
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.spinnerlayout, data);
         spinner.setAdapter(itemsAdapter);
+
+        int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(1).toString()));
+        spinner.setSelection(spinnerPosition);
     }
 
     /*
@@ -1864,8 +1821,6 @@ public class ConfigActivity extends Activity {
         action = DIALOG_LOAD_FIELDFILECSV;
 
         try {
-            importMain.removeAllViews();
-
             FileReader fr = new FileReader(mChosenFile);
             CSVReader cr = new CSVReader(fr);
 
@@ -1923,8 +1878,6 @@ public class ConfigActivity extends Activity {
         wbSettings.setUseTemporaryFileDuringWrite(true);
 
         try {
-            importMain.removeAllViews();
-
             wb = Workbook.getWorkbook(new File(mChosenFile), wbSettings);
 
             importColumns = new String[wb.getSheet(0).getColumns()];
@@ -2020,7 +1973,7 @@ public class ConfigActivity extends Activity {
         importFieldDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params2);
 
         importFieldDialog.setCancelable(true);
-        importFieldDialog.setCanceledOnTouchOutside(true);
+        importFieldDialog.setCanceledOnTouchOutside(false);
 
         Button startImport = (Button) importFieldDialog.findViewById(R.id.okBtn);
 
@@ -2041,9 +1994,9 @@ public class ConfigActivity extends Activity {
         primary = (Spinner) importFieldDialog.findViewById(R.id.primarySpin);
         secondary = (Spinner) importFieldDialog.findViewById(R.id.secondarySpin);
 
-        setSpinner(unique, columns);
-        setSpinner(primary, columns);
-        setSpinner(secondary, columns);
+        setSpinner(unique, columns, "ImportUniqueName");
+        setSpinner(primary, columns, "ImportFirstName");
+        setSpinner(secondary, columns, "ImportSecondName");
 
         importFieldDialog.show();
     }
@@ -2100,9 +2053,9 @@ public class ConfigActivity extends Activity {
 
                     Editor e = ep.edit();
 
-                    e.putString("DROP1", "");
-                    e.putString("DROP2", "");
-                    e.putString("DROP3", "");
+                    e.putString("DROP1", null);
+                    e.putString("DROP2", null);
+                    e.putString("DROP3", null);
 
                     e.commit();
                 } else {
@@ -2321,9 +2274,9 @@ public class ConfigActivity extends Activity {
 
                     Editor e = ep.edit();
 
-                    e.putString("DROP1", "");
-                    e.putString("DROP2", "");
-                    e.putString("DROP3", "");
+                    e.putString("DROP1", null);
+                    e.putString("DROP2", null);
+                    e.putString("DROP3", null);
 
                     e.commit();
                 } else {

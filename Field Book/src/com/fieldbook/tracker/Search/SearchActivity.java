@@ -307,7 +307,7 @@ public class SearchActivity extends Activity {
         likes[4] = getString(R.string.morethan);
         likes[5] = getString(R.string.lessthan);
 
-        ArrayAdapter adapter = new ArrayAdapter(SearchActivity.this, R.layout.smallspinnerlayout, likes);
+        ArrayAdapter adapter = new ArrayAdapter(SearchActivity.this, R.layout.spinnerlayout, likes);
         s.setAdapter(adapter);
 
         String[] col = MainActivity.dt.getRangeColumns();
@@ -315,7 +315,7 @@ public class SearchActivity extends Activity {
         if (col != null) {
             rangeUntil = col.length;
 
-            ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.smallspinnerlayout,
+            ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.spinnerlayout,
                     concat(col, MainActivity.dt.getVisibleTrait()));
 
             c.setAdapter(adapter2);

@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingLeft="10dp"
+        android:background="#FFFFFF"
         android:paddingRight="10dp"
         android:paddingTop="5dp">
 

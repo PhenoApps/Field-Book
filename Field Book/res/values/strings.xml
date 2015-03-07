@@ -67,6 +67,8 @@
 
     <string name="importdb">Import</string>
 
+    <string name="deletePhoto">Are you sure you want to delete this photo?</string>
+
     <string name="firstname">First name</string>
     <string name="lastname">Last name</string>
     <string name="person">Person</string>

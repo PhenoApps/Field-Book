@@ -7,5 +7,5 @@
     android:ellipsize="end"
     android:gravity="center"
     android:textColor="#000000"
-    android:textSize="28dp"
+    android:textSize="26dp"
     android:textStyle="bold" />

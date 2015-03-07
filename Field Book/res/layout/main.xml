@@ -23,8 +23,8 @@
             android:background="#000000" />
 
         <TableLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <TableRow
                 android:id="@+id/tableRow1"
@@ -150,17 +150,6 @@
             android:orientation="vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:minWidth="100dp"
-                android:paddingRight="10dp"
-                android:text="@string/traitdetails"
-                android:textColor="@color/s_text"
-                android:textSize="20dp"
-                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/traitDetails"

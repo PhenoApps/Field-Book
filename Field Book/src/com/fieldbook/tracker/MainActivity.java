@@ -1002,7 +1002,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         Message msg = new Message();
                         msg.what = MESSAGE_CHECK_BTN_STILL_PRESSED;
                         msg.arg1 = R.id.rangeLeft;
-                        msg.arg2 = 200; // this btn's repeat time in ms
+                        msg.arg2 = 100;// this btn's repeat time in ms
                         v.setTag(v); // mark btn as pressed (any non-null)
                         myGuiHandler.sendMessageDelayed(msg, msg.arg2);
                         break;
@@ -1094,7 +1094,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         Message msg = new Message();
                         msg.what = MESSAGE_CHECK_BTN_STILL_PRESSED;
                         msg.arg1 = R.id.rangeRight;
-                        msg.arg2 = 200; // this btn's repeat time in ms
+                        msg.arg2 = 100; // this btn's repeat time in ms
                         v.setTag(v); // mark btn as pressed (any non-null)
                         myGuiHandler.sendMessageDelayed(msg, msg.arg2);
                         break;
@@ -1771,48 +1771,6 @@ public class MainActivity extends Activity implements OnClickListener {
         drop1.setTextSize(pixelSize);
         drop2.setTextSize(pixelSize);
         drop3.setTextSize(pixelSize);
-
-        /*if (ep.getString("DROP1", "").length() == 0)
-            drop1prefix.setText(getString(R.string.drop1) + ": ");
-        else
-            drop1prefix.setText(ep.getString("DROP1", "") + ": ");
-
-        if (ep.getString("DROP2", "").length() == 0)
-            drop2prefix.setText(getString(R.string.drop2) + ": ");
-        else
-            drop2prefix.setText(ep.getString("DROP2", "") + ": ");
-
-        if (ep.getString("DROP3", "").length() == 0)
-            drop3prefix.setText(getString(R.string.drop3) + ": ");
-        else
-            drop3prefix.setText(ep.getString("DROP3", "") + ": ");
-
-
-
-        myList1 = dt.getAllRange(ep.getString("DROP1", ""), range
-                .getText().toString(), plot.getText().toString());
-
-        myList2 = dt.getAllRange(ep.getString("DROP2", ""), range
-                .getText().toString(), plot.getText().toString());
-
-        myList3 = dt.getAllRange(ep.getString("DROP3", ""), range
-                .getText().toString(), plot.getText().toString());
-
-        if (myList1 == null | ep.getString("DROP1", "").length() == 0) {
-            drop1.setText(getString(R.string.nodata));
-        } else
-            drop1.setText(myList1[0]);
-
-        if (myList2 == null | ep.getString("DROP2", "").length() == 0) {
-            drop2.setText(getString(R.string.nodata));
-        } else
-            drop2.setText(myList2[0]);
-
-        if (myList3 == null | ep.getString("DROP3", "").length() == 0) {
-            drop3.setText(getString(R.string.nodata));
-        } else
-            drop3.setText(myList3[0]);
-*/
     }
 
     // This is central to the application
@@ -1837,27 +1795,27 @@ public class MainActivity extends Activity implements OnClickListener {
             drop1prefix.setSelection(drop1Selection);
 
             if (!drop1prefix.equals(null)) {
-                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP1", ep.getString("ImportUniqueName","")));
-                drop1prefix.setSelection(spinnerPostion);
-                spinnerPostion = 0;
+                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP1", ep.getString("ImportUniqueName","")));
+                drop1prefix.setSelection(spinnerPosition);
+                spinnerPosition = 0;
             }
 
             drop2prefix.setAdapter(prefixArrayAdapter);
             drop2prefix.setSelection(drop2Selection);
 
             if (!drop2prefix.equals(null)) {
-                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP2", ep.getString("ImportUniqueName","")));
-                drop2prefix.setSelection(spinnerPostion);
-                spinnerPostion = 0;
+                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP2", ep.getString("ImportFirstName","")));
+                drop2prefix.setSelection(spinnerPosition);
+                spinnerPosition = 0;
             }
 
             drop3prefix.setAdapter(prefixArrayAdapter);
             drop3prefix.setSelection(drop3Selection);
 
             if (!drop3prefix.equals(null)) {
-                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP3", ep.getString("ImportUniqueName","")));
-                drop3prefix.setSelection(spinnerPostion);
-                spinnerPostion = 0;
+                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP3", ep.getString("ImportSecondName","")));
+                drop3prefix.setSelection(spinnerPosition);
+                spinnerPosition = 0;
             }
 
             drop1prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -1956,47 +1914,6 @@ public class MainActivity extends Activity implements OnClickListener {
             savePrefix = true;
         }
 
-        /*if (ep.getString("DROP1", "").length() == 0)
-            drop1prefix.setText(getString(R.string.drop1) + ": ");
-        else
-            drop1prefix.setText(ep.getString("DROP1", "") + ": ");
-
-        if (ep.getString("DROP2", "").length() == 0)
-            drop2prefix.setText(getString(R.string.drop2) + ": ");
-        else
-            drop2prefix.setText(ep.getString("DROP2", "") + ": ");
-
-        if (ep.getString("DROP3", "").length() == 0)
-            drop3prefix.setText(getString(R.string.drop3) + ": ");
-        else
-            drop3prefix.setText(ep.getString("DROP3", "") + ": ");
-
-
-
-        myList1 = dt.getAllRange(ep.getString("DROP1", ""), range
-                .getText().toString(), plot.getText().toString());
-
-        myList2 = dt.getAllRange(ep.getString("DROP2", ""), range
-                .getText().toString(), plot.getText().toString());
-
-        myList3 = dt.getAllRange(ep.getString("DROP3", ""), range
-                .getText().toString(), plot.getText().toString());
-
-        if (myList1 == null | ep.getString("DROP1", "").length() == 0) {
-            drop1.setText(getString(R.string.nodata));
-        } else
-            drop1.setText(myList1[0]);
-
-        if (myList2 == null | ep.getString("DROP2", "").length() == 0) {
-            drop2.setText(getString(R.string.nodata));
-        } else
-            drop2.setText(myList2[0]);
-
-        if (myList3 == null | ep.getString("DROP3", "").length() == 0) {
-            drop3.setText(getString(R.string.nodata));
-        } else
-            drop3.setText(myList3[0]);
-*/
         // trait is unique, format is not
 
         traits = dt.getVisibleTrait();
@@ -2024,6 +1941,21 @@ public class MainActivity extends Activity implements OnClickListener {
                     // This updates the in memory hashmap from database
                     currentTrait = dt.getDetail(traitType.getSelectedItem()
                             .toString());
+
+                    imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (!currentTrait.format.equals("text")) {
+                        try {
+                            imm.hideSoftInputFromWindow(eNum.getWindowToken(), 0);
+                        } catch (Exception e) {
+
+                        }
+
+                        try {
+                            imm.hideSoftInputFromWindow(tNum.getWindowToken(), 0);
+                        } catch (Exception e) {
+
+                        }
+                    }
 
                     traitDetails.setText(currentTrait.details);
 
@@ -2818,6 +2750,43 @@ public class MainActivity extends Activity implements OnClickListener {
         }
     }
 
+
+    private void loadPrefixes() {
+        if (prefixTraits != null) {
+            savePrefix = false;
+
+            ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<String>(
+                    this, R.layout.spinnerlayout, prefixTraits);
+
+            drop1prefix.setAdapter(prefixArrayAdapter);
+            drop1prefix.setSelection(drop1Selection);
+
+            if (!drop1prefix.equals(null)) {
+                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP1", ep.getString("ImportUniqueName", "")));
+                drop1prefix.setSelection(spinnerPostion);
+                spinnerPostion = 0;
+            }
+
+            drop2prefix.setAdapter(prefixArrayAdapter);
+            drop2prefix.setSelection(drop2Selection);
+
+            if (!drop2prefix.equals(null)) {
+                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP2", ep.getString("ImportUniqueName", "")));
+                drop2prefix.setSelection(spinnerPostion);
+                spinnerPostion = 0;
+            }
+
+            drop3prefix.setAdapter(prefixArrayAdapter);
+            drop3prefix.setSelection(drop3Selection);
+
+            if (!drop3prefix.equals(null)) {
+                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP3", ep.getString("ImportUniqueName", "")));
+                drop3prefix.setSelection(spinnerPostion);
+                spinnerPostion = 0;
+            }
+        }
+    }
+
     // For audio trait type
     private void setRecordingLocation(String recordingName) {
         mRecordingLocation = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/audio/",
@@ -3189,6 +3158,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
             reloadData = false;
             partialReload = false;
+
+            rangeName.setText(ep.getString("ImportFirstName", getString(R.string.range)) + ":");
+            plotName.setText(ep.getString("ImportSecondName", getString(R.string.plot)) + ":");
 
             paging = 1;
 
@@ -4349,38 +4321,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 // Clear Photo
                 case R.id.clearPhoto:
-
-                    if (photo.getCount() > 0)
-                    {
-                        String item = photoLocation.get(photo.getSelectedItemPosition());
-                        photoLocation.remove(photo.getSelectedItemPosition());
-                        drawables.remove(photo.getSelectedItemPosition());
-
-                        File f = new File(item);
-                        f.delete();
-                        scanFile(f);
-
-                        // Remove individual images
-                        dt.deleteTraitByValue(cRange.plot_id, currentTrait.trait, item);
-
-                        // Only do a purge by trait when there are no more images left
-                        if (photoLocation.size() == 0)
-                            removeTrait(currentTrait.trait);
-
-                        tNum.setText("");
-
-                        photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
-
-                        photo.setAdapter(photoAdapter);
-                    }
-                    else
-                    {
-                        ArrayList<Drawable> emptyList = new ArrayList<Drawable>();
-
-                        photoAdapter = new GalleryImageAdapter(MainActivity.this, emptyList);
-
-                        photo.setAdapter(photoAdapter);
-                    }
+                    deletePhotoWarning();
                     break;
 
 
@@ -4516,6 +4457,65 @@ public class MainActivity extends Activity implements OnClickListener {
         } else {
             eNum.setText(eNum.getText().toString() + v);
         }
+    }
+
+    private void deletePhotoWarning() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+        builder.setTitle(getString(R.string.warning));
+        builder.setMessage(getString(R.string.deletePhoto));
+
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+
+                if (photo.getCount() > 0)
+                {
+                    String item = photoLocation.get(photo.getSelectedItemPosition());
+                    photoLocation.remove(photo.getSelectedItemPosition());
+                    drawables.remove(photo.getSelectedItemPosition());
+
+                    File f = new File(item);
+                    f.delete();
+                    scanFile(f);
+
+                    // Remove individual images
+                    dt.deleteTraitByValue(cRange.plot_id, currentTrait.trait, item);
+
+                    // Only do a purge by trait when there are no more images left
+                    if (photoLocation.size() == 0)
+                        removeTrait(currentTrait.trait);
+
+                    tNum.setText("");
+
+                    photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
+
+                    photo.setAdapter(photoAdapter);
+                }
+                else
+                {
+                    ArrayList<Drawable> emptyList = new ArrayList<Drawable>();
+
+                    photoAdapter = new GalleryImageAdapter(MainActivity.this, emptyList);
+
+                    photo.setAdapter(photoAdapter);
+                }
+            }
+
+        });
+
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
     }
 
     private void takePicture() {

@@ -220,6 +220,8 @@ public class TraitEditorActivity extends Activity {
         Button saveBtn = (Button) createDialog.findViewById(R.id.saveBtn);
         Button closeBtn = (Button) createDialog.findViewById(R.id.closeBtn);
 
+        trait.isFocused();
+
         traitListener = new AdapterView.OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
