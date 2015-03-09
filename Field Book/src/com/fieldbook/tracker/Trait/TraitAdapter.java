@@ -52,6 +52,11 @@ public class TraitAdapter extends BaseAdapter {
     }
 
     public long getItemId(int position) {
+
+        if (position < 0 || position >= visibility.size()) {
+            return -1;
+        }
+
         return position;
     }
 

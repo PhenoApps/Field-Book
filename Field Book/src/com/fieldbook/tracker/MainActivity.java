@@ -1344,8 +1344,9 @@ public class MainActivity extends Activity implements OnClickListener {
     private void createDir(String path) {
         File dir = new File(path);
 
-        if (!dir.exists())
+        if (!dir.exists()) {
             dir.mkdirs();
+        }
     }
 
     // Simulate range left key press

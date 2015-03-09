@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
+import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1013,6 +1014,8 @@ public class TraitEditorActivity extends Activity {
         } catch (Exception sqlEx) {
         }
 
+        scanFile(file);
+
     }
 
     // Creates a new thread to do importing
@@ -1138,5 +1141,10 @@ public class TraitEditorActivity extends Activity {
     public static void makeToast(String message) {
 
         Toast.makeText(TraitEditorActivity.thisActivity, message, Toast.LENGTH_SHORT).show();
+    }
+
+
+    private void scanFile(File filePath) {
+        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
     }
 }
