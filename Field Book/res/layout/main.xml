@@ -96,7 +96,7 @@
 
                 <com.fieldbook.tracker.AutoResizeTextView
                     android:id="@+id/drop3"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
                     android:ellipsize="none"
@@ -104,8 +104,7 @@
                     android:singleLine="true"
                     android:textColor="#000000"
                     android:textSize="30dp"
-                    android:textStyle="bold" />
-
+                    android:textStyle="bold"/>
             </TableRow>
         </TableLayout>
 
@@ -233,6 +232,18 @@
                         android:textColor="#000000"
                         android:textSize="35dp"
                         android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvRange"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:singleLine="true"
+                        android:text=""
+                        android:textColor="#000000"
+                        android:textSize="35dp"
+                        android:textStyle="bold"
+                        android:visibility="gone"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -266,6 +277,18 @@
                         android:textColor="#000000"
                         android:textSize="35dp"
                         android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvPlot"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:singleLine="true"
+                        android:text=""
+                        android:textColor="#000000"
+                        android:textSize="35dp"
+                        android:textStyle="bold"
+                        android:visibility="gone"/>
                 </LinearLayout>
             </LinearLayout>
 

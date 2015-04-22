@@ -265,6 +265,7 @@ public class ConfigActivity extends Activity {
         CheckBox rangeSound = (CheckBox) advancedDialog.findViewById(R.id.rangeSound);
         CheckBox jumpToPlot = (CheckBox) advancedDialog.findViewById(R.id.jumpToPlot);
         CheckBox nextEmptyPlot = (CheckBox) advancedDialog.findViewById(R.id.nextEmptyPlot);
+        CheckBox quickGoTo = (CheckBox) advancedDialog.findViewById(R.id.quickGoTo);
 
         Button advCloseBtn = (Button) advancedDialog.findViewById(R.id.closeBtn);
 
@@ -284,6 +285,7 @@ public class ConfigActivity extends Activity {
         rangeSound.setChecked(ep.getBoolean("RangeSound", false));
         jumpToPlot.setChecked(ep.getBoolean("JumpToPlot", false));
         nextEmptyPlot.setChecked(ep.getBoolean("NextEmptyPlot", false));
+        quickGoTo.setChecked(ep.getBoolean("QuickGoTo", false));
 
         tips
                 .setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -376,7 +378,17 @@ public class ConfigActivity extends Activity {
                         e.commit();
                     }
                 });
+        quickGoTo
+                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
+                    public void onCheckedChanged(CompoundButton arg0,
+                                                 boolean checked) {
+                        Editor e = ep.edit();
+                        e.putBoolean("QuickGoTo", checked);
+                        e.commit();
+                        MainActivity.reloadData = true;
+                    }
+                });
 
         // Export Field book
         saveDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
@@ -535,76 +547,6 @@ public class ConfigActivity extends Activity {
         });
 
         // To configure location
-        locationDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
-        locationDialog.setTitle(getString(R.string.locationsetup));
-        locationDialog.setContentView(R.layout.location);
-
-        android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.FILL_PARENT;
-        locationDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) langParams);
-
-        locationDialog.setCancelable(true);
-        locationDialog.setCanceledOnTouchOutside(true);
-
-        Button findLocation = (Button) locationDialog
-                .findViewById(R.id.getLctnBtn);
-        Button yesLocation = (Button) locationDialog.findViewById(R.id.saveBtn);
-
-        final EditText longitude = (EditText) locationDialog
-                .findViewById(R.id.longitude);
-        final EditText latitude = (EditText) locationDialog
-                .findViewById(R.id.latitude);
-
-        //TODO force location update
-
-        final LocationListener locationListener = new LocationListener() {
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-                Toast.makeText(ConfigActivity.this,
-                        "Provider enabled: " + provider, Toast.LENGTH_SHORT)
-                        .show();
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-                Toast.makeText(ConfigActivity.this,
-                        "Provider disabled: " + provider, Toast.LENGTH_SHORT)
-                        .show();
-            }
-
-            @Override
-            public void onLocationChanged(Location location) {
-                fieldLocation = location;
-            }
-        };
-
-        findLocation.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                LocationManager locationManager = (LocationManager) thisActivity.getSystemService(Context.LOCATION_SERVICE);
-                fieldLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-                lat = fieldLocation.getLatitude();
-                lng = fieldLocation.getLongitude();
-
-                latitude.setText(truncateDecimalString(String.valueOf(lat)));
-                longitude.setText(truncateDecimalString(String.valueOf(lng)));
-                locationManager.removeUpdates(locationListener);
-            }
-        });
-
-        yesLocation.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                Editor e = ep.edit();
-                e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
-                e.commit();
-                updateSetupList();
-                locationDialog.dismiss();
-            }
-        });
 
 
         // This is the list of items shown on the settings screen itself
@@ -1268,7 +1210,7 @@ public class ConfigActivity extends Activity {
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.spinnerlayout, data);
         spinner.setAdapter(itemsAdapter);
 
-        int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(1).toString()));
+        int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(0).toString()));
         spinner.setSelection(spinnerPosition);
     }
 
@@ -1623,16 +1565,52 @@ public class ConfigActivity extends Activity {
     }
 
     private void showLocationDialog() {
-        LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
+        locationDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        locationDialog.setTitle(getString(R.string.locationsetup));
+        locationDialog.setContentView(R.layout.location);
 
-        boolean enabled = service
-                .isProviderEnabled(LocationManager.GPS_PROVIDER);
+        android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
+        langParams.width = LayoutParams.FILL_PARENT;
+        locationDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) langParams);
 
-        if (!enabled) {
+        locationDialog.setCancelable(true);
+        locationDialog.setCanceledOnTouchOutside(true);
+
+        GPSTracker gps = new GPSTracker(this);
+        if(gps.canGetLocation()) { //GPS enabled
+            lat = gps.getLatitude(); // returns latitude
+            lng = gps.getLongitude(); // returns longitude
+        } else {
             Intent intent = new Intent(
                     Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivity(intent);
         }
+
+        Button findLocation = (Button) locationDialog
+                .findViewById(R.id.getLctnBtn);
+        Button yesLocation = (Button) locationDialog.findViewById(R.id.saveBtn);
+
+        final EditText longitude = (EditText) locationDialog
+                .findViewById(R.id.longitude);
+        final EditText latitude = (EditText) locationDialog
+                .findViewById(R.id.latitude);
+
+        findLocation.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                latitude.setText(truncateDecimalString(String.valueOf(lat)));
+                longitude.setText(truncateDecimalString(String.valueOf(lng)));
+            }
+        });
+
+        yesLocation.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                Editor e = ep.edit();
+                e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
+                e.commit();
+                updateSetupList();
+                locationDialog.dismiss();
+            }
+        });
 
         locationDialog.show();
     }
@@ -1793,28 +1771,46 @@ public class ConfigActivity extends Activity {
         e.putString("FieldFile", mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.lastIndexOf(".")));
         e.commit();
 
-        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", ""));
-        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/audio");
-        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos");
-
         columnFail = false;
 
         if (mChosenFile.toLowerCase().contains(".xls")) {
             isCSV = false;
+            makeDirs();
             loadXLSFile();
         }
 
         if (mChosenFile.toLowerCase().contains(".csv")) {
             isCSV = true;
+            makeDirs();
             loadCSVFile();
         }
+
+        if (!mChosenFile.toLowerCase().contains(".csv") && !mChosenFile.toLowerCase().contains(".xls")) {
+            makeToast(getString(R.string.notsupported));
+
+        }
+    }
+
+    private void makeDirs() {
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", ""));
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/audio");
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos");
     }
 
     private void createDir(String path) {
         File dir = new File(path);
-        if (!dir.exists())
+        File blankFile = new File(path + "/.fieldbook");
+
+        if (!dir.exists()) {
             dir.mkdirs();
-        MediaScannerConnection.scanFile(this, new String[] {dir.toString()}, null, null);
+
+            try {
+                blankFile.getParentFile().mkdirs();
+                blankFile.createNewFile();
+                scanFile(blankFile);
+            } catch (IOException e) {
+            }
+        }
     }
 
     private void loadCSVFile() {
@@ -2161,6 +2157,7 @@ public class ConfigActivity extends Activity {
         }
     }
 
+    //TODO make generic
     private void showNoFieldDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
 
@@ -2177,7 +2174,6 @@ public class ConfigActivity extends Activity {
 
         AlertDialog alert = builder.create();
         alert.show();
-
     }
 
     private void showNoTraitDialog() {
@@ -2455,7 +2451,7 @@ public class ConfigActivity extends Activity {
 
         Button closeBtn = (Button) dbSaveDialog.findViewById(R.id.closeBtn);
 
-        closeBtn.setOnClickListener(new OnClickListener(){
+        closeBtn.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
                 dbSaveDialog.dismiss();
@@ -2650,6 +2646,18 @@ public class ConfigActivity extends Activity {
             if (activeNetworkInfo != null && activeNetworkInfo.isConnected() && !currentServerVersion.equals(versionName)) {
                 makeToast(getString(R.string.notmostrecent));
             }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!ep.getBoolean("ImportFieldFinished", false)) {
+            showNoFieldDialog();
+            return;
+        } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
+            showNoTraitDialog();
+        } else {
+            finish();
         }
     }
 }

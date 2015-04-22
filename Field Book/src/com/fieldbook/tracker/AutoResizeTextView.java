@@ -6,6 +6,7 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 /**

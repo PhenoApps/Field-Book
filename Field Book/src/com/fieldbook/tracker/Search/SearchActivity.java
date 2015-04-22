@@ -323,13 +323,6 @@ public class SearchActivity extends Activity {
             if (text.length() > 0)
                 e.setText(text);
 
-            if (colName.length() > 0) {
-                for (int i = 0; i < c.getCount(); i++) {
-                    if (c.getItemAtPosition(i).toString().equals(colName)) {
-                        c.setSelection(i);
-                    }
-                }
-            }
             parent.addView(v);
         }
     }

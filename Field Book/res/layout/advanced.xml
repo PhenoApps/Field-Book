@@ -31,11 +31,11 @@
                 android:layout_height="25dp" />
 
             <CheckBox
-                android:id="@+id/cycle"
+                android:id="@+id/nextEmptyPlot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="false"
-                android:text="@string/cycle"
+                android:text="@string/nextmissingenable"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -45,39 +45,11 @@
                 android:layout_height="25dp" />
 
             <CheckBox
-                android:id="@+id/enableMap"
+                android:id="@+id/quickGoTo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="false"
-                android:text="@string/enablemap"
-                android:textColor="#000000"
-                android:textSize="30dp"
-                android:textStyle="bold" />
-
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <CheckBox
-                android:id="@+id/ignoreExisting"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="false"
-                android:text="@string/ignoreentries"
-                android:textColor="#000000"
-                android:textSize="30dp"
-                android:textStyle="bold" />
-
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <CheckBox
-                android:id="@+id/useDay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="false"
-                android:text="@string/useday"
+                android:checked="true"
+                android:text="@string/quickgoto"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -115,14 +87,60 @@
                 android:layout_height="25dp" />
 
             <CheckBox
-                android:id="@+id/nextEmptyPlot"
+                android:id="@+id/cycle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="false"
-                android:text="@string/nextmissingenable"
+                android:text="@string/cycle"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
+
+            <CheckBox
+                android:id="@+id/ignoreExisting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/ignoreentries"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
+
+            <CheckBox
+                android:id="@+id/useDay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/useday"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
+
+            <CheckBox
+                android:id="@+id/enableMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/enablemap"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
 
         </LinearLayout>
     </ScrollView>

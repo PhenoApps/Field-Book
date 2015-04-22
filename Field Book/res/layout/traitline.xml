@@ -8,7 +8,6 @@
     android:paddingBottom="2dip"
     android:paddingTop="2dip">
 
-
     <View
         android:layout_width="10dp"
         android:layout_height="wrap_content" />

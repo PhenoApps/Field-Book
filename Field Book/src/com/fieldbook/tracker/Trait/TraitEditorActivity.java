@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1014,7 +1015,7 @@ public class TraitEditorActivity extends Activity {
         } catch (Exception sqlEx) {
         }
 
-        scanFile(file);
+        shareFile(file);
 
     }
 
@@ -1143,8 +1144,18 @@ public class TraitEditorActivity extends Activity {
         Toast.makeText(TraitEditorActivity.thisActivity, message, Toast.LENGTH_SHORT).show();
     }
 
-
-    private void scanFile(File filePath) {
+    /**
+     * Scan file to update file list and share exported file
+     */
+    private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
+        try {
+            startActivity(Intent.createChooser(intent, "Sending File..."));
+        } finally {
+        }
     }
 }

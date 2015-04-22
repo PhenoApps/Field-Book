@@ -130,10 +130,18 @@ public class FileExploreActivity extends ListActivity {
 
         // Checks whether path exists
         if (path.exists()) {
+
+
+
+
+
             File[] filesList = path.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String filename) {
                     File sel = new File(dir, filename);
-                    return sel.isFile() || sel.isDirectory();
+                    if (sel.toString().contains(".fieldbook")){
+                        return false;
+                    }
+                    return true;
                 }
             });
 

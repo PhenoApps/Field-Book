@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:padding="5dp">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingTop="10dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/camBtn"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@android:drawable/btn_default"
+                android:drawableTop="@drawable/ic_action_camera"
+                android:focusable="false"
+                android:minWidth="30dp"
+                android:text="" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/barcodeid"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="200"
+            android:singleLine="true"
+            android:textColor="#000000"
+            android:textSize="20dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingTop="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/closeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:background="@android:drawable/btn_default"
+            android:layout_gravity="center"
+            android:minWidth="150dp"
+            android:text="@string/close"
+            android:textColor="#000000"
+            android:textSize="30dp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/saveBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:background="@android:drawable/btn_default"
+            android:minWidth="150dp"
+            android:text="@string/okay"
+            android:textColor="#000000"
+            android:textSize="30dp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</LinearLayout>

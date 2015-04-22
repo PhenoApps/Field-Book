@@ -325,7 +325,7 @@ public class DataHelper {
         }
 
         query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
-                " FROM range range " + joinArgs;
+                " FROM range range " + joinArgs + "GROUP BY range." + ep.getString("ImportUniqueName", "");
 
         Log.e("DH", query);
 

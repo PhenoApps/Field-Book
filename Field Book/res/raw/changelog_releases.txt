@@ -1,11 +1,16 @@
 17/2.3.0
-New Import layout
 New Photo trait
-Audio trait updates and fixes
+New Import layout
+Import columns remembered between files
 InfoBars can be changed from main screen
-Table export speed drastically improved
+Table export speed significantly improved
 Import and export the internal database
+Continuous plot scrolling improved
+QuickGoTo now disabled by default (toggled in Advanced Settings)
 Toggle all trait visibility at once
+Audio trait updates and fixes
+Updated summary dialog
+Fixed bugs with Location and Search
 
 16/2.2.0
 New Advanced Settings option to make sound when primary organizer changes
@@ -18,8 +23,8 @@ Clear categorical traits by reclicking the current choice
 Miscellaneous interface improvements
 Long press ActionBar icons to get labels
 Changelog can be accessed from the About dialog
-BUGFIX: Traits can now be made in other languages
-BUGFIX: App doesn't move to first plot when screen is turned off
+Traits can now be made in other languages (Bug)
+App doesn't move to first plot when screen is turned off (Bug)
 
 15/2.1.2
 Fixed issue with field folders

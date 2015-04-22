@@ -151,6 +151,7 @@
     <string name="noexportcheck">Export type must be selected</string>
     <string name="results">Search results</string>
     <string name="tips">Enable tutorial</string>
+    <string name="quickgoto">Enable the Quick Go To in the middle of the main screen</string>
     <string name="cycle">Moving forward from last trait advances to first trait of next entry</string>
     <string name="enablemap">Map</string>
     <string name="useday">Use day of year instead of date</string>
@@ -167,6 +168,7 @@
     <string name="tutorial">Tutorial</string>
     <string name="tipshort">Tutorial</string>
     <string name="mapsummary">Summary</string>
+    <string name="notsupported">This file type is not currently supported.</string>
     <string name="importtraitwarning">A field must be imported before traits can be created.</string>
     <string name="datasetwarning">No data set exists</string>
     <string name="nofieldloaded">No field is currently loaded. Please load a field before collecting data.</string>
@@ -286,6 +288,15 @@
     <string name="developers">Developers</string>
     <string name="translators">Translators</string>
 
+    <string name="versiontitle">Version: </string>
+    <string name="devr">Trevor Rife, Kansas State University</string>
+    <string name="devremail">trife@ksu.edu</string>
+    <string name="devrsite">https://github.com/trife/Field-Book</string>
+    <string name="devp">Jesse Poland, Kansas State University</string>
+    <string name="devpemail">jpoland@ksu.edu</string>
+    <string name="devpsite">http://wheatgenetics.org</string>
+    <string name="translist">Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa</string>
+
     <string name="help1">Use HELP on the menu to learn about Field Book</string>
     <string name="help2">Turn on Tutorial in the Advanced Settings</string>
     <string name="mhelp1">The InfoBars at the top of the screen show extra data for each entry. These can be changed in the Setup menu.</string>
@@ -305,6 +316,8 @@
 
     <string name="languagesettings">Language</string>
     <string name="devicedefaultlanguage">Device default</string>
+
+
 
     <string name="english">English (US)</string>
     <string name="spanish">Español (México)</string>

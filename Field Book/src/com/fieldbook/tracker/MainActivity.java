@@ -22,7 +22,6 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,7 +40,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -51,7 +49,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -66,6 +63,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.fieldbook.tracker.Barcodes.*;
 import com.fieldbook.tracker.Map.*;
 import com.fieldbook.tracker.Search.*;
 import com.fieldbook.tracker.Trait.*;
@@ -120,6 +118,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private TraitObject currentTrait;
 
+    private Handler repeatHandler;
+
     String mCurrentPhotoPath;
 
     private EditText eNum;
@@ -154,8 +154,13 @@ public class MainActivity extends Activity implements OnClickListener {
     private String[] myList2;
     private String[] myList3;
 
+    Dialog goToId;
+
     private EditText range;
     private EditText plot;
+
+    private TextView tvRange;
+    private TextView tvPlot;
 
     private InputMethodManager imm;
 
@@ -361,6 +366,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         range = (EditText) findViewById(R.id.range);
         plot = (EditText) findViewById(R.id.plot);
+
+        tvRange = (TextView) findViewById(R.id.tvRange);
+        tvPlot = (TextView) findViewById(R.id.tvPlot);
 
         drop3 = (AutoResizeTextView) findViewById(R.id.drop3);
         drop2 = (AutoResizeTextView) findViewById(R.id.drop2);
@@ -806,6 +814,7 @@ public class MainActivity extends Activity implements OnClickListener {
             public void onClick(View arg0) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.MONTH, tempMonth);
+                calendar.set(Calendar.MONTH, tempMonth);
                 Integer i = Integer.parseInt(day.getText().toString());
                 calendar.set(Calendar.DAY_OF_MONTH, i);
 
@@ -975,7 +984,6 @@ public class MainActivity extends Activity implements OnClickListener {
         eImg.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 String val = newTraits.get(currentTrait.trait).toString();
-                Log.d("Field",val);
 
                 if (val.equals("false")) {
                     val = "true";
@@ -998,19 +1006,23 @@ public class MainActivity extends Activity implements OnClickListener {
                     case MotionEvent.ACTION_DOWN:
                         rangeLeft.setImageResource(R.drawable.ml_arrows);
                         rangeLeft.performClick();
-                        // Make this a repeating button, using MessageHandler
-                        Message msg = new Message();
-                        msg.what = MESSAGE_CHECK_BTN_STILL_PRESSED;
-                        msg.arg1 = R.id.rangeLeft;
-                        msg.arg2 = 100;// this btn's repeat time in ms
-                        v.setTag(v); // mark btn as pressed (any non-null)
-                        myGuiHandler.sendMessageDelayed(msg, msg.arg2);
+
+                        if (repeatHandler != null) return true;
+                        repeatHandler = new Handler();
+                        repeatHandler.postDelayed(mActionLeft, 750);
+
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
                         rangeLeft.setImageResource(R.drawable.ml_arrow);
+
+                        if (repeatHandler == null) return true;
+                        repeatHandler.removeCallbacks(mActionLeft);
+                        repeatHandler = null;
+
                         repeatUpdate();
+                        break;
                     case MotionEvent.ACTION_CANCEL:
                         v.setTag(null); // mark btn as not pressed
                         break;
@@ -1090,19 +1102,23 @@ public class MainActivity extends Activity implements OnClickListener {
                     case MotionEvent.ACTION_DOWN:
                         rangeRight.setImageResource(R.drawable.mr_arrows);
                         rangeRight.performClick();
-                        // Make this a repeating button, using MessageHandler
-                        Message msg = new Message();
-                        msg.what = MESSAGE_CHECK_BTN_STILL_PRESSED;
-                        msg.arg1 = R.id.rangeRight;
-                        msg.arg2 = 100; // this btn's repeat time in ms
-                        v.setTag(v); // mark btn as pressed (any non-null)
-                        myGuiHandler.sendMessageDelayed(msg, msg.arg2);
+
+                        if (repeatHandler != null) return true;
+                        repeatHandler = new Handler();
+                        repeatHandler.postDelayed(mActionRight, 750);
+
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
                         rangeRight.setImageResource(R.drawable.mr_arrow);
+
+                        if (repeatHandler == null) return true;
+                        repeatHandler.removeCallbacks(mActionRight);
+                        repeatHandler = null;
+
                         repeatUpdate();
+                        break;
                     case MotionEvent.ACTION_CANCEL:
                         v.setTag(null); // mark btn as not pressed
                         break;
@@ -1288,6 +1304,20 @@ public class MainActivity extends Activity implements OnClickListener {
         });
     }
 
+    Runnable mActionRight = new Runnable() {
+        @Override public void run() {
+            repeatRight();
+            repeatHandler.postDelayed(this, 100);
+        }
+    };
+
+    Runnable mActionLeft = new Runnable() {
+        @Override public void run() {
+            repeatLeft();
+            repeatHandler.postDelayed(this, 100);
+        }
+    };
+
     private void setCategoricalButtons(Button[] buttonList, Button choice) {
         for (int i = 0; i < buttonList.length; i++) {
             if (buttonList[i] == choice) {
@@ -1338,14 +1368,35 @@ public class MainActivity extends Activity implements OnClickListener {
         createDir(Constants.FIELDEXPORTPATH);
         createDir(Constants.BACKUPPATH);
         createDir(Constants.ERRORPATH);
+
+        scanSampleFiles();
+    }
+
+    private void scanSampleFiles() {
+        String[] fileList = {Constants.TRAITPATH + "/trait_sample.trt", Constants.FIELDIMPORTPATH + "/field_sample.csv", Constants.FIELDIMPORTPATH + "/field_sample.xls"};
+
+        for (int i=0; i<fileList.length; i++) {
+            File temp = new File(fileList[i]);
+            if(temp.exists()){
+                scanFile(temp);
+            }
+        }
     }
 
     // Helper function to create a single directory
     private void createDir(String path) {
         File dir = new File(path);
+        File blankFile = new File(path + "/.fieldbook");
 
         if (!dir.exists()) {
             dir.mkdirs();
+
+            try {
+                blankFile.getParentFile().mkdirs();
+                blankFile.createNewFile();
+                scanFile(blankFile);
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -1405,6 +1456,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
             displayRange(cRange);
 
+            newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                    .clone();
+
+            initWidgets(true);
         }
     }
 
@@ -1471,6 +1526,10 @@ public class MainActivity extends Activity implements OnClickListener {
             }
 
             displayRange(cRange);
+            newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                    .clone();
+
+            initWidgets(true);
 
         }
     }
@@ -1765,6 +1824,8 @@ public class MainActivity extends Activity implements OnClickListener {
         range.setText(cRange.range);
         plot.setText(cRange.plot);
 
+        tvRange.setText(cRange.range);
+        tvPlot.setText(cRange.plot);
 
         //TODO change to dp
         int pixelSize = getPixelSize();
@@ -1913,6 +1974,31 @@ public class MainActivity extends Activity implements OnClickListener {
             });
 
             savePrefix = true;
+
+            drop1.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    makeToast(drop1.getText().toString());
+                    return false;
+                }
+            });
+
+            drop2.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    makeToast(drop2.getText().toString());
+                    return false;
+                }
+            });
+
+            drop3.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    makeToast(drop3.getText().toString());
+                    return false;
+                }
+            });
+
         }
 
         // trait is unique, format is not
@@ -2683,7 +2769,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
                         if (img.listFiles() != null) {
                             photoLocation = dt.getPlotPhotos(cRange.plot_id);
-                            Log.d("Field",Integer.toString(photoLocation.size()));
 
                             for (int i = 0; i < photoLocation.size(); i++) {
                                 drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
@@ -3159,6 +3244,18 @@ public class MainActivity extends Activity implements OnClickListener {
 
             reloadData = false;
             partialReload = false;
+
+            if (ep.getBoolean("QuickGoTo", false)) {
+                tvRange.setVisibility(TextView.GONE);
+                tvPlot.setVisibility(TextView.GONE);
+                range.setVisibility(EditText.VISIBLE);
+                plot.setVisibility(EditText.VISIBLE);
+            } else {
+                tvRange.setVisibility(TextView.VISIBLE);
+                tvPlot.setVisibility(TextView.VISIBLE);
+                range.setVisibility(EditText.GONE);
+                plot.setVisibility(EditText.GONE);
+            }
 
             rangeName.setText(ep.getString("ImportFirstName", getString(R.string.range)) + ":");
             plotName.setText(ep.getString("ImportSecondName", getString(R.string.plot)) + ":");
@@ -4194,7 +4291,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 nextEmptyPlot();
                 break;
             case R.id.jumpToPlot:
-                moveToPlotID();
+                moveToPlotID2();
                 break;
             case R.id.summary:
                 showSummary();
@@ -4202,6 +4299,52 @@ public class MainActivity extends Activity implements OnClickListener {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void moveToPlotID2() {
+        goToId = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        goToId.setTitle(getString(R.string.jumptoplotidbutton));
+        goToId.setContentView(R.layout.gotobarcode);
+
+        goToId.setCancelable(true);
+        goToId.setCanceledOnTouchOutside(true);
+
+        android.view.WindowManager.LayoutParams langParams = goToId.getWindow().getAttributes();
+        langParams.width = LayoutParams.FILL_PARENT;
+        goToId.getWindow().setAttributes((android.view.WindowManager.LayoutParams) langParams);
+
+        final EditText barcodeId = (EditText) goToId.findViewById(R.id.barcodeid);
+        Button exportButton = (Button) goToId.findViewById(R.id.saveBtn);
+        Button closeBtn = (Button) goToId.findViewById(R.id.closeBtn);
+        Button camBtn = (Button) goToId.findViewById(R.id.camBtn);
+
+        camBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                IntentIntegrator integrator = new IntentIntegrator(thisActivity);
+                integrator.initiateScan();
+            }
+        });
+
+        closeBtn.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View v) {
+                goToId.dismiss();
+            }
+        });
+
+        exportButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                inputPlotId = barcodeId.getText().toString();
+                String plot = dt.getPlotFromId(inputPlotId);
+                String range = dt.getRangeFromId(inputPlotId);
+                rangeID = dt.getAllRangeID();
+                moveTo(rangeID, range, plot, true);
+            }
+        });
+
+        goToId.show();
+    }
+
 
     private void moveToPlotID() {
         final EditText input = new EditText(this);
@@ -4246,7 +4389,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     public void makeToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     public void nextEmptyPlot() {
@@ -4471,8 +4614,7 @@ public class MainActivity extends Activity implements OnClickListener {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
 
-                if (photo.getCount() > 0)
-                {
+                if (photo.getCount() > 0) {
                     String item = photoLocation.get(photo.getSelectedItemPosition());
                     photoLocation.remove(photo.getSelectedItemPosition());
                     drawables.remove(photo.getSelectedItemPosition());
@@ -4493,9 +4635,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
 
                     photo.setAdapter(photoAdapter);
-                }
-                else
-                {
+                } else {
                     ArrayList<Drawable> emptyList = new ArrayList<Drawable>();
 
                     photoAdapter = new GalleryImageAdapter(MainActivity.this, emptyList);
@@ -5115,10 +5255,9 @@ public class MainActivity extends Activity implements OnClickListener {
         String data = "";
 
         if (cRange != null) {
-            //TODO get all data for the plot and present it cleaner
-
-            data = getString(R.string.range) + ": " + cRange.range + "\n";
-            data += getString(R.string.plot) + ": " + cRange.plot + "\n";
+            for (String s : prefixTraits) {
+                data += s + ": " + dt.getDropDownRange(s, cRange.plot_id)[0] + "\n";
+            }
         }
 
         for (String s : traitList) {
@@ -5462,6 +5601,16 @@ public class MainActivity extends Activity implements OnClickListener {
                     makeImage(mCurrentPhotoPath);
                 }
                 break;
+        }
+
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (scanResult != null) {
+            inputPlotId = scanResult.getContents();
+            String plot = dt.getPlotFromId(inputPlotId);
+            String range = dt.getRangeFromId(inputPlotId);
+            rangeID = dt.getAllRangeID();
+            moveTo(rangeID, range, plot, true);
+            goToId.dismiss();
         }
 
     }
