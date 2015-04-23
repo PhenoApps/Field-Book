@@ -123,6 +123,7 @@
     <string name="qualitative">Categorical</string>
     <string name="date">Date</string>
     <string name="percent">Percent</string>
+    <string name="counter">Counter</string>
     <string name="bool">Boolean</string>
     <string name="text">Text</string>
     <string name="up">Up</string>

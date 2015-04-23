@@ -419,6 +419,11 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
+            <include
+                layout="@layout/trait_counter"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
         </LinearLayout>
 
         <Button

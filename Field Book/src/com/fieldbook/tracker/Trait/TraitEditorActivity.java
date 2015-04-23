@@ -158,8 +158,8 @@ public class TraitEditorActivity extends Activity {
 
         thisActivity = this;
 
-        final String[] data = new String[8];
-        final String[] enData = new String[8];
+        final String[] data = new String[9];
+        final String[] enData = new String[9];
 
         data[0] = getString(R.string.numeric);
         data[1] = getString(R.string.qualitative);
@@ -169,6 +169,7 @@ public class TraitEditorActivity extends Activity {
         data[5] = getString(R.string.text);
         data[6] = getString(R.string.photo);
         data[7] = getString(R.string.audio);
+        data[8] = getString(R.string.counter);
 
         enData[0] = "Numeric";
         enData[1] = "Categorical";
@@ -178,6 +179,7 @@ public class TraitEditorActivity extends Activity {
         enData[5] = "Text";
         enData[6] = "Photo";
         enData[7] = "Audio";
+        enData[8] = "Counter";
 
         traitList = (ListView) findViewById(R.id.myList);
 
@@ -532,7 +534,7 @@ public class TraitEditorActivity extends Activity {
             maxBox.setVisibility(View.GONE);
         }
 
-        if (position == 6 || position == 2) {
+        if (position == 6 || position == 2 || position == 8 || position == 9) {
             defBox.setVisibility(View.GONE);
             minBox.setVisibility(View.GONE);
             maxBox.setVisibility(View.GONE);
@@ -550,33 +552,26 @@ public class TraitEditorActivity extends Activity {
                 minimum.setHint(getString(R.string.optional));
                 maximum.setHint(getString(R.string.optional));
                 break;
-
-            case 3:
-                //def.setHint(getString(R.string.optional));
-                break;
-
             case 1:
-            case 5:
-                def.setHint(getString(R.string.optional));
-                break;
-        }
-
-        switch (position) {
-            case 0:
+            case 2:
             case 3:
                 def.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 minimum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 maximum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 break;
-
-            case 1:
-            case 2:
             case 4:
             case 5:
+                def.setHint(getString(R.string.optional));
+                break;
             case 6:
                 def.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
                 minimum.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
                 maximum.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+                break;
+            case 7:
+                def.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                minimum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                maximum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 break;
         }
 

@@ -201,6 +201,9 @@ public class MainActivity extends Activity implements OnClickListener {
     private Button clearBoolean;
     private Button clearDate;
 
+    private Button clearCounterBtn;
+    private TextView counterTv;
+
     private ImageView traitLeft;
     private ImageView traitRight;
 
@@ -302,6 +305,7 @@ public class MainActivity extends Activity implements OnClickListener {
     LinearLayout traitPercent;
     LinearLayout traitText;
     LinearLayout traitPhoto;
+    LinearLayout traitCounter;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -398,6 +402,7 @@ public class MainActivity extends Activity implements OnClickListener {
         traitPercent = (LinearLayout) findViewById(R.id.percentLayout);
         traitText = (LinearLayout) findViewById(R.id.textLayout);
         traitPhoto = (LinearLayout) findViewById(R.id.photoLayout);
+        traitCounter = (LinearLayout) findViewById(R.id.counterLayout);
 
         traitType = (Spinner) findViewById(R.id.traitType);
 
@@ -619,6 +624,13 @@ public class MainActivity extends Activity implements OnClickListener {
         Button minusDayBtn = (Button) traitDate.findViewById(R.id.minusDateBtn);
         Button saveDayBtn = (Button) traitDate.findViewById(R.id.enterBtn);
 
+        clearDate = (Button) traitDate.findViewById(R.id.clearDateBtn);
+
+        Button addCounterBtn = (Button) traitCounter.findViewById(R.id.addBtn);
+        Button minusCounterBtn = (Button) traitCounter.findViewById(R.id.minusBtn);
+        clearCounterBtn = (Button) traitCounter.findViewById(R.id.clearCounterBtn);
+        counterTv = (TextView) traitCounter.findViewById(R.id.curCount);
+
         //Button clearBtn = (Button) findViewById(R.id.clearBtn);
         Button clearBtn2 = (Button) traitCategorical.findViewById(R.id.clearBtn2);
 
@@ -827,6 +839,30 @@ public class MainActivity extends Activity implements OnClickListener {
                 // Change the text color accordingly
                 month.setTextColor(Color.parseColor(displayColor));
                 day.setTextColor(Color.parseColor(displayColor));
+            }
+        });
+
+        // Add counter
+        addCounterBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) + 1));
+                updateTrait(currentTrait.trait, "counter", counterTv.getText().toString());
+            }
+        });
+
+        // Minus counter
+        minusCounterBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) - 1));
+                updateTrait(currentTrait.trait, "counter", counterTv.getText().toString());
+            }
+        });
+
+        // Clear counter
+        clearCounterBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                removeTrait(currentTrait.trait);
+                counterTv.setText("0");
             }
         });
 
@@ -2068,6 +2104,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitBoolean.setVisibility(View.GONE);
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2139,6 +2176,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitBoolean.setVisibility(View.GONE);
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2205,6 +2243,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitBoolean.setVisibility(View.GONE);
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2298,6 +2337,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitBoolean.setVisibility(View.GONE);
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
                         traitPhoto.setVisibility(View.GONE);
@@ -2361,6 +2401,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitBoolean.setVisibility(View.GONE);
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.VISIBLE);
                         traitPhoto.setVisibility(View.GONE);
@@ -2649,6 +2690,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitBoolean.setVisibility(View.VISIBLE);
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2694,6 +2736,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitBoolean.setVisibility(View.GONE);
                         traitAudio.setVisibility(View.VISIBLE);
                         traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2736,6 +2779,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitBoolean.setVisibility(View.GONE);
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.VISIBLE);
+                        traitCounter.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2801,6 +2845,44 @@ public class MainActivity extends Activity implements OnClickListener {
                             if (!img.exists())
                                 img.mkdirs();
                         }
+                    } else if(currentTrait.format.equals("counter")) {
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.VISIBLE);
+
+                        tNum.removeTextChangedListener(tNumUpdate);
+
+                        tNum.setVisibility(EditText.GONE);
+                        tNum.setEnabled(false);
+
+                        clearGeneric.setVisibility(View.GONE);
+                        clearBoolean.setVisibility(View.GONE);
+
+                        pNum.setVisibility(EditText.GONE);
+                        eNum.setVisibility(EditText.GONE);
+                        seekBar.setVisibility(EditText.GONE);
+                        datePicker.setVisibility(LinearLayout.GONE);
+                        eImg.setVisibility(EditText.GONE);
+
+                        rangeLeft.setEnabled(true);
+                        rangeRight.setEnabled(true);
+
+                        traitLeft.setEnabled(true);
+                        traitRight.setEnabled(true);
+
+                        if (!newTraits.containsKey(currentTrait.trait)) {
+                            counterTv.setText("0");
+                        } else {
+                            counterTv.setText(newTraits.get(currentTrait.trait).toString());
+                        }
+
+
                     } else {
                         qPicker.setVisibility(LinearLayout.GONE);
 
