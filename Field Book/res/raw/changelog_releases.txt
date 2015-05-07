@@ -1,3 +1,12 @@
+18/2.3.5
+New Rust Rating trait with customizable severity scale (severity.txt in traits folder)
+New Counter trait
+New Advanced Setting to disable the automatic file sharing
+New Advanced Setting to disable plot navigation if no data collected with sound notification
+Saves and moves to the last plot that the user was collecting data on
+Updated tutorial
+Changed timestamp format
+
 17/2.3.0
 New Photo trait
 New Import layout

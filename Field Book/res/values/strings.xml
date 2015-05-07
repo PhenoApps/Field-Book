@@ -124,6 +124,7 @@
     <string name="date">Date</string>
     <string name="percent">Percent</string>
     <string name="counter">Counter</string>
+    <string name="rustrating">Rust Rating</string>
     <string name="bool">Boolean</string>
     <string name="text">Text</string>
     <string name="up">Up</string>
@@ -138,6 +139,10 @@
     <string name="notemptycategory">Category cannot be empty</string>
     <string name="truevalue">True</string>
     <string name="falsevalue">False</string>
+    <string name="rustwarning">Severity already stored</string>
+    <string name="disableshare">Disable file sharing when exporting</string>
+    <string name="disableentrynav">Disable moving between entries if no data collected</string>
+    <string name="disableentryanavwarning">Data must be collected before you can go to the next entry</string>
 
     <string name="advanced">Advanced settings</string>
     <string name="listfieldimport">List imported fields</string>
@@ -260,6 +265,7 @@
     <string name="nextmissingbutton">Next empty entry</string>
     <string name="jumptoplotid">Enables option to advance to specific unique identifier</string>
     <string name="jumptoplotidbutton">Go to ID</string>
+    <string name="datagrid">DataGrid</string>
 
     <string name="sort">Sort</string>
     <string name="load">Load</string>
@@ -300,25 +306,32 @@
 
     <string name="help1">Use HELP on the menu to learn about Field Book</string>
     <string name="help2">Turn on Tutorial in the Advanced Settings</string>
-    <string name="mhelp1">The InfoBars at the top of the screen show extra data for each entry. These can be changed in the Setup menu.</string>
+
+    <string name="mhelp1">The InfoBars at the top of the screen show extra data for each entry. These can be changed using the dropdown menus or in the Setup menu.</string>
     <string name="mhelp2">The large, black arrows move between entries. The small, green arrows move between traits.</string>
-    <string name="mhelp3">A list of enabled traits is displayed when the active trait is pressed.</string>
-    <string name="mhelp4">The primary and secondary order text areas can be used to move to the first occurrence of a specific value.</string>
-    <string name="mhelp5">"Search" at the top of screen allows database queries.</string>
+    <string name="mhelp3">A list of active traits is displayed when the current trait is pressed.</string>
+    <string name="mhelp4">The folder icon displays a list of files in the Resources folder.</string>
+    <string name="mhelp5">The search icon allows database queries.</string>
+    <string name="mhelp6">The document icon displays a summary of all data for a given entry.</string>
+    <string name="mhelp7">The gear icon will take you back to the settings.</string>
+
     <string name="shelp1">To import a CSV or XLS file, select Fields.</string>
     <string name="shelp2">After selecting a file, the file columns are listed on the left and their data type can be configured on the right. Files must contain three columns: a unique identifier, a primary order, and a secondary order.</string>
     <string name="shelp3">To add or import new traits, press Traits.</string>
     <string name="shelp4">To prepare for data collection, choose Setup.</string>
     <string name="shelp5">In the Setup screen: Person is the name of the person collecting data, Location collects the field coordinates, Traits allows adjustment of active traits, and InfoBars display contextual entry information on the main screen.</string>
-    <string name="shelp6">Once data is imported, the back button in the top left corner is used to move to the main screen.</string>
+    <string name="shelp6">Data can be exported in two formats: database or table. Columns from the original file can be included or excluded from the exported file.</string>
+    <string name="shelp7">Advanced Settings contains several optional settings to augment how data is collected.</string>
+    <string name="shelp8">Once data is imported, the back button in the top left corner is used to move to the main screen.</string>
+
     <string name="thelp1">Add Trait on the menu creates a new trait. It is not possible to use the keyboard and tutorial at the same time. Different trait formats are available for data collection.</string>
     <string name="thelp2">To import trait files, press the menu button and choose Import.</string>
     <string name="thelp3">Consult the app manual for additional information about trait creation.</string>
+    <string name="thelp4">Use the checkbox on each trait to toggle its visibility on the main collection screen. Uncheck any traits you do not want to collect.</string>
+    <string name="thelp5">Press the back button in the top left corner to return to the Settings screen.</string>
 
     <string name="languagesettings">Language</string>
     <string name="devicedefaultlanguage">Device default</string>
-
-
 
     <string name="english">English (US)</string>
     <string name="spanish">Español (México)</string>

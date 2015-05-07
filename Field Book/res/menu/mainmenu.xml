@@ -16,6 +16,11 @@
         android:showAsAction="always"
         android:title="@string/jumptoplotidbutton" />
     <item
+        android:id="@+id/datagrid"
+        android:icon="@drawable/ic_action_grid"
+        android:showAsAction="always"
+        android:title="@string/jumptoplotidbutton" />
+    <item
         android:id="@+id/help"
         android:icon="@drawable/ic_action_help"
         android:showAsAction="always"

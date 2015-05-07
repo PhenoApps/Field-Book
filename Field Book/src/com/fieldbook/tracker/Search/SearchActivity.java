@@ -249,8 +249,6 @@ public class SearchActivity extends Activity {
 
                         resultDialog.show();
                     } else {
-                        resultDialog.show();
-
                         Toast.makeText(SearchActivity.this, getString(R.string.searchempty), Toast.LENGTH_LONG).show();
                     }
                 } catch (Exception z) {

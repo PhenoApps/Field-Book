@@ -87,6 +87,34 @@
                 android:layout_height="25dp" />
 
             <CheckBox
+                android:id="@+id/disableShare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/disableshare"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
+
+            <CheckBox
+                android:id="@+id/disableEntryNav"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/disableentrynav"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
+
+            <CheckBox
                 android:id="@+id/cycle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

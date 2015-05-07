@@ -1,3 +1,17 @@
+25
+Added a rust rating trait (up to 21 severity ratings)
+Changed timestamp to ISO 8601
+Updated counter trait layout (bigger + button)
+Stores last entry the user was on and automatically moves to it
+Added option to disable the automatic file sharing
+Added option to disable navigation if no data collected
+Updated tutorial
+Modified trait sample file
+Started work on a datagrid viewer (work in progress)
+
+24
+Added a counter trait
+
 23
 Long press InfoBar text for a toast containing the same text
 Fixed a bug in Lollipop with MediaContentScanner

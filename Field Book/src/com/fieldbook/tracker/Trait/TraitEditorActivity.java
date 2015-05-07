@@ -158,8 +158,8 @@ public class TraitEditorActivity extends Activity {
 
         thisActivity = this;
 
-        final String[] data = new String[9];
-        final String[] enData = new String[9];
+        final String[] data = new String[10];
+        final String[] enData = new String[10];
 
         data[0] = getString(R.string.numeric);
         data[1] = getString(R.string.qualitative);
@@ -170,6 +170,7 @@ public class TraitEditorActivity extends Activity {
         data[6] = getString(R.string.photo);
         data[7] = getString(R.string.audio);
         data[8] = getString(R.string.counter);
+        data[9] = getString(R.string.rustrating);
 
         enData[0] = "Numeric";
         enData[1] = "Categorical";
@@ -180,6 +181,7 @@ public class TraitEditorActivity extends Activity {
         enData[6] = "Photo";
         enData[7] = "Audio";
         enData[8] = "Counter";
+        enData[9] = "Rust Rating";
 
         traitList = (ListView) findViewById(R.id.myList);
 
@@ -534,7 +536,7 @@ public class TraitEditorActivity extends Activity {
             maxBox.setVisibility(View.GONE);
         }
 
-        if (position == 6 || position == 2 || position == 8 || position == 9) {
+        if (position == 6 || position == 2 || position == 8 || position == 9 || position == 10) {
             defBox.setVisibility(View.GONE);
             minBox.setVisibility(View.GONE);
             maxBox.setVisibility(View.GONE);
@@ -1144,13 +1146,16 @@ public class TraitEditorActivity extends Activity {
      */
     private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
-        Intent intent = new Intent();
-        intent.setAction(android.content.Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
-        try {
-            startActivity(Intent.createChooser(intent, "Sending File..."));
-        } finally {
+
+        if(ep.getBoolean("DisableShare",true)==false) {
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
+            try {
+                startActivity(Intent.createChooser(intent, "Sending File..."));
+            } finally {
+            }
         }
     }
 }

@@ -80,6 +80,7 @@ public class TutorialTraitsActivity extends Activity {
         array[0] = getString(R.string.thelp1);
         array[1] = getString(R.string.thelp2);
         array[2] = getString(R.string.thelp3);
+        array[3] = getString(R.string.thelp4);
 
         header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
         content.setText(array[screen - 1]);
@@ -110,14 +111,11 @@ public class TutorialTraitsActivity extends Activity {
 
                 screen += 1;
 
-                if (screen > max) {
+                if (screen > max)
                     screen = max;
 
-                    header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
-                    content.setText(array[screen - 1]);
-                } else {
-                    TraitEditorActivity.hideImportDialog();
-                }
+                header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
+                content.setText(array[screen - 1]);
             }
         });
 

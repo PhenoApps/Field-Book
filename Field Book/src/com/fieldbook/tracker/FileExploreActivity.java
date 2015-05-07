@@ -138,7 +138,7 @@ public class FileExploreActivity extends ListActivity {
             File[] filesList = path.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String filename) {
                     File sel = new File(dir, filename);
-                    if (sel.toString().contains(".fieldbook")){
+                    if (sel.toString().contains(".fieldbook")||sel.toString().contains("severity.txt")){
                         return false;
                     }
                     return true;

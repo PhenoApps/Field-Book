@@ -30,7 +30,6 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
@@ -71,6 +70,7 @@ import com.fieldbook.tracker.Tutorial.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -80,7 +80,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -121,6 +123,8 @@ public class MainActivity extends Activity implements OnClickListener {
     private Handler repeatHandler;
 
     String mCurrentPhotoPath;
+
+    Button[] rustBtnArray;
 
     private EditText eNum;
     private EditText pNum;
@@ -203,6 +207,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private Button clearCounterBtn;
     private TextView counterTv;
+
+    Button rust0,rust5,rust10,rust15,rust20,rust25,rust30,rust35,rust40,rust45,rust50,rust55,rust60,rust65,rust70,rust75,rust80,rust85,rust90,rust95,rust100,rustR,rustMR,rustMS,rustS,rustDelim,rustClear;
 
     private ImageView traitLeft;
     private ImageView traitRight;
@@ -306,6 +312,7 @@ public class MainActivity extends Activity implements OnClickListener {
     LinearLayout traitText;
     LinearLayout traitPhoto;
     LinearLayout traitCounter;
+    LinearLayout traitRustRating;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -324,7 +331,42 @@ public class MainActivity extends Activity implements OnClickListener {
 
         loadScreen();
 
+        /*
+        *
+        * Get screen size and density
+        *
+        *
+        if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE) {
+            Toast.makeText(this, "Large screen", Toast.LENGTH_LONG).show();
+        }
+        else if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
+            Toast.makeText(this, "Normal sized screen", Toast.LENGTH_LONG).show();
+        }
+        else if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_SMALL) {
+            Toast.makeText(this, "Small sized screen", Toast.LENGTH_LONG).show();
+        }
+        else {
+            Toast.makeText(this, "Screen size is neither large, normal or small", Toast.LENGTH_LONG).show();
+        }
 
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        int density = metrics.densityDpi;
+
+        if (density == DisplayMetrics.DENSITY_HIGH) {
+            Toast.makeText(this, "DENSITY_HIGH... Density is " + String.valueOf(density), Toast.LENGTH_LONG).show();
+        }
+        else if (density == DisplayMetrics.DENSITY_MEDIUM) {
+            Toast.makeText(this, "DENSITY_MEDIUM... Density is " + String.valueOf(density), Toast.LENGTH_LONG).show();
+        }
+        else if (density == DisplayMetrics.DENSITY_LOW) {
+            Toast.makeText(this, "DENSITY_LOW... Density is " + String.valueOf(density), Toast.LENGTH_LONG).show();
+        }
+        else {
+            Toast.makeText(this, "Density is neither HIGH, MEDIUM OR LOW.  Density is " + String.valueOf(density), Toast.LENGTH_LONG).show();
+        }
+
+        */
 
         // If the user hasn't configured range and traits, open settings screen
         if (!ep.getBoolean("ImportFieldFinished", false) | !ep.getBoolean("CreateTraitFinished", false)) {
@@ -403,11 +445,10 @@ public class MainActivity extends Activity implements OnClickListener {
         traitText = (LinearLayout) findViewById(R.id.textLayout);
         traitPhoto = (LinearLayout) findViewById(R.id.photoLayout);
         traitCounter = (LinearLayout) findViewById(R.id.counterLayout);
+        traitRustRating = (LinearLayout) findViewById(R.id.rustLayout);
 
         traitType = (Spinner) findViewById(R.id.traitType);
-
         newTraits = new HashMap();
-
         traitDetails = (TextView) findViewById(R.id.traitDetails);
 
         range.setOnEditorActionListener(new OnEditorActionListener() {
@@ -610,6 +651,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
         kb = (LinearLayout) traitNumeric.findViewById(R.id.kb);
 
+
+
         month = (TextView) traitDate.findViewById(R.id.mth);
         day = (TextView) traitDate.findViewById(R.id.day);
 
@@ -667,6 +710,87 @@ public class MainActivity extends Activity implements OnClickListener {
         k14.setOnClickListener(this);
         k15.setOnClickListener(this);
         k16.setOnClickListener(this);
+
+        rust0=(Button)traitRustRating.findViewById(R.id.rust0);
+        rust5=(Button)traitRustRating.findViewById(R.id.rust5);
+        rust10=(Button)traitRustRating.findViewById(R.id.rust10);
+        rust15=(Button)traitRustRating.findViewById(R.id.rust15);
+        rust20=(Button)traitRustRating.findViewById(R.id.rust20);
+        rust25=(Button)traitRustRating.findViewById(R.id.rust25);
+        rust30=(Button)traitRustRating.findViewById(R.id.rust30);
+        rust35=(Button)traitRustRating.findViewById(R.id.rust35);
+        rust40=(Button)traitRustRating.findViewById(R.id.rust40);
+        rust45=(Button)traitRustRating.findViewById(R.id.rust45);
+        rust50=(Button)traitRustRating.findViewById(R.id.rust50);
+        rust55=(Button)traitRustRating.findViewById(R.id.rust55);
+        rust60=(Button)traitRustRating.findViewById(R.id.rust60);
+        rust65=(Button)traitRustRating.findViewById(R.id.rust65);
+        rust70=(Button)traitRustRating.findViewById(R.id.rust70);
+        rust75=(Button)traitRustRating.findViewById(R.id.rust75);
+        rust80=(Button)traitRustRating.findViewById(R.id.rust80);
+        rust85=(Button)traitRustRating.findViewById(R.id.rust85);
+        rust90=(Button)traitRustRating.findViewById(R.id.rust90);
+        rust95=(Button)traitRustRating.findViewById(R.id.rust95);
+        rust100=(Button)traitRustRating.findViewById(R.id.rust100);
+        rustR=(Button)traitRustRating.findViewById(R.id.rustR);
+        rustMR=(Button)traitRustRating.findViewById(R.id.rustMR);
+        rustMS=(Button)traitRustRating.findViewById(R.id.rustMS);
+        rustS=(Button)traitRustRating.findViewById(R.id.rustS);
+        rustDelim = (Button) traitRustRating.findViewById(R.id.rustDelim);
+        rustClear = (Button) traitRustRating.findViewById(R.id.clearRustBtn);
+
+        Button[] rustBtnArray = new Button[]{rust0,rust5,rust10,rust15,rust20,rust25,rust30,rust35,rust40,rust45,rust50,rust55,rust60,rust65,rust70,rust75,rust80,rust85,rust90,rust95,rust100};
+        List<String> temps = new ArrayList<String>();
+        List<String> tempsNoFile = Arrays.asList("0","5","10","15","20","25","30","35","40","45","50","55","60","65","70","75","80","85","90","95","100");
+        String token1 = "";
+        Scanner inFile1 = null;
+
+        try {
+            inFile1 = new Scanner(new File(Constants.TRAITPATH + "/severity.txt"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if(inFile1!=null) {
+
+            while (inFile1.hasNext()) {
+                // find next line
+                token1 = inFile1.next();
+                temps.add(token1);
+            }
+            inFile1.close();
+
+            String[] tempsArray = temps.toArray(new String[0]);
+
+            for (String s : tempsArray) {
+                System.out.println(s);
+            }
+
+            //Trim list to 21 since only 21 buttons
+            int k = temps.size();
+            if ( k > 21 ) {
+                temps.subList(21, k).clear();
+            }
+
+            for (int i = 0; i < temps.size(); i++) {
+                rustBtnArray[i].setVisibility(View.VISIBLE);
+                rustBtnArray[i].setText(tempsArray[i]);
+                rustBtnArray[i].setOnClickListener(this);
+            }
+        } else {
+            for (int i = 0; i < tempsNoFile.size(); i++) {
+                rustBtnArray[i].setVisibility(View.VISIBLE);
+                rustBtnArray[i].setText(tempsNoFile.get(i));
+                rustBtnArray[i].setOnClickListener(this);
+            }
+        }
+
+        rustR.setOnClickListener(this);
+        rustMR.setOnClickListener(this);
+        rustMS.setOnClickListener(this);
+        rustS.setOnClickListener(this);
+        rustDelim.setOnClickListener(this);
+        rustClear.setOnClickListener(this);
 
         rangeName.setText(ep.getString("ImportFirstName", getString(R.string.range)) + ":");
         plotName.setText(ep.getString("ImportSecondName", getString(R.string.plot)) + ":");
@@ -1071,63 +1195,85 @@ public class MainActivity extends Activity implements OnClickListener {
         // Go to previous range
         rangeLeft.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if (rangeID != null && rangeID.length > 0) {
-                    //index.setEnabled(true);
+                if(ep.getBoolean("DisableEntryNav",false)==true && !newTraits.containsKey(currentTrait.trait)) {
 
-                    // If ignore existing data is enabled, then skip accordingly
-                    if (ep.getBoolean("IgnoreExisting", false)) {
-                        int pos = paging;
+                    try {
+                        int resID = getResources().getIdentifier("error", "raw", getPackageName());
+                        MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                        chimePlayer.start();
 
-                        while (pos >= 0) {
-                            pos -= 1;
-
-                            if (pos < 1)
-                                return;
-
-                            if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                                    currentTrait.format)) {
-                                paging = pos;
-                                break;
-                            }
-                        }
-                    } else {
-                        paging -= 1;
-
-                        if (paging < 1)
-                            paging = rangeID.length;
+                        chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            public void onCompletion(MediaPlayer mp) {
+                                mp.release();
+                            };
+                        });
+                    } catch (Exception e) {
                     }
 
-                    // Refresh onscreen controls
-                    cRange = dt.getRange(rangeID[paging - 1]);
+                } else {
+                    if (rangeID != null && rangeID.length > 0) {
+                        //index.setEnabled(true);
 
-                    displayRange(cRange);
+                        // If ignore existing data is enabled, then skip accordingly
+                        if (ep.getBoolean("IgnoreExisting", false)) {
+                            int pos = paging;
 
-                    if (ep.getBoolean("RangeSound", false)) {
-                        if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                            lastRange = cRange.range;
+                            while (pos >= 0) {
+                                pos -= 1;
 
-                            try {
-                                int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                                MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                                chimePlayer.start();
+                                if (pos < 1)
+                                    return;
 
-                                chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                    public void onCompletion(MediaPlayer mp) {
-                                        mp.release();
-                                    }
+                                if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                                        currentTrait.format)) {
+                                    paging = pos;
+                                    break;
+                                }
+                            }
+                        } else {
+                            paging -= 1;
 
-                                    ;
-                                });
-                            } catch (Exception e) {
+                            if (paging < 1)
+                                paging = rangeID.length;
+                        }
+
+                        // Refresh onscreen controls
+                        cRange = dt.getRange(rangeID[paging - 1]);
+
+                        Editor ed = ep.edit();
+                        ed.putString("lastplot",cRange.plot_id);
+                        ed.commit();
+
+                        displayRange(cRange);
+
+                        if (ep.getBoolean("RangeSound", false)) {
+                            if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
+                                lastRange = cRange.range;
+
+                                try {
+                                    int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+                                    MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                                    chimePlayer.start();
+
+                                    chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                        public void onCompletion(MediaPlayer mp) {
+                                            mp.release();
+                                        }
+
+                                        ;
+                                    });
+                                } catch (Exception e) {
+                                }
                             }
                         }
+
+                        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                                .clone();
+
+                        initWidgets(true);
                     }
-
-                    newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                            .clone();
-
-                    initWidgets(true);
                 }
+
             }
         });
 
@@ -1160,6 +1306,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         break;
                 }
 
+
                 return true; // return true to prevent calling btn onClick handler
             }
         });
@@ -1167,70 +1314,93 @@ public class MainActivity extends Activity implements OnClickListener {
         // Go to next range
         rangeRight.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if (rangeID != null && rangeID.length > 0) {
-                    //index.setEnabled(true);
 
-                    // If ignore existing data is enabled, then skip accordingly
-                    if (ep.getBoolean("IgnoreExisting", false)) {
-                        int pos = paging;
+                if(ep.getBoolean("DisableEntryNav",false)==true && !newTraits.containsKey(currentTrait.trait)) {
 
-                        if (pos == rangeID.length) {
-                            pos = 1;
-                            return;
-                        }
+                    try {
+                        int resID = getResources().getIdentifier("error", "raw", getPackageName());
+                        MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                        chimePlayer.start();
 
-                        while (pos <= rangeID.length) {
-                            pos += 1;
+                        chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            public void onCompletion(MediaPlayer mp) {
+                                mp.release();
+                            };
+                        });
+                    } catch (Exception e) {
+                    }
 
-                            if (pos > rangeID.length) {
+                } else {
+                    if (rangeID != null && rangeID.length > 0) {
+                        //index.setEnabled(true);
+
+                        // If ignore existing data is enabled, then skip accordingly
+                        if (ep.getBoolean("IgnoreExisting", false)) {
+                            int pos = paging;
+
+                            if (pos == rangeID.length) {
                                 pos = 1;
                                 return;
                             }
 
-                            if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                                    currentTrait.format)) {
-                                paging = pos;
-                                break;
+                            while (pos <= rangeID.length) {
+                                pos += 1;
+
+                                if (pos > rangeID.length) {
+                                    pos = 1;
+                                    return;
+                                }
+
+                                if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                                        currentTrait.format)) {
+                                    paging = pos;
+                                    break;
+                                }
+                            }
+                        } else {
+                            paging += 1;
+
+                            if (paging > rangeID.length)
+                                paging = 1;
+                        }
+
+                        // Refresh onscreen controls
+                        cRange = dt.getRange(rangeID[paging - 1]);
+
+                        Editor ed = ep.edit();
+                        ed.putString("lastplot",cRange.plot_id);
+                        ed.commit();
+
+                        displayRange(cRange);
+                        if (ep.getBoolean("RangeSound", false)) {
+                            if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
+                                lastRange = cRange.range;
+
+                                try {
+                                    int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+                                    MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                                    chimePlayer.start();
+
+                                    chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                        public void onCompletion(MediaPlayer mp) {
+                                            mp.release();
+                                        }
+
+                                        ;
+                                    });
+                                } catch (Exception e) {
+                                }
                             }
                         }
-                    } else {
-                        paging += 1;
+                        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                                .clone();
 
-                        if (paging > rangeID.length)
-                            paging = 1;
+                        initWidgets(true);
                     }
-
-                    // Refresh onscreen controls
-                    cRange = dt.getRange(rangeID[paging - 1]);
-
-                    displayRange(cRange);
-                    if (ep.getBoolean("RangeSound", false)) {
-                        if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                            lastRange = cRange.range;
-
-                            try {
-                                int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                                MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                                chimePlayer.start();
-
-                                chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                    public void onCompletion(MediaPlayer mp) {
-                                        mp.release();
-                                    }
-
-                                    ;
-                                });
-                            } catch (Exception e) {
-                            }
-                        }
-                    }
-                    newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                            .clone();
-
-                    initWidgets(true);
                 }
             }
         });
+
 
         traitLeft = (ImageView) findViewById(R.id.traitLeft);
         traitRight = (ImageView) findViewById(R.id.traitRight);
@@ -1409,7 +1579,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     private void scanSampleFiles() {
-        String[] fileList = {Constants.TRAITPATH + "/trait_sample.trt", Constants.FIELDIMPORTPATH + "/field_sample.csv", Constants.FIELDIMPORTPATH + "/field_sample.xls"};
+        String[] fileList = {Constants.TRAITPATH + "/trait_sample.trt", Constants.FIELDIMPORTPATH + "/field_sample.csv", Constants.FIELDIMPORTPATH + "/field_sample.xls", Constants.TRAITPATH + "/severity.txt"};
 
         for (int i=0; i<fileList.length; i++) {
             File temp = new File(fileList[i]);
@@ -1465,6 +1635,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
             // Refresh onscreen controls
             cRange = dt.getRange(rangeID[paging - 1]);
+
+            Editor ed = ep.edit();
+            ed.putString("lastplot",cRange.plot_id);
+            ed.commit();
 
             if (cRange.plot_id.length() == 0)
                 return;
@@ -1536,6 +1710,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
             // Refresh onscreen controls
             cRange = dt.getRange(rangeID[paging - 1]);
+            Editor ed = ep.edit();
+            ed.putString("lastplot",cRange.plot_id);
+            ed.commit();
 
             if (cRange.plot_id.length() == 0)
                 return;
@@ -1577,7 +1754,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
         newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                 .clone();
-
 
         drop1Selection = drop1prefix.getSelectedItemPosition();
         drop2Selection = drop2prefix.getSelectedItemPosition();
@@ -2105,6 +2281,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
+                        traitRustRating.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2177,6 +2354,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
+                        traitRustRating.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2244,6 +2422,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
+                        traitRustRating.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2338,6 +2517,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
+                        traitRustRating.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
                         traitPhoto.setVisibility(View.GONE);
@@ -2402,6 +2582,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
+                        traitRustRating.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.VISIBLE);
                         traitPhoto.setVisibility(View.GONE);
@@ -2691,6 +2872,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
+                        traitRustRating.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2737,6 +2919,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitAudio.setVisibility(View.VISIBLE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
+                        traitRustRating.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2780,6 +2963,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.VISIBLE);
                         traitCounter.setVisibility(View.GONE);
+                        traitRustRating.setVisibility(View.GONE);
 
                         qPicker.setVisibility(LinearLayout.GONE);
 
@@ -2855,6 +3039,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.VISIBLE);
+                        traitRustRating.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
 
@@ -2882,6 +3067,76 @@ public class MainActivity extends Activity implements OnClickListener {
                             counterTv.setText(newTraits.get(currentTrait.trait).toString());
                         }
 
+
+                    } else if(currentTrait.format.equals("rust rating")) {
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
+                        traitRustRating.setVisibility(View.VISIBLE);
+
+                        tNum.removeTextChangedListener(tNumUpdate);
+
+                        tNum.setVisibility(EditText.GONE);
+                        tNum.setEnabled(false);
+
+                        eNum.setVisibility(EditText.VISIBLE);
+                        eNum.setEnabled(true);
+
+                        clearGeneric.setVisibility(View.GONE);
+                        clearBoolean.setVisibility(View.GONE);
+
+                        pNum.setVisibility(EditText.GONE);
+
+                        seekBar.setVisibility(EditText.GONE);
+                        datePicker.setVisibility(LinearLayout.GONE);
+                        eImg.setVisibility(EditText.GONE);
+
+                        traitAudio.setVisibility(EditText.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+
+
+
+                        // create Scanner inFile1
+
+                        if (newTraits.containsKey(currentTrait.trait)) {
+                            eNum.removeTextChangedListener(eNumUpdate);
+                            eNum.setText(newTraits.get(currentTrait.trait).toString());
+                            eNum.setTextColor(Color.parseColor(displayColor));
+                            eNum.addTextChangedListener(eNumUpdate);
+                        } else {
+                            eNum.removeTextChangedListener(eNumUpdate);
+
+                            eNum.setText("");
+                            eNum.setTextColor(Color.BLACK);
+
+                            if (currentTrait.defaultValue != null
+                                    && currentTrait.defaultValue.length() > 0)
+                                eNum.setText(currentTrait.defaultValue);
+
+                            eNum.addTextChangedListener(eNumUpdate);
+                        }
+
+                        // This is needed to fix the keyboard bug
+                        mHandler.postDelayed(new Runnable() {
+
+                            public void run() {
+                                eNum.dispatchTouchEvent(MotionEvent.obtain(
+                                        SystemClock.uptimeMillis(),
+                                        SystemClock.uptimeMillis(),
+                                        MotionEvent.ACTION_DOWN, 0, 0, 0));
+                                eNum.dispatchTouchEvent(MotionEvent.obtain(
+                                        SystemClock.uptimeMillis(),
+                                        SystemClock.uptimeMillis(),
+                                        MotionEvent.ACTION_UP, 0, 0, 0));
+                            }
+
+                        }, 300);
 
                     } else {
                         qPicker.setVisibility(LinearLayout.GONE);
@@ -2918,43 +3173,6 @@ public class MainActivity extends Activity implements OnClickListener {
         }
     }
 
-
-    private void loadPrefixes() {
-        if (prefixTraits != null) {
-            savePrefix = false;
-
-            ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<String>(
-                    this, R.layout.spinnerlayout, prefixTraits);
-
-            drop1prefix.setAdapter(prefixArrayAdapter);
-            drop1prefix.setSelection(drop1Selection);
-
-            if (!drop1prefix.equals(null)) {
-                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP1", ep.getString("ImportUniqueName", "")));
-                drop1prefix.setSelection(spinnerPostion);
-                spinnerPostion = 0;
-            }
-
-            drop2prefix.setAdapter(prefixArrayAdapter);
-            drop2prefix.setSelection(drop2Selection);
-
-            if (!drop2prefix.equals(null)) {
-                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP2", ep.getString("ImportUniqueName", "")));
-                drop2prefix.setSelection(spinnerPostion);
-                spinnerPostion = 0;
-            }
-
-            drop3prefix.setAdapter(prefixArrayAdapter);
-            drop3prefix.setSelection(drop3Selection);
-
-            if (!drop3prefix.equals(null)) {
-                int spinnerPostion = prefixArrayAdapter.getPosition(ep.getString("DROP3", ep.getString("ImportUniqueName", "")));
-                drop3prefix.setSelection(spinnerPostion);
-                spinnerPostion = 0;
-            }
-        }
-    }
-
     // For audio trait type
     private void setRecordingLocation(String recordingName) {
         mRecordingLocation = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/audio/",
@@ -2981,7 +3199,7 @@ public class MainActivity extends Activity implements OnClickListener {
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 
         SimpleDateFormat timeStamp = new SimpleDateFormat(
-                "yyyy.MM.dd_hh_mm_ss", Locale.getDefault());
+                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
         Calendar c = Calendar.getInstance();
 
@@ -3266,6 +3484,11 @@ public class MainActivity extends Activity implements OnClickListener {
     @Override
     public void onDestroy() {
 
+        //save last plot id
+        Editor ed = ep.edit();
+        ed.putString("lastplot",cRange.plot_id);
+        ed.commit();
+
         try {
             // Always close tips / hints along with the main activity
             TutorialMainActivity.thisActivity.finish();
@@ -3307,6 +3530,9 @@ public class MainActivity extends Activity implements OnClickListener {
             } else {
                 systemMenu.findItem(R.id.nextEmptyPlot).setVisible(false);
             }
+
+            //TODO add datagrid
+
         }
 
         // This allows dynamic language change without exiting the app
@@ -3360,6 +3586,14 @@ public class MainActivity extends Activity implements OnClickListener {
 
             initWidgets(false);
             traitType.setSelection(0);
+
+            // try to go to last saved plot
+            if(ep.getString("lastplot",null)!=null) {
+                String plot = dt.getPlotFromId(ep.getString("lastplot",null));
+                String range = dt.getRangeFromId(ep.getString("lastplot",null));
+                rangeID = dt.getAllRangeID();
+                moveTo(rangeID, range, plot, true);
+            }
 
         } else if (partialReload) {
             partialReload = false;
@@ -4318,6 +4552,8 @@ public class MainActivity extends Activity implements OnClickListener {
             systemMenu.findItem(R.id.nextEmptyPlot).setVisible(false);
         }
 
+        //TODO add logic for datagrid
+        systemMenu.findItem(R.id.datagrid).setVisible(false);
 
         return true;
     }
@@ -4373,16 +4609,28 @@ public class MainActivity extends Activity implements OnClickListener {
                 nextEmptyPlot();
                 break;
             case R.id.jumpToPlot:
-                moveToPlotID2();
+                moveToPlotID();
+                makeToast(ep.getString("lastplot", "nope"));
                 break;
             case R.id.summary:
                 showSummary();
+                break;
+            case R.id.datagrid:
+                try {
+                    TutorialMainActivity.thisActivity.finish();
+                } catch (Exception e) {
+
+                }
+
+                intent.setClassName(MainActivity.this,
+                        DatagridActivity.class.getName());
+                startActivity(intent);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void moveToPlotID2() {
+    private void moveToPlotID() {
         goToId = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
         goToId.setTitle(getString(R.string.jumptoplotidbutton));
         goToId.setContentView(R.layout.gotobarcode);
@@ -4427,51 +4675,8 @@ public class MainActivity extends Activity implements OnClickListener {
         goToId.show();
     }
 
-
-    private void moveToPlotID() {
-        final EditText input = new EditText(this);
-
-        final AlertDialog builder = new AlertDialog.Builder(this)
-                .setTitle(R.string.jumptoplotidbutton)
-                .setView(input)
-                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        inputPlotId = input.getText().toString();
-                        String plot = dt.getPlotFromId(inputPlotId);
-                        String range = dt.getRangeFromId(inputPlotId);
-                        rangeID = dt.getAllRangeID();
-                        moveTo(rangeID, range, plot, true);
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .create();
-
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        input.setOnEditorActionListener(new OnEditorActionListener() {
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
-                    inputPlotId = input.getText().toString();
-                    String plot = dt.getPlotFromId(inputPlotId);
-                    String range = dt.getRangeFromId(inputPlotId);
-                    rangeID = dt.getAllRangeID();
-                    moveTo(rangeID, range, plot, true);
-                    builder.dismiss();
-                }
-                return false;
-            }
-        });
-
-        builder.show();
-    }
-
     public void makeToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     public void nextEmptyPlot() {
@@ -4672,16 +4877,104 @@ public class MainActivity extends Activity implements OnClickListener {
             case R.id.k15:
                 v = "0";
                 break;
+
+            case R.id.rust0:
+                v = rust0.getText().toString();
+                break;
+            case R.id.rust5:
+                v = rust5.getText().toString();
+                break;
+            case R.id.rust10:
+                v = rust10.getText().toString();
+                break;
+            case R.id.rust15:
+                v = rust15.getText().toString();
+                break;
+            case R.id.rust20:
+                v = rust20.getText().toString();
+                break;
+            case R.id.rust25:
+                v = rust25.getText().toString();
+                break;
+            case R.id.rust30:
+                v = rust30.getText().toString();
+                break;
+            case R.id.rust35:
+                v = rust35.getText().toString();
+                break;
+            case R.id.rust40:
+                v = rust40.getText().toString();
+                break;
+            case R.id.rust45:
+                v = rust45.getText().toString();
+                break;
+            case R.id.rust50:
+                v = rust50.getText().toString();
+                break;
+            case R.id.rust55:
+                v = rust55.getText().toString();
+                break;
+            case R.id.rust60:
+                v = rust60.getText().toString();
+                break;
+            case R.id.rust65:
+                v = rust65.getText().toString();
+                break;
+            case R.id.rust70:
+                v = rust70.getText().toString();
+                break;
+            case R.id.rust75:
+                v = rust75.getText().toString();
+                break;
+            case R.id.rust80:
+                v = rust80.getText().toString();
+                break;
+            case R.id.rust85:
+                v = rust85.getText().toString();
+                break;
+            case R.id.rust90:
+                v = rust90.getText().toString();
+                break;
+            case R.id.rust95:
+                v = rust95.getText().toString();
+                break;
+            case R.id.rust100:
+                v = rust100.getText().toString();
+                break;
+            case R.id.rustR:
+                v = "R";
+                break;
+            case R.id.rustMR:
+                v = "MR";
+                break;
+            case R.id.rustMS:
+                v = "MS";
+                break;
+            case R.id.rustS:
+                v = "S";
+                break;
+            case R.id.rustDelim:
+                v = "/";
+                break;
+            }
+
+        if(traitRustRating.getVisibility() == View.VISIBLE && eNum.getText().length()>0 && !v.equals("/") && !eNum.getText().toString().substring(eNum.getText().length()-1).equals("/"))  {
+            v = ":" + v;
         }
 
-        if (b.getId() == R.id.k16) {
+        if (b.getId() == R.id.k16 || b.getId() == R.id.clearRustBtn) {
             //eNum.setText(eNum.getText().toString().substring(0, eNum.getText().toString().length()-1));
             eNum.removeTextChangedListener(eNumUpdate);
             eNum.setText("");
             removeTrait(currentTrait.trait);
             eNum.addTextChangedListener(eNumUpdate);
         } else {
-            eNum.setText(eNum.getText().toString() + v);
+            if(eNum.getText().toString().matches(".*\\d.*") && v.matches(".*\\d.*") && traitRustRating.getVisibility() == View.VISIBLE && !eNum.getText().toString().contains("/") ){
+                makeToast(getString(R.string.rustwarning));
+                v = "";
+            } else {
+                eNum.setText(eNum.getText().toString() + v);
+            }
         }
     }
 
@@ -5694,7 +5987,6 @@ public class MainActivity extends Activity implements OnClickListener {
             moveTo(rangeID, range, plot, true);
             goToId.dismiss();
         }
-
     }
 
     public void ErrorLog(String sFileName, String sErrMsg)

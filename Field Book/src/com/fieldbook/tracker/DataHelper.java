@@ -72,7 +72,7 @@ public class DataHelper {
             this.insertTraits = this.db.compileStatement(INSERTTRAITS);
             this.insertUserTraits = this.db.compileStatement(INSERTUSERTRAITS);
 
-            timeStamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss",
+            timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
                     Locale.getDefault());
 
         } catch (Exception e) {
@@ -1673,7 +1673,7 @@ public class DataHelper {
      * Export database
      */
     public void exportDatabase(String filename) throws IOException {
-        String internalDbPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
+        String internalDbPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME; // TODO don't hardcode th
         String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
 
         close();

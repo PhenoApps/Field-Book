@@ -266,6 +266,8 @@ public class ConfigActivity extends Activity {
         CheckBox jumpToPlot = (CheckBox) advancedDialog.findViewById(R.id.jumpToPlot);
         CheckBox nextEmptyPlot = (CheckBox) advancedDialog.findViewById(R.id.nextEmptyPlot);
         CheckBox quickGoTo = (CheckBox) advancedDialog.findViewById(R.id.quickGoTo);
+        CheckBox disableShare = (CheckBox) advancedDialog.findViewById(R.id.disableShare);
+        CheckBox disableEntryNav = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNav);
 
         Button advCloseBtn = (Button) advancedDialog.findViewById(R.id.closeBtn);
 
@@ -286,6 +288,7 @@ public class ConfigActivity extends Activity {
         jumpToPlot.setChecked(ep.getBoolean("JumpToPlot", false));
         nextEmptyPlot.setChecked(ep.getBoolean("NextEmptyPlot", false));
         quickGoTo.setChecked(ep.getBoolean("QuickGoTo", false));
+        disableEntryNav.setChecked(ep.getBoolean("DisableEntryNav", false));
 
         tips
                 .setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -389,6 +392,27 @@ public class ConfigActivity extends Activity {
                         MainActivity.reloadData = true;
                     }
                 });
+        disableShare
+                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+                    public void onCheckedChanged(CompoundButton arg0,
+                                                 boolean checked) {
+                        Editor e = ep.edit();
+                        e.putBoolean("DisableShare", checked);
+                        e.commit();
+                        MainActivity.reloadData = true;
+                    }
+                });
+        disableEntryNav.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("DisableEntryNav", checked);
+                e.commit();
+                MainActivity.reloadData = true;
+            }
+        });
 
         // Export Field book
         saveDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
@@ -1100,13 +1124,16 @@ public class ConfigActivity extends Activity {
      */
     private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
-        Intent intent = new Intent();
-        intent.setAction(android.content.Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
-        try {
-            startActivity(Intent.createChooser(intent, "Sending File..."));
-        } finally {
+
+        if(ep.getBoolean("DisableShare",true)==false) {
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
+            try {
+                startActivity(Intent.createChooser(intent, "Sending File..."));
+            } finally {
+            }
         }
     }
 
