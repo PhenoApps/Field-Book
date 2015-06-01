@@ -46,6 +46,7 @@ import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.Tutorial.TutorialTraitsActivity;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -625,6 +626,7 @@ public class TraitEditorActivity extends Activity {
 
             traitList.setAdapter(mAdapter);
         } catch (Exception e) {
+            ErrorLog("LoadDataError.txt", e.getMessage());
             e.printStackTrace();
         }
     }
@@ -691,6 +693,11 @@ public class TraitEditorActivity extends Activity {
     private void changeAllVisibility() {
         Boolean globalVis = ep.getBoolean("allTraitsVisible",false);
         String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
+
+        if(allTraits == null) {
+            makeToast(getString(R.string.changeAllVisibilityError));
+            return;
+        }
 
         for (int j = 0; j < allTraits.length; j++) {
             MainActivity.dt.updateTraitVisibility(allTraits[j],globalVis);
@@ -875,7 +882,7 @@ public class TraitEditorActivity extends Activity {
         // we parse it out here
         String fName = "trait";
         SimpleDateFormat timeStamp = new SimpleDateFormat(
-                "yyyy.MM.dd", Locale.getDefault());
+                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
         exportFile.setText(fName
                 + "_export_"
@@ -1010,6 +1017,7 @@ public class TraitEditorActivity extends Activity {
 
             csvWriter.close();
         } catch (Exception sqlEx) {
+            ErrorLog("ExportTraitError.txt", sqlEx.getMessage());
         }
 
         shareFile(file);
@@ -1086,13 +1094,14 @@ public class TraitEditorActivity extends Activity {
                 try {
                     cr.close();
                 } catch (Exception e) {
+                    ErrorLog("TraitImportError.txt", e.getMessage());
 
                 }
 
                 try {
                     fr.close();
                 } catch (Exception e) {
-
+                    ErrorLog("TraitImportError.txt", e.getMessage());
                 }
 
                 // These 2 lines are necessary due to importing of range data.
@@ -1107,6 +1116,7 @@ public class TraitEditorActivity extends Activity {
                 newDir.mkdirs();
 
             } catch (Exception e) {
+                ErrorLog("TraitImportError.txt", e.getMessage());
                 e.printStackTrace();
                 fail = true;
             }
@@ -1136,9 +1146,36 @@ public class TraitEditorActivity extends Activity {
         }
     }
 
+    public static void ErrorLog(String sFileName, String sErrMsg)
+    {
+        try
+        {
+            SimpleDateFormat lv_parser = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+
+            File file = new File(Constants.ERRORPATH, sFileName);
+
+            FileWriter filewriter = new FileWriter(file, true);
+            BufferedWriter out = new BufferedWriter(filewriter);
+
+            out.write(lv_parser.format(Calendar.getInstance().getTime()) + " " + sErrMsg + "\n");
+            out.flush();
+            out.close();
+
+            scanFile(file);
+        }
+        catch (Exception e)
+        {
+
+        }
+    }
+
     public static void makeToast(String message) {
 
         Toast.makeText(TraitEditorActivity.thisActivity, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private static void scanFile(File filePath) {
+        MediaScannerConnection.scanFile(thisActivity, new String[]{filePath.getAbsolutePath()}, null, null);
     }
 
     /**

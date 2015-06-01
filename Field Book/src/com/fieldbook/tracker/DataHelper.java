@@ -1647,7 +1647,7 @@ public class DataHelper {
      * Import database
      */
 
-    public boolean importDatabase(String filename) throws IOException {
+    public void importDatabase(String filename) throws IOException {
         String internalDbPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
         String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
 
@@ -1657,16 +1657,18 @@ public class DataHelper {
 
         Log.w("File to copy", Constants.BACKUPPATH + "/" + filename);
 
-        File newDb = new File(Constants.BACKUPPATH + "/" + filename);
-        File oldDb = new File(internalDbPath);
+        try {
+            File newDb = new File(Constants.BACKUPPATH + "/" + filename);
+            File oldDb = new File(internalDbPath);
 
-        File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
-        File oldSp = new File(internalSpPath);
+            File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
+            File oldSp = new File(internalSpPath);
 
-        copyFile(newDb,oldDb);
-        copyFile(newSp,oldSp);
+            copyFile(newDb,oldDb);
+            copyFile(newSp,oldSp);
+        } catch (IOException e) {
 
-        throw new IOException("System database in backup directory can't be loaded. Unable to copy.");
+        }
     }
 
     /**
@@ -1678,16 +1680,18 @@ public class DataHelper {
 
         close();
 
-        File newDb = new File(Constants.BACKUPPATH + "/" + filename + ".db");
-        File oldDb = new File(internalDbPath);
+        try {
+            File newDb = new File(Constants.BACKUPPATH + "/" + filename + ".db");
+            File oldDb = new File(internalDbPath);
 
-        File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
-        File oldSp = new File(internalSpPath);
+            File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
+            File oldSp = new File(internalSpPath);
 
-        copyFile(oldDb,newDb);
-        copyFile(oldSp,newSp);
+            copyFile(oldDb,newDb);
+            copyFile(oldSp,newSp);
+        } catch (IOException e) {
 
-        throw new IOException("Original system database in app does not exist. Unable to copy.");
+        }
     }
 
     /**

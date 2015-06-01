@@ -136,9 +136,9 @@ public class FileExploreActivity extends ListActivity {
 
 
             File[] filesList = path.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String filename) {
+                public boolean accept(File dir, String filename) { //TODO add option to exclude certain filenames from search
                     File sel = new File(dir, filename);
-                    if (sel.toString().contains(".fieldbook")||sel.toString().contains("severity.txt")){
+                    if (sel.toString().contains(".fieldbook")||sel.toString().contains("severity.txt")||sel.toString().contains("sharedpref.xml")){
                         return false;
                     }
                     return true;

@@ -16,12 +16,15 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,6 +34,7 @@ import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -70,6 +74,7 @@ import com.fieldbook.tracker.Tutorial.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -459,6 +464,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         moveRangeTo(rangeID, range.getText().toString(), false);
                         imm.hideSoftInputFromWindow(range.getWindowToken(), 0);
                     } catch (Exception e) {
+                        ErrorLog("MainScreenError.txt", e.getMessage());
                     }
                     return true;
                 }
@@ -475,6 +481,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         movePlotTo(rangeID, plot.getText().toString(), false);
                         imm.hideSoftInputFromWindow(plot.getWindowToken(), 0);
                     } catch (Exception e) {
+                        ErrorLog("MainScreenError.txt", e.getMessage());
                     }
                     return true;
                 }
@@ -748,6 +755,7 @@ public class MainActivity extends Activity implements OnClickListener {
         try {
             inFile1 = new Scanner(new File(Constants.TRAITPATH + "/severity.txt"));
         } catch (FileNotFoundException e) {
+            ErrorLog("RustError.txt", e.getMessage());
             e.printStackTrace();
         }
 
@@ -954,11 +962,14 @@ public class MainActivity extends Activity implements OnClickListener {
                 Integer i = Integer.parseInt(day.getText().toString());
                 calendar.set(Calendar.DAY_OF_MONTH, i);
 
-                updateTrait(currentTrait.trait,
-                        "date",
-                        calendar.get(Calendar.YEAR) + "."
-                                + (calendar.get(Calendar.MONTH) + 1) + "."
-                                + calendar.get(Calendar.DAY_OF_MONTH));
+                if (ep.getBoolean("UseDay", false) == true) {
+                    updateTrait(currentTrait.trait, "date",String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+                } else {
+                    updateTrait(currentTrait.trait, "date",
+                            calendar.get(Calendar.YEAR) + "."
+                                    + (calendar.get(Calendar.MONTH) + 1) + "."
+                                    + calendar.get(Calendar.DAY_OF_MONTH));
+                }
 
                 // Change the text color accordingly
                 month.setTextColor(Color.parseColor(displayColor));
@@ -1195,7 +1206,7 @@ public class MainActivity extends Activity implements OnClickListener {
         // Go to previous range
         rangeLeft.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(ep.getBoolean("DisableEntryNav",false)==true && !newTraits.containsKey(currentTrait.trait)) {
+                if(ep.getBoolean("DisableEntryNavLeft",false)==true && !newTraits.containsKey(currentTrait.trait)) {
 
                     try {
                         int resID = getResources().getIdentifier("error", "raw", getPackageName());
@@ -1208,6 +1219,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             };
                         });
                     } catch (Exception e) {
+                        ErrorLog("SoundError.txt", e.getMessage());
                     }
 
                 } else {
@@ -1263,6 +1275,7 @@ public class MainActivity extends Activity implements OnClickListener {
                                         ;
                                     });
                                 } catch (Exception e) {
+                                    ErrorLog("SoundError.txt", e.getMessage());
                                 }
                             }
                         }
@@ -1315,7 +1328,7 @@ public class MainActivity extends Activity implements OnClickListener {
         rangeRight.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
 
-                if(ep.getBoolean("DisableEntryNav",false)==true && !newTraits.containsKey(currentTrait.trait)) {
+                if(ep.getBoolean("DisableEntryNavRight",false)==true && !newTraits.containsKey(currentTrait.trait)) {
 
                     try {
                         int resID = getResources().getIdentifier("error", "raw", getPackageName());
@@ -1328,6 +1341,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             };
                         });
                     } catch (Exception e) {
+                        ErrorLog("SoundError.txt", e.getMessage());
                     }
 
                 } else {
@@ -1389,6 +1403,7 @@ public class MainActivity extends Activity implements OnClickListener {
                                         ;
                                     });
                                 } catch (Exception e) {
+                                    ErrorLog("SoundError.txt", e.getMessage());
                                 }
                             }
                         }
@@ -1435,13 +1450,13 @@ public class MainActivity extends Activity implements OnClickListener {
                 try {
                     imm.hideSoftInputFromWindow(eNum.getWindowToken(), 0);
                 } catch (Exception e) {
-
+                    ErrorLog("MainScreenError.txt", e.getMessage());
                 }
 
                 try {
                     imm.hideSoftInputFromWindow(tNum.getWindowToken(), 0);
                 } catch (Exception e) {
-
+                    ErrorLog("MainScreenError.txt", e.getMessage());
                 }
 
                 int pos = traitType.getSelectedItemPosition() - 1;
@@ -1487,13 +1502,13 @@ public class MainActivity extends Activity implements OnClickListener {
                 try {
                     imm.hideSoftInputFromWindow(eNum.getWindowToken(), 0);
                 } catch (Exception e) {
-
+                    ErrorLog("MainScreenError.txt", e.getMessage());
                 }
 
                 try {
                     imm.hideSoftInputFromWindow(tNum.getWindowToken(), 0);
                 } catch (Exception e) {
-
+                    ErrorLog("MainScreenError.txt", e.getMessage());
                 }
 
                 int pos = traitType.getSelectedItemPosition() + 1;
@@ -1564,6 +1579,11 @@ public class MainActivity extends Activity implements OnClickListener {
                     getResources().getDisplayMetrics());
     }
 
+    public static float dipToPixels(Context context, float dipValue) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
+    }
+
     // Create all necessary directories and subdirectories	
     private void createDirs() {
         createDir(mPath.getAbsolutePath());
@@ -1602,6 +1622,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 blankFile.createNewFile();
                 scanFile(blankFile);
             } catch (IOException e) {
+                ErrorLog("DirectoryError.txt", e.getMessage());
             }
         }
     }
@@ -1660,6 +1681,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             ;
                         });
                     } catch (Exception e) {
+                        ErrorLog("SoundError.txt", e.getMessage());
                     }
                 }
             }
@@ -1734,6 +1756,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             ;
                         });
                     } catch (Exception e) {
+                        ErrorLog("SoundError.txt", e.getMessage());
                     }
                 }
             }
@@ -2069,27 +2092,24 @@ public class MainActivity extends Activity implements OnClickListener {
             drop1prefix.setSelection(drop1Selection);
 
             if (!drop1prefix.equals(null)) {
-                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP1", ep.getString("ImportUniqueName","")));
+                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP1",prefixTraits[0].toString()));
                 drop1prefix.setSelection(spinnerPosition);
-                spinnerPosition = 0;
             }
 
             drop2prefix.setAdapter(prefixArrayAdapter);
             drop2prefix.setSelection(drop2Selection);
 
             if (!drop2prefix.equals(null)) {
-                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP2", ep.getString("ImportFirstName","")));
+                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP2",prefixTraits[1].toString()));
                 drop2prefix.setSelection(spinnerPosition);
-                spinnerPosition = 0;
             }
 
             drop3prefix.setAdapter(prefixArrayAdapter);
             drop3prefix.setSelection(drop3Selection);
 
             if (!drop3prefix.equals(null)) {
-                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP3", ep.getString("ImportSecondName","")));
+                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP3",prefixTraits[2].toString()));
                 drop3prefix.setSelection(spinnerPosition);
-                spinnerPosition = 0;
             }
 
             drop1prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -2112,6 +2132,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             e.putString("DROP1", prefixTraits[pos]);
                             e.commit();
                     } catch (Exception e) {
+                        ErrorLog("DropdownError.txt", e.getMessage());
                         e.printStackTrace();
                     }
 
@@ -2144,6 +2165,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             e.putString("DROP2", prefixTraits[pos]);
                             e.commit();
                     } catch (Exception e) {
+                        ErrorLog("DropdownError.txt", e.getMessage());
                         e.printStackTrace();
                     }
                 }
@@ -2174,6 +2196,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             e.putString("DROP3", prefixTraits[pos]);
                             e.commit();
                     } catch (Exception e) {
+                        ErrorLog("DropdownError.txt", e.getMessage());
                         e.printStackTrace();
 
                     }
@@ -2222,6 +2245,7 @@ public class MainActivity extends Activity implements OnClickListener {
         try {
             traitPosition = traitType.getSelectedItemPosition();
         } catch (Exception f) {
+            ErrorLog("MainScreenTraitError.txt", f.getMessage());
             traitPosition = 0;
         }
 
@@ -2246,13 +2270,13 @@ public class MainActivity extends Activity implements OnClickListener {
                         try {
                             imm.hideSoftInputFromWindow(eNum.getWindowToken(), 0);
                         } catch (Exception e) {
-
+                            ErrorLog("KeyboardError.txt", e.getMessage());
                         }
 
                         try {
                             imm.hideSoftInputFromWindow(tNum.getWindowToken(), 0);
                         } catch (Exception e) {
-
+                            ErrorLog("KeyboardError.txt", e.getMessage());
                         }
                     }
 
@@ -2541,17 +2565,33 @@ public class MainActivity extends Activity implements OnClickListener {
                         final Calendar c = Calendar.getInstance();
 
                         if (newTraits.containsKey(currentTrait.trait)) {
-                            String[] d = newTraits.get(currentTrait.trait).toString()
-                                    .split("\\.");
+                            if(!newTraits.get(currentTrait.trait).toString().contains(".")) { // no period means it was stored as a day of the year
+                                Calendar b = Calendar.getInstance();
+                                b.set(Calendar.DAY_OF_YEAR, Integer.parseInt(newTraits.get(currentTrait.trait).toString()));
 
-                            month.setTextColor(Color.parseColor(displayColor));
-                            day.setTextColor(Color.parseColor(displayColor));
+                                String[] e = {Integer.toString(b.get(Calendar.MONTH)),Integer.toString(b.get(Calendar.DAY_OF_MONTH))};
 
-                            //This is used to persist moving between months
-                            tempMonth = Integer.parseInt(d[1]) - 1;
+                                month.setTextColor(Color.parseColor(displayColor));
+                                day.setTextColor(Color.parseColor(displayColor));
 
-                            month.setText(getMonthForInt(Integer.parseInt(d[1]) - 1));
-                            day.setText(d[2]);
+                                tempMonth = Integer.parseInt(e[0]);
+
+                                month.setText(getMonthForInt(Integer.parseInt(e[0])));
+                                day.setText(e[1]);
+                            } else {
+                                String[] d = newTraits.get(currentTrait.trait).toString()
+                                        .split("\\.");
+
+                                month.setTextColor(Color.parseColor(displayColor));
+                                day.setTextColor(Color.parseColor(displayColor));
+
+                                //This is used to persist moving between months
+                                tempMonth = Integer.parseInt(d[1]) - 1;
+
+                                month.setText(getMonthForInt(Integer.parseInt(d[1])-1));
+                                day.setText(d[2]);
+                            }
+
                         } else {
                             month.setTextColor(Color.BLACK);
                             day.setTextColor(Color.BLACK);
@@ -2994,18 +3034,17 @@ public class MainActivity extends Activity implements OnClickListener {
                         drawables = new ArrayList<Drawable>();
 
                         File img = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/" + "/photos/");
-
                         if (img.listFiles() != null) {
                             photoLocation = dt.getPlotPhotos(cRange.plot_id);
 
-                            for (int i = 0; i < photoLocation.size(); i++) {
+                           for (int i = 0; i < photoLocation.size(); i++) {
                                 drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
-                            }
+                           }
 
                             photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
 
                             photo.setAdapter(photoAdapter);
-                            photo.setSelection(photo.getCount()-1);
+                            photo.setSelection(photo.getCount() - 1);
                             photo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                                 @Override
@@ -3206,6 +3245,7 @@ public class MainActivity extends Activity implements OnClickListener {
         try {
             mGeneratedName = MainActivity.cRange.plot_id + " " + timeStamp.format(c.getTime());
         } catch (Exception e) {
+            ErrorLog("AudioError.txt", e.getMessage());
             mGeneratedName = "error " + timeStamp.format(c.getTime());
         }
 
@@ -3216,8 +3256,10 @@ public class MainActivity extends Activity implements OnClickListener {
         try {
             mRecorder.prepare();
         } catch (IllegalStateException e) {
+            ErrorLog("AudioError.txt", e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
+            ErrorLog("AudioError.txt", e.getMessage());
             e.printStackTrace();
         }
     }
@@ -3242,6 +3284,7 @@ public class MainActivity extends Activity implements OnClickListener {
             mPlayer.prepare();
         }
         catch (Exception e) {
+            ErrorLog("AudioError.txt", e.getMessage());
             e.printStackTrace();
         }
 
@@ -3493,7 +3536,7 @@ public class MainActivity extends Activity implements OnClickListener {
             // Always close tips / hints along with the main activity
             TutorialMainActivity.thisActivity.finish();
         } catch (Exception e) {
-
+            ErrorLog("TutorialError.txt", e.getMessage());
         }
 
         // Always close the database connection when the app ends
@@ -3531,6 +3574,11 @@ public class MainActivity extends Activity implements OnClickListener {
                 systemMenu.findItem(R.id.nextEmptyPlot).setVisible(false);
             }
 
+            if (ep.getBoolean("BarcodeScan", false)) {
+                systemMenu.findItem(R.id.barcodeScan).setVisible(true);
+            } else {
+                systemMenu.findItem(R.id.barcodeScan).setVisible(false);
+            }
             //TODO add datagrid
 
         }
@@ -4552,6 +4600,12 @@ public class MainActivity extends Activity implements OnClickListener {
             systemMenu.findItem(R.id.nextEmptyPlot).setVisible(false);
         }
 
+        if (ep.getBoolean("BarcodeScan", false)) {
+            systemMenu.findItem(R.id.barcodeScan).setVisible(true);
+        } else {
+            systemMenu.findItem(R.id.barcodeScan).setVisible(false);
+        }
+
         //TODO add logic for datagrid
         systemMenu.findItem(R.id.datagrid).setVisible(false);
 
@@ -4612,6 +4666,9 @@ public class MainActivity extends Activity implements OnClickListener {
                 moveToPlotID();
                 makeToast(ep.getString("lastplot", "nope"));
                 break;
+            case R.id.barcodeScan:
+                barcodeScan();
+                break;
             case R.id.summary:
                 showSummary();
                 break;
@@ -4628,6 +4685,11 @@ public class MainActivity extends Activity implements OnClickListener {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void barcodeScan() {
+        IntentIntegrator integrator = new IntentIntegrator(thisActivity);
+        integrator.initiateScan();
     }
 
     private void moveToPlotID() {
@@ -4775,6 +4837,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         File storedAudio = new File(mRecordingLocation.getAbsolutePath());
                         scanFile(storedAudio);
                     } catch (Exception e) {
+                        ErrorLog("AudioError.txt", e.getMessage());
                         e.printStackTrace();
                     }
 
@@ -5729,6 +5792,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 out.close();
                 b.recycle();
             } catch (Exception e) {
+                ErrorLog("FileSaveError.txt", e.getMessage());
                 e.printStackTrace();
             }
 
@@ -5851,6 +5915,7 @@ public class MainActivity extends Activity implements OnClickListener {
             photo.setSelection(photoAdapter.getCount() - 1);
 
         } catch (Exception e) {
+            ErrorLog("CameraError.txt", e.getMessage());
             e.printStackTrace();
         }
 
@@ -5893,7 +5958,7 @@ public class MainActivity extends Activity implements OnClickListener {
             intent.setDataAndType(Uri.fromFile(f), "image/*");
             startActivity(intent);
         } catch (Exception e) {
-
+            ErrorLog("MapError.txt", e.getMessage());
         }
     }
 
@@ -5909,8 +5974,6 @@ public class MainActivity extends Activity implements OnClickListener {
         }
 
         try {
-
-            // Get the dimensions of the bitmap
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inJustDecodeBounds = true;
 
@@ -5939,10 +6002,46 @@ public class MainActivity extends Activity implements OnClickListener {
             bmOptions.inSampleSize = scaleFactor;
             bmOptions.inPurgeable = true;
 
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
             Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
-            return bitmap;
+            Bitmap correctBmp = bitmap;
+
+            try {
+                File f = new File(path);
+                ExifInterface exif = new ExifInterface(f.getPath());
+                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+                int angle = 0;
+
+                if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+                    angle = 90;
+                }
+                else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                    angle = 180;
+                }
+                else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                    angle = 270;
+                }
+
+                Matrix mat = new Matrix();
+                mat.postRotate(angle);
+
+                correctBmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mat, true);
+
+            }
+            catch (IOException e) {
+                Log.w("TAG", "-- Error in setting image");
+            }
+            catch(OutOfMemoryError oom) {
+                Log.w("TAG", "-- OOM Error in setting image");
+            }
+
+            return correctBmp;
 
         } catch (Exception e) {
+            ErrorLog("CameraError.txt", e.getMessage());
             e.printStackTrace();
             Toast toast = Toast.makeText(MainActivity.this, getString(R.string.photodecodefail), Toast.LENGTH_LONG);
             toast.setGravity(Gravity.TOP, 0, 0);
@@ -5985,7 +6084,9 @@ public class MainActivity extends Activity implements OnClickListener {
             String range = dt.getRangeFromId(inputPlotId);
             rangeID = dt.getAllRangeID();
             moveTo(rangeID, range, plot, true);
-            goToId.dismiss();
+            if(goToId!=null) {
+                goToId.dismiss();
+            }
         }
     }
 
@@ -5993,17 +6094,18 @@ public class MainActivity extends Activity implements OnClickListener {
     {
         try
         {
-            SimpleDateFormat lv_parser = new SimpleDateFormat("dd-MM-yyyy h:mm:ss a");
-            lv_parser.setTimeZone(TimeZone.getTimeZone("UTC"));
+            SimpleDateFormat lv_parser = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
 
             File file = new File(Constants.ERRORPATH, sFileName);
 
             FileWriter filewriter = new FileWriter(file, true);
             BufferedWriter out = new BufferedWriter(filewriter);
 
-            out.write(lv_parser.format(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime()) + " " + sErrMsg + "\n");
+            out.write(lv_parser.format(Calendar.getInstance().getTime()) + " " + sErrMsg + "\n");
             out.flush();
             out.close();
+
+            scanFile(file);
         }
         catch (Exception e)
         {

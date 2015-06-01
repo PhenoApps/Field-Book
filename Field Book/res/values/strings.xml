@@ -141,8 +141,13 @@
     <string name="falsevalue">False</string>
     <string name="rustwarning">Severity already stored</string>
     <string name="disableshare">Disable file sharing when exporting</string>
-    <string name="disableentrynav">Disable moving between entries if no data collected</string>
+    <string name="disableentrynavleft">Disable left entry arrow if no data collected</string>
+    <string name="disableentrynavright">Disable right entry arrow if no data collected</string>
     <string name="disableentryanavwarning">Data must be collected before you can go to the next entry</string>
+
+    <string name="changeAllVisibilityError">Create traits before disabling their visibility.</string>
+    <string name="barcodeScan">Adds icon to instantly open camera to scan barcode</string>
+    <string name="barcodescan">Scan barcode</string>
 
     <string name="advanced">Advanced settings</string>
     <string name="listfieldimport">List imported fields</string>

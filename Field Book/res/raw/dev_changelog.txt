@@ -1,3 +1,15 @@
+26
+Fixed day of year advanced setting
+Disable left, right, or both entry arrows in advanced settings
+Renamed exported files to avoid potentially overwriting
+Spaces in input file column names are replaced with underscores
+More errors are written to error logs
+Fixed a bug that cause a crash when toggling visibility of nonexistent traits
+Fixed a bug that caused a crash when getting location
+Fixed a bug that caused the unique id to incorrectly indicate it was duplicated
+Fixed a bug that caused collected photos to rotate on certain devices
+Fixed a bug that prevented export or import of the app database
+
 25
 Added a rust rating trait (up to 21 severity ratings)
 Changed timestamp to ISO 8601

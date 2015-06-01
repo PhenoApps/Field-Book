@@ -83,7 +83,7 @@ public class CSVWriter {
      * database, and so is passed in as a parameter
      * V2 - Range added, columns selectable
      */
-    public void writeDatabaseFormat(ArrayList<String> range, String person, String location, boolean useDay) throws Exception {
+    public void writeDatabaseFormat(ArrayList<String> range, String person, String location) throws Exception {
         // Simply loop through all items
         if (curCSV.getCount() > 0) {
 
@@ -117,17 +117,7 @@ public class CSVWriter {
                         traitName = curCSV.getString(i);
                     } else if (count == 1) {
                         TraitObject temp = MainActivity.dt.getDetail(traitName);
-
-                        if (useDay) {
-                            if (temp.format.equals("date")) {
-                                Calendar c = Calendar.getInstance();
-                                String[] d = curCSV.getString(i).split("\\.");
-                                c.set(Integer.parseInt(d[0]), Integer.parseInt(d[1]) - 1, Integer.parseInt(d[2]));
-                                arrStr[i] = String.valueOf(c.get(Calendar.DAY_OF_YEAR));
-                            } else
-                                arrStr[i] = curCSV.getString(i);
-                        } else
-                            arrStr[i] = curCSV.getString(i);
+                        arrStr[i] = curCSV.getString(i);
                     } else if (count == 2)
                         arrStr[i] = person;
                     else if (count == 4)

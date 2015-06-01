@@ -16,6 +16,11 @@
         android:showAsAction="always"
         android:title="@string/jumptoplotidbutton" />
     <item
+        android:id="@+id/barcodeScan"
+        android:icon="@drawable/ic_action_barcode_scanner"
+        android:showAsAction="always"
+        android:title="@string/barcodescan" />
+    <item
         android:id="@+id/datagrid"
         android:icon="@drawable/ic_action_grid"
         android:showAsAction="always"

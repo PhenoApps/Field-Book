@@ -264,10 +264,12 @@ public class ConfigActivity extends Activity {
         CheckBox useDay = (CheckBox) advancedDialog.findViewById(R.id.useDay);
         CheckBox rangeSound = (CheckBox) advancedDialog.findViewById(R.id.rangeSound);
         CheckBox jumpToPlot = (CheckBox) advancedDialog.findViewById(R.id.jumpToPlot);
+        CheckBox barcodeScan = (CheckBox) advancedDialog.findViewById(R.id.barcodeScan);
         CheckBox nextEmptyPlot = (CheckBox) advancedDialog.findViewById(R.id.nextEmptyPlot);
         CheckBox quickGoTo = (CheckBox) advancedDialog.findViewById(R.id.quickGoTo);
         CheckBox disableShare = (CheckBox) advancedDialog.findViewById(R.id.disableShare);
-        CheckBox disableEntryNav = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNav);
+        CheckBox disableEntryNavLeft = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNavLeft);
+        CheckBox disableEntryNavRight = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNavRight);
 
         Button advCloseBtn = (Button) advancedDialog.findViewById(R.id.closeBtn);
 
@@ -286,9 +288,12 @@ public class ConfigActivity extends Activity {
         useDay.setChecked(ep.getBoolean("UseDay", false));
         rangeSound.setChecked(ep.getBoolean("RangeSound", false));
         jumpToPlot.setChecked(ep.getBoolean("JumpToPlot", false));
+        barcodeScan.setChecked(ep.getBoolean("BarcodeScan", false));
         nextEmptyPlot.setChecked(ep.getBoolean("NextEmptyPlot", false));
         quickGoTo.setChecked(ep.getBoolean("QuickGoTo", false));
-        disableEntryNav.setChecked(ep.getBoolean("DisableEntryNav", false));
+        disableShare.setChecked(ep.getBoolean("DisableShare", false));
+        disableEntryNavLeft.setChecked(ep.getBoolean("DisableEntryNavLeft", false));
+        disableEntryNavRight.setChecked(ep.getBoolean("DisableEntryNavRight", false));
 
         tips
                 .setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -403,12 +408,32 @@ public class ConfigActivity extends Activity {
                         MainActivity.reloadData = true;
                     }
                 });
-        disableEntryNav.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        disableEntryNavLeft.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
             public void onCheckedChanged(CompoundButton arg0,
                                          boolean checked) {
                 Editor e = ep.edit();
-                e.putBoolean("DisableEntryNav", checked);
+                e.putBoolean("DisableEntryNavLeft", checked);
+                e.commit();
+                MainActivity.reloadData = true;
+            }
+        });
+        disableEntryNavRight.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("DisableEntryNavRight", checked);
+                e.commit();
+                MainActivity.reloadData = true;
+            }
+        });
+        barcodeScan.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("BarcodeScan", checked);
                 e.commit();
                 MainActivity.reloadData = true;
             }
@@ -821,6 +846,8 @@ public class ConfigActivity extends Activity {
         String priCol = primary.getSelectedItem().toString();
         String secCol = secondary.getSelectedItem().toString();
 
+        idColPosition = unique.getSelectedItemPosition();
+
         if (idCol.equals(priCol) || idCol.equals(secCol) || priCol.equals(secCol)) {
             Toast.makeText(ConfigActivity.this, getString(R.string.colnamesdif),
                     Toast.LENGTH_LONG).show();
@@ -876,9 +903,10 @@ public class ConfigActivity extends Activity {
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
-                                + ep.getString("LastName", ""), ep.getString("Location", ""), ep.getBoolean("UseDay", false));
+                                + ep.getString("LastName", ""), ep.getString("Location", ""));
                         shareFile(file);
                     } catch (Exception e) {
+                        ErrorLog("ExportDataError.txt", e.getMessage());
                         fail = true;
                     }
                 }
@@ -906,6 +934,7 @@ public class ConfigActivity extends Activity {
                                 traits);
                         shareFile(file);
                     } catch (Exception e) {
+                        ErrorLog("ExportDataError.txt", e.getMessage());
                         fail = true;
                     }
                 }
@@ -924,9 +953,10 @@ public class ConfigActivity extends Activity {
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
-                                + ep.getString("LastName", ""), ep.getString("Location", ""), ep.getBoolean("UseDay", false));
+                                + ep.getString("LastName", ""), ep.getString("Location", ""));
                         shareFile(file);
                     } catch (Exception e) {
+                        ErrorLog("ExportDataError.txt", e.getMessage());
                         fail = true;
                     }
                 }
@@ -956,6 +986,7 @@ public class ConfigActivity extends Activity {
                                 traits);
                         shareFile(file);
                     } catch (Exception e) {
+                        ErrorLog("ExportDataError.txt", e.getMessage());
                         fail = true;
                     }
                 }
@@ -1014,6 +1045,7 @@ public class ConfigActivity extends Activity {
             }
             catch (Exception e)
             {
+                ErrorLog("ExportDatabaseError.txt", e.getMessage());
                 e.printStackTrace();
                 error = e.getMessage();
                 fail = true;
@@ -1036,7 +1068,7 @@ public class ConfigActivity extends Activity {
 
             if (fail)
             {
-                ErrorLog("DBBackupError.txt", error);
+                ErrorLog("ExportDatabaseError.txt", error);
 
                 Toast toast = Toast.makeText(ConfigActivity.this,
                         getString(R.string.exporterror), Toast.LENGTH_LONG);
@@ -1084,6 +1116,7 @@ public class ConfigActivity extends Activity {
             try {
                 MainActivity.dt.importDatabase(mChosenFile);
             } catch (Exception e) {
+                ErrorLog("ImportDatabase.txt", e.getMessage());
                 e.printStackTrace();
 
                 error = e.getMessage();
@@ -1204,6 +1237,8 @@ public class ConfigActivity extends Activity {
 
             String[] columns = cr.readNext();
 
+            System.out.println(idColPosition);
+
             while (columns != null) {
                 columns = cr.readNext();
 
@@ -1218,6 +1253,7 @@ public class ConfigActivity extends Activity {
 
             return true;
         } catch (Exception n) {
+            ErrorLog("VerifyUniqueError.txt", n.getMessage());
             n.printStackTrace();
             return false;
         }
@@ -1470,7 +1506,9 @@ public class ConfigActivity extends Activity {
     private void updateSetupList() {
         ArrayAdapter<String> ga = (ArrayAdapter) setupList.getAdapter();
 
-        ga.clear();
+        if(ga!=null) {
+            ga.clear();
+        }
 
         String[] arrayData = prepareSetup();
 
@@ -1501,22 +1539,8 @@ public class ConfigActivity extends Activity {
 
         // As the export filename uses the import file name as well,
         // we parse it out here
-        String fName = "";
         SimpleDateFormat timeStamp = new SimpleDateFormat(
-                "yyyy.MM.dd", Locale.getDefault());
-
-        if (ep.getString("FieldFile", "").length() > 0) {
-            int index = ep.getString("FieldFile", "").lastIndexOf(
-                    '.');
-
-            if (index > 0
-                    && index <= ep.getString("FieldFile", "")
-                    .length() - 2) {
-                fName = ep.getString("FieldFile", "").substring(0,
-                        index);
-            }
-
-        }
+                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
         String fFile = ep.getString("FieldFile", "");
 
@@ -1524,7 +1548,7 @@ public class ConfigActivity extends Activity {
             fFile = fFile.substring(0, fFile.length() - 4);
         }
 
-        exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile);
+        exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile );
 
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_checked, MainActivity.dt.getRangeColumns());
         saveList.setAdapter(itemsAdapter);
@@ -1836,6 +1860,7 @@ public class ConfigActivity extends Activity {
                 blankFile.createNewFile();
                 scanFile(blankFile);
             } catch (IOException e) {
+                ErrorLog("DirectoryError.txt", e.getMessage());
             }
         }
     }
@@ -1882,7 +1907,7 @@ public class ConfigActivity extends Activity {
                 }
             }
         } catch (Exception n) {
-
+            ErrorLog("CSVError.txt", n.getMessage());
         }
 
         mUserChoice = "";
@@ -1940,7 +1965,7 @@ public class ConfigActivity extends Activity {
                 }
             }
         } catch (Exception n) {
-
+            ErrorLog("ExcelError.txt", n.getMessage());
         }
 
         if (!columnFail)
@@ -2060,7 +2085,6 @@ public class ConfigActivity extends Activity {
                 //verify unique
                 if (!verifyUniqueColumnCSV(mChosenFile)) {
                     uniqueFail = true;
-
                     return 0;
                 }
 
@@ -2069,6 +2093,10 @@ public class ConfigActivity extends Activity {
                 CSVReader cr = new CSVReader(fr);
 
                 columns = cr.readNext();
+
+                for(int i=0;i<columns.length;i++) {
+                    columns[i] = columns[i].replaceAll(" ","_");
+                }
 
                 if (action == DIALOG_LOAD_FIELDFILECSV) {
                     MainActivity.dt.dropRange();
@@ -2124,13 +2152,13 @@ public class ConfigActivity extends Activity {
                 try {
                     cr.close();
                 } catch (Exception e) {
-
+                    ErrorLog("CSVError.txt", e.getMessage());
                 }
 
                 try {
                     fr.close();
                 } catch (Exception e) {
-
+                    ErrorLog("CSVError.txt", e.getMessage());
                 }
 
                 // These 2 lines are necessary due to importing of range data.
@@ -2145,6 +2173,7 @@ public class ConfigActivity extends Activity {
                 newDir.mkdirs();
 
             } catch (Exception e) {
+                ErrorLog("CSVError.txt", e.getMessage());
                 e.printStackTrace();
                 fail = true;
 
@@ -2226,15 +2255,14 @@ public class ConfigActivity extends Activity {
     {
         try
         {
-            SimpleDateFormat lv_parser = new SimpleDateFormat("dd-MM-yyyy h:mm:ss a");
-            lv_parser.setTimeZone(TimeZone.getTimeZone("UTC"));
+            SimpleDateFormat lv_parser = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
 
             File file = new File(Constants.ERRORPATH, sFileName);
 
             FileWriter filewriter = new FileWriter(file, true);
             BufferedWriter out = new BufferedWriter(filewriter);
 
-            out.write(lv_parser.format(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime()) + " " + sErrMsg + "\n");
+            out.write(lv_parser.format(Calendar.getInstance().getTime()) + " " + sErrMsg + "\n");
             out.flush();
             out.close();
 
@@ -2360,6 +2388,7 @@ public class ConfigActivity extends Activity {
                 newDir.mkdirs();
 
             } catch (Exception e) {
+                ErrorLog("ImportExcelError.txt", e.getMessage());
                 e.printStackTrace();
                 fail = true;
 
@@ -2496,7 +2525,7 @@ public class ConfigActivity extends Activity {
         });
 
         SimpleDateFormat timeStamp = new SimpleDateFormat(
-                "yyyy.MM.dd", Locale.getDefault());
+                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
         exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + MainActivity.dt.DATABASE_VERSION + ".db");
 
@@ -2661,6 +2690,7 @@ public class ConfigActivity extends Activity {
                     Elements spans = doc.select("div[itemprop=softwareVersion]");
                     title = spans.first().ownText();
                 } catch (IOException e) {
+                    ErrorLog("VersionCheckError.txt", e.getMessage());
                     e.printStackTrace();
                 }
             }

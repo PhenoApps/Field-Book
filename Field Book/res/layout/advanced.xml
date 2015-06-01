@@ -73,6 +73,19 @@
                 android:layout_height="25dp" />
 
             <CheckBox
+                android:id="@+id/barcodeScan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/barcodeScan"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
+
+            <CheckBox
                 android:id="@+id/jumpToPlot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -101,11 +114,25 @@
                 android:layout_height="25dp" />
 
             <CheckBox
-                android:id="@+id/disableEntryNav"
+                android:id="@+id/disableEntryNavLeft"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="false"
-                android:text="@string/disableentrynav"
+                android:text="@string/disableentrynavleft"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
+
+            <CheckBox
+                android:id="@+id/disableEntryNavRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/disableentrynavright"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
