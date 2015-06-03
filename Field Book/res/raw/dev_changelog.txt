@@ -1,3 +1,11 @@
+27
+Map temporarily removed
+Added a app rating dialog
+Plot scrolling speed accelerates the longer the arrow is pressed
+Added a beta datagrid advanced setting (choosing plot goes to that plot)
+Reorganized export layout
+App checks wheatgenetics.org for updates
+
 26
 Fixed day of year advanced setting
 Disable left, right, or both entry arrows in advanced settings

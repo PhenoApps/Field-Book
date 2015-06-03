@@ -14,11 +14,6 @@
         android:textColor="@color/s_text"
         android:textStyle="bold" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="10dp"
-        android:background="#FFFFFF" />
-
     <CheckBox
         android:id="@+id/formatDB"
         android:layout_width="wrap_content"
@@ -43,21 +38,63 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/allcolumns"
+        android:text="@string/fieldcolumns"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/s_text"
         android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/fieldsRadioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/onlyUnique"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/onlyunique"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <RadioButton
+            android:id="@+id/allColumns"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/allcolumns"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+    </RadioGroup>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="10dp"
         android:background="#FFFFFF" />
 
-    <ListView
-        android:id="@+id/myList"
-        android:layout_width="fill_parent"
-        android:layout_height="350dp"
-        android:layout_weight="1" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/traits"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/s_text"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/traitsRadioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/activeTraits"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/activetraits"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <RadioButton
+            android:id="@+id/allTraits"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/alltraits"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+    </RadioGroup>
 
     <View
         android:layout_width="match_parent"
@@ -71,11 +108,6 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/s_text"
         android:textStyle="bold" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="10dp"
-        android:background="#FFFFFF" />
 
     <EditText
         android:id="@+id/fileName"

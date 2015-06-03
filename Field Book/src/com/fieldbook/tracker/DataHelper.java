@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
-import com.fieldbook.tracker.Map.MapData;
 import com.fieldbook.tracker.Search.SearchData;
 import com.fieldbook.tracker.Trait.TraitObject;
 
@@ -248,8 +247,9 @@ public class DataHelper {
      * Retrieves the columns needed for export using a join statement
      * v1.6 - Amended to consider both trait and format
      */
-    public Cursor getExportDBData(String[] fieldList) {
+    public Cursor getExportDBData(String[] fieldList, String[] traits) {
         String fields = arrayToString("range", fieldList);
+        String activeTraits = arrayToLikeString(traits);
 
         Cursor cursor = this.db
                 .rawQuery(
@@ -257,11 +257,25 @@ public class DataHelper {
                                 "user_traits.timeTaken from user_traits, range, traits where " +
                                 "user_traits.rid = range." + ep.getString("ImportUniqueName", "") +
                                 " and user_traits.parent = traits.trait and " +
-                                "user_traits.trait = traits.format and user_traits.userValue is not null",
+                                "user_traits.trait = traits.format and user_traits.userValue is not null and " + activeTraits,
                         null
                 );
 
         return cursor;
+    }
+
+    private String arrayToLikeString(String[] visibleTrait) {
+        String value = "(";
+
+        for (int i = 0; i < visibleTrait.length; i++) {
+            value += "user_traits.parent like \"" + visibleTrait[i] + "\"";
+            if(i!=visibleTrait.length-1) {
+                value += " or ";
+            }
+        }
+
+        value += ")";
+        return value;
     }
 
     /**
@@ -1522,51 +1536,6 @@ public class DataHelper {
         return data;
     }
 
-    /**
-     * V2 - After generating plots by range, return the data forward (from the first plot)
-     * or backwards.
-     */
-    public MapData[] arrangePlotByRow(boolean ascending) {
-        String range = ep.getString("ImportFirstName", "");
-
-        String sql = "select count(" + range + "), " + range + " from range group by " + range +
-                " order by cast(" + range + " as integer) ";
-
-        if (ascending)
-            sql += "asc";
-        else
-            sql += "desc";
-
-        Cursor cursor = this.db.rawQuery(sql, null);
-
-        MapData[] data = null;
-
-        int count = 0;
-
-        if (cursor.moveToFirst()) {
-            data = new MapData[cursor.getCount()];
-
-            do {
-
-                MapData item = new MapData();
-
-                item.plotCount = cursor.getInt(0);
-                item.plot = cursor.getString(1);
-
-                data[count] = item;
-
-                count += 1;
-
-            } while (cursor.moveToNext());
-
-        }
-
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return data;
-    }
 
     /**
      * V2 - Check if a string has any special characters

@@ -32,4 +32,7 @@ public class Constants {
     public static String ERRORPATH = Environment.getExternalStorageDirectory()
             + "/fieldBook/errors";
 
+    public static String UPDATEPATH = Environment.getExternalStorageDirectory()
+            + "/fieldBook/updates";
+
 }

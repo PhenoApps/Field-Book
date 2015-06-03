@@ -160,6 +160,8 @@
     <string name="nodata">No data</string>
     <string name="nocolumns">No columns selected</string>
     <string name="noexportcheck">Export type must be selected</string>
+    <string name="nofieldcheck">Field column type must be selected</string>
+    <string name="notraitcheck">Trait type must be selected</string>
     <string name="results">Search results</string>
     <string name="tips">Enable tutorial</string>
     <string name="quickgoto">Enable the Quick Go To in the middle of the main screen</string>
@@ -197,8 +199,11 @@
     <string name="datasetselected">A valid data set has been loaded</string>
     <string name="headerformat">Format</string>
     <string name="headercontent">Content</string>
-    <string name="allcolumns">Field columns</string>
+    <string name="allcolumns">All field columns</string>
+    <string name="fieldcolumns">Field columns</string>
+    <string name="onlyunique">Only unique identifier</string>
     <string name="alltraits">All traits</string>
+    <string name="activetraits">Only active traits</string>
     <string name="notraits">No traits selected</string>
     <string name="photo">Photo</string>
     <string name="play">Play</string>
@@ -270,7 +275,7 @@
     <string name="nextmissingbutton">Next empty entry</string>
     <string name="jumptoplotid">Enables option to advance to specific unique identifier</string>
     <string name="jumptoplotidbutton">Go to ID</string>
-    <string name="datagrid">DataGrid</string>
+    <string name="datagrid">DataGrid (Beta)</string>
 
     <string name="sort">Sort</string>
     <string name="load">Load</string>
@@ -334,6 +339,16 @@
     <string name="thelp3">Consult the app manual for additional information about trait creation.</string>
     <string name="thelp4">Use the checkbox on each trait to toggle its visibility on the main collection screen. Uncheck any traits you do not want to collect.</string>
     <string name="thelp5">Press the back button in the top left corner to return to the Settings screen.</string>
+
+    <string name="rta_dialog_title">Rate this app</string>
+    <string name="rta_dialog_message">If you enjoy using this app, would you mind taking a moment to rate it? It won\'t take more than a minute. Thank you for your support!</string>
+    <string name="rta_dialog_ok">Rate now</string>
+    <string name="rta_dialog_cancel">Later</string>
+    <string name="rta_dialog_no">No, thanks</string>
+
+    <string name="newversion">An update is available for Field Book. Would you like to download and install the new version?</string>
+    <string name="update">Update</string>
+    <string name="installnow">Install now</string>
 
     <string name="languagesettings">Language</string>
     <string name="devicedefaultlanguage">Device default</string>

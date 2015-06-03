@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -20,15 +21,19 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -39,19 +44,25 @@ import android.widget.Toast;
 import com.fieldbook.tracker.Search.SearchAdapter;
 import com.fieldbook.tracker.Search.SearchData;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 
 public class DatagridActivity extends Activity {
-    Handler mHandler = new Handler();
 
     private SharedPreferences ep;
 
     private String local;
     private String region;
     private Button close;
+    private String plotId;
+    private boolean selMade;
+    private int previousView = 0;
+
     Cursor databaseData;
-    TableLayout table_layout;
+    public GridView gridView;
+    ArrayAdapter<String> adapter;
+    public ArrayList<String> ArrayofName = new ArrayList<String>();
 
     @Override
     public void onDestroy() {
@@ -75,21 +86,26 @@ public class DatagridActivity extends Activity {
                 .getDisplayMetrics());
 
         setContentView(R.layout.datagrid);
+        setTitle(R.string.datagrid);
 
-        table_layout = (TableLayout) findViewById(R.id.tableLayout1);
+        gridView = (GridView) findViewById(R.id.tableLayout1);
         close = (Button) findViewById(R.id.closeBtn);
-        BuildTable();
+
+        gridViewTable();
 
         close.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("result", plotId);
+                setResult(RESULT_OK, returnIntent);
                 finish();
             }
         });
+
     }
 
-    private void BuildTable() {
-
+    private void gridViewTable() {
         String[] columns = {"plot_id"};
         String[] traits = MainActivity.dt.getVisibleTrait();
 
@@ -97,32 +113,66 @@ public class DatagridActivity extends Activity {
         databaseData.moveToPosition(-1);
 
         int rows = databaseData.getCount();
-        int cols = databaseData.getColumnCount();
+        final int cols = databaseData.getColumnCount();
 
         databaseData.moveToFirst();
+
+        final String[] plotIdData = new String[rows];
+
+        ArrayofName.add(columns[0]);
+
+        for(int i=0; i<traits.length;i++) {
+            ArrayofName.add(traits[i]);
+        }
+
 
         // outer for loop
         for (int i = 0; i < rows; i++) {
 
-            TableRow row = new TableRow(this);
-            row.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-                    LayoutParams.WRAP_CONTENT));
+            plotIdData[i] = databaseData.getString( databaseData.getColumnIndex(databaseData.getColumnName(0)));
 
             for (int j = 0; j < cols; j++) {
-                TextView tv = new TextView(this);
-                tv.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                        LayoutParams.WRAP_CONTENT));
-                tv.setBackgroundResource(R.drawable.cell_shape);
-                tv.setGravity(Gravity.CENTER);
-                tv.setTextSize(18);
-                tv.setPadding(5, 5, 5, 5);
 
-                tv.setText(databaseData.getString(j));
-                row.addView(tv);
-
+                if (!databaseData.isNull(j)) {
+                    ArrayofName.add(databaseData.getString(j));
+                } else {
+                    ArrayofName.add("");
+                }
             }
             databaseData.moveToNext();
-            table_layout.addView(row);
         }
+
+        if(adapter!=null) {
+            System.out.println("here");
+            adapter.clear();
+        }
+        gridView.setNumColumns(cols);
+        gridView.setVerticalSpacing(1);
+        gridView.setHorizontalSpacing(1);
+        //gridView.setVerticalScrollbarPosition(GridView.SCROLLBAR_POSITION_LEFT);
+        gridView.setFastScrollEnabled(true);
+
+        adapter = new ArrayAdapter<String>(this,
+                R.layout.simple_list_item, ArrayofName);
+
+        gridView.setAdapter(adapter);
+
+        gridView.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+                gridView.getChildAt(previousView).setBackgroundColor(Color.WHITE);
+                previousView = position;
+                v.setBackgroundColor(Color.rgb(0,128,0));
+
+                plotId =  plotIdData[(position/cols)-1];
+                makeToast(plotId);
+            }
+        });
+
     }
+
+    public void makeToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
 }

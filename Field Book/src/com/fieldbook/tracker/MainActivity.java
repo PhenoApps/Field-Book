@@ -3,7 +3,6 @@ package com.fieldbook.tracker;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,22 +11,21 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
-import android.media.ThumbnailUtils;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -43,7 +41,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
@@ -67,18 +64,23 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.Barcodes.*;
-import com.fieldbook.tracker.Map.*;
 import com.fieldbook.tracker.Search.*;
 import com.fieldbook.tracker.Trait.*;
 import com.fieldbook.tracker.Tutorial.*;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -88,7 +90,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -138,7 +139,12 @@ public class MainActivity extends Activity implements OnClickListener {
     private SeekBar seekBar;
 
     private Spinner traitType;
-    private boolean gridCreated;
+
+    int delay = 100;
+    int count = 1;
+
+    private String currentServerVersion;
+    String versionName;
 
     private ImageView eImg;
 
@@ -213,27 +219,15 @@ public class MainActivity extends Activity implements OnClickListener {
     private Button clearCounterBtn;
     private TextView counterTv;
 
-    Button rust0,rust5,rust10,rust15,rust20,rust25,rust30,rust35,rust40,rust45,rust50,rust55,rust60,rust65,rust70,rust75,rust80,rust85,rust90,rust95,rust100,rustR,rustMR,rustMS,rustS,rustDelim,rustClear;
+    Button rust0, rust5, rust10, rust15, rust20, rust25, rust30, rust35, rust40, rust45, rust50, rust55, rust60, rust65, rust70, rust75, rust80, rust85, rust90, rust95, rust100, rustR, rustMR, rustMS, rustS, rustDelim, rustClear;
 
     private ImageView traitLeft;
     private ImageView traitRight;
 
-    private ImageView mapUp;
-    private ImageView mapDown;
-    private ImageView mapLeft;
-    private ImageView mapRight;
-
     private int tempMonth;
-
     private OnSeekBarChangeListener seekListener;
 
-    private GridLayout map;
-
-    private int mapIndex;
-
     private ArrayList<Drawable> drawables;
-
-    private boolean analyze;
 
     private String local;
     private String region;
@@ -242,12 +236,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private ImageView rangeLeft;
     private ImageView rangeRight;
-
-    private Button mapAnalyze;
-    private Button mapParameter;
-    private Button mapClose;
-    private Button mapExport;
-    private Button mapSummary;
 
     private Button doRecord;
     private Button doPlay;
@@ -266,43 +254,11 @@ public class MainActivity extends Activity implements OnClickListener {
     private boolean mRecording;
     private boolean mListening = false;
 
-    private TextView mapSegment;
-    private TextView mapSegmenth;
-    private TextView mapPlot;
-    private TextView mapRange;
-    private TextView mapValue;
-
-    private Spinner mapTrait;
-
     private Menu systemMenu;
-
-    private MapData[] mapData;
-
-    private ImageView prevCell;
-
-    private float sNumeric;
-    private float bNumeric;
-
-    private int exportRowSize;
-
-    private boolean redraw;
-
-    private String mapExportfilename;
-
-    private int mapScrollSegment;
-    private int currentMapScrollSegment;
-    private int scrollSegmentSize;
 
     private File mPath = Constants.MPATH;
 
-    private EditText exportFile;
-
-    private final int TRIGGER_SERACH = 1;
-    private final long SEARCH_TRIGGER_DELAY_IN_MS = 750;
-
     private TextView dpi;
-
-    private boolean[] init;
 
     private Gallery photo;
 
@@ -335,7 +291,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 .getDisplayMetrics());
 
         loadScreen();
-
+        checkNewVersion();
         /*
         *
         * Get screen size and density
@@ -1182,6 +1138,9 @@ public class MainActivity extends Activity implements OnClickListener {
                         repeatHandler = new Handler();
                         repeatHandler.postDelayed(mActionLeft, 750);
 
+                        delay = 100;
+                        count = 1;
+
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
@@ -1301,6 +1260,9 @@ public class MainActivity extends Activity implements OnClickListener {
                         if (repeatHandler != null) return true;
                         repeatHandler = new Handler();
                         repeatHandler.postDelayed(mActionRight, 750);
+
+                        delay = 100;
+                        count = 1;
 
                         break;
                     case MotionEvent.ACTION_MOVE:
@@ -1528,13 +1490,29 @@ public class MainActivity extends Activity implements OnClickListener {
     Runnable mActionRight = new Runnable() {
         @Override public void run() {
             repeatRight();
-            repeatHandler.postDelayed(this, 100);
+
+            if((count % 5) ==0 ) {
+                if(delay>20) {
+                    delay = delay - 10;
+                }
+            }
+
+            count++;
+            repeatHandler.postDelayed(this, delay);
         }
     };
 
     Runnable mActionLeft = new Runnable() {
         @Override public void run() {
             repeatLeft();
+
+            if((count % 5) ==0 ) {
+                if(delay>20) {
+                    delay = delay - 10;
+                }
+            }
+
+            count++;
             repeatHandler.postDelayed(this, 100);
         }
     };
@@ -1594,6 +1572,7 @@ public class MainActivity extends Activity implements OnClickListener {
         createDir(Constants.FIELDEXPORTPATH);
         createDir(Constants.BACKUPPATH);
         createDir(Constants.ERRORPATH);
+        createDir(Constants.UPDATEPATH);
 
         scanSampleFiles();
     }
@@ -1794,260 +1773,6 @@ public class MainActivity extends Activity implements OnClickListener {
         image.setImageResource(R.drawable.emptysquare);
 
         return image;
-    }
-
-    // Create a square on grid with specific color
-    private ImageView createSquare(final int id, final String mapColor) {
-        final ImageView image;
-        image = new ImageView(MainActivity.this);
-
-        image.setImageResource(R.drawable.nosquare);
-
-        image.setBackgroundColor(Color.parseColor(mapColor));
-        image.setTag(id + "-" + mapColor);
-
-        image.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-
-                try {
-                    // On click display the plot's values
-                    String[] d = v.getTag().toString().split("-");
-
-                    paging = Integer.parseInt(d[0]);
-
-                    cRange = dt.getRange(paging);
-
-                    mapPlot.setText(cRange.plot);
-                    mapRange.setText(cRange.range);
-
-                    displayRange(cRange);
-
-                    newTraits = (HashMap) dt.getUserDetail(cRange.plot_id).clone();
-
-                    if (newTraits.containsKey(mapTrait.getSelectedItem().toString()))
-                        mapValue.setText(newTraits.get(mapTrait.getSelectedItem().toString()).toString());
-
-                    initWidgets(false);
-
-                    // Now that the user has selected a new plot, change the look
-                    // of the previous plot back to original
-                    if (prevCell != null) {
-                        String[] d2 = prevCell.getTag().toString().split("-");
-                        prevCell.setBackgroundColor(Color.parseColor(d2[1]));
-                        prevCell.setImageResource(R.drawable.nosquare);
-                    }
-
-                    prevCell = (ImageView) v;
-                    prevCell.setTag(v.getTag().toString());
-
-                    //((ImageView) v).setBackgroundColor(Color.GREEN);
-                    ((ImageView) v).setImageResource(R.drawable.selectedsquare);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        return image;
-    }
-
-    // Initialize the toggle states of the map
-    // Only used for serpentine
-    private void initMap(boolean start, int length) {
-        init = new boolean[length];
-
-        for (int i = 0; i < length; i++) {
-            init[i] = start;
-
-            start = !start;
-        }
-    }
-
-    // Create data for serpentine map
-    private void processSerpentineMap(HashMap<Integer, String> compare, int mapType) {
-        switch (mapType) {
-            //top left
-            case 0:
-                mapData = dt.arrangePlotByRow(true);
-                initMap(true, mapData.length);
-                break;
-
-            // btm left
-            case 1:
-                mapData = dt.arrangePlotByRow(false);
-                initMap(false, mapData.length);
-                break;
-
-            //top right
-            case 2:
-                mapData = dt.arrangePlotByRow(true);
-                initMap(false, mapData.length);
-                break;
-
-            // btm right
-            case 3:
-                mapData = dt.arrangePlotByRow(false);
-                initMap(true, mapData.length);
-                break;
-
-            default:
-                mapData = dt.arrangePlotByRow(true);
-                initMap(true, mapData.length);
-                break;
-        }
-
-    }
-
-    // Create data for Zig Zag map
-    private void processZigZagMap(HashMap<Integer, String> compare, int mapType) {
-        switch (mapType) {
-            //top left
-            case 0:
-                mapData = dt.arrangePlotByRow(true);
-                break;
-
-            // btm left
-            case 1:
-                mapData = dt.arrangePlotByRow(false);
-                break;
-
-            //top right
-            case 2:
-                mapData = dt.arrangePlotByRow(true);
-                break;
-
-            // btm right
-            case 3:
-                mapData = dt.arrangePlotByRow(false);
-                break;
-
-            default:
-                mapData = dt.arrangePlotByRow(true);
-                break;
-        }
-
-    }
-
-    // Display the map accordingly
-    private void loadSerpentineMap(HashMap<Integer, String> compare, int mapType, String mapColor) {
-        switch (mapType) {
-            // top left
-            case 0:
-                serpentineGridLeft(compare, mapIndex, mapColor, false);
-                break;
-
-            // btm left
-            case 1:
-                serpentineGridRight(compare, mapIndex, mapColor, false);
-                break;
-
-            // top right
-            case 2:
-                serpentineGridRight(compare, mapIndex, mapColor, false);
-                break;
-
-            // btm right
-            case 3:
-                serpentineGridLeft(compare, mapIndex, mapColor, false);
-                break;
-
-            default:
-                serpentineGridLeft(compare, mapIndex, mapColor, false);
-                break;
-        }
-
-    }
-
-    // Export data accordingly
-    private void loadSerpentineMapExport(HashMap<Integer, String> compare, int mapType, int mapColor, Canvas c) {
-
-        switch (mapType) {
-            // top left
-            case 0:
-                serpentineGridLeftExport(compare, 0, mapColor, c);
-                break;
-
-            // btm left
-            case 1:
-                serpentineGridRightExport(compare, 0, mapColor, c);
-                break;
-
-            // top right
-            case 2:
-                serpentineGridRightExport(compare, 0, mapColor, c);
-                break;
-
-            // btm right
-            case 3:
-                serpentineGridLeftExport(compare, 0, mapColor, c);
-                break;
-
-            default:
-                serpentineGridLeftExport(compare, 0, mapColor, c);
-                break;
-        }
-
-    }
-
-    // Display the map accordingly	
-    private void loadZigZagMap(HashMap<Integer, String> compare, int mapType, String mapColor) {
-        switch (mapType) {
-            //top left
-            case 0:
-                zigZagGridLeft(compare, mapIndex, mapColor, false);
-                break;
-
-            // btm left
-            case 1:
-                zigZagGridLeft(compare, mapIndex, mapColor, false);
-                break;
-
-            //top right
-            case 2:
-                zigZagGridRight(compare, mapIndex, mapColor, false);
-                break;
-
-            // btm right
-            case 3:
-                zigZagGridRight(compare, mapIndex, mapColor, false);
-                break;
-
-            default:
-                zigZagGridLeft(compare, mapIndex, mapColor, false);
-                break;
-        }
-
-    }
-
-    // Export data accordingly
-    private void loadZigZagMapExport(HashMap<Integer, String> compare, int mapType, int mapColor, Canvas c) {
-        switch (mapType) {
-            //top left
-            case 0:
-                zigZagGridLeftExport(compare, 0, mapColor, c);
-                break;
-
-            // btm left
-            case 1:
-                zigZagGridLeftExport(compare, 0, mapColor, c);
-                break;
-
-            //top right
-            case 2:
-                zigZagGridRightExport(compare, 0, mapColor, c);
-                break;
-
-            // btm right 
-            case 3:
-                zigZagGridRightExport(compare, 0, mapColor, c);
-                break;
-
-            default:
-                zigZagGridLeftExport(compare, 0, mapColor, c);
-                break;
-        }
-
     }
 
     // Updates the data shown in the dropdown
@@ -3529,7 +3254,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
         //save last plot id
         Editor ed = ep.edit();
-        ed.putString("lastplot",cRange.plot_id);
+        ed.putString("lastplot", cRange.plot_id);
         ed.commit();
 
         try {
@@ -3551,11 +3276,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
         // Update menu item visibility
         if (systemMenu != null) {
-            if (ep.getBoolean("EnableMap", false)) {
-                systemMenu.findItem(R.id.map).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.map).setVisible(false);
-            }
 
             if (ep.getBoolean("Tips", false)) {
                 systemMenu.findItem(R.id.help).setVisible(true);
@@ -3579,7 +3299,11 @@ public class MainActivity extends Activity implements OnClickListener {
             } else {
                 systemMenu.findItem(R.id.barcodeScan).setVisible(false);
             }
-            //TODO add datagrid
+            if (ep.getBoolean("DataGrid", false)) {
+                systemMenu.findItem(R.id.datagrid).setVisible(true);
+            } else {
+                systemMenu.findItem(R.id.datagrid).setVisible(false);
+            }
 
         }
 
@@ -3628,8 +3352,6 @@ public class MainActivity extends Activity implements OnClickListener {
                 newTraits = (HashMap) dt.getUserDetail(cRange.plot_id).clone();
             }
 
-            mapIndex = 0;
-
             prefixTraits = MainActivity.dt.getRangeColumnsWithoutOrganizer();
 
             initWidgets(false);
@@ -3658,834 +3380,6 @@ public class MainActivity extends Activity implements OnClickListener {
             if (rangeID != null) {
                 moveTo(rangeID, searchRange, searchPlot, true);
             }
-        }
-    }
-
-    // Get size of a row in a map 
-    private int getMapRangeRowSize() {
-        if (mapData == null)
-            return 0;
-
-        int large = 0;
-
-        for (int i = 0; i < mapData.length; i++) {
-            if (mapData[i].plotCount > large)
-                large = mapData[i].plotCount;
-        }
-
-        return large;
-    }
-
-    // Helper function to draw grid
-    // Simply loop through data, and perform action depending on whether it is doing analyze
-    // or just map
-    private void zigZagGridLeft(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing) {
-        map.removeAllViews();
-
-        if (mapData == null)
-            return;
-
-        int max = mapData.length;
-
-        int rowSize = getMapRangeRowSize();
-
-        map.setColumnCount(rowSize);
-
-        int actualRows = 0;
-
-        if (max - start < GRIDSIZE) {
-            actualRows = max - start;
-        } else {
-            actualRows = GRIDSIZE;
-        }
-
-        SearchData[] rowData = null;
-
-        int segmentValue = max;
-
-        if (!ignoreSizing)
-            segmentValue = start + actualRows;
-
-        for (int i = start; i < segmentValue; i++) {
-            rowData = dt.getRowForMapPlot(mapData[i].plot, true);
-
-            for (int j = 0; j < rowSize; j++) {
-                if (j < rowData.length) {
-                    if (compare == null) {
-                        map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                    } else {
-                        if (!analyze) {
-                            if (compare.containsKey(rowData[j].id))
-                                map.addView(createSquare(rowData[j].id, mapColor));
-                            else
-                                map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                        } else {
-                            if (compare.containsKey(rowData[j].id)) {
-                                if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
-                                    map.addView(createSquare(rowData[j].id, mapColor));
-                                else
-                                    colorGradient(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric);
-                            } else {
-                                map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-
-                            }
-
-                        }
-                    }
-                } else {
-                    map.addView(createBoundarySpace());
-                }
-            }
-
-        }
-    }
-
-    // Helper function to export grid
-    // Simply loop through data, and perform action depending on whether it is doing analyze
-    // or just map	
-    private void zigZagGridLeftExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c) {
-        if (mapData == null)
-            return;
-
-        int max = mapData.length;
-
-        int rowSize = getMapRangeRowSize();
-
-        int actualRows = 0;
-
-        if (max - start < GRIDSIZE) {
-            actualRows = max - start;
-        } else {
-            actualRows = GRIDSIZE;
-        }
-
-        SearchData[] rowData = null;
-
-        int segmentValue = max;
-
-        for (int i = start; i < segmentValue; i++) {
-            rowData = dt.getRowForMapPlot(mapData[i].plot, true);
-
-            for (int j = 0; j < rowSize; j++) {
-                if (j < rowData.length) {
-                    if (compare == null) {
-                        exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                    } else {
-                        if (!analyze) {
-                            if (compare.containsKey(rowData[j].id))
-                                exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, mapColor);
-                            else
-                                exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                        } else {
-                            if (compare.containsKey(rowData[j].id)) {
-                                if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
-                                    exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, mapColor);
-                                else
-                                    colorGradientExport(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric, c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE);
-                            } else {
-                                exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                            }
-
-                        }
-                    }
-                } else {
-                    exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                }
-            }
-
-        }
-    }
-
-    // Helper function to draw grid
-    // Simply loop through data, and perform action depending on whether it is doing analyze
-    // or just map	
-    private void zigZagGridRight(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing) {
-        map.removeAllViews();
-
-        if (mapData == null)
-            return;
-
-        int max = mapData.length;
-
-        int rowSize = getMapRangeRowSize();
-
-        map.setColumnCount(rowSize);
-
-        int actualRows = 0;
-
-        if (max - start < GRIDSIZE) {
-            actualRows = max - start;
-        } else {
-            actualRows = GRIDSIZE;
-        }
-
-        SearchData[] rowData = null;
-
-        int segmentValue = max;
-
-        if (!ignoreSizing)
-            segmentValue = start + actualRows;
-
-        for (int i = start; i < segmentValue; i++) {
-            rowData = dt.getRowForMapPlot(mapData[i].plot, false);
-
-            for (int j = 0; j < rowSize; j++) {
-                if (j < rowData.length) {
-                    if (compare == null) {
-                        map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                    } else {
-                        if (!analyze) {
-                            if (compare.containsKey(rowData[j].id))
-                                map.addView(createSquare(rowData[j].id, mapColor));
-                            else
-                                map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                        } else {
-                            if (compare.containsKey(rowData[j].id)) {
-                                if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
-                                    map.addView(createSquare(rowData[j].id, mapColor));
-                                else
-                                    colorGradient(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric);
-                            } else {
-                                map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-
-                            }
-                        }
-                    }
-                } else {
-                    map.addView(createBoundarySpace());
-                }
-            }
-        }
-    }
-
-    // Helper function to export grid
-    // Simply loop through data, and perform action depending on whether it is doing analyze
-    // or just map	
-    private void zigZagGridRightExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c) {
-        if (mapData == null)
-            return;
-
-        int max = mapData.length;
-
-        int rowSize = getMapRangeRowSize();
-
-        int actualRows = 0;
-
-        if (max - start < GRIDSIZE) {
-            actualRows = max - start;
-        } else {
-            actualRows = GRIDSIZE;
-        }
-
-        SearchData[] rowData = null;
-
-        int segmentValue = max;
-
-        for (int i = start; i < segmentValue; i++) {
-            rowData = dt.getRowForMapPlot(mapData[i].plot, true);
-
-            for (int j = 0; j < rowSize; j++) {
-                if (j < rowData.length) {
-                    if (compare == null) {
-                        exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                    } else {
-                        if (!analyze) {
-                            if (compare.containsKey(rowData[j].id))
-                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
-                            else
-                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                        } else {
-                            if (compare.containsKey(rowData[j].id)) {
-                                if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
-                                    exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
-                                else
-                                    colorGradientExport(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric, c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE);
-                            } else {
-                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                            }
-                        }
-                    }
-                } else {
-                    exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                }
-            }
-        }
-    }
-
-    // Helper function to draw grid
-    // Simply loop through data, and perform action depending on whether it is doing analyze
-    // or just map	
-    private void serpentineGridLeft(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing) {
-        map.removeAllViews();
-
-        if (mapData == null)
-            return;
-
-        int max = mapData.length;
-
-        int rowSize = getMapRangeRowSize();
-
-        map.setColumnCount(rowSize);
-
-        int actualRows = 0;
-
-        if (max - start < GRIDSIZE) {
-            actualRows = max - start;
-        } else {
-            actualRows = GRIDSIZE;
-        }
-
-        SearchData[] rowData = null;
-
-        int segmentValue = max;
-
-        if (!ignoreSizing)
-            segmentValue = start + actualRows;
-
-        for (int i = start; i < segmentValue; i++) {
-            rowData = dt.getRowForMapPlot(mapData[i].plot, init[i]);
-
-            for (int j = 0; j < rowSize; j++) {
-                if (j < rowData.length) {
-                    if (compare == null) {
-                        map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                    } else {
-                        if (!analyze) {
-                            if (compare.containsKey(rowData[j].id))
-                                map.addView(createSquare(rowData[j].id, mapColor));
-                            else
-                                map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                        } else {
-                            if (compare.containsKey(rowData[j].id)) {
-                                if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
-                                    map.addView(createSquare(rowData[j].id, mapColor));
-                                else
-                                    colorGradient(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric);
-                            } else {
-                                map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-
-                            }
-
-                        }
-                    }
-                } else {
-                    map.addView(createBoundarySpace());
-                }
-            }
-
-        }
-    }
-
-    // Helper function to export grid
-    // Simply loop through data, and perform action depending on whether it is doing analyze
-    // or just map	
-    private void serpentineGridLeftExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c) {
-        if (mapData == null)
-            return;
-
-        int max = mapData.length;
-
-        int rowSize = getMapRangeRowSize();
-
-        int actualRows = 0;
-
-        if (max - start < GRIDSIZE) {
-            actualRows = max - start;
-        } else {
-            actualRows = GRIDSIZE;
-        }
-
-        SearchData[] rowData = null;
-
-        int segmentValue = max;
-
-        for (int i = start; i < segmentValue; i++) {
-            rowData = dt.getRowForMapPlot(mapData[i].plot, init[i]);
-
-            for (int j = 0; j < rowSize; j++) {
-                if (j < rowData.length) {
-                    if (compare == null) {
-                        exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                    } else {
-                        if (!analyze) {
-                            if (compare.containsKey(rowData[j].id))
-                                exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, mapColor);
-                            else
-                                exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                        } else {
-                            if (compare.containsKey(rowData[j].id)) {
-                                if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
-                                    exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, mapColor);
-                                else
-                                    colorGradientExport(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric, c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE);
-                            } else {
-                                exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                            }
-
-                        }
-                    }
-                } else {
-                    exportSquare(c, j * EXPORTGRIDSIZE, i * EXPORTGRIDSIZE, "#FFFFFF");
-                }
-            }
-        }
-    }
-
-    // Helper function to export grid
-    // Simply loop through data, and perform action depending on whether it is doing analyze
-    // or just map	
-    private void serpentineGridRightExport(HashMap<Integer, String> compare, int start, int mapColor, Canvas c) {
-        if (mapData == null)
-            return;
-
-        int max = mapData.length;
-
-        int rowSize = getMapRangeRowSize();
-
-        int actualRows = 0;
-
-        if (max - start < GRIDSIZE) {
-            actualRows = max - start;
-        } else {
-            actualRows = GRIDSIZE;
-        }
-
-        SearchData[] rowData = null;
-
-        int segmentValue = max;
-
-        for (int i = start; i < segmentValue; i++) {
-            rowData = dt.getRowForMapPlot(mapData[i].plot, !init[i]);
-
-            for (int j = 0; j < rowSize; j++) {
-                if (j < rowData.length) {
-                    if (compare == null) {
-                        exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                    } else {
-                        if (!analyze) {
-                            if (compare.containsKey(rowData[j].id))
-                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
-                            else
-                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                        } else {
-                            if (compare.containsKey(rowData[j].id)) {
-                                if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
-                                    exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, mapColor);
-                                else
-                                    colorGradientExport(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric, c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE);
-                            } else {
-                                exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                            }
-                        }
-                    }
-                } else {
-                    exportSquare(c, ((rowSize - 1) * EXPORTGRIDSIZE) - (j * EXPORTGRIDSIZE), i * EXPORTGRIDSIZE, "#FFFFFF");
-                }
-            }
-        }
-    }
-
-    // Helper function to draw grid
-    // Simply loop through data, and perform action depending on whether it is doing analyze
-    // or just map	
-    private void serpentineGridRight(HashMap<Integer, String> compare, int start, String mapColor, boolean ignoreSizing) {
-        map.removeAllViews();
-
-        if (mapData == null)
-            return;
-
-        int max = mapData.length;
-
-        int rowSize = getMapRangeRowSize();
-
-        map.setColumnCount(rowSize);
-
-        int actualRows = 0;
-
-        if (max - start < GRIDSIZE) {
-            actualRows = max - start;
-        } else {
-            actualRows = GRIDSIZE;
-        }
-
-        SearchData[] rowData = null;
-
-        int segmentValue = max;
-
-        if (!ignoreSizing)
-            segmentValue = start + actualRows;
-
-        for (int i = start; i < segmentValue; i++) {
-            rowData = dt.getRowForMapPlot(mapData[i].plot, init[i]);
-
-            for (int j = 0; j < rowSize; j++) {
-                if (j < rowData.length) {
-                    if (compare == null) {
-                        map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                    } else {
-                        if (!analyze) {
-                            if (compare.containsKey(rowData[j].id))
-                                map.addView(createSquare(rowData[j].id, mapColor));
-                            else
-                                map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-                        } else {
-                            if (compare.containsKey(rowData[j].id)) {
-                                if (MainActivity.dt.getDetail(mapTrait.getSelectedItem().toString()).format.equals("text"))
-                                    map.addView(createSquare(rowData[j].id, mapColor));
-                                else
-                                    colorGradient(rowData[j].id, compare.get(rowData[j].id).toString(), sNumeric, bNumeric);
-                            } else {
-                                map.addView(createSquare(rowData[j].id, "#FFFFFF"));
-
-                            }
-                        }
-                    }
-                } else {
-                    map.addView(createBoundarySpace());
-                }
-            }
-        }
-    }
-
-    // Find largest number for a trait; used in map analysis
-    private float largestNumeric(String[] plots, String trait) {
-        float v = 0;
-
-        for (String i : plots) {
-            float g;
-
-            try {
-                g = Float.parseFloat(dt.getSingleValue(i, trait));
-            } catch (Exception e) {
-                g = 0;
-            }
-
-            if (g > v)
-                v = g;
-        }
-
-        return v;
-    }
-
-    // Find smallest number for a trait; used in map analysis
-    private float smallestNumeric(String[] plots, String trait) {
-        float v = -1;
-
-        for (String i : plots) {
-            float g;
-
-            try {
-                g = Float.parseFloat(dt.getSingleValue(i, trait));
-            } catch (Exception e) {
-                g = 0;
-            }
-
-            if (v == -1)
-                v = g;
-
-            if (g < v)
-                v = g;
-        }
-
-        return v;
-    }
-
-    // Function colors analysis depending on trait type
-    private void colorGradient(int id, String value, float sNumeric, float bNumeric) {
-        TraitObject colorTrait = dt.getDetail(mapTrait.getSelectedItem().toString());
-
-        if (colorTrait.format.equals("numeric")) {
-            map.addView(createSquare(id, interpolateColor(Double.parseDouble(value) / bNumeric)));
-        } else if (colorTrait.format.equals("percent")) {
-            map.addView(createSquare(id, interpolateColor(Double.parseDouble(value) / Double.parseDouble(colorTrait.maximum))));
-        } else if (colorTrait.format.equals("date")) {
-            Calendar c = Calendar.getInstance();
-
-            String[] d = value.split("\\.");
-
-            c.set(Integer.parseInt(d[0]), Integer.parseInt(d[1]) - 1, Integer.parseInt(d[2]));
-
-            Double v = (double) c.get(Calendar.DAY_OF_YEAR);
-
-            map.addView(createSquare(id, interpolateColor(v / 365)));
-        } else if (colorTrait.format.equals("boolean")) {
-            int v = 0;
-
-            if (value.equals("false"))
-                v = 0;
-            else
-                v = 1;
-
-            map.addView(createSquare(id, interpolateColor(v)));
-        } else if (colorTrait.format.equals("categorical")) {
-            String[] d = colorTrait.categories.split("/");
-
-            for (int i = 0; i < d.length; i++) {
-                if (value.equals(d[i])) {
-                    map.addView(createSquare(id, getColor(i + 1)));
-                    break;
-                }
-            }
-        } else
-            map.addView(createSquare(id, "#FFFFFF"));
-
-    }
-
-    // Function exports grid square based on trait type
-    private void colorGradientExport(int id, String value, float sNumeric, float bNumeric, Canvas cv, int x, int y) {
-        TraitObject colorTrait = dt.getDetail(mapTrait.getSelectedItem().toString());
-
-        if (colorTrait.format.equals("numeric")) {
-            exportSquare(cv, x, y, interpolateColor(Double.parseDouble(value) / bNumeric));
-        } else if (colorTrait.format.equals("percent")) {
-            exportSquare(cv, x, y, interpolateColor(Double.parseDouble(value) / Double.parseDouble(colorTrait.maximum)));
-        } else if (colorTrait.format.equals("date")) {
-            Calendar c = Calendar.getInstance();
-
-            String[] d = value.split("\\.");
-
-            c.set(Integer.parseInt(d[0]), Integer.parseInt(d[1]) - 1, Integer.parseInt(d[2]));
-
-            Double v = (double) c.get(Calendar.DAY_OF_YEAR);
-
-            exportSquare(cv, x, y, interpolateColor(v / 365));
-        } else if (colorTrait.format.equals("boolean")) {
-            int v = 0;
-
-            if (value.equals("false"))
-                v = 0;
-            else
-                v = 1;
-
-            exportSquare(cv, x, y, interpolateColor(v));
-        } else if (colorTrait.format.equals("qualitative") | colorTrait.format.equals("categorical")) {
-            String[] d = colorTrait.categories.split("/");
-
-            for (int i = 0; i < d.length; i++) {
-                if (value.equals(d[i])) {
-                    if (x >= exportRowSize) {
-                        x = 0;
-                        y += EXPORTGRIDSIZE;
-                    }
-
-                    exportSquare(cv, x, y, getColor(i + 1));
-
-                    x += EXPORTGRIDSIZE;
-
-                    break;
-                }
-            }
-        } else
-            exportSquare(cv, x, y, "#FFFFFF");
-
-    }
-
-    // This is used to generate range from green to red
-    public static String interpolateColor(double power) {
-        double H = (1 - power) * 120f; // base green
-        double S = 0.9; // Saturation
-        double B = 0.9; // Brightness
-
-        float[] hsv = new float[3];
-
-        hsv[0] = (float) H;
-        hsv[1] = (float) S;
-        hsv[2] = (float) B;
-
-        String hexColor = String.format("#%06X", (0xFFFFFF & Color.HSVToColor(hsv)));
-
-        return hexColor;
-    }
-
-    // This is used for qualitative
-    // I won't go through the formula but it will generate hundreds of unique colors
-    // and ensure that adjacent colors are not similar e.g. light green, dark green
-    public static String getColor(int i) {
-
-        String hexColor = String.format("#%06X", (0xFFFFFF & getRGB(i)));
-
-        return hexColor;
-    }
-
-    // As above
-    public static int getRGB(int index) {
-        int[] p = getPattern(index);
-        return getElement(p[0]) << 16 | getElement(p[1]) << 8 | getElement(p[2]);
-    }
-
-    // As above	
-    public static int getElement(int index) {
-        int value = index - 1;
-        int v = 0;
-        for (int i = 0; i < 8; i++) {
-            v = v | (value & 1);
-            v <<= 1;
-            value >>= 1;
-        }
-        v >>= 1;
-        return v & 0xFF;
-    }
-
-    // As above	
-    public static int[] getPattern(int index) {
-        int n = (int) Math.cbrt(index);
-        index -= (n * n * n);
-        int[] p = new int[3];
-        Arrays.fill(p, n);
-        if (index == 0) {
-            return p;
-        }
-        index--;
-        int v = index % 3;
-        index = index / 3;
-        if (index < n) {
-            p[v] = index % n;
-            return p;
-        }
-        index -= n;
-        p[v] = index / n;
-        p[++v % 3] = index % n;
-        return p;
-    }
-
-    private Runnable doAnalyze = new Runnable() {
-        public void run() {
-            new AnalyzeTask().execute(0);
-        }
-    };
-
-    private class AnalyzeTask extends AsyncTask<Integer, Integer, Integer> {
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            dialog = new ProgressDialog(MainActivity.this);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(getString(R.string.analyzewait));
-
-            dialog.show();
-
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            // redraw is only called if you want to regenerate all the data
-            if (redraw) {
-                analyzeRange = dt.analyze(mapTrait.getSelectedItem().toString());
-
-                mapIndex = 0;
-
-                // Data for analysis
-                String[] plots = dt.getAllPlotID();
-                bNumeric = largestNumeric(plots, mapTrait.getSelectedItem().toString());
-                sNumeric = smallestNumeric(plots, mapTrait.getSelectedItem().toString());
-
-                if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0) {
-                    processSerpentineMap(analyzeRange, ep.getInt("GRIDPOSITION", 0));
-                } else {
-                    processZigZagMap(analyzeRange, ep.getInt("GRIDPOSITION", 0));
-                }
-
-            }
-
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            // Move the map the way the user will so all the variables are constant
-            if (redraw) {
-                map.scrollTo(0, 0);
-
-                switch (ep.getInt("GRIDPOSITION", 0)) {
-                    case 1:
-                    case 3:
-                        // Simulate user moving to the plot
-                        do {
-                            if (mapIndex + GRIDSIZE >= mapData.length) {
-                                break;
-                            } else {
-                                mapIndex += GRIDSIZE;
-
-                                if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0) {
-                                    loadSerpentineMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
-                                } else {
-                                    loadZigZagMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
-                                }
-                            }
-
-                        } while (mapIndex + GRIDSIZE < mapData.length);
-
-                        break;
-
-                    case 0:
-                    case 2:
-                        if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0) {
-                            loadSerpentineMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
-                        } else {
-                            loadZigZagMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
-                        }
-                        break;
-                }
-
-                // Display the number of segments you can scroll up /down, left / right
-
-                mapScrollSegment = getMapRangeRowSize();
-
-                if (mapScrollSegment >= 13)
-                    scrollSegmentSize = 13;
-                else
-                    scrollSegmentSize = mapScrollSegment;
-
-                currentMapScrollSegment = scrollSegmentSize;
-
-                switch (ep.getInt("GRIDPOSITION", 0)) {
-                    case 0:
-                    case 1:
-                        mapSegmenth.setText("W: " + currentMapScrollSegment + "/" + mapScrollSegment);
-                        break;
-
-                    case 2:
-                    case 3:
-                        do {
-                            currentMapScrollSegment += scrollSegmentSize;
-
-                            if (currentMapScrollSegment > mapScrollSegment) {
-                                currentMapScrollSegment = mapScrollSegment;
-                            }
-
-                            map.scrollBy(520, 0);
-
-                            mapSegmenth.setText("W: " + currentMapScrollSegment + "/" + mapScrollSegment);
-
-                        } while (currentMapScrollSegment < mapScrollSegment);
-
-                        break;
-
-                }
-
-            } else {
-                if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0) {
-                    loadSerpentineMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
-                } else {
-                    loadZigZagMap(analyzeRange, ep.getInt("GRIDPOSITION", 0), "#16e616");
-                }
-
-            }
-
-            if (mapIndex + GRIDSIZE >= mapData.length)
-                mapSegment.setText("H: " + mapData.length + "/" + mapData.length);
-            else
-                mapSegment.setText("H: " + String.valueOf(mapIndex + GRIDSIZE) + "/" + mapData.length);
-
-            if (redraw)
-                redraw = false;
-
-            if (dialog.isShowing())
-                dialog.dismiss();
         }
     }
 
@@ -4519,8 +3413,6 @@ public class MainActivity extends Activity implements OnClickListener {
         if (cRange == null || cRange.plot_id.length() == 0) {
             return;
         }
-
-        gridCreated = false;
 
         if (newTraits.containsKey(parent))
             newTraits.remove(parent);
@@ -4576,12 +3468,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
         systemMenu = menu;
 
-        if (ep.getBoolean("EnableMap", false)) {
-            systemMenu.findItem(R.id.map).setVisible(true);
-        } else {
-            systemMenu.findItem(R.id.map).setVisible(false);
-        }
-
         if (ep.getBoolean("Tips", false)) {
             systemMenu.findItem(R.id.help).setVisible(true);
         } else {
@@ -4606,8 +3492,11 @@ public class MainActivity extends Activity implements OnClickListener {
             systemMenu.findItem(R.id.barcodeScan).setVisible(false);
         }
 
-        //TODO add logic for datagrid
-        systemMenu.findItem(R.id.datagrid).setVisible(false);
+        if (ep.getBoolean("DataGrid", false)) {
+            systemMenu.findItem(R.id.datagrid).setVisible(true);
+        } else {
+            systemMenu.findItem(R.id.datagrid).setVisible(false);
+        }
 
         return true;
     }
@@ -4640,10 +3529,6 @@ public class MainActivity extends Activity implements OnClickListener {
                 intent.setClassName(MainActivity.this,
                         SearchActivity.class.getName());
                 startActivity(intent);
-                break;
-
-            case R.id.map:
-                showMapDialog();
                 break;
 
             case R.id.resources:
@@ -4681,7 +3566,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                 intent.setClassName(MainActivity.this,
                         DatagridActivity.class.getName());
-                startActivity(intent);
+                startActivityForResult(intent,2);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -5157,514 +4042,6 @@ public class MainActivity extends Activity implements OnClickListener {
         photo.setSelection(photoAdapter.getCount() - 1);
     }
 
-    private void showMapDialog() {
-        final Dialog configDialog = new Dialog(MainActivity.this, android.R.style.Theme_Holo_Light_Dialog);
-        configDialog.setTitle(getString(R.string.mapconfig));
-        configDialog.setContentView(R.layout.parameter);
-
-        android.view.WindowManager.LayoutParams params = configDialog.getWindow().getAttributes();
-        params.width = LayoutParams.FILL_PARENT;
-
-        configDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
-
-        configDialog.setCancelable(true);
-        configDialog.setCanceledOnTouchOutside(true);
-
-        final Dialog mapDialog = new Dialog(MainActivity.this, android.R.style.Theme_Holo_Light_Dialog);
-
-        mapDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        mapDialog.setContentView(R.layout.map);
-
-        android.view.WindowManager.LayoutParams params2 = configDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.FILL_PARENT;
-
-        mapDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
-
-        mapDialog.setCancelable(true);
-        mapDialog.setCanceledOnTouchOutside(true);
-
-        final Spinner dir = (Spinner) configDialog.findViewById(R.id.direction);
-        final Spinner orientation = (Spinner) configDialog.findViewById(R.id.orientation);
-
-        orientation.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-            public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                       int position, long arg3) {
-
-            }
-
-            public void onNothingSelected(AdapterView<?> arg0) {
-
-            }
-        });
-
-        dir.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-            public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                       int position, long arg3) {
-
-            }
-
-            public void onNothingSelected(AdapterView<?> arg0) {
-
-            }
-        });
-
-        String[] directions = new String[4];
-        directions[0] = getString(R.string.topleft);
-        directions[1] = getString(R.string.btmleft);
-        directions[2] = getString(R.string.topright);
-        directions[3] = getString(R.string.btmright);
-
-        ArrayAdapter adapter2 = new ArrayAdapter(MainActivity.this, R.layout.spinnerlayout, directions);
-        dir.setAdapter(adapter2);
-
-        String[] orientations = new String[2];
-        orientations[0] = getString(R.string.serpentine);
-        orientations[1] = getString(R.string.zigzag);
-
-        ArrayAdapter adapter3 = new ArrayAdapter(MainActivity.this, R.layout.spinnerlayout, orientations);
-        orientation.setAdapter(adapter3);
-
-        Button saveBtn = (Button) configDialog.findViewById(R.id.saveBtn);
-        Button clearBtn = (Button) configDialog.findViewById(R.id.clearBtn);
-
-        // Map configure, save
-        saveBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-
-                Editor ed = ep.edit();
-                ed.putInt("GRIDPOSITIONORIENTATION", orientation.getSelectedItemPosition());
-                ed.putInt("GRIDPOSITION", dir.getSelectedItemPosition());
-                ed.commit();
-
-                configDialog.dismiss();
-
-                if (!ep.getBoolean("MAPCONFIGURED", false)) {
-                    ed.putBoolean("MAPCONFIGURED", true);
-                    ed.commit();
-
-                    mapDialog.show();
-                } else {
-                    redraw = true;
-
-                    mHandler.post(doAnalyze);
-                }
-            }
-        });
-
-        // Map configure, clear
-        clearBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-
-                Editor ed = ep.edit();
-                ed.remove("GRIDPOSITION");
-                ed.remove("GRIDPOSITIONORIENTATION");
-                ed.remove("MAPCONFIGURED");
-                ed.commit();
-
-                configDialog.dismiss();
-
-                redraw = true;
-
-                mHandler.post(doAnalyze);
-            }
-        });
-
-
-        map = (GridLayout) mapDialog.findViewById(R.id.map);
-        mapUp = (ImageView) mapDialog.findViewById(R.id.upBtn);
-        mapDown = (ImageView) mapDialog.findViewById(R.id.downBtn);
-        mapLeft = (ImageView) mapDialog.findViewById(R.id.leftBtn);
-        mapRight = (ImageView) mapDialog.findViewById(R.id.rightBtn);
-
-        mapAnalyze = (Button) mapDialog.findViewById(R.id.mapAnalyze);
-        mapParameter = (Button) mapDialog.findViewById(R.id.mapParameter);
-        mapClose = (Button) mapDialog.findViewById(R.id.mapClose);
-        mapExport = (Button) mapDialog.findViewById(R.id.mapExport);
-        mapSummary = (Button) mapDialog.findViewById(R.id.mapSummary);
-
-        mapSegment = (TextView) mapDialog.findViewById(R.id.segment);
-        mapSegmenth = (TextView) mapDialog.findViewById(R.id.segmenth);
-
-        mapPlot = (TextView) mapDialog.findViewById(R.id.plot);
-        mapRange = (TextView) mapDialog.findViewById(R.id.range);
-        mapValue = (TextView) mapDialog.findViewById(R.id.value);
-
-        mapTrait = (Spinner) mapDialog.findViewById(R.id.mapTrait);
-
-        // Map Summary 
-        mapSummary.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-
-                showSummary();
-            }
-        });
-
-        // Export bitmap to disk
-        mapExport.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-
-                final Dialog mapExportDialog = new Dialog(MainActivity.this, android.R.style.Theme_Holo_Light_Dialog);
-                mapExportDialog.setTitle(getString(R.string.exportas));
-                mapExportDialog.setContentView(R.layout.savedb);
-
-                android.view.WindowManager.LayoutParams params2 = mapExportDialog.getWindow().getAttributes();
-                params2.width = LayoutParams.FILL_PARENT;
-                mapExportDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params2);
-
-                mapExportDialog.setCancelable(true);
-                mapExportDialog.setCanceledOnTouchOutside(true);
-
-                Button closeBtn = (Button) mapExportDialog.findViewById(R.id.closeBtn);
-                Button saveBtn = (Button) mapExportDialog.findViewById(R.id.saveBtn);
-
-                exportFile = (EditText) mapExportDialog.findViewById(R.id.fileName);
-
-                SimpleDateFormat timeStamp = new SimpleDateFormat(
-                        "yyyy.MM.dd", Locale.getDefault());
-
-
-                mapExportfilename = "";
-
-                try {
-                    mapExportfilename = mapTrait.getSelectedItem().toString();
-                } catch (Exception e) {
-                    mapExportfilename = "map_error";
-                }
-
-                exportFile.setText(mapExportfilename + "_" +
-                        timeStamp.format(Calendar.getInstance().getTime())
-                        + ".jpg");
-
-                saveBtn.setOnClickListener(new OnClickListener() {
-
-                    public void onClick(View v) {
-                        mapExportDialog.dismiss();
-
-                        mHandler.post(exportMap);
-                    }
-                });
-
-                closeBtn.setOnClickListener(new OnClickListener() {
-
-                    public void onClick(View v) {
-                        mapExportDialog.dismiss();
-                    }
-                });
-
-                mapExportDialog.show();
-            }
-        });
-
-        mapClose.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-                mapDialog.dismiss();
-            }
-        });
-
-        mapParameter.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-                orientation.setSelection(ep.getInt("GRIDPOSITIONORIENTATION", 0));
-                dir.setSelection(ep.getInt("GRIDPOSITION", 0));
-
-                configDialog.show();
-            }
-        });
-
-        mapAnalyze.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-
-                if (dt.getVisibleTrait() == null)
-                    return;
-
-                analyze = !analyze;
-
-                if (analyze) {
-                    mapAnalyze.setText(getString(R.string.clear));
-                } else {
-                    mapAnalyze.setText(getString(R.string.mapanalyze));
-                }
-
-                mHandler.post(doAnalyze);
-            }
-
-        });
-
-        mapLeft.setOnTouchListener(new OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-
-                    case MotionEvent.ACTION_DOWN:
-                        mapLeft.setImageResource(R.drawable.lefts);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        mapLeft.setImageResource(R.drawable.left);
-                    case MotionEvent.ACTION_CANCEL:
-                        break;
-                }
-
-                return false; // return true to prevent calling btn onClick handler
-            }
-        });
-
-        mapLeft.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-
-                if (currentMapScrollSegment == scrollSegmentSize)
-                    return;
-
-                currentMapScrollSegment -= scrollSegmentSize;
-
-                if (currentMapScrollSegment < scrollSegmentSize) {
-                    currentMapScrollSegment = scrollSegmentSize;
-                }
-
-                map.scrollBy(-520, 0);
-
-                mapSegmenth.setText("W: " + currentMapScrollSegment + "/" + mapScrollSegment);
-            }
-        });
-
-        mapRight.setOnTouchListener(new OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-
-                    case MotionEvent.ACTION_DOWN:
-                        mapRight.setImageResource(R.drawable.rights);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        mapRight.setImageResource(R.drawable.right);
-                    case MotionEvent.ACTION_CANCEL:
-                        break;
-                }
-
-                return false; // return true to prevent calling btn onClick handler
-            }
-        });
-
-        mapRight.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-
-                if (currentMapScrollSegment == mapScrollSegment)
-                    return;
-
-                currentMapScrollSegment += scrollSegmentSize;
-
-                if (currentMapScrollSegment > mapScrollSegment) {
-                    currentMapScrollSegment = mapScrollSegment;
-                }
-
-                map.scrollBy(520, 0);
-
-                mapSegmenth.setText("W: " + currentMapScrollSegment + "/" + mapScrollSegment);
-
-            }
-        });
-
-        mapUp.setOnTouchListener(new OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-
-                    case MotionEvent.ACTION_DOWN:
-                        mapUp.setImageResource(R.drawable.ups);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        mapUp.setImageResource(R.drawable.up);
-                    case MotionEvent.ACTION_CANCEL:
-                        break;
-                }
-
-                return false; // return true to prevent calling btn onClick handler
-            }
-        });
-
-        mapUp.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-
-                mapIndex -= GRIDSIZE;
-
-                if (mapIndex <= 0) {
-                    mapIndex = 0;
-                }
-
-                mHandler.post(doAnalyze);
-            }
-
-        });
-
-        mapDown.setOnTouchListener(new OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-
-                    case MotionEvent.ACTION_DOWN:
-                        mapDown.setImageResource(R.drawable.downs);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        mapDown.setImageResource(R.drawable.down);
-                    case MotionEvent.ACTION_CANCEL:
-                        break;
-                }
-
-                return false; // return true to prevent calling btn onClick handler
-            }
-        });
-
-        mapDown.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-                if (mapIndex + GRIDSIZE >= mapData.length) {
-                    return;
-                } else
-                    mapIndex += GRIDSIZE;
-
-                mHandler.post(doAnalyze);
-            }
-
-        });
-
-        if (traits != null) {
-            ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<String>(
-                    this, R.layout.spinnerlayout, traits);
-            directionArrayAdapter
-                    .setDropDownViewResource(R.layout.spinnerlayout);
-            mapTrait.setAdapter(directionArrayAdapter);
-
-        }
-
-        final ImageView mapTraitLeft = (ImageView) mapDialog.findViewById(R.id.traitLeft);
-        final ImageView mapTraitRight = (ImageView) mapDialog.findViewById(R.id.traitRight);
-
-        mapTraitLeft.setOnTouchListener(new OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-
-                    case MotionEvent.ACTION_DOWN:
-                        mapTraitLeft.setImageResource(R.drawable.l_arrows);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        mapTraitLeft.setImageResource(R.drawable.l_arrow);
-                    case MotionEvent.ACTION_CANCEL:
-                        break;
-                }
-
-                return false; // return true to prevent calling btn onClick handler
-            }
-        });
-
-        // Go to previous trait
-        mapTraitLeft.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-
-                int mapPos = mapTrait.getSelectedItemPosition() - 1;
-
-                if (mapPos < 0)
-                    mapPos = 0;
-
-                mapTrait.setSelection(mapPos);
-            }
-        });
-
-        mapTraitRight.setOnTouchListener(new OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-
-                    case MotionEvent.ACTION_DOWN:
-                        mapTraitRight.setImageResource(R.drawable.r_arrows);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        mapTraitRight.setImageResource(R.drawable.r_arrow);
-                    case MotionEvent.ACTION_CANCEL:
-                        break;
-                }
-
-                return false; // return true to prevent calling btn onClick handler
-            }
-        });
-
-        // Go to next trait
-        mapTraitRight.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-
-                int mapPos = mapTrait.getSelectedItemPosition() + 1;
-
-                if (mapPos > mapTrait.getCount() - 1)
-                    mapPos = 0;
-
-                mapTrait.setSelection(mapPos);
-            }
-        });
-
-        if (dt.getVisibleTrait() != null) {
-            ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, R.layout.spinnerlayout, dt.getVisibleTrait());
-            mapTrait.setAdapter(adapter);
-
-            mapTrait.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-                public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                           int arg2, long arg3) {
-
-                    mapRange.setText("");
-                    mapPlot.setText("");
-                    mapValue.setText("");
-
-                    redraw = true;
-
-                    mHandler.post(doAnalyze);
-                }
-
-                public void onNothingSelected(AdapterView<?> arg0) {
-                }
-            });
-        }
-
-        redraw = true;
-        analyze = false;
-
-        if (!ep.getBoolean("MAPCONFIGURED", false)) {
-            configDialog.show();
-        } else {
-            mapDialog.show();
-        }
-
-    }
 
     private void showSummary() {
         final Dialog summaryDialog = new Dialog(MainActivity.this, android.R.style.Theme_Holo_Light_Dialog);
@@ -5706,105 +4083,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
         summaryText.setText(data);
         summaryDialog.show();
-    }
-
-    // This is used for exporting a grid square
-    private void exportSquare(Canvas c, int x, int y, String color) {
-        Paint paint = new Paint();
-        paint.setAlpha(0);
-        paint.setAntiAlias(true);
-
-        paint.setColor(Color.BLACK);
-        c.drawRect(x, y, x + EXPORTGRIDSIZE, y + EXPORTGRIDSIZE, paint);
-
-        paint.setColor(Color.parseColor(color));
-
-        c.drawRect(x + 1, y + 1, x + EXPORTGRIDSIZE - 1, y + EXPORTGRIDSIZE - 1, paint);
-    }
-
-    // This is used for exporting a grid square
-    private void exportSquare(Canvas c, int x, int y, int color) {
-        Paint paint = new Paint();
-        paint.setAlpha(0);
-        paint.setAntiAlias(true);
-
-        paint.setColor(Color.BLACK);
-        c.drawRect(x, y, x + EXPORTGRIDSIZE, y + EXPORTGRIDSIZE, paint);
-
-        paint.setColor(color);
-
-        c.drawRect(x + 1, y + 1, x + EXPORTGRIDSIZE - 1, y + EXPORTGRIDSIZE - 1, paint);
-    }
-
-    private Runnable exportMap = new Runnable() {
-        public void run() {
-            new ExportMapTask().execute(0);
-        }
-    };
-
-    private class ExportMapTask extends AsyncTask<Integer, Integer, Integer> {
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            dialog = new ProgressDialog(MainActivity.this);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(getString(R.string.mapexportwait));
-
-            dialog.show();
-
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            Bitmap b = null;
-
-            // serpentine
-            exportRowSize = getMapRangeRowSize() * EXPORTGRIDSIZE;
-
-            b = Bitmap.createBitmap(exportRowSize, mapData.length * EXPORTGRIDSIZE, Bitmap.Config.ARGB_8888);
-
-            Canvas c = new Canvas(b);
-
-            Paint paint = new Paint();
-            paint.setAlpha(0);
-            paint.setAntiAlias(true);
-            paint.setColor(Color.parseColor("#FFFFFF"));
-
-            c.drawRect(0, 0, exportRowSize * EXPORTGRIDSIZE, mapData.length * EXPORTGRIDSIZE, paint);
-            c.save();
-
-            if (ep.getInt("GRIDPOSITIONORIENTATION", 0) == 0) {
-                loadSerpentineMapExport(analyzeRange, ep.getInt("GRIDPOSITION", 0), Color.GREEN, c);
-            } else {
-                loadZigZagMapExport(analyzeRange, ep.getInt("GRIDPOSITION", 0), Color.GREEN, c);
-            }
-
-            c.save();
-
-            try {
-                FileOutputStream out = new FileOutputStream(Constants.RESOURCEPATH + "/" + exportFile.getText().toString());
-                b.compress(CompressFormat.JPEG, 100, out);
-                out.flush();
-                out.close();
-                b.recycle();
-            } catch (Exception e) {
-                ErrorLog("FileSaveError.txt", e.getMessage());
-                e.printStackTrace();
-            }
-
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (dialog.isShowing())
-                dialog.dismiss();
-
-        }
     }
 
     public int getVersion() {
@@ -5865,62 +4143,6 @@ public class MainActivity extends Activity implements OnClickListener {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void capturePhoto(Intent intent) {
-        Bundle extras = intent.getExtras();
-        Bitmap bitmap = (Bitmap) extras.get("data");
-
-        if (bitmap == null)
-            return;
-
-        SimpleDateFormat timeStamp = new SimpleDateFormat(
-                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
-
-        File dir = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/");
-
-        dir.mkdirs();
-
-        String generatedName = MainActivity.cRange.plot_id + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
-
-        Log.w("File", Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/" + generatedName);
-
-        // Save photo capture with timestamp as filename
-        File file = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/",
-                generatedName);
-
-        try {
-            file.createNewFile();
-            FileOutputStream ostream = new FileOutputStream(file);
-            bitmap.compress(CompressFormat.JPEG, 100, ostream);
-            ostream.close();
-
-            photoLocation.add(file.getAbsolutePath());
-
-            drawables.add(new BitmapDrawable(displayScaledSavedPhoto(file.getAbsolutePath())));
-
-            // Force Gallery to update
-
-            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-
-            Uri contentUri = Uri.fromFile(file);
-            mediaScanIntent.setData(contentUri);
-
-            this.sendBroadcast(mediaScanIntent);
-
-            updateTraitAllowDuplicates(currentTrait.trait, "photo", file.getAbsolutePath());
-
-            photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
-
-            photo.setAdapter(photoAdapter);
-
-            photo.setSelection(photoAdapter.getCount() - 1);
-
-        } catch (Exception e) {
-            ErrorLog("CameraError.txt", e.getMessage());
-            e.printStackTrace();
-        }
-
-    }
-
     private void updateTraitAllowDuplicates(String parent, String trait, String value) {
 
         if (cRange == null || cRange.plot_id.length() == 0)
@@ -5958,7 +4180,7 @@ public class MainActivity extends Activity implements OnClickListener {
             intent.setDataAndType(Uri.fromFile(f), "image/*");
             startActivity(intent);
         } catch (Exception e) {
-            ErrorLog("MapError.txt", e.getMessage());
+            ErrorLog("PhotoError.txt", e.getMessage());
         }
     }
 
@@ -6069,7 +4291,15 @@ public class MainActivity extends Activity implements OnClickListener {
                 if (resultCode == RESULT_CANCELED) {
                 }
                 break;
-
+            case 2:
+                if (resultCode == RESULT_OK) {
+                    inputPlotId = data.getStringExtra("result");
+                    String plot = dt.getPlotFromId(inputPlotId);
+                    String range = dt.getRangeFromId(inputPlotId);
+                    rangeID = dt.getAllRangeID();
+                    moveTo(rangeID, range, plot, true);
+                }
+                break;
             case 252:
                 if (resultCode == RESULT_OK) {
                     makeImage(mCurrentPhotoPath);
@@ -6115,5 +4345,138 @@ public class MainActivity extends Activity implements OnClickListener {
 
     private void scanFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
+    }
+
+    private void checkNewVersion() {
+        new checkVersion().execute();
+    }
+
+    private class checkVersion extends AsyncTask<Void, Void, Void> {
+        String title = "";
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+                try {
+                    Document doc = Jsoup
+                            .connect("http://wheatgenetics.org/appupdates/fieldbook/currentversion.html"
+                            )
+                            .get();
+                    Elements spans = doc.select("div[itemprop=softwareVersion]");
+                    title = spans.first().ownText();
+                } catch (IOException e) {
+                    ErrorLog("VersionCheckError.txt", e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            currentServerVersion = title;
+            System.out.println("Field.Book."+ currentServerVersion +".apk");
+            if (activeNetworkInfo != null && activeNetworkInfo.isConnected() && !currentServerVersion.equals(versionName) && currentServerVersion.length()>0) {
+                downloadUpdate();
+            }
+        }
+    }
+
+    private void downloadUpdate() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+        builder.setTitle(getString(R.string.update));
+        builder.setMessage(getString(R.string.newversion));
+
+        builder.setPositiveButton(getString(R.string.installnow), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                new downloadUpdate().execute();
+            }
+
+        });
+
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                //TODO add shared pref that's used to not check again
+                dialog.dismiss();
+            }
+
+        });
+
+        builder.setNeutralButton(getString(R.string.rta_dialog_cancel), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+
+                //TODO add shared pref thats used to later check again
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private class downloadUpdate extends AsyncTask<Void, Void, Void> {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+                try {
+                    URL u = new URL("http://wheatgenetics.org/appupdates/fieldbook/" + "Field.Book."+ currentServerVersion +".apk");
+                    HttpURLConnection c = (HttpURLConnection) u.openConnection();
+                    c.setRequestMethod("GET");
+                    c.setDoOutput(true);
+                    c.connect();
+                    FileOutputStream f = new FileOutputStream(new File(Constants.UPDATEPATH,"/Field.Book."+ currentServerVersion +".apk"));
+
+                    InputStream in = c.getInputStream();
+
+                    byte[] buffer = new byte[1024];
+                    int len1;
+                    while ( (len1 = in.read(buffer)) > 0 ) {
+                        f.write(buffer,0, len1);
+                    }
+                    f.close();
+                } catch (Exception e) {
+                    ErrorLog("VersionUpdateError.txt",e.getMessage());
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            scanFile(new File(Constants.UPDATEPATH,"/Field.Book."+ currentServerVersion +".apk"));
+            installUpdate();
+        }
+    }
+
+    private void installUpdate() {
+        if (new File(Constants.UPDATEPATH, "/Field.Book."+ currentServerVersion + ".apk").exists()) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.fromFile(new File(Constants.UPDATEPATH + "/Field.Book."+ currentServerVersion +".apk")), "application/vnd.android.package-archive");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // without this flag android returned a intent error!
+            startActivity(intent);
+        }
+
+        //TODO delete downloaded apk
     }
 }

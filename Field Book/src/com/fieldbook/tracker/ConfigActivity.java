@@ -3,6 +3,9 @@ package com.fieldbook.tracker;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,8 +17,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -25,7 +26,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.Html;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,7 +36,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -47,6 +47,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,24 +58,24 @@ import com.fieldbook.tracker.Tutorial.TutorialSettingsActivity;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import jxl.Workbook;
 import jxl.WorkbookSettings;
@@ -126,12 +128,10 @@ public class ConfigActivity extends Activity {
     private String importDirectory = "";
 
     private ListView rateList;
-    private ListView saveList;
     private ListView setupList;
 
     private Location fieldLocation;
 
-    private String currentServerVersion;
     String versionName;
 
     private double lat;
@@ -156,6 +156,14 @@ public class ConfigActivity extends Activity {
     Spinner primary;
     Spinner secondary;
 
+    private RadioGroup traitGroup;
+    private RadioGroup fieldGroup;
+
+    private RadioButton onlyUnique;
+    private RadioButton allColumns;
+    private RadioButton allTraits;
+    private RadioButton activeTraits;
+
     private int action;
 
     private OnItemClickListener mainSettingsListener;
@@ -163,6 +171,7 @@ public class ConfigActivity extends Activity {
     private boolean columnFail;
 
     private ArrayList<String> newRange;
+    private ArrayList<String> exportTrait;
 
     private String local;
     private String region;
@@ -233,6 +242,8 @@ public class ConfigActivity extends Activity {
         invalidateOptionsMenu();
         loadScreen();
 
+
+
         helpActive = false;
     }
 
@@ -259,7 +270,6 @@ public class ConfigActivity extends Activity {
 
         CheckBox tips = (CheckBox) advancedDialog.findViewById(R.id.tips);
         CheckBox cycle = (CheckBox) advancedDialog.findViewById(R.id.cycle);
-        CheckBox enableMap = (CheckBox) advancedDialog.findViewById(R.id.enableMap);
         CheckBox ignoreEntries = (CheckBox) advancedDialog.findViewById(R.id.ignoreExisting);
         CheckBox useDay = (CheckBox) advancedDialog.findViewById(R.id.useDay);
         CheckBox rangeSound = (CheckBox) advancedDialog.findViewById(R.id.rangeSound);
@@ -270,6 +280,7 @@ public class ConfigActivity extends Activity {
         CheckBox disableShare = (CheckBox) advancedDialog.findViewById(R.id.disableShare);
         CheckBox disableEntryNavLeft = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNavLeft);
         CheckBox disableEntryNavRight = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNavRight);
+        CheckBox dataGrid = (CheckBox) advancedDialog.findViewById(R.id.dataGrid);
 
         Button advCloseBtn = (Button) advancedDialog.findViewById(R.id.closeBtn);
 
@@ -283,7 +294,6 @@ public class ConfigActivity extends Activity {
         // Set default values for advanced settings
         tips.setChecked(ep.getBoolean("Tips", false));
         cycle.setChecked(ep.getBoolean("CycleTraits", false));
-        enableMap.setChecked(ep.getBoolean("EnableMap", false));
         ignoreEntries.setChecked(ep.getBoolean("IgnoreExisting", false));
         useDay.setChecked(ep.getBoolean("UseDay", false));
         rangeSound.setChecked(ep.getBoolean("RangeSound", false));
@@ -294,6 +304,7 @@ public class ConfigActivity extends Activity {
         disableShare.setChecked(ep.getBoolean("DisableShare", false));
         disableEntryNavLeft.setChecked(ep.getBoolean("DisableEntryNavLeft", false));
         disableEntryNavRight.setChecked(ep.getBoolean("DisableEntryNavRight", false));
+        dataGrid.setChecked(ep.getBoolean("DataGrid", false));
 
         tips
                 .setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -317,17 +328,6 @@ public class ConfigActivity extends Activity {
                                                  boolean checked) {
                         Editor e = ep.edit();
                         e.putBoolean("CycleTraits", checked);
-                        e.commit();
-                    }
-                });
-
-        enableMap
-                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean checked) {
-                        Editor e = ep.edit();
-                        e.putBoolean("EnableMap", checked);
                         e.commit();
                     }
                 });
@@ -438,6 +438,16 @@ public class ConfigActivity extends Activity {
                 MainActivity.reloadData = true;
             }
         });
+        dataGrid.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("DataGrid", checked);
+                e.commit();
+                MainActivity.reloadData = true;
+            }
+        });
 
         // Export Field book
         saveDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
@@ -462,26 +472,64 @@ public class ConfigActivity extends Activity {
 
         exportFile = (EditText) saveDialog.findViewById(R.id.fileName);
 
-        saveList = (ListView) saveDialog.findViewById(R.id.myList);
-
-        saveList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        saveList.setItemsCanFocus(false);
-
-        // Export DB Format
         checkDB = (CheckBox) saveDialog.findViewById(R.id.formatDB);
-
-        // Export Excel Format
         checkExcel = (CheckBox) saveDialog.findViewById(R.id.formatExcel);
 
-        checkDB.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        traitGroup = (RadioGroup) saveDialog.findViewById(R.id.traitsRadioGroup);
+        fieldGroup = (RadioGroup) saveDialog.findViewById(R.id.fieldsRadioGroup);
 
+        allColumns = (RadioButton) saveDialog.findViewById(R.id.allColumns);
+        onlyUnique = (RadioButton) saveDialog.findViewById(R.id.onlyUnique);
+        allTraits = (RadioButton) saveDialog.findViewById(R.id.allTraits);
+        activeTraits = (RadioButton) saveDialog.findViewById(R.id.activeTraits);
+
+        checkDB.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
             }
         });
 
         checkExcel.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
             public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+            }
+        });
+
+        traitGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+            }
+        });
+
+        fieldGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+            }
+        });
+
+        allColumns.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+            }
+        });
+
+        onlyUnique.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+            }
+        });
+
+        allTraits.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+            }
+        });
+
+        activeTraits.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
             }
         });
 
@@ -490,9 +538,6 @@ public class ConfigActivity extends Activity {
         exportButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-
-                int count = saveList.getAdapter().getCount();
-
                 // Ensure at least one export type is checked
                 if (!checkDB.isChecked() & !checkExcel.isChecked()) {
                     Toast.makeText(ConfigActivity.this, getString(R.string.noexportcheck),
@@ -500,27 +545,51 @@ public class ConfigActivity extends Activity {
                     return;
                 }
 
-                newRange = new ArrayList<String>();
-
-                // Get the columns selected by the user
-                for (int i = 0; i < count; i++) {
-                    String currentItem = (String) saveList.getAdapter()
-                            .getItem(i);
-
-                    if (saveList.isItemChecked(i)) {
-                        newRange.add(currentItem);
-                    }
-                }
-
-                // If there are no columns selected, inform the user
-                if (newRange.size() == 0) {
-                    Toast.makeText(ConfigActivity.this, getString(R.string.nocolumns),
+                if(!onlyUnique.isChecked() & !allColumns.isChecked()) {
+                    Toast.makeText(ConfigActivity.this, getString(R.string.nofieldcheck),
                             Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                saveDialog.dismiss();
+                if(!activeTraits.isChecked() & !allTraits.isChecked()) {
+                    Toast.makeText(ConfigActivity.this, getString(R.string.notraitcheck),
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
 
+                newRange = new ArrayList<String>();
+
+                if(onlyUnique.isChecked()) {
+                    newRange.add(ep.getString("ImportUniqueName", ""));
+                }
+
+                if(allColumns.isChecked()) {
+                    String[] columns = MainActivity.dt.getRangeColumns();
+
+                    for (int i = 0; i < columns.length; i++) {
+                        newRange.add(columns[i]);
+                    }
+                }
+
+                exportTrait = new ArrayList<String>();
+
+                if(activeTraits.isChecked()) {
+                    String[] traits = MainActivity.dt.getVisibleTrait();
+
+                    for (int i = 0; i < traits.length; i++) {
+                        exportTrait.add(traits[i]);
+                    }
+                }
+
+                if(allTraits.isChecked()) {
+                    String[] traits = MainActivity.dt.getAllTraits();
+
+                    for (int i = 0; i < traits.length; i++) {
+                        exportTrait.add(traits[i]);
+                    }
+                }
+
+                saveDialog.dismiss();
                 mHandler.post(exportData);
             }
         });
@@ -670,6 +739,9 @@ public class ConfigActivity extends Activity {
             Intent intent = new Intent();
             intent.setClass(ConfigActivity.this, ChangelogActivity.class);
             startActivity(intent);
+
+            RateThisApp.onStart(this);
+            RateThisApp.showRateDialogIfNeeded(this);
         }
         if (!ep.getBoolean("TipsConfigured", false)) {
             ed.putBoolean("TipsConfigured", true);
@@ -831,14 +903,11 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        checkNewVersion();
 
         aboutDialog.show();
     }
 
-    private void checkNewVersion() {
-        new Version().execute();
-    }
+
 
     // Validate that column choices are different from one another
     private boolean checkImportColumnNames() {
@@ -851,7 +920,7 @@ public class ConfigActivity extends Activity {
         if (idCol.equals(priCol) || idCol.equals(secCol) || priCol.equals(secCol)) {
             Toast.makeText(ConfigActivity.this, getString(R.string.colnamesdif),
                     Toast.LENGTH_LONG).show();
-            return false;
+
         }
 
         return true;
@@ -884,17 +953,18 @@ public class ConfigActivity extends Activity {
         @Override
         protected Integer doInBackground(Integer... params) {
             String[] newRanges = newRange.toArray(new String[newRange.size()]);
+            String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
 
             // Retrieves the data needed for export
-            Cursor exportData = MainActivity.dt.getExportDBData(newRanges);
+            Cursor exportData = MainActivity.dt.getExportDBData(newRanges, exportTraits);
 
             if (checkDB.isChecked() & !checkExcel.isChecked()) {
                 // Do not proceed if there is no data
+
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
                                 exportFile.getText().toString() + "_database.csv");
-
                         if (file.exists())
                             file.delete();
 
@@ -904,6 +974,8 @@ public class ConfigActivity extends Activity {
 
                         csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
                                 + ep.getString("LastName", ""), ep.getString("Location", ""));
+
+                        System.out.println(exportFile.getText().toString());
                         shareFile(file);
                     } catch (Exception e) {
                         ErrorLog("ExportDataError.txt", e.getMessage());
@@ -924,7 +996,7 @@ public class ConfigActivity extends Activity {
 
                         // Total number of columns to write
                         String[] range = newRanges;
-                        String[] traits = MainActivity.dt.getAllTraits();
+                        String[] traits = exportTraits;
 
                         exportData = MainActivity.dt.convertDatabaseToTable(newRanges, traits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
@@ -1318,7 +1390,6 @@ public class ConfigActivity extends Activity {
     }
 
     public void makeToast(String message) {
-
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
@@ -1522,20 +1593,6 @@ public class ConfigActivity extends Activity {
     }
 
     private void showSaveDialog() {
-        final OnItemClickListener saveListener = new OnItemClickListener() {
-
-            public void onItemClick(AdapterView<?> av, View v, int position,
-                                    long arg3) {
-
-                if (checkExcel.isChecked()) {
-                    if (saveList.getAdapter().getItem(position).toString().toUpperCase().
-                            equals(ep.getString("ImportUniqueName", "").toUpperCase())) {
-                        saveList.setItemChecked(position, true);
-                        return;
-                    }
-                }
-            }
-        };
 
         // As the export filename uses the import file name as well,
         // we parse it out here
@@ -1549,13 +1606,6 @@ public class ConfigActivity extends Activity {
         }
 
         exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile );
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem_checked, MainActivity.dt.getRangeColumns());
-        saveList.setAdapter(itemsAdapter);
-
-        for (int i = 0; i < saveList.getAdapter().getCount(); i++) {
-            saveList.setItemChecked(i, true);
-        }
 
         saveDialog.show();
     }
@@ -2668,43 +2718,6 @@ public class ConfigActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class Version extends AsyncTask<Void, Void, Void> {
-        String title = "";
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
-                try {
-                    Document doc = Jsoup
-                            .connect("http://play.google.com/store/apps/details?id=com.fieldbook.tracker"
-                            )
-                            .get();
-                    Elements spans = doc.select("div[itemprop=softwareVersion]");
-                    title = spans.first().ownText();
-                } catch (IOException e) {
-                    ErrorLog("VersionCheckError.txt", e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            currentServerVersion = title;
-            if (activeNetworkInfo != null && activeNetworkInfo.isConnected() && !currentServerVersion.equals(versionName)) {
-                makeToast(getString(R.string.notmostrecent));
-            }
-        }
-    }
 
     @Override
     public void onBackPressed() {
@@ -2716,5 +2729,18 @@ public class ConfigActivity extends Activity {
         } else {
             finish();
         }
+    }
+
+    public static boolean isPackageInstalled(Context context) {
+        PackageManager pm = context.getPackageManager();
+        boolean app_installed = false;
+        try {
+            PackageInfo info = pm.getPackageInfo("com.android.vending", PackageManager.GET_ACTIVITIES);
+            String label = (String) info.applicationInfo.loadLabel(pm);
+            app_installed = (!TextUtils.isEmpty(label) && label.startsWith("Google Play"));
+        } catch(PackageManager.NameNotFoundException e) {
+            app_installed = false;
+        }
+        return app_installed;
     }
 }

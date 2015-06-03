@@ -100,6 +100,19 @@
                 android:layout_height="25dp" />
 
             <CheckBox
+                android:id="@+id/dataGrid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/datagrid"
+                android:textColor="#000000"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="25dp" />
+            <CheckBox
                 android:id="@+id/disableShare"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -175,20 +188,6 @@
                 android:layout_height="wrap_content"
                 android:checked="false"
                 android:text="@string/useday"
-                android:textColor="#000000"
-                android:textSize="30dp"
-                android:textStyle="bold" />
-
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <CheckBox
-                android:id="@+id/enableMap"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="false"
-                android:text="@string/enablemap"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />

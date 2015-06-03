@@ -100,7 +100,6 @@ public class CSVWriter {
             curCSV.moveToPosition(-1);
 
             while (curCSV.moveToNext()) {
-
                 String arrStr[] = new String[labels.length];
 
                 for (int i = 0; i < labels.length - 5; i++) {

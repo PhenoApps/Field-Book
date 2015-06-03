@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fieldbook.tracker"
     android:versionCode="235"
-    android:versionName="2.3.5">
+    android:versionName="2.3.6">
 
     <uses-sdk
         android:minSdkVersion="14"
