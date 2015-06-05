@@ -25,6 +25,7 @@ public class DatagridActivity extends Activity {
 
     private String plotId;
     private int previousView = 0;
+    private SharedPreferences ep;
 
     Cursor databaseData;
     public GridView gridView;
@@ -70,7 +71,7 @@ public class DatagridActivity extends Activity {
     }
 
     private void gridViewTable() {
-        String[] columns = {"plot_id"};
+        String[] columns = {ep.getString("ImportFirstName", getString(R.string.range))};
         String[] traits = MainActivity.dt.getVisibleTrait();
 
         databaseData = MainActivity.dt.convertDatabaseToTable(columns, traits);
