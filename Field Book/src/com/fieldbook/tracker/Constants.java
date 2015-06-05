@@ -4,9 +4,6 @@ import android.os.Environment;
 
 import java.io.File;
 
-/**
- * Created by trife on 9/9/2014.
- */
 public class Constants {
     public static final String RESOURCEPATH = Environment.getExternalStorageDirectory()
             + "/fieldBook/resources";

@@ -155,7 +155,6 @@
     <string name="spanish">Español (México)</string>
     <string name="german">Deutsch</string>
     <string name="tutorial">tutoriel</string>
-    <string name="tipshort">tutoriel</string>
     <string name="help1">"utiliser l'aide du menu pour découvrir Field Book"</string>
     <string name="help2">activer le tutoriel dans les paramètres avancés</string>
     <string name="mhelp1">"Les InfoBars au sommet de l'écran présentent des informations supplémentaires pour chaque entrée. Elles peuvent être modifiées dans le menu Configuration."</string>

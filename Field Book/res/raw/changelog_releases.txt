@@ -1,3 +1,17 @@
+19/2.4.0
+Reorganized export layout
+New Advanced Setting to show DataGrid (beta) on the main screen
+New Advanced Setting to open directly to camera to scan barcodes
+Plot scrolling speed accelerates the longer the arrow is pressed
+New Advanced Setting to disable left, right, or both entry arrows if no data has been collected
+Field Book checks for updates
+Spaces in imported column names replaced with underscores
+Renamed default exported files
+Map temporarily removed
+More errors written to error logs
+Updated strings for clarity
+Bug fixes and improvements
+
 18/2.3.5
 New Rust Rating trait with customizable severity scale (severity.txt in traits folder)
 New Counter trait

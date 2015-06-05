@@ -22,8 +22,6 @@ import java.util.Locale;
 public class TutorialSettingsActivity extends Activity {
     public static Activity thisActivity;
 
-    private String local;
-    private String region;
     private int screen;
 
     private final int max = 8;
@@ -43,8 +41,8 @@ public class TutorialSettingsActivity extends Activity {
         SharedPreferences ep = getSharedPreferences("Settings", 0);
 
         // This allows dynamic language change without exiting the app
-        local = ep.getString("language", "en");
-        region = ep.getString("region", "");
+        String local = ep.getString("language", "en");
+        String region = ep.getString("region", "");
         Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
@@ -85,7 +83,7 @@ public class TutorialSettingsActivity extends Activity {
         array[6] = getString(R.string.shelp7);
         array[7] = getString(R.string.shelp8);
 
-        header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
+        header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
         content.setText(array[screen - 1]);
 
         // move one step back in the tutorial        
@@ -98,7 +96,7 @@ public class TutorialSettingsActivity extends Activity {
                 if (screen < 1)
                     screen = 1;
 
-                header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
+                header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
                 content.setText(array[screen - 1]);
             }
         });
@@ -113,7 +111,7 @@ public class TutorialSettingsActivity extends Activity {
                 if (screen > max)
                     screen = max;
 
-                header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
+                header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
                 content.setText(array[screen - 1]);
             }
         });

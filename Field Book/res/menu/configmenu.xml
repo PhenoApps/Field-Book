@@ -2,7 +2,7 @@
 	<menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
         android:id="@+id/help"
-        android:title="@string/help"
+        android:title="@string/tutorial"
         android:icon="@drawable/ic_action_help"
         android:showAsAction="always" />
 

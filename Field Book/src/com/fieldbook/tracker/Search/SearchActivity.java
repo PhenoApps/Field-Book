@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
-import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,16 +33,11 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class SearchActivity extends Activity {
-    Handler mHandler = new Handler();
-
     private SharedPreferences ep;
 
     private LinearLayout parent;
-
+    private static String TAG = "Field Book";
     private int rangeUntil;
-
-    private String local;
-    private String region;
 
     @Override
     public void onDestroy() {
@@ -56,8 +51,8 @@ public class SearchActivity extends Activity {
         ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
-        local = ep.getString("language", "en");
-        region = ep.getString("region", "");
+        String local = ep.getString("language", "en");
+        String region = ep.getString("region", "");
         Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
@@ -71,7 +66,7 @@ public class SearchActivity extends Activity {
 
         WindowManager.LayoutParams params = getWindow().getAttributes();
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        params.width = WindowManager.LayoutParams.FILL_PARENT;
+        params.width = WindowManager.LayoutParams.MATCH_PARENT;
 
         this.getWindow().setAttributes(params);
 
@@ -105,7 +100,7 @@ public class SearchActivity extends Activity {
                         Spinner s = (Spinner) child.findViewById(R.id.like);
 
                         String value = "";
-                        String prefix = "";
+                        String prefix;
 
                         boolean before;
 
@@ -190,7 +185,7 @@ public class SearchActivity extends Activity {
                     else
                         sql = sql1 + sql;
 
-                    final SearchData[] data = MainActivity.dt.getRangeBySql2(sql);
+                    final SearchData[] data = MainActivity.dt.getRangeBySql(sql);
 
                     final Dialog resultDialog = new Dialog(SearchActivity.this, android.R.style.Theme_Holo_Light_Dialog);
                     resultDialog.setContentView(R.layout.searchlist);
@@ -206,7 +201,7 @@ public class SearchActivity extends Activity {
 
                     WindowManager.LayoutParams params = resultDialog.getWindow().getAttributes();
                     params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                    params.width = WindowManager.LayoutParams.FILL_PARENT;
+                    params.width = WindowManager.LayoutParams.MATCH_PARENT;
 
                     resultDialog.getWindow().setAttributes(params);
 
@@ -252,7 +247,7 @@ public class SearchActivity extends Activity {
                         Toast.makeText(SearchActivity.this, getString(R.string.searchempty), Toast.LENGTH_LONG).show();
                     }
                 } catch (Exception z) {
-
+                    Log.e(TAG, z.getMessage());
                 }
             }
         });

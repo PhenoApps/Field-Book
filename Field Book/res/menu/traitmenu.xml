@@ -4,7 +4,7 @@
         android:id="@+id/help"
         android:icon="@drawable/ic_action_help"
         android:showAsAction="always"
-        android:title="@string/help" />
+        android:title="@string/tutorial" />
     <item
         android:id="@+id/addTrait"
         android:icon="@drawable/ic_action_new"
@@ -29,6 +29,6 @@
         android:id="@+id/importexport"
         android:icon="@drawable/ic_action_import_export"
         android:showAsAction="always"
-        android:title="@string/export" />
+        android:title="@string/importexport" />
 </menu>
 

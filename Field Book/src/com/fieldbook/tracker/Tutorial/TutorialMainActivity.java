@@ -22,8 +22,6 @@ import java.util.Locale;
 public class TutorialMainActivity extends Activity {
     public static Activity thisActivity;
 
-    private String local;
-    private String region;
     private int screen;
 
     private final int max = 7;
@@ -43,8 +41,8 @@ public class TutorialMainActivity extends Activity {
         SharedPreferences ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
-        local = ep.getString("language", "en");
-        region = ep.getString("region", "");
+        String local = ep.getString("language", "en");
+        String region = ep.getString("region", "");
         Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
@@ -84,7 +82,7 @@ public class TutorialMainActivity extends Activity {
         array[5] = getString(R.string.mhelp6);
         array[6] = getString(R.string.mhelp7);
 
-        header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
+        header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
         content.setText(array[screen - 1]);
 
         // move one step back in the tutorial
@@ -97,7 +95,7 @@ public class TutorialMainActivity extends Activity {
                 if (screen < 1)
                     screen = 1;
 
-                header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
+                header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
                 content.setText(array[screen - 1]);
             }
         });
@@ -112,7 +110,7 @@ public class TutorialMainActivity extends Activity {
                 if (screen > max)
                     screen = max;
 
-                header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
+                header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
                 content.setText(array[screen - 1]);
             }
         });

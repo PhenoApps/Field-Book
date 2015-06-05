@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,6 +35,8 @@ import java.util.regex.Pattern;
 public class DataHelper {
     private static final String DATABASE_NAME = "fieldbook.db";
     public static final int DATABASE_VERSION = 5;
+
+    private static String TAG = "Field Book";
 
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
@@ -64,12 +67,12 @@ public class DataHelper {
         try {
             this.context = context;
             openHelper = new OpenHelper(this.context);
-            this.db = openHelper.getWritableDatabase();
+            db = openHelper.getWritableDatabase();
 
             ep = context.getSharedPreferences("Settings", 0);
 
-            this.insertTraits = this.db.compileStatement(INSERTTRAITS);
-            this.insertUserTraits = this.db.compileStatement(INSERTUSERTRAITS);
+            this.insertTraits = db.compileStatement(INSERTTRAITS);
+            this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
 
             timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
                     Locale.getDefault());
@@ -105,34 +108,10 @@ public class DataHelper {
                 }
             }
 
-            this.db.execSQL("insert into RANGE (" + fields + " values ("
+            db.execSQL("insert into RANGE (" + fields + " values ("
                     + values);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    /**
-     * Inserting traits data. The last field isVisible determines if the trait
-     * is visible when using the app
-     */
-    public long insertTraits(String trait, String format, String defaultValue,
-                             String minimum, String maximum, String details, String categories,
-                             String isVisible) {
-        try {
-            this.insertTraits.bindString(1, trait);
-            this.insertTraits.bindString(2, format);
-            this.insertTraits.bindString(3, defaultValue);
-            this.insertTraits.bindString(4, minimum);
-            this.insertTraits.bindString(5, maximum);
-            this.insertTraits.bindString(6, details);
-            this.insertTraits.bindString(7, categories);
-            this.insertTraits.bindString(8, isVisible);
-
-            return this.insertTraits.executeInsert();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
         }
     }
 
@@ -141,7 +120,7 @@ public class DataHelper {
      * screen
      */
     public void updateTraitVisibility(String trait, boolean val) {
-        this.db.execSQL("update " + TRAITS
+        db.execSQL("update " + TRAITS
                 + " set isVisible = ? where trait like ?", new String[]{
                 String.valueOf(val), trait});
     }
@@ -173,13 +152,13 @@ public class DataHelper {
 
         int largest = 0;
 
-        Cursor cursor = this.db.rawQuery("select max(realPosition) from " + TRAITS, null);
+        Cursor cursor = db.rawQuery("select max(realPosition) from " + TRAITS, null);
 
         if (cursor.moveToFirst()) {
             largest = cursor.getInt(0);
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -191,9 +170,9 @@ public class DataHelper {
      */
     public void close() {
         try {
-            this.db.close();
+            db.close();
         } catch (Exception e) {
-
+            Log.e(TAG,e.getMessage());
         }
     }
 
@@ -202,25 +181,12 @@ public class DataHelper {
      */
     public void open() {
         try {
-            this.db = openHelper.getWritableDatabase();
+            db = openHelper.getWritableDatabase();
 
-            this.insertTraits = this.db.compileStatement(INSERTTRAITS);
-            this.insertUserTraits = this.db.compileStatement(INSERTUSERTRAITS);
+            this.insertTraits = db.compileStatement(INSERTTRAITS);
+            this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
         } catch (Exception e) {
-
-        }
-    }
-
-    /**
-     * Helper function to delete all boolean values. Used when importing traits
-     * v1.6 - Amended to consider trait
-     */
-    public void deleteAllBoolean(String parent) {
-        try {
-            this.db.delete(USER_TRAITS, "parent like ? and trait like ?",
-                    new String[]{parent, "boolean"});
-        } catch (Exception e) {
-
+            Log.e(TAG,e.getMessage());
         }
     }
 
@@ -251,7 +217,7 @@ public class DataHelper {
         String fields = arrayToString("range", fieldList);
         String activeTraits = arrayToLikeString(traits);
 
-        Cursor cursor = this.db
+        Cursor cursor = db
                 .rawQuery(
                         "select " + fields + ", traits.trait, user_traits.userValue, " +
                                 "user_traits.timeTaken from user_traits, range, traits where " +
@@ -278,52 +244,13 @@ public class DataHelper {
         return value;
     }
 
-    /**
-     * Retrieves the columns needed for excel style export
-     */
-    public Cursor getExportExcelData(String[] fieldList) {
-        String fields = arrayToString("", fieldList);
-
-        Cursor cursor = this.db
-                .rawQuery(
-                        "select " + fields + " from range",
-                        null);
-
-        return cursor;
-    }
 
     /**
-     * Used when exporting to Excel format by matching column and trait
-     * v1.6 - Amended to consider both trait and format
+     * Convert EAV database to relational
+     * TODO add where statement for repeated values
      */
-    public String getSingleValue(String col, String trait) {
-        Cursor cursor = this.db
-                .rawQuery(
-                        "select user_traits.rid, traits.trait, user_traits.userValue from user_traits, " +
-                                "traits where user_traits.parent = traits.trait and user_traits.trait = traits.format " +
-                                "and user_traits.userValue is not null and rid = '" + col + "' " +
-                                "and traits.trait = '" + trait + "'", null
-                );
-
-        String val = "";
-
-        if (cursor.moveToFirst()) {
-            val = cursor.getString(2);
-        }
-
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return val;
-    }
-
-    /**
-     * Convert EAV database to relational //TODO add where statement for repeated values
-     */
-
     public Cursor convertDatabaseToTable(String[] col, String[] traits) {
-        String query = "";
+        String query;
         String[] rangeArgs = new String[col.length];
         String[] traitArgs = new String[traits.length];
         String joinArgs = "";
@@ -343,71 +270,11 @@ public class DataHelper {
 
         Log.e("DH", query);
 
-        Cursor cursor = this.db.rawQuery(query, null);
+        Cursor cursor = db.rawQuery(query, null);
 
         return cursor;
     }
 
-    /**
-     * Convert EAV database to relational //TODO add where statement for repeated values
-     */
-
-    public Cursor exportDatabaseFormat(String[] col, String[] traits) {
-        String query = "";
-        String[] rangeArgs = new String[col.length];
-        String[] traitArgs = new String[traits.length];
-        String joinArgs = "";
-
-        for (int i = 0; i < col.length; i++) {
-            rangeArgs[i] = "range." + col[i];
-        }
-
-        for (int i = 0; i < traits.length; i++) {
-            traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
-            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + ep.getString("ImportUniqueName", "")
-                    + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
-        }
-
-        query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
-                " FROM range range " + joinArgs;
-
-        Log.e("DH", query);
-
-        Cursor cursor = this.db.rawQuery(query, null);
-
-        return cursor;
-    }
-
-    /**
-     * Used by the application when moving between ranges (to uniquely identify
-     * them)
-     */
-    public String[] getPlotID() {
-        String[] data = null;
-
-        Cursor cursor = this.db.query(RANGE,
-                new String[]{ep.getString("ImportUniqueName", "")}, null, null, null, null,
-                ep.getString("ImportUniqueName", ""));
-
-        int count = 0;
-
-        if (cursor.moveToFirst()) {
-            data = new String[cursor.getCount()];
-
-            do {
-                data[count] = cursor.getString(0);
-
-                count += 1;
-
-            } while (cursor.moveToNext());
-        }
-
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return data;
-    }
 
     /**
      * Used by the application to return all traits which are visible
@@ -415,7 +282,7 @@ public class DataHelper {
     public String[] getVisibleTrait() {
         String[] data = null;
 
-        Cursor cursor = this.db.query(TRAITS, new String[]{"id", "trait", "realPosition"},
+        Cursor cursor = db.query(TRAITS, new String[]{"id", "trait", "realPosition"},
                 "isVisible like ?", new String[]{"true"}, null, null, "realPosition");
 
         int count = 0;
@@ -431,7 +298,7 @@ public class DataHelper {
             } while (cursor.moveToNext());
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -444,7 +311,7 @@ public class DataHelper {
     public String[] getFormat() {
         String[] data = null;
 
-        Cursor cursor = this.db.query(TRAITS, new String[]{"id", "format", "realPosition"},
+        Cursor cursor = db.query(TRAITS, new String[]{"id", "format", "realPosition"},
                 "isVisible like ?", new String[]{"true"}, null, null, "realPosition");
 
         int count = 0;
@@ -460,7 +327,7 @@ public class DataHelper {
             } while (cursor.moveToNext());
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -473,7 +340,7 @@ public class DataHelper {
     public String[] getAllTraits() {
         String[] data = null;
 
-        Cursor cursor = this.db.query(TRAITS, new String[]{"id", "trait", "realPosition"},
+        Cursor cursor = db.query(TRAITS, new String[]{"id", "trait", "realPosition"},
                 null, null, null, null, "realPosition");
 
         int count = 0;
@@ -489,7 +356,7 @@ public class DataHelper {
             } while (cursor.moveToNext());
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -502,7 +369,7 @@ public class DataHelper {
     public String[] getTraitColumnData(String column) {
         String[] data = null;
 
-        Cursor cursor = this.db.query(TRAITS, new String[]{column},
+        Cursor cursor = db.query(TRAITS, new String[]{column},
                 null, null, null, null, null);
 
         int count = 0;
@@ -518,7 +385,7 @@ public class DataHelper {
             } while (cursor.moveToNext());
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -531,14 +398,14 @@ public class DataHelper {
     public void writeNewPosition(String column, String id, String position) {
         ContentValues cv = new ContentValues();
         cv.put("realPosition", position);
-        this.db.update(TRAITS, cv, column + "= ?", new String[]{id});
+        db.update(TRAITS, cv, column + "= ?", new String[]{id});
     }
 
     /**
      * V2 - Returns all traits column titles as a string array
      */
     public String[] getTraitColumns() {
-        Cursor cursor = this.db.rawQuery("SELECT * from traits limit 1", null);
+        Cursor cursor = db.rawQuery("SELECT * from traits limit 1", null);
 
         String[] data = null;
 
@@ -557,7 +424,7 @@ public class DataHelper {
             }
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -568,7 +435,7 @@ public class DataHelper {
      * V2 - Returns all traits column titles as a cursor
      */
     public Cursor getAllTraitsForExport() {
-        Cursor cursor = this.db.query(TRAITS, getTraitColumns(),
+        Cursor cursor = db.query(TRAITS, getTraitColumns(),
                 null, null, null, null, "id");
 
         return cursor;
@@ -581,7 +448,7 @@ public class DataHelper {
 
         ArrayList<TraitObject> list = new ArrayList<TraitObject>();
 
-        Cursor cursor = this.db.query(TRAITS, new String[]{"id", "trait", "format", "defaultValue",
+        Cursor cursor = db.query(TRAITS, new String[]{"id", "trait", "format", "defaultValue",
                         "minimum", "maximum", "details", "categories", "isVisible", "realPosition"},
                 null, null, null, null, "realPosition"
         );
@@ -605,7 +472,7 @@ public class DataHelper {
             } while (cursor.moveToNext());
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -618,7 +485,7 @@ public class DataHelper {
     public HashMap getTraitVisibility() {
         HashMap data = new HashMap();
 
-        Cursor cursor = this.db.query(TRAITS, new String[]{"id", "trait",
+        Cursor cursor = db.query(TRAITS, new String[]{"id", "trait",
                 "isVisible", "realPosition"}, null, null, null, null, "realPosition");
 
         if (cursor.moveToFirst()) {
@@ -628,7 +495,7 @@ public class DataHelper {
             } while (cursor.moveToNext());
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -649,7 +516,7 @@ public class DataHelper {
         data.details = "";
         data.categories = "";
 
-        Cursor cursor = this.db.query(TRAITS, new String[]{"trait", "format", "defaultValue", "minimum",
+        Cursor cursor = db.query(TRAITS, new String[]{"trait", "format", "defaultValue", "minimum",
                         "maximum", "details", "categories", "id"}, "trait like ? and isVisible like ?",
                 new String[]{trait, "true"}, null, null, null
         );
@@ -665,7 +532,7 @@ public class DataHelper {
             data.id = cursor.getString(7);
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -679,7 +546,7 @@ public class DataHelper {
     public HashMap getUserDetail(String plotId) {
         HashMap data = new HashMap();
 
-        Cursor cursor = this.db.query(USER_TRAITS, new String[]{"parent", "trait",
+        Cursor cursor = db.query(USER_TRAITS, new String[]{"parent", "trait",
                         "userValue", "rid"}, "rid like ?", new String[]{plotId},
                 null, null, null
         );
@@ -690,7 +557,7 @@ public class DataHelper {
             } while (cursor.moveToNext());
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -704,7 +571,7 @@ public class DataHelper {
     public boolean getTraitExists(int id, String parent, String trait) {
         boolean haveData = false;
 
-        Cursor cursor = this.db
+        Cursor cursor = db
                 .rawQuery(
                         "select range.id, user_traits.userValue from user_traits, range where " +
                                 "user_traits.rid = range." + ep.getString("ImportUniqueName", "") +
@@ -718,7 +585,7 @@ public class DataHelper {
             }
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -729,7 +596,7 @@ public class DataHelper {
      * Returns the primary key for all ranges
      */
     public int[] getAllRangeID() {
-        Cursor cursor = this.db.query(RANGE, new String[]{"id"}, null, null,
+        Cursor cursor = db.query(RANGE, new String[]{"id"}, null, null,
                 null, null, "id");
 
         int[] data = null;
@@ -746,35 +613,7 @@ public class DataHelper {
             } while (cursor.moveToNext());
         }
 
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return data;
-    }
-
-    /**
-     * V2 - Used for mapping, returns all plot_id in order
-     */
-    public String[] getAllPlotID() {
-        Cursor cursor = this.db.query(RANGE, new String[]{ep.getString("ImportUniqueName", "")}, null, null,
-                null, null, "id");
-
-        String[] data = null;
-
-        if (cursor.moveToFirst()) {
-            data = new String[cursor.getCount()];
-
-            int count = 0;
-
-            do {
-                data[count] = cursor.getString(0);
-
-                count += 1;
-            } while (cursor.moveToNext());
-        }
-
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -785,10 +624,10 @@ public class DataHelper {
      * V2 - Execute a custom sql query, returning the result as SearchData objects
      * Used for user search function
      */
-    public SearchData[] getRangeBySql2(String sql) {
+    public SearchData[] getRangeBySql(String sql) {
 
         try {
-            Cursor cursor = this.db.rawQuery(sql, null);
+            Cursor cursor = db.rawQuery(sql, null);
 
             SearchData[] data = null;
 
@@ -811,85 +650,12 @@ public class DataHelper {
                 } while (cursor.moveToNext());
             }
 
-            if (cursor != null && !cursor.isClosed()) {
+            if (!cursor.isClosed()) {
                 cursor.close();
             }
 
             return data;
         } catch (Exception n) {
-            return null;
-        }
-    }
-
-    /**
-     * V2 - Execute a custom sql query, returning the result as an integer array
-     * Used for user search function
-     */
-    public int[] getRangeBySql(String sql) {
-
-        try {
-            Cursor cursor = this.db.rawQuery(sql, null);
-
-            int[] data = null;
-
-            if (cursor.moveToFirst()) {
-                data = new int[cursor.getCount()];
-
-                int count = 0;
-
-                do {
-                    data[count] = cursor.getInt(0);
-
-                    count += 1;
-                } while (cursor.moveToNext());
-            }
-
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-
-            return data;
-        } catch (Exception n) {
-            return null;
-        }
-    }
-
-    /**
-     * Returns saved data based on trait, range and plot Meant for the on screen
-     * drop downs
-     */
-    public String[] getAllRange(String trait, String range, String plot) {
-
-        if (trait.length() == 0)
-            return null;
-
-        try {
-            Cursor cursor = this.db.query(RANGE, new String[]{trait},
-                    ep.getString("ImportFirstName", "") + " like ? and " +
-                            ep.getString("ImportSecondName", "") + " like ?", new String[]{range, plot},
-                    null, null, null
-            );
-
-            String[] myList = null;
-
-            if (cursor.moveToFirst()) {
-                myList = new String[cursor.getCount()];
-
-                int count = 0;
-
-                do {
-                    myList[count] = cursor.getString(0);
-
-                    count += 1;
-                } while (cursor.moveToNext());
-            }
-
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-
-            return myList;
-        } catch (Exception e) {
             return null;
         }
     }
@@ -905,7 +671,7 @@ public class DataHelper {
         data.plot_id = "";
         data.range = "";
 
-        Cursor cursor = this.db.query(RANGE, new String[]{ep.getString("ImportFirstName", ""),
+        Cursor cursor = db.query(RANGE, new String[]{ep.getString("ImportFirstName", ""),
                         ep.getString("ImportSecondName", ""),
                         ep.getString("ImportUniqueName", ""), "id"}, "id = ?",
                 new String[]{String.valueOf(id)}, null, null, null
@@ -919,7 +685,7 @@ public class DataHelper {
 
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -927,45 +693,11 @@ public class DataHelper {
     }
 
     /**
-     * V2 - Returns the ids for items that match the specified range and plot
-     */
-    public int[] getAllRange(String range, String plot) {
-
-        try {
-            Cursor cursor = this.db.query(RANGE, new String[]{"id"},
-                    ep.getString("ImportFirstName", "") + " like ? and " + ep.getString("ImportSecondName", "") + " like ?", new String[]{range, plot},
-                    null, null, null);
-
-            int[] myList = null;
-
-            if (cursor.moveToFirst()) {
-                myList = new int[cursor.getCount()];
-
-                int count = 0;
-
-                do {
-                    myList[count] = cursor.getInt(0);
-
-                    count += 1;
-                } while (cursor.moveToNext());
-            }
-
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-
-            return myList;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /**
      * Returns the range for items that match the specified id
      */
     public String getRangeFromId(String plot_id) {
         try {
-            Cursor cursor = this.db.query(RANGE, new String[]{ep.getString("ImportFirstName", "")},
+            Cursor cursor = db.query(RANGE, new String[]{ep.getString("ImportFirstName", "")},
                     ep.getString("ImportUniqueName", "") + " like ? ", new String[]{plot_id},
                     null, null, null);
 
@@ -975,7 +707,7 @@ public class DataHelper {
                 myList = cursor.getString(0);
             }
 
-            if (cursor != null && !cursor.isClosed()) {
+            if (!cursor.isClosed()) {
                 cursor.close();
             }
 
@@ -992,10 +724,10 @@ public class DataHelper {
     public void deleteTraitByValue(String rid, String parent, String value) {
 
         try {
-            this.db.delete(USER_TRAITS, "rid like ? and parent like ? and userValue = ?",
+            db.delete(USER_TRAITS, "rid like ? and parent like ? and userValue = ?",
                     new String[] { rid, parent, value });
         } catch (Exception e) {
-
+            Log.e(TAG,e.getMessage());
         }
     }
 
@@ -1005,7 +737,7 @@ public class DataHelper {
 
     public ArrayList<String> getPlotPhotos(String plot) {
         try {
-            Cursor cursor = this.db.query(USER_TRAITS, new String[]{"userValue"},"rid like ? and trait like ?", new String[]{plot,"photo"},
+            Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"},"rid like ? and trait like ?", new String[]{plot,"photo"},
                     null, null, null);
 
             ArrayList<String> photoList = new ArrayList<String>();
@@ -1018,7 +750,7 @@ public class DataHelper {
                 while (cursor.moveToNext());
             }
 
-            if (cursor != null && !cursor.isClosed()) {
+            if (!cursor.isClosed()) {
                 cursor.close();
             }
 
@@ -1037,11 +769,9 @@ public class DataHelper {
         if (trait.length() == 0)
             return null;
 
-        //String tableName = getRangeTableById(importId);
-
         try
         {
-            Cursor cursor = this.db.query(RANGE, new String[] { trait },
+            Cursor cursor = db.query(RANGE, new String[] { trait },
                     ep.getString("ImportUniqueName", "") + " like ? ", new String[] { plotId },
                     null, null, null);
 
@@ -1059,7 +789,7 @@ public class DataHelper {
                 } while (cursor.moveToNext());
             }
 
-            if (cursor != null && !cursor.isClosed()) {
+            if (!cursor.isClosed()) {
                 cursor.close();
             }
 
@@ -1074,8 +804,8 @@ public class DataHelper {
     /**
      * Returns the column names for the range table
      */
-    public String[] getRangeColumnsWithoutOrganizer() {
-        Cursor cursor = this.db.rawQuery("SELECT * from " + RANGE + " limit 1", null);
+    public String[] getRangeColumnNames() {
+        Cursor cursor = db.rawQuery("SELECT * from " + RANGE + " limit 1", null);
 
         String[] data = null;
 
@@ -1086,23 +816,16 @@ public class DataHelper {
 
             int k = 0;
 
-            String first = ep.getString("ImportFirstName", "");
-            String second = ep.getString("ImportSecondName", "");
-
             for (int j = 0; j < cursor.getColumnCount(); j++) {
 
-                // need to hide importId and organizers
-                if (!cursor.getColumnName(j).equals("id")) { // & !cursor.getColumnName(j).equals("importId") & !cursor.getColumnName(j).equals(first) & !cursor.getColumnName(j).equals(second)) {
-
+                if (!cursor.getColumnName(j).equals("id")) {
                     data[k] = cursor.getColumnName(j).replace("//", "/");
                     k += 1;
-
-                    //Log.w("data " + k, cursor.getColumnName(j));
                 }
             }
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
@@ -1114,7 +837,7 @@ public class DataHelper {
      */
     public String getPlotFromId(String plot_id) {
         try {
-            Cursor cursor = this.db.query(RANGE, new String[]{ep.getString("ImportSecondName", "")},
+            Cursor cursor = db.query(RANGE, new String[]{ep.getString("ImportSecondName", "")},
                     ep.getString("ImportUniqueName", "") + " like ?", new String[]{plot_id},
                     null, null, null);
 
@@ -1124,7 +847,7 @@ public class DataHelper {
                 myList = cursor.getString(0);
             }
 
-            if (cursor != null && !cursor.isClosed()) {
+            if (!cursor.isClosed()) {
                 cursor.close();
             }
 
@@ -1140,10 +863,10 @@ public class DataHelper {
      */
     public void deleteTrait(String rid, String parent) {
         try {
-            this.db.delete(USER_TRAITS, "rid like ? and parent like ?",
+            db.delete(USER_TRAITS, "rid like ? and parent like ?",
                     new String[]{rid, parent});
         } catch (Exception e) {
-
+            Log.e(TAG,e.getMessage());
         }
     }
 
@@ -1153,10 +876,10 @@ public class DataHelper {
      */
     public void deleteTrait(String id) {
         try {
-            this.db.delete(TRAITS, "id = ?",
+            db.delete(TRAITS, "id = ?",
                     new String[]{id});
         } catch (Exception e) {
-
+            Log.e(TAG,e.getMessage());
         }
     }
 
@@ -1165,9 +888,9 @@ public class DataHelper {
      */
     public void deleteTable(String table) {
         try {
-            this.db.delete(table, null, null);
+            db.delete(table, null, null);
         } catch (Exception e) {
-
+            Log.e(TAG,e.getMessage());
         }
     }
 
@@ -1196,28 +919,6 @@ public class DataHelper {
     }
 
     /**
-     * V2 - Returns titles of all range columns as a comma delimited string
-     */
-    public String getRangeColumnsAsString() {
-        try {
-            String[] s = getRangeColumns();
-
-            String value = "";
-
-            for (int i = 0; i < s.length; i++) {
-                value += s[i];
-
-                if (i < s.length - 1)
-                    value += ",";
-            }
-
-            return value;
-        } catch (Exception b) {
-            return null;
-        }
-    }
-
-    /**
      * V2 - Returns titles of all trait columns as a comma delimited string
      */
     public String getTraitColumnsAsString() {
@@ -1241,35 +942,10 @@ public class DataHelper {
     }
 
     /**
-     * V2 - Returns titles of all trait columns as a comma delimited string
-     * with an additional " " in between each comma
-     * This function is used to assist with paragaphing
-     */
-    public String getTraitColumnsAsString2() {
-        try {
-            String[] s = getAllTraits();
-
-            String value = "";
-
-            for (int i = 0; i < s.length; i++) {
-                value += s[i];
-
-                if (i < s.length - 1)
-                    value += ", ";
-            }
-
-            return value;
-        } catch (Exception b) {
-            return null;
-        }
-
-    }
-
-    /**
      * Returns the column names for the range table
      */
     public String[] getRangeColumns() {
-        Cursor cursor = this.db.rawQuery("SELECT * from range limit 1", null);
+        Cursor cursor = db.rawQuery("SELECT * from range limit 1", null);
 
         String[] data = null;
 
@@ -1288,120 +964,11 @@ public class DataHelper {
             }
         }
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
         return data;
-    }
-
-    /**
-     * Returns the column names for the range table
-     */
-    public int findRangeColumns(String col) {
-        Cursor cursor = this.db.rawQuery("SELECT * from range limit 1", null);
-
-        int pos = -1;
-
-        if (cursor.moveToFirst()) {
-            for (int j = 0; j < cursor.getColumnCount(); j++) {
-                if (!cursor.getColumnName(j).equals("id")) {
-                    if (cursor.getColumnName(j).toUpperCase().equals(col.toUpperCase()))
-                        pos = j;
-
-                }
-            }
-        }
-
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return pos;
-    }
-
-    /**
-     * Returns the column names for the range table
-     */
-    public int findRangeColumns(String col, String[] fieldList) {
-
-        String fields = arrayToString("", fieldList);
-
-        Cursor cursor = this.db.rawQuery("SELECT " + fields + " from range limit 1", null);
-
-        int pos = -1;
-
-        if (cursor.moveToFirst()) {
-            for (int j = 0; j < cursor.getColumnCount(); j++) {
-                if (!cursor.getColumnName(j).equals("id")) {
-                    if (cursor.getColumnName(j).toUpperCase().equals(col.toUpperCase()))
-                        pos = j;
-
-                }
-            }
-        }
-
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return pos;
-    }
-
-    /**
-     * V2 - Returns raw data for a trait, so that analysis can calculate the values based on it
-     */
-    public HashMap<Integer, String> analyze(String trait) {
-
-        Cursor cursor = this.db
-                .rawQuery(
-                        "select range.id, user_traits.uservalue from user_traits, range, " +
-                                "traits where user_traits.rid = range." + ep.getString("ImportUniqueName", "") +
-                                " and user_traits.parent = traits.trait and user_traits.trait = traits.format " +
-                                "and user_traits.userValue is not null and user_traits.parent like '" + trait + "'",
-                        null
-                );
-
-        HashMap<Integer, String> data = null;
-
-        if (cursor.moveToFirst()) {
-            data = new HashMap<Integer, String>(cursor.getCount());
-
-            int count = 0;
-
-            do {
-                data.put(cursor.getInt(0), cursor.getString(1));
-
-                count += 1;
-            } while (cursor.moveToNext());
-        }
-
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return data;
-    }
-
-    /**
-     * V2 - Get the smallest value for a trait
-     * Used in analysis only
-     */
-    public String getTraitMinimum(String trait) {
-        Cursor cursor = this.db
-                .rawQuery("select minimum from traits where trait = ?", new String[]{trait});
-
-        String val = "";
-
-        if (cursor.moveToFirst()) {
-            val = cursor.getString(0);
-        }
-
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return val;
     }
 
     /**
@@ -1437,10 +1004,10 @@ public class DataHelper {
             ContentValues c = new ContentValues();
             c.put("realPosition", realPosition);
 
-            this.db.update(TRAITS, c, "id = ?", new String[]{id});
+            db.update(TRAITS, c, "id = ?", new String[]{id});
 
         } catch (Exception e) {
-
+            Log.e(TAG,e.getMessage());
         }
     }
 
@@ -1459,7 +1026,7 @@ public class DataHelper {
             c.put("details", details);
             c.put("categories", categories);
 
-            return this.db.update(TRAITS, c, "id = ?", new String[]{id});
+            return db.update(TRAITS, c, "id = ?", new String[]{id});
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
@@ -1472,70 +1039,17 @@ public class DataHelper {
     public boolean hasTrait(String name) {
         boolean exist;
 
-        Cursor cursor = this.db.rawQuery("select id from traits where " +
+        Cursor cursor = db.rawQuery("select id from traits where " +
                 "trait = ? COLLATE NOCASE", new String[]{name});
 
-        if (cursor.moveToFirst())
-            exist = true;
-        else
-            exist = false;
+        exist = cursor.moveToFirst();
 
-        if (cursor != null && !cursor.isClosed()) {
+        if (!cursor.isClosed()) {
             cursor.close();
         }
 
         return exist;
     }
-
-    /**
-     * V2 - Returns plots for a particular range
-     * This is a logical mapping created from database data
-     */
-    public SearchData[] getRowForMapPlot(String rid, boolean forward) {
-        String range = ep.getString("ImportFirstName", "");
-        String plot = ep.getString("ImportSecondName", "");
-
-        Cursor cursor = this.db.rawQuery("select id, " + range + " from range where " +
-                range + " = '" + rid + "' order by cast(" + plot + " as integer) asc", null);
-
-        SearchData[] data = null;
-
-        int count = 0;
-
-        if (forward)
-            count = 0;
-        else
-            count = cursor.getCount() - 1;
-
-        if (cursor.moveToFirst()) {
-            data = new SearchData[cursor.getCount()];
-
-            do {
-
-                SearchData item = new SearchData();
-
-                item.id = cursor.getInt(0);
-                item.range = cursor.getString(1);
-                item.plot = rid;
-
-                data[count] = item;
-
-                if (forward)
-                    count += 1;
-                else
-                    count -= 1;
-
-            } while (cursor.moveToNext());
-
-        }
-
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return data;
-    }
-
 
     /**
      * V2 - Check if a string has any special characters
@@ -1544,10 +1058,7 @@ public class DataHelper {
         final Pattern p = Pattern.compile("[()<>/;\\*%$]");
         final Matcher m = p.matcher(s);
 
-        if (m.find())
-            return true;
-        else
-            return false;
+        return m.find();
     }
 
     /**
@@ -1589,6 +1100,7 @@ public class DataHelper {
                 db.execSQL("CREATE TABLE android_metadata (locale TEXT)");
                 db.execSQL("INSERT INTO android_metadata(locale) VALUES('en_US')");
             } catch (Exception e) {
+                Log.e(TAG,e.getMessage());
             }
         }
 
@@ -1617,7 +1129,7 @@ public class DataHelper {
      */
 
     public void importDatabase(String filename) throws IOException {
-        String internalDbPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME;
+        String internalDbPath = getDatabasePath(this.context);
         String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
 
         // Close the SQLiteOpenHelper so it will commit the created empty
@@ -1636,7 +1148,7 @@ public class DataHelper {
             copyFile(newDb,oldDb);
             copyFile(newSp,oldSp);
         } catch (IOException e) {
-
+            Log.e(TAG,e.getMessage());
         }
     }
 
@@ -1644,9 +1156,8 @@ public class DataHelper {
      * Export database
      */
     public void exportDatabase(String filename) throws IOException {
-        String internalDbPath = "/data/data/com.fieldbook.tracker/databases/" + DATABASE_NAME; // TODO don't hardcode th
+        String internalDbPath = getDatabasePath(this.context);
         String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
-
         close();
 
         try {
@@ -1659,7 +1170,7 @@ public class DataHelper {
             copyFile(oldDb,newDb);
             copyFile(oldSp,newSp);
         } catch (IOException e) {
-
+            Log.e(TAG,e.getMessage());
         }
     }
 
@@ -1668,7 +1179,7 @@ public class DataHelper {
      */
     private Boolean copyFile(File oldFile, File newFile) throws IOException {
         if (oldFile.exists()) {
-            FileUtils.copyFile(new FileInputStream(oldFile), new FileOutputStream(newFile));
+            copyFileCall(new FileInputStream(oldFile), new FileOutputStream(newFile));
             openHelper = new OpenHelper(this.context);
             open();
             return true;
@@ -1677,18 +1188,11 @@ public class DataHelper {
     }
 
     /**
-     * Drop specified table
-     */
-    public void dropTable(String table) {
-        db.execSQL("DROP TABLE IF EXISTS " + table);
-    }
-
-    /**
      * V2 - Helper function to copy multiple files from asset to SDCard
      */
     public void copyFileOrDir(String fullPath, String path) {
         AssetManager assetManager = context.getAssets();
-        String assets[] = null;
+        String assets[];
 
         try {
             assets = assetManager.list(path);
@@ -1701,8 +1205,8 @@ public class DataHelper {
                 if (!dir.exists())
                     dir.mkdir();
 
-                for (int i = 0; i < assets.length; ++i) {
-                    copyFileOrDir(fullPath, path + "/" + assets[i]);
+                for (String asset : assets) {
+                    copyFileOrDir(fullPath, path + "/" + asset);
                 }
             }
         } catch (IOException ex) {
@@ -1716,13 +1220,12 @@ public class DataHelper {
     public void copyFile(String fullPath, String filename) {
         AssetManager assetManager = context.getAssets();
 
-        InputStream in = null;
-        OutputStream out = null;
+        InputStream in;
+        OutputStream out;
 
         try {
             in = assetManager.open(filename);
-            String newFileName = filename;
-            out = new FileOutputStream(fullPath + "/" + newFileName);
+            out = new FileOutputStream(fullPath + "/" + filename);
 
             byte[] buffer = new byte[1024];
             int read;
@@ -1732,10 +1235,8 @@ public class DataHelper {
             }
 
             in.close();
-            in = null;
             out.flush();
             out.close();
-            out = null;
         } catch (Exception e) {
             Log.e("Sample Data", e.getMessage());
         }
@@ -1746,7 +1247,7 @@ public class DataHelper {
      * Helper function to convert array to csv format
      */
     public static String convertToCommaDelimited(String[] list) {
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         for (int i = 0; list != null && i < list.length; i++) {
             ret.append(list[i]);
             if (i < list.length - 1) {
@@ -1754,6 +1255,34 @@ public class DataHelper {
             }
         }
         return ret.toString();
+    }
+
+    /**
+     * Helper function to copy database
+     */
+    public static void copyFileCall(FileInputStream fromFile, FileOutputStream toFile) throws IOException {
+        FileChannel fromChannel = null;
+        FileChannel toChannel = null;
+
+        try {
+            fromChannel = fromFile.getChannel();
+            toChannel = toFile.getChannel();
+            fromChannel.transferTo(0, fromChannel.size(), toChannel);
+        } finally {
+            try {
+                if (fromChannel != null) {
+                    fromChannel.close();
+                }
+            } finally {
+                if (toChannel != null) {
+                    toChannel.close();
+                }
+            }
+        }
+    }
+
+    private String getDatabasePath(Context context) {
+        return context.getDatabasePath(DATABASE_NAME).getPath();
     }
 
 }

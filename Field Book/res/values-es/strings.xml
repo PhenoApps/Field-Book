@@ -154,7 +154,6 @@
     <string name="english">English</string>
     <string name="german">Deutsch</string>
     <string name="tutorial">Tutorial</string>
-    <string name="tipshort">Tutorial</string>
     <string name="help1">Use el menú AYUDA para conocer más acerca de Field Book</string>
     <string name="help2">Active el Tutorial en Configuración avanzada</string>
     <string name="mhelp1">Las barras desplegables en la parte superior de la pantalla muestran información de la columna escogida o seleccionada. Éstas pueden ser cambiadas en el menú Congfiguración.</string>

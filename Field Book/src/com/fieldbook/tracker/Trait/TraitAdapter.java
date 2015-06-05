@@ -199,6 +199,8 @@ public class TraitAdapter extends BaseAdapter {
             public void onClick(View v) {
                 int pos = MainActivity.dt.getMaxPositionFromTraits() + 1;
 
+                //TODO change copy protocol
+
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
                 String postfix = "-" + context.getString(R.string.copy) + "-" + dateFormat.format(Calendar.getInstance().getTime());
 

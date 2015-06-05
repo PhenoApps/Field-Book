@@ -1,3 +1,11 @@
+28
+Advanced settings layout reorganized
+Trait default values no longer stored upon field import
+Long press square in datagrid to close dialog and move directly to plot
+Code cleanup and refactoring
+String cleanup and organization
+Fixed a bug that didn't change the language on the main screen unless the app was restarted
+
 27
 Map temporarily removed
 Added a app rating dialog
@@ -73,7 +81,7 @@ Visibility of traits is now changed in the Traits screen instead of Setup
 
 17
 Clear categorical traits by reclicking the current choice
-BUGFIX: App doesn't move to first plot when screen is turned off
+Bugfix: App doesn't move to first plot when screen is turned off
 
 16
 New Advanced Settings option to make sound when primary organizer changes
@@ -81,7 +89,7 @@ New Advanced Settings option to go to specific unique ID (for barcodes)
 New Advanced Settings option to go to next plot without data
 Changelog can be accessed from the About dialog
 Support for XLS readded
-BUGFIX: Traits can now be made in other languages
+Bugfix: Traits can now be made in other languages
 
 15
 Fixed issue with field folders
@@ -99,7 +107,7 @@ Language dialog updated
 Exported files are shared to other installed apps
 App does not move to first plot when external hardware added
 Items are disabled if not available
-Replace text on ActionBar with appropriate icons
+Replaced text on ActionBar with appropriate icons
 Removed XLS support due to performance issues
 Added support for folders in the Fields dialog
 Added support for Amharic, Arabic, Brazilian Portuguese, Chinese, French, Hindi, Japanese, Oromo, and Russian
@@ -111,11 +119,11 @@ Bugfix: files are now visible via computer after export
 12
 Updated user interface
 Create traits from within the app
-Export and load trait lists
-Added an audio trait format
-Lots of bug fixes
+Export and load trait files
+Added audio trait format
 Added support for Spanish and German
 Map feature added to visualize and analyze plots (beta)
+Bug fixes
 
 5
 Added support for multiple instances of the same trait format
@@ -123,11 +131,11 @@ Added support for multiple instances of the same trait format
 4
 Added text input trait format
 Added table export option
-Lots of bug fixes
+Bug fixes
 
 2
-Added location recording and exporting via device GPS. Accessible via settings. Tablet GPS has a high resolution and should only be used for field location.
-“Quit” option now resets Person and Location fields.
+Added field level location recording
+“Quit” option now resets Person and Location fields
 
 1
 Initial release

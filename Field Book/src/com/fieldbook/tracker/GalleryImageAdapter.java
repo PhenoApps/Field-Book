@@ -16,7 +16,7 @@ public class GalleryImageAdapter extends BaseAdapter {
     private Activity context;
     private static ImageView imageView;
     private List<Drawable> plotsImages;
-    private static ViewHolder holder;
+
     public GalleryImageAdapter(Activity context, List<Drawable> plotsImages) {
         this.context = context;
         this.plotsImages = plotsImages;
@@ -40,6 +40,7 @@ public class GalleryImageAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
+        ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
             imageView = new ImageView(this.context);

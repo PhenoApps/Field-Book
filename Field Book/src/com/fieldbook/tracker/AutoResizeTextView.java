@@ -6,7 +6,6 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 /**
@@ -24,7 +23,7 @@ public class AutoResizeTextView extends TextView {
 
     // Interface for resize notifications
     public interface OnTextResizeListener {
-        public void onTextResize(TextView textView, float oldSize, float newSize);
+        void onTextResize(TextView textView, float oldSize, float newSize);
     }
 
     // Our ellipse string

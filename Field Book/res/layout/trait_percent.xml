@@ -22,7 +22,7 @@
         android:thumbOffset="0dp" />
 
     <Button
-        android:id="@+id/clearBtn4"
+        android:id="@+id/clearPercent"
         android:layout_width="wrap_content"
         android:layout_height="60dp"
         android:layout_gravity="center"

@@ -16,15 +16,12 @@ import android.widget.TextView;
 
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.Trait.TraitEditorActivity;
 
 import java.util.Locale;
 
 public class TutorialTraitsActivity extends Activity {
     public static Activity thisActivity;
 
-    private String local;
-    private String region;
     private int screen;
 
     private final int max = 4;
@@ -44,8 +41,8 @@ public class TutorialTraitsActivity extends Activity {
         SharedPreferences ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
-        local = ep.getString("language", "en");
-        region = ep.getString("region", "");
+        String local = ep.getString("language", "en");
+        String region = ep.getString("region", "");
         Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
@@ -82,7 +79,7 @@ public class TutorialTraitsActivity extends Activity {
         array[2] = getString(R.string.thelp3);
         array[3] = getString(R.string.thelp4);
 
-        header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
+        header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
         content.setText(array[screen - 1]);
 
         // move one step back in the tutorial        
@@ -95,7 +92,7 @@ public class TutorialTraitsActivity extends Activity {
                 if (screen < 1)
                     screen = 1;
 
-                header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
+                header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
                 content.setText(array[screen - 1]);
             }
         });
@@ -114,7 +111,7 @@ public class TutorialTraitsActivity extends Activity {
                 if (screen > max)
                     screen = max;
 
-                header.setText(getString(R.string.tipshort) + " " + screen + "/" + max);
+                header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
                 content.setText(array[screen - 1]);
             }
         });

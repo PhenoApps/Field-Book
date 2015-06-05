@@ -3,9 +3,6 @@ package com.fieldbook.tracker;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,17 +13,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.location.Location;
 import android.media.MediaScannerConnection;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.Html;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,11 +38,9 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,23 +48,16 @@ import android.widget.Toast;
 import com.fieldbook.tracker.Trait.TraitEditorActivity;
 import com.fieldbook.tracker.Tutorial.TutorialSettingsActivity;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -84,15 +69,11 @@ import jxl.WorkbookSettings;
  * Settings Screen
  */
 public class ConfigActivity extends Activity {
+
+    //TODO organize variables
+
     Handler mHandler = new Handler();
 
-    private static final int DIALOG_LOAD_TRAITFILE = 1002;
-    private static final int DIALOG_LOAD_TRAITS1 = 1003;
-    private static final int DIALOG_LOAD_TRAITS2 = 1004;
-    private static final int DIALOG_LOAD_TRAITS3 = 1005;
-
-    private static final String CSV = ".csv";
-    private static final String XLS = ".xls";
     private static final int DIALOG_LOAD_FIELDFILECSV = 1000;
     private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
 
@@ -103,13 +84,9 @@ public class ConfigActivity extends Activity {
 
     private Dialog personDialog;
     private Dialog locationDialog;
-    private Dialog rateDialog;
     private Dialog saveDialog;
 
-    private Dialog fieldDialog;
     private Dialog fieldDialog2;
-
-    private Dialog fieldCurrentDialog;
 
     private Dialog advancedDialog;
 
@@ -120,17 +97,11 @@ public class ConfigActivity extends Activity {
 
     private Dialog dbSaveDialog;
 
-    private String[] mFileList;
     private String[] importColumns;
 
-    private String mUserChoice = "";
     private String mChosenFile = "";
-    private String importDirectory = "";
 
-    private ListView rateList;
     private ListView setupList;
-
-    private Location fieldLocation;
 
     String versionName;
 
@@ -144,20 +115,13 @@ public class ConfigActivity extends Activity {
 
     private boolean isCSV;
     private int idColPosition;
+    public static boolean languageChange = false;
 
     private Workbook wb;
-
-    private int uPosition;
-    private int fPosition;
-    private int sPosition;
-    private int ePosition;
 
     Spinner unique;
     Spinner primary;
     Spinner secondary;
-
-    private RadioGroup traitGroup;
-    private RadioGroup fieldGroup;
 
     private RadioButton onlyUnique;
     private RadioButton allColumns;
@@ -165,8 +129,6 @@ public class ConfigActivity extends Activity {
     private RadioButton activeTraits;
 
     private int action;
-
-    private OnItemClickListener mainSettingsListener;
 
     private boolean columnFail;
 
@@ -176,20 +138,14 @@ public class ConfigActivity extends Activity {
     private String local;
     private String region;
 
-    private FrameLayout mFrame;
-
-    private ListView settingsList;
-
     private Menu systemMenu;
 
     @Override
     public void onDestroy() {
-
         try {
-            // Always close the tutorial along with the activity
             TutorialSettingsActivity.thisActivity.finish();
         } catch (Exception e) {
-
+            Log.e("Field Book","");
         }
 
         super.onDestroy();
@@ -200,7 +156,6 @@ public class ConfigActivity extends Activity {
         super.onResume();
 
         if (systemMenu != null) {
-            // Always reload item visibility in the menu in the event settings has changed
             if (ep.getBoolean("Tips", false)) {
                 systemMenu.findItem(R.id.help).setVisible(true);
             } else {
@@ -242,17 +197,16 @@ public class ConfigActivity extends Activity {
         invalidateOptionsMenu();
         loadScreen();
 
-
-
         helpActive = false;
     }
 
     private void loadScreen() {
-        getActionBar().setHomeButtonEnabled(true);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getActionBar()!=null) {
+            getActionBar().setHomeButtonEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
-        mFrame = new FrameLayout(this);
-
+        FrameLayout mFrame = new FrameLayout(this);
         mFrame.addView(LayoutInflater.from(getBaseContext()).inflate(R.layout.config, null));
         setContentView(mFrame);
 
@@ -262,8 +216,8 @@ public class ConfigActivity extends Activity {
         advancedDialog.setContentView(R.layout.advanced);
 
         android.view.WindowManager.LayoutParams params = advancedDialog.getWindow().getAttributes();
-        params.width = LayoutParams.FILL_PARENT;
-        advancedDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        params.width = LayoutParams.MATCH_PARENT;
+        advancedDialog.getWindow().setAttributes(params);
 
         advancedDialog.setCancelable(true);
         advancedDialog.setCanceledOnTouchOutside(true);
@@ -306,157 +260,152 @@ public class ConfigActivity extends Activity {
         disableEntryNavRight.setChecked(ep.getBoolean("DisableEntryNavRight", false));
         dataGrid.setChecked(ep.getBoolean("DataGrid", false));
 
-        tips
-                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        tips.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean checked) {
-                        Editor e = ep.edit();
-                        e.putBoolean("Tips", checked);
-                        e.commit();
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("Tips", checked);
+                e.apply();
+                invalidateOptionsMenu();
+                MainActivity.reloadData = true;
+            }
+        });
 
-                        // This is important - menu items won't change their language if
-                        // this isn't called
-                        invalidateOptionsMenu();
-                    }
-                });
+        cycle.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-        cycle
-                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("CycleTraits", checked);
+                e.apply();
+                MainActivity.reloadData = true;
+            }
+        });
 
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean checked) {
-                        Editor e = ep.edit();
-                        e.putBoolean("CycleTraits", checked);
-                        e.commit();
-                    }
-                });
+        ignoreEntries.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-        ignoreEntries
-                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("IgnoreExisting", checked);
+                e.apply();
+                MainActivity.reloadData = true;
+            }
+        });
 
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean checked) {
-                        Editor e = ep.edit();
-                        e.putBoolean("IgnoreExisting", checked);
-                        e.commit();
-                    }
-                });
+        useDay.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-        useDay
-                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("UseDay", checked);
+                e.apply();
+                MainActivity.reloadData = true;
+            }
+        });
 
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean checked) {
-                        Editor e = ep.edit();
-                        e.putBoolean("UseDay", checked);
-                        e.commit();
-                    }
-                });
+        rangeSound.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-        rangeSound
-                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("RangeSound", checked);
+                e.apply();
+                MainActivity.reloadData = true;
+            }
+        });
 
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean checked) {
-                        Editor e = ep.edit();
-                        e.putBoolean("RangeSound", checked);
-                        e.commit();
-                    }
-                });
+        jumpToPlot.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-        jumpToPlot
-                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("JumpToPlot", checked);
+                e.apply();
+                MainActivity.reloadData = true;
+            }
+        });
 
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean checked) {
-                        Editor e = ep.edit();
-                        e.putBoolean("JumpToPlot", checked);
-                        e.commit();
-                    }
-                });
+        nextEmptyPlot.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton arg0, boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("NextEmptyPlot", checked);
+                e.apply();
+                MainActivity.reloadData = true;
+            }
+        });
 
-        nextEmptyPlot
-                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        quickGoTo.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean checked) {
-                        Editor e = ep.edit();
-                        e.putBoolean("NextEmptyPlot", checked);
-                        e.commit();
-                    }
-                });
-        quickGoTo
-                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("QuickGoTo", checked);
+                e.apply();
+                MainActivity.reloadData = true;
+            }
+        });
 
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean checked) {
-                        Editor e = ep.edit();
-                        e.putBoolean("QuickGoTo", checked);
-                        e.commit();
-                        MainActivity.reloadData = true;
-                    }
-                });
-        disableShare
-                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        disableShare.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("DisableShare", checked);
+                e.apply();
+                MainActivity.reloadData = true;
+            }
+        });
 
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean checked) {
-                        Editor e = ep.edit();
-                        e.putBoolean("DisableShare", checked);
-                        e.commit();
-                        MainActivity.reloadData = true;
-                    }
-                });
         disableEntryNavLeft.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
             public void onCheckedChanged(CompoundButton arg0,
                                          boolean checked) {
                 Editor e = ep.edit();
                 e.putBoolean("DisableEntryNavLeft", checked);
-                e.commit();
+                e.apply();
                 MainActivity.reloadData = true;
             }
         });
-        disableEntryNavRight.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
+        disableEntryNavRight.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton arg0,
                                          boolean checked) {
                 Editor e = ep.edit();
                 e.putBoolean("DisableEntryNavRight", checked);
-                e.commit();
+                e.apply();
                 MainActivity.reloadData = true;
             }
         });
-        barcodeScan.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
+        barcodeScan.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton arg0,
                                          boolean checked) {
                 Editor e = ep.edit();
                 e.putBoolean("BarcodeScan", checked);
-                e.commit();
+                e.apply();
                 MainActivity.reloadData = true;
             }
         });
+
         dataGrid.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
             public void onCheckedChanged(CompoundButton arg0,
                                          boolean checked) {
                 Editor e = ep.edit();
                 e.putBoolean("DataGrid", checked);
-                e.commit();
+                e.apply();
                 MainActivity.reloadData = true;
             }
         });
 
         // Export Field book
         saveDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
-        saveDialog.setTitle(getString(R.string.exportas));
+        saveDialog.setTitle(getString(R.string.export));
         saveDialog.setContentView(R.layout.savefile);
 
         android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.FILL_PARENT;
-        saveDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params2);
+        params2.width = LayoutParams.MATCH_PARENT;
+        saveDialog.getWindow().setAttributes(params2);
 
         saveDialog.setCancelable(true);
         saveDialog.setCanceledOnTouchOutside(true);
@@ -475,63 +424,10 @@ public class ConfigActivity extends Activity {
         checkDB = (CheckBox) saveDialog.findViewById(R.id.formatDB);
         checkExcel = (CheckBox) saveDialog.findViewById(R.id.formatExcel);
 
-        traitGroup = (RadioGroup) saveDialog.findViewById(R.id.traitsRadioGroup);
-        fieldGroup = (RadioGroup) saveDialog.findViewById(R.id.fieldsRadioGroup);
-
         allColumns = (RadioButton) saveDialog.findViewById(R.id.allColumns);
         onlyUnique = (RadioButton) saveDialog.findViewById(R.id.onlyUnique);
         allTraits = (RadioButton) saveDialog.findViewById(R.id.allTraits);
         activeTraits = (RadioButton) saveDialog.findViewById(R.id.activeTraits);
-
-        checkDB.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-            }
-        });
-
-        checkExcel.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-            }
-        });
-
-        traitGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-            }
-        });
-
-        fieldGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-            }
-        });
-
-        allColumns.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-            }
-        });
-
-        onlyUnique.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-            }
-        });
-
-        allTraits.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-            }
-        });
-
-        activeTraits.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-            }
-        });
 
         Button exportButton = (Button) saveDialog.findViewById(R.id.saveBtn);
 
@@ -565,28 +461,19 @@ public class ConfigActivity extends Activity {
 
                 if(allColumns.isChecked()) {
                     String[] columns = MainActivity.dt.getRangeColumns();
-
-                    for (int i = 0; i < columns.length; i++) {
-                        newRange.add(columns[i]);
-                    }
+                    Collections.addAll(newRange, columns);
                 }
 
                 exportTrait = new ArrayList<String>();
 
                 if(activeTraits.isChecked()) {
                     String[] traits = MainActivity.dt.getVisibleTrait();
-
-                    for (int i = 0; i < traits.length; i++) {
-                        exportTrait.add(traits[i]);
-                    }
+                    Collections.addAll(exportTrait, traits);
                 }
 
                 if(allTraits.isChecked()) {
                     String[] traits = MainActivity.dt.getAllTraits();
-
-                    for (int i = 0; i < traits.length; i++) {
-                        exportTrait.add(traits[i]);
-                    }
+                    Collections.addAll(exportTrait, traits);
                 }
 
                 saveDialog.dismiss();
@@ -608,7 +495,6 @@ public class ConfigActivity extends Activity {
         Button setupCloseBtn = (Button) setupDialog.findViewById(R.id.closeBtn);
 
         setupCloseBtn.setOnClickListener(new OnClickListener() {
-
             public void onClick(View v) {
                 setupDialog.dismiss();
             }
@@ -637,7 +523,7 @@ public class ConfigActivity extends Activity {
                 e.putString("FirstName", firstName.getText().toString());
                 e.putString("LastName", lastName.getText().toString());
 
-                e.commit();
+                e.apply();
 
                 updateSetupList();
 
@@ -645,15 +531,12 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        // choose type of field import
         fieldDialog2 = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
         fieldDialog2.setTitle(getString(R.string.fields));
         fieldDialog2.setContentView(R.layout.config);
 
         fieldDialog2.setCancelable(true);
         fieldDialog2.setCanceledOnTouchOutside(true);
-
-        ListView fieldList2 = (ListView) fieldDialog2.findViewById(R.id.myList);
 
         Button fdCloseBtn2 = (Button) fieldDialog2.findViewById(R.id.closeBtn);
 
@@ -664,11 +547,7 @@ public class ConfigActivity extends Activity {
             }
         });
 
-        // To configure location
-
-
-        // This is the list of items shown on the settings screen itself
-        settingsList = (ListView) findViewById(R.id.myList);
+        ListView settingsList = (ListView) findViewById(R.id.myList);
 
         Button mainCloseBtn = (Button) findViewById(R.id.closeBtn);
 
@@ -691,8 +570,7 @@ public class ConfigActivity extends Activity {
 
                     case 1:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            Toast toast = Toast.makeText(ConfigActivity.this, getString(R.string.importtraitwarning), Toast.LENGTH_LONG);
-                            toast.show();
+                            makeToast(getString(R.string.importtraitwarning));
                             return;
                         }
 
@@ -702,7 +580,7 @@ public class ConfigActivity extends Activity {
                         break;
                     case 2:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            showNoFieldDialog();
+                            makeToast(getString(R.string.nofieldloaded));
                             return;
                         }
 
@@ -710,17 +588,18 @@ public class ConfigActivity extends Activity {
                         break;
                     case 3:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            showNoFieldDialog();
+                            makeToast(getString(R.string.nofieldloaded));
+                            return;
+                        }else if (MainActivity.dt.getTraitColumnsAsString() == null) {
+                            makeToast(getString(R.string.notraitloaded));
                             return;
                         }
 
                         showSaveDialog();
                         break;
-
                     case 4:
                         advancedDialog.show();
                         break;
-
                     case 5:
                         showLanguageDialog();
                         break;
@@ -735,17 +614,14 @@ public class ConfigActivity extends Activity {
 
         if (ep.getInt("UpdateVersion", -1) < getVersion()) {
             ed.putInt("UpdateVersion", getVersion());
-            ed.commit();
+            ed.apply();
             Intent intent = new Intent();
             intent.setClass(ConfigActivity.this, ChangelogActivity.class);
             startActivity(intent);
-
-            RateThisApp.onStart(this);
-            RateThisApp.showRateDialogIfNeeded(this);
         }
         if (!ep.getBoolean("TipsConfigured", false)) {
             ed.putBoolean("TipsConfigured", true);
-            ed.commit();
+            ed.apply();
             showTipsDialog();
         }
     }
@@ -756,8 +632,6 @@ public class ConfigActivity extends Activity {
                 mChosenFile = data.getStringExtra("result");
                 showFieldFileDialog();
             }
-            if (resultCode == RESULT_CANCELED) {
-            }
         }
 
         if (requestCode == 2) {
@@ -765,8 +639,6 @@ public class ConfigActivity extends Activity {
                 mChosenFile = data.getStringExtra("result");
                 mChosenFile = mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.length());
                 mHandler.post(importDB);
-            }
-            if (resultCode == RESULT_CANCELED) {
             }
         }
     }
@@ -776,6 +648,7 @@ public class ConfigActivity extends Activity {
         try {
             v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
+            Log.e("Field Book",e.getMessage());
         }
         return v;
     }
@@ -783,7 +656,7 @@ public class ConfigActivity extends Activity {
     private void showTipsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
 
-        builder.setTitle(getString(R.string.tipshort));
+        builder.setTitle(getString(R.string.tutorial));
         builder.setMessage(getString(R.string.tipsdesc));
 
         builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
@@ -824,12 +697,9 @@ public class ConfigActivity extends Activity {
 
         });
 
-
         AlertDialog alert = builder.create();
         alert.show();
-
     }
-
 
     // Only used for truncating lat long values
     private String truncateDecimalString(String v) {
@@ -858,7 +728,6 @@ public class ConfigActivity extends Activity {
     }
 
     private void showAboutDialog() {
-
         final PackageManager packageManager = this.getPackageManager();
 
         try {
@@ -876,8 +745,8 @@ public class ConfigActivity extends Activity {
         aboutDialog.setContentView(R.layout.about);
 
         android.view.WindowManager.LayoutParams langParams = aboutDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.FILL_PARENT;
-        aboutDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) langParams);
+        langParams.width = LayoutParams.MATCH_PARENT;
+        aboutDialog.getWindow().setAttributes(langParams);
 
         aboutDialog.setCancelable(true);
         aboutDialog.setCanceledOnTouchOutside(true);
@@ -903,11 +772,8 @@ public class ConfigActivity extends Activity {
             }
         });
 
-
         aboutDialog.show();
     }
-
-
 
     // Validate that column choices are different from one another
     private boolean checkImportColumnNames() {
@@ -918,9 +784,7 @@ public class ConfigActivity extends Activity {
         idColPosition = unique.getSelectedItemPosition();
 
         if (idCol.equals(priCol) || idCol.equals(secCol) || priCol.equals(secCol)) {
-            Toast.makeText(ConfigActivity.this, getString(R.string.colnamesdif),
-                    Toast.LENGTH_LONG).show();
-
+            makeToast(getString(R.string.colnamesdif));
         }
 
         return true;
@@ -958,15 +822,20 @@ public class ConfigActivity extends Activity {
             // Retrieves the data needed for export
             Cursor exportData = MainActivity.dt.getExportDBData(newRanges, exportTraits);
 
-            if (checkDB.isChecked() & !checkExcel.isChecked()) {
-                // Do not proceed if there is no data
+            if(exportData.getCount()==0) {
+                makeToast(getString(R.string.exporttraiterror));
+                return(0);
+            }
 
+            if (checkDB.isChecked() & !checkExcel.isChecked()) {
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
                                 exportFile.getText().toString() + "_database.csv");
-                        if (file.exists())
+
+                        if (file.exists()) {
                             file.delete();
+                        }
 
                         FileWriter fw = new FileWriter(file);
 
@@ -983,27 +852,21 @@ public class ConfigActivity extends Activity {
                     }
                 }
             } else if (checkExcel.isChecked() & !checkDB.isChecked()) {
-                // Do not proceed if there is no data
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
                                 exportFile.getText().toString() + "_table.csv");
 
-                        if (file.exists())
+                        if (file.exists()) {
                             file.delete();
+                        }
 
                         FileWriter fw = new FileWriter(file);
 
-                        // Total number of columns to write
-                        String[] range = newRanges;
-                        String[] traits = exportTraits;
-
-                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, traits);
+                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        csvWriter.writeTableFormat(concat(range, traits), range.length,
-                                MainActivity.dt.findRangeColumns(ep.getString("ImportUniqueName", ""), range),
-                                traits);
+                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
                         shareFile(file);
                     } catch (Exception e) {
                         ErrorLog("ExportDataError.txt", e.getMessage());
@@ -1011,14 +874,14 @@ public class ConfigActivity extends Activity {
                     }
                 }
             } else {
-                // Do not proceed if there is no data
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
                                 exportFile.getText().toString() + "_database.csv");
 
-                        if (file.exists())
+                        if (file.exists()) {
                             file.delete();
+                        }
 
                         FileWriter fw = new FileWriter(file);
 
@@ -1041,28 +904,22 @@ public class ConfigActivity extends Activity {
                         File file = new File(Constants.FIELDEXPORTPATH,
                                 exportFile.getText().toString() + "_table.csv");
 
-                        if (file.exists())
+                        if (file.exists()) {
                             file.delete();
+                        }
 
                         FileWriter fw = new FileWriter(file);
 
-                        // Total number of columns to write
-                        String[] range = newRanges;
-                        String[] traits = MainActivity.dt.getAllTraits();
-
-                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, traits);
+                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        csvWriter.writeTableFormat(concat(range, traits), range.length,
-                                MainActivity.dt.findRangeColumns(ep.getString("ImportUniqueName", ""), range),
-                                traits);
+                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
                         shareFile(file);
                     } catch (Exception e) {
                         ErrorLog("ExportDataError.txt", e.getMessage());
                         fail = true;
                     }
                 }
-
             }
             return 0;
         }
@@ -1071,15 +928,13 @@ public class ConfigActivity extends Activity {
         protected void onPostExecute(Integer result) {
             newRange.clear();
 
-            if (dialog.isShowing())
+            if (dialog.isShowing()) {
                 dialog.dismiss();
-
-            if (fail) {
-                Toast.makeText(ConfigActivity.this,
-                        getString(R.string.exporterror), Toast.LENGTH_LONG)
-                        .show();
             }
 
+            if (fail) {
+                makeToast(getString(R.string.exporterror));
+            }
         }
     }
 
@@ -1135,24 +990,15 @@ public class ConfigActivity extends Activity {
         @Override
         protected void onPostExecute(Integer result)
         {
-            if (dialog.isShowing())
+            if (dialog.isShowing()) {
                 dialog.dismiss();
-
-            if (fail)
-            {
-                ErrorLog("ExportDatabaseError.txt", error);
-
-                Toast toast = Toast.makeText(ConfigActivity.this,
-                        getString(R.string.exporterror), Toast.LENGTH_LONG);
-                toast.show();
-
             }
-            else
-            {
-                Toast toast = Toast.makeText(ConfigActivity.this,
-                        getString(R.string.exportcomplete), Toast.LENGTH_LONG);
 
-
+            if (fail) {
+                ErrorLog("ExportDatabaseError.txt", error);
+                makeToast(getString(R.string.exporterror));
+            } else {
+                makeToast(getString(R.string.exportcomplete));
             }
 
         }
@@ -1208,18 +1054,12 @@ public class ConfigActivity extends Activity {
 
             if (fail) {
                 ErrorLog("DBImportError.txt", error);
-
-                Toast toast = Toast.makeText(ConfigActivity.this,
-                        getString(R.string.importerror), Toast.LENGTH_LONG);
-
-                toast.show();
-
+                makeToast(getString(R.string.importerror));
             } else {
                 ed.putBoolean("ImportFieldFinished", true);
             }
 
-            ed.commit();
-
+            ed.apply();
             MainActivity.reloadData = true;
         }
     }
@@ -1230,59 +1070,24 @@ public class ConfigActivity extends Activity {
     private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
 
-        if(ep.getBoolean("DisableShare",true)==false) {
+        if(!ep.getBoolean("DisableShare", true)) {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
             try {
                 startActivity(Intent.createChooser(intent, "Sending File..."));
-            } finally {
+            } catch(Exception e) {
+                Log.e("Field Book",e.getMessage());
             }
         }
     }
-
 
     private void scanFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
     }
 
-    // Because the import dialog layout is created dynamically, this function
-    // loops through child views and checks spinner values for duplicate values
-    private int findColValue(LinearLayout parent, int value, boolean allowDuplicate) {
-        int count = 0;
-        int found = -1;
-
-        for (int i = 0; i < parent.getChildCount(); i++) {
-            LinearLayout child = (LinearLayout) parent.getChildAt(i);
-
-            Spinner c = (Spinner) child.findViewById(R.id.map);
-            TextView v = (TextView) child.findViewById(R.id.column);
-
-            if (allowDuplicate) {
-                if (c.getSelectedItemPosition() == value)
-                    return i;
-            } else {
-                if (c.getSelectedItemPosition() == value) {
-                    if (found == -1)
-                        found = i;
-
-                    count += 1;
-                }
-            }
-        }
-
-        if (allowDuplicate)
-            return -1;
-        else {
-            if (count > 1)
-                return -1;
-            else
-                return found;
-        }
-    }
-
-    // Ensure the values in the key column are unique for Excel workbooks
+    //TODO merge with verfiyuniquecolumncsv
     private boolean verifyUniqueColumnExcel(Workbook wb) {
         HashMap<String, String> check = new HashMap<String, String>();
 
@@ -1298,7 +1103,6 @@ public class ConfigActivity extends Activity {
         return true;
     }
 
-    // Ensure the key column has unique values for CSV files
     private boolean verifyUniqueColumnCSV(String path) {
         try {
             HashMap<String, String> check = new HashMap<String, String>();
@@ -1345,48 +1149,8 @@ public class ConfigActivity extends Activity {
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.spinnerlayout, data);
         spinner.setAdapter(itemsAdapter);
 
-        int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(0).toString()));
+        int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(0)));
         spinner.setSelection(spinnerPosition);
-    }
-
-    /*
-     * Helper function to create the necessary dialog screens. This is only
-     * useful for simple dialogs. Complex dialogs such as choosing traits to
-     * rate must be customized and so is not located here.
-     */
-    private void createDialog(int id) {
-
-        columnFail = false;
-
-        switch (id) {
-
-            case DIALOG_LOAD_FIELDFILECSV:
-                isCSV = true;
-                showFieldFileDialog();
-                break;
-
-            case DIALOG_LOAD_FIELDFILEEXCEL:
-                isCSV = false;
-                showFieldFileExcelDialog();
-                break;
-
-            case DIALOG_LOAD_TRAITS1:
-                final String[] traits1 = MainActivity.dt.getRangeColumns();
-                showTrait1Dialog(traits1);
-                break;
-
-            case DIALOG_LOAD_TRAITS2:
-                final String[] traits2 = MainActivity.dt.getRangeColumns();
-                showTrait2Dialog(traits2);
-                break;
-
-            case DIALOG_LOAD_TRAITS3:
-                final String[] traits3 = MainActivity.dt.getRangeColumns();
-                showTrait3Dialog(traits3);
-                break;
-
-        }
-
     }
 
     public void makeToast(String message) {
@@ -1400,9 +1164,9 @@ public class ConfigActivity extends Activity {
         languageDialog.setContentView(R.layout.genericdialog);
 
         android.view.WindowManager.LayoutParams params = languageDialog.getWindow().getAttributes();
-        params.width = LayoutParams.WRAP_CONTENT;
+        params.width = LayoutParams.MATCH_PARENT;
         params.height = LayoutParams.WRAP_CONTENT;
-        languageDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        languageDialog.getWindow().setAttributes(params);
 
         languageDialog.setCancelable(true);
         languageDialog.setCanceledOnTouchOutside(true);
@@ -1476,7 +1240,7 @@ public class ConfigActivity extends Activity {
                 Editor ed = ep.edit();
                 ed.putString("language", local);
                 ed.putString("region", region);
-                ed.commit();
+                ed.apply();
 
                 Locale locale2 = new Locale(local, region);
                 Locale.setDefault(locale2);
@@ -1487,17 +1251,15 @@ public class ConfigActivity extends Activity {
                                 .getDisplayMetrics());
 
                 invalidateOptionsMenu();
-
                 loadScreen();
+
+                languageChange = true;
+
                 languageDialog.dismiss();
             }
         });
 
-
-        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, langArray);
-        //myList.setAdapter(adapter);
-
-        Customlistadapter adapterImg = new Customlistadapter(this, image_id, langArray);
+        CustomListAdapter adapterImg = new CustomListAdapter(this, image_id, langArray);
         myList.setAdapter(adapterImg);
 
         Button langCloseBtn = (Button) languageDialog
@@ -1512,12 +1274,12 @@ public class ConfigActivity extends Activity {
         languageDialog.show();
     }
 
-    public class Customlistadapter extends ArrayAdapter<String> {
+    public class CustomListAdapter extends ArrayAdapter<String> {
         String[] color_names;
         Integer[] image_id;
         Context context;
 
-        public Customlistadapter(Activity context, Integer[] image_id, String[] text) {
+        public CustomListAdapter(Activity context, Integer[] image_id, String[] text) {
             super(context, R.layout.languageline, text);
             this.color_names = text;
             this.image_id = image_id;
@@ -1545,31 +1307,36 @@ public class ConfigActivity extends Activity {
         String tagDrop2 = "";
         String tagDrop3 = "";
 
-        if (ep.getString("FirstName", "").length() > 0 | ep.getString("LastName", "").length() > 0)
+        if (ep.getString("FirstName", "").length() > 0 | ep.getString("LastName", "").length() > 0) {
             tagName += getString(R.string.person) + ": " + ep.getString("FirstName", "")
                     + " " + ep.getString("LastName", "");
-        else
+        } else {
             tagName += getString(R.string.person) + ": " + getString(R.string.none);
+        }
 
-        if (ep.getString("Location", "").length() > 0)
+        if (ep.getString("Location", "").length() > 0) {
             tagLocation += getString(R.string.location) + ": " + ep.getString("Location", "");
-        else
+        } else {
             tagLocation += getString(R.string.location) + ": " + getString(R.string.none);
+        }
 
-        if (ep.getString("DROP1", "").length() > 0)
+        if (ep.getString("DROP1", "").length() > 0) {
             tagDrop1 = getString(R.string.drop1) + ": " + ep.getString("DROP1", "");
-        else
+        } else {
             tagDrop1 = getString(R.string.drop1) + ": " + getString(R.string.none);
+        }
 
-        if (ep.getString("DROP2", "").length() > 0)
+        if (ep.getString("DROP2", "").length() > 0) {
             tagDrop2 = getString(R.string.drop2) + ": " + ep.getString("DROP2", "");
-        else
+        } else {
             tagDrop2 = getString(R.string.drop2) + ": " + getString(R.string.none);
+        }
 
-        if (ep.getString("DROP3", "").length() > 0)
+        if (ep.getString("DROP3", "").length() > 0) {
             tagDrop3 = getString(R.string.drop3) + ": " + ep.getString("DROP3", "");
-        else
+        } else {
             tagDrop3 = getString(R.string.drop3) + ": " + getString(R.string.none);
+        }
 
         return new String[]{tagName, tagLocation, tagDrop1, tagDrop2, tagDrop3, getString(R.string.clearsettings)};
     }
@@ -1593,9 +1360,6 @@ public class ConfigActivity extends Activity {
     }
 
     private void showSaveDialog() {
-
-        // As the export filename uses the import file name as well,
-        // we parse it out here
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
@@ -1605,8 +1369,7 @@ public class ConfigActivity extends Activity {
             fFile = fFile.substring(0, fFile.length() - 4);
         }
 
-        exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile );
-
+        exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile);
         saveDialog.show();
     }
 
@@ -1614,6 +1377,7 @@ public class ConfigActivity extends Activity {
         String[] array = prepareSetup();
         ArrayList<String> lst = new ArrayList<String>();
         lst.addAll(Arrays.asList(array));
+        final String[] traits = MainActivity.dt.getRangeColumns();
 
         setupList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -1630,21 +1394,21 @@ public class ConfigActivity extends Activity {
                         if (MainActivity.dt.getRangeColumns() == null)
                             return;
 
-                        createDialog(DIALOG_LOAD_TRAITS1);
+                        showTrait1Dialog(traits);
                         break;
 
                     case 3:
                         if (MainActivity.dt.getRangeColumns() == null)
                             return;
 
-                        createDialog(DIALOG_LOAD_TRAITS2);
+                        showTrait2Dialog(traits);
                         break;
 
                     case 4:
                         if (MainActivity.dt.getRangeColumns() == null)
                             return;
 
-                        createDialog(DIALOG_LOAD_TRAITS3);
+                        showTrait3Dialog(traits);
                         break;
 
                     case 5:
@@ -1671,8 +1435,8 @@ public class ConfigActivity extends Activity {
         locationDialog.setContentView(R.layout.location);
 
         android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.FILL_PARENT;
-        locationDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) langParams);
+        langParams.width = LayoutParams.MATCH_PARENT;
+        locationDialog.getWindow().setAttributes(langParams);
 
         locationDialog.setCancelable(true);
         locationDialog.setCanceledOnTouchOutside(true);
@@ -1707,7 +1471,7 @@ public class ConfigActivity extends Activity {
             public void onClick(View arg0) {
                 Editor e = ep.edit();
                 e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
-                e.commit();
+                e.apply();
                 updateSetupList();
                 locationDialog.dismiss();
             }
@@ -1726,7 +1490,6 @@ public class ConfigActivity extends Activity {
 
             public void onClick(DialogInterface dialog, int which) {
                 setupDialog.dismiss();
-
                 dialog.dismiss();
 
                 Editor ed = ep.edit();
@@ -1736,13 +1499,11 @@ public class ConfigActivity extends Activity {
                 ed.putString("DROP1", "");
                 ed.putString("DROP2", "");
                 ed.putString("DROP3", "");
-                ed.commit();
+                ed.apply();
             }
-
         });
 
         builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
@@ -1756,7 +1517,7 @@ public class ConfigActivity extends Activity {
     private void showTrait3Dialog(final String[] traits) {
         final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
 
-        dialog.setTitle(getString(R.string.currentColumn) + ": " + ep.getString("DROP3", ""));
+        dialog.setTitle(getString(R.string.drop3) + ": " + ep.getString("DROP3", ""));
         dialog.setContentView(R.layout.genericdialog);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
@@ -1794,7 +1555,7 @@ public class ConfigActivity extends Activity {
     private void showTrait2Dialog(final String[] traits) {
         final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
 
-        dialog.setTitle(getString(R.string.currentColumn) + ": " + ep.getString("DROP2", ""));
+        dialog.setTitle(getString(R.string.drop2) + ": " + ep.getString("DROP2", ""));
         dialog.setContentView(R.layout.genericdialog);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
@@ -1832,7 +1593,7 @@ public class ConfigActivity extends Activity {
     private void showTrait1Dialog(final String[] traits) {
         final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
 
-        dialog.setTitle(getString(R.string.currentColumn) + ": " + ep.getString("DROP1", ""));
+        dialog.setTitle(getString(R.string.drop1) + ": " + ep.getString("DROP1", ""));
         dialog.setContentView(R.layout.genericdialog);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
@@ -1851,12 +1612,10 @@ public class ConfigActivity extends Activity {
                 dialog.dismiss();
 
                 Editor e = ep.edit();
-
                 e.putString("DROP1", traits[which]);
                 e.commit();
 
                 MainActivity.partialReload = true;
-
                 updateSetupList();
             }
         });
@@ -1876,19 +1635,19 @@ public class ConfigActivity extends Activity {
 
         if (mChosenFile.toLowerCase().contains(".xls")) {
             isCSV = false;
-            makeDirs();
-            loadXLSFile();
+            action = DIALOG_LOAD_FIELDFILEEXCEL;
         }
 
         if (mChosenFile.toLowerCase().contains(".csv")) {
+            action = DIALOG_LOAD_FIELDFILECSV;
             isCSV = true;
-            makeDirs();
-            loadCSVFile();
         }
 
         if (!mChosenFile.toLowerCase().contains(".csv") && !mChosenFile.toLowerCase().contains(".xls")) {
             makeToast(getString(R.string.notsupported));
-
+        } else {
+            makeDirs();
+            loadFile();
         }
     }
 
@@ -1915,150 +1674,71 @@ public class ConfigActivity extends Activity {
         }
     }
 
-    private void loadCSVFile() {
-        action = DIALOG_LOAD_FIELDFILECSV;
+    private void loadFile() {
+        if(action==DIALOG_LOAD_FIELDFILEEXCEL) {
+            WorkbookSettings wbSettings = new WorkbookSettings();
+            wbSettings.setUseTemporaryFileDuringWrite(true);
 
-        try {
-            FileReader fr = new FileReader(mChosenFile);
-            CSVReader cr = new CSVReader(fr);
+            try {
+                wb = Workbook.getWorkbook(new File(mChosenFile), wbSettings);
 
-            importColumns = cr.readNext();
+                importColumns = new String[wb.getSheet(0).getColumns()];
 
-            String[] reservedNames = new String[]{"abort", "action", "add", "after", "all", "alter",
-                    "analyze", "and", "as", "asc", "attach", "autoincrement", "before", "begin",
-                    "between", "by", "cascade", "case", "cast", "check", "collate", "commit",
-                    "conflict", "constraint", "create", "cross", "current_date", "current_time",
-                    "current_timestamp", "database", "default", "deferrable", "deferred", "delete",
-                    "desc", "detach", "distinct", "drop", "each", "else", "end", "escape", "except",
-                    "exclusive", "exists", "explain", "fail", "for", "foreign", "from", "full", "glob",
-                    "group", "having", "if", "ignore", "immediate", "in", "index", "indexed", "initially",
-                    "inner", "insert", "instead", "intersect", "into", "is", "isnull", "join", "key",
-                    "left", "like", "limit", "match", "natural", "no", "not", "notnull", "null", "of",
-                    "offset", "on", "or", "order", "outer", "plan", "pragma", "primary", "query", "raise",
-                    "recursive", "references", "regexp", "reindex", "release", "rename", "replace",
-                    "restrict", "right", "rollback", "savepoint", "select", "set", "table", "then", "to",
-                    "transaction", "trigger", "union", "update", "using", "vacuum", "virtual", "when",
-                    "where", "with", "without"};
-
-            List<String> list = Arrays.asList(reservedNames);
-
-            for (String s : importColumns) {
-                if (DataHelper.hasSpecialChars(s)) {
-                    columnFail = true;
-                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
-                    break;
-
+                for (int s = 0; s < wb.getSheet(0).getColumns(); s++) {
+                    importColumns[s] = wb.getSheet(0).getCell(s, 0).getContents();
                 }
-                if (list.contains(s.toLowerCase())) {
-                    columnFail = true;
-                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
-                    break;
 
-                }
+            } catch (Exception n) {
+                ErrorLog("ExcelError.txt", n.getMessage());
             }
-        } catch (Exception n) {
-            ErrorLog("CSVError.txt", n.getMessage());
+
+        }
+        if(action==DIALOG_LOAD_FIELDFILECSV) {
+            try {
+                FileReader fr = new FileReader(mChosenFile);
+                CSVReader cr = new CSVReader(fr);
+
+                importColumns = cr.readNext();
+
+            } catch (Exception n) {
+                ErrorLog("CSVError.txt", n.getMessage());
+            }
         }
 
-        mUserChoice = "";
-        importDirectory = "";
+        String[] reservedNames = new String[]{"abort", "action", "add", "after", "all", "alter",
+                "analyze", "and", "as", "asc", "attach", "autoincrement", "before", "begin",
+                "between", "by", "cascade", "case", "cast", "check", "collate", "commit",
+                "conflict", "constraint", "create", "cross", "current_date", "current_time",
+                "current_timestamp", "database", "default", "deferrable", "deferred", "delete",
+                "desc", "detach", "distinct", "drop", "each", "else", "end", "escape", "except",
+                "exclusive", "exists", "explain", "fail", "for", "foreign", "from", "full", "glob",
+                "group", "having", "if", "ignore", "immediate", "in", "index", "indexed", "initially",
+                "inner", "insert", "instead", "intersect", "into", "is", "isnull", "join", "key",
+                "left", "like", "limit", "match", "natural", "no", "not", "notnull", "null", "of",
+                "offset", "on", "or", "order", "outer", "plan", "pragma", "primary", "query", "raise",
+                "recursive", "references", "regexp", "reindex", "release", "rename", "replace",
+                "restrict", "right", "rollback", "savepoint", "select", "set", "table", "then", "to",
+                "transaction", "trigger", "union", "update", "using", "vacuum", "virtual", "when",
+                "where", "with", "without"};
 
-        if (!columnFail)
+        List<String> list = Arrays.asList(reservedNames);
 
-        importDialog(importColumns);
-        //importFieldMapDialog.show();
-    }
-
-    private void loadXLSFile() {
-        action = DIALOG_LOAD_FIELDFILEEXCEL;
-
-        WorkbookSettings wbSettings = new WorkbookSettings();
-        wbSettings.setUseTemporaryFileDuringWrite(true);
-
-        try {
-            wb = Workbook.getWorkbook(new File(mChosenFile), wbSettings);
-
-            importColumns = new String[wb.getSheet(0).getColumns()];
-
-            for (int s = 0; s < wb.getSheet(0).getColumns(); s++) {
-                importColumns[s] = wb.getSheet(0).getCell(s, 0).getContents();
+        for (String s : importColumns) {
+            if (DataHelper.hasSpecialChars(s)) {
+                columnFail = true;
+                Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
+                break;
             }
-
-            String[] reservedNames = new String[]{"abort", "action", "add", "after", "all", "alter",
-                    "analyze", "and", "as", "asc", "attach", "autoincrement", "before", "begin",
-                    "between", "by", "cascade", "case", "cast", "check", "collate", "commit",
-                    "conflict", "constraint", "create", "cross", "current_date", "current_time",
-                    "current_timestamp", "database", "default", "deferrable", "deferred", "delete",
-                    "desc", "detach", "distinct", "drop", "each", "else", "end", "escape", "except",
-                    "exclusive", "exists", "explain", "fail", "for", "foreign", "from", "full", "glob",
-                    "group", "having", "if", "ignore", "immediate", "in", "index", "indexed", "initially",
-                    "inner", "insert", "instead", "intersect", "into", "is", "isnull", "join", "key",
-                    "left", "like", "limit", "match", "natural", "no", "not", "notnull", "null", "of",
-                    "offset", "on", "or", "order", "outer", "plan", "pragma", "primary", "query", "raise",
-                    "recursive", "references", "regexp", "reindex", "release", "rename", "replace",
-                    "restrict", "right", "rollback", "savepoint", "select", "set", "table", "then", "to",
-                    "transaction", "trigger", "union", "update", "using", "vacuum", "virtual", "when",
-                    "where", "with", "without"};
-
-            List<String> list = Arrays.asList(reservedNames);
-
-            for (String s : importColumns) {
-                if (DataHelper.hasSpecialChars(s)) {
-                    columnFail = true;
-                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
-                    break;
-                }
-                if (list.contains(s.toLowerCase())) {
-                    columnFail = true;
-                    Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
-                    break;
-                }
+            if (list.contains(s.toLowerCase())) {
+                columnFail = true;
+                Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
+                break;
             }
-        } catch (Exception n) {
-            ErrorLog("ExcelError.txt", n.getMessage());
         }
 
-        if (!columnFail)
+        if (!columnFail) {
             importDialog(importColumns);
-        //importFieldMapDialog.show();
-    }
-
-    private void showFieldFileExcelDialog() {
-        final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
-
-        dialog.setTitle(getString(R.string.choosefieldfile));
-        dialog.setContentView(R.layout.genericdialog);
-        dialog.setCancelable(true);
-        dialog.setCanceledOnTouchOutside(true);
-
-        ListView csvList = (ListView) dialog.findViewById(R.id.myList);
-        Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
-
-        csvButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        csvList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                dialog.dismiss();
-                mChosenFile = mFileList[which];
-
-                Editor e = ep.edit();
-
-                e.putString("FieldFile", mChosenFile);
-
-                e.commit();
-
-
-            }
-        });
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, mFileList);
-        csvList.setAdapter(itemsAdapter);
-        dialog.show();
+        }
     }
 
     private void importDialog(String[] columns) {
@@ -2067,8 +1747,8 @@ public class ConfigActivity extends Activity {
         importFieldDialog.setContentView(R.layout.importdialog);
 
         android.view.WindowManager.LayoutParams params2 = importFieldDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.FILL_PARENT;
-        importFieldDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params2);
+        params2.width = LayoutParams.MATCH_PARENT;
+        importFieldDialog.getWindow().setAttributes(params2);
 
         importFieldDialog.setCancelable(true);
         importFieldDialog.setCanceledOnTouchOutside(false);
@@ -2099,15 +1779,14 @@ public class ConfigActivity extends Activity {
         importFieldDialog.show();
     }
 
-
     // Creates a new thread to do importing
     private Runnable importCSV = new Runnable() {
         public void run() {
             new ImportCSVTask().execute(0);
         }
-
     };
 
+    //TODO combine with excel
     private class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
         ProgressDialog dialog;
 
@@ -2144,24 +1823,18 @@ public class ConfigActivity extends Activity {
 
                 columns = cr.readNext();
 
-                for(int i=0;i<columns.length;i++) {
-                    columns[i] = columns[i].replaceAll(" ","_");
+                for (int i = 0; i < columns.length; i++) {
+                    columns[i] = columns[i].replaceAll(" ", "_");
                 }
 
-                if (action == DIALOG_LOAD_FIELDFILECSV) {
-                    MainActivity.dt.dropRange();
-                    MainActivity.dt.createRange(columns);
+                MainActivity.dt.dropRange();
+                MainActivity.dt.createRange(columns);
 
-                    Editor e = ep.edit();
-
-                    e.putString("DROP1", null);
-                    e.putString("DROP2", null);
-                    e.putString("DROP3", null);
-
-                    e.commit();
-                } else {
-                    MainActivity.dt.deleteTable(MainActivity.dt.TRAITS);
-                }
+                Editor e = ep.edit();
+                e.putString("DROP1", null);
+                e.putString("DROP2", null);
+                e.putString("DROP3", null);
+                e.apply();
 
                 data = columns;
 
@@ -2169,46 +1842,20 @@ public class ConfigActivity extends Activity {
                     data = cr.readNext();
 
                     if (data != null) {
-                        switch (action) {
-                            case DIALOG_LOAD_FIELDFILECSV:
-                                MainActivity.dt.insertRange(columns, data);
-                                break;
-
-                            case DIALOG_LOAD_TRAITFILE:
-                                MainActivity.dt.insertTraits(data[0], data[1],
-                                        data[2], data[3], data[4], data[5],
-                                        data[6], "true", "");
-
-                                String[] plots = MainActivity.dt.getPlotID();
-
-                                // For boolean data, always remove existing data
-                                // first
-                                // Then reinsert the default value
-                                if (data[1].equals("boolean")) {
-                                    if (plots != null) {
-                                        MainActivity.dt.deleteAllBoolean(data[0]);
-
-                                        for (String plot : plots) {
-                                            MainActivity.dt.insertUserTraits(plot, data[0],
-                                                    "boolean", "false");
-                                        }
-                                    }
-                                }
-                                break;
-                        }
+                        MainActivity.dt.insertRange(columns, data);
                     }
                 }
 
                 try {
                     cr.close();
-                } catch (Exception e) {
-                    ErrorLog("CSVError.txt", e.getMessage());
+                } catch (Exception f) {
+                    ErrorLog("CSVError.txt", f.getMessage());
                 }
 
                 try {
                     fr.close();
-                } catch (Exception e) {
-                    ErrorLog("CSVError.txt", e.getMessage());
+                } catch (Exception f) {
+                    ErrorLog("CSVError.txt", f.getMessage());
                 }
 
                 // These 2 lines are necessary due to importing of range data.
@@ -2219,7 +1866,6 @@ public class ConfigActivity extends Activity {
                 MainActivity.dt.open();
 
                 File newDir = new File(mChosenFile);
-
                 newDir.mkdirs();
 
             } catch (Exception e) {
@@ -2233,7 +1879,6 @@ public class ConfigActivity extends Activity {
                 MainActivity.dt.close();
                 MainActivity.dt.open();
             }
-
             return 0;
         }
 
@@ -2253,10 +1898,8 @@ public class ConfigActivity extends Activity {
                 ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
                 ed.putString("ImportFirstName", primary.getSelectedItem().toString());
                 ed.putString("ImportSecondName", secondary.getSelectedItem().toString());
-
                 ed.putBoolean("ImportFieldFinished", true);
-
-                ed.commit();
+                ed.apply();
 
                 MainActivity.reloadData = true;
             }
@@ -2301,10 +1944,8 @@ public class ConfigActivity extends Activity {
 
     }
 
-    public void ErrorLog(String sFileName, String sErrMsg)
-    {
-        try
-        {
+    public void ErrorLog(String sFileName, String sErrMsg) {
+        try {
             SimpleDateFormat lv_parser = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
 
             File file = new File(Constants.ERRORPATH, sFileName);
@@ -2317,13 +1958,12 @@ public class ConfigActivity extends Activity {
             out.close();
 
             scanFile(file);
-        }
-        catch (Exception e)
-        {
-
+        } catch (Exception e) {
+            Log.e("Field Book",e.getMessage());
         }
     }
 
+    //TODO combine with csv
     private Runnable importExcel = new Runnable() {
         public void run() {
             new ImportExcelTask().execute(0);
@@ -2353,13 +1993,11 @@ public class ConfigActivity extends Activity {
         protected Integer doInBackground(Integer... params) {
             try {
                 String[] data;
-
                 String[] columns;
 
                 //verify unique
                 if (!verifyUniqueColumnExcel(wb)) {
                     uniqueFail = true;
-
                     return 0;
                 }
 
@@ -2369,20 +2007,16 @@ public class ConfigActivity extends Activity {
                     columns[s] = wb.getSheet(0).getCell(s, 0).getContents();
                 }
 
-                if (action == DIALOG_LOAD_FIELDFILEEXCEL) {
-                    MainActivity.dt.dropRange();
-                    MainActivity.dt.createRange(columns);
+                MainActivity.dt.dropRange();
+                MainActivity.dt.createRange(columns);
 
-                    Editor e = ep.edit();
+                Editor e = ep.edit();
 
-                    e.putString("DROP1", null);
-                    e.putString("DROP2", null);
-                    e.putString("DROP3", null);
+                e.putString("DROP1", null);
+                e.putString("DROP2", null);
+                e.putString("DROP3", null);
 
-                    e.commit();
-                } else {
-                    MainActivity.dt.deleteTable(MainActivity.dt.TRAITS);
-                }
+                e.apply();
 
                 int row = 1;
 
@@ -2395,35 +2029,7 @@ public class ConfigActivity extends Activity {
 
                     row += 1;
 
-                    if (data != null) {
-                        switch (action) {
-                            case DIALOG_LOAD_FIELDFILEEXCEL:
-                                MainActivity.dt.insertRange(columns, data);
-                                break;
-
-                            case DIALOG_LOAD_TRAITFILE:
-                                MainActivity.dt.insertTraits(data[0], data[1],
-                                        data[2], data[3], data[4], data[5],
-                                        data[6], "true", "");
-
-                                String[] plots = MainActivity.dt.getPlotID();
-
-                                // For boolean data, always remove existing data
-                                // first
-                                // Then reinsert the default value
-                                if (data[1].equals("boolean")) {
-                                    if (plots != null) {
-                                        MainActivity.dt.deleteAllBoolean(data[0]);
-
-                                        for (String plot : plots) {
-                                            MainActivity.dt.insertUserTraits(plot, data[0],
-                                                    "boolean", "false");
-                                        }
-                                    }
-                                }
-                                break;
-                        }
-                    }
+                    MainActivity.dt.insertRange(columns, data);
                 }
 
                 // These 2 lines are necessary due to importing of range data.
@@ -2465,14 +2071,11 @@ public class ConfigActivity extends Activity {
                         Toast.LENGTH_LONG).show();
             else {
                 Editor ed = ep.edit();
-
                 ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
                 ed.putString("ImportFirstName", primary.getSelectedItem().toString());
                 ed.putString("ImportSecondName", secondary.getSelectedItem().toString());
-
                 ed.putBoolean("ImportFieldFinished", true);
-
-                ed.commit();
+                ed.apply();
 
                 MainActivity.reloadData = true;
             }
@@ -2492,7 +2095,7 @@ public class ConfigActivity extends Activity {
         android.view.WindowManager.LayoutParams params = chooseBackupDialog.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
         params.height = LayoutParams.WRAP_CONTENT;
-        chooseBackupDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        chooseBackupDialog.getWindow().setAttributes(params);
 
         chooseBackupDialog.setCancelable(true);
         chooseBackupDialog.setCanceledOnTouchOutside(true);
@@ -2547,8 +2150,8 @@ public class ConfigActivity extends Activity {
         dbSaveDialog.setContentView(R.layout.savedb);
 
         android.view.WindowManager.LayoutParams params2 = dbSaveDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.FILL_PARENT;
-        dbSaveDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params2);
+        params2.width = LayoutParams.MATCH_PARENT;
+        dbSaveDialog.getWindow().setAttributes(params2);
 
         dbSaveDialog.setCancelable(true);
         dbSaveDialog.setCanceledOnTouchOutside(true);
@@ -2577,7 +2180,7 @@ public class ConfigActivity extends Activity {
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
-        exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + MainActivity.dt.DATABASE_VERSION + ".db");
+        exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + DataHelper.DATABASE_VERSION + ".db");
 
         dbSaveDialog.show();
     }
@@ -2627,7 +2230,7 @@ public class ConfigActivity extends Activity {
                 // Clear all existing settings
                 Editor ed = ep.edit();
                 ed.clear();
-                ed.commit();
+                ed.apply();
 
                 dialog.dismiss();
 
@@ -2637,13 +2240,13 @@ public class ConfigActivity extends Activity {
                 try {
                     ConfigActivity.thisActivity.finish();
                 } catch (Exception e) {
-
+                    Log.e("Field Book", e.getMessage());
                 }
 
                 try {
                     MainActivity.thisActivity.finish();
-                } catch (Exception f) {
-
+                } catch (Exception e) {
+                    Log.e("Field Book", e.getMessage());
                 }
             }
 
@@ -2675,13 +2278,11 @@ public class ConfigActivity extends Activity {
                 systemMenu.findItem(R.id.help).setVisible(false);
             }
         }
-
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         switch (item.getItemId()) {
@@ -2707,9 +2308,9 @@ public class ConfigActivity extends Activity {
 
             case android.R.id.home:
                 if (!ep.getBoolean("ImportFieldFinished", false)) {
-                    showNoFieldDialog();
+                    makeToast(getString(R.string.nofieldloaded));
                 } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
-                    showNoTraitDialog();
+                    makeToast(getString(R.string.notraitloaded));
                 } else
                     finish();
                 break;
@@ -2718,29 +2319,14 @@ public class ConfigActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-
     @Override
     public void onBackPressed() {
         if (!ep.getBoolean("ImportFieldFinished", false)) {
-            showNoFieldDialog();
-            return;
+            makeToast(getString(R.string.nofieldloaded));
         } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
-            showNoTraitDialog();
+            makeToast(getString(R.string.notraitloaded));
         } else {
             finish();
         }
-    }
-
-    public static boolean isPackageInstalled(Context context) {
-        PackageManager pm = context.getPackageManager();
-        boolean app_installed = false;
-        try {
-            PackageInfo info = pm.getPackageInfo("com.android.vending", PackageManager.GET_ACTIVITIES);
-            String label = (String) info.applicationInfo.loadLabel(pm);
-            app_installed = (!TextUtils.isEmpty(label) && label.startsWith("Google Play"));
-        } catch(PackageManager.NameNotFoundException e) {
-            app_installed = false;
-        }
-        return app_installed;
     }
 }
