@@ -1,62 +1,29 @@
 package com.fieldbook.tracker;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.HorizontalScrollView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.Spinner;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
-import android.widget.TableRow.LayoutParams;
 import android.widget.Toast;
 
-import com.fieldbook.tracker.Search.SearchAdapter;
-import com.fieldbook.tracker.Search.SearchData;
-
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 
 public class DatagridActivity extends Activity {
 
-    private SharedPreferences ep;
-
-    private String local;
-    private String region;
-    private Button close;
     private String plotId;
-    private boolean selMade;
     private int previousView = 0;
 
     Cursor databaseData;
@@ -73,11 +40,11 @@ public class DatagridActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ep = getSharedPreferences("Settings", 0);
+        SharedPreferences ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
-        local = ep.getString("language", "en");
-        region = ep.getString("region", "");
+        String local = ep.getString("language", "en");
+        String region = ep.getString("region", "");
         Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
@@ -89,16 +56,13 @@ public class DatagridActivity extends Activity {
         setTitle(R.string.datagrid);
 
         gridView = (GridView) findViewById(R.id.tableLayout1);
-        close = (Button) findViewById(R.id.closeBtn);
+        Button close = (Button) findViewById(R.id.closeBtn);
 
         gridViewTable();
 
         close.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra("result", plotId);
-                setResult(RESULT_OK, returnIntent);
                 finish();
             }
         });
@@ -121,15 +85,12 @@ public class DatagridActivity extends Activity {
 
         ArrayofName.add(columns[0]);
 
-        for(int i=0; i<traits.length;i++) {
-            ArrayofName.add(traits[i]);
-        }
-
+        Collections.addAll(ArrayofName, traits);
 
         // outer for loop
         for (int i = 0; i < rows; i++) {
 
-            plotIdData[i] = databaseData.getString( databaseData.getColumnIndex(databaseData.getColumnName(0)));
+            plotIdData[i] = databaseData.getString(databaseData.getColumnIndex(databaseData.getColumnName(0)));
 
             for (int j = 0; j < cols; j++) {
 
@@ -142,7 +103,7 @@ public class DatagridActivity extends Activity {
             databaseData.moveToNext();
         }
 
-        if(adapter!=null) {
+        if (adapter != null) {
             System.out.println("here");
             adapter.clear();
         }
@@ -162,10 +123,28 @@ public class DatagridActivity extends Activity {
                                     int position, long id) {
                 gridView.getChildAt(previousView).setBackgroundColor(Color.WHITE);
                 previousView = position;
-                v.setBackgroundColor(Color.rgb(0,128,0));
-
-                plotId =  plotIdData[(position/cols)-1];
+                v.setBackgroundColor(Color.rgb(0, 128, 0));
+                try {
+                    plotId = plotIdData[(position / cols) - 1];
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    Log.e("Field Book", e.getMessage());
+                }
                 makeToast(plotId);
+            }
+        });
+
+        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                //TODO go to trait as well as plotId
+
+                plotId = plotIdData[(position / cols) - 1];
+                makeToast(plotId);
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("result", plotId);
+                setResult(RESULT_OK, returnIntent);
+                finish();
+                return false;
             }
         });
 
@@ -174,5 +153,4 @@ public class DatagridActivity extends Activity {
     public void makeToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
-
 }

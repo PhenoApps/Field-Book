@@ -3,8 +3,8 @@
     android:id="@+id/categoricalLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:visibility="gone"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:visibility="gone">
 
     <LinearLayout
         android:id="@+id/qPick"
@@ -27,7 +27,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -44,7 +43,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -61,7 +59,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -81,7 +78,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -98,7 +94,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -115,7 +110,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -135,7 +129,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -152,7 +145,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -169,7 +161,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -190,7 +181,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -207,7 +197,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
@@ -224,14 +213,13 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:minWidth="150dp"
-                android:text="@string/add"
                 android:textColor="#000000"
                 android:textSize="30dp"
                 android:textStyle="bold" />
         </LinearLayout>
 
         <Button
-            android:id="@+id/clearBtn2"
+            android:id="@+id/clearCatBtn"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
             android:layout_gravity="center"

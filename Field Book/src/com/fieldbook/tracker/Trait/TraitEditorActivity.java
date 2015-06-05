@@ -50,9 +50,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -64,7 +62,7 @@ public class TraitEditorActivity extends Activity {
 
     private static Handler mHandler = new Handler();
 
-    private static final String TRT = ".trt";
+    private static String TAG = "Field Book";
 
     public static ListView traitList;
     public static TraitAdapter mAdapter;
@@ -73,12 +71,10 @@ public class TraitEditorActivity extends Activity {
     public static Activity thisActivity;
     public static EditText trait;
 
-    private static String[] mFileList;
     private static String mChosenFile;
 
     private static SharedPreferences ep;
 
-    private static Dialog importDialog;
     private static OnItemClickListener traitListener;
 
     private Dialog createDialog;
@@ -104,9 +100,6 @@ public class TraitEditorActivity extends Activity {
 
     int currentPosition;
 
-    private String local;
-    private String region;
-
     private TraitObject o;
 
     private Menu systemMenu;
@@ -116,7 +109,7 @@ public class TraitEditorActivity extends Activity {
         try {
             TutorialTraitsActivity.thisActivity.finish();
         } catch (Exception e) {
-
+            Log.e(TAG,e.getMessage());
         }
 
         super.onDestroy();
@@ -143,8 +136,8 @@ public class TraitEditorActivity extends Activity {
         ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
-        local = ep.getString("language", "en");
-        region = ep.getString("region", "");
+        String local = ep.getString("language", "en");
+        String region = ep.getString("region", "");
         Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
@@ -154,8 +147,10 @@ public class TraitEditorActivity extends Activity {
 
         setContentView(R.layout.list);
 
-        getActionBar().setHomeButtonEnabled(true);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getActionBar()!=null) {
+            getActionBar().setHomeButtonEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         thisActivity = this;
 
@@ -193,9 +188,9 @@ public class TraitEditorActivity extends Activity {
         createDialog.setCanceledOnTouchOutside(true);
 
         android.view.WindowManager.LayoutParams params = createDialog.getWindow().getAttributes();
-        params.width = LayoutParams.FILL_PARENT;
+        params.width = LayoutParams.MATCH_PARENT;
 
-        createDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        createDialog.getWindow().setAttributes(params);
         createDialog.setOnCancelListener(new OnCancelListener() {
 
             public void onCancel(DialogInterface arg0) {
@@ -288,7 +283,6 @@ public class TraitEditorActivity extends Activity {
             }
 
             public void onNothingSelected(AdapterView<?> arg0) {
-
             }
         });
 
@@ -434,12 +428,11 @@ public class TraitEditorActivity extends Activity {
 
                 Editor ed = ep.edit();
                 ed.putBoolean("CreateTraitFinished", true);
-                ed.commit();
+                ed.apply();
 
                 loadData();
 
                 MainActivity.reloadData = true;
-
                 createDialog.dismiss();
             }
         });
@@ -448,7 +441,7 @@ public class TraitEditorActivity extends Activity {
     // Helper function to see if any fields have been edited
     private boolean dataChanged() {
         if (o != null) {
-            String defString = "";
+            String defString;
 
             if (bool.isChecked()) {
                 defString = "true";
@@ -503,89 +496,103 @@ public class TraitEditorActivity extends Activity {
                     return true;
             }
         }
-
         return false;
     }
 
-    // Reset fields based on the trait type
     private void prepareFields(int position) {
-        if (position == 1)
-            categoryBox.setVisibility(View.VISIBLE);
-        else
-            categoryBox.setVisibility(View.GONE);
-
-        def.setVisibility(View.VISIBLE);
-        bool.setVisibility(View.GONE);
-
-        defBox.setVisibility(View.VISIBLE);
-        minBox.setVisibility(View.VISIBLE);
-        maxBox.setVisibility(View.VISIBLE);
-
-        if (position == 1 || position == 5) {
-            minBox.setVisibility(View.GONE);
-            maxBox.setVisibility(View.GONE);
-        } else {
-            minBox.setVisibility(View.VISIBLE);
-            maxBox.setVisibility(View.VISIBLE);
-        }
-
-        if (position == 4) {
-            def.setVisibility(View.GONE);
-            bool.setVisibility(View.VISIBLE);
-
-            minBox.setVisibility(View.GONE);
-            maxBox.setVisibility(View.GONE);
-        }
-
-        if (position == 6 || position == 2 || position == 8 || position == 9 || position == 10) {
-            defBox.setVisibility(View.GONE);
-            minBox.setVisibility(View.GONE);
-            maxBox.setVisibility(View.GONE);
-        }
-
+        details.setHint(getString(R.string.optional));
         def.setHint(null);
         minimum.setHint(null);
         maximum.setHint(null);
 
-        details.setHint(getString(R.string.optional));
+        def.setVisibility(View.GONE);
+        minBox.setVisibility(View.GONE);
+        maxBox.setVisibility(View.GONE);
+        bool.setVisibility(View.GONE);
+        categoryBox.setVisibility(View.GONE);
 
         switch (position) {
-            case 0:
+            case 0: //numeric
+                def.setVisibility(View.VISIBLE);
+                minBox.setVisibility(View.VISIBLE);
+                maxBox.setVisibility(View.VISIBLE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.GONE);
+
                 def.setHint(getString(R.string.optional));
                 minimum.setHint(getString(R.string.optional));
                 maximum.setHint(getString(R.string.optional));
                 break;
-            case 1:
-            case 2:
-            case 3:
+            case 1: //categorical
+                def.setVisibility(View.GONE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.VISIBLE);
+                break;
+            case 2: //date
+                def.setVisibility(View.GONE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.GONE);
+                break;
+            case 3: //percent
+                def.setVisibility(View.VISIBLE);
+                minBox.setVisibility(View.VISIBLE);
+                maxBox.setVisibility(View.VISIBLE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.GONE);
+
                 def.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 minimum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 maximum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 break;
-            case 4:
-            case 5:
+            case 4: //boolean
+                def.setVisibility(View.GONE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                bool.setVisibility(View.VISIBLE);
+                categoryBox.setVisibility(View.GONE);
+                break;
+            case 5: //text
+                def.setVisibility(View.VISIBLE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.GONE);
+
                 def.setHint(getString(R.string.optional));
                 break;
-            case 6:
-                def.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-                minimum.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-                maximum.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+            case 6: //photo
+                def.setVisibility(View.GONE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.GONE);
                 break;
-            case 7:
-                def.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                minimum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                maximum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            case 7: //audio
+                def.setVisibility(View.GONE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.GONE);
+                break;
+            case 8: //counter
+                def.setVisibility(View.GONE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.GONE);
+                break;
+            case 9: //rust rating
+                def.setVisibility(View.GONE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.GONE);
                 break;
         }
-
-    }
-
-    // pad strings
-    private static String pad(int c) {
-        if (c >= 10)
-            return String.valueOf(c);
-        else
-            return "0" + String.valueOf(c);
     }
 
     // Non negative numbers only
@@ -603,14 +610,6 @@ public class TraitEditorActivity extends Activity {
         }
 
         return true;
-    }
-
-    // Check if string is boolean
-    public static boolean isBoolean(String str) {
-        if (!str.equals("true") & !str.equals("false"))
-            return false;
-        else
-            return true;
     }
 
     // Helper function to load data
@@ -655,7 +654,6 @@ public class TraitEditorActivity extends Activity {
 
         switch (item.getItemId()) {
             case R.id.help:
-                // Open tips
                 Intent intent = new Intent();
                 intent.setClassName(TraitEditorActivity.this,
                         TutorialTraitsActivity.class.getName());
@@ -686,42 +684,41 @@ public class TraitEditorActivity extends Activity {
                 finish();
                 break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     private void changeAllVisibility() {
-        Boolean globalVis = ep.getBoolean("allTraitsVisible",false);
+        Boolean globalVis = ep.getBoolean("allTraitsVisible", false);
         String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
 
-        if(allTraits == null) {
-            makeToast(getString(R.string.changeAllVisibilityError));
+        if (allTraits == null) {
+            makeToast(getString(R.string.createtraitserror));
             return;
         }
 
-        for (int j = 0; j < allTraits.length; j++) {
-            MainActivity.dt.updateTraitVisibility(allTraits[j],globalVis);
-            Log.d("Field",allTraits[j]);
+        for (String allTrait : allTraits) {
+            MainActivity.dt.updateTraitVisibility(allTrait, globalVis);
+            Log.d("Field", allTrait);
         }
 
         globalVis = !globalVis;
 
         Editor ed = ep.edit();
-        ed.putBoolean("allTraitsVisible",globalVis);
-        ed.commit();
+        ed.putBoolean("allTraitsVisible", globalVis);
+        ed.apply();
         loadData();
     }
 
     private void importExportDialog() {
         final Dialog importExport = new Dialog(TraitEditorActivity.this,
                 android.R.style.Theme_Holo_Light_Dialog);
-        importExport.setTitle(getString(R.string.importdb));
+        importExport.setTitle(getString(R.string.importexport));
         importExport.setContentView(R.layout.config);
 
         android.view.WindowManager.LayoutParams params = importExport.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
         params.height = LayoutParams.WRAP_CONTENT;
-        importExport.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        importExport.getWindow().setAttributes(params);
 
         importExport.setCancelable(true);
         importExport.setCanceledOnTouchOutside(true);
@@ -762,6 +759,13 @@ public class TraitEditorActivity extends Activity {
     }
 
     private void sortDialog() {
+        String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
+
+        if(allTraits == null) {
+            makeToast(getString(R.string.createtraitserror));
+            return;
+        }
+
         final Dialog sortDialog = new Dialog(TraitEditorActivity.this,
                 android.R.style.Theme_Holo_Light_Dialog);
         sortDialog.setTitle(getString(R.string.sort));
@@ -770,7 +774,7 @@ public class TraitEditorActivity extends Activity {
         android.view.WindowManager.LayoutParams params = sortDialog.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
         params.height = LayoutParams.WRAP_CONTENT;
-        sortDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        sortDialog.getWindow().setAttributes(params);
 
         sortDialog.setCancelable(true);
         sortDialog.setCanceledOnTouchOutside(true);
@@ -857,15 +861,15 @@ public class TraitEditorActivity extends Activity {
 
     private void showExportDialog() {
         final Dialog exportDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
-        exportDialog.setTitle(getString(R.string.exportas));
+        exportDialog.setTitle(getString(R.string.export));
         exportDialog.setContentView(R.layout.savedb);
 
         exportDialog.setCancelable(true);
         exportDialog.setCanceledOnTouchOutside(true);
 
         android.view.WindowManager.LayoutParams langParams = exportDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.FILL_PARENT;
-        exportDialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) langParams);
+        langParams.width = LayoutParams.MATCH_PARENT;
+        exportDialog.getWindow().setAttributes(langParams);
 
         Button closeBtn = (Button) exportDialog.findViewById(R.id.closeBtn);
 
@@ -904,6 +908,13 @@ public class TraitEditorActivity extends Activity {
     }
 
     private void showDeleteTraitDialog() {
+        String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
+
+        if(allTraits == null) {
+            makeToast(getString(R.string.createtraitserror));
+            return;
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this);
 
         builder.setTitle(getString(R.string.deletealltraits));
@@ -911,10 +922,7 @@ public class TraitEditorActivity extends Activity {
 
         builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                Editor ed = ep.edit();
-                ed.remove("MAPCONFIGURED");
-                ed.commit();
-                MainActivity.dt.deleteTable(MainActivity.dt.TRAITS);
+                MainActivity.dt.deleteTable(DataHelper.TRAITS);
                 loadData();
                 dialog.dismiss();
             }
@@ -954,9 +962,7 @@ public class TraitEditorActivity extends Activity {
     }
 
     public void showImportDialog() {
-        loadFileList(TRT);
         Intent intent = new Intent();
-
         intent.setClassName(thisActivity,
                 FileExploreActivity.class.getName());
         intent.putExtra("path", Constants.TRAITPATH);
@@ -969,50 +975,19 @@ public class TraitEditorActivity extends Activity {
                 mChosenFile = data.getStringExtra("result");
                 mHandler.post(importCSV);
             }
-            if (resultCode == RESULT_CANCELED) {
-            }
-        }
-    }
-
-    public static void hideImportDialog() {
-        try {
-            importDialog.dismiss();
-        } catch (Exception e) {
-
-        }
-    }
-
-    // Creates a list of all files in directory by type
-    private static void loadFileList(final String type) {
-
-        File data = new File(Constants.TRAITPATH);
-
-        if (data.exists()) {
-            FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(File dir, String filename) {
-                    File sel = new File(dir, filename);
-                    return filename.contains(type);
-                }
-            };
-            mFileList = data.list(filter);
-        } else {
-            mFileList = new String[0];
         }
     }
 
     // Helper function export data as CSV
     private void exportTable(String exportName) {
         File backup = new File(Constants.TRAITPATH);
-
         backup.mkdirs();
 
         File file = new File(Constants.TRAITPATH + "/" + exportName);
 
         try {
             FileWriter fw = new FileWriter(file);
-
             CSVWriter csvWriter = new CSVWriter(fw, MainActivity.dt.getAllTraitsForExport());
-
             csvWriter.writeTraitFile(MainActivity.dt.getTraitColumns());
 
             csvWriter.close();
@@ -1021,7 +996,6 @@ public class TraitEditorActivity extends Activity {
         }
 
         shareFile(file);
-
     }
 
     // Creates a new thread to do importing
@@ -1063,7 +1037,7 @@ public class TraitEditorActivity extends Activity {
 
                 data = columns;
 
-                MainActivity.dt.deleteTable(MainActivity.dt.TRAITS);
+                MainActivity.dt.deleteTable(DataHelper.TRAITS);
 
                 while (data != null) {
                     data = cr.readNext();
@@ -1072,22 +1046,6 @@ public class TraitEditorActivity extends Activity {
                         MainActivity.dt.insertTraits(data[0], data[1],
                                 data[2], data[3], data[4], data[5],
                                 data[6], data[7].toLowerCase(), data[8]);
-
-                        String[] plots = MainActivity.dt.getPlotID();
-
-                        // For boolean data, always remove existing data
-                        // first
-                        // Then reinsert the default value
-                        if (data[1].equals("boolean")) {
-                            if (plots != null) {
-                                MainActivity.dt.deleteAllBoolean(data[0]);
-
-                                for (String plot : plots) {
-                                    MainActivity.dt.insertUserTraits(plot, data[0],
-                                            "boolean", "false");
-                                }
-                            }
-                        }
                     }
                 }
 
@@ -1095,7 +1053,6 @@ public class TraitEditorActivity extends Activity {
                     cr.close();
                 } catch (Exception e) {
                     ErrorLog("TraitImportError.txt", e.getMessage());
-
                 }
 
                 try {
@@ -1104,10 +1061,6 @@ public class TraitEditorActivity extends Activity {
                     ErrorLog("TraitImportError.txt", e.getMessage());
                 }
 
-                // These 2 lines are necessary due to importing of range data.
-                // As the table is dropped and recreated,
-                // changes are not visible until you refresh the database
-                // connection
                 MainActivity.dt.close();
                 MainActivity.dt.open();
 
@@ -1128,10 +1081,7 @@ public class TraitEditorActivity extends Activity {
         protected void onPostExecute(Integer result) {
             Editor ed = ep.edit();
             ed.putBoolean("CreateTraitFinished", true);
-
-            // This makes the map dialog appear again
-            ed.remove("MAPCONFIGURED");
-            ed.commit();
+            ed.apply();
 
             loadData();
 
@@ -1146,10 +1096,8 @@ public class TraitEditorActivity extends Activity {
         }
     }
 
-    public static void ErrorLog(String sFileName, String sErrMsg)
-    {
-        try
-        {
+    public static void ErrorLog(String sFileName, String sErrMsg) {
+        try {
             SimpleDateFormat lv_parser = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
 
             File file = new File(Constants.ERRORPATH, sFileName);
@@ -1162,10 +1110,8 @@ public class TraitEditorActivity extends Activity {
             out.close();
 
             scanFile(file);
-        }
-        catch (Exception e)
-        {
-
+        } catch (Exception e) {
+            Log.e(TAG,e.getMessage());
         }
     }
 
@@ -1184,7 +1130,7 @@ public class TraitEditorActivity extends Activity {
     private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
 
-        if(ep.getBoolean("DisableShare",true)==false) {
+        if (!ep.getBoolean("DisableShare", true)) {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
@@ -1192,6 +1138,7 @@ public class TraitEditorActivity extends Activity {
             try {
                 startActivity(Intent.createChooser(intent, "Sending File..."));
             } finally {
+
             }
         }
     }

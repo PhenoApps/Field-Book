@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -21,19 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Created by trife on 6/24/2014.
- */
 
 public class ChangelogActivity extends Activity {
-    Handler mHandler = new Handler();
 
-    private SharedPreferences ep;
+    private static String TAG = "Field Book";
 
-    private String currentTable;
-    private String importId;
-    private String local;
-    private String region;
     WindowManager.LayoutParams params;
     private LinearLayout parent;
 
@@ -46,12 +39,12 @@ public class ChangelogActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ep = getSharedPreferences("Settings", 0);
+        SharedPreferences ep = getSharedPreferences("Settings", 0);
 
         // Enforce language
-        local = ep.getString("language", "en");
-        region = ep.getString("region", region);
-        Locale locale2 = new Locale(local, "");
+        String local = ep.getString("language", "en");
+        String region = ep.getString("region", "");
+        Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
         config2.locale = locale2;
@@ -60,7 +53,7 @@ public class ChangelogActivity extends Activity {
 
         SharedPreferences.Editor ed = ep.edit();
         ed.putInt("UpdateVersion", getVersion());
-        ed.commit();
+        ed.apply();
 
 
         setContentView(R.layout.changelog);
@@ -86,28 +79,25 @@ public class ChangelogActivity extends Activity {
         try {
             v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
-
+            Log.e(TAG, e.getMessage());
         }
         return v;
     }
 
     // Helper function to add row
     public void parseLog(int resId) {
-        List views = new ArrayList();
-
         try {
             InputStream is = getResources().openRawResource(resId);
             InputStreamReader isr = new InputStreamReader(is);
             BufferedReader br = new BufferedReader(isr, 8192);
 
-            int curVersionCode = -1;
             String curVersionName = null;
 
             String line;
             while ((line = br.readLine()) != null) {
-                TextView header = (TextView) new TextView(this);
-                TextView content = (TextView) new TextView(this);
-                TextView spacer = (TextView) new TextView(this);
+                TextView header = new TextView(this);
+                TextView content = new TextView(this);
+                TextView spacer = new TextView(this);
                 spacer.setTextSize(5);
                 View ruler = new View(this);
 
@@ -116,13 +106,11 @@ public class ChangelogActivity extends Activity {
                 content.setTextAppearance(getApplicationContext(), R.style.Dialog_SectionSubtitles);
 
                 if (line.length() == 0) {
-                    curVersionCode = -1;
                     curVersionName = null;
                     spacer.setText("\n");
                     parent.addView(spacer);
                 } else if (curVersionName == null) {
                     final String[] lineSplit = line.split("/");
-                    curVersionCode = Integer.parseInt(lineSplit[0]);
                     curVersionName = lineSplit[1];
                     header.setText(curVersionName);
                     parent.addView(header);

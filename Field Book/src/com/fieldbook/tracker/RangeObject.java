@@ -6,7 +6,5 @@ package com.fieldbook.tracker;
 public class RangeObject {
     String range;
     String plot;
-    String entry;
     String plot_id;
-
 }

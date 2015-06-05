@@ -1,15 +1,11 @@
 package com.fieldbook.tracker;
 
 import android.database.Cursor;
-import android.util.Log;
-
-import com.fieldbook.tracker.Trait.TraitObject;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 /**
  * Custom CSV Writing Class
@@ -108,14 +104,10 @@ public class CSVWriter {
 
                 int count = 0;
 
-                String traitName = "";
-
                 for (int i = labels.length - 5; i < labels.length; i++) {
                     if (count == 0) {
                         arrStr[i] = curCSV.getString(i);
-                        traitName = curCSV.getString(i);
                     } else if (count == 1) {
-                        TraitObject temp = MainActivity.dt.getDetail(traitName);
                         arrStr[i] = curCSV.getString(i);
                     } else if (count == 2)
                         arrStr[i] = person;
@@ -139,7 +131,6 @@ public class CSVWriter {
      * Exports traits table
      */
     public void writeTraitFile(String[] labels) throws Exception {
-        // Simply loop through all items
         if (curCSV.getCount() > 0) {
 
             writeNext(labels);
@@ -165,8 +156,7 @@ public class CSVWriter {
     /**
      * Generates data in an table style format
      */
-    public void writeTableFormat(String[] labels, int rangeTotal, int pid, String[] traits) throws Exception {
-        // Simply loop through all items
+    public void writeTableFormat(String[] labels, int rangeTotal) throws Exception {
         if (curCSV.getCount() > 0) {
 
             writeNext(labels);
@@ -201,7 +191,7 @@ public class CSVWriter {
         if (nextLine == null)
             return;
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < nextLine.length; i++) {
 
             if (i != 0) {
@@ -239,18 +229,10 @@ public class CSVWriter {
     }
 
     /**
-     * Flush underlying stream to writer.
-     */
-    public void flush() throws IOException {
-        pw.flush();
-    }
-
-    /**
      * Close the underlying stream writer flushing any buffered content.
      */
     public void close() throws IOException {
         pw.flush();
         pw.close();
     }
-
 }

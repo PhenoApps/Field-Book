@@ -155,7 +155,6 @@
     <string name="spanish">Español (México)</string>
     <string name="german">Deutsch</string>
     <string name="tutorial">チュートリアル</string>
-    <string name="tipshort">チュートリアル</string>
     <string name="help1">メニューにヘルプを表示してField Bookについて学ぶ。</string>
     <string name="help2">「高度な設定」からチュートリアルを有効にする。</string>
     <string name="mhelp1">スクリーン上部の「表示項目」に各エントリーの追加情報を表示できます。これらは「設定」メニューで変えることができます。</string>

@@ -14,7 +14,7 @@
         android:id="@+id/barcodeScan"
         android:icon="@drawable/ic_action_barcode_scanner"
         android:showAsAction="always"
-        android:title="@string/barcodescan" />
+        android:title="@string/barcodescantitle" />
     <item
         android:id="@+id/datagrid"
         android:icon="@drawable/ic_action_grid"
@@ -24,7 +24,7 @@
         android:id="@+id/help"
         android:icon="@drawable/ic_action_help"
         android:showAsAction="always"
-        android:title="@string/help" />
+        android:title="@string/tutorial" />
     <item
         android:id="@+id/search"
         android:icon="@drawable/ic_action_search"
