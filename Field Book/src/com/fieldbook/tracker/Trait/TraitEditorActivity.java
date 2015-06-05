@@ -109,7 +109,7 @@ public class TraitEditorActivity extends Activity {
         try {
             TutorialTraitsActivity.thisActivity.finish();
         } catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG,"" + e.getMessage());
         }
 
         super.onDestroy();
@@ -625,7 +625,7 @@ public class TraitEditorActivity extends Activity {
 
             traitList.setAdapter(mAdapter);
         } catch (Exception e) {
-            ErrorLog("LoadDataError.txt", e.getMessage());
+            ErrorLog("LoadDataError.txt", "" + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -992,7 +992,7 @@ public class TraitEditorActivity extends Activity {
 
             csvWriter.close();
         } catch (Exception sqlEx) {
-            ErrorLog("ExportTraitError.txt", sqlEx.getMessage());
+            ErrorLog("ExportTraitError.txt", "" + sqlEx.getMessage());
         }
 
         shareFile(file);
@@ -1052,13 +1052,13 @@ public class TraitEditorActivity extends Activity {
                 try {
                     cr.close();
                 } catch (Exception e) {
-                    ErrorLog("TraitImportError.txt", e.getMessage());
+                    ErrorLog("TraitImportError.txt", "" + e.getMessage());
                 }
 
                 try {
                     fr.close();
                 } catch (Exception e) {
-                    ErrorLog("TraitImportError.txt", e.getMessage());
+                    ErrorLog("TraitImportError.txt", "" + e.getMessage());
                 }
 
                 MainActivity.dt.close();
@@ -1069,7 +1069,7 @@ public class TraitEditorActivity extends Activity {
                 newDir.mkdirs();
 
             } catch (Exception e) {
-                ErrorLog("TraitImportError.txt", e.getMessage());
+                ErrorLog("TraitImportError.txt", "" + e.getMessage());
                 e.printStackTrace();
                 fail = true;
             }
@@ -1111,7 +1111,7 @@ public class TraitEditorActivity extends Activity {
 
             scanFile(file);
         } catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG,"" + e.getMessage());
         }
     }
 

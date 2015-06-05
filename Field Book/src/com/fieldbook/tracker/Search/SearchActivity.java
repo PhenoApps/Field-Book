@@ -247,7 +247,7 @@ public class SearchActivity extends Activity {
                         Toast.makeText(SearchActivity.this, getString(R.string.searchempty), Toast.LENGTH_LONG).show();
                     }
                 } catch (Exception z) {
-                    Log.e(TAG, z.getMessage());
+                    Log.e(TAG, "" +z.getMessage());
                 }
             }
         });

@@ -1,3 +1,6 @@
+29
+Fixed a bug causing crashes
+
 28
 Advanced settings layout reorganized
 Trait default values no longer stored upon field import

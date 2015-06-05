@@ -351,7 +351,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         moveRangeTo(rangeID, range.getText().toString(), false);
                         imm.hideSoftInputFromWindow(range.getWindowToken(), 0);
                     } catch (Exception e) {
-                        ErrorLog("MainScreenError.txt", e.getMessage());
+                        ErrorLog("MainScreenError.txt", "" + e.getMessage());
                     }
                     return true;
                 }
@@ -368,7 +368,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         movePlotTo(rangeID, plot.getText().toString(), false);
                         imm.hideSoftInputFromWindow(plot.getWindowToken(), 0);
                     } catch (Exception e) {
-                        ErrorLog("MainScreenError.txt", e.getMessage());
+                        ErrorLog("MainScreenError.txt", "" + e.getMessage());
                     }
                     return true;
                 }
@@ -453,7 +453,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         }
                     }
                 } catch (Exception e) {
-                    Log.e(TAG,e.getMessage());
+                    Log.e(TAG,"" + e.getMessage());
                 }
 
                 if (en.toString().length() > 0) {
@@ -629,7 +629,7 @@ public class MainActivity extends Activity implements OnClickListener {
         try {
             inFile1 = new Scanner(new File(Constants.TRAITPATH + "/severity.txt"));
         } catch (FileNotFoundException e) {
-            ErrorLog("RustError.txt", e.getMessage());
+            ErrorLog("RustError.txt", "" + e.getMessage());
             e.printStackTrace();
         }
 
@@ -1065,7 +1065,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             }
                         });
                     } catch (Exception e) {
-                        ErrorLog("SoundError.txt", e.getMessage());
+                        ErrorLog("SoundError.txt", "" + e.getMessage());
                     }
 
                 } else {
@@ -1119,7 +1119,7 @@ public class MainActivity extends Activity implements OnClickListener {
                                         }
                                     });
                                 } catch (Exception e) {
-                                    ErrorLog("SoundError.txt", e.getMessage());
+                                    ErrorLog("SoundError.txt", "" + e.getMessage());
                                 }
                             }
                         }
@@ -1186,7 +1186,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             };
                         });
                     } catch (Exception e) {
-                        ErrorLog("SoundError.txt", e.getMessage());
+                        ErrorLog("SoundError.txt", "" + e.getMessage());
                     }
 
                 } else {
@@ -1246,7 +1246,7 @@ public class MainActivity extends Activity implements OnClickListener {
                                         }
                                     });
                                 } catch (Exception e) {
-                                    ErrorLog("SoundError.txt", e.getMessage());
+                                    ErrorLog("SoundError.txt", "" + e.getMessage());
                                 }
                             }
                         }
@@ -1293,13 +1293,13 @@ public class MainActivity extends Activity implements OnClickListener {
                 try {
                     imm.hideSoftInputFromWindow(eNum.getWindowToken(), 0);
                 } catch (Exception e) {
-                    ErrorLog("MainScreenError.txt", e.getMessage());
+                    ErrorLog("MainScreenError.txt", "" + e.getMessage());
                 }
 
                 try {
                     imm.hideSoftInputFromWindow(tNum.getWindowToken(), 0);
                 } catch (Exception e) {
-                    ErrorLog("MainScreenError.txt", e.getMessage());
+                    ErrorLog("MainScreenError.txt", "" + e.getMessage());
                 }
 
                 int pos = traitType.getSelectedItemPosition() - 1;
@@ -1345,13 +1345,13 @@ public class MainActivity extends Activity implements OnClickListener {
                 try {
                     imm.hideSoftInputFromWindow(eNum.getWindowToken(), 0);
                 } catch (Exception e) {
-                    ErrorLog("MainScreenError.txt", e.getMessage());
+                    ErrorLog("MainScreenError.txt", "" + e.getMessage());
                 }
 
                 try {
                     imm.hideSoftInputFromWindow(tNum.getWindowToken(), 0);
                 } catch (Exception e) {
-                    ErrorLog("MainScreenError.txt", e.getMessage());
+                    ErrorLog("MainScreenError.txt", "" + e.getMessage());
                 }
 
                 int pos = traitType.getSelectedItemPosition() + 1;
@@ -1482,7 +1482,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 blankFile.createNewFile();
                 scanFile(blankFile);
             } catch (IOException e) {
-                ErrorLog("DirectoryError.txt", e.getMessage());
+                ErrorLog("DirectoryError.txt", "" + e.getMessage());
             }
         }
     }
@@ -1541,7 +1541,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             ;
                         });
                     } catch (Exception e) {
-                        ErrorLog("SoundError.txt", e.getMessage());
+                        ErrorLog("SoundError.txt", "" + e.getMessage());
                     }
                 }
             }
@@ -1614,7 +1614,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             }
                         });
                     } catch (Exception e) {
-                        ErrorLog("SoundError.txt", e.getMessage());
+                        ErrorLog("SoundError.txt", "" + e.getMessage());
                     }
                 }
             }
@@ -1725,7 +1725,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             e.putString("DROP1", prefixTraits[pos]);
                             e.apply();
                     } catch (Exception e) {
-                        ErrorLog("DropdownError.txt", e.getMessage());
+                        ErrorLog("DropdownError.txt", "" + e.getMessage());
                         e.printStackTrace();
                     }
 
@@ -1758,7 +1758,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             e.putString("DROP2", prefixTraits[pos]);
                             e.apply();
                     } catch (Exception e) {
-                        ErrorLog("DropdownError.txt", e.getMessage());
+                        ErrorLog("DropdownError.txt", "" + e.getMessage());
                         e.printStackTrace();
                     }
                 }
@@ -1789,7 +1789,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             e.putString("DROP3", prefixTraits[pos]);
                             e.apply();
                     } catch (Exception e) {
-                        ErrorLog("DropdownError.txt", e.getMessage());
+                        ErrorLog("DropdownError.txt", "" + e.getMessage());
                         e.printStackTrace();
 
                     }
@@ -1838,7 +1838,7 @@ public class MainActivity extends Activity implements OnClickListener {
         try {
             traitPosition = traitType.getSelectedItemPosition();
         } catch (Exception f) {
-            ErrorLog("MainScreenTraitError.txt", f.getMessage());
+            ErrorLog("MainScreenTraitError.txt", "" + f.getMessage());
             traitPosition = 0;
         }
 
@@ -1863,13 +1863,13 @@ public class MainActivity extends Activity implements OnClickListener {
                         try {
                             imm.hideSoftInputFromWindow(eNum.getWindowToken(), 0);
                         } catch (Exception e) {
-                            ErrorLog("KeyboardError.txt", e.getMessage());
+                            ErrorLog("KeyboardError.txt", "" + e.getMessage());
                         }
 
                         try {
                             imm.hideSoftInputFromWindow(tNum.getWindowToken(), 0);
                         } catch (Exception e) {
-                            ErrorLog("KeyboardError.txt", e.getMessage());
+                            ErrorLog("KeyboardError.txt", "" + e.getMessage());
                         }
                     }
 
@@ -2700,7 +2700,7 @@ public class MainActivity extends Activity implements OnClickListener {
         try {
             mGeneratedName = MainActivity.cRange.plot_id + " " + timeStamp.format(c.getTime());
         } catch (Exception e) {
-            ErrorLog("AudioError.txt", e.getMessage());
+            ErrorLog("AudioError.txt", "" + e.getMessage());
             mGeneratedName = "error " + timeStamp.format(c.getTime());
         }
 
@@ -2710,10 +2710,10 @@ public class MainActivity extends Activity implements OnClickListener {
         try {
             mRecorder.prepare();
         } catch (IllegalStateException e) {
-            ErrorLog("AudioError.txt", e.getMessage());
+            ErrorLog("AudioError.txt", "" + e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            ErrorLog("AudioError.txt", e.getMessage());
+            ErrorLog("AudioError.txt", "" + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -2738,7 +2738,7 @@ public class MainActivity extends Activity implements OnClickListener {
             mPlayer.prepare();
         }
         catch (Exception e) {
-            ErrorLog("AudioError.txt", e.getMessage());
+            ErrorLog("AudioError.txt", "" + e.getMessage());
             e.printStackTrace();
         }
 
@@ -2987,7 +2987,7 @@ public class MainActivity extends Activity implements OnClickListener {
             // Always close tips / hints along with the main activity
             TutorialMainActivity.thisActivity.finish();
         } catch (Exception e) {
-            ErrorLog("TutorialError.txt", e.getMessage());
+            ErrorLog("TutorialError.txt", "" + e.getMessage());
         }
 
         // Always close the database connection when the app ends
@@ -3241,7 +3241,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 try {
                     TutorialMainActivity.thisActivity.finish();
                 } catch (Exception e) {
-                    Log.e(TAG,e.getMessage());
+                    Log.e(TAG,"" + e.getMessage());
                 }
 
                 intent.setClassName(MainActivity.this,
@@ -3253,7 +3253,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 try {
                     TutorialMainActivity.thisActivity.finish();
                 } catch (Exception e) {
-                    Log.e(TAG,e.getMessage());
+                    Log.e(TAG,"" + e.getMessage());
                 }
 
                 intent.setClassName(MainActivity.this,
@@ -3279,7 +3279,6 @@ public class MainActivity extends Activity implements OnClickListener {
                 break;
             case R.id.jumpToPlot:
                 moveToPlotID();
-                makeToast(ep.getString("lastplot", "nope"));
                 break;
             case R.id.barcodeScan:
                 barcodeScan();
@@ -3291,7 +3290,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 try {
                     TutorialMainActivity.thisActivity.finish();
                 } catch (Exception e) {
-                    Log.e(TAG,e.getMessage());
+                    Log.e(TAG,"" + e.getMessage());
                 }
 
                 intent.setClassName(MainActivity.this,
@@ -3408,7 +3407,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 } catch (Exception e) {
                     e.printStackTrace();
 
-                    ErrorLog("CameraError.txt", e.getMessage());
+                    ErrorLog("CameraError.txt", "" + e.getMessage());
 
                     Toast toast = Toast.makeText(MainActivity.this, getString(R.string.hardwaremissing), Toast.LENGTH_LONG);
                     toast.show();
@@ -3441,7 +3440,7 @@ public class MainActivity extends Activity implements OnClickListener {
                         File storedAudio = new File(mRecordingLocation.getAbsolutePath());
                         scanFile(storedAudio);
                     } catch (Exception e) {
-                        ErrorLog("AudioError.txt", e.getMessage());
+                        ErrorLog("AudioError.txt", "" + e.getMessage());
                         e.printStackTrace();
                     }
 
@@ -3797,7 +3796,7 @@ public class MainActivity extends Activity implements OnClickListener {
         try {
             v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG,"" + e.getMessage());
         }
         return v;
     }
@@ -3887,7 +3886,7 @@ public class MainActivity extends Activity implements OnClickListener {
             intent.setDataAndType(Uri.fromFile(f), "image/*");
             startActivity(intent);
         } catch (Exception e) {
-            ErrorLog("PhotoError.txt", e.getMessage());
+            ErrorLog("PhotoError.txt", "" + e.getMessage());
         }
     }
 
@@ -3969,7 +3968,7 @@ public class MainActivity extends Activity implements OnClickListener {
             return correctBmp;
 
         } catch (Exception e) {
-            ErrorLog("CameraError.txt", e.getMessage());
+            ErrorLog("CameraError.txt", "" + e.getMessage());
             e.printStackTrace();
             makeToast(getString(R.string.photodecodefail));
             return null;
@@ -4040,7 +4039,7 @@ public class MainActivity extends Activity implements OnClickListener {
         }
         catch (Exception e)
         {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG,"" + e.getMessage());
         }
     }
 
@@ -4084,7 +4083,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     Elements spans = doc.select("div[itemprop=softwareVersion]");
                     title = spans.first().ownText();
                 } catch (IOException e) {
-                    ErrorLog("VersionCheckError.txt", e.getMessage());
+                    ErrorLog("VersionCheckError.txt", "" + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -4165,7 +4164,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     }
                     f.close();
                 } catch (Exception e) {
-                    ErrorLog("VersionUpdateError.txt", e.getMessage());
+                    ErrorLog("VersionUpdateError.txt", "" + e.getMessage());
                 }
             }
             return null;

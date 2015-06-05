@@ -127,7 +127,7 @@ public class DatagridActivity extends Activity {
                 try {
                     plotId = plotIdData[(position / cols) - 1];
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    Log.e("Field Book", e.getMessage());
+                    Log.e("Field Book", "" + e.getMessage());
                 }
                 makeToast(plotId);
             }

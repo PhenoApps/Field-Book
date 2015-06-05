@@ -79,7 +79,7 @@ public class ChangelogActivity extends Activity {
         try {
             v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, "" + e.getMessage());
         }
         return v;
     }

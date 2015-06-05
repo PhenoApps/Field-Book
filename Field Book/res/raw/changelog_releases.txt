@@ -6,7 +6,7 @@ Plot scrolling speed accelerates the longer the arrow is pressed
 New Advanced Setting to disable left, right, or both entry arrows if no data has been collected
 Field Book checks for updates
 Spaces in imported column names replaced with underscores
-Renamed default exported files
+Changed default name for exported files
 Map temporarily removed
 More errors written to error logs
 Updated strings for clarity

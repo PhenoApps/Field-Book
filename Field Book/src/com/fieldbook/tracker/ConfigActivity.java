@@ -648,7 +648,7 @@ public class ConfigActivity extends Activity {
         try {
             v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e("Field Book",e.getMessage());
+            Log.e("Field Book","" + e.getMessage());
         }
         return v;
     }
@@ -847,7 +847,7 @@ public class ConfigActivity extends Activity {
                         System.out.println(exportFile.getText().toString());
                         shareFile(file);
                     } catch (Exception e) {
-                        ErrorLog("ExportDataError.txt", e.getMessage());
+                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
                         fail = true;
                     }
                 }
@@ -869,7 +869,7 @@ public class ConfigActivity extends Activity {
                         csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
                         shareFile(file);
                     } catch (Exception e) {
-                        ErrorLog("ExportDataError.txt", e.getMessage());
+                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
                         fail = true;
                     }
                 }
@@ -891,7 +891,7 @@ public class ConfigActivity extends Activity {
                                 + ep.getString("LastName", ""), ep.getString("Location", ""));
                         shareFile(file);
                     } catch (Exception e) {
-                        ErrorLog("ExportDataError.txt", e.getMessage());
+                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
                         fail = true;
                     }
                 }
@@ -916,7 +916,7 @@ public class ConfigActivity extends Activity {
                         csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
                         shareFile(file);
                     } catch (Exception e) {
-                        ErrorLog("ExportDataError.txt", e.getMessage());
+                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
                         fail = true;
                     }
                 }
@@ -972,9 +972,9 @@ public class ConfigActivity extends Activity {
             }
             catch (Exception e)
             {
-                ErrorLog("ExportDatabaseError.txt", e.getMessage());
+                ErrorLog("ExportDatabaseError.txt", "" + e.getMessage());
                 e.printStackTrace();
-                error = e.getMessage();
+                error = "" + e.getMessage();
                 fail = true;
             }
 
@@ -1034,10 +1034,10 @@ public class ConfigActivity extends Activity {
             try {
                 MainActivity.dt.importDatabase(mChosenFile);
             } catch (Exception e) {
-                ErrorLog("ImportDatabase.txt", e.getMessage());
+                ErrorLog("ImportDatabase.txt", "" + e.getMessage());
                 e.printStackTrace();
 
-                error = e.getMessage();
+                error = "" + e.getMessage();
 
                 fail = true;
             }
@@ -1078,7 +1078,7 @@ public class ConfigActivity extends Activity {
             try {
                 startActivity(Intent.createChooser(intent, "Sending File..."));
             } catch(Exception e) {
-                Log.e("Field Book",e.getMessage());
+                Log.e("Field Book","" + e.getMessage());
             }
         }
     }
@@ -1129,7 +1129,7 @@ public class ConfigActivity extends Activity {
 
             return true;
         } catch (Exception n) {
-            ErrorLog("VerifyUniqueError.txt", n.getMessage());
+            ErrorLog("VerifyUniqueError.txt", "" + n.getMessage());
             n.printStackTrace();
             return false;
         }
@@ -1669,7 +1669,7 @@ public class ConfigActivity extends Activity {
                 blankFile.createNewFile();
                 scanFile(blankFile);
             } catch (IOException e) {
-                ErrorLog("DirectoryError.txt", e.getMessage());
+                ErrorLog("DirectoryError.txt", "" + e.getMessage());
             }
         }
     }
@@ -1689,7 +1689,7 @@ public class ConfigActivity extends Activity {
                 }
 
             } catch (Exception n) {
-                ErrorLog("ExcelError.txt", n.getMessage());
+                ErrorLog("ExcelError.txt", "" + n.getMessage());
             }
 
         }
@@ -1701,7 +1701,7 @@ public class ConfigActivity extends Activity {
                 importColumns = cr.readNext();
 
             } catch (Exception n) {
-                ErrorLog("CSVError.txt", n.getMessage());
+                ErrorLog("CSVError.txt", "" + n.getMessage());
             }
         }
 
@@ -1849,13 +1849,13 @@ public class ConfigActivity extends Activity {
                 try {
                     cr.close();
                 } catch (Exception f) {
-                    ErrorLog("CSVError.txt", f.getMessage());
+                    ErrorLog("CSVError.txt", "" +f.getMessage());
                 }
 
                 try {
                     fr.close();
                 } catch (Exception f) {
-                    ErrorLog("CSVError.txt", f.getMessage());
+                    ErrorLog("CSVError.txt","" + f.getMessage());
                 }
 
                 // These 2 lines are necessary due to importing of range data.
@@ -1869,7 +1869,7 @@ public class ConfigActivity extends Activity {
                 newDir.mkdirs();
 
             } catch (Exception e) {
-                ErrorLog("CSVError.txt", e.getMessage());
+                ErrorLog("CSVError.txt", "" + e.getMessage());
                 e.printStackTrace();
                 fail = true;
 
@@ -1959,7 +1959,7 @@ public class ConfigActivity extends Activity {
 
             scanFile(file);
         } catch (Exception e) {
-            Log.e("Field Book",e.getMessage());
+            Log.e("Field Book","" + e.getMessage());
         }
     }
 
@@ -2044,7 +2044,7 @@ public class ConfigActivity extends Activity {
                 newDir.mkdirs();
 
             } catch (Exception e) {
-                ErrorLog("ImportExcelError.txt", e.getMessage());
+                ErrorLog("ImportExcelError.txt", "" + e.getMessage());
                 e.printStackTrace();
                 fail = true;
 
@@ -2240,13 +2240,13 @@ public class ConfigActivity extends Activity {
                 try {
                     ConfigActivity.thisActivity.finish();
                 } catch (Exception e) {
-                    Log.e("Field Book", e.getMessage());
+                    Log.e("Field Book", "" + e.getMessage());
                 }
 
                 try {
                     MainActivity.thisActivity.finish();
                 } catch (Exception e) {
-                    Log.e("Field Book", e.getMessage());
+                    Log.e("Field Book", "" + e.getMessage());
                 }
             }
 
