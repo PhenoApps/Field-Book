@@ -4092,8 +4092,12 @@ public class MainActivity extends Activity implements OnClickListener {
 
         @Override
         protected void onPostExecute(Void result) {
-            currentServerVersion = title;
-            int currentServerVersionInt = Integer.parseInt(title.replace(".",""));
+            int currentServerVersionInt = 0;
+
+            if(title!="") {
+                currentServerVersionInt = Integer.parseInt(title.replace(".",""));
+            }
+
             System.out.println("Field.Book." + currentServerVersion + ".apk" + "\t" + versionName);
             if (activeNetworkInfo != null && activeNetworkInfo.isConnected() && currentServerVersionInt>versionNum && currentServerVersion.length()>0) {
                 downloadUpdate();

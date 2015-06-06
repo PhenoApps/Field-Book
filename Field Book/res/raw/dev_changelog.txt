@@ -1,3 +1,6 @@
+31
+Fixed a bug that caused a crash when checking for updates
+
 30
 Fixed a bug that caused the datagrid to crash
 
