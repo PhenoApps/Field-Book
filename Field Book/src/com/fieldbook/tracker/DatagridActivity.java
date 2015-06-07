@@ -71,7 +71,7 @@ public class DatagridActivity extends Activity {
     }
 
     private void gridViewTable() {
-        String[] columns = {ep.getString("ImportFirstName", getString(R.string.range))};
+        String[] columns = {ep.getString("ImportUniqueName", getString(R.string.range))};
         String[] traits = MainActivity.dt.getVisibleTrait();
 
         databaseData = MainActivity.dt.convertDatabaseToTable(columns, traits);
