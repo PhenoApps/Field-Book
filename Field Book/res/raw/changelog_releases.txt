@@ -1,3 +1,6 @@
+20/2.4.5
+Fixed a bug causing crashes on startup
+
 19/2.4.0
 Reorganized export layout
 New Advanced Setting to show DataGrid (beta) on the main screen

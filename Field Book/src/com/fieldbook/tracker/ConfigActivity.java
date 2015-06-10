@@ -1895,7 +1895,7 @@ public class ConfigActivity extends Activity {
                         Toast.LENGTH_LONG).show();
             else {
                 Editor ed = ep.edit();
-                ed.putString("iName", unique.getSelectedItem().toString());
+                ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
                 ed.putString("ImportFirstName", primary.getSelectedItem().toString());
                 ed.putString("ImportSecondName", secondary.getSelectedItem().toString());
                 ed.putBoolean("ImportFieldFinished", true);

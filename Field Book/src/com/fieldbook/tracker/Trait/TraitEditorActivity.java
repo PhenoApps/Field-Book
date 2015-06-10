@@ -1037,7 +1037,9 @@ public class TraitEditorActivity extends Activity {
 
                 data = columns;
 
-                MainActivity.dt.deleteTable(DataHelper.TRAITS);
+                if(MainActivity.dt.isTableExists(DataHelper.TRAITS)) {
+                    MainActivity.dt.deleteTable(DataHelper.TRAITS);
+                }
 
                 while (data != null) {
                     data = cr.readNext();

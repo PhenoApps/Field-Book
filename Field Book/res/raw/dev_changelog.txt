@@ -1,3 +1,7 @@
+33
+Fixed a bug that caused percent trait layout not to display
+Fixed a bug causing crashes on startup
+
 32
 Fixed a bug that caused the datagrid to crash
 

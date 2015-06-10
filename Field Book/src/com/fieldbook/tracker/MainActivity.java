@@ -2573,7 +2573,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
                         pNum.setVisibility(EditText.GONE);
                         eNum.setVisibility(EditText.GONE);
-                        seekBar.setVisibility(EditText.GONE);
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
                             counterTv.setText("0");
@@ -2979,9 +2978,11 @@ public class MainActivity extends Activity implements OnClickListener {
     public void onDestroy() {
 
         //save last plot id
-        Editor ed = ep.edit();
-        ed.putString("lastplot", cRange.plot_id);
-        ed.apply();
+        if (ep.getBoolean("ImportFieldFinished", false)) {
+            Editor ed = ep.edit();
+            ed.putString("lastplot", cRange.plot_id);
+            ed.apply();
+        }
 
         try {
             // Always close tips / hints along with the main activity
