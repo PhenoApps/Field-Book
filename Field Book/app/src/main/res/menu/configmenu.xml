@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:id="@+id/help"
+        android:title="@string/tutorial"
+        android:icon="@drawable/ic_action_help"
+        android:showAsAction="always" />
+
+    <item
+        android:id="@+id/database"
+        android:title="@string/dbformat"
+        android:icon="@drawable/ic_action_storage"
+        android:showAsAction="ifRoom|withText" />"
+
+    <item
+        android:id="@+id/about"
+        android:title="@string/about"
+        android:icon="@drawable/ic_action_about"
+        android:showAsAction="ifRoom|withText" />"
+
+	</menu>
+

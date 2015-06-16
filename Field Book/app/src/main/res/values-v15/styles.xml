@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CustomDialog" parent="@android:style/Theme.Holo.Light.Dialog">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:actionBarStyle">@style/Custom.ActionBar</item>
+        <item name="android:actionMenuTextAppearance">@style/Custom.MenuTextStyle</item>
+    </style>
+    <style name="Theme.Custom" parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/Custom.ActionBar</item>
+        <item name="android:actionMenuTextAppearance">@style/Custom.MenuTextStyle</item>
+    </style>
+    <style name="Custom.MenuTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Menu">
+        <item name="android:textSize">16.0dip</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Custom.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:background">#ffffffff</item>
+        <item name="android:displayOptions">showHome|useLogo</item>
+    </style>
+    <style name="Theme.Dialog" parent="@android:style/Theme.Holo.Light.Dialog" />
+</resources>
