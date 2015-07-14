@@ -283,6 +283,10 @@ public class MainActivity extends Activity implements OnClickListener {
             intent.setClass(MainActivity.this, ChangelogActivity.class);
             startActivity(intent);
         }
+
+        if(ep.getBoolean("BarcodeScan",false)) {
+            findViewById(R.id.plotSearchBox).setOnClickListener(this);
+        }
     }
 
     private void loadScreen() {
@@ -3023,8 +3027,10 @@ public class MainActivity extends Activity implements OnClickListener {
 
             if (ep.getBoolean("BarcodeScan", false)) {
                 systemMenu.findItem(R.id.barcodeScan).setVisible(true);
+                findViewById(R.id.plotSearchBox).setOnClickListener(this);
             } else {
                 systemMenu.findItem(R.id.barcodeScan).setVisible(false);
+                findViewById(R.id.plotSearchBox).setOnClickListener(null);
             }
             if (ep.getBoolean("DataGrid", false)) {
                 systemMenu.findItem(R.id.datagrid).setVisible(true);
@@ -3622,6 +3628,10 @@ public class MainActivity extends Activity implements OnClickListener {
                 break;
             case R.id.rustDelim:
                 v = "/";
+                break;
+            case R.id.plotSearchBox:
+                IntentIntegrator scanIntegrator = new IntentIntegrator(this);
+                scanIntegrator.initiateScan();
                 break;
             }
 
