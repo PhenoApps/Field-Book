@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -104,6 +105,9 @@ public class ChangelogActivity extends Activity {
                 ruler.setBackgroundColor(0xff33b5e5);
                 header.setTextAppearance(getApplicationContext(), R.style.Dialog_SectionTitles);
                 content.setTextAppearance(getApplicationContext(), R.style.Dialog_SectionSubtitles);
+
+                header.setTextSize(TypedValue.COMPLEX_UNIT_SP,(int) getResources().getDimension(R.dimen.text_size_small)/ getResources().getDisplayMetrics().density);
+                content.setTextSize(TypedValue.COMPLEX_UNIT_SP,(int) getResources().getDimension(R.dimen.text_size_small)/ getResources().getDisplayMetrics().density);
 
                 if (line.length() == 0) {
                     curVersionName = null;

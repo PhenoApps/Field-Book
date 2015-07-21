@@ -3,8 +3,8 @@
     android:id="@+id/photoLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:visibility="gone"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:visibility="gone">
 
     <LinearLayout
         android:id="@+id/photoArea"
@@ -37,29 +37,27 @@
             <Button
                 android:id="@+id/capture"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@android:drawable/btn_default"
                 android:gravity="center"
-                android:minWidth="120dp"
-                android:padding="2dp"
+                android:minWidth="@dimen/button_default_width"
                 android:text="@string/capture"
                 android:textColor="#000000"
-                android:textSize="30dp"
+                android:textSize="@dimen/text_size_large"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/clearPhoto"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@android:drawable/btn_default"
                 android:gravity="center"
-                android:minWidth="120dp"
-                android:padding="2dp"
+                android:minWidth="@dimen/button_default_width"
                 android:text="@string/clear"
                 android:textColor="#000000"
-                android:textSize="30dp"
+                android:textSize="@dimen/text_size_large"
                 android:textStyle="bold" />
 
         </LinearLayout>

@@ -94,7 +94,6 @@ public class ConfigActivity extends Activity {
 
     private Dialog importFieldDialog;
 
-
     private Dialog dbSaveDialog;
 
     private String[] importColumns;
@@ -555,7 +554,7 @@ public class ConfigActivity extends Activity {
 
         String[] items2 = new String[]{ getString(R.string.fields),
                 getString(R.string.traits), getString(R.string.setup),getString(R.string.export), getString(R.string.advanced),
-                getString(R.string.language)};
+                getString(R.string.language)};//, "API Test"}; TODO cleanup
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
@@ -603,6 +602,11 @@ public class ConfigActivity extends Activity {
                     case 5:
                         showLanguageDialog();
                         break;
+                    /*case 6:
+                        intent.setClassName(ConfigActivity.this,
+                                ApiActivity.class.getName());
+                        startActivity(intent);
+                        break;*/
                 }
             }
         });
@@ -1161,7 +1165,7 @@ public class ConfigActivity extends Activity {
         final Dialog languageDialog = new Dialog(ConfigActivity.this,
                 android.R.style.Theme_Holo_Light_Dialog);
         languageDialog.setTitle(getString(R.string.language));
-        languageDialog.setContentView(R.layout.genericdialog);
+        languageDialog.setContentView(R.layout.config);
 
         android.view.WindowManager.LayoutParams params = languageDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
@@ -1518,7 +1522,7 @@ public class ConfigActivity extends Activity {
         final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
 
         dialog.setTitle(getString(R.string.drop3) + ": " + ep.getString("DROP3", ""));
-        dialog.setContentView(R.layout.genericdialog);
+        dialog.setContentView(R.layout.config);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
 
@@ -1556,7 +1560,7 @@ public class ConfigActivity extends Activity {
         final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
 
         dialog.setTitle(getString(R.string.drop2) + ": " + ep.getString("DROP2", ""));
-        dialog.setContentView(R.layout.genericdialog);
+        dialog.setContentView(R.layout.config);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
 
@@ -1594,7 +1598,7 @@ public class ConfigActivity extends Activity {
         final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
 
         dialog.setTitle(getString(R.string.drop1) + ": " + ep.getString("DROP1", ""));
-        dialog.setContentView(R.layout.genericdialog);
+        dialog.setContentView(R.layout.config);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
 

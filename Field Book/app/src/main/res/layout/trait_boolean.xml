@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/eImg"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:scaleType="fitXY"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/keep" />
@@ -17,13 +17,13 @@
     <Button
         android:id="@+id/clearBoolean"
         android:layout_width="wrap_content"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:background="@android:drawable/btn_default"
         android:gravity="center"
-        android:minWidth="150dp"
+        android:minWidth="@dimen/button_default_width"
         android:text="@string/clear"
         android:textColor="#000000"
-        android:textSize="30dp"
+        android:textSize="@dimen/text_size_large"
         android:textStyle="bold" />
 </LinearLayout>

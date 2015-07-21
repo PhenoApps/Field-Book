@@ -1,5 +1,9 @@
+35
+Fixed a bug that caused update check to fail
+
 34
 Fixed a bug that caused datagrid to crash
+Changed project structure to Android Studio format
 
 33
 Fixed a bug that caused percent trait layout not to display

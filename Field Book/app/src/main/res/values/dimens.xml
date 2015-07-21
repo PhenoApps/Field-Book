@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- The default gap between components in a layout. -->
-    <dimen name="default_gap">16dp</dimen>  
+    <!-- text sizes -->
+    <dimen name="text_size_xsmall">12sp</dimen>
+    <dimen name="text_size_small">14sp</dimen>
+    <dimen name="text_size_medium">16sp</dimen>
+    <dimen name="text_size_large">20sp</dimen>
+    <dimen name="text_size_xlarge">22sp</dimen>
+    <dimen name="text_size_xxlarge">30sp</dimen>
+
+
+    <dimen name="button_default_height">40dp</dimen>
+    <dimen name="button_default_width">110dp</dimen>
 </resources>

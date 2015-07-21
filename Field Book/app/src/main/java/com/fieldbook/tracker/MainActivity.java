@@ -115,7 +115,7 @@ public class MainActivity extends Activity implements OnClickListener {
     int delay = 100;
     int count = 1;
 
-    private String currentServerVersion;
+    private String currentServerVersion = "";
     String versionName;
     int versionNum;
 
@@ -1430,12 +1430,19 @@ public class MainActivity extends Activity implements OnClickListener {
     // So what we do is embed the sizing we want into the layout file itself
     // And follow the layout instead of using screenMetrics.density
     private int getPixelSize() {
-        if (dpi.getText().toString().equals("high"))
-            return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 30,
-                    getResources().getDisplayMetrics());
-        else
+        if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_SMALL) {
             return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 16,
                     getResources().getDisplayMetrics());
+        } else if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
+            return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 25,
+                    getResources().getDisplayMetrics());
+        } else if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE) {
+            return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 30,
+                    getResources().getDisplayMetrics());
+        } else {
+            return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 30,
+                    getResources().getDisplayMetrics());
+        }
     }
 
     public static float dipToPixels(Context context, float dipValue) {
@@ -1443,7 +1450,7 @@ public class MainActivity extends Activity implements OnClickListener {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
     }
 
-    // Create all necessary directories and subdirectories	
+    // Create all necessary directories and subdirectories
     private void createDirs() {
         createDir(Constants.MPATH.getAbsolutePath());
         createDir(Constants.RESOURCEPATH);
@@ -1966,6 +1973,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
                         eNum.setVisibility(EditText.VISIBLE);
                         eNum.setEnabled(true);
+                        eNum.setCursorVisible(false);
 
                         pNum.setVisibility(EditText.GONE);
 
@@ -2096,12 +2104,12 @@ public class MainActivity extends Activity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitRustRating.setVisibility(View.GONE);
 
-                        tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
+                        tNum.setVisibility(View.GONE);
 
-                        pNum.setVisibility(EditText.GONE);
+                        pNum.setVisibility(View.GONE);
 
-                        eNum.setVisibility(EditText.GONE);
+                        eNum.setVisibility(View.GONE);
 
                         final Calendar c = Calendar.getInstance();
 
@@ -2672,7 +2680,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 recordingName + ".mp4");
     }
 
-    // Make sure we're not recording music playing in the background; ask the 
+    // Make sure we're not recording music playing in the background; ask the
     // MediaPlaybackService to pause playback
     private void stopAudioPlayback() {
         Intent i = new Intent("com.android.music.musicservicecommand");
@@ -2831,7 +2839,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Moving to a range will obey the usual settings, such as ignore existing
-    // For search results, this is bypassed e.g. always show result regardless	
+    // For search results, this is bypassed e.g. always show result regardless
     private void moveRangeTo(int[] rangeID, String range, boolean alwaysShow) {
         if (rangeID == null | range == null)
             return;
@@ -2903,7 +2911,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     // Moving to a plot will obey the usual settings, such as ignore existing
-    // For search results, this is bypassed e.g. always show result regardless	
+    // For search results, this is bypassed e.g. always show result regardless
     private void movePlotTo(int[] rangeID, String plot, boolean alwaysShow) {
         if (rangeID == null | range == null)
             return;
@@ -3175,7 +3183,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 switch (msg.what) {
                     case 1:
                         ImageView btn = (ImageView) findViewById(msg.arg1);
-                        if (btn.getTag() != null) { // button is still pressed	                
+                        if (btn.getTag() != null) { // button is still pressed
                             Message msg1 = new Message(); // schedule next btn pressed check
                             msg1.copyFrom(msg);
                             if (msg.arg1 == R.id.rangeLeft) {
@@ -4063,7 +4071,6 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     private class checkVersion extends AsyncTask<Void, Void, Void> {
-        String title = "";
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
@@ -4082,7 +4089,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             )
                             .get();
                     Elements spans = doc.select("div[itemprop=softwareVersion]");
-                    title = spans.first().ownText();
+                    currentServerVersion = spans.first().ownText();
                 } catch (IOException e) {
                     ErrorLog("VersionCheckError.txt", "" + e.getMessage());
                     e.printStackTrace();
@@ -4095,8 +4102,8 @@ public class MainActivity extends Activity implements OnClickListener {
         protected void onPostExecute(Void result) {
             int currentServerVersionInt = 0;
 
-            if(title!="") {
-                currentServerVersionInt = Integer.parseInt(title.replace(".",""));
+            if(!currentServerVersion.equals("")) {
+                currentServerVersionInt = Integer.parseInt(currentServerVersion.replace(".",""));
             }
 
             System.out.println("Field.Book." + currentServerVersion + ".apk" + "\t" + versionName);

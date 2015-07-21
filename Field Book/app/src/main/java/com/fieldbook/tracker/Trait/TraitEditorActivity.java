@@ -145,7 +145,10 @@ public class TraitEditorActivity extends Activity {
         getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
                 .getDisplayMetrics());
 
-        setContentView(R.layout.list);
+        setContentView(R.layout.config);
+
+        Button mainCloseBtn = (Button) findViewById(R.id.closeBtn);
+        mainCloseBtn.setVisibility(View.GONE);
 
         if(getActionBar()!=null) {
             getActionBar().setHomeButtonEnabled(true);

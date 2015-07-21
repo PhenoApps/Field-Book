@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/percentLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone"
+    android:orientation="vertical">
+
+    <SeekBar
+        android:id="@+id/seekbar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="35dp"
+        android:maxHeight="18dip"
+        android:minHeight="18dip"
+        android:paddingBottom="10px"
+        android:paddingLeft="30px"
+        android:paddingRight="30px"
+        android:paddingTop="10px"
+        android:progressDrawable="@drawable/custom_seek_bar"
+        android:thumb="@drawable/custom_seek_bar_thumb"
+        android:thumbOffset="0dp" />
+
+    <Button
+        android:id="@+id/clearPercent"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:background="@android:drawable/btn_default"
+        android:gravity="center"
+        android:minWidth="150dp"
+        android:text="@string/clear"
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_large"
+        android:textStyle="bold" />
+</LinearLayout>

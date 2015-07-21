@@ -14,12 +14,27 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+
+            signingConfig getSigningConfig()
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    def newName = output.outputFile.name
+                    newName = newName.replace("app-release", "Field-Book")
+                    output.outputFile = new File(output.outputFile.parent, newName)
+                }
+            }
         }
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        disable 'MissingTranslation'
     }
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:22.1.1'
+    compile 'com.android.support:support-v4:22.2.0'
+    compile 'com.android.support:design:22.2.0'
     compile 'org.jsoup:jsoup:1.8.1'
     compile 'net.sourceforge.jexcelapi:jxl:2.6.10'
 }
