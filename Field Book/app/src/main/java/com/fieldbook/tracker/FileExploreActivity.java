@@ -131,10 +131,6 @@ public class FileExploreActivity extends ListActivity {
         // Checks whether path exists
         if (path.exists()) {
 
-
-
-
-
             File[] filesList = path.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String filename) { //TODO add option to exclude certain filenames from search
                     File sel = new File(dir, filename);

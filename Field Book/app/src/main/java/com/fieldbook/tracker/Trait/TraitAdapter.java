@@ -3,7 +3,11 @@ package com.fieldbook.tracker.Trait;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.media.Image;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -14,13 +18,17 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.Dragsort.DragSortListView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -64,11 +72,8 @@ public class TraitAdapter extends BaseAdapter {
         TextView name;
         TextView format;
         CheckBox visible;
-        ImageView up;
-        ImageView down;
-        Button copy;
-        Button del;
-        Button edt;
+        ImageView dragSort;
+        ImageView menuPopup;
         String id;
         String realPosition;
     }
@@ -82,11 +87,8 @@ public class TraitAdapter extends BaseAdapter {
             holder.name = (TextView) convertView.findViewById(R.id.text1);
             holder.format = (TextView) convertView.findViewById(R.id.text2);
             holder.visible = (CheckBox) convertView.findViewById(R.id.visible);
-            holder.up = (ImageView) convertView.findViewById(R.id.upBtn);
-            holder.down = (ImageView) convertView.findViewById(R.id.downBtn);
-            holder.copy = (Button) convertView.findViewById(R.id.copyBtn);
-            holder.del = (Button) convertView.findViewById(R.id.delBtn);
-            holder.edt = (Button) convertView.findViewById(R.id.edtBtn);
+            holder.dragSort = (ImageView) convertView.findViewById(R.id.dragSort);
+            holder.menuPopup = (ImageView) convertView.findViewById(R.id.popupMenu);
 
             convertView.setTag(holder);
         } else {
@@ -126,92 +128,112 @@ public class TraitAdapter extends BaseAdapter {
                 } else {
                     MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(), false);
                 }
-
+                TraitEditorActivity.loadData();
                 MainActivity.reloadData = true;
             }
         });
 
-        holder.del.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        holder.dragSort.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
 
-                builder.setTitle(context.getString(R.string.deletetrait));
-                builder.setMessage(context.getString(R.string.areyousure));
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    DragSortListView drag = (DragSortListView) parent;
 
-                builder.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    drag.startDrag(position, DragSortListView.DRAG_POS_Y | DragSortListView.DRAG_NEG_Y, 0, 0);
 
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
+                    Log.w("drag", "started");
 
-                        MainActivity.dt.deleteTrait(holder.id);
-                        TraitEditorActivity.loadData();
+                    return true;
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    DragSortListView drag = (DragSortListView) parent;
+
+                    drag.stopDrag(false);
+
+                    Log.w("drag", "stopped");
+
+                    return true;
+                } else
+                    return false;
+            }
+        });
+
+        holder.menuPopup.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                PopupMenu popup = new PopupMenu(TraitEditorActivity.thisActivity, v);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater().inflate(R.menu.traititemmenu, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.copy))) {
+                            int pos = MainActivity.dt.getMaxPositionFromTraits() + 1;
+
+                            //TODO change copy protocol
+
+                            String traitName = getItem(position).trait;
+
+                            if (traitName.contains("-Copy")) {
+                                traitName = traitName.substring(0, traitName.indexOf("-Copy"));
+                            }
+
+                            String newTraitName = "";
+
+                            String[] allTraits = MainActivity.dt.getAllTraits();
+
+                            for (int i = 0; i < allTraits.length; i++) {
+                                newTraitName = traitName + "-Copy-" + "(" + Integer.toString(i) + ")";
+
+                                if (!Arrays.asList(allTraits).contains(newTraitName)) {
+                                    break;
+                                }
+                            }
+
+                            MainActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
+                            TraitEditorActivity.loadData();
+                            MainActivity.reloadData = true;
+
+                        } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.delete))) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+                            builder.setTitle(context.getString(R.string.deletetrait));
+                            builder.setMessage(context.getString(R.string.areyousure));
+
+                            builder.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() {
+
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+
+                                    MainActivity.dt.deleteTrait(holder.id);
+                                    TraitEditorActivity.loadData();
+                                    MainActivity.reloadData = true;
+                                }
+
+                            });
+
+                            builder.setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener() {
+
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+
+                            });
+
+                            AlertDialog alert = builder.create();
+                            alert.show();
+
+                        } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.edit))) {
+                            listener.onItemClick((AdapterView) parent, v, position, v.getId());
+                        }
+
+                        return false;
                     }
-
                 });
 
-                builder.setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener() {
+                popup.show();//showing popup menu
 
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-
-                });
-
-                AlertDialog alert = builder.create();
-                alert.show();
-
-            }
-        });
-
-        holder.up.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                if (position > 0) {
-                    String prevID = getItem(position - 1).id;
-                    String prevPosition = getItem(position - 1).realPosition;
-
-                    String currentID = holder.id;
-                    String currentPosition = holder.realPosition;
-
-                    MainActivity.dt.updateTraitPosition(prevID, currentPosition);
-                    MainActivity.dt.updateTraitPosition(currentID, prevPosition);
-                    TraitEditorActivity.loadData();
-                }
-            }
-        });
-
-        holder.down.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                if (position < getCount() - 1) {
-                    String nextID = getItem(position + 1).id;
-                    String nextPosition = getItem(position + 1).realPosition;
-
-                    String currentID = holder.id;
-                    String currentPosition = holder.realPosition;
-
-                    MainActivity.dt.updateTraitPosition(nextID, currentPosition);
-                    MainActivity.dt.updateTraitPosition(currentID, nextPosition);
-                    TraitEditorActivity.loadData();
-                }
-            }
-        });
-
-        holder.copy.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                int pos = MainActivity.dt.getMaxPositionFromTraits() + 1;
-
-                //TODO change copy protocol
-
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-                String postfix = "-" + context.getString(R.string.copy) + "-" + dateFormat.format(Calendar.getInstance().getTime());
-
-                MainActivity.dt.insertTraits(getItem(position).trait + postfix, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
-                TraitEditorActivity.loadData();
-            }
-        });
-
-        holder.edt.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                listener.onItemClick((AdapterView) parent, v, position, v.getId());
             }
         });
 

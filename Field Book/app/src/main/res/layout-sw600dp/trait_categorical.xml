@@ -18,9 +18,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:columnCount="3"
+            android:alignmentMode="alignBounds"
             android:orientation="horizontal"
             android:paddingTop="15dp">
-
 
             <Button
                 android:id="@+id/q1"

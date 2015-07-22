@@ -3,7 +3,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#FFFFFF"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="5dp">
 
     <LinearLayout
         android:id="@+id/formatbox"
@@ -78,6 +79,7 @@
 
         <TextView
             android:layout_width="150dp"
+            android:id="@+id/defTv"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:paddingRight="10dp"
@@ -96,7 +98,6 @@
             android:paddingRight="10dp"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_small" />
-
 
         <ToggleButton
             android:id="@+id/boolBtn"
@@ -255,9 +256,9 @@
         <Button
             android:id="@+id/saveBtn"
             android:layout_width="wrap_content"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:background="@android:drawable/btn_default"
-            android:minWidth="150dp"
+            android:minWidth="@dimen/button_default_width"
             android:text="@string/save"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
@@ -266,9 +267,9 @@
         <Button
             android:id="@+id/closeBtn"
             android:layout_width="wrap_content"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:background="@android:drawable/btn_default"
-            android:minWidth="150dp"
+            android:minWidth="@dimen/button_default_width"
             android:text="@string/close"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"

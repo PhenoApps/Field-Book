@@ -6,6 +6,7 @@
     android:background="#FFFFFF"
     android:ellipsize="end"
     android:gravity="center"
+    android:singleLine="true"
     android:textColor="#000000"
     android:textSize="@dimen/text_size_large"
     android:textStyle="bold" />

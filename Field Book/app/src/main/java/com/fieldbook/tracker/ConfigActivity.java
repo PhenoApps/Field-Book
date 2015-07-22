@@ -485,6 +485,11 @@ public class ConfigActivity extends Activity {
         setupDialog.setTitle(getString(R.string.setup));
         setupDialog.setContentView(R.layout.config);
 
+        params = setupDialog.getWindow().getAttributes();
+        params.width = LayoutParams.MATCH_PARENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        setupDialog.getWindow().setAttributes(params);
+
         setupDialog.setCancelable(true);
         setupDialog.setCanceledOnTouchOutside(true);
 

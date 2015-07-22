@@ -31,6 +31,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.view.Menu;
@@ -45,6 +46,8 @@ import com.fieldbook.tracker.FileExploreActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.Tutorial.TutorialTraitsActivity;
+import com.fieldbook.tracker.Dragsort.DragSortListView;
+import com.fieldbook.tracker.Dragsort.DragSortListView.DropListener;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -64,7 +67,7 @@ public class TraitEditorActivity extends Activity {
 
     private static String TAG = "Field Book";
 
-    public static ListView traitList;
+    public static DragSortListView traitList;
     public static TraitAdapter mAdapter;
     public static boolean createVisible;
 
@@ -89,6 +92,7 @@ public class TraitEditorActivity extends Activity {
     private EditText maximum;
     private EditText details;
     private EditText categories;
+    private TextView defTv;
     private ToggleButton bool;
 
     private String oldTrait;
@@ -145,10 +149,10 @@ public class TraitEditorActivity extends Activity {
         getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
                 .getDisplayMetrics());
 
-        setContentView(R.layout.config);
+        setContentView(R.layout.draglist);
 
-        Button mainCloseBtn = (Button) findViewById(R.id.closeBtn);
-        mainCloseBtn.setVisibility(View.GONE);
+        //Button mainCloseBtn = (Button) findViewById(R.id.closeBtn);
+        //mainCloseBtn.setVisibility(View.GONE);
 
         if(getActionBar()!=null) {
             getActionBar().setHomeButtonEnabled(true);
@@ -182,8 +186,137 @@ public class TraitEditorActivity extends Activity {
         enData[8] = "Counter";
         enData[9] = "Rust Rating";
 
-        traitList = (ListView) findViewById(R.id.myList);
+        traitList = (DragSortListView) findViewById(R.id.myList);
 
+        traitList.setDropListener(new DropListener() {
+
+            @Override
+            public void drop(int from, int to) {
+
+                // The new logic is that the drop point is now the center of the list. Any items before / after are reordered based on the drop point's position.
+                // This means while the realposition may not start from zero, the ordering will always be correct.
+
+                // downward drag
+                if (to > from)
+                {
+                    Log.w("Downward", "drag");
+
+                    try
+                    {
+                        // e.g. 4
+                        String prevID = mAdapter.getItem(from).id;
+                        String prevPosition = mAdapter.getItem(from).realPosition;
+
+                        // e.g. 6
+                        String currentID = mAdapter.getItem(to).id;
+                        String currentPosition = mAdapter.getItem(to).realPosition;
+
+                        MainActivity.dt.updateTraitPosition(currentID, currentPosition);
+                        MainActivity.dt.updateTraitPosition(prevID, String.valueOf(Integer.parseInt(currentPosition) + 1));
+
+                        // Push everything below down by 1
+                        int newCount = 2;
+
+                        for (int i = to + 1; i < mAdapter.getCount(); i++)
+                        {
+                            MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
+
+                            newCount ++;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                else
+                {
+                    Log.w("Upward", "drag");
+
+                    try
+                    {
+                        // upward drag
+                        // e.g. 4
+                        String prevID = mAdapter.getItem(from).id;
+                        String prevPosition = mAdapter.getItem(from).realPosition;
+
+                        // e.g. 6
+                        String currentID = mAdapter.getItem(to).id;
+                        String currentPosition = mAdapter.getItem(to).realPosition;
+
+                        if (Integer.parseInt(currentPosition) - to >= 0)
+                        {
+                            Log.w("Reorder", "top");
+
+                            // Reorder everything above
+                            int newCount = Integer.parseInt(currentPosition) - to;
+
+                            for (int i = 0; i < to; i++)
+                            {
+                                MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(newCount));
+                                Log.w(mAdapter.getItem(i).trait, String.valueOf(newCount));
+
+                                newCount ++;
+                            }
+
+                            Log.w("Reorder", "current");
+
+                            MainActivity.dt.updateTraitPosition(prevID, currentPosition);
+
+                            Log.w(mAdapter.getItem(from).trait, currentPosition);
+                        }
+                        else
+                        {
+                            // We hit a -1, might as well do a full zero based reorder
+                            // Reorder everything above
+
+                            Log.w("Reorder", "top");
+
+                            for (int i = 0; i < to; i++)
+                            {
+                                MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(i));
+
+                                Log.w(mAdapter.getItem(i).trait, String.valueOf(i));
+                            }
+
+                            Log.w("Reorder", "current");
+
+                            MainActivity.dt.updateTraitPosition(prevID, String.valueOf(to));
+
+                            Log.w(mAdapter.getItem(from).trait, String.valueOf(to));
+
+                            // Reset current position as well, otherwise we don't know where it points to
+                            currentPosition = String.valueOf(to);
+                        }
+
+                        Log.w("Reorder", "below");
+
+                        // Push everything below down by 1
+                        int newCount = 1;
+
+                        // last pulled position is from field
+
+                        for (int i = to; i < mAdapter.getCount(); i++)
+                        {
+                            if (i != from)
+                            {
+                                MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
+
+                                Log.w(mAdapter.getItem(i).trait, String.valueOf(Integer.parseInt(currentPosition) + newCount));
+
+                                newCount ++;
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+
+                loadData();
+            }
+        });
         createDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
         createDialog.setContentView(R.layout.trait);
         createDialog.setTitle(getString(R.string.addtrait));
@@ -221,6 +354,7 @@ public class TraitEditorActivity extends Activity {
         categoryBox = (LinearLayout) createDialog.findViewById(R.id.categorybox);
 
         bool = (ToggleButton) createDialog.findViewById(R.id.boolBtn);
+        defTv = (TextView) createDialog.findViewById(R.id.defTv);
 
         Button saveBtn = (Button) createDialog.findViewById(R.id.saveBtn);
         Button closeBtn = (Button) createDialog.findViewById(R.id.closeBtn);
@@ -508,7 +642,7 @@ public class TraitEditorActivity extends Activity {
         minimum.setHint(null);
         maximum.setHint(null);
 
-        def.setVisibility(View.GONE);
+        defBox.setVisibility(View.GONE);
         minBox.setVisibility(View.GONE);
         maxBox.setVisibility(View.GONE);
         bool.setVisibility(View.GONE);
@@ -516,10 +650,10 @@ public class TraitEditorActivity extends Activity {
 
         switch (position) {
             case 0: //numeric
-                def.setVisibility(View.VISIBLE);
+                defBox.setVisibility(View.VISIBLE);
+                bool.setVisibility(View.GONE);
                 minBox.setVisibility(View.VISIBLE);
                 maxBox.setVisibility(View.VISIBLE);
-                bool.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.GONE);
 
                 def.setHint(getString(R.string.optional));
@@ -527,24 +661,24 @@ public class TraitEditorActivity extends Activity {
                 maximum.setHint(getString(R.string.optional));
                 break;
             case 1: //categorical
-                def.setVisibility(View.GONE);
+                defBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
                 minBox.setVisibility(View.GONE);
                 maxBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.VISIBLE);
                 break;
             case 2: //date
-                def.setVisibility(View.GONE);
+                defBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
                 minBox.setVisibility(View.GONE);
                 maxBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.GONE);
                 break;
             case 3: //percent
-                def.setVisibility(View.VISIBLE);
+                defBox.setVisibility(View.VISIBLE);
+                bool.setVisibility(View.GONE);
                 minBox.setVisibility(View.VISIBLE);
                 maxBox.setVisibility(View.VISIBLE);
-                bool.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.GONE);
 
                 def.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -552,14 +686,16 @@ public class TraitEditorActivity extends Activity {
                 maximum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 break;
             case 4: //boolean
+                defBox.setVisibility(View.VISIBLE);
                 def.setVisibility(View.GONE);
+                defTv.setVisibility(View.VISIBLE);
+                bool.setVisibility(View.VISIBLE);
                 minBox.setVisibility(View.GONE);
                 maxBox.setVisibility(View.GONE);
-                bool.setVisibility(View.VISIBLE);
                 categoryBox.setVisibility(View.GONE);
                 break;
             case 5: //text
-                def.setVisibility(View.VISIBLE);
+                defBox.setVisibility(View.VISIBLE);
                 minBox.setVisibility(View.GONE);
                 maxBox.setVisibility(View.GONE);
                 bool.setVisibility(View.GONE);
@@ -568,28 +704,28 @@ public class TraitEditorActivity extends Activity {
                 def.setHint(getString(R.string.optional));
                 break;
             case 6: //photo
-                def.setVisibility(View.GONE);
+                defBox.setVisibility(View.GONE);
                 minBox.setVisibility(View.GONE);
                 maxBox.setVisibility(View.GONE);
                 bool.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.GONE);
                 break;
             case 7: //audio
-                def.setVisibility(View.GONE);
+                defBox.setVisibility(View.GONE);
                 minBox.setVisibility(View.GONE);
                 maxBox.setVisibility(View.GONE);
                 bool.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.GONE);
                 break;
             case 8: //counter
-                def.setVisibility(View.GONE);
+                defBox.setVisibility(View.GONE);
                 minBox.setVisibility(View.GONE);
                 maxBox.setVisibility(View.GONE);
                 bool.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.GONE);
                 break;
             case 9: //rust rating
-                def.setVisibility(View.GONE);
+                defBox.setVisibility(View.GONE);
                 minBox.setVisibility(View.GONE);
                 maxBox.setVisibility(View.GONE);
                 bool.setVisibility(View.GONE);

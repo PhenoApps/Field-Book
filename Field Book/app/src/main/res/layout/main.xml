@@ -129,8 +129,8 @@
             <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
                 android:stretchColumns="1">
 
                 <TableRow>
@@ -139,6 +139,7 @@
                         android:id="@+id/traitLeft"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:layout_weight=".1"
                         android:layout_gravity="center_vertical"
                         android:paddingRight="5dp"
                         android:scaleType="fitCenter"
@@ -146,7 +147,8 @@
 
                     <Spinner
                         android:id="@+id/traitType"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight=".8"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:gravity="center" />
@@ -155,6 +157,7 @@
                         android:id="@+id/traitRight"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:layout_weight=".1"
                         android:adjustViewBounds="true"
                         android:paddingLeft="5dp"
                         android:scaleType="fitCenter"
@@ -186,7 +189,7 @@
                 android:orientation="horizontal"
                 android:paddingTop="5dp">
 
-                <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                <TableLayout
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:stretchColumns="1">

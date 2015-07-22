@@ -62,6 +62,7 @@ public class ChangelogActivity extends Activity {
         params = getWindow().getAttributes();
 
         this.getWindow().setAttributes(params);
+
         parent = (LinearLayout) findViewById(R.id.data);
 
         Button close = (Button) findViewById(R.id.closeBtn);
