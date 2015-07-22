@@ -171,8 +171,6 @@ public class TraitAdapter extends BaseAdapter {
                         if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.copy))) {
                             int pos = MainActivity.dt.getMaxPositionFromTraits() + 1;
 
-                            //TODO change copy protocol
-
                             String traitName = getItem(position).trait;
 
                             if (traitName.contains("-Copy")) {

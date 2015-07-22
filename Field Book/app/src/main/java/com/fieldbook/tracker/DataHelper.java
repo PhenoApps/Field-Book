@@ -9,6 +9,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.fieldbook.tracker.Search.SearchData;
@@ -16,9 +17,12 @@ import com.fieldbook.tracker.Trait.TraitObject;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
@@ -26,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1007,7 +1012,7 @@ public class DataHelper {
             db.update(TRAITS, c, "id = ?", new String[]{id});
 
         } catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
 
@@ -1132,23 +1137,21 @@ public class DataHelper {
         String internalDbPath = getDatabasePath(this.context);
         String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
 
-        // Close the SQLiteOpenHelper so it will commit the created empty
-        // database to internal storage.
         close();
 
         Log.w("File to copy", Constants.BACKUPPATH + "/" + filename);
 
+        File newDb = new File(Constants.BACKUPPATH + "/" + filename);
+        File oldDb = new File(internalDbPath);
+
+        File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
+        File oldSp = new File(internalSpPath);
+
         try {
-            File newDb = new File(Constants.BACKUPPATH + "/" + filename);
-            File oldDb = new File(internalDbPath);
-
-            File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
-            File oldSp = new File(internalSpPath);
-
             copyFile(newDb,oldDb);
             copyFile(newSp,oldSp);
         } catch (IOException e) {
-            Log.e(TAG,e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -1161,16 +1164,16 @@ public class DataHelper {
         close();
 
         try {
-            File newDb = new File(Constants.BACKUPPATH + "/" + filename + ".db");
+            File newDb = new File(Constants.BACKUPPATH + "/" + filename);
             File oldDb = new File(internalDbPath);
 
             File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
             File oldSp = new File(internalSpPath);
 
             copyFile(oldDb,newDb);
-            copyFile(oldSp,newSp);
+            copyFile(oldSp, newSp);
         } catch (IOException e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
 
@@ -1179,12 +1182,15 @@ public class DataHelper {
      */
     private Boolean copyFile(File oldFile, File newFile) throws IOException {
         if (oldFile.exists()) {
-            copyFileCall(new FileInputStream(oldFile), new FileOutputStream(newFile));
-            openHelper = new OpenHelper(this.context);
-            open();
-            return true;
+            try {
+                copyFileCall(new FileInputStream(oldFile), new FileOutputStream(newFile));
+                openHelper = new OpenHelper(this.context);
+                open();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        throw new IOException("Unable to copy database.");
+        return false;
     }
 
     /**

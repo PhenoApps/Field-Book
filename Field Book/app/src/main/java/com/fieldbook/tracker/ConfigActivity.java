@@ -1059,16 +1059,15 @@ public class ConfigActivity extends Activity {
             if (dialog.isShowing())
                 dialog.dismiss();
 
-            Editor ed = ep.edit();
-
             if (fail) {
                 ErrorLog("DBImportError.txt", error);
                 makeToast(getString(R.string.importerror));
-            } else {
-                ed.putBoolean("ImportFieldFinished", true);
             }
 
-            ed.apply();
+            SharedPreferences prefs = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.apply();
+
             MainActivity.reloadData = true;
         }
     }
