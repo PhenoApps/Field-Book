@@ -188,6 +188,7 @@ public class TraitEditorActivity extends Activity {
 
         traitList = (DragSortListView) findViewById(R.id.myList);
 
+        //TODO clean this up
         traitList.setDropListener(new DropListener() {
 
             @Override
@@ -220,9 +221,10 @@ public class TraitEditorActivity extends Activity {
                         for (int i = to + 1; i < mAdapter.getCount(); i++)
                         {
                             MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
-
                             newCount ++;
                         }
+
+                        MainActivity.reloadData = true;
                     }
                     catch (Exception e)
                     {
@@ -313,10 +315,11 @@ public class TraitEditorActivity extends Activity {
                         e.printStackTrace();
                     }
                 }
-
+                MainActivity.reloadData = true;
                 loadData();
             }
         });
+
         createDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
         createDialog.setContentView(R.layout.trait);
         createDialog.setTitle(getString(R.string.addtrait));

@@ -70,8 +70,6 @@ import jxl.WorkbookSettings;
  */
 public class ConfigActivity extends Activity {
 
-    //TODO organize variables
-
     Handler mHandler = new Handler();
 
     private static final int DIALOG_LOAD_FIELDFILECSV = 1000;
@@ -108,9 +106,12 @@ public class ConfigActivity extends Activity {
     private double lng;
 
     private EditText exportFile;
+    private String exportFileString = "";
 
     private CheckBox checkDB;
     private CheckBox checkExcel;
+    private Boolean checkDbBool = false;
+    private Boolean checkExcelBool = false;
 
     private boolean isCSV;
     private int idColPosition;
@@ -452,7 +453,7 @@ public class ConfigActivity extends Activity {
                     return;
                 }
 
-                newRange = new ArrayList<String>();
+                newRange = new ArrayList<>();
 
                 if(onlyUnique.isChecked()) {
                     newRange.add(ep.getString("ImportUniqueName", ""));
@@ -463,7 +464,7 @@ public class ConfigActivity extends Activity {
                     Collections.addAll(newRange, columns);
                 }
 
-                exportTrait = new ArrayList<String>();
+                exportTrait = new ArrayList<>();
 
                 if(activeTraits.isChecked()) {
                     String[] traits = MainActivity.dt.getVisibleTrait();
@@ -474,6 +475,10 @@ public class ConfigActivity extends Activity {
                     String[] traits = MainActivity.dt.getAllTraits();
                     Collections.addAll(exportTrait, traits);
                 }
+
+                checkDbBool = checkDB.isChecked();
+                checkExcelBool = checkExcel.isChecked();
+                exportFileString = exportFile.getText().toString();
 
                 saveDialog.dismiss();
                 mHandler.post(exportData);
@@ -807,6 +812,7 @@ public class ConfigActivity extends Activity {
 
     private class ExportDataTask extends AsyncTask<Integer, Integer, Integer> {
         boolean fail;
+        boolean noData = false;
 
         ProgressDialog dialog;
 
@@ -832,15 +838,15 @@ public class ConfigActivity extends Activity {
             Cursor exportData = MainActivity.dt.getExportDBData(newRanges, exportTraits);
 
             if(exportData.getCount()==0) {
-                makeToast(getString(R.string.exporttraiterror));
+                noData = true;
                 return(0);
             }
 
-            if (checkDB.isChecked() & !checkExcel.isChecked()) {
+            if (checkDbBool & !checkExcelBool) {
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
-                                exportFile.getText().toString() + "_database.csv");
+                                exportFileString + "_database.csv");
 
                         if (file.exists()) {
                             file.delete();
@@ -853,18 +859,18 @@ public class ConfigActivity extends Activity {
                         csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
                                 + ep.getString("LastName", ""), ep.getString("Location", ""));
 
-                        System.out.println(exportFile.getText().toString());
+                        System.out.println(exportFileString);
                         shareFile(file);
                     } catch (Exception e) {
                         ErrorLog("ExportDataError.txt", "" + e.getMessage());
                         fail = true;
                     }
                 }
-            } else if (checkExcel.isChecked() & !checkDB.isChecked()) {
+            } else if (checkExcelBool & !checkDbBool) {
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
-                                exportFile.getText().toString() + "_table.csv");
+                                exportFileString + "_table.csv");
 
                         if (file.exists()) {
                             file.delete();
@@ -886,7 +892,7 @@ public class ConfigActivity extends Activity {
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
-                                exportFile.getText().toString() + "_database.csv");
+                                exportFileString + "_database.csv");
 
                         if (file.exists()) {
                             file.delete();
@@ -911,7 +917,7 @@ public class ConfigActivity extends Activity {
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
-                                exportFile.getText().toString() + "_table.csv");
+                                exportFileString + "_table.csv");
 
                         if (file.exists()) {
                             file.delete();
@@ -943,6 +949,10 @@ public class ConfigActivity extends Activity {
 
             if (fail) {
                 makeToast(getString(R.string.exporterror));
+            }
+
+            if (noData) {
+                makeToast(getString(R.string.exporttraiterror));
             }
         }
     }
@@ -977,7 +987,7 @@ public class ConfigActivity extends Activity {
         protected Integer doInBackground(Integer... params)
         {
             try {
-                MainActivity.dt.exportDatabase(exportFile.getText().toString());
+                MainActivity.dt.exportDatabase(exportFileString);
             }
             catch (Exception e)
             {
@@ -987,8 +997,8 @@ public class ConfigActivity extends Activity {
                 fail = true;
             }
 
-            File exportedDb = new File(Constants.BACKUPPATH + "/" + exportFile.getText().toString() + ".db");
-            File exportedSp = new File(Constants.BACKUPPATH + "/" + exportFile.getText().toString() + "_sharedpref.xml");
+            File exportedDb = new File(Constants.BACKUPPATH + "/" + exportFileString + ".db");
+            File exportedSp = new File(Constants.BACKUPPATH + "/" + exportFileString + "_sharedpref.xml");
 
             shareFile(exportedDb);
             shareFile(exportedSp);
@@ -1914,44 +1924,6 @@ public class ConfigActivity extends Activity {
         }
     }
 
-    //TODO make generic
-    private void showNoFieldDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
-
-        builder.setTitle(getString(R.string.warning));
-        builder.setMessage(getString(R.string.nofieldloaded));
-
-        builder.setPositiveButton(getString(R.string.okay), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    private void showNoTraitDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
-
-        builder.setTitle(getString(R.string.warning));
-        builder.setMessage(getString(R.string.notraitloaded));
-
-        builder.setPositiveButton(getString(R.string.okay), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-
-    }
-
     public void ErrorLog(String sFileName, String sErrMsg) {
         try {
             SimpleDateFormat lv_parser = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
@@ -2181,6 +2153,7 @@ public class ConfigActivity extends Activity {
 
             public void onClick(View arg0) {
                 dbSaveDialog.dismiss();
+                exportFileString = exportFile.getText().toString();
                 mHandler.post(exportDB);
             }
         });

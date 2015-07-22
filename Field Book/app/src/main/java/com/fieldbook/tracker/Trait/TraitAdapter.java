@@ -128,8 +128,6 @@ public class TraitAdapter extends BaseAdapter {
                 } else {
                     MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(), false);
                 }
-                TraitEditorActivity.loadData();
-                MainActivity.reloadData = true;
             }
         });
 
@@ -149,6 +147,9 @@ public class TraitAdapter extends BaseAdapter {
                     DragSortListView drag = (DragSortListView) parent;
 
                     drag.stopDrag(false);
+
+                    TraitEditorActivity.loadData();
+                    MainActivity.reloadData = true;
 
                     Log.w("drag", "stopped");
 
