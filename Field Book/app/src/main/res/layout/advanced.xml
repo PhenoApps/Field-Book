@@ -22,17 +22,17 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/tips"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="false"
-                    android:scaleX="1.3"
                     android:paddingRight="3dp"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -41,6 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/tips"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -53,17 +54,17 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/nextEmptyPlot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="false"
-                    android:scaleX="1.3"
                     android:paddingRight="3dp"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -72,6 +73,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/nextmissingenable"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -85,8 +87,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/quickGoTo"
@@ -94,8 +96,8 @@
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:paddingRight="3dp"
-                    android:scaleX="1.3"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -104,6 +106,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/quickgoto"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -116,8 +119,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/rangeSound"
@@ -125,8 +128,8 @@
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:paddingRight="3dp"
-                    android:scaleX="1.3"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -135,6 +138,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/rangechime"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -147,8 +151,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/barcodeScan"
@@ -156,8 +160,8 @@
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:paddingRight="3dp"
-                    android:scaleX="1.3"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -166,6 +170,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/barcodescan"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -178,17 +183,17 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/jumpToPlot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="false"
-                    android:scaleX="1.3"
                     android:paddingRight="3dp"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -197,6 +202,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/jumptoplotid"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -209,8 +215,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/dataGrid"
@@ -218,8 +224,8 @@
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:paddingRight="3dp"
-                    android:scaleX="1.3"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -228,6 +234,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/datagrid"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -240,8 +247,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/disableShare"
@@ -249,8 +256,8 @@
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:paddingRight="3dp"
-                    android:scaleX="1.3"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -259,6 +266,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/disableshare"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -271,17 +279,17 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/disableEntryNavLeft"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="false"
-                    android:scaleX="1.3"
                     android:paddingRight="3dp"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -290,6 +298,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/disableentrynavleft"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -302,8 +311,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/disableEntryNavRight"
@@ -311,8 +320,8 @@
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:paddingRight="3dp"
-                    android:scaleX="1.3"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -321,6 +330,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/disableentrynavright"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -333,8 +343,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/cycle"
@@ -342,8 +352,8 @@
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:paddingRight="3dp"
-                    android:scaleX="1.3"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -352,6 +362,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/cycle"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -364,8 +375,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/ignoreExisting"
@@ -373,8 +384,8 @@
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:paddingRight="3dp"
-                    android:scaleX="1.3"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -383,6 +394,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/ignoreentries"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -395,8 +407,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:paddingLeft="3dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="3dp">
 
                 <CheckBox
                     android:id="@+id/useDay"
@@ -404,8 +416,8 @@
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:paddingRight="3dp"
-                    android:scaleX="1.3"
-                    android:scaleY="1.3"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -414,6 +426,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/useday"
+                    android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -423,10 +436,10 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="0"
         android:gravity="center_horizontal"
         android:orientation="horizontal"
-        android:paddingTop="10dp"
-        android:layout_weight="0">
+        android:paddingTop="10dp">
 
         <Button
             android:id="@+id/closeBtn"

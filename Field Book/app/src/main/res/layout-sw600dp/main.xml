@@ -1,446 +1,484 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#FFFFFF"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="vertical">
+    <android.support.v7.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/toolbar"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:fitsSystemWindows="true"
+        android:minHeight="?attr/actionBarSize"
+        app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        android:background="@color/main_primary"/>
 
-        <TextView
-            android:id="@+id/dpi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="high"
-            android:visibility="gone" />
-
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:background="#000000" />
-
-        <LinearLayout
-            android:id="@+id/infoBarLayout"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TableLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <TableRow
-                    android:id="@+id/tableRow1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <Spinner
-                        android:id="@+id/drop1prefix"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/drop1"
-                        android:textColor="@color/s_text"
-                        android:textSize="@dimen/text_size_large"
-                        android:textStyle="bold" />
-
-                    <com.fieldbook.tracker.AutoResizeTextView
-                        android:id="@+id/drop1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="left|center_vertical"
-                        android:ellipsize="none"
-                        android:paddingLeft="10dp"
-                        android:singleLine="true"
-                        android:textColor="#000000"
-                        android:textSize="@dimen/text_size_large"
-                        android:textStyle="bold" />
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <Spinner
-                        android:id="@+id/drop2prefix"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/drop2"
-                        android:textColor="@color/s_text"
-                        android:textSize="@dimen/text_size_large"
-                        android:textStyle="bold" />
-
-                    <com.fieldbook.tracker.AutoResizeTextView
-                        android:id="@+id/drop2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="left|center_vertical"
-                        android:ellipsize="none"
-                        android:paddingLeft="10dp"
-                        android:singleLine="true"
-                        android:textColor="#000000"
-                        android:textSize="@dimen/text_size_large"
-                        android:textStyle="bold" />
-
-                </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <Spinner
-                        android:id="@+id/drop3prefix"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/drop3"
-                        android:textColor="@color/s_text"
-                        android:textSize="@dimen/text_size_large"
-                        android:textStyle="bold" />
-
-                    <com.fieldbook.tracker.AutoResizeTextView
-                        android:id="@+id/drop3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="left|center_vertical"
-                        android:ellipsize="none"
-                        android:paddingLeft="10dp"
-                        android:singleLine="true"
-                        android:textColor="#000000"
-                        android:textSize="@dimen/text_size_large"
-                        android:textStyle="bold" />
-                </TableRow>
-            </TableLayout>
-
-        </LinearLayout>
+    <android.support.v4.widget.DrawerLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/plotTraitLayout"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:stretchColumns="1">
-
-                <TableRow>
-                    <ImageView
-                        android:id="@+id/traitLeft"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_weight=".1"
-                        android:layout_gravity="center_vertical"
-                        android:paddingRight="5dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/l_arrow" />
-
-                    <Spinner
-                        android:id="@+id/traitType"
-                        android:layout_width="0dp"
-                        android:layout_weight=".8"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:gravity="center" />
-
-                    <ImageView
-                        android:id="@+id/traitRight"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_weight=".1"
-                        android:adjustViewBounds="true"
-                        android:paddingLeft="5dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/r_arrow" />
-                </TableRow>
-            </TableLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp">
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/traitDetails"
-                    android:layout_width="fill_parent"
+                    android:id="@+id/dpi"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/traitdetails"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="5dp">
-
-                <TableLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_gravity="center"
-                    android:stretchColumns="1">
-
-                    <TableRow>
-                        <ImageView
-                            android:id="@+id/rangeLeft"
-                            android:layout_width="130dp"
-                            android:layout_height="130dp"
-                            android:adjustViewBounds="true"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/ml_arrow" />
-
-                        <GridLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:columnCount="3"
-                            android:layout_gravity="center"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:id="@+id/rangeName"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:gravity="right"
-                                android:paddingRight="10dp"
-                                android:text="@string/range"
-                                android:textColor="@color/s_text"
-                                android:textSize="@dimen/text_size_xlarge"
-                                android:textStyle="bold" />
-
-                            <EditText
-                                android:id="@+id/range"
-                                android:layout_width="80dp"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:imeOptions="actionDone"
-                                android:inputType="phone"
-                                android:singleLine="true"
-                                android:text=""
-                                android:textColor="#000000"
-                                android:textSize="@dimen/text_size_large"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvRange"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:padding="0dp"
-                                android:singleLine="true"
-                                android:text=""
-                                android:textColor="#000000"
-                                android:textSize="@dimen/text_size_xlarge"
-                                android:textStyle="bold"
-                                android:visibility="gone" />
-
-                            <TextView
-                                android:id="@+id/plotName"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:gravity="right"
-                                android:paddingRight="10dp"
-                                android:text="@string/plot"
-                                android:textColor="@color/s_text"
-                                android:textSize="@dimen/text_size_xlarge"
-                                android:textStyle="bold" />
-
-                            <EditText
-                                android:id="@+id/plot"
-                                android:layout_width="80dp"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:imeOptions="actionDone"
-                                android:inputType="phone"
-                                android:padding="0dp"
-                                android:singleLine="true"
-                                android:text=""
-                                android:textColor="#000000"
-                                android:textSize="@dimen/text_size_large"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvPlot"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:singleLine="true"
-                                android:text=""
-                                android:textColor="#000000"
-                                android:textSize="@dimen/text_size_xlarge"
-                                android:textStyle="bold"
-                                android:visibility="gone" />
-
-                        </GridLayout>
-
-                        <ImageView
-                            android:id="@+id/rangeRight"
-                            android:layout_width="130dp"
-                            android:layout_height="130dp"
-                            android:adjustViewBounds="true"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/mr_arrow" />
-                    </TableRow>
-                </TableLayout>
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/inputLayout"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:minWidth="100dp"
-                android:text="@string/currentvalue"
-                android:textColor="@color/s_text"
-                android:textSize="@dimen/text_size_medium"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/tNum"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center"
-                android:inputType="textNoSuggestions"
-                android:singleLine="true"
-                android:text=""
-                android:textColor="#000000"
-                android:textSize="@dimen/text_size_xlarge"
-                android:textStyle="bold"
-                android:visibility="gone" />
-
-            <EditText
-                android:id="@+id/eNum"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center"
-                android:inputType="phone"
-                android:selectAllOnFocus="true"
-                android:singleLine="true"
-                android:text=""
-                android:textColor="#000000"
-                android:textSize="@dimen/text_size_xlarge"
-                android:textStyle="bold"
-                android:visibility="gone" />
-
-            <EditText
-                android:id="@+id/pNum"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:enabled="false"
-                android:gravity="center"
-                android:inputType="text"
-                android:singleLine="true"
-                android:state_enabled="false"
-                android:text=""
-                android:textColor="#000000"
-                android:textSize="@dimen/text_size_xlarge"
-                android:textStyle="bold"
-                android:visibility="gone" />
-
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:isScrollContainer="false" >
+                    android:text="high"
+                    android:visibility="gone" />
 
                 <LinearLayout
-                    android:id="@+id/traitHolder"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
+                    android:id="@+id/infoBarLayout"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <include
-                        layout="@layout/trait_audio"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                    <TableLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
 
-                    <include
-                        layout="@layout/trait_boolean"
-                        android:layout_width="fill_parent"
-                        android:layout_height="fill_parent" />
+                        <TableRow
+                            android:id="@+id/tableRow1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
 
-                    <include
-                        layout="@layout/trait_categorical"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                            <Spinner
+                                android:id="@+id/drop1prefix"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/drop1"
+                                android:textColor="@color/s_text"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
 
-                    <include
-                        layout="@layout/trait_date"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                            <com.fieldbook.tracker.AutoResizeTextView
+                                android:id="@+id/drop1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left|center_vertical"
+                                android:ellipsize="none"
+                                android:paddingLeft="10dp"
+                                android:singleLine="true"
+                                android:textColor="#000000"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
+                        </TableRow>
 
-                    <include
-                        layout="@layout/trait_numeric"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                        <TableRow
+                            android:id="@+id/tableRow2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
 
-                    <include
-                        layout="@layout/trait_percent"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                            <Spinner
+                                android:id="@+id/drop2prefix"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/drop2"
+                                android:textColor="@color/s_text"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
 
-                    <include
-                        layout="@layout/trait_text"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                            <com.fieldbook.tracker.AutoResizeTextView
+                                android:id="@+id/drop2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left|center_vertical"
+                                android:ellipsize="none"
+                                android:paddingLeft="10dp"
+                                android:singleLine="true"
+                                android:textColor="#000000"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
 
-                    <include
-                        layout="@layout/trait_photo"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                        </TableRow>
 
-                    <include
-                        layout="@layout/trait_counter"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                        <TableRow
+                            android:id="@+id/tableRow3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
 
-                    <include
-                        layout="@layout/trait_rustrating"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                            <Spinner
+                                android:id="@+id/drop3prefix"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/drop3"
+                                android:textColor="@color/s_text"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
+
+                            <com.fieldbook.tracker.AutoResizeTextView
+                                android:id="@+id/drop3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left|center_vertical"
+                                android:ellipsize="none"
+                                android:paddingLeft="10dp"
+                                android:singleLine="true"
+                                android:textColor="#000000"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
+                        </TableRow>
+                    </TableLayout>
 
                 </LinearLayout>
-            </ScrollView>
 
-            <Button
-                android:id="@+id/clearBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="60dp"
-                android:layout_gravity="center_horizontal"
-                android:background="@android:drawable/btn_default"
-                android:gravity="center"
-                android:minWidth="130dp"
-                android:text="@string/clear"
-                android:textColor="#000000"
-                android:textSize="@dimen/text_size_large"
-                android:textStyle="bold"
-                android:visibility="gone" />
+                <LinearLayout
+                    android:id="@+id/plotTraitLayout"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="10dp">
+
+                    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:stretchColumns="1">
+
+                        <TableRow>
+                            <ImageView
+                                android:id="@+id/traitLeft"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_weight=".1"
+                                android:layout_gravity="center_vertical"
+                                android:paddingRight="5dp"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/l_arrow" />
+
+                            <Spinner
+                                android:id="@+id/traitType"
+                                android:layout_width="0dp"
+                                android:layout_weight=".8"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:gravity="center" />
+
+                            <ImageView
+                                android:id="@+id/traitRight"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_weight=".1"
+                                android:adjustViewBounds="true"
+                                android:paddingLeft="5dp"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/r_arrow" />
+                        </TableRow>
+                    </TableLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp">
+
+                        <TextView
+                            android:id="@+id/traitDetails"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/traitdetails"
+                            android:textColor="#000000"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="5dp">
+
+                        <TableLayout
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:layout_gravity="center"
+                            android:stretchColumns="1">
+
+                            <TableRow>
+                                <ImageView
+                                    android:id="@+id/rangeLeft"
+                                    android:layout_width="130dp"
+                                    android:layout_height="130dp"
+                                    android:adjustViewBounds="true"
+                                    android:scaleType="fitCenter"
+                                    android:src="@drawable/ml_arrow" />
+
+                                <GridLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:columnCount="3"
+                                    android:layout_gravity="center"
+                                    android:orientation="horizontal">
+
+                                    <TextView
+                                        android:id="@+id/rangeName"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="center_vertical"
+                                        android:gravity="right"
+                                        android:paddingRight="10dp"
+                                        android:text="@string/range"
+                                        android:textColor="@color/s_text"
+                                        android:textSize="@dimen/text_size_xlarge"
+                                        android:textStyle="bold" />
+
+                                    <EditText
+                                        android:id="@+id/range"
+                                        android:layout_width="80dp"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:imeOptions="actionDone"
+                                        android:inputType="phone"
+                                        android:singleLine="true"
+                                        android:text=""
+                                        android:textColor="#000000"
+                                        android:textSize="@dimen/text_size_large"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:id="@+id/tvRange"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:padding="0dp"
+                                        android:singleLine="true"
+                                        android:text=""
+                                        android:textColor="#000000"
+                                        android:textSize="@dimen/text_size_xlarge"
+                                        android:textStyle="bold"
+                                        android:visibility="gone" />
+
+                                    <TextView
+                                        android:id="@+id/plotName"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="center_vertical"
+                                        android:gravity="right"
+                                        android:paddingRight="10dp"
+                                        android:text="@string/plot"
+                                        android:textColor="@color/s_text"
+                                        android:textSize="@dimen/text_size_xlarge"
+                                        android:textStyle="bold" />
+
+                                    <EditText
+                                        android:id="@+id/plot"
+                                        android:layout_width="80dp"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:imeOptions="actionDone"
+                                        android:inputType="phone"
+                                        android:padding="0dp"
+                                        android:singleLine="true"
+                                        android:text=""
+                                        android:textColor="#000000"
+                                        android:textSize="@dimen/text_size_large"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:id="@+id/tvPlot"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:singleLine="true"
+                                        android:text=""
+                                        android:textColor="#000000"
+                                        android:textSize="@dimen/text_size_xlarge"
+                                        android:textStyle="bold"
+                                        android:visibility="gone" />
+
+                                </GridLayout>
+
+                                <ImageView
+                                    android:id="@+id/rangeRight"
+                                    android:layout_width="130dp"
+                                    android:layout_height="130dp"
+                                    android:adjustViewBounds="true"
+                                    android:scaleType="fitCenter"
+                                    android:src="@drawable/mr_arrow" />
+                            </TableRow>
+                        </TableLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/inputLayout"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:minWidth="100dp"
+                        android:text="@string/currentvalue"
+                        android:textColor="@color/s_text"
+                        android:textSize="@dimen/text_size_medium"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/tNum"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center"
+                        android:inputType="textNoSuggestions"
+                        android:singleLine="true"
+                        android:paddingLeft = "10dp"
+                        android:paddingRight="10dp"
+                        android:text=""
+                        android:textColor="#000000"
+                        android:textSize="@dimen/text_size_xlarge"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <EditText
+                        android:id="@+id/eNum"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center"
+                        android:inputType="phone"
+                        android:selectAllOnFocus="true"
+                        android:singleLine="true"
+                        android:paddingLeft = "10dp"
+                        android:paddingRight="10dp"
+                        android:text=""
+                        android:textColor="#000000"
+                        android:textSize="@dimen/text_size_xlarge"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <EditText
+                        android:id="@+id/pNum"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:enabled="false"
+                        android:gravity="center"
+                        android:paddingLeft = "10dp"
+                        android:paddingRight="10dp"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:state_enabled="false"
+                        android:text=""
+                        android:textColor="#000000"
+                        android:textSize="@dimen/text_size_xlarge"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <ScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:isScrollContainer="false" >
+
+                        <LinearLayout
+                            android:id="@+id/traitHolder"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <include
+                                layout="@layout/trait_audio"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
+                            <include
+                                layout="@layout/trait_boolean"
+                                android:layout_width="fill_parent"
+                                android:layout_height="fill_parent" />
+
+                            <include
+                                layout="@layout/trait_categorical"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
+                            <include
+                                layout="@layout/trait_date"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
+                            <include
+                                layout="@layout/trait_numeric"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
+                            <include
+                                layout="@layout/trait_percent"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
+                            <include
+                                layout="@layout/trait_text"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
+                            <include
+                                layout="@layout/trait_photo"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
+                            <include
+                                layout="@layout/trait_counter"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
+                            <include
+                                layout="@layout/trait_rustrating"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
+                        </LinearLayout>
+                    </ScrollView>
+
+                    <Button
+                        android:id="@+id/clearBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="60dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="@android:drawable/btn_default"
+                        android:gravity="center"
+                        android:minWidth="130dp"
+                        android:text="@string/clear"
+                        android:textColor="#000000"
+                        android:textSize="@dimen/text_size_large"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nvView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            app:headerLayout="@layout/nav_header"
+            app:theme="@style/NavigationDrawerTheme"
+            android:background="@android:color/white"
+            app:menu="@menu/drawer_view" />
+    </android.support.v4.widget.DrawerLayout>
 
 </LinearLayout>

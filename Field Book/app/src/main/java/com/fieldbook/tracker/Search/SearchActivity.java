@@ -77,6 +77,11 @@ public class SearchActivity extends Activity {
         Button clear = (Button) findViewById(R.id.clearBtn);
         Button add = (Button) findViewById(R.id.addBtn);
 
+        start.setTransformationMethod(null);
+        close.setTransformationMethod(null);
+        clear.setTransformationMethod(null);
+        add.setTransformationMethod(null);
+
         start.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
@@ -187,7 +192,7 @@ public class SearchActivity extends Activity {
 
                     final SearchData[] data = MainActivity.dt.getRangeBySql(sql);
 
-                    final Dialog resultDialog = new Dialog(SearchActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+                    final Dialog resultDialog = new Dialog(SearchActivity.this, R.style.AppDialog);
                     resultDialog.setContentView(R.layout.searchlist);
                     resultDialog.setTitle(getString(R.string.results));
                     resultDialog.setCancelable(true);
@@ -207,6 +212,7 @@ public class SearchActivity extends Activity {
 
                     ListView myList = (ListView) resultDialog.findViewById(R.id.myList);
                     Button closeBtn = (Button) resultDialog.findViewById(R.id.closeBtn);
+                    closeBtn.setTransformationMethod(null);
 
                     myList.setOnItemClickListener(new OnItemClickListener() {
 

@@ -3,8 +3,9 @@
 
     <color name="s_text">#000000</color>
     <color name="s_grey">#f0f0f0</color>
-    
-    <color name="help_background">#DD000000</color>
-    <color name="holo_blue_light">#ff33b5e5</color>
-    
+
+    <color name="main_primary">#8BC34A</color>
+    <color name="main_primaryDark">#689F38</color>
+    <color name="main_colorAccent">#795548</color>
+
 </resources>

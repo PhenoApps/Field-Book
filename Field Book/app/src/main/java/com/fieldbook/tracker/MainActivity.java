@@ -30,6 +30,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
@@ -96,7 +102,7 @@ import java.util.TimerTask;
 /**
  * All main screen logic resides here
  */
-public class MainActivity extends Activity implements OnClickListener {
+public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     /**
      * Other variables
@@ -244,6 +250,17 @@ public class MainActivity extends Activity implements OnClickListener {
     LinearLayout traitAudio;
     LinearLayout traitRustRating;
 
+    /**
+     * Test area
+     */
+
+    private DrawerLayout mDrawer;
+    private Toolbar toolbar;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private DrawerLayout mDrawerLayout;
+    private String mActivityTitle;
+    NavigationView nvDrawer;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -267,6 +284,7 @@ public class MainActivity extends Activity implements OnClickListener {
             dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "field_import");
             dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "resources");
             dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "trait");
+            dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
 
             Intent intent = new Intent();
             intent.setClassName(MainActivity.this,
@@ -283,10 +301,32 @@ public class MainActivity extends Activity implements OnClickListener {
             intent.setClass(MainActivity.this, ChangelogActivity.class);
             startActivity(intent);
         }
+
+
     }
 
     private void loadScreen() {
         setContentView(R.layout.main);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().getThemedContext();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        mActivityTitle = getTitle().toString();
+
+        nvDrawer = (NavigationView) findViewById(R.id.nvView);
+
+        // Setup drawer view
+
+        setupDrawerContent(nvDrawer);
+        setupDrawer();
 
         // If the app is just starting up, we must always allow refreshing of
         // data onscreen
@@ -488,7 +528,7 @@ public class MainActivity extends Activity implements OnClickListener {
                     if (newTraits != null & currentTrait != null)
                         newTraits.remove(currentTrait.trait);
                 }
-                tNum.setSelection(tNum.getText().length());
+                //tNum.setSelection(tNum.getText().length());
 
             }
 
@@ -1366,6 +1406,80 @@ public class MainActivity extends Activity implements OnClickListener {
                 traitType.setSelection(pos);
             }
         });
+    }
+
+    private void setupDrawer() {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                R.string.drawer_open, R.string.drawer_close) {
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                TextView person = (TextView) findViewById(R.id.nameLabel);
+                person.setText(ep.getString("FirstName","") + " " + ep.getString("LastName",""));
+
+            }
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+            }
+
+        };
+
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+    }
+
+    private void setupDrawerContent(NavigationView navigationView) {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        selectDrawerItem(menuItem);
+                        return true;
+                    }
+                });
+    }
+
+    public void selectDrawerItem(MenuItem menuItem) {
+
+        switch(menuItem.getItemId()) {
+
+            case R.id.nav_settings:
+                Intent a = new Intent(this, ConfigActivity.class);
+                startActivity(a);
+                break;
+
+            case R.id.nav_fields:
+                Intent b = new Intent(this, ConfigActivity.class);
+                b.putExtra("dialog","fields");
+                startActivity(b);
+                break;
+
+            case R.id.nav_traits:
+                Intent c = new Intent(this, TraitEditorActivity.class);
+                startActivity(c);
+                break;
+
+            case R.id.nav_person:
+                Intent d = new Intent(this, ConfigActivity.class);
+                d.putExtra("dialog", "person");
+                startActivity(d);
+                break;
+
+            case R.id.nav_location:
+                Intent e = new Intent(this, ConfigActivity.class);
+                e.putExtra("dialog", "location");
+                startActivity(e);
+                break;
+
+            case R.id.nav_language:
+                Intent f = new Intent(this, ConfigActivity.class);
+                f.putExtra("dialog", "language");
+                startActivity(f);
+                break;
+        }
+
+        mDrawer.closeDrawers();
     }
 
     Runnable mActionRight = new Runnable() {
@@ -3061,7 +3175,6 @@ public class MainActivity extends Activity implements OnClickListener {
         // If reload data is true, it means there was an import operation, and
         // the screen should refresh
         if (reloadData) {
-
             reloadData = false;
             partialReload = false;
 
@@ -3241,22 +3354,30 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        switch (item.getItemId()) {
-            case R.id.settings:
-                try {
-                    TutorialMainActivity.thisActivity.finish();
-                } catch (Exception e) {
-                    Log.e(TAG,"" + e.getMessage());
-                }
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
 
-                intent.setClassName(MainActivity.this,
-                        ConfigActivity.class.getName());
-                startActivity(intent);
-                break;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawer.openDrawer(GravityCompat.START);
+                return true;
 
             case R.id.search:
                 try {
@@ -3316,7 +3437,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     private void moveToPlotID() {
-        goToId = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        goToId = new Dialog(this, R.style.AppDialog);
         goToId.setTitle(getString(R.string.jumptoplotidbutton));
         goToId.setContentView(R.layout.gotobarcode);
 
@@ -3759,7 +3880,7 @@ public class MainActivity extends Activity implements OnClickListener {
     }
 
     private void showSummary() {
-        final Dialog summaryDialog = new Dialog(MainActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+        final Dialog summaryDialog = new Dialog(MainActivity.this, R.style.AppDialog);
         summaryDialog.setTitle(getString(R.string.mapsummary));
         summaryDialog.setContentView(R.layout.summary);
 

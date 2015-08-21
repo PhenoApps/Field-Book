@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="ImportSecondName">plot</string>
+    <int name="UpdateVersion" value="300" />
+    <boolean name="ImportFieldFinished" value="true" />
+    <string name="FieldFile">field_sample</string>
+    <string name="ImportFirstName">row</string>
+    <string name="DROP1">plot_id</string>
+    <boolean name="TipsConfigured" value="true" />
+    <boolean name="CreateTraitFinished" value="true" />
+    <string name="DROP2">seed_name</string>
+    <string name="ImportUniqueName">plot_id</string>
+</map>

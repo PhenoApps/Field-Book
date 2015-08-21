@@ -229,11 +229,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
+                android:background="@android:drawable/btn_default"
                 android:minWidth="85dp"
                 android:text="@string/clear"
-                android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
                 android:textStyle="bold" />
 

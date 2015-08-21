@@ -1,3 +1,11 @@
+36
+Updated app to be compatible with phones
+Updated app to mostly match material design guidelines
+Added drag and drop to traits
+Added navigation drawer to main screen
+Added ability to automatically load sample data on first install
+Fixed a bug where cursor would move to the end of the text whenever editing text trait data
+
 35
 Fixed a bug that caused update check to fail
 

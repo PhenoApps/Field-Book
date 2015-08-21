@@ -58,7 +58,7 @@ public class DatagridActivity extends Activity {
 
         gridView = (GridView) findViewById(R.id.tableLayout1);
         Button close = (Button) findViewById(R.id.closeBtn);
-
+        close.setTransformationMethod(null);
         gridViewTable();
 
         close.setOnClickListener(new OnClickListener() {

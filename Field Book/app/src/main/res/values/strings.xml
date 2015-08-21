@@ -20,6 +20,7 @@
     <string name="currentvalue">Current value</string>
     <string name="traitdetails">Trait details</string>
     <string name="nodata">No data</string>
+    <string name="theme">Theme</string>
 
     <!-- Trait layouts and messages -->
     <string name="minusday">-1</string>
@@ -48,6 +49,8 @@
     <string name="advanced">Advanced Settings</string>
     <string name="language">Language</string>
     <string name="updatemsg">Changelog</string>
+    <string name="sampledata">Sample Data</string>
+    <string name="loadsampledata">Would you like to load the sample data provided?</string>
 
     <!-- Traits -->
     <string name="traitname">Trait name</string>
@@ -260,6 +263,10 @@
     <string name="morethan">is more than</string>
     <string name="lessthan">is less than</string>
     <string name="searchempty">Search did not return results</string>
+
+    <!-- Strings being used for dev -->
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
 
 
     <!-- Strings below this line have not been integrated into the app -->

@@ -5,9 +5,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -19,8 +17,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 
@@ -59,8 +55,9 @@ public class ChangelogActivity extends Activity {
 
         setContentView(R.layout.changelog);
         setTitle(R.string.updatemsg);
-        params = getWindow().getAttributes();
 
+        params = getWindow().getAttributes();
+        params.width = LinearLayout.LayoutParams.MATCH_PARENT;
         this.getWindow().setAttributes(params);
 
         parent = (LinearLayout) findViewById(R.id.data);
@@ -103,12 +100,12 @@ public class ChangelogActivity extends Activity {
                 spacer.setTextSize(5);
                 View ruler = new View(this);
 
-                ruler.setBackgroundColor(0xff33b5e5);
-                header.setTextAppearance(getApplicationContext(), R.style.Dialog_SectionTitles);
-                content.setTextAppearance(getApplicationContext(), R.style.Dialog_SectionSubtitles);
+                ruler.setBackgroundColor(getResources().getColor(R.color.main_colorAccent));
+                header.setTextAppearance(getApplicationContext(), R.style.ChangelogTitles);
+                content.setTextAppearance(getApplicationContext(), R.style.ChangelogContent);
 
-                header.setTextSize(TypedValue.COMPLEX_UNIT_SP,(int) getResources().getDimension(R.dimen.text_size_small)/ getResources().getDisplayMetrics().density);
-                content.setTextSize(TypedValue.COMPLEX_UNIT_SP,(int) getResources().getDimension(R.dimen.text_size_small)/ getResources().getDisplayMetrics().density);
+                //header.setTextSize(TypedValue.COMPLEX_UNIT_SP,(int) getResources().getDimension(R.dimen.text_size_small)/ getResources().getDisplayMetrics().density);
+                //content.setTextSize(TypedValue.COMPLEX_UNIT_SP,(int) getResources().getDimension(R.dimen.text_size_small)/ getResources().getDisplayMetrics().density);
 
                 if (line.length() == 0) {
                     curVersionName = null;

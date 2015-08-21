@@ -10,13 +10,13 @@
         android:id="@+id/database"
         android:title="@string/dbformat"
         android:icon="@drawable/ic_action_storage"
-        android:showAsAction="ifRoom|withText" />"
+        android:showAsAction="ifRoom" />"
 
     <item
         android:id="@+id/about"
         android:title="@string/about"
         android:icon="@drawable/ic_action_about"
-        android:showAsAction="ifRoom|withText" />"
+        android:showAsAction="ifRoom" />"
 
 	</menu>
 

@@ -194,7 +194,7 @@ public class FileExploreActivity extends ListActivity {
 
                 // put the image on the text view
                 textView.setCompoundDrawablesWithIntrinsicBounds(
-                        fileList[position].icon, 0, 0, 0);
+                        fileList[position].icon, 0, 0, 0); //TODO fix this for phones (text too big and icons are terrible)
 
                 // add margin between image and text (support various screen
                 // densities)

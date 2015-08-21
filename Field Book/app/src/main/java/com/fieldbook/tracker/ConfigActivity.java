@@ -19,6 +19,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,7 +40,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
@@ -68,7 +71,7 @@ import jxl.WorkbookSettings;
 /**
  * Settings Screen
  */
-public class ConfigActivity extends Activity {
+public class ConfigActivity extends AppCompatActivity {
 
     Handler mHandler = new Handler();
 
@@ -140,6 +143,12 @@ public class ConfigActivity extends Activity {
 
     private Menu systemMenu;
 
+    private DrawerLayout mDrawer;
+    private Toolbar toolbar;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private DrawerLayout mDrawerLayout;
+    private String mActivityTitle;
+
     @Override
     public void onDestroy() {
         try {
@@ -198,20 +207,24 @@ public class ConfigActivity extends Activity {
         loadScreen();
 
         helpActive = false;
+
+        checkIntent();
     }
 
     private void loadScreen() {
-        if(getActionBar()!=null) {
-            getActionBar().setHomeButtonEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        setContentView(R.layout.config_activity);
 
-        FrameLayout mFrame = new FrameLayout(this);
-        mFrame.addView(LayoutInflater.from(getBaseContext()).inflate(R.layout.config, null));
-        setContentView(mFrame);
+        // Toolbar
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().getThemedContext();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         // Advanced Settings
-        advancedDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        advancedDialog = new Dialog(this, R.style.AppDialog);
         advancedDialog.setTitle(getString(R.string.advanced));
         advancedDialog.setContentView(R.layout.advanced);
 
@@ -399,7 +412,7 @@ public class ConfigActivity extends Activity {
         });
 
         // Export Field book
-        saveDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        saveDialog = new Dialog(this, R.style.AppDialog);
         saveDialog.setTitle(getString(R.string.export));
         saveDialog.setContentView(R.layout.savefile);
 
@@ -486,7 +499,7 @@ public class ConfigActivity extends Activity {
         });
 
         //setup
-        setupDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        setupDialog = new Dialog(this, R.style.AppDialog);
         setupDialog.setTitle(getString(R.string.setup));
         setupDialog.setContentView(R.layout.config);
 
@@ -500,47 +513,14 @@ public class ConfigActivity extends Activity {
 
         // This is the list of items shown on the settings screen itself
         setupList = (ListView) setupDialog.findViewById(R.id.myList);
-
         Button setupCloseBtn = (Button) setupDialog.findViewById(R.id.closeBtn);
-
         setupCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 setupDialog.dismiss();
             }
         });
 
-        // To configure first name, last name
-        personDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
-        personDialog.setTitle(getString(R.string.personsetup));
-        personDialog.setContentView(R.layout.person);
-
-        personDialog.setCancelable(true);
-        personDialog.setCanceledOnTouchOutside(true);
-
-        final EditText firstName = (EditText) personDialog
-                .findViewById(R.id.firstName);
-        final EditText lastName = (EditText) personDialog
-                .findViewById(R.id.lastName);
-
-        Button yesButton = (Button) personDialog.findViewById(R.id.saveBtn);
-
-        yesButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-                Editor e = ep.edit();
-
-                e.putString("FirstName", firstName.getText().toString());
-                e.putString("LastName", lastName.getText().toString());
-
-                e.apply();
-
-                updateSetupList();
-
-                personDialog.dismiss();
-            }
-        });
-
-        fieldDialog2 = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        fieldDialog2 = new Dialog(this, R.style.AppDialog);
         fieldDialog2.setTitle(getString(R.string.fields));
         fieldDialog2.setContentView(R.layout.config);
 
@@ -557,10 +537,6 @@ public class ConfigActivity extends Activity {
         });
 
         ListView settingsList = (ListView) findViewById(R.id.myList);
-
-        Button mainCloseBtn = (Button) findViewById(R.id.closeBtn);
-
-        mainCloseBtn.setVisibility(View.GONE);
 
         String[] items2 = new String[]{ getString(R.string.fields),
                 getString(R.string.traits), getString(R.string.setup),getString(R.string.export), getString(R.string.advanced),
@@ -637,6 +613,7 @@ public class ConfigActivity extends Activity {
             ed.putBoolean("TipsConfigured", true);
             ed.apply();
             showTipsDialog();
+            loadSampleDataDialog();
         }
     }
 
@@ -715,6 +692,30 @@ public class ConfigActivity extends Activity {
         alert.show();
     }
 
+    private void loadSampleDataDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+
+        builder.setTitle(getString(R.string.sampledata));
+        builder.setMessage(getString(R.string.loadsampledata));
+
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // Load database with sample data
+                mChosenFile = "sample.db";
+                mHandler.post(importDB);
+            }
+        });
+
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
     // Only used for truncating lat long values
     private String truncateDecimalString(String v) {
         int count = 0;
@@ -752,7 +753,7 @@ public class ConfigActivity extends Activity {
         }
 
         final Dialog aboutDialog = new Dialog(ConfigActivity.this,
-                android.R.style.Theme_Holo_Light_Dialog);
+                R.style.AppDialog);
 
         aboutDialog.setTitle(R.string.about);
 
@@ -1177,7 +1178,7 @@ public class ConfigActivity extends Activity {
 
     private void showLanguageDialog() {
         final Dialog languageDialog = new Dialog(ConfigActivity.this,
-                android.R.style.Theme_Holo_Light_Dialog);
+                R.style.AppDialog);
         languageDialog.setTitle(getString(R.string.language));
         languageDialog.setContentView(R.layout.config);
 
@@ -1444,11 +1445,43 @@ public class ConfigActivity extends Activity {
     }
 
     private void showPersonDialog() {
+        // To configure first name, last name
+        personDialog = new Dialog(this, R.style.AppDialog);
+        personDialog.setTitle(getString(R.string.personsetup));
+        personDialog.setContentView(R.layout.person);
+
+        personDialog.setCancelable(true);
+        personDialog.setCanceledOnTouchOutside(true);
+
+        final EditText firstName = (EditText) personDialog
+                .findViewById(R.id.firstName);
+        final EditText lastName = (EditText) personDialog
+                .findViewById(R.id.lastName);
+
+        Button yesButton = (Button) personDialog.findViewById(R.id.saveBtn);
+
+        yesButton.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View arg0) {
+                Editor e = ep.edit();
+
+                e.putString("FirstName", firstName.getText().toString());
+                e.putString("LastName", lastName.getText().toString());
+
+                e.apply();
+
+                if(setupDialog.isShowing()) {
+                    updateSetupList();
+                }
+
+                personDialog.dismiss();
+            }
+        });
         personDialog.show();
     }
 
     private void showLocationDialog() {
-        locationDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        locationDialog = new Dialog(this, R.style.AppDialog);
         locationDialog.setTitle(getString(R.string.locationsetup));
         locationDialog.setContentView(R.layout.location);
 
@@ -1490,7 +1523,9 @@ public class ConfigActivity extends Activity {
                 Editor e = ep.edit();
                 e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
                 e.apply();
-                updateSetupList();
+                if(setupDialog.isShowing()) {
+                    updateSetupList();
+                }
                 locationDialog.dismiss();
             }
         });
@@ -1533,7 +1568,7 @@ public class ConfigActivity extends Activity {
     }
 
     private void showTrait3Dialog(final String[] traits) {
-        final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+        final Dialog dialog = new Dialog(ConfigActivity.this, R.style.AppDialog);
 
         dialog.setTitle(getString(R.string.drop3) + ": " + ep.getString("DROP3", ""));
         dialog.setContentView(R.layout.config);
@@ -1571,7 +1606,7 @@ public class ConfigActivity extends Activity {
     }
 
     private void showTrait2Dialog(final String[] traits) {
-        final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+        final Dialog dialog = new Dialog(ConfigActivity.this, R.style.AppDialog);
 
         dialog.setTitle(getString(R.string.drop2) + ": " + ep.getString("DROP2", ""));
         dialog.setContentView(R.layout.config);
@@ -1609,7 +1644,7 @@ public class ConfigActivity extends Activity {
     }
 
     private void showTrait1Dialog(final String[] traits) {
-        final Dialog dialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+        final Dialog dialog = new Dialog(ConfigActivity.this, R.style.AppDialog);
 
         dialog.setTitle(getString(R.string.drop1) + ": " + ep.getString("DROP1", ""));
         dialog.setContentView(R.layout.config);
@@ -1760,7 +1795,7 @@ public class ConfigActivity extends Activity {
     }
 
     private void importDialog(String[] columns) {
-        importFieldDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        importFieldDialog = new Dialog(this, R.style.AppDialog);
         importFieldDialog.setTitle(getString(R.string.importfields));
         importFieldDialog.setContentView(R.layout.importdialog);
 
@@ -2062,13 +2097,43 @@ public class ConfigActivity extends Activity {
         }
     }
 
+    private void checkIntent() {
+        Bundle extras = getIntent().getExtras();
+        String dialog="";
+
+        if(extras != null) {
+            dialog = extras.getString("dialog");
+        }
+
+        if(dialog != null) {
+            if(dialog.equals("person")) {
+                showPersonDialog();
+            }
+
+            if(dialog.equals("location")) {
+                showLocationDialog();
+            }
+
+            if(dialog.equals("fields")) {
+                Intent intent = new Intent();
+                intent.setClassName(ConfigActivity.this,
+                        FileExploreActivity.class.getName());
+                intent.putExtra("path", Constants.FIELDIMPORTPATH);
+                startActivityForResult(intent, 1);
+            }
+
+            if(dialog.equals("language")) {
+                showLanguageDialog();
+            }
+        }
+    }
+
     private void showDatabaseDialog() {
         String[] items = new String[3];
         items[0] = getString(R.string.dbexport);
         items[1] = getString(R.string.dbimport);
         items[2] = getString(R.string.dbreset);
-
-        final Dialog chooseBackupDialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+        final Dialog chooseBackupDialog = new Dialog(ConfigActivity.this, R.style.AppDialog);
         chooseBackupDialog.setTitle(getString(R.string.dbbackup));
         chooseBackupDialog.setContentView(R.layout.config);
 
@@ -2125,7 +2190,7 @@ public class ConfigActivity extends Activity {
     }
 
     private void showDatabaseExportDialog() {
-        dbSaveDialog = new Dialog(ConfigActivity.this, android.R.style.Theme_Holo_Light_Dialog);
+        dbSaveDialog = new Dialog(ConfigActivity.this, R.style.AppDialog);
         dbSaveDialog.setTitle(getString(R.string.dbbackup));
         dbSaveDialog.setContentView(R.layout.savedb);
 

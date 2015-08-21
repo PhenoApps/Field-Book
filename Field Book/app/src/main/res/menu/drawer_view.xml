@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_settings"
+            android:title="@string/settings"
+            android:icon="@drawable/ic_settings"/>
+
+        <item
+            android:id="@+id/nav_fields"
+            android:title="@string/fields"
+            android:icon="@drawable/ic_fields"/>
+
+        <item
+            android:id="@+id/nav_traits"
+            android:title="@string/traits"
+            android:icon="@drawable/ic_list"/>
+
+    </group>
+
+
+    <item android:title="@string/setup">
+        <menu>
+            <item
+                android:id="@+id/nav_person"
+                android:title="@string/person"
+                android:icon="@drawable/ic_person"/>
+
+            <item
+                android:id="@+id/nav_location"
+                android:title="@string/location"
+                android:icon="@drawable/ic_my_location"/>
+
+            <item
+                android:id="@+id/nav_language"
+                android:title="@string/language"
+                android:icon="@drawable/ic_translate"/>
+
+        </menu>
+    </item>
+
+</menu>

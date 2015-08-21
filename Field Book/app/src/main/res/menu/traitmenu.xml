@@ -6,19 +6,14 @@
         android:showAsAction="always"
         android:title="@string/tutorial" />
     <item
-        android:id="@+id/addTrait"
-        android:icon="@drawable/ic_action_new"
-        android:showAsAction="always"
-        android:title="@string/addtrait" />
-    <item
         android:id="@+id/sortTrait"
         android:icon="@drawable/ic_action_sort_by_size"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/sort" />
     <item
         android:id="@+id/deleteTrait"
         android:icon="@drawable/ic_action_discard"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/deletealltraits" />
     <item
         android:id="@+id/toggleTrait"
@@ -26,9 +21,14 @@
         android:showAsAction="always"
         android:title="@string/visibility" />
     <item
+        android:id="@+id/addTrait"
+        android:icon="@drawable/ic_action_new"
+        android:showAsAction="always"
+        android:title="@string/addtrait" />
+    <item
         android:id="@+id/importexport"
         android:icon="@drawable/ic_action_import_export"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/importexport" />
 </menu>
 

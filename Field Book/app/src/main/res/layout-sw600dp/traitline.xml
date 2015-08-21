@@ -2,9 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/listmimic"
     android:gravity="center_vertical"
     android:orientation="horizontal"
+
+    android:background="#FFFFFF"
     android:paddingBottom="4dp"
     android:paddingTop="4dp">
 
@@ -16,7 +17,7 @@
         android:layout_centerVertical="true"
         android:paddingLeft="5dp"
         android:paddingTop="3dp"
-        android:src="@drawable/ic_action_overflow" />
+        android:src="@drawable/ic_more_vert" />
 
     <View
         android:id="@+id/spacer1"
@@ -79,12 +80,12 @@
 
     <ImageView
         android:id="@+id/dragSort"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:background="#FFFFFF"
         android:padding="3dp"
-        android:src="@drawable/drag_reorder" />
+        android:src="@drawable/ic_reorder" />
 
 </RelativeLayout>

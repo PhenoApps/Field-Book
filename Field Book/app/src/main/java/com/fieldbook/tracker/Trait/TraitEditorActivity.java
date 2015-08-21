@@ -16,6 +16,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
@@ -29,6 +31,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -61,7 +64,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class TraitEditorActivity extends Activity {
+public class TraitEditorActivity extends AppCompatActivity {
 
     private static Handler mHandler = new Handler();
 
@@ -108,6 +111,8 @@ public class TraitEditorActivity extends Activity {
 
     private Menu systemMenu;
 
+    private Toolbar toolbar;
+
     @Override
     public void onDestroy() {
         try {
@@ -149,7 +154,15 @@ public class TraitEditorActivity extends Activity {
         getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
                 .getDisplayMetrics());
 
-        setContentView(R.layout.draglist);
+        setContentView(R.layout.draglist_activity);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().getThemedContext();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         //Button mainCloseBtn = (Button) findViewById(R.id.closeBtn);
         //mainCloseBtn.setVisibility(View.GONE);
@@ -320,7 +333,7 @@ public class TraitEditorActivity extends Activity {
             }
         });
 
-        createDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        createDialog = new Dialog(this, R.style.AppDialog);
         createDialog.setContentView(R.layout.trait);
         createDialog.setTitle(getString(R.string.addtrait));
         createDialog.setCancelable(true);
@@ -576,6 +589,13 @@ public class TraitEditorActivity extends Activity {
                 createDialog.dismiss();
             }
         });
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.newTrait);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                showCreateTraitDialog();
+            }
+        });
     }
 
     // Helper function to see if any fields have been edited
@@ -806,10 +826,6 @@ public class TraitEditorActivity extends Activity {
                 showDeleteTraitDialog();
                 break;
 
-            case R.id.addTrait:
-                showCreateTraitDialog();
-                break;
-
             case R.id.sortTrait:
                 sortDialog();
                 break;
@@ -818,11 +834,16 @@ public class TraitEditorActivity extends Activity {
                 importExportDialog();
                 break;
 
+            case R.id.addTrait:
+                showCreateTraitDialog();
+                break;
+
             case R.id.toggleTrait:
                 changeAllVisibility();
                 break;
 
             case android.R.id.home:
+                MainActivity.reloadData = true;
                 finish();
                 break;
         }
@@ -853,7 +874,7 @@ public class TraitEditorActivity extends Activity {
 
     private void importExportDialog() {
         final Dialog importExport = new Dialog(TraitEditorActivity.this,
-                android.R.style.Theme_Holo_Light_Dialog);
+                R.style.AppDialog);
         importExport.setTitle(getString(R.string.importexport));
         importExport.setContentView(R.layout.config);
 
@@ -909,7 +930,7 @@ public class TraitEditorActivity extends Activity {
         }
 
         final Dialog sortDialog = new Dialog(TraitEditorActivity.this,
-                android.R.style.Theme_Holo_Light_Dialog);
+                R.style.AppDialog);
         sortDialog.setTitle(getString(R.string.sort));
         sortDialog.setContentView(R.layout.config);
 
@@ -1002,7 +1023,7 @@ public class TraitEditorActivity extends Activity {
     }
 
     private void showExportDialog() {
-        final Dialog exportDialog = new Dialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        final Dialog exportDialog = new Dialog(this, R.style.AppDialog);
         exportDialog.setTitle(getString(R.string.export));
         exportDialog.setContentView(R.layout.savedb);
 
@@ -1103,6 +1124,11 @@ public class TraitEditorActivity extends Activity {
         prepareFields(0);
     }
 
+    public void onBackPressed(){
+        MainActivity.reloadData = true;
+        finish();
+    }
+
     public void showImportDialog() {
         Intent intent = new Intent();
         intent.setClassName(thisActivity,
@@ -1138,6 +1164,11 @@ public class TraitEditorActivity extends Activity {
         }
 
         shareFile(file);
+    }
+
+    public static void importData(String fileName) {
+        mChosenFile = fileName;
+        mHandler.post(importCSV);
     }
 
     // Creates a new thread to do importing
