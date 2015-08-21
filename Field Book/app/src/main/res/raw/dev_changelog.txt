@@ -1,3 +1,6 @@
+37
+Added no date button (courtesy zacharymiller90)
+
 36
 Updated app to be compatible with phones
 Updated app to mostly match material design guidelines

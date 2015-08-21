@@ -26,6 +26,7 @@
     <string name="minusday">-1</string>
     <string name="enter">Enter</string>
     <string name="plusday">+1</string>
+    <string name="nodate">No Date</string>
     <string name="record">Record</string>
     <string name="play">Play</string>
     <string name="capture">Capture</string>

@@ -589,6 +589,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         Button minusDayBtn = (Button) traitDate.findViewById(R.id.minusDateBtn);
         Button saveDayBtn = (Button) traitDate.findViewById(R.id.enterBtn);
         Button clearDate = (Button) traitDate.findViewById(R.id.clearDateBtn);
+        Button noDateBtn = (Button) traitDate.findViewById(R.id.noDateBtn);
 
         Button addCounterBtn = (Button) traitCounter.findViewById(R.id.addBtn);
         Button minusCounterBtn = (Button) traitCounter.findViewById(R.id.minusBtn);
@@ -814,6 +815,30 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     day.setText(String.format("%02d", i - 1));
                 }
 
+                // Change the text color accordingly
+                if (newTraits.containsKey(currentTrait.trait)) {
+                    month.setTextColor(Color.BLUE);
+                    day.setTextColor(Color.BLUE);
+                } else {
+                    month.setTextColor(Color.BLACK);
+                    day.setTextColor(Color.BLACK);
+                }
+            }
+        });
+
+        //No Day Button
+        noDateBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.MONTH, 0);
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+                calendar.set(Calendar.YEAR, 2000);
+
+                day.setText(String.format("%02d", 1));
+                month.setText(getMonthForInt(0));
+
+
+                tempMonth = 0;
                 // Change the text color accordingly
                 if (newTraits.containsKey(currentTrait.trait)) {
                     month.setTextColor(Color.BLUE);

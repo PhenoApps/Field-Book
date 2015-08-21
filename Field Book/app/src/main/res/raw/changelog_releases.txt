@@ -3,6 +3,7 @@ Overhauled interface
 Added support for phones
 Reorder traits with drag and drop
 Fixed a bug with the cursor in text traits
+Added no date button
 
 20/2.4.5
 Fixed a bug causing crashes on startup
