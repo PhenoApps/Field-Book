@@ -45,7 +45,8 @@
     <string name="settings">Settings</string>
     <string name="fields">Fields</string>
     <string name="traits">Traits</string>
-    <string name="setup">Setup</string>
+    <string name="setup">Profile</string> <!-- Get rid of this when it gets translated -->
+    <string name="profile">Profile</string>
     <string name="export">Export</string>
     <string name="advanced">Advanced Settings</string>
     <string name="language">Language</string>

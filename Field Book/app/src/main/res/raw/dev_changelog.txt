@@ -1,3 +1,7 @@
+38
+Changed no date button to save date in addition to setting to Jan 1 2000
+Renamed Setup to Profile
+
 37
 Added no date button (courtesy zacharymiller90)
 

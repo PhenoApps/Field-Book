@@ -500,7 +500,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         //setup
         setupDialog = new Dialog(this, R.style.AppDialog);
-        setupDialog.setTitle(getString(R.string.setup));
+        setupDialog.setTitle(getString(R.string.profile));
         setupDialog.setContentView(R.layout.config);
 
         params = setupDialog.getWindow().getAttributes();
@@ -539,7 +539,7 @@ public class ConfigActivity extends AppCompatActivity {
         ListView settingsList = (ListView) findViewById(R.id.myList);
 
         String[] items2 = new String[]{ getString(R.string.fields),
-                getString(R.string.traits), getString(R.string.setup),getString(R.string.export), getString(R.string.advanced),
+                getString(R.string.traits), getString(R.string.profile),getString(R.string.export), getString(R.string.advanced),
                 getString(R.string.language)};//, "API Test"}; TODO cleanup
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
@@ -1322,9 +1322,6 @@ public class ConfigActivity extends AppCompatActivity {
     private String[] prepareSetup() {
         String tagName = "";
         String tagLocation = "";
-        String tagDrop1 = "";
-        String tagDrop2 = "";
-        String tagDrop3 = "";
 
         if (ep.getString("FirstName", "").length() > 0 | ep.getString("LastName", "").length() > 0) {
             tagName += getString(R.string.person) + ": " + ep.getString("FirstName", "")
@@ -1339,25 +1336,7 @@ public class ConfigActivity extends AppCompatActivity {
             tagLocation += getString(R.string.location) + ": " + getString(R.string.none);
         }
 
-        if (ep.getString("DROP1", "").length() > 0) {
-            tagDrop1 = getString(R.string.drop1) + ": " + ep.getString("DROP1", "");
-        } else {
-            tagDrop1 = getString(R.string.drop1) + ": " + getString(R.string.none);
-        }
-
-        if (ep.getString("DROP2", "").length() > 0) {
-            tagDrop2 = getString(R.string.drop2) + ": " + ep.getString("DROP2", "");
-        } else {
-            tagDrop2 = getString(R.string.drop2) + ": " + getString(R.string.none);
-        }
-
-        if (ep.getString("DROP3", "").length() > 0) {
-            tagDrop3 = getString(R.string.drop3) + ": " + ep.getString("DROP3", "");
-        } else {
-            tagDrop3 = getString(R.string.drop3) + ": " + getString(R.string.none);
-        }
-
-        return new String[]{tagName, tagLocation, tagDrop1, tagDrop2, tagDrop3, getString(R.string.clearsettings)};
+        return new String[]{tagName, tagLocation, getString(R.string.clearsettings)};
     }
 
     private void updateSetupList() {
@@ -1396,7 +1375,6 @@ public class ConfigActivity extends AppCompatActivity {
         String[] array = prepareSetup();
         ArrayList<String> lst = new ArrayList<String>();
         lst.addAll(Arrays.asList(array));
-        final String[] traits = MainActivity.dt.getRangeColumns();
 
         setupList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -1410,27 +1388,6 @@ public class ConfigActivity extends AppCompatActivity {
                         break;
 
                     case 2:
-                        if (MainActivity.dt.getRangeColumns() == null)
-                            return;
-
-                        showTrait1Dialog(traits);
-                        break;
-
-                    case 3:
-                        if (MainActivity.dt.getRangeColumns() == null)
-                            return;
-
-                        showTrait2Dialog(traits);
-                        break;
-
-                    case 4:
-                        if (MainActivity.dt.getRangeColumns() == null)
-                            return;
-
-                        showTrait3Dialog(traits);
-                        break;
-
-                    case 5:
                         showClearSettingsDialog();
                         break;
 
@@ -1549,9 +1506,6 @@ public class ConfigActivity extends AppCompatActivity {
                 ed.putString("FirstName", "");
                 ed.putString("LastName", "");
                 ed.putString("Location", "");
-                ed.putString("DROP1", "");
-                ed.putString("DROP2", "");
-                ed.putString("DROP3", "");
                 ed.apply();
             }
         });
@@ -1565,117 +1519,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-    }
-
-    private void showTrait3Dialog(final String[] traits) {
-        final Dialog dialog = new Dialog(ConfigActivity.this, R.style.AppDialog);
-
-        dialog.setTitle(getString(R.string.drop3) + ": " + ep.getString("DROP3", ""));
-        dialog.setContentView(R.layout.config);
-        dialog.setCancelable(true);
-        dialog.setCanceledOnTouchOutside(true);
-
-        ListView csvList = (ListView) dialog.findViewById(R.id.myList);
-        Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
-
-        csvButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        csvList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                dialog.dismiss();
-
-                Editor e = ep.edit();
-
-                e.putString("DROP3", traits[which]);
-                e.commit();
-
-                MainActivity.partialReload = true;
-
-                updateSetupList();
-            }
-        });
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, traits);
-        csvList.setAdapter(itemsAdapter);
-        dialog.show();
-    }
-
-    private void showTrait2Dialog(final String[] traits) {
-        final Dialog dialog = new Dialog(ConfigActivity.this, R.style.AppDialog);
-
-        dialog.setTitle(getString(R.string.drop2) + ": " + ep.getString("DROP2", ""));
-        dialog.setContentView(R.layout.config);
-        dialog.setCancelable(true);
-        dialog.setCanceledOnTouchOutside(true);
-
-        ListView csvList = (ListView) dialog.findViewById(R.id.myList);
-        Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
-
-        csvButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        csvList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                dialog.dismiss();
-
-                Editor e = ep.edit();
-
-                e.putString("DROP2", traits[which]);
-                e.commit();
-
-                MainActivity.partialReload = true;
-
-                updateSetupList();
-            }
-        });
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, traits);
-        csvList.setAdapter(itemsAdapter);
-        dialog.show();
-    }
-
-    private void showTrait1Dialog(final String[] traits) {
-        final Dialog dialog = new Dialog(ConfigActivity.this, R.style.AppDialog);
-
-        dialog.setTitle(getString(R.string.drop1) + ": " + ep.getString("DROP1", ""));
-        dialog.setContentView(R.layout.config);
-        dialog.setCancelable(true);
-        dialog.setCanceledOnTouchOutside(true);
-
-        ListView csvList = (ListView) dialog.findViewById(R.id.myList);
-        Button csvButton = (Button) dialog.findViewById(R.id.closeBtn);
-
-        csvButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        csvList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                dialog.dismiss();
-
-                Editor e = ep.edit();
-                e.putString("DROP1", traits[which]);
-                e.commit();
-
-                MainActivity.partialReload = true;
-                updateSetupList();
-            }
-        });
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.listitem, traits);
-        csvList.setAdapter(itemsAdapter);
-        dialog.show();
     }
 
     private void showFieldFileDialog() {

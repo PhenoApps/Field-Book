@@ -6,30 +6,30 @@ import java.io.File;
 
 public class Constants {
     public static final String RESOURCEPATH = Environment.getExternalStorageDirectory()
-            + "/fieldBook/resources";
+            + "/FieldBook/resources";
 
     public static String PLOTDATAPATH = Environment.getExternalStorageDirectory()
-            + "/fieldBook/plot_data";
+            + "/FieldBook/plot_data";
 
     public static String TRAITPATH = Environment.getExternalStorageDirectory()
-            + "/fieldBook/trait";
+            + "/FieldBook/trait";
 
     public static String FIELDIMPORTPATH = Environment.getExternalStorageDirectory()
-            + "/fieldBook/field_import";
+            + "/FieldBook/field_import";
 
     public static String FIELDEXPORTPATH = Environment.getExternalStorageDirectory()
-            + "/fieldBook/field_export";
+            + "/FieldBook/field_export";
 
     public static final File MPATH = new File(Environment.getExternalStorageDirectory()
-            + "/fieldBook");
+            + "/FieldBook");
 
     public static String BACKUPPATH = Environment.getExternalStorageDirectory()
-            + "/fieldBook/database";
+            + "/FieldBook/database";
 
     public static String ERRORPATH = Environment.getExternalStorageDirectory()
-            + "/fieldBook/errors";
+            + "/FieldBook/errors";
 
     public static String UPDATEPATH = Environment.getExternalStorageDirectory()
-            + "/fieldBook/updates";
+            + "/FieldBook/updates";
 
 }

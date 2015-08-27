@@ -837,16 +837,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 day.setText(String.format("%02d", 1));
                 month.setText(getMonthForInt(0));
 
-
                 tempMonth = 0;
-                // Change the text color accordingly
-                if (newTraits.containsKey(currentTrait.trait)) {
-                    month.setTextColor(Color.BLUE);
-                    day.setTextColor(Color.BLUE);
+
+                if (ep.getBoolean("UseDay", false)) {
+                    updateTrait(currentTrait.trait, "date",String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
                 } else {
-                    month.setTextColor(Color.BLACK);
-                    day.setTextColor(Color.BLACK);
+                    updateTrait(currentTrait.trait, "date",
+                            calendar.get(Calendar.YEAR) + "."
+                                    + (calendar.get(Calendar.MONTH) + 1) + "."
+                                    + calendar.get(Calendar.DAY_OF_MONTH));
                 }
+
+                // Change the text color accordingly
+                month.setTextColor(Color.parseColor(displayColor));
+                day.setTextColor(Color.parseColor(displayColor));
             }
         });
 
