@@ -1,3 +1,6 @@
+39
+Miscellaneous code fixes and cleanup
+
 38
 Changed no date button to save date in addition to setting to Jan 1 2000
 Renamed Setup to Profile
