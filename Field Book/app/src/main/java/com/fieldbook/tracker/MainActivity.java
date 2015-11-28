@@ -498,7 +498,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 if (en.toString().length() > 0) {
                     if (newTraits != null & currentTrait != null)
-                        updateTrait(currentTrait.trait, "numeric", en.toString());
+                        updateTrait(currentTrait.trait, currentTrait.format, en.toString());
                 } else {
                     if (newTraits != null & currentTrait != null)
                         newTraits.remove(currentTrait.trait);
@@ -1200,6 +1200,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     }
                 }
 
+                makeToast(currentTrait.format);
             }
         });
 
@@ -1441,14 +1442,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 R.string.drawer_open, R.string.drawer_close) {
 
-            /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 TextView person = (TextView) findViewById(R.id.nameLabel);
                 person.setText(ep.getString("FirstName","") + " " + ep.getString("LastName",""));
 
+                TextView template = (TextView) findViewById(R.id.currentField);
+                template.setText(ep.getString("FieldFile",""));
             }
 
-            /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
             }
 
@@ -2752,14 +2753,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         pNum.setVisibility(EditText.GONE);
 
-                        if (newTraits.containsKey(currentTrait.trait)) {
+                        if (!newTraits.containsKey(currentTrait.trait)) {
                             eNum.removeTextChangedListener(eNumUpdate);
-                            eNum.setText(newTraits.get(currentTrait.trait).toString());
-                            eNum.setTextColor(Color.parseColor(displayColor));
-                            eNum.addTextChangedListener(eNumUpdate);
-                        } else {
-                            eNum.removeTextChangedListener(eNumUpdate);
-
                             eNum.setText("");
                             eNum.setTextColor(Color.BLACK);
 
@@ -2768,23 +2763,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 eNum.setText(currentTrait.defaultValue);
 
                             eNum.addTextChangedListener(eNumUpdate);
+                        } else {
+                            eNum.removeTextChangedListener(eNumUpdate);
+                            eNum.setText(newTraits.get(currentTrait.trait).toString());
+                            eNum.setTextColor(Color.parseColor(displayColor));
+                            eNum.addTextChangedListener(eNumUpdate);
                         }
-
-                        // This is needed to fix the keyboard bug
-                        mHandler.postDelayed(new Runnable() {
-
-                            public void run() {
-                                eNum.dispatchTouchEvent(MotionEvent.obtain(
-                                        SystemClock.uptimeMillis(),
-                                        SystemClock.uptimeMillis(),
-                                        MotionEvent.ACTION_DOWN, 0, 0, 0));
-                                eNum.dispatchTouchEvent(MotionEvent.obtain(
-                                        SystemClock.uptimeMillis(),
-                                        SystemClock.uptimeMillis(),
-                                        MotionEvent.ACTION_UP, 0, 0, 0));
-                            }
-
-                        }, 300);
 
                     } else {
                         traitText.setVisibility(View.GONE);
@@ -2892,14 +2876,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             e.printStackTrace();
         }
 
-        mPlayer.start();
-        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            public void onCompletion(MediaPlayer mp) {
-                mListening = false;
-                doRecord.setText(R.string.play);
-                clearRecord.setEnabled(true);
-            }
-        });
+        try {
+            mPlayer.start();
+            mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                public void onCompletion(MediaPlayer mp) {
+                    mListening = false;
+                    doRecord.setText(R.string.play);
+                    clearRecord.setEnabled(true);
+                }
+            });
+        } catch (NullPointerException e) {
+            Log.w(TAG,e.getMessage());
+        }
     }
 
     // Delete recording

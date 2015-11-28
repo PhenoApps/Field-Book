@@ -14,22 +14,18 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.Dragsort.DragSortListView;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 
 /**
@@ -132,11 +128,12 @@ public class TraitAdapter extends BaseAdapter {
         });
 
         holder.dragSort.setOnTouchListener(new View.OnTouchListener() {
+            DragSortListView drag = (DragSortListView) parent;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    DragSortListView drag = (DragSortListView) parent;
 
                     drag.startDrag(position, DragSortListView.DRAG_POS_Y | DragSortListView.DRAG_NEG_Y, 0, 0);
 
@@ -144,8 +141,6 @@ public class TraitAdapter extends BaseAdapter {
 
                     return true;
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    DragSortListView drag = (DragSortListView) parent;
-
                     drag.stopDrag(false);
 
                     TraitEditorActivity.loadData();
@@ -158,6 +153,7 @@ public class TraitAdapter extends BaseAdapter {
                     return false;
             }
         });
+
 
         holder.menuPopup.setOnClickListener(new OnClickListener() {
             @Override

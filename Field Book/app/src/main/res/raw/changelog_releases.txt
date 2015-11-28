@@ -1,3 +1,8 @@
+22/3.0.1
+Field name is listed in the navigation drawer on the main screen
+Location exports as null if not set
+Fixed a bug related to audio and rust traits
+
 21/3.0.0
 Updated user interface
 Added support for phones

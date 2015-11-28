@@ -4,6 +4,8 @@
     android:layout_height="wrap_content"
     android:background="@drawable/listmimic"
     android:gravity="center_vertical"
+    android:focusable="false"
+    android:focusableInTouchMode="false"
     android:orientation="horizontal"
     android:paddingBottom="4dp"
     android:paddingTop="4dp">

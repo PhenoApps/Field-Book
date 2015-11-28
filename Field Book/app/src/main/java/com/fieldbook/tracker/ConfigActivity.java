@@ -838,6 +838,15 @@ public class ConfigActivity extends AppCompatActivity {
             // Retrieves the data needed for export
             Cursor exportData = MainActivity.dt.getExportDBData(newRanges, exportTraits);
 
+            for(String i : newRanges) {
+                Log.i("Field Book : Ranges : ",i);
+            }
+
+            for(String j : exportTraits) {
+                Log.i("Field Book : Traits : ",j);
+            }
+
+
             if(exportData.getCount()==0) {
                 noData = true;
                 return(0);
@@ -1478,7 +1487,12 @@ public class ConfigActivity extends AppCompatActivity {
         yesLocation.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 Editor e = ep.edit();
-                e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
+                if(latitude.getText().toString().length()>0 && longitude.getText().toString().length()>0) {
+                    e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
+                } else {
+                    e.putString("Location", "null");
+                }
+
                 e.apply();
                 if(setupDialog.isShowing()) {
                     updateSetupList();

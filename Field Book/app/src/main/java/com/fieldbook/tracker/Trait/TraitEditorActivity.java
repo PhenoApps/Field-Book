@@ -118,7 +118,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         try {
             TutorialTraitsActivity.thisActivity.finish();
         } catch (Exception e) {
-            Log.e(TAG,"" + e.getMessage());
+            Log.e(TAG, "" + e.getMessage());
         }
 
         super.onDestroy();
@@ -167,7 +167,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         //Button mainCloseBtn = (Button) findViewById(R.id.closeBtn);
         //mainCloseBtn.setVisibility(View.GONE);
 
-        if(getActionBar()!=null) {
+        if (getActionBar() != null) {
             getActionBar().setHomeButtonEnabled(true);
             getActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -210,13 +210,12 @@ public class TraitEditorActivity extends AppCompatActivity {
                 // The new logic is that the drop point is now the center of the list. Any items before / after are reordered based on the drop point's position.
                 // This means while the realposition may not start from zero, the ordering will always be correct.
 
+                Log.w("ReorderStart","start");
                 // downward drag
-                if (to > from)
-                {
+                if (to > from) {
                     Log.w("Downward", "drag");
 
-                    try
-                    {
+                    try {
                         // e.g. 4
                         String prevID = mAdapter.getItem(from).id;
                         String prevPosition = mAdapter.getItem(from).realPosition;
@@ -231,25 +230,19 @@ public class TraitEditorActivity extends AppCompatActivity {
                         // Push everything below down by 1
                         int newCount = 2;
 
-                        for (int i = to + 1; i < mAdapter.getCount(); i++)
-                        {
+                        for (int i = to + 1; i < mAdapter.getCount(); i++) {
                             MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
-                            newCount ++;
+                            newCount++;
                         }
 
                         MainActivity.reloadData = true;
-                    }
-                    catch (Exception e)
-                    {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }
-                else
-                {
+                } else {
                     Log.w("Upward", "drag");
 
-                    try
-                    {
+                    try {
                         // upward drag
                         // e.g. 4
                         String prevID = mAdapter.getItem(from).id;
@@ -259,46 +252,34 @@ public class TraitEditorActivity extends AppCompatActivity {
                         String currentID = mAdapter.getItem(to).id;
                         String currentPosition = mAdapter.getItem(to).realPosition;
 
-                        if (Integer.parseInt(currentPosition) - to >= 0)
-                        {
-                            Log.w("Reorder", "top");
+                        if (Integer.parseInt(currentPosition) - to >= 0) {
+                            Log.w("Reorder", "top1");
 
                             // Reorder everything above
                             int newCount = Integer.parseInt(currentPosition) - to;
 
-                            for (int i = 0; i < to; i++)
-                            {
+                            for (int i = 0; i < to; i++) {
                                 MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(newCount));
-                                Log.w(mAdapter.getItem(i).trait, String.valueOf(newCount));
-
-                                newCount ++;
+                                newCount++;
                             }
 
                             Log.w("Reorder", "current");
 
                             MainActivity.dt.updateTraitPosition(prevID, currentPosition);
 
-                            Log.w(mAdapter.getItem(from).trait, currentPosition);
-                        }
-                        else
-                        {
+                        } else {
                             // We hit a -1, might as well do a full zero based reorder
                             // Reorder everything above
 
-                            Log.w("Reorder", "top");
+                            Log.w("Reorder", "top2");
 
-                            for (int i = 0; i < to; i++)
-                            {
+                            for (int i = 0; i < to; i++) {
                                 MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(i));
-
-                                Log.w(mAdapter.getItem(i).trait, String.valueOf(i));
                             }
 
                             Log.w("Reorder", "current");
 
                             MainActivity.dt.updateTraitPosition(prevID, String.valueOf(to));
-
-                            Log.w(mAdapter.getItem(from).trait, String.valueOf(to));
 
                             // Reset current position as well, otherwise we don't know where it points to
                             currentPosition = String.valueOf(to);
@@ -311,20 +292,13 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                         // last pulled position is from field
 
-                        for (int i = to; i < mAdapter.getCount(); i++)
-                        {
-                            if (i != from)
-                            {
+                        for (int i = to; i < mAdapter.getCount(); i++) {
+                            if (i != from) {
                                 MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
-
-                                Log.w(mAdapter.getItem(i).trait, String.valueOf(Integer.parseInt(currentPosition) + newCount));
-
-                                newCount ++;
+                                newCount++;
                             }
                         }
-                    }
-                    catch (Exception e)
-                    {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -592,7 +566,8 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.newTrait);
         fab.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
                 showCreateTraitDialog();
             }
         });
@@ -924,7 +899,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     private void sortDialog() {
         String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
 
-        if(allTraits == null) {
+        if (allTraits == null) {
             makeToast(getString(R.string.createtraitserror));
             return;
         }
@@ -1073,7 +1048,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     private void showDeleteTraitDialog() {
         String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
 
-        if(allTraits == null) {
+        if (allTraits == null) {
             makeToast(getString(R.string.createtraitserror));
             return;
         }
@@ -1124,7 +1099,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         prepareFields(0);
     }
 
-    public void onBackPressed(){
+    public void onBackPressed() {
         MainActivity.reloadData = true;
         finish();
     }
@@ -1210,7 +1185,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 data = columns;
 
-                if(MainActivity.dt.isTableExists(DataHelper.TRAITS)) {
+                if (MainActivity.dt.isTableExists(DataHelper.TRAITS)) {
                     MainActivity.dt.deleteTable(DataHelper.TRAITS);
                 }
 
@@ -1286,7 +1261,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
             scanFile(file);
         } catch (Exception e) {
-            Log.e(TAG,"" + e.getMessage());
+            Log.e(TAG, "" + e.getMessage());
         }
     }
 

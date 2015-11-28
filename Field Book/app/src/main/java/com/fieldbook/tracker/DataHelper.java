@@ -222,6 +222,14 @@ public class DataHelper {
         String fields = arrayToString("range", fieldList);
         String activeTraits = arrayToLikeString(traits);
 
+        String query = "select " + fields + ", traits.trait, user_traits.userValue, " +
+                "user_traits.timeTaken from user_traits, range, traits where " +
+                "user_traits.rid = range." + ep.getString("ImportUniqueName", "") +
+                " and user_traits.parent = traits.trait and " +
+                "user_traits.trait = traits.format and user_traits.userValue is not null and " + activeTraits;
+
+        Log.i("Field Book", query);
+
         Cursor cursor = db
                 .rawQuery(
                         "select " + fields + ", traits.trait, user_traits.userValue, " +
