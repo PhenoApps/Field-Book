@@ -45,10 +45,12 @@
     <string name="settings">Settings</string>
     <string name="fields">Fields</string>
     <string name="traits">Traits</string>
-    <string name="setup">Profile</string> <!-- Get rid of this when it gets translated -->
+    <string name="setup">Profile</string>
+
+    <!-- Get rid of this when it gets translated -->
     <string name="profile">Profile</string>
     <string name="export">Export</string>
-    <string name="advanced">Advanced Settings</string>
+    <string name="advanced">Advanced</string>
     <string name="language">Language</string>
     <string name="updatemsg">Changelog</string>
     <string name="sampledata">Sample Data</string>
@@ -74,6 +76,7 @@
     <string name="text">Text</string>
     <string name="photo">Photo</string>
     <string name="audio">Audio</string>
+    <string name="multicategorical">Multicat</string>
 
     <string name="trait">Trait</string>
     <string name="format">Format</string>
@@ -96,24 +99,38 @@
     <string name="notemptycategory">Category cannot be empty</string>
 
     <!-- Advanced settings -->
-    <string name="tips">Enable tutorial</string>
-    <string name="quickgoto">Enable the Quick GoTo in the middle of the main screen</string>
-    <string name="cycle">Cycling traits advances to next entry</string>
-    <string name="useday">Use day of year instead of date</string>
-    <string name="ignoreentries">Hide entries with collected data</string>
-    <string name="disableshare">Disable file sharing when exporting files</string>
-    <string name="disableentrynavleft">Disable left entry arrow if no data collected</string>
-    <string name="disableentrynavright">Disable right entry arrow if no data collected</string>
-    <string name="barcodescan">Enables button that opens camera to scan barcode</string>
-    <string name="rangechime">Notification sound when primary order changes</string>
-    <string name="nextmissingenable">Enables button that moves to next entry with no data</string>
-    <string name="jumptoplotid">Enables button that moves to specific unique identifier</string>
+    <string name="tips">Tutorial</string>
+    <string name="quickgoto">Quick GoTo</string>
+    <string name="cycle">Cycling traits advances entry</string>
+    <string name="useday">Use day of year</string>
+    <string name="ignoreentries">Hide entries with data</string>
+    <string name="disableshare">Disable file sharing</string>
+    <string name="disableentrynavleft">Disable left entry arrow</string>
+    <string name="disableentrynavright">Disable right entry arrow</string>
+    <string name="barcodescan">Camera barcode scanner</string>
+    <string name="rangechime">Primary order sound</string>
+    <string name="nextmissingenable">Next entry with no data</string>
+    <string name="jumptoplotid">Move to unique identifier</string>
+    <string name="datagrid">Datagrid (Beta)</string>
+
+    <string name="tips_desc">Adds a tutorial icon to the main, settings, and traits screens</string>
+    <string name="quickgoto_desc">Changes middle section of main screen to the legacy Quick GoTo</string>
+    <string name="cycle_desc">After going through all traits, the app goes to the next entry</string>
+    <string name="useday_desc">Use day of year when collecting data instead of the date</string>
+    <string name="ignoreentries_desc">Skips entries that have data for the current trait</string>
+    <string name="disableshare_desc">When files are exported, the share dialog will not be displayed</string>
+    <string name="disableentrynavleft_desc">If no data has been collected, disables left entry movement</string>
+    <string name="disableentrynavright_desc">If no data has been collected, disables right entry movement</string>
+    <string name="barcodescan_desc">Opens camera to scan barcode and move to the specific entry</string>
+    <string name="rangechime_desc">Notification sound when the primary order changes</string>
+    <string name="nextmissingenable_desc">Adds a button to the toolbar that jumps to the next entry with no data for the current trait</string>
+    <string name="jumptoplotid_desc">Opens dialog to input unique id and move to specific entry</string>
+    <string name="datagrid_desc">Displays a grid of plots and traits showing collected data</string>
 
     <!-- Advanced settings titles and messages -->
     <string name="nomatches">No matching value</string>
     <string name="nextmissingbutton">Next empty entry</string>
     <string name="jumptoplotidbutton">Go to ID</string>
-    <string name="datagrid">DataGrid (Beta)</string>
     <string name="barcodescantitle">Scan barcode</string>
     <string name="disableentryanavwarning">Data must be collected before you can go to the next entry</string>
 
@@ -166,8 +183,8 @@
     <string name="tableformat">Table</string>
     <string name="filename">Filename</string>
     <string name="headerformat">Format</string>
-    <string name="allcolumns">All field columns</string>
-    <string name="fieldcolumns">Field columns</string>
+    <string name="allcolumns">All imported columns</string>
+    <string name="fieldcolumns">Imported columns</string>
     <string name="onlyunique">Only unique identifier</string>
     <string name="alltraits">All traits</string>
     <string name="activetraits">Only active traits</string>
@@ -177,6 +194,7 @@
     <string name="noexportcheck">Export type must be selected</string>
     <string name="nofieldcheck">Field column type must be selected</string>
     <string name="notraitcheck">Trait type must be selected</string>
+    <string name="overwrite_previous_export">Overwrite previously exported file</string>
 
     <!-- Language dialog -->
     <string name="english">English (US)</string>
@@ -269,7 +287,8 @@
     <!-- Strings being used for dev -->
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-
+    <string name="lock_data">Lock data</string>
+    <string name="unlock_data">Unlock data</string>
 
     <!-- Strings below this line have not been integrated into the app -->
     <!-- Map -->

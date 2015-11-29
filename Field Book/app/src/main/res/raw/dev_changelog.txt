@@ -2,6 +2,11 @@
 Field name is listed in the navigation drawer on the main screen
 Location exports as null if not set
 Fixed a bug related to audio and rust traits
+Updated dialogs with titles
+Updated icons in FileExploreActivity and on toolbar
+FileExploreActivity can now include/exclude file extensions
+New multicategorical trait
+Added ability to overwrite previously exported files
 
 39
 Miscellaneous code fixes and cleanup

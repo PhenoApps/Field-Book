@@ -2,32 +2,32 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/help"
-        android:icon="@drawable/ic_action_help"
+        android:icon="@drawable/ic_help"
         android:showAsAction="always"
         android:title="@string/tutorial" />
     <item
         android:id="@+id/sortTrait"
-        android:icon="@drawable/ic_action_sort_by_size"
+        android:icon="@drawable/ic_sort"
         android:showAsAction="ifRoom"
         android:title="@string/sort" />
     <item
         android:id="@+id/deleteTrait"
-        android:icon="@drawable/ic_action_discard"
+        android:icon="@drawable/ic_delete"
         android:showAsAction="ifRoom"
         android:title="@string/deletealltraits" />
     <item
         android:id="@+id/toggleTrait"
-        android:icon="@drawable/ic_action_checkbox"
+        android:icon="@drawable/ic_done_all"
         android:showAsAction="always"
         android:title="@string/visibility" />
     <item
         android:id="@+id/addTrait"
-        android:icon="@drawable/ic_action_new"
+        android:icon="@drawable/ic_add_circle"
         android:showAsAction="ifRoom"
         android:title="@string/addtrait" />
     <item
         android:id="@+id/importexport"
-        android:icon="@drawable/ic_action_import_export"
+        android:icon="@drawable/ic_import_export"
         android:showAsAction="ifRoom"
         android:title="@string/importexport" />
 </menu>

@@ -4,7 +4,11 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="#FFFFFF"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingBottom="5dp"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:paddingTop="5dp">
 
     <ScrollView
         android:layout_width="fill_parent"
@@ -14,422 +18,605 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#FFFFFF"
             android:orientation="vertical">
 
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/tips"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="false"
-                    android:paddingRight="3dp"
-                    android:scaleX="1.1"
-                    android:scaleY="1.1"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
-                    android:textStyle="bold" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
 
                 <TextView
+                    android:id="@+id/tipsTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/tipsCheckbox"
                     android:text="@string/tips"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/nextEmptyPlot"
+                <TextView
+                    android:id="@+id/tipsDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/tipsTitle"
+                    android:layout_toLeftOf="@+id/tipsCheckbox"
+                    android:text="@string/tips_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/tipsCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/nextEmptyPlotTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/nextEmptyPlotCheckbox"
                     android:text="@string/nextmissingenable"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/quickGoTo"
+                <TextView
+                    android:id="@+id/nextEmptyPlotDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:paddingRight="3dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/nextEmptyPlotTitle"
+                    android:layout_toLeftOf="@+id/nextEmptyPlotCheckbox"
+                    android:text="@string/nextmissingenable_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/nextEmptyPlotCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
+                    android:checked="false"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/quickGoToTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/quickGoToCheckbox"
                     android:text="@string/quickgoto"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/rangeSound"
+                <TextView
+                    android:id="@+id/quickGoToDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/quickGoToTitle"
+                    android:layout_toLeftOf="@+id/quickGoToCheckbox"
+                    android:text="@string/quickgoto_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/quickGoToCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/rangeSoundTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/rangeSoundCheckbox"
                     android:text="@string/rangechime"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/barcodeScan"
+                <TextView
+                    android:id="@+id/rangeSoundDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/rangeSoundTitle"
+                    android:layout_toLeftOf="@+id/rangeSoundCheckbox"
+                    android:text="@string/rangechime_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/rangeSoundCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/barcodeScanTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/barcodeScanCheckbox"
                     android:text="@string/barcodescan"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/jumpToPlot"
+                <TextView
+                    android:id="@+id/barcodeScanDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/barcodeScanTitle"
+                    android:layout_toLeftOf="@+id/barcodeScanCheckbox"
+                    android:text="@string/barcodescan_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/barcodeScanCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/jumpToPlotTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/jumpToPlotCheckbox"
                     android:text="@string/jumptoplotid"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/dataGrid"
+                <TextView
+                    android:id="@+id/jumpToPlotDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/jumpToPlotTitle"
+                    android:layout_toLeftOf="@+id/jumpToPlotCheckbox"
+                    android:text="@string/jumptoplotid_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/jumpToPlotCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/dataGridTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/dataGridCheckbox"
                     android:text="@string/datagrid"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/disableShare"
+                <TextView
+                    android:id="@+id/dataGridDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/dataGridTitle"
+                    android:layout_toLeftOf="@+id/dataGridCheckbox"
+                    android:text="@string/datagrid_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/dataGridCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/disableShareTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/disableShareCheckbox"
                     android:text="@string/disableshare"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/disableEntryNavLeft"
+                <TextView
+                    android:id="@+id/disableShareDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/disableShareTitle"
+                    android:layout_toLeftOf="@+id/disableShareCheckbox"
+                    android:text="@string/disableshare_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/disableShareCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/disableEntryNavLeftTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/disableEntryNavLeftCheckbox"
                     android:text="@string/disableentrynavleft"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/disableEntryNavRight"
+                <TextView
+                    android:id="@+id/disableEntryNavLeftDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/disableEntryNavLeftTitle"
+                    android:layout_toLeftOf="@+id/disableEntryNavLeftCheckbox"
+                    android:text="@string/disableentrynavleft_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/disableEntryNavLeftCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/disableEntryNavRightTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/disableEntryNavRightCheckbox"
                     android:text="@string/disableentrynavright"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/cycle"
+                <TextView
+                    android:id="@+id/disableEntryNavRightDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/disableEntryNavRightTitle"
+                    android:layout_toLeftOf="@+id/disableEntryNavRightCheckbox"
+                    android:text="@string/disableentrynavright_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/disableEntryNavRightCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/cycleTraitsTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/cycleTraitsCheckbox"
                     android:text="@string/cycle"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/ignoreExisting"
+                <TextView
+                    android:id="@+id/cycleTraitsDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/cycleTraitsTitle"
+                    android:layout_toLeftOf="@+id/cycleTraitsCheckbox"
+                    android:text="@string/cycle_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/cycleTraitsCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/ignoreExistingTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/ignoreExistingCheckbox"
                     android:text="@string/ignoreentries"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
-            </LinearLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="25dp" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="horizontal"
-                android:paddingLeft="3dp">
-
-                <CheckBox
-                    android:id="@+id/useDay"
+                <TextView
+                    android:id="@+id/ignoreExistingDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/ignoreExistingTitle"
+                    android:layout_toLeftOf="@+id/ignoreExistingCheckbox"
+                    android:text="@string/ignoreentries_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/ignoreExistingCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
                     android:checked="false"
-                    android:paddingRight="3dp"
+                    android:padding="5dp"
                     android:scaleX="1.1"
                     android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
                 <TextView
+                    android:id="@+id/useDayTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/useDayCheckbox"
                     android:text="@string/useday"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/useDayDescription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/useDayTitle"
+                    android:layout_toLeftOf="@+id/useDayCheckbox"
+                    android:text="@string/useday_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/useDayCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
+                    android:checked="false"
+                    android:padding="5dp"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
-            </LinearLayout>
+
+            </RelativeLayout>
         </LinearLayout>
     </ScrollView>
 

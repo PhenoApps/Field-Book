@@ -1,6 +1,9 @@
-22/3.0.1
+22/3.1.0
+New multicategorical trait format
+Added option to overwrite preivously exported files
 Field name is listed in the navigation drawer on the main screen
 Location exports as null if not set
+Updated dialogs with titles
 Fixed a bug related to audio and rust traits
 
 21/3.0.0

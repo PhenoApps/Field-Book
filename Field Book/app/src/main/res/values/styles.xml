@@ -17,9 +17,19 @@
         <item name="colorPrimary">@color/main_primary</item>
         <item name="colorPrimaryDark">@color/main_primaryDark</item>
         <item name="colorAccent">@color/main_colorAccent</item>
-
+        <item name="android:windowNoTitle">false</item>
+        <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
+        <item name="windowActionBar">false</item>
         <item name="buttonStyle">@style/ButtonStyle</item>
         <item name="android:actionMenuTextAppearance">@style/AppMenuText</item>
+        <item name="android:windowTitleStyle">@style/MyTitleTextStyle</item>
+    </style>
+
+    <style name="MyTitleTextStyle">
+        <item name="android:textColor">#000000</item>
+        <item name="android:background">#FFFFFF</item>
+        <item name="android:textSize">@dimen/text_size_large</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
     </style>
 
     <style name="AppMenuText" parent="Theme.AppCompat.Light.NoActionBar">
@@ -40,6 +50,14 @@
     <style name="ChangelogContent" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:textSize">@dimen/text_size_small</item>
         <item name="android:textColor">#000000</item>
+    </style>
+
+    <style name="AppToolbar" parent="@style/ThemeOverlay.AppCompat.ActionBar">
+        <item name="drawerArrowStyle">@style/MyDrawerArrowToggle</item>
+    </style>
+
+    <style name="MyDrawerArrowToggle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">#343434</item>
     </style>
 
 </resources>

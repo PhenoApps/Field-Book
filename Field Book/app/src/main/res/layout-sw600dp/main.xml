@@ -14,7 +14,8 @@
         android:layout_width="match_parent"
         android:fitsSystemWindows="true"
         android:minHeight="?attr/actionBarSize"
-        app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/AppToolbar"
+        app:theme="@style/AppToolbar"
         android:background="@color/main_primary"/>
 
     <android.support.v4.widget.DrawerLayout
@@ -447,6 +448,10 @@
                                 android:layout_width="fill_parent"
                                 android:layout_height="wrap_content" />
 
+                            <include
+                                layout="@layout/trait_multicat"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
                         </LinearLayout>
                     </ScrollView>
 

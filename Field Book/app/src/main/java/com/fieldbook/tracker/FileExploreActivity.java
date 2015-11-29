@@ -1,25 +1,19 @@
 package com.fieldbook.tracker;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.app.ListActivity;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -31,13 +25,15 @@ import java.util.Locale;
 public class FileExploreActivity extends ListActivity {
 
     // Stores names of traversed directories
-    ArrayList<String> str = new ArrayList<String>();
+    ArrayList<String> str = new ArrayList<>();
 
     // Check if the first level of the directory structure is the one showing
     private Boolean firstLvl = true;
 
     private Item[] fileList;
     private File path;
+    private String[] include = new String[0];
+    private String[] exclude = new String[0];
 
     private String chosenFile;
     private ListAdapter adapter;
@@ -49,7 +45,10 @@ public class FileExploreActivity extends ListActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         String data = getIntent().getExtras().getString("path");
+        include = getIntent().getExtras().getStringArray("include");
+        exclude = getIntent().getExtras().getStringArray("exclude");
         path = new File(data);
 
         super.onCreate(savedInstanceState);
@@ -134,9 +133,26 @@ public class FileExploreActivity extends ListActivity {
             File[] filesList = path.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String filename) { //TODO add option to exclude certain filenames from search
                     File sel = new File(dir, filename);
-                    if (sel.toString().contains(".fieldbook")||sel.toString().contains("severity.txt")||sel.toString().contains("sharedpref.xml")){
+                    if (exclude != null && exclude.length > 0) {
+                        if (Arrays.asList(exclude).contains(getFileExtension(sel))) {
+                            return false;
+                        }
+                    }
+
+                    if (include != null && include.length > 0) {
+                        if (Arrays.asList(include).contains(getFileExtension(sel))) {
+                            return true;
+                        } else if (sel.isDirectory()) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    if (sel.toString().contains(".fieldbook") || sel.toString().contains("severity.txt") || sel.toString().contains("sharedpref.xml")) {
                         return false;
                     }
+
                     return true;
                 }
             });
@@ -151,22 +167,22 @@ public class FileExploreActivity extends ListActivity {
             fileList = new Item[fList.length];
 
             for (int i = 0; i < fList.length; i++) {
-                fileList[i] = new Item(fList[i], R.drawable.file_icon);
+                fileList[i] = new Item(fList[i], R.drawable.ic_document);
 
                 // Convert into file path
                 File sel = new File(path, fList[i]);
 
                 // Set drawables
                 if (sel.isDirectory()) {
-                    fileList[i].icon = R.drawable.directory_icon;
+                    fileList[i].icon = R.drawable.ic_directory;
                     Log.d("DIRECTORY", fileList[i].file);
                 }
                 if (sel.toString().toLowerCase().contains(".csv")) {
-                    fileList[i].icon = R.drawable.csv;
+                    fileList[i].icon = R.drawable.ic_csv;
                 }
 
                 if (sel.toString().toLowerCase().contains(".xls")) {
-                    fileList[i].icon = R.drawable.xls;
+                    fileList[i].icon = R.drawable.ic_xls;
                 } else {
                     Log.d("FILE", fileList[i].file);
                 }
@@ -177,13 +193,13 @@ public class FileExploreActivity extends ListActivity {
                 for (int i = 0; i < fileList.length; i++) {
                     temp[i + 1] = fileList[i];
                 }
-                temp[0] = new Item("Up", R.drawable.directory_up);
+                temp[0] = new Item("Up", R.drawable.ic_up_dir);
                 fileList = temp;
             }
         }
 
         adapter = new ArrayAdapter<Item>(this,
-                android.R.layout.select_dialog_item, android.R.id.text1,
+                R.layout.select_dialog_item, android.R.id.text1,
                 fileList) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -204,6 +220,17 @@ public class FileExploreActivity extends ListActivity {
                 return view;
             }
         };
+    }
+
+    private String getFileExtension(File file) {
+        String extension = "";
+        String fileName = file.toString();
+
+        int i = fileName.lastIndexOf('.');
+        if (i > 0) {
+            extension = fileName.substring(i + 1);
+        }
+        return extension;
     }
 
     Comparator comp = new Comparator() {

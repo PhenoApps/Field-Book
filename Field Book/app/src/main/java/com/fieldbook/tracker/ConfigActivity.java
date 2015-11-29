@@ -32,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -110,11 +111,15 @@ public class ConfigActivity extends AppCompatActivity {
 
     private EditText exportFile;
     private String exportFileString = "";
+    private String fFile;
 
     private CheckBox checkDB;
     private CheckBox checkExcel;
+    private CheckBox checkOverwrite;
     private Boolean checkDbBool = false;
     private Boolean checkExcelBool = false;
+    private Boolean checkOverwriteBool = false;
+
 
     private boolean isCSV;
     private int idColPosition;
@@ -154,7 +159,7 @@ public class ConfigActivity extends AppCompatActivity {
         try {
             TutorialSettingsActivity.thisActivity.finish();
         } catch (Exception e) {
-            Log.e("Field Book","");
+            Log.e("Field Book", "");
         }
 
         super.onDestroy();
@@ -223,7 +228,718 @@ public class ConfigActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        // Advanced Settings
+        //setup
+        setupDialog = new Dialog(this, R.style.AppDialog);
+        setupDialog.setTitle(getString(R.string.profile));
+        setupDialog.setContentView(R.layout.config);
+
+        android.view.WindowManager.LayoutParams params = setupDialog.getWindow().getAttributes();
+        params.width = LayoutParams.MATCH_PARENT;
+        params = setupDialog.getWindow().getAttributes();
+        params.width = LayoutParams.MATCH_PARENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        setupDialog.getWindow().setAttributes(params);
+
+        setupDialog.setCancelable(true);
+        setupDialog.setCanceledOnTouchOutside(true);
+
+        // This is the list of items shown on the settings screen itself
+        setupList = (ListView) setupDialog.findViewById(R.id.myList);
+        Button setupCloseBtn = (Button) setupDialog.findViewById(R.id.closeBtn);
+        setupCloseBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                setupDialog.dismiss();
+            }
+        });
+
+        fieldDialog2 = new Dialog(this, R.style.AppDialog);
+        fieldDialog2.setTitle(getString(R.string.fields));
+        fieldDialog2.setContentView(R.layout.config);
+
+        fieldDialog2.setCancelable(true);
+        fieldDialog2.setCanceledOnTouchOutside(true);
+
+        Button fdCloseBtn2 = (Button) fieldDialog2.findViewById(R.id.closeBtn);
+
+        fdCloseBtn2.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View v) {
+                fieldDialog2.dismiss();
+            }
+        });
+
+        ListView settingsList = (ListView) findViewById(R.id.myList);
+
+        String[] items2 = new String[]{getString(R.string.fields),
+                getString(R.string.traits), getString(R.string.profile), getString(R.string.export), getString(R.string.advanced),
+                getString(R.string.language)};//, "API Test"}; TODO cleanup
+
+        settingsList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
+                Intent intent = new Intent();
+                switch (position) {
+                    case 0:
+                        intent.setClassName(ConfigActivity.this,
+                                FileExploreActivity.class.getName());
+                        intent.putExtra("path", Constants.FIELDIMPORTPATH);
+                        intent.putExtra("include", new String[]{"csv", "xls"});
+                        startActivityForResult(intent, 1);
+                        break;
+
+                    case 1:
+                        if (!ep.getBoolean("ImportFieldFinished", false)) {
+                            makeToast(getString(R.string.importtraitwarning));
+                            return;
+                        }
+
+                        intent.setClassName(ConfigActivity.this,
+                                TraitEditorActivity.class.getName());
+                        startActivity(intent);
+                        break;
+                    case 2:
+                        if (!ep.getBoolean("ImportFieldFinished", false)) {
+                            makeToast(getString(R.string.nofieldloaded));
+                            return;
+                        }
+
+                        showSetupDialog();
+                        break;
+                    case 3:
+                        if (!ep.getBoolean("ImportFieldFinished", false)) {
+                            makeToast(getString(R.string.nofieldloaded));
+                            return;
+                        } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
+                            makeToast(getString(R.string.notraitloaded));
+                            return;
+                        }
+
+                        showSaveDialog();
+                        break;
+                    case 4:
+                        showAdvancedDialog();
+                        break;
+                    case 5:
+                        showLanguageDialog();
+                        break;
+                    /*case 6:
+                        intent.setClassName(ConfigActivity.this,
+                                ApiActivity.class.getName());
+                        startActivity(intent);
+                        break;*/
+                }
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, items2);
+        settingsList.setAdapter(adapter);
+
+        SharedPreferences.Editor ed = ep.edit();
+
+        if (ep.getInt("UpdateVersion", -1) < getVersion()) {
+            ed.putInt("UpdateVersion", getVersion());
+            ed.apply();
+            Intent intent = new Intent();
+            intent.setClass(ConfigActivity.this, ChangelogActivity.class);
+            startActivity(intent);
+        }
+        if (!ep.getBoolean("TipsConfigured", false)) {
+            ed.putBoolean("TipsConfigured", true);
+            ed.apply();
+            showTipsDialog();
+            loadSampleDataDialog();
+        }
+    }
+
+    private String getOverwriteFile(String filename) {
+        String[] fileArray;
+        File dir = new File(Constants.FIELDEXPORTPATH);
+        File[] files = dir.listFiles();
+        fileArray = new String[files.length];
+        for (int i = 0; i < files.length; ++i) {
+            fileArray[i] = files[i].getName();
+        }
+
+        if (filename.contains(fFile)) {
+            for (int i = 0; i < fileArray.length; i++) {
+
+                if (checkDbBool) {
+                    if (fileArray[i].contains(fFile) && fileArray[i].contains("database")) {
+                        File delFile = new File(Constants.FIELDEXPORTPATH,fileArray[i]);
+                        delFile.delete();
+                        scanFile(delFile);
+                    }
+                }
+
+                if (checkExcelBool) {
+                    if (fileArray[i].contains(fFile) && fileArray[i].contains("table")) {
+                        File delFile = new File(Constants.FIELDEXPORTPATH,fileArray[i]);
+                        delFile.delete();
+                        scanFile(delFile);
+                    }
+                }
+            }
+        }
+
+        return filename;
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                mChosenFile = data.getStringExtra("result");
+                showFieldFileDialog();
+            }
+        }
+
+        if (requestCode == 2) {
+            if (resultCode == RESULT_OK) {
+                mChosenFile = data.getStringExtra("result");
+                mChosenFile = mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.length());
+                mHandler.post(importDB);
+            }
+        }
+    }
+
+    public int getVersion() {
+        int v = 0;
+        try {
+            v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e("Field Book", "" + e.getMessage());
+        }
+        return v;
+    }
+
+    private void showTipsDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+
+        builder.setTitle(getString(R.string.tutorial));
+        builder.setMessage(getString(R.string.tipsdesc));
+
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                Editor ed = ep.edit();
+                ed.putBoolean("Tips", true);
+                ed.putBoolean("TipsConfigured", true);
+                ed.apply();
+
+                dialog.dismiss();
+
+                invalidateOptionsMenu();
+
+                Intent intent = new Intent();
+                intent.setClassName(ConfigActivity.this,
+                        ConfigActivity.class.getName());
+                startActivity(intent);
+
+            }
+
+        });
+
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                Editor ed = ep.edit();
+                ed.putBoolean("TipsConfigured", true);
+                ed.apply();
+
+                dialog.dismiss();
+
+                Intent intent = new Intent();
+                intent.setClassName(ConfigActivity.this,
+                        ConfigActivity.class.getName());
+                startActivity(intent);
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void loadSampleDataDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+
+        builder.setTitle(getString(R.string.sampledata));
+        builder.setMessage(getString(R.string.loadsampledata));
+
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // Load database with sample data
+                mChosenFile = "sample.db";
+                mHandler.post(importDB);
+            }
+        });
+
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    // Only used for truncating lat long values
+    private String truncateDecimalString(String v) {
+        int count = 0;
+
+        boolean found = false;
+
+        String truncated = "";
+
+        for (int i = 0; i < v.length(); i++) {
+            if (found) {
+                count += 1;
+
+                if (count == 5)
+                    break;
+            }
+
+            if (v.charAt(i) == '.') {
+                found = true;
+            }
+
+            truncated += v.charAt(i);
+        }
+
+        return truncated;
+    }
+
+    private void showAboutDialog() {
+        final PackageManager packageManager = this.getPackageManager();
+
+        try {
+            PackageInfo packageInfo = packageManager.getPackageInfo(this.getPackageName(), 0);
+            versionName = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            versionName = null;
+        }
+
+        final Dialog aboutDialog = new Dialog(ConfigActivity.this,
+                R.style.AppDialog);
+
+        aboutDialog.setTitle(R.string.about);
+
+        aboutDialog.setContentView(R.layout.about);
+
+        android.view.WindowManager.LayoutParams langParams = aboutDialog.getWindow().getAttributes();
+        langParams.width = LayoutParams.MATCH_PARENT;
+        aboutDialog.getWindow().setAttributes(langParams);
+
+        aboutDialog.setCancelable(true);
+        aboutDialog.setCanceledOnTouchOutside(true);
+
+        TextView versionText = (TextView) aboutDialog.findViewById(R.id.tvVersion);
+        versionText.setText(getString(R.string.updatemsg) + " " + versionName);
+
+        versionText.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(ConfigActivity.this, ChangelogActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        Button closeBtn = (Button) aboutDialog
+                .findViewById(R.id.closeBtn);
+
+        closeBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                aboutDialog.dismiss();
+            }
+        });
+
+        aboutDialog.show();
+    }
+
+    // Validate that column choices are different from one another
+    private boolean checkImportColumnNames() {
+        String idCol = unique.getSelectedItem().toString();
+        String priCol = primary.getSelectedItem().toString();
+        String secCol = secondary.getSelectedItem().toString();
+
+        idColPosition = unique.getSelectedItemPosition();
+
+        if (idCol.equals(priCol) || idCol.equals(secCol) || priCol.equals(secCol)) {
+            makeToast(getString(R.string.colnamesdif));
+        }
+
+        return true;
+    }
+
+    private Runnable exportData = new Runnable() {
+        public void run() {
+            new ExportDataTask().execute(0);
+        }
+    };
+
+    private class ExportDataTask extends AsyncTask<Integer, Integer, Integer> {
+        boolean fail;
+        boolean noData = false;
+
+        ProgressDialog dialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            fail = false;
+
+            dialog = new ProgressDialog(ConfigActivity.this);
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(false);
+            dialog.setMessage(Html
+                    .fromHtml(getString(R.string.exportmsg)));
+            dialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... params) {
+            String[] newRanges = newRange.toArray(new String[newRange.size()]);
+            String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
+
+            // Retrieves the data needed for export
+            Cursor exportData = MainActivity.dt.getExportDBData(newRanges, exportTraits);
+
+            for (String i : newRanges) {
+                Log.i("Field Book : Ranges : ", i);
+            }
+
+            for (String j : exportTraits) {
+                Log.i("Field Book : Traits : ", j);
+            }
+
+
+            if (exportData.getCount() == 0) {
+                noData = true;
+                return (0);
+            }
+
+            if (checkDbBool & !checkExcelBool) {
+                if (exportData.getCount() > 0) {
+                    try {
+                        File file = new File(Constants.FIELDEXPORTPATH,
+                                exportFileString + "_database.csv");
+
+                        if (file.exists()) {
+                            file.delete();
+                        }
+
+                        FileWriter fw = new FileWriter(file);
+
+                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
+
+                        csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
+                                + ep.getString("LastName", ""), ep.getString("Location", ""));
+
+                        System.out.println(exportFileString);
+                        shareFile(file);
+                    } catch (Exception e) {
+                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
+                        fail = true;
+                    }
+                }
+            } else if (checkExcelBool & !checkDbBool) {
+                if (exportData.getCount() > 0) {
+                    try {
+                        File file = new File(Constants.FIELDEXPORTPATH,
+                                exportFileString + "_table.csv");
+
+                        if (file.exists()) {
+                            file.delete();
+                        }
+
+                        FileWriter fw = new FileWriter(file);
+
+                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, exportTraits);
+                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
+
+                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
+                        shareFile(file);
+                    } catch (Exception e) {
+                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
+                        fail = true;
+                    }
+                }
+            } else {
+                if (exportData.getCount() > 0) {
+                    try {
+                        File file = new File(Constants.FIELDEXPORTPATH,
+                                exportFileString + "_database.csv");
+
+                        if (file.exists()) {
+                            file.delete();
+                        }
+
+                        FileWriter fw = new FileWriter(file);
+
+                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
+
+                        csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
+                                + ep.getString("LastName", ""), ep.getString("Location", ""));
+                        shareFile(file);
+                    } catch (Exception e) {
+                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
+                        fail = true;
+                    }
+                }
+
+                if (fail)
+                    return 0;
+
+                if (exportData.getCount() > 0) {
+                    try {
+                        File file = new File(Constants.FIELDEXPORTPATH,
+                                exportFileString + "_table.csv");
+
+                        if (file.exists()) {
+                            file.delete();
+                        }
+
+                        FileWriter fw = new FileWriter(file);
+
+                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, exportTraits);
+                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
+
+                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
+                        shareFile(file);
+                    } catch (Exception e) {
+                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
+                        fail = true;
+                    }
+                }
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            newRange.clear();
+
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+
+            if (fail) {
+                makeToast(getString(R.string.exporterror));
+            }
+
+            if (noData) {
+                makeToast(getString(R.string.exporttraiterror));
+            }
+        }
+    }
+
+    private Runnable exportDB = new Runnable() {
+        public void run() {
+            new ExportDBTask().execute(0);
+        }
+    };
+
+    private class ExportDBTask extends AsyncTask<Integer, Integer, Integer> {
+        boolean fail;
+        ProgressDialog dialog;
+        String error;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            fail = false;
+
+            dialog = new ProgressDialog(ConfigActivity.this);
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(false);
+            dialog.setMessage(Html
+                    .fromHtml(getString(R.string.exportmsg)));
+            dialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... params) {
+            try {
+                MainActivity.dt.exportDatabase(exportFileString);
+            } catch (Exception e) {
+                ErrorLog("ExportDatabaseError.txt", "" + e.getMessage());
+                e.printStackTrace();
+                error = "" + e.getMessage();
+                fail = true;
+            }
+
+            File exportedDb = new File(Constants.BACKUPPATH + "/" + exportFileString + ".db");
+            File exportedSp = new File(Constants.BACKUPPATH + "/" + exportFileString + "_sharedpref.xml");
+
+            shareFile(exportedDb);
+            shareFile(exportedSp);
+
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+
+            if (fail) {
+                ErrorLog("ExportDatabaseError.txt", error);
+                makeToast(getString(R.string.exporterror));
+            } else {
+                makeToast(getString(R.string.exportcomplete));
+            }
+
+        }
+    }
+
+    private Runnable importDB = new Runnable() {
+        public void run() {
+            new ImportDBTask().execute(0);
+        }
+    };
+
+    private class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {
+        boolean fail;
+        ProgressDialog dialog;
+        String error;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            fail = false;
+
+            dialog = new ProgressDialog(ConfigActivity.this);
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(false);
+            dialog.setMessage(Html
+                    .fromHtml(getString(R.string.importmsg)));
+            dialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... params) {
+            try {
+                MainActivity.dt.importDatabase(mChosenFile);
+            } catch (Exception e) {
+                ErrorLog("ImportDatabase.txt", "" + e.getMessage());
+                e.printStackTrace();
+
+                error = "" + e.getMessage();
+
+                fail = true;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if (dialog.isShowing())
+                dialog.dismiss();
+
+            if (fail) {
+                ErrorLog("DBImportError.txt", error);
+                makeToast(getString(R.string.importerror));
+            }
+
+            SharedPreferences prefs = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.apply();
+
+            MainActivity.reloadData = true;
+        }
+    }
+
+    /**
+     * Scan file to update file list and share exported file
+     */
+    private void shareFile(File filePath) {
+        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
+
+        if (!ep.getBoolean("DisableShare", true)) {
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
+            try {
+                startActivity(Intent.createChooser(intent, "Sending File..."));
+            } catch (Exception e) {
+                Log.e("Field Book", "" + e.getMessage());
+            }
+        }
+    }
+
+    private void scanFile(File filePath) {
+        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
+    }
+
+    //TODO merge with verfiyuniquecolumncsv
+    private boolean verifyUniqueColumnExcel(Workbook wb) {
+        HashMap<String, String> check = new HashMap<String, String>();
+
+        for (int s = 0; s < wb.getSheet(0).getRows(); s++) {
+            String value = wb.getSheet(0).getCell(idColPosition, s).getContents();
+
+            if (check.containsKey(value)) {
+                return false;
+            } else
+                check.put(value, value);
+        }
+
+        return true;
+    }
+
+    private boolean verifyUniqueColumnCSV(String path) {
+        try {
+            HashMap<String, String> check = new HashMap<String, String>();
+            FileReader fr = new FileReader(path);
+            CSVReader cr = new CSVReader(fr);
+            String[] columns = cr.readNext();
+            System.out.println(idColPosition);
+
+            while (columns != null) {
+                columns = cr.readNext();
+
+                if (columns != null) {
+                    if (check.containsKey(columns[idColPosition])) {
+                        cr.close();
+                        return false;
+                    } else
+                        check.put(columns[idColPosition], columns[idColPosition]);
+                }
+            }
+
+            return true;
+        } catch (Exception n) {
+            ErrorLog("VerifyUniqueError.txt", "" + n.getMessage());
+            n.printStackTrace();
+            return false;
+        }
+    }
+
+    // Helper function to merge arrays
+    String[] concat(String[] a1, String[] a2) {
+        String[] n = new String[a1.length + a2.length];
+        System.arraycopy(a1, 0, n, 0, a1.length);
+        System.arraycopy(a2, 0, n, a1.length, a2.length);
+
+        return n;
+    }
+
+    // Helper function to set spinner adapter and listener
+    private void setSpinner(Spinner spinner, String[] data, String pref) {
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.spinnerlayout, data);
+        spinner.setAdapter(itemsAdapter);
+
+        int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(0)));
+        spinner.setSelection(spinnerPosition);
+    }
+
+    public void makeToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showAdvancedDialog() {
         advancedDialog = new Dialog(this, R.style.AppDialog);
         advancedDialog.setTitle(getString(R.string.advanced));
         advancedDialog.setContentView(R.layout.advanced);
@@ -235,19 +951,19 @@ public class ConfigActivity extends AppCompatActivity {
         advancedDialog.setCancelable(true);
         advancedDialog.setCanceledOnTouchOutside(true);
 
-        CheckBox tips = (CheckBox) advancedDialog.findViewById(R.id.tips);
-        CheckBox cycle = (CheckBox) advancedDialog.findViewById(R.id.cycle);
-        CheckBox ignoreEntries = (CheckBox) advancedDialog.findViewById(R.id.ignoreExisting);
-        CheckBox useDay = (CheckBox) advancedDialog.findViewById(R.id.useDay);
-        CheckBox rangeSound = (CheckBox) advancedDialog.findViewById(R.id.rangeSound);
-        CheckBox jumpToPlot = (CheckBox) advancedDialog.findViewById(R.id.jumpToPlot);
-        CheckBox barcodeScan = (CheckBox) advancedDialog.findViewById(R.id.barcodeScan);
-        CheckBox nextEmptyPlot = (CheckBox) advancedDialog.findViewById(R.id.nextEmptyPlot);
-        CheckBox quickGoTo = (CheckBox) advancedDialog.findViewById(R.id.quickGoTo);
-        CheckBox disableShare = (CheckBox) advancedDialog.findViewById(R.id.disableShare);
-        CheckBox disableEntryNavLeft = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNavLeft);
-        CheckBox disableEntryNavRight = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNavRight);
-        CheckBox dataGrid = (CheckBox) advancedDialog.findViewById(R.id.dataGrid);
+        CheckBox tips = (CheckBox) advancedDialog.findViewById(R.id.tipsCheckbox);
+        CheckBox cycle = (CheckBox) advancedDialog.findViewById(R.id.cycleTraitsCheckbox);
+        CheckBox ignoreEntries = (CheckBox) advancedDialog.findViewById(R.id.ignoreExistingCheckbox);
+        CheckBox useDay = (CheckBox) advancedDialog.findViewById(R.id.useDayCheckbox);
+        CheckBox rangeSound = (CheckBox) advancedDialog.findViewById(R.id.rangeSoundCheckbox);
+        CheckBox jumpToPlot = (CheckBox) advancedDialog.findViewById(R.id.jumpToPlotCheckbox);
+        CheckBox barcodeScan = (CheckBox) advancedDialog.findViewById(R.id.barcodeScanCheckbox);
+        CheckBox nextEmptyPlot = (CheckBox) advancedDialog.findViewById(R.id.nextEmptyPlotCheckbox);
+        CheckBox quickGoTo = (CheckBox) advancedDialog.findViewById(R.id.quickGoToCheckbox);
+        CheckBox disableShare = (CheckBox) advancedDialog.findViewById(R.id.disableShareCheckbox);
+        CheckBox disableEntryNavLeft = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNavLeftCheckbox);
+        CheckBox disableEntryNavRight = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNavRightCheckbox);
+        CheckBox dataGrid = (CheckBox) advancedDialog.findViewById(R.id.dataGridCheckbox);
 
         Button advCloseBtn = (Button) advancedDialog.findViewById(R.id.closeBtn);
 
@@ -411,778 +1127,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        // Export Field book
-        saveDialog = new Dialog(this, R.style.AppDialog);
-        saveDialog.setTitle(getString(R.string.export));
-        saveDialog.setContentView(R.layout.savefile);
-
-        android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        saveDialog.getWindow().setAttributes(params2);
-
-        saveDialog.setCancelable(true);
-        saveDialog.setCanceledOnTouchOutside(true);
-
-        Button closeBtn = (Button) saveDialog.findViewById(R.id.closeBtn);
-
-        closeBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                saveDialog.dismiss();
-            }
-        });
-
-        exportFile = (EditText) saveDialog.findViewById(R.id.fileName);
-
-        checkDB = (CheckBox) saveDialog.findViewById(R.id.formatDB);
-        checkExcel = (CheckBox) saveDialog.findViewById(R.id.formatExcel);
-
-        allColumns = (RadioButton) saveDialog.findViewById(R.id.allColumns);
-        onlyUnique = (RadioButton) saveDialog.findViewById(R.id.onlyUnique);
-        allTraits = (RadioButton) saveDialog.findViewById(R.id.allTraits);
-        activeTraits = (RadioButton) saveDialog.findViewById(R.id.activeTraits);
-
-        Button exportButton = (Button) saveDialog.findViewById(R.id.saveBtn);
-
-        exportButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-                // Ensure at least one export type is checked
-                if (!checkDB.isChecked() & !checkExcel.isChecked()) {
-                    Toast.makeText(ConfigActivity.this, getString(R.string.noexportcheck),
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                if(!onlyUnique.isChecked() & !allColumns.isChecked()) {
-                    Toast.makeText(ConfigActivity.this, getString(R.string.nofieldcheck),
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                if(!activeTraits.isChecked() & !allTraits.isChecked()) {
-                    Toast.makeText(ConfigActivity.this, getString(R.string.notraitcheck),
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                newRange = new ArrayList<>();
-
-                if(onlyUnique.isChecked()) {
-                    newRange.add(ep.getString("ImportUniqueName", ""));
-                }
-
-                if(allColumns.isChecked()) {
-                    String[] columns = MainActivity.dt.getRangeColumns();
-                    Collections.addAll(newRange, columns);
-                }
-
-                exportTrait = new ArrayList<>();
-
-                if(activeTraits.isChecked()) {
-                    String[] traits = MainActivity.dt.getVisibleTrait();
-                    Collections.addAll(exportTrait, traits);
-                }
-
-                if(allTraits.isChecked()) {
-                    String[] traits = MainActivity.dt.getAllTraits();
-                    Collections.addAll(exportTrait, traits);
-                }
-
-                checkDbBool = checkDB.isChecked();
-                checkExcelBool = checkExcel.isChecked();
-                exportFileString = exportFile.getText().toString();
-
-                saveDialog.dismiss();
-                mHandler.post(exportData);
-            }
-        });
-
-        //setup
-        setupDialog = new Dialog(this, R.style.AppDialog);
-        setupDialog.setTitle(getString(R.string.profile));
-        setupDialog.setContentView(R.layout.config);
-
-        params = setupDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        setupDialog.getWindow().setAttributes(params);
-
-        setupDialog.setCancelable(true);
-        setupDialog.setCanceledOnTouchOutside(true);
-
-        // This is the list of items shown on the settings screen itself
-        setupList = (ListView) setupDialog.findViewById(R.id.myList);
-        Button setupCloseBtn = (Button) setupDialog.findViewById(R.id.closeBtn);
-        setupCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                setupDialog.dismiss();
-            }
-        });
-
-        fieldDialog2 = new Dialog(this, R.style.AppDialog);
-        fieldDialog2.setTitle(getString(R.string.fields));
-        fieldDialog2.setContentView(R.layout.config);
-
-        fieldDialog2.setCancelable(true);
-        fieldDialog2.setCanceledOnTouchOutside(true);
-
-        Button fdCloseBtn2 = (Button) fieldDialog2.findViewById(R.id.closeBtn);
-
-        fdCloseBtn2.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                fieldDialog2.dismiss();
-            }
-        });
-
-        ListView settingsList = (ListView) findViewById(R.id.myList);
-
-        String[] items2 = new String[]{ getString(R.string.fields),
-                getString(R.string.traits), getString(R.string.profile),getString(R.string.export), getString(R.string.advanced),
-                getString(R.string.language)};//, "API Test"}; TODO cleanup
-
-        settingsList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
-                Intent intent = new Intent();
-                switch (position) {
-                    case 0:
-                        intent.setClassName(ConfigActivity.this,
-                                FileExploreActivity.class.getName());
-                        intent.putExtra("path", Constants.FIELDIMPORTPATH);
-                        startActivityForResult(intent, 1);
-                        break;
-
-                    case 1:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.importtraitwarning));
-                            return;
-                        }
-
-                        intent.setClassName(ConfigActivity.this,
-                                TraitEditorActivity.class.getName());
-                        startActivity(intent);
-                        break;
-                    case 2:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.nofieldloaded));
-                            return;
-                        }
-
-                        showSetupDialog();
-                        break;
-                    case 3:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.nofieldloaded));
-                            return;
-                        }else if (MainActivity.dt.getTraitColumnsAsString() == null) {
-                            makeToast(getString(R.string.notraitloaded));
-                            return;
-                        }
-
-                        showSaveDialog();
-                        break;
-                    case 4:
-                        advancedDialog.show();
-                        break;
-                    case 5:
-                        showLanguageDialog();
-                        break;
-                    /*case 6:
-                        intent.setClassName(ConfigActivity.this,
-                                ApiActivity.class.getName());
-                        startActivity(intent);
-                        break;*/
-                }
-            }
-        });
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, items2);
-        settingsList.setAdapter(adapter);
-
-        SharedPreferences.Editor ed = ep.edit();
-
-        if (ep.getInt("UpdateVersion", -1) < getVersion()) {
-            ed.putInt("UpdateVersion", getVersion());
-            ed.apply();
-            Intent intent = new Intent();
-            intent.setClass(ConfigActivity.this, ChangelogActivity.class);
-            startActivity(intent);
-        }
-        if (!ep.getBoolean("TipsConfigured", false)) {
-            ed.putBoolean("TipsConfigured", true);
-            ed.apply();
-            showTipsDialog();
-            loadSampleDataDialog();
-        }
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
-                mChosenFile = data.getStringExtra("result");
-                showFieldFileDialog();
-            }
-        }
-
-        if (requestCode == 2) {
-            if (resultCode == RESULT_OK) {
-                mChosenFile = data.getStringExtra("result");
-                mChosenFile = mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.length());
-                mHandler.post(importDB);
-            }
-        }
-    }
-
-    public int getVersion() {
-        int v = 0;
-        try {
-            v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e("Field Book","" + e.getMessage());
-        }
-        return v;
-    }
-
-    private void showTipsDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
-
-        builder.setTitle(getString(R.string.tutorial));
-        builder.setMessage(getString(R.string.tipsdesc));
-
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                Editor ed = ep.edit();
-                ed.putBoolean("Tips", true);
-                ed.putBoolean("TipsConfigured", true);
-                ed.commit();
-
-                dialog.dismiss();
-
-                invalidateOptionsMenu();
-
-                Intent intent = new Intent();
-                intent.setClassName(ConfigActivity.this,
-                        ConfigActivity.class.getName());
-                startActivity(intent);
-
-            }
-
-        });
-
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                Editor ed = ep.edit();
-                ed.putBoolean("TipsConfigured", true);
-                ed.commit();
-
-                dialog.dismiss();
-
-                Intent intent = new Intent();
-                intent.setClassName(ConfigActivity.this,
-                        ConfigActivity.class.getName());
-                startActivity(intent);
-            }
-
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    private void loadSampleDataDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
-
-        builder.setTitle(getString(R.string.sampledata));
-        builder.setMessage(getString(R.string.loadsampledata));
-
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                // Load database with sample data
-                mChosenFile = "sample.db";
-                mHandler.post(importDB);
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    // Only used for truncating lat long values
-    private String truncateDecimalString(String v) {
-        int count = 0;
-
-        boolean found = false;
-
-        String truncated = "";
-
-        for (int i = 0; i < v.length(); i++) {
-            if (found) {
-                count += 1;
-
-                if (count == 5)
-                    break;
-            }
-
-            if (v.charAt(i) == '.') {
-                found = true;
-            }
-
-            truncated += v.charAt(i);
-        }
-
-        return truncated;
-    }
-
-    private void showAboutDialog() {
-        final PackageManager packageManager = this.getPackageManager();
-
-        try {
-            PackageInfo packageInfo = packageManager.getPackageInfo(this.getPackageName(), 0);
-            versionName = packageInfo.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            versionName = null;
-        }
-
-        final Dialog aboutDialog = new Dialog(ConfigActivity.this,
-                R.style.AppDialog);
-
-        aboutDialog.setTitle(R.string.about);
-
-        aboutDialog.setContentView(R.layout.about);
-
-        android.view.WindowManager.LayoutParams langParams = aboutDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.MATCH_PARENT;
-        aboutDialog.getWindow().setAttributes(langParams);
-
-        aboutDialog.setCancelable(true);
-        aboutDialog.setCanceledOnTouchOutside(true);
-
-        TextView versionText = (TextView) aboutDialog.findViewById(R.id.tvVersion);
-        versionText.setText(getString(R.string.updatemsg) + " " + versionName);
-
-        versionText.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setClass(ConfigActivity.this, ChangelogActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        Button closeBtn = (Button) aboutDialog
-                .findViewById(R.id.closeBtn);
-
-        closeBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                aboutDialog.dismiss();
-            }
-        });
-
-        aboutDialog.show();
-    }
-
-    // Validate that column choices are different from one another
-    private boolean checkImportColumnNames() {
-        String idCol = unique.getSelectedItem().toString();
-        String priCol = primary.getSelectedItem().toString();
-        String secCol = secondary.getSelectedItem().toString();
-
-        idColPosition = unique.getSelectedItemPosition();
-
-        if (idCol.equals(priCol) || idCol.equals(secCol) || priCol.equals(secCol)) {
-            makeToast(getString(R.string.colnamesdif));
-        }
-
-        return true;
-    }
-
-    private Runnable exportData = new Runnable() {
-        public void run() {
-            new ExportDataTask().execute(0);
-        }
-    };
-
-    private class ExportDataTask extends AsyncTask<Integer, Integer, Integer> {
-        boolean fail;
-        boolean noData = false;
-
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            fail = false;
-
-            dialog = new ProgressDialog(ConfigActivity.this);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html
-                    .fromHtml(getString(R.string.exportmsg)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            String[] newRanges = newRange.toArray(new String[newRange.size()]);
-            String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
-
-            // Retrieves the data needed for export
-            Cursor exportData = MainActivity.dt.getExportDBData(newRanges, exportTraits);
-
-            for(String i : newRanges) {
-                Log.i("Field Book : Ranges : ",i);
-            }
-
-            for(String j : exportTraits) {
-                Log.i("Field Book : Traits : ",j);
-            }
-
-
-            if(exportData.getCount()==0) {
-                noData = true;
-                return(0);
-            }
-
-            if (checkDbBool & !checkExcelBool) {
-                if (exportData.getCount() > 0) {
-                    try {
-                        File file = new File(Constants.FIELDEXPORTPATH,
-                                exportFileString + "_database.csv");
-
-                        if (file.exists()) {
-                            file.delete();
-                        }
-
-                        FileWriter fw = new FileWriter(file);
-
-                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
-
-                        csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
-                                + ep.getString("LastName", ""), ep.getString("Location", ""));
-
-                        System.out.println(exportFileString);
-                        shareFile(file);
-                    } catch (Exception e) {
-                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
-                        fail = true;
-                    }
-                }
-            } else if (checkExcelBool & !checkDbBool) {
-                if (exportData.getCount() > 0) {
-                    try {
-                        File file = new File(Constants.FIELDEXPORTPATH,
-                                exportFileString + "_table.csv");
-
-                        if (file.exists()) {
-                            file.delete();
-                        }
-
-                        FileWriter fw = new FileWriter(file);
-
-                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, exportTraits);
-                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
-
-                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
-                        shareFile(file);
-                    } catch (Exception e) {
-                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
-                        fail = true;
-                    }
-                }
-            } else {
-                if (exportData.getCount() > 0) {
-                    try {
-                        File file = new File(Constants.FIELDEXPORTPATH,
-                                exportFileString + "_database.csv");
-
-                        if (file.exists()) {
-                            file.delete();
-                        }
-
-                        FileWriter fw = new FileWriter(file);
-
-                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
-
-                        csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
-                                + ep.getString("LastName", ""), ep.getString("Location", ""));
-                        shareFile(file);
-                    } catch (Exception e) {
-                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
-                        fail = true;
-                    }
-                }
-
-                if (fail)
-                    return 0;
-
-                if (exportData.getCount() > 0) {
-                    try {
-                        File file = new File(Constants.FIELDEXPORTPATH,
-                                exportFileString + "_table.csv");
-
-                        if (file.exists()) {
-                            file.delete();
-                        }
-
-                        FileWriter fw = new FileWriter(file);
-
-                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, exportTraits);
-                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
-
-                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
-                        shareFile(file);
-                    } catch (Exception e) {
-                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
-                        fail = true;
-                    }
-                }
-            }
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            newRange.clear();
-
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-
-            if (fail) {
-                makeToast(getString(R.string.exporterror));
-            }
-
-            if (noData) {
-                makeToast(getString(R.string.exporttraiterror));
-            }
-        }
-    }
-
-    private Runnable exportDB = new Runnable() {
-        public void run() {
-            new ExportDBTask().execute(0);
-        }
-    };
-
-    private class ExportDBTask extends AsyncTask<Integer, Integer, Integer>
-    {
-        boolean fail;
-        ProgressDialog dialog;
-        String error;
-
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-            fail = false;
-
-            dialog = new ProgressDialog(ConfigActivity.this);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html
-                    .fromHtml(getString(R.string.exportmsg)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params)
-        {
-            try {
-                MainActivity.dt.exportDatabase(exportFileString);
-            }
-            catch (Exception e)
-            {
-                ErrorLog("ExportDatabaseError.txt", "" + e.getMessage());
-                e.printStackTrace();
-                error = "" + e.getMessage();
-                fail = true;
-            }
-
-            File exportedDb = new File(Constants.BACKUPPATH + "/" + exportFileString + ".db");
-            File exportedSp = new File(Constants.BACKUPPATH + "/" + exportFileString + "_sharedpref.xml");
-
-            shareFile(exportedDb);
-            shareFile(exportedSp);
-
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result)
-        {
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-
-            if (fail) {
-                ErrorLog("ExportDatabaseError.txt", error);
-                makeToast(getString(R.string.exporterror));
-            } else {
-                makeToast(getString(R.string.exportcomplete));
-            }
-
-        }
-    }
-
-    private Runnable importDB = new Runnable() {
-        public void run() {
-            new ImportDBTask().execute(0);
-        }
-    };
-
-    private class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {
-        boolean fail;
-        ProgressDialog dialog;
-        String error;
-
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-            fail = false;
-
-            dialog = new ProgressDialog(ConfigActivity.this);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html
-                    .fromHtml(getString(R.string.importmsg)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            try {
-                MainActivity.dt.importDatabase(mChosenFile);
-            } catch (Exception e) {
-                ErrorLog("ImportDatabase.txt", "" + e.getMessage());
-                e.printStackTrace();
-
-                error = "" + e.getMessage();
-
-                fail = true;
-            }
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result)
-        {
-            if (dialog.isShowing())
-                dialog.dismiss();
-
-            if (fail) {
-                ErrorLog("DBImportError.txt", error);
-                makeToast(getString(R.string.importerror));
-            }
-
-            SharedPreferences prefs = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.apply();
-
-            MainActivity.reloadData = true;
-        }
-    }
-
-    /**
-     * Scan file to update file list and share exported file
-     */
-    private void shareFile(File filePath) {
-        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
-
-        if(!ep.getBoolean("DisableShare", true)) {
-            Intent intent = new Intent();
-            intent.setAction(android.content.Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
-            try {
-                startActivity(Intent.createChooser(intent, "Sending File..."));
-            } catch(Exception e) {
-                Log.e("Field Book","" + e.getMessage());
-            }
-        }
-    }
-
-    private void scanFile(File filePath) {
-        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
-    }
-
-    //TODO merge with verfiyuniquecolumncsv
-    private boolean verifyUniqueColumnExcel(Workbook wb) {
-        HashMap<String, String> check = new HashMap<String, String>();
-
-        for (int s = 0; s < wb.getSheet(0).getRows(); s++) {
-            String value = wb.getSheet(0).getCell(idColPosition, s).getContents();
-
-            if (check.containsKey(value)) {
-                return false;
-            } else
-                check.put(value, value);
-        }
-
-        return true;
-    }
-
-    private boolean verifyUniqueColumnCSV(String path) {
-        try {
-            HashMap<String, String> check = new HashMap<String, String>();
-
-            FileReader fr = new FileReader(path);
-
-            CSVReader cr = new CSVReader(fr);
-
-            String[] columns = cr.readNext();
-
-            System.out.println(idColPosition);
-
-            while (columns != null) {
-                columns = cr.readNext();
-
-                if (columns != null) {
-                    if (check.containsKey(columns[idColPosition])) {
-                        cr.close();
-                        return false;
-                    } else
-                        check.put(columns[idColPosition], columns[idColPosition]);
-                }
-            }
-
-            return true;
-        } catch (Exception n) {
-            ErrorLog("VerifyUniqueError.txt", "" + n.getMessage());
-            n.printStackTrace();
-            return false;
-        }
-    }
-
-    // Helper function to merge arrays
-    String[] concat(String[] a1, String[] a2) {
-        String[] n = new String[a1.length + a2.length];
-        System.arraycopy(a1, 0, n, 0, a1.length);
-        System.arraycopy(a2, 0, n, a1.length, a2.length);
-
-        return n;
-    }
-
-    // Helper function to set spinner adapter and listener
-    private void setSpinner(Spinner spinner, String[] data, String pref) {
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.spinnerlayout, data);
-        spinner.setAdapter(itemsAdapter);
-
-        int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(0)));
-        spinner.setSelection(spinnerPosition);
-    }
-
-    public void makeToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        advancedDialog.show();
     }
 
     private void showLanguageDialog() {
@@ -1318,8 +1263,7 @@ public class ConfigActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View single_row = inflater.inflate(R.layout.languageline, null,
-                    true);
+            View single_row = inflater.inflate(R.layout.languageline, null, true);
             TextView textView = (TextView) single_row.findViewById(R.id.txt);
             ImageView imageView = (ImageView) single_row.findViewById(R.id.img);
             textView.setText(color_names[position]);
@@ -1351,7 +1295,7 @@ public class ConfigActivity extends AppCompatActivity {
     private void updateSetupList() {
         ArrayAdapter<String> ga = (ArrayAdapter) setupList.getAdapter();
 
-        if(ga!=null) {
+        if (ga != null) {
             ga.clear();
         }
 
@@ -1367,16 +1311,131 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showSaveDialog() {
+        // Export Field book
+        saveDialog = new Dialog(this, R.style.AppDialog);
+        saveDialog.setTitle(getString(R.string.export));
+        saveDialog.setContentView(R.layout.savefile);
+
+        android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
+        params2.width = LayoutParams.MATCH_PARENT;
+        saveDialog.getWindow().setAttributes(params2);
+
+        saveDialog.setCancelable(true);
+        saveDialog.setCanceledOnTouchOutside(true);
+
+        Button closeBtn = (Button) saveDialog.findViewById(R.id.closeBtn);
+
+        closeBtn.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View v) {
+                saveDialog.dismiss();
+            }
+        });
+
+        exportFile = (EditText) saveDialog.findViewById(R.id.fileName);
+
+        checkDB = (CheckBox) saveDialog.findViewById(R.id.formatDB);
+        checkExcel = (CheckBox) saveDialog.findViewById(R.id.formatExcel);
+        checkOverwrite = (CheckBox) saveDialog.findViewById(R.id.overwrite);
+
+        if (ep.getBoolean("Overwrite", false) ) {
+            checkOverwrite.setChecked(true);
+        }
+
+        checkOverwrite.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    Editor ed = ep.edit();
+                    ed.putBoolean("Overwrite", true);
+                    ed.apply();
+                } else {
+                    Editor ed = ep.edit();
+                    ed.putBoolean("Overwrite", false);
+                    ed.apply();
+                }
+            }
+        });
+
+        allColumns = (RadioButton) saveDialog.findViewById(R.id.allColumns);
+        onlyUnique = (RadioButton) saveDialog.findViewById(R.id.onlyUnique);
+        allTraits = (RadioButton) saveDialog.findViewById(R.id.allTraits);
+        activeTraits = (RadioButton) saveDialog.findViewById(R.id.activeTraits);
+
+        Button exportButton = (Button) saveDialog.findViewById(R.id.saveBtn);
+
+        exportButton.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View arg0) {
+                // Ensure at least one export type is checked
+                if (!checkDB.isChecked() & !checkExcel.isChecked()) {
+                    Toast.makeText(ConfigActivity.this, getString(R.string.noexportcheck),
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                if (!onlyUnique.isChecked() & !allColumns.isChecked()) {
+                    Toast.makeText(ConfigActivity.this, getString(R.string.nofieldcheck),
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                if (!activeTraits.isChecked() & !allTraits.isChecked()) {
+                    Toast.makeText(ConfigActivity.this, getString(R.string.notraitcheck),
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                newRange = new ArrayList<>();
+
+                if (onlyUnique.isChecked()) {
+                    newRange.add(ep.getString("ImportUniqueName", ""));
+                }
+
+                if (allColumns.isChecked()) {
+                    String[] columns = MainActivity.dt.getRangeColumns();
+                    Collections.addAll(newRange, columns);
+                }
+
+                exportTrait = new ArrayList<>();
+
+                if (activeTraits.isChecked()) {
+                    String[] traits = MainActivity.dt.getVisibleTrait();
+                    Collections.addAll(exportTrait, traits);
+                }
+
+                if (allTraits.isChecked()) {
+                    String[] traits = MainActivity.dt.getAllTraits();
+                    Collections.addAll(exportTrait, traits);
+                }
+
+                checkDbBool = checkDB.isChecked();
+                checkExcelBool = checkExcel.isChecked();
+
+                if (ep.getBoolean("Overwrite", false) ) {
+                    exportFileString = getOverwriteFile(exportFile.getText().toString());
+                } else {
+                    exportFileString = exportFile.getText().toString();
+                }
+
+                saveDialog.dismiss();
+                mHandler.post(exportData);
+            }
+        });
+
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
-        String fFile = ep.getString("FieldFile", "");
+        fFile = ep.getString("FieldFile", "");
 
         if (fFile.length() > 4 & fFile.toLowerCase().endsWith(".csv")) {
             fFile = fFile.substring(0, fFile.length() - 4);
         }
 
         exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile);
+
+        saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         saveDialog.show();
     }
 
@@ -1436,7 +1495,7 @@ public class ConfigActivity extends AppCompatActivity {
 
                 e.apply();
 
-                if(setupDialog.isShowing()) {
+                if (setupDialog.isShowing()) {
                     updateSetupList();
                 }
 
@@ -1459,7 +1518,7 @@ public class ConfigActivity extends AppCompatActivity {
         locationDialog.setCanceledOnTouchOutside(true);
 
         GPSTracker gps = new GPSTracker(this);
-        if(gps.canGetLocation()) { //GPS enabled
+        if (gps.canGetLocation()) { //GPS enabled
             lat = gps.getLatitude(); // returns latitude
             lng = gps.getLongitude(); // returns longitude
         } else {
@@ -1487,14 +1546,14 @@ public class ConfigActivity extends AppCompatActivity {
         yesLocation.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 Editor e = ep.edit();
-                if(latitude.getText().toString().length()>0 && longitude.getText().toString().length()>0) {
+                if (latitude.getText().toString().length() > 0 && longitude.getText().toString().length() > 0) {
                     e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
                 } else {
                     e.putString("Location", "null");
                 }
 
                 e.apply();
-                if(setupDialog.isShowing()) {
+                if (setupDialog.isShowing()) {
                     updateSetupList();
                 }
                 locationDialog.dismiss();
@@ -1565,6 +1624,7 @@ public class ConfigActivity extends AppCompatActivity {
         createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", ""));
         createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/audio");
         createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos");
+        createDir(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/.thumbnails");
     }
 
     private void createDir(String path) {
@@ -1585,7 +1645,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void loadFile() {
-        if(action==DIALOG_LOAD_FIELDFILEEXCEL) {
+        if (action == DIALOG_LOAD_FIELDFILEEXCEL) {
             WorkbookSettings wbSettings = new WorkbookSettings();
             wbSettings.setUseTemporaryFileDuringWrite(true);
 
@@ -1603,7 +1663,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
         }
-        if(action==DIALOG_LOAD_FIELDFILECSV) {
+        if (action == DIALOG_LOAD_FIELDFILECSV) {
             try {
                 FileReader fr = new FileReader(mChosenFile);
                 CSVReader cr = new CSVReader(fr);
@@ -1759,13 +1819,13 @@ public class ConfigActivity extends AppCompatActivity {
                 try {
                     cr.close();
                 } catch (Exception f) {
-                    ErrorLog("CSVError.txt", "" +f.getMessage());
+                    ErrorLog("CSVError.txt", "" + f.getMessage());
                 }
 
                 try {
                     fr.close();
                 } catch (Exception f) {
-                    ErrorLog("CSVError.txt","" + f.getMessage());
+                    ErrorLog("CSVError.txt", "" + f.getMessage());
                 }
 
                 // These 2 lines are necessary due to importing of range data.
@@ -1831,7 +1891,7 @@ public class ConfigActivity extends AppCompatActivity {
 
             scanFile(file);
         } catch (Exception e) {
-            Log.e("Field Book","" + e.getMessage());
+            Log.e("Field Book", "" + e.getMessage());
         }
     }
 
@@ -1956,30 +2016,31 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void checkIntent() {
         Bundle extras = getIntent().getExtras();
-        String dialog="";
+        String dialog = "";
 
-        if(extras != null) {
+        if (extras != null) {
             dialog = extras.getString("dialog");
         }
 
-        if(dialog != null) {
-            if(dialog.equals("person")) {
+        if (dialog != null) {
+            if (dialog.equals("person")) {
                 showPersonDialog();
             }
 
-            if(dialog.equals("location")) {
+            if (dialog.equals("location")) {
                 showLocationDialog();
             }
 
-            if(dialog.equals("fields")) {
+            if (dialog.equals("fields")) {
                 Intent intent = new Intent();
                 intent.setClassName(ConfigActivity.this,
                         FileExploreActivity.class.getName());
                 intent.putExtra("path", Constants.FIELDIMPORTPATH);
+                intent.putExtra("include", new String[]{"csv", "xls"});
                 startActivityForResult(intent, 1);
             }
 
-            if(dialog.equals("language")) {
+            if (dialog.equals("language")) {
                 showLanguageDialog();
             }
         }
@@ -2043,6 +2104,7 @@ public class ConfigActivity extends AppCompatActivity {
         intent.setClassName(ConfigActivity.this,
                 FileExploreActivity.class.getName());
         intent.putExtra("path", Constants.BACKUPPATH);
+        intent.putExtra("include", new String[]{"db"});
         startActivityForResult(intent, 2);
     }
 

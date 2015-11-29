@@ -174,8 +174,8 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         thisActivity = this;
 
-        final String[] data = new String[10];
-        final String[] enData = new String[10];
+        final String[] data = new String[11];
+        final String[] enData = new String[11];
 
         data[0] = getString(R.string.numeric);
         data[1] = getString(R.string.qualitative);
@@ -187,6 +187,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         data[7] = getString(R.string.audio);
         data[8] = getString(R.string.counter);
         data[9] = getString(R.string.rustrating);
+        data[10] = getString(R.string.multicategorical);
 
         enData[0] = "Numeric";
         enData[1] = "Categorical";
@@ -198,6 +199,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         enData[7] = "Audio";
         enData[8] = "Counter";
         enData[9] = "Rust Rating";
+        enData[10] = "Multicat";
 
         traitList = (DragSortListView) findViewById(R.id.myList);
 
@@ -729,6 +731,13 @@ public class TraitEditorActivity extends AppCompatActivity {
                 bool.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.GONE);
                 break;
+            case 10: //multicategorical
+                defBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.VISIBLE);
+                break;
         }
     }
 
@@ -1109,6 +1118,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         intent.setClassName(thisActivity,
                 FileExploreActivity.class.getName());
         intent.putExtra("path", Constants.TRAITPATH);
+        intent.putExtra("include", new String[] {"trt"});
         startActivityForResult(intent, 1);
     }
 

@@ -12,7 +12,7 @@
         android:layout_height="160dp"
         android:scaleType="fitXY"
         android:layout_gravity="center_horizontal"
-        android:src="@drawable/keep" />
+        android:src="@drawable/boolean_true" />
 
     <Button
         android:id="@+id/clearBoolean"

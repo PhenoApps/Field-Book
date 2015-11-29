@@ -13,7 +13,8 @@
         android:background="@color/main_primary"
         android:fitsSystemWindows="true"
         android:minHeight="?attr/actionBarSize"
-        app:theme="@style/ThemeOverlay.AppCompat.ActionBar"/>
+        app:popupTheme="@style/AppToolbar"
+        app:theme="@style/AppToolbar" />
 
     <ListView
         android:id="@+id/myList"

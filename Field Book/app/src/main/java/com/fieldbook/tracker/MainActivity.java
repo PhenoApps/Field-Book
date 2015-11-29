@@ -15,6 +15,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
@@ -43,19 +44,24 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Gallery;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -74,6 +80,7 @@ import com.fieldbook.tracker.Search.*;
 import com.fieldbook.tracker.Trait.*;
 import com.fieldbook.tracker.Tutorial.*;
 
+import org.apache.log4j.chainsaw.Main;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -226,6 +233,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     final Button buttonArray[] = new Button[12];
 
+    ExpandableHeightGridView gridMultiCat;
+    Boolean buttonsCreated;
+
     private EditText eNum;
     private EditText pNum;
     private EditText tNum;
@@ -249,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     LinearLayout traitCounter;
     LinearLayout traitAudio;
     LinearLayout traitRustRating;
+    LinearLayout traitMulticat;
 
     /**
      * Test area
@@ -260,6 +271,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private DrawerLayout mDrawerLayout;
     private String mActivityTitle;
     NavigationView nvDrawer;
+
+    private Boolean dataLocked = false;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -277,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 .getDisplayMetrics());
 
         loadScreen();
-        checkNewVersion();
+        //checkNewVersion(); TODO fix this
 
         // If the user hasn't configured range and traits, open settings screen
         if (!ep.getBoolean("ImportFieldFinished", false) | !ep.getBoolean("CreateTraitFinished", false)) {
@@ -327,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         setupDrawerContent(nvDrawer);
         setupDrawer();
+        //lockData(dataLocked);
 
         // If the app is just starting up, we must always allow refreshing of
         // data onscreen
@@ -378,6 +392,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         traitPhoto = (LinearLayout) findViewById(R.id.photoLayout);
         traitCounter = (LinearLayout) findViewById(R.id.counterLayout);
         traitRustRating = (LinearLayout) findViewById(R.id.rustLayout);
+        traitMulticat = (LinearLayout) findViewById(R.id.multicatLayout);
 
         traitType = (Spinner) findViewById(R.id.traitType);
         newTraits = new HashMap();
@@ -595,6 +610,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         Button minusCounterBtn = (Button) traitCounter.findViewById(R.id.minusBtn);
         Button clearCounterBtn = (Button) traitCounter.findViewById(R.id.clearCounterBtn);
         counterTv = (TextView) traitCounter.findViewById(R.id.curCount);
+
+        // Multicat
+        Button clearMultiCat = (Button) traitMulticat.findViewById(R.id.clearCatBtn);
+        gridMultiCat = (ExpandableHeightGridView) traitMulticat.findViewById(R.id.catGrid);
+        gridMultiCat.setExpanded(true);
+        buttonsCreated = false;
 
         //Button clearBtn = (Button) findViewById(R.id.clearBtn);
         Button clearCat = (Button) traitCategorical.findViewById(R.id.clearCatBtn);
@@ -1045,6 +1066,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
+        // Multicat clear button
+        clearMultiCat.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                newTraits.remove(currentTrait.trait);
+                dt.deleteTrait(cRange.plot_id, currentTrait.trait);
+                eNum.setText("");
+            }
+        });
+
         eImg = (ImageView) traitBoolean.findViewById(R.id.eImg);
         Button clearBoolean = (Button) traitBoolean.findViewById(R.id.clearBoolean);
 
@@ -1055,10 +1085,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 if (val.equals("false")) {
                     val = "true";
-                    eImg.setImageResource(R.drawable.keep);
+                    eImg.setImageResource(R.drawable.boolean_true);
                 } else {
                     val = "false";
-                    eImg.setImageResource(R.drawable.trash);
+                    eImg.setImageResource(R.drawable.boolean_false);
                 }
 
                 updateTrait(currentTrait.trait, "boolean", val);
@@ -1072,10 +1102,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 if (currentTrait.defaultValue.trim().toLowerCase()
                         .equals("true")) {
                     updateTrait(currentTrait.trait, "boolean", "true");
-                    eImg.setImageResource(R.drawable.keep);
+                    eImg.setImageResource(R.drawable.boolean_true);
                 } else {
                     updateTrait(currentTrait.trait, "boolean", "false");
-                    eImg.setImageResource(R.drawable.trash);
+                    eImg.setImageResource(R.drawable.boolean_false);
                 }
             }
         });
@@ -1200,7 +1230,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     }
                 }
 
-                makeToast(currentTrait.format);
             }
         });
 
@@ -2050,6 +2079,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
                         traitRustRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.VISIBLE);
                         tNum.setSelection(tNum.getText().length());
@@ -2111,6 +2141,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
                         traitRustRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
@@ -2166,6 +2197,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
                         traitRustRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
@@ -2247,6 +2279,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
                         traitRustRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
 
                         tNum.setEnabled(false);
                         tNum.setVisibility(View.GONE);
@@ -2316,6 +2349,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
                         traitRustRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
@@ -2591,6 +2625,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
                         traitRustRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
@@ -2603,18 +2638,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             if (currentTrait.defaultValue.trim().toLowerCase()
                                     .equals("true")) {
                                 updateTrait(currentTrait.trait, "boolean", "true");
-                                eImg.setImageResource(R.drawable.keep);
+                                eImg.setImageResource(R.drawable.boolean_true);
                             } else {
                                 updateTrait(currentTrait.trait, "boolean", "false");
-                                eImg.setImageResource(R.drawable.trash);
+                                eImg.setImageResource(R.drawable.boolean_false);
                             }
                         } else {
                             String bval = newTraits.get(currentTrait.trait).toString();
 
                             if (bval.equals("false")) {
-                                eImg.setImageResource(R.drawable.trash);
+                                eImg.setImageResource(R.drawable.boolean_false);
                             } else {
-                                eImg.setImageResource(R.drawable.keep);
+                                eImg.setImageResource(R.drawable.boolean_true);
                             }
 
                         }
@@ -2629,6 +2664,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
                         traitRustRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.VISIBLE);
@@ -2659,6 +2695,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.VISIBLE);
                         traitCounter.setVisibility(View.GONE);
                         traitRustRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.GONE);
@@ -2669,8 +2706,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         eNum.setVisibility(EditText.GONE);
 
                         // Always set to null as default, then fill in with trait value
-                        photoLocation = new ArrayList<String>();
-                        drawables = new ArrayList<Drawable>();
+                        photoLocation = new ArrayList<>();
+                        drawables = new ArrayList<>();
 
                         File img = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/" + "/photos/");
                         if (img.listFiles() != null) {
@@ -2718,6 +2755,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.VISIBLE);
                         traitRustRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.GONE);
@@ -2743,6 +2781,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
                         traitRustRating.setVisibility(View.VISIBLE);
+                        traitMulticat.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.GONE);
@@ -2769,6 +2808,91 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             eNum.setTextColor(Color.parseColor(displayColor));
                             eNum.addTextChangedListener(eNumUpdate);
                         }
+
+                    } else if(currentTrait.format.equals("multicat")) {
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
+                        traitRustRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.VISIBLE);
+
+                        tNum.setVisibility(EditText.GONE);
+                        tNum.setEnabled(false);
+
+                        eNum.setVisibility(EditText.VISIBLE);
+                        eNum.setEnabled(true);
+                        eNum.setCursorVisible(false);
+
+                        pNum.setVisibility(EditText.GONE);
+
+                        if (!newTraits.containsKey(currentTrait.trait)) {
+                            eNum.setText("");
+                        } else {
+                            eNum.removeTextChangedListener(eNumUpdate);
+                            eNum.setText(newTraits.get(currentTrait.trait).toString());
+                            eNum.setTextColor(Color.parseColor(displayColor));
+                            eNum.addTextChangedListener(eNumUpdate);
+                        }
+
+                        final String[] cat = currentTrait.categories.split("/");
+
+                        gridMultiCat.setAdapter(new BaseAdapter() {
+                            @Override
+                            public int getCount() {
+                                return cat.length;
+                            }
+
+                            @Override
+                            public Object getItem(int position) {
+                                return null;
+                            }
+
+                            @Override
+                            public long getItemId(int position) {
+                                return 0;
+                            }
+
+                            @Override
+                            public View getView(int position, View convertView, ViewGroup parent) {
+                                final Button newButton = (Button) LayoutInflater.from(MainActivity.this).inflate(R.layout.multicat_button, null);
+                                newButton.setText(cat[position]);
+
+                                newButton.setOnClickListener(new OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if(eNum.length()>0) {
+                                            eNum.setText(eNum.getText().toString() + ":" + newButton.getText().toString());
+                                        } else {
+                                            eNum.setText(newButton.getText().toString());
+                                        }
+                                    }
+                                });
+
+                                return newButton;
+                            }
+                        });
+
+                        gridMultiCat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            public void onItemClick(AdapterView<?> parent, View v,
+                                                    int position, long id) {
+                                makeToast("test");
+                            }
+                        });
+
+                        gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                            @Override
+                            public void onGlobalLayout() {
+                                gridMultiCat.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                                View lastChild = gridMultiCat.getChildAt(gridMultiCat.getChildCount() - 1);
+                                gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, lastChild.getBottom()));
+                            }
+                        });
 
                     } else {
                         traitText.setVisibility(View.GONE);
@@ -3367,6 +3491,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             systemMenu.findItem(R.id.datagrid).setVisible(false);
         }
 
+        lockData(dataLocked);
+
         return true;
     }
 
@@ -3412,6 +3538,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 intent.setClassName(MainActivity.this,
                         FileExploreActivity.class.getName());
                 intent.putExtra("path", Constants.RESOURCEPATH);
+                intent.putExtra("exclude", new String[] {"fieldbook"});
                 startActivityForResult(intent, 1);
                 break;
 
@@ -3444,8 +3571,56 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         DatagridActivity.class.getName());
                 startActivityForResult(intent,2);
                 break;
+            case R.id.lockData:
+                dataLocked = !dataLocked;
+                lockData(dataLocked);
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void lockData(Boolean lock) {
+        LinearLayout[] traitViews = {traitText, traitNumeric, traitPercent, traitDate, traitCategorical,
+                traitBoolean, traitAudio, traitPhoto, traitCounter, traitRustRating, traitMulticat};
+
+        if(lock) {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock);
+
+            for(LinearLayout traitLayout : traitViews) {
+                disableViews(traitLayout);
+            }
+
+        } else {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_unlock);
+
+            for(LinearLayout traitLayout : traitViews) {
+                enableViews(traitLayout);
+            }
+        }
+    }
+
+    private static void disableViews(ViewGroup layout) {
+        layout.setEnabled(false);
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            View child = layout.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                disableViews((ViewGroup) child);
+            } else {
+                child.setEnabled(false);
+            }
+        }
+    }
+
+    private static void enableViews(ViewGroup layout) {
+        layout.setEnabled(false);
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            View child = layout.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                enableViews((ViewGroup) child);
+            } else {
+                child.setEnabled(true);
+            }
+        }
     }
 
     private void barcodeScan() {
@@ -3530,6 +3705,81 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         initWidgets(true);
     }
 
+    public void nextEmptyPlot2() { //TODO fix this
+            //If multiTraitJump is on
+            //Loop through previous plots
+            int pos = paging;
+            if (pos == rangeID.length) {
+                pos = 1;
+                return;
+            }
+
+            while (pos <= rangeID.length) {
+                //Move to next plot
+                pos += 1;
+
+                //Check traits
+                String[] traitNames = dt.getVisibleTrait();
+                String[] traitType = dt.getFormat();
+                int traitHolder = -1;
+                for(int traitCounter = 0; traitCounter<traitNames.length; traitCounter++) {
+                    //if a trait already exists, break out
+                    if (!dt.getTraitExists(rangeID[pos - 1], traitNames[traitCounter],
+                            traitType[traitCounter])) {
+                        paging = pos;
+                        traitHolder = traitCounter;
+                        break;
+                    }
+                }
+                if(traitHolder!=-1) {
+                    int currentHolder = -1;
+                    // Find index for currentTrait
+                    for(int currentTraitCounter = 0; currentTraitCounter < traitNames.length; currentTraitCounter++) {
+                        if(traitNames[currentTraitCounter].equals(currentTrait.trait)) {
+                            currentHolder = currentTraitCounter;
+                            break;
+                        }
+                    }
+
+                    if(currentHolder == traitHolder) {
+                        //do nothing
+                        break;
+                    }
+                    else if(currentHolder > traitHolder) {
+                        //Loop left currentHolder - traitHolder times
+                        for(int loopCounter = 0; loopCounter < (currentHolder-traitHolder); loopCounter++) {
+                            traitLeft.performClick();
+                        }
+                        break;
+                    }
+                    else {
+                        //Loop traits right traitHolder - currentHolder
+                        for(int loopCounter = 0; loopCounter < (traitHolder-currentHolder); loopCounter++) {
+                            traitRight.performClick();
+                        }
+                        break;
+                    }
+                }
+            }
+
+        // If ignore existing data is enabled, then skip accordingly
+
+
+        // Refresh onscreen controls
+        cRange = dt.getRange(rangeID[paging - 1]);
+
+        Editor ed = ep.edit();
+        ed.putString("lastplot", cRange.plot_id);
+        ed.apply();
+
+        displayRange(cRange);
+
+        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                .clone();
+
+        initWidgets(true);
+    }
+
     public void onClick(View b) {
 
         String v = "";
@@ -3566,7 +3816,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case R.id.clearPhoto:
                 deletePhotoWarning();
                 break;
-
 
             case R.id.record:
                 newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)

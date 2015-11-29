@@ -177,7 +177,7 @@ public class DataHelper {
         try {
             db.close();
         } catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
 
@@ -191,7 +191,7 @@ public class DataHelper {
             this.insertTraits = db.compileStatement(INSERTTRAITS);
             this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
         } catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
 
@@ -248,7 +248,7 @@ public class DataHelper {
 
         for (int i = 0; i < visibleTrait.length; i++) {
             value += "user_traits.parent like \"" + visibleTrait[i] + "\"";
-            if(i!=visibleTrait.length-1) {
+            if (i != visibleTrait.length - 1) {
                 value += " or ";
             }
         }
@@ -738,9 +738,9 @@ public class DataHelper {
 
         try {
             db.delete(USER_TRAITS, "rid like ? and parent like ? and userValue = ?",
-                    new String[] { rid, parent, value });
+                    new String[]{rid, parent, value});
         } catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
 
@@ -750,13 +750,13 @@ public class DataHelper {
 
     public ArrayList<String> getPlotPhotos(String plot) {
         try {
-            Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"},"rid like ? and trait like ?", new String[]{plot,"photo"},
+            Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"}, "rid like ? and trait like ?", new String[]{plot, "photo"},
                     null, null, null);
 
             ArrayList<String> photoList = new ArrayList<String>();
-            Log.d("Field",Integer.toString(cursor.getCount()));
+            Log.d("Field", Integer.toString(cursor.getCount()));
 
-            if(cursor.moveToFirst()) {
+            if (cursor.moveToFirst()) {
                 do {
                     photoList.add(cursor.getString(0));
                 }
@@ -782,10 +782,9 @@ public class DataHelper {
         if (trait.length() == 0)
             return null;
 
-        try
-        {
-            Cursor cursor = db.query(RANGE, new String[] { trait },
-                    ep.getString("ImportUniqueName", "") + " like ? ", new String[] { plotId },
+        try {
+            Cursor cursor = db.query(RANGE, new String[]{trait},
+                    ep.getString("ImportUniqueName", "") + " like ? ", new String[]{plotId},
                     null, null, null);
 
             String[] myList = null;
@@ -807,9 +806,7 @@ public class DataHelper {
             }
 
             return myList;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -879,7 +876,7 @@ public class DataHelper {
             db.delete(USER_TRAITS, "rid like ? and parent like ?",
                     new String[]{rid, parent});
         } catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
 
@@ -892,7 +889,7 @@ public class DataHelper {
             db.delete(TRAITS, "id = ?",
                     new String[]{id});
         } catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
 
@@ -903,7 +900,7 @@ public class DataHelper {
         try {
             db.delete(table, null, null);
         } catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
 
@@ -1113,7 +1110,7 @@ public class DataHelper {
                 db.execSQL("CREATE TABLE android_metadata (locale TEXT)");
                 db.execSQL("INSERT INTO android_metadata(locale) VALUES('en_US')");
             } catch (Exception e) {
-                Log.e(TAG,e.getMessage());
+                Log.e(TAG, e.getMessage());
             }
         }
 
@@ -1121,9 +1118,21 @@ public class DataHelper {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w("FieldBook",
                     "Upgrading database, this will drop tables and recreate.");
-            db.execSQL("DROP TABLE IF EXISTS " + RANGE);
-            db.execSQL("DROP TABLE IF EXISTS " + TRAITS);
-            db.execSQL("DROP TABLE IF EXISTS " + USER_TRAITS);
+
+            if (oldVersion < 5) {
+                db.execSQL("DROP TABLE IF EXISTS " + RANGE);
+                db.execSQL("DROP TABLE IF EXISTS " + TRAITS);
+                db.execSQL("DROP TABLE IF EXISTS " + USER_TRAITS);
+            }
+
+            if (oldVersion == 5 & newVersion == 6) {
+                // add columns to tables
+
+                // make table for all fields
+
+                // move current range table to a new table
+
+            }
 
             onCreate(db);
         }
@@ -1156,8 +1165,8 @@ public class DataHelper {
         File oldSp = new File(internalSpPath);
 
         try {
-            copyFile(newDb,oldDb);
-            copyFile(newSp,oldSp);
+            copyFile(newDb, oldDb);
+            copyFile(newSp, oldSp);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1178,7 +1187,7 @@ public class DataHelper {
             File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
             File oldSp = new File(internalSpPath);
 
-            copyFile(oldDb,newDb);
+            copyFile(oldDb, newDb);
             copyFile(oldSp, newSp);
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
@@ -1302,8 +1311,8 @@ public class DataHelper {
     public boolean isTableExists(String tableName) {
 
         Cursor cursor = db.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '" + tableName + "'", null);
-        if(cursor!=null) {
-            if(cursor.getCount()>0) {
+        if (cursor != null) {
+            if (cursor.getCount() > 0) {
                 cursor.close();
                 return true;
             }
