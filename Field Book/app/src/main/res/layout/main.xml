@@ -281,7 +281,6 @@
                                     android:gravity="center"
                                     android:imeOptions="actionDone"
                                     android:inputType="phone"
-                                    android:padding="0dp"
                                     android:singleLine="true"
                                     android:text=""
                                     android:textColor="#000000"
@@ -320,17 +319,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:minWidth="100dp"
-                    android:text="@string/currentvalue"
-                    android:textColor="@color/s_text"
-                    android:textSize="@dimen/text_size_medium"
-                    android:textStyle="bold" />
 
                 <EditText
                     android:id="@+id/tNum"
@@ -436,6 +424,11 @@
 
                         <include
                             layout="@layout/trait_rustrating"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content" />
+
+                        <include
+                            layout="@layout/trait_multicat"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content" />
 

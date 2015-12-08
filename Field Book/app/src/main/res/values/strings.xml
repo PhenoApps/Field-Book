@@ -87,6 +87,7 @@
     <string name="categories">Categories</string>
     <string name="save">Save</string>
     <string name="importexport">Import/Export</string>
+    <string name="import_title">Import</string>
     <string name="truevalue">True</string>
     <string name="falsevalue">False</string>
     <string name="catseparator">Separate items with /</string>
@@ -132,6 +133,7 @@
     <string name="nextmissingbutton">Next empty entry</string>
     <string name="jumptoplotidbutton">Go to ID</string>
     <string name="barcodescantitle">Scan barcode</string>
+    <string name="scan">Scan</string>
     <string name="disableentryanavwarning">Data must be collected before you can go to the next entry</string>
 
     <!-- Tutorial -->
@@ -177,6 +179,9 @@
     <string name="devpemail">jpoland@ksu.edu</string>
     <string name="devpsite">http://wheatgenetics.org</string>
     <string name="translist">Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa</string>
+
+    <!-- Other Apps -->
+    <string name="otherapps">Other Apps</string>
 
     <!-- Export dialog -->
     <string name="dbformat">Database</string>

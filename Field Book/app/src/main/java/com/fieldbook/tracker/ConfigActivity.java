@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -45,6 +46,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -283,6 +285,7 @@ public class ConfigActivity extends AppCompatActivity {
                                 FileExploreActivity.class.getName());
                         intent.putExtra("path", Constants.FIELDIMPORTPATH);
                         intent.putExtra("include", new String[]{"csv", "xls"});
+                        intent.putExtra("title",getString(R.string.importfields));
                         startActivityForResult(intent, 1);
                         break;
 
@@ -361,20 +364,23 @@ public class ConfigActivity extends AppCompatActivity {
 
         if (filename.contains(fFile)) {
             for (int i = 0; i < fileArray.length; i++) {
-
                 if (checkDbBool) {
                     if (fileArray[i].contains(fFile) && fileArray[i].contains("database")) {
-                        File delFile = new File(Constants.FIELDEXPORTPATH,fileArray[i]);
-                        delFile.delete();
-                        scanFile(delFile);
+                        File oldFile = new File(Constants.FIELDEXPORTPATH,fileArray[i]);
+                        File newFile = new File(Constants.ARCHIVEPATH,fileArray[i]);
+                        oldFile.renameTo(newFile);
+                        scanFile(oldFile);
+                        scanFile(newFile);
                     }
                 }
 
                 if (checkExcelBool) {
                     if (fileArray[i].contains(fFile) && fileArray[i].contains("table")) {
-                        File delFile = new File(Constants.FIELDEXPORTPATH,fileArray[i]);
-                        delFile.delete();
-                        scanFile(delFile);
+                        File oldFile = new File(Constants.FIELDEXPORTPATH,fileArray[i]);
+                        File newFile = new File(Constants.ARCHIVEPATH,fileArray[i]);
+                        oldFile.renameTo(newFile);
+                        scanFile(oldFile);
+                        scanFile(newFile);
                     }
                 }
             }
@@ -533,7 +539,9 @@ public class ConfigActivity extends AppCompatActivity {
         aboutDialog.setCanceledOnTouchOutside(true);
 
         TextView versionText = (TextView) aboutDialog.findViewById(R.id.tvVersion);
-        versionText.setText(getString(R.string.updatemsg) + " " + versionName);
+        versionText.setText(getString(R.string.version) + " " + versionName);
+
+        TextView otherApps = (TextView) aboutDialog.findViewById(R.id.tvOtherApps);
 
         versionText.setOnClickListener(new OnClickListener() {
             @Override
@@ -541,6 +549,13 @@ public class ConfigActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setClass(ConfigActivity.this, ChangelogActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        otherApps.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showOtherAppsDialog();
             }
         });
 
@@ -554,6 +569,73 @@ public class ConfigActivity extends AppCompatActivity {
         });
 
         aboutDialog.show();
+    }
+
+    private void showOtherAppsDialog() {
+        final Dialog otherAppsDialog = new Dialog(ConfigActivity.this,
+                R.style.AppDialog);
+        otherAppsDialog.setTitle(getString(R.string.otherapps));
+        otherAppsDialog.setContentView(R.layout.config);
+
+        android.view.WindowManager.LayoutParams params = otherAppsDialog.getWindow().getAttributes();
+        params.width = LayoutParams.MATCH_PARENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        otherAppsDialog.getWindow().setAttributes(params);
+
+        otherAppsDialog.setCancelable(true);
+        otherAppsDialog.setCanceledOnTouchOutside(true);
+
+        ListView myList = (ListView) otherAppsDialog
+                .findViewById(R.id.myList);
+
+        String[] appsArray = new String[3];
+
+        appsArray[0] = "Inventory";
+        appsArray[1] = "Coordinate";
+        appsArray[2] = "1KK";
+        //appsArray[3] = "Intercross";
+        //appsArray[4] = "Rangle";
+
+        Integer app_images[] = {R.drawable.other_ic_inventory, R.drawable.other_ic_coordinate, R.drawable.other_ic_1kk};
+        final String[] links = {"https://play.google.com/store/apps/details?id=org.wheatgenetics.inventory",
+                "http://wheatgenetics.org/apps",
+                "http://wheatgenetics.org/apps"}; //TODO update these links
+
+        myList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                Uri uri = Uri.parse(links[which]);
+                Intent intent;
+
+                switch (which) {
+                    case 0:
+                        intent = new Intent(Intent.ACTION_VIEW, uri);
+                        startActivity(intent);
+                        break;
+                    case 1:
+                        intent = new Intent(Intent.ACTION_VIEW, uri);
+                        startActivity(intent);
+                        break;
+                    case 2:
+                        intent = new Intent(Intent.ACTION_VIEW, uri);
+                        startActivity(intent);
+                        break;
+                }
+            }
+        });
+
+        CustomListAdapter adapterImg = new CustomListAdapter(this, app_images, appsArray);
+        myList.setAdapter(adapterImg);
+
+        Button langCloseBtn = (Button) otherAppsDialog
+                .findViewById(R.id.closeBtn);
+
+        langCloseBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                otherAppsDialog.dismiss();
+            }
+        });
+
+        otherAppsDialog.show();
     }
 
     // Validate that column choices are different from one another
@@ -1136,6 +1218,9 @@ public class ConfigActivity extends AppCompatActivity {
         languageDialog.setTitle(getString(R.string.language));
         languageDialog.setContentView(R.layout.config);
 
+        final float scale = this.getResources().getDisplayMetrics().density;
+        int pixels = (int) (500 * scale + 0.5f);
+
         android.view.WindowManager.LayoutParams params = languageDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
         params.height = LayoutParams.WRAP_CONTENT;
@@ -1146,6 +1231,11 @@ public class ConfigActivity extends AppCompatActivity {
 
         ListView myList = (ListView) languageDialog
                 .findViewById(R.id.myList);
+
+        ViewGroup.LayoutParams params2 = myList.getLayoutParams();
+        params2.height = pixels;
+        myList.setLayoutParams(params2);
+
 
         region = "";
         String[] langArray = new String[12];
@@ -1483,6 +1573,12 @@ public class ConfigActivity extends AppCompatActivity {
         final EditText lastName = (EditText) personDialog
                 .findViewById(R.id.lastName);
 
+        firstName.setText(ep.getString("FirstName",""));
+        lastName.setText(ep.getString("LastName",""));
+
+        firstName.setSelectAllOnFocus(true);
+        lastName.setSelectAllOnFocus(true);
+
         Button yesButton = (Button) personDialog.findViewById(R.id.saveBtn);
 
         yesButton.setOnClickListener(new OnClickListener() {
@@ -1536,6 +1632,9 @@ public class ConfigActivity extends AppCompatActivity {
         final EditText latitude = (EditText) locationDialog
                 .findViewById(R.id.latitude);
 
+        longitude.setText(ep.getString("Longitude", ""));
+        latitude.setText(ep.getString("Latitude", ""));
+
         findLocation.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 latitude.setText(truncateDecimalString(String.valueOf(lat)));
@@ -1548,6 +1647,8 @@ public class ConfigActivity extends AppCompatActivity {
                 Editor e = ep.edit();
                 if (latitude.getText().toString().length() > 0 && longitude.getText().toString().length() > 0) {
                     e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
+                    e.putString("Latitude",latitude.getText().toString());
+                    e.putString("Longitude",longitude.getText().toString());
                 } else {
                     e.putString("Location", "null");
                 }
@@ -2037,6 +2138,7 @@ public class ConfigActivity extends AppCompatActivity {
                         FileExploreActivity.class.getName());
                 intent.putExtra("path", Constants.FIELDIMPORTPATH);
                 intent.putExtra("include", new String[]{"csv", "xls"});
+                intent.putExtra("title",getString(R.string.importfields));
                 startActivityForResult(intent, 1);
             }
 
@@ -2105,6 +2207,7 @@ public class ConfigActivity extends AppCompatActivity {
                 FileExploreActivity.class.getName());
         intent.putExtra("path", Constants.BACKUPPATH);
         intent.putExtra("include", new String[]{"db"});
+        intent.putExtra("title",getString(R.string.dbimport));
         startActivityForResult(intent, 2);
     }
 

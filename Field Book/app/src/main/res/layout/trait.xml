@@ -4,10 +4,10 @@
     android:layout_height="fill_parent"
     android:background="#FFFFFF"
     android:orientation="vertical"
+    android:paddingBottom="5dp"
     android:paddingLeft="20dp"
     android:paddingRight="20dp"
-    android:paddingTop="5dp"
-    android:paddingBottom="5dp">
+    android:paddingTop="5dp">
 
     <LinearLayout
         android:id="@+id/formatbox"
@@ -19,7 +19,7 @@
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="150dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:paddingRight="10dp"
@@ -30,9 +30,8 @@
 
         <Spinner
             android:id="@+id/format"
-            android:layout_width="400dp"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:textColor="#FFFFFF"
             android:textSize="@dimen/text_size_small"
             android:textStyle="bold" />
@@ -49,7 +48,7 @@
         android:paddingTop="10dp">
 
         <TextView
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:paddingRight="10dp"
@@ -60,9 +59,10 @@
 
         <EditText
             android:id="@+id/trait"
-            android:layout_width="400dp"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
+            android:layout_weight=".8"
             android:imeOptions="actionNext"
             android:inputType="textCapWords"
             android:paddingRight="10dp"
@@ -81,8 +81,8 @@
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="150dp"
             android:id="@+id/defTv"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:paddingRight="10dp"
@@ -93,7 +93,7 @@
 
         <EditText
             android:id="@+id/def"
-            android:layout_width="400dp"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:imeOptions="actionNext"
@@ -117,13 +117,14 @@
         android:id="@+id/minbox"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_weight=".2"
         android:orientation="horizontal"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:paddingRight="10dp"
@@ -134,7 +135,7 @@
 
         <EditText
             android:id="@+id/minimum"
-            android:layout_width="400dp"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:imeOptions="actionNext"
@@ -155,7 +156,7 @@
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:paddingRight="10dp"
@@ -166,7 +167,7 @@
 
         <EditText
             android:id="@+id/maximum"
-            android:layout_width="400dp"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:imeOptions="actionNext"
@@ -188,7 +189,7 @@
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:paddingRight="10dp"
@@ -199,7 +200,7 @@
 
         <EditText
             android:id="@+id/details"
-            android:layout_width="400dp"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:imeOptions="actionNext"
@@ -220,7 +221,7 @@
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:paddingRight="10dp"
@@ -231,7 +232,7 @@
 
         <EditText
             android:id="@+id/categories"
-            android:layout_width="400dp"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:hint="@string/catseparator"

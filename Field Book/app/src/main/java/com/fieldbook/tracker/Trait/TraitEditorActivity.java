@@ -651,6 +651,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         switch (position) {
             case 0: //numeric
                 defBox.setVisibility(View.VISIBLE);
+                def.setVisibility(View.VISIBLE);
                 bool.setVisibility(View.GONE);
                 minBox.setVisibility(View.VISIBLE);
                 maxBox.setVisibility(View.VISIBLE);
@@ -676,6 +677,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 break;
             case 3: //percent
                 defBox.setVisibility(View.VISIBLE);
+                def.setVisibility(View.VISIBLE);
                 bool.setVisibility(View.GONE);
                 minBox.setVisibility(View.VISIBLE);
                 maxBox.setVisibility(View.VISIBLE);
@@ -696,6 +698,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 break;
             case 5: //text
                 defBox.setVisibility(View.VISIBLE);
+                def.setVisibility(View.VISIBLE);
                 minBox.setVisibility(View.GONE);
                 maxBox.setVisibility(View.GONE);
                 bool.setVisibility(View.GONE);
@@ -1119,6 +1122,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 FileExploreActivity.class.getName());
         intent.putExtra("path", Constants.TRAITPATH);
         intent.putExtra("include", new String[] {"trt"});
+        intent.putExtra("title",getString(R.string.import_title));
         startActivityForResult(intent, 1);
     }
 

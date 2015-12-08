@@ -10,10 +10,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.app.ListActivity;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -35,6 +37,8 @@ public class FileExploreActivity extends ListActivity {
     private String[] include = new String[0];
     private String[] exclude = new String[0];
 
+    private String title = "";
+
     private String chosenFile;
     private ListAdapter adapter;
 
@@ -49,6 +53,7 @@ public class FileExploreActivity extends ListActivity {
         String data = getIntent().getExtras().getString("path");
         include = getIntent().getExtras().getStringArray("include");
         exclude = getIntent().getExtras().getStringArray("exclude");
+        title = getIntent().getExtras().getString("title");
         path = new File(data);
 
         super.onCreate(savedInstanceState);
@@ -66,6 +71,15 @@ public class FileExploreActivity extends ListActivity {
 
         loadFileList();
         getListView().setAdapter(adapter);
+
+        if(title!=null && title.length()>0) {
+            this.setTitle(title);
+        }
+
+        android.view.WindowManager.LayoutParams params = this.getWindow().getAttributes();
+        params.width = LinearLayout.LayoutParams.MATCH_PARENT;
+        params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        this.getWindow().setAttributes(params);
 
         getListView().setOnItemClickListener(new OnItemClickListener() {
 

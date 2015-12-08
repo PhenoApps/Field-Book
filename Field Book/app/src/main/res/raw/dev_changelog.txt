@@ -1,3 +1,14 @@
+41
+Updated sample files
+Changed multicat to three columns
+Fixed trait editor edittexts being cut off
+Current person/location filled in when dialogs are opened
+Overwritten files moved to Archive folder
+Fixed a bug with data locking and multicat trait
+Fixed alignement issue with Quick GoTo
+Added Other Apps to About dialog
+App database is backed up to backup.db at onPause
+
 40
 Field name is listed in the navigation drawer on the main screen
 Location exports as null if not set

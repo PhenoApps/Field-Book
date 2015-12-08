@@ -1181,7 +1181,7 @@ public class DataHelper {
         close();
 
         try {
-            File newDb = new File(Constants.BACKUPPATH + "/" + filename);
+            File newDb = new File(Constants.BACKUPPATH + "/" + filename + ".db");
             File oldDb = new File(internalDbPath);
 
             File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");

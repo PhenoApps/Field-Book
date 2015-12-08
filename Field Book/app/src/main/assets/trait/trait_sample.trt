@@ -7,5 +7,6 @@ insect damage,boolean,FALSE,,,,,TRUE,5
 notes,text,,,,,,TRUE,6
 picture,photo,,,,,,TRUE,7
 plants,counter,,,,,,TRUE,8
-rust score,rust rating,,,,,,TRUE,9
-audio,audio,,,,,,TRUE,10
+type,multicat,,,,,Yellow/Purple/Axil/Terminal/Long/Short/Round/Wrinkled/Yellow/Green,true,9
+rust score,rust rating,,,,,,TRUE,10
+audio,audio,,,,,,TRUE,11

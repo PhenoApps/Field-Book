@@ -612,7 +612,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         counterTv = (TextView) traitCounter.findViewById(R.id.curCount);
 
         // Multicat
-        Button clearMultiCat = (Button) traitMulticat.findViewById(R.id.clearCatBtn);
+        Button clearMultiCat = (Button) traitMulticat.findViewById(R.id.clearMultiCatBtn);
         gridMultiCat = (ExpandableHeightGridView) traitMulticat.findViewById(R.id.catGrid);
         gridMultiCat.setExpanded(true);
         buttonsCreated = false;
@@ -1634,6 +1634,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         createDir(Constants.BACKUPPATH);
         createDir(Constants.ERRORPATH);
         createDir(Constants.UPDATEPATH);
+        createDir(Constants.ARCHIVEPATH);
 
         scanSampleFiles();
     }
@@ -2842,48 +2843,43 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         final String[] cat = currentTrait.categories.split("/");
 
-                        gridMultiCat.setAdapter(new BaseAdapter() {
-                            @Override
-                            public int getCount() {
-                                return cat.length;
-                            }
+                        if(!dataLocked) {
+                            gridMultiCat.setAdapter(new BaseAdapter() {
+                                @Override
+                                public int getCount() {
+                                    return cat.length;
+                                }
 
-                            @Override
-                            public Object getItem(int position) {
-                                return null;
-                            }
+                                @Override
+                                public Object getItem(int position) {
+                                    return null;
+                                }
 
-                            @Override
-                            public long getItemId(int position) {
-                                return 0;
-                            }
+                                @Override
+                                public long getItemId(int position) {
+                                    return 0;
+                                }
 
-                            @Override
-                            public View getView(int position, View convertView, ViewGroup parent) {
-                                final Button newButton = (Button) LayoutInflater.from(MainActivity.this).inflate(R.layout.multicat_button, null);
-                                newButton.setText(cat[position]);
+                                @Override
+                                public View getView(int position, View convertView, ViewGroup parent) {
+                                    final Button newButton = (Button) LayoutInflater.from(MainActivity.this).inflate(R.layout.multicat_button, null);
+                                    newButton.setText(cat[position]);
 
-                                newButton.setOnClickListener(new OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        if(eNum.length()>0) {
-                                            eNum.setText(eNum.getText().toString() + ":" + newButton.getText().toString());
-                                        } else {
-                                            eNum.setText(newButton.getText().toString());
+                                    newButton.setOnClickListener(new OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            if (eNum.length() > 0) {
+                                                eNum.setText(eNum.getText().toString() + ":" + newButton.getText().toString());
+                                            } else {
+                                                eNum.setText(newButton.getText().toString());
+                                            }
                                         }
-                                    }
-                                });
+                                    });
 
-                                return newButton;
-                            }
-                        });
-
-                        gridMultiCat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            public void onItemClick(AdapterView<?> parent, View v,
-                                                    int position, long id) {
-                                makeToast("test");
-                            }
-                        });
+                                    return newButton;
+                                }
+                            });
+                        }
 
                         gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                             @Override
@@ -3238,6 +3234,30 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     @Override
+    public void onPause() {
+
+        //save last plot id
+        if (ep.getBoolean("ImportFieldFinished", false)) {
+            Editor ed = ep.edit();
+            ed.putString("lastplot", cRange.plot_id);
+            ed.apply();
+        }
+
+        // Backup database
+        try {
+            dt.exportDatabase("backup");
+            File exportedDb = new File(Constants.BACKUPPATH + "/" + "backup" + ".db");
+            File exportedSp = new File(Constants.BACKUPPATH + "/" + "backup" + "_sharedpref.xml");
+            scanFile(exportedDb);
+            scanFile(exportedSp);
+        } catch (Exception e) {
+            Log.e(TAG,e.getMessage());
+        }
+
+        super.onPause();
+    }
+
+    @Override
     public void onDestroy() {
 
         //save last plot id
@@ -3248,7 +3268,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         try {
-            // Always close tips / hints along with the main activity
             TutorialMainActivity.thisActivity.finish();
         } catch (Exception e) {
             ErrorLog("TutorialError.txt", "" + e.getMessage());
@@ -3539,6 +3558,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         FileExploreActivity.class.getName());
                 intent.putExtra("path", Constants.RESOURCEPATH);
                 intent.putExtra("exclude", new String[] {"fieldbook"});
+                intent.putExtra("title",getString(R.string.resources));
                 startActivityForResult(intent, 1);
                 break;
 
@@ -3667,6 +3687,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 String range = dt.getRangeFromId(inputPlotId);
                 rangeID = dt.getAllRangeID();
                 moveTo(rangeID, range, plot, true);
+                goToId.dismiss();
             }
         });
 

@@ -5,6 +5,7 @@ Field name is listed in the navigation drawer on the main screen
 Location exports as null if not set
 Updated dialogs with titles
 Fixed a bug related to audio and rust traits
+Database is automatically backed up to database folder
 
 21/3.0.0
 Updated user interface
