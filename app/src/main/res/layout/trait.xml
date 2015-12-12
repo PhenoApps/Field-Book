@@ -14,14 +14,16 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:paddingBottom="5dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="250dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="left|center_vertical"
+            android:layout_weight=".2"
             android:paddingRight="10dp"
             android:text="@string/format"
             android:textColor="#000000"
@@ -30,8 +32,9 @@
 
         <Spinner
             android:id="@+id/format"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight=".8"
             android:textColor="#FFFFFF"
             android:textSize="@dimen/text_size_small"
             android:textStyle="bold" />
@@ -45,12 +48,12 @@
         android:orientation="horizontal"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:paddingTop="10dp">
+        android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="200dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="left|center_vertical"
             android:paddingRight="10dp"
             android:text="@string/trait"
             android:textColor="#000000"
@@ -62,8 +65,6 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
-            android:layout_weight=".8"
-            android:imeOptions="actionNext"
             android:inputType="textCapWords"
             android:paddingRight="10dp"
             android:textColor="#000000"
@@ -82,9 +83,9 @@
 
         <TextView
             android:id="@+id/defTv"
-            android:layout_width="200dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="left|center_vertical"
             android:paddingRight="10dp"
             android:text="@string/def"
             android:textColor="#000000"
@@ -104,7 +105,7 @@
 
         <ToggleButton
             android:id="@+id/boolBtn"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="@android:drawable/btn_default"
             android:textOff="@string/falsevalue"
@@ -124,9 +125,9 @@
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="200dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="left|center_vertical"
             android:paddingRight="10dp"
             android:text="@string/minimum"
             android:textColor="#000000"
@@ -156,9 +157,9 @@
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="200dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="left|center_vertical"
             android:paddingRight="10dp"
             android:text="@string/maximum"
             android:textColor="#000000"
@@ -189,9 +190,9 @@
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="200dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="left|center_vertical"
             android:paddingRight="10dp"
             android:text="@string/details"
             android:textColor="#000000"
@@ -221,9 +222,9 @@
         android:paddingTop="5dp">
 
         <TextView
-            android:layout_width="200dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="left|center_vertical"
             android:paddingRight="10dp"
             android:text="@string/categories"
             android:textColor="#000000"

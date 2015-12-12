@@ -1,3 +1,8 @@
+42
+Fixed a bug causing crashes in onPause
+Fixed a bug causing multicat data not to save
+Fixed the trait creation screen
+
 41
 Updated sample files
 Changed multicat to three columns

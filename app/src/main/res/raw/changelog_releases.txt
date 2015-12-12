@@ -1,3 +1,7 @@
+23/3.1.1
+Fixed a bug with the new multicat trait
+Fixed the trait creation layout
+
 22/3.1.0
 New multicategorical trait format
 Added option to overwrite preivously exported files

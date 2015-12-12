@@ -2833,7 +2833,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         pNum.setVisibility(EditText.GONE);
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
+                            eNum.removeTextChangedListener(eNumUpdate);
                             eNum.setText("");
+                            eNum.setTextColor(Color.BLACK);
+                            eNum.addTextChangedListener(eNumUpdate);
                         } else {
                             eNum.removeTextChangedListener(eNumUpdate);
                             eNum.setText(newTraits.get(currentTrait.trait).toString());
@@ -3006,7 +3009,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 }
             });
         } catch (NullPointerException e) {
-            Log.w(TAG,e.getMessage());
+            Log.w(TAG, e.getMessage());
         }
     }
 
@@ -3238,9 +3241,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         //save last plot id
         if (ep.getBoolean("ImportFieldFinished", false)) {
-            Editor ed = ep.edit();
-            ed.putString("lastplot", cRange.plot_id);
-            ed.apply();
+            if(cRange!=null) {
+                Editor ed = ep.edit();
+                ed.putString("lastplot", cRange.plot_id);
+                ed.apply();
+            }
         }
 
         // Backup database
