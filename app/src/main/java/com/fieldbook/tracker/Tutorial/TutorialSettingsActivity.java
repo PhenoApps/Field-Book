@@ -24,7 +24,7 @@ public class TutorialSettingsActivity extends Activity {
 
     private int screen;
 
-    private final int max = 8;
+    private final int max = 6;
 
     @Override
     public void onDestroy() {
@@ -80,8 +80,6 @@ public class TutorialSettingsActivity extends Activity {
         array[3] = getString(R.string.shelp4);
         array[4] = getString(R.string.shelp5);
         array[5] = getString(R.string.shelp6);
-        array[6] = getString(R.string.shelp7);
-        array[7] = getString(R.string.shelp8);
 
         header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
         content.setText(array[screen - 1]);

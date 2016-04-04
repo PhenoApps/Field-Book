@@ -49,8 +49,7 @@
                 <Button
                     android:id="@+id/minusBtn"
                     android:layout_width="130dp"
-                    android:layout_height="60dp"
-                    android:background="@android:drawable/btn_default"
+                    android:layout_height="wrap_content"
                     android:gravity="center|center_vertical"
                     android:text="@string/minusday"
                     android:textColor="#000000"
@@ -60,8 +59,7 @@
                 <Button
                     android:id="@+id/clearCounterBtn"
                     android:layout_width="wrap_content"
-                    android:layout_height="60dp"
-                    android:background="@android:drawable/btn_default"
+                    android:layout_height="wrap_content"
                     android:gravity="center"
                     android:minWidth="130dp"
                     android:text="@string/clear"
@@ -74,8 +72,7 @@
             <Button
                 android:id="@+id/addBtn"
                 android:layout_width="130dp"
-                android:layout_height="120dp"
-                android:background="@android:drawable/btn_default"
+                android:layout_height="wrap_content"
                 android:gravity="center"
                 android:minWidth="130dp"
                 android:text="@string/plusday"

@@ -238,7 +238,7 @@
 
                                 <EditText
                                     android:id="@+id/range"
-                                    android:layout_width="80dp"
+                                    android:layout_width="100dp"
                                     android:layout_height="wrap_content"
                                     android:gravity="center"
                                     android:imeOptions="actionDone"
@@ -276,7 +276,7 @@
 
                                 <EditText
                                     android:id="@+id/plot"
-                                    android:layout_width="80dp"
+                                    android:layout_width="100dp"
                                     android:layout_height="wrap_content"
                                     android:gravity="center"
                                     android:imeOptions="actionDone"
@@ -440,7 +440,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="60dp"
                     android:layout_gravity="center_horizontal"
-                    android:background="@android:drawable/btn_default"
                     android:gravity="center"
                     android:minWidth="130dp"
                     android:text="@string/clear"

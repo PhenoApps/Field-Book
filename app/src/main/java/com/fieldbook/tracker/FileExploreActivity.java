@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.app.ListActivity;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -24,10 +24,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 
-public class FileExploreActivity extends ListActivity {
+public class FileExploreActivity extends AppCompatActivity {
 
     // Stores names of traversed directories
     ArrayList<String> str = new ArrayList<>();
+    public ListView mainListView;
 
     // Check if the first level of the directory structure is the one showing
     private Boolean firstLvl = true;
@@ -59,6 +60,15 @@ public class FileExploreActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         ep = getSharedPreferences("Settings", 0);
 
+        mainListView = new ListView(this);
+
+        android.view.WindowManager.LayoutParams params = this.getWindow().getAttributes();
+        params.width = LinearLayout.LayoutParams.MATCH_PARENT;
+        params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        this.getWindow().setAttributes(params);
+
+        setContentView(mainListView);
+
         // Enforce internal language change
         local = ep.getString("language", "en");
         region = ep.getString("region", "");
@@ -70,18 +80,13 @@ public class FileExploreActivity extends ListActivity {
                 .getDisplayMetrics());
 
         loadFileList();
-        getListView().setAdapter(adapter);
+        mainListView.setAdapter(adapter);
 
         if(title!=null && title.length()>0) {
             this.setTitle(title);
         }
 
-        android.view.WindowManager.LayoutParams params = this.getWindow().getAttributes();
-        params.width = LinearLayout.LayoutParams.MATCH_PARENT;
-        params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-        this.getWindow().setAttributes(params);
-
-        getListView().setOnItemClickListener(new OnItemClickListener() {
+        mainListView.setOnItemClickListener(new OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> arg0, View arg1, int which, long arg3) {
                 chosenFile = fileList[which].file;
@@ -98,7 +103,7 @@ public class FileExploreActivity extends ListActivity {
 
                     loadFileList();
 
-                    getListView().setAdapter(adapter);
+                    mainListView.setAdapter(adapter);
                 }
 
                 // Checks if 'up' was clicked
@@ -118,7 +123,7 @@ public class FileExploreActivity extends ListActivity {
                         firstLvl = true;
                     }
                     loadFileList();
-                    getListView().setAdapter(adapter);
+                    mainListView.setAdapter(adapter);
                 }
                 // File picked
                 else {
@@ -143,9 +148,8 @@ public class FileExploreActivity extends ListActivity {
 
         // Checks whether path exists
         if (path.exists()) {
-
             File[] filesList = path.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String filename) { //TODO add option to exclude certain filenames from search
+                public boolean accept(File dir, String filename) {
                     File sel = new File(dir, filename);
                     if (exclude != null && exclude.length > 0) {
                         if (Arrays.asList(exclude).contains(getFileExtension(sel))) {
@@ -224,7 +228,7 @@ public class FileExploreActivity extends ListActivity {
 
                 // put the image on the text view
                 textView.setCompoundDrawablesWithIntrinsicBounds(
-                        fileList[position].icon, 0, 0, 0); //TODO fix this for phones (text too big and icons are terrible)
+                        fileList[position].icon, 0, 0, 0);
 
                 // add margin between image and text (support various screen
                 // densities)

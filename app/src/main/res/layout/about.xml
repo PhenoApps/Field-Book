@@ -155,7 +155,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:background="@android:drawable/btn_default"
             android:minWidth="@dimen/button_default_width"
             android:text="@string/okay"
             android:textColor="#000000"

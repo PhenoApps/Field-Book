@@ -1,6 +1,6 @@
 package com.fieldbook.tracker.Trait;
 
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.media.Image;
@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import com.fieldbook.tracker.Dragsort.DragSortController;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.Dragsort.DragSortListView;
@@ -33,15 +34,13 @@ import java.util.HashMap;
  */
 public class TraitAdapter extends BaseAdapter {
 
-    LayoutInflater mLayoutInflater;
     ArrayList<TraitObject> list;
     Context context;
     OnItemClickListener listener;
     HashMap visibility;
 
-    public TraitAdapter(Context context, ArrayList<TraitObject> list, OnItemClickListener listener, HashMap visibility) {
+    public TraitAdapter(Context context, int resource, ArrayList<TraitObject> list, OnItemClickListener listener, HashMap visibility) {
         this.context = context;
-        mLayoutInflater = LayoutInflater.from(context);
         this.list = list;
         this.listener = listener;
         this.visibility = visibility;
@@ -78,8 +77,10 @@ public class TraitAdapter extends BaseAdapter {
         final ViewHolder holder;
 
         if (convertView == null) {
+            LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = vi.inflate(R.layout.traitline, parent, false);
+
             holder = new ViewHolder();
-            convertView = mLayoutInflater.inflate(R.layout.traitline, null);
             holder.name = (TextView) convertView.findViewById(R.id.text1);
             holder.format = (TextView) convertView.findViewById(R.id.text2);
             holder.visible = (CheckBox) convertView.findViewById(R.id.visible);
@@ -91,20 +92,13 @@ public class TraitAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        convertView.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-            }
-        });
-
-
         holder.id = getItem(position).id;
         holder.realPosition = getItem(position).realPosition;
 
         holder.name.setText(getItem(position).trait);
         holder.format.setText(getItem(position).format);
 
-        // Check or uncheck the list items based on existing
-        // visibility
+        // Check or uncheck the list items
         if (visibility != null) {
             if (visibility.get(holder.name.getText().toString()) != null) {
                 if (visibility.get(holder.name.getText().toString()).equals("true")) {
@@ -126,34 +120,6 @@ public class TraitAdapter extends BaseAdapter {
                 }
             }
         });
-
-        holder.dragSort.setOnTouchListener(new View.OnTouchListener() {
-            DragSortListView drag = (DragSortListView) parent;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-                    drag.startDrag(position, DragSortListView.DRAG_POS_Y | DragSortListView.DRAG_NEG_Y, 0, 0);
-
-                    Log.w("drag", "started");
-
-                    return true;
-                } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    drag.stopDrag(false);
-
-                    TraitEditorActivity.loadData();
-                    MainActivity.reloadData = true;
-
-                    Log.w("drag", "stopped");
-
-                    return true;
-                } else
-                    return false;
-            }
-        });
-
 
         holder.menuPopup.setOnClickListener(new OnClickListener() {
             @Override
@@ -191,7 +157,7 @@ public class TraitAdapter extends BaseAdapter {
                             MainActivity.reloadData = true;
 
                         } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.delete))) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
 
                             builder.setTitle(context.getString(R.string.deletetrait));
                             builder.setMessage(context.getString(R.string.areyousure));

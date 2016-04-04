@@ -1,8 +1,8 @@
 package com.fieldbook.tracker;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
+import android.graphics.PorterDuff;
+import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,7 +15,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
@@ -61,7 +60,6 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Gallery;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -80,7 +78,6 @@ import com.fieldbook.tracker.Search.*;
 import com.fieldbook.tracker.Trait.*;
 import com.fieldbook.tracker.Tutorial.*;
 
-import org.apache.log4j.chainsaw.Main;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -123,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     String inputPlotId = "";
     public int[] rangeID;
 
-    Dialog goToId;
+    AlertDialog goToId;
 
     int delay = 100;
     int count = 1;
@@ -294,10 +291,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // If the user hasn't configured range and traits, open settings screen
         if (!ep.getBoolean("ImportFieldFinished", false) | !ep.getBoolean("CreateTraitFinished", false)) {
-            dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "field_import");
-            dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "resources");
-            dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "trait");
-            dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
+            updateAssets();
 
             Intent intent = new Intent();
             intent.setClassName(MainActivity.this,
@@ -313,9 +307,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, ChangelogActivity.class);
             startActivity(intent);
+
+            updateAssets();
         }
+    }
 
-
+    private void updateAssets() {
+        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "field_import");
+        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "resources");
+        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "trait");
+        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
     }
 
     private void loadScreen() {
@@ -476,7 +477,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 final long DELAY = 750; // in ms
 
                 try {
-                    final int val = Integer.parseInt(eNum.getText().toString());
+                    final double val = Double.parseDouble(eNum.getText().toString());
                     timer.cancel();
                     timer = new Timer();
                     timer.schedule(new TimerTask() {
@@ -484,7 +485,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             runOnUiThread(new Runnable() {
                                 public void run() {
                                     if (currentTrait.minimum.length() > 0) {
-                                        if (val < Integer.parseInt(currentTrait.minimum)) {
+                                        if (val < Double.parseDouble(currentTrait.minimum)) {
                                             en.clear();
                                             removeTrait(currentTrait.trait);
                                         }
@@ -495,7 +496,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     }, DELAY);
 
                     if (currentTrait.maximum.length() > 0) {
-                        if (val > Integer.parseInt(currentTrait.maximum)) {
+                        if (val > Double.parseDouble(currentTrait.maximum)) {
                             Toast.makeText(
                                     MainActivity.this,
                                     getString(R.string.valuemore) + " "
@@ -1575,10 +1576,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         for (Button aButtonList : buttonList) {
             if (aButtonList == choice) {
                 aButtonList.setTextColor(Color.parseColor(displayColor));
-                aButtonList.setBackgroundResource(R.drawable.btn_default);
+                aButtonList.getBackground().setColorFilter(getResources().getColor(R.color.button_pressed), PorterDuff.Mode.SRC);
             } else {
                 aButtonList.setTextColor(Color.BLACK);
-                aButtonList.setBackgroundResource(android.R.drawable.btn_default);
+                aButtonList.getBackground().setColorFilter(getResources().getColor(R.color.button_normal), PorterDuff.Mode.SRC);
             }
         }
     }
@@ -2284,9 +2285,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         tNum.setEnabled(false);
                         tNum.setVisibility(View.GONE);
-
                         pNum.setVisibility(View.GONE);
-
                         eNum.setVisibility(View.GONE);
 
                         final Calendar c = Calendar.getInstance();
@@ -2354,9 +2353,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
-
                         pNum.setVisibility(EditText.GONE);
-
                         eNum.setVisibility(EditText.GONE);
 
                         String lastQualitative = "";
@@ -2372,44 +2369,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         // For example, there are only 7 items
                         // items 10, 11, 12 will be removed totally
                         for (int i = cat.length; i < 12; i++) {
-                            switch (i) {
-                                case 0:
-                                    buttonArray[0].setVisibility(Button.GONE);
-                                    break;
-                                case 1:
-                                    buttonArray[1].setVisibility(Button.GONE);
-                                    break;
-                                case 2:
-                                    buttonArray[2].setVisibility(Button.GONE);
-                                    break;
-                                case 3:
-                                    buttonArray[3].setVisibility(Button.GONE);
-                                    break;
-                                case 4:
-                                    buttonArray[4].setVisibility(Button.GONE);
-                                    break;
-                                case 5:
-                                    buttonArray[5].setVisibility(Button.GONE);
-                                    break;
-                                case 6:
-                                    buttonArray[6].setVisibility(Button.GONE);
-                                    break;
-                                case 7:
-                                    buttonArray[7].setVisibility(Button.GONE);
-                                    break;
-                                case 8:
-                                    buttonArray[8].setVisibility(Button.GONE);
-                                    break;
-                                case 9:
-                                    buttonArray[9].setVisibility(Button.GONE);
-                                    break;
-                                case 10:
-                                    buttonArray[10].setVisibility(Button.GONE);
-                                    break;
-                                case 11:
-                                    buttonArray[11].setVisibility(Button.GONE);
-                                    break;
-                            }
+                            buttonArray[i].setVisibility(Button.GONE);
                         }
 
                         // Reset button visibility for items in the last row
@@ -2417,45 +2377,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         // items 8, 9 will be invisible
                         if (12 - cat.length > 0) {
                             for (int i = 11; i >= cat.length; i--) {
-                                switch (i) {
-                                    case 0:
-                                        buttonArray[0].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 1:
-                                        buttonArray[1].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 2:
-                                        buttonArray[2].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 3:
-                                        buttonArray[3].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 4:
-                                        buttonArray[4].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 5:
-                                        buttonArray[5].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 6:
-                                        buttonArray[6].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 7:
-                                        buttonArray[7].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 8:
-                                        buttonArray[8].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 9:
-                                        buttonArray[9].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 10:
-                                        buttonArray[10].setVisibility(Button.INVISIBLE);
-                                        break;
-                                    case 11:
-                                        buttonArray[11].setVisibility(Button.INVISIBLE);
-                                        break;
-
-                                }
+                                buttonArray[i].setVisibility(Button.INVISIBLE);
                             }
                         }
 
@@ -2463,156 +2385,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         // buttons
                         for (int i = 0; i < cat.length; i++) {
                             if (cat[i].equals(lastQualitative)) {
-                                switch (i) {
-                                    case 0:
-                                        buttonArray[0].setVisibility(Button.VISIBLE);
-                                        buttonArray[0].setText(cat[i]);
-                                        buttonArray[0].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[0].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 1:
-                                        buttonArray[1].setVisibility(Button.VISIBLE);
-                                        buttonArray[1].setText(cat[i]);
-                                        buttonArray[1].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[1].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 2:
-                                        buttonArray[2].setVisibility(Button.VISIBLE);
-                                        buttonArray[2].setText(cat[i]);
-                                        buttonArray[2].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[2].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 3:
-                                        buttonArray[3].setVisibility(Button.VISIBLE);
-                                        buttonArray[3].setText(cat[i]);
-                                        buttonArray[3].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[3].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 4:
-                                        buttonArray[4].setVisibility(Button.VISIBLE);
-                                        buttonArray[4].setText(cat[i]);
-                                        buttonArray[4].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[4].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 5:
-                                        buttonArray[5].setVisibility(Button.VISIBLE);
-                                        buttonArray[5].setText(cat[i]);
-                                        buttonArray[5].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[5].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 6:
-                                        buttonArray[6].setVisibility(Button.VISIBLE);
-                                        buttonArray[6].setText(cat[i]);
-                                        buttonArray[6].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[6].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 7:
-                                        buttonArray[7].setVisibility(Button.VISIBLE);
-                                        buttonArray[7].setText(cat[i]);
-                                        buttonArray[7].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[7].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 8:
-                                        buttonArray[8].setVisibility(Button.VISIBLE);
-                                        buttonArray[8].setText(cat[i]);
-                                        buttonArray[8].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[8].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 9:
-                                        buttonArray[9].setVisibility(Button.VISIBLE);
-                                        buttonArray[9].setText(cat[i]);
-                                        buttonArray[9].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[9].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 10:
-                                        buttonArray[10].setVisibility(Button.VISIBLE);
-                                        buttonArray[10].setText(cat[i]);
-                                        buttonArray[10].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[10].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-                                    case 11:
-                                        buttonArray[11].setVisibility(Button.VISIBLE);
-                                        buttonArray[11].setText(cat[i]);
-                                        buttonArray[11].setTextColor(Color.parseColor(displayColor));
-                                        buttonArray[11].setBackgroundResource(R.drawable.btn_default);
-                                        break;
-
-                                }
+                                buttonArray[i].setVisibility(Button.VISIBLE);
+                                buttonArray[i].setText(cat[i]);
+                                buttonArray[i].setTextColor(Color.parseColor(displayColor));
+                                buttonArray[i].getBackground().setColorFilter(getResources().getColor(R.color.button_pressed), PorterDuff.Mode.SRC);
                             } else {
-                                switch (i) {
-                                    case 0:
-                                        buttonArray[0].setVisibility(Button.VISIBLE);
-                                        buttonArray[0].setText(cat[i]);
-                                        buttonArray[0].setTextColor(Color.BLACK);
-                                        buttonArray[0].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 1:
-                                        buttonArray[1].setVisibility(Button.VISIBLE);
-                                        buttonArray[1].setText(cat[i]);
-                                        buttonArray[1].setTextColor(Color.BLACK);
-                                        buttonArray[1].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 2:
-                                        buttonArray[2].setVisibility(Button.VISIBLE);
-                                        buttonArray[2].setText(cat[i]);
-                                        buttonArray[2].setTextColor(Color.BLACK);
-                                        buttonArray[2].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 3:
-                                        buttonArray[3].setVisibility(Button.VISIBLE);
-                                        buttonArray[3].setText(cat[i]);
-                                        buttonArray[3].setTextColor(Color.BLACK);
-                                        buttonArray[3].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 4:
-                                        buttonArray[4].setVisibility(Button.VISIBLE);
-                                        buttonArray[4].setText(cat[i]);
-                                        buttonArray[4].setTextColor(Color.BLACK);
-                                        buttonArray[4].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 5:
-                                        buttonArray[5].setVisibility(Button.VISIBLE);
-                                        buttonArray[5].setText(cat[i]);
-                                        buttonArray[5].setTextColor(Color.BLACK);
-                                        buttonArray[5].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 6:
-                                        buttonArray[6].setVisibility(Button.VISIBLE);
-                                        buttonArray[6].setText(cat[i]);
-                                        buttonArray[6].setTextColor(Color.BLACK);
-                                        buttonArray[6].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 7:
-                                        buttonArray[7].setVisibility(Button.VISIBLE);
-                                        buttonArray[7].setText(cat[i]);
-                                        buttonArray[7].setTextColor(Color.BLACK);
-                                        buttonArray[7].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 8:
-                                        buttonArray[8].setVisibility(Button.VISIBLE);
-                                        buttonArray[8].setText(cat[i]);
-                                        buttonArray[8].setTextColor(Color.BLACK);
-                                        buttonArray[8].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 9:
-                                        buttonArray[9].setVisibility(Button.VISIBLE);
-                                        buttonArray[9].setText(cat[i]);
-                                        buttonArray[9].setTextColor(Color.BLACK);
-                                        buttonArray[9].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 10:
-                                        buttonArray[10].setVisibility(Button.VISIBLE);
-                                        buttonArray[10].setText(cat[i]);
-                                        buttonArray[10].setTextColor(Color.BLACK);
-                                        buttonArray[10].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                    case 11:
-                                        buttonArray[11].setVisibility(Button.VISIBLE);
-                                        buttonArray[11].setText(cat[i]);
-                                        buttonArray[11].setTextColor(Color.BLACK);
-                                        buttonArray[11].setBackgroundResource(android.R.drawable.btn_default);
-                                        break;
-                                }
+                                buttonArray[i].setVisibility(Button.VISIBLE);
+                                buttonArray[i].setText(cat[i]);
+                                buttonArray[i].setTextColor(Color.BLACK);
+                                buttonArray[i].getBackground().setColorFilter(getResources().getColor(R.color.button_normal), PorterDuff.Mode.SRC);
                             }
                         }
                     } else if (currentTrait.format.equals("boolean")) {
@@ -3421,7 +3202,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
         dt.deleteTrait(cRange.plot_id, parent);
-        dt.insertUserTraits(cRange.plot_id, parent, trait, value);
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName","") + " " + ep.getString("LastName",""), ep.getString("Location",""),"",""); //TODO add notes and exp_id
     }
 
     // Delete trait, including from database
@@ -3654,21 +3435,25 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private void moveToPlotID() {
-        goToId = new Dialog(this, R.style.AppDialog);
-        goToId.setTitle(getString(R.string.jumptoplotidbutton));
-        goToId.setContentView(R.layout.gotobarcode);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
-        goToId.setCancelable(true);
-        goToId.setCanceledOnTouchOutside(true);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.gotobarcode, null);
+
+        builder.setTitle(R.string.jumptoplotidbutton)
+                .setCancelable(true)
+                .setView(layout);
+
+        goToId = builder.create();
 
         android.view.WindowManager.LayoutParams langParams = goToId.getWindow().getAttributes();
         langParams.width = LayoutParams.MATCH_PARENT;
         goToId.getWindow().setAttributes(langParams);
 
-        final EditText barcodeId = (EditText) goToId.findViewById(R.id.barcodeid);
-        Button exportButton = (Button) goToId.findViewById(R.id.saveBtn);
-        Button closeBtn = (Button) goToId.findViewById(R.id.closeBtn);
-        Button camBtn = (Button) goToId.findViewById(R.id.camBtn);
+        final EditText barcodeId = (EditText) layout.findViewById(R.id.barcodeid);
+        Button exportButton = (Button) layout.findViewById(R.id.saveBtn);
+        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+        Button camBtn = (Button) layout.findViewById(R.id.camBtn);
 
         camBtn.setOnClickListener(new OnClickListener() {
             @Override
@@ -4172,29 +3957,31 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private void showSummary() {
-        final Dialog summaryDialog = new Dialog(MainActivity.this, R.style.AppDialog);
-        summaryDialog.setTitle(getString(R.string.mapsummary));
-        summaryDialog.setContentView(R.layout.summary);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
-        android.view.WindowManager.LayoutParams params2 = summaryDialog.getWindow().getAttributes();
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.summary, null);
+
+        builder.setTitle(R.string.mapsummary)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog dialog = builder.create();
+
+        android.view.WindowManager.LayoutParams params2 = dialog.getWindow().getAttributes();
         params2.width = LayoutParams.MATCH_PARENT;
-        summaryDialog.getWindow().setAttributes(params2);
+        dialog.getWindow().setAttributes(params2);
 
-        summaryDialog.setCancelable(true);
-        summaryDialog.setCanceledOnTouchOutside(true);
-
-        Button closeBtn = (Button) summaryDialog.findViewById(R.id.closeBtn);
-
-        TextView summaryText = (TextView) summaryDialog.findViewById(R.id.text1);
+        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+        TextView summaryText = (TextView) layout.findViewById(R.id.text1);
 
         closeBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                summaryDialog.dismiss();
+                dialog.dismiss();
             }
         });
 
         String[] traitList = dt.getAllTraits();
-
         String data = "";
 
         if (cRange != null) {
@@ -4210,7 +3997,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         summaryText.setText(data);
-        summaryDialog.show();
+
+        dialog.show();
     }
 
     public int getVersion() {
@@ -4287,7 +4075,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         dt.deleteTraitByValue(cRange.plot_id, parent, value);
 
-        dt.insertUserTraits(cRange.plot_id, parent, trait, value);
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName","") + " " + ep.getString("LastName",""), ep.getString("Location",""),"",""); //TODO add notes and exp_id
 
         SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss",
                 Locale.getDefault());

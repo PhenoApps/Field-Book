@@ -20,7 +20,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="15dp"
-        android:background="@android:drawable/btn_default"
         android:gravity="center"
         android:minWidth="@dimen/button_default_width"
         android:text="@string/clear"

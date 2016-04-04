@@ -571,29 +571,6 @@ public class DragSortListView extends ListView {
     }
 
     /**
-     * Usually called from a FloatViewManager. The float alpha
-     * will be reset to the xml-defined value every time a drag
-     * is stopped.
-     */
-    public void setFloatAlpha(float alpha) {
-        mCurrFloatAlpha = alpha;
-    }
-
-    public float getFloatAlpha() {
-        return mCurrFloatAlpha;
-    }
-
-    /**
-     * Set maximum drag scroll speed in positions/second. Only applies
-     * if using default ScrollSpeedProfile.
-     *
-     * @param max Maximum scroll speed.
-     */
-    public void setMaxScrollSpeed(float max) {
-        mMaxScrollSpeed = max;
-    }
-
-    /**
      * For each DragSortListView Listener interface implemented by
      * <code>adapter</code>, this method calls the appropriate
      * set*Listener method with <code>adapter</code> as the argument.
@@ -604,6 +581,7 @@ public class DragSortListView extends ListView {
      */
     @Override
     public void setAdapter(ListAdapter adapter) {
+
         if (adapter != null) {
             mAdapterWrapper = new AdapterWrapper(adapter);
             adapter.registerDataSetObserver(mObserver);
@@ -632,6 +610,7 @@ public class DragSortListView extends ListView {
      * @return The ListAdapter set as the argument of {@link setAdapter()}
      */
     public ListAdapter getInputAdapter() {
+
         if (mAdapterWrapper == null) {
             return null;
         } else {
@@ -793,6 +772,7 @@ public class DragSortListView extends ListView {
         }
 
         if (mFloatView != null) {
+
             // draw the float view over everything
             final int floatViewWidth = mFloatView.getWidth();
             final int floatViewHeight = mFloatView.getHeight();
@@ -1415,24 +1395,6 @@ public class DragSortListView extends ListView {
                 mRemoveAnimator.start();
             } else {
                 doRemoveItem(which);
-            }
-        }
-    }
-
-    /**
-     * Move an item, bypassing the drag-sort process. Simply calls
-     * through to {@link DropListener#drop(int, int)}.
-     *
-     * @param from Position to move (NOTE: headers/footers ignored!
-     *             this is a position in your input ListAdapter).
-     * @param to   Target position (NOTE: headers/footers ignored!
-     *             this is a position in your input ListAdapter).
-     */
-    public void moveItem(int from, int to) {
-        if (mDropListener != null) {
-            final int count = getInputAdapter().getCount();
-            if (from >= 0 && from < count && to >= 0 && to < count) {
-                mDropListener.drop(from, to);
             }
         }
     }
@@ -2206,7 +2168,7 @@ public class DragSortListView extends ListView {
         final View srcItem = getChildAt(mSrcPos - getFirstVisiblePosition());
 
         if (srcItem != null) {
-            //srcItem.setVisibility(View.INVISIBLE);
+            srcItem.setVisibility(View.INVISIBLE);
         }
 
         if (mTrackDragSort) {
@@ -2863,7 +2825,6 @@ public class DragSortListView extends ListView {
     // TODO: Bluuurgh... switch to SharedPreferences
     private class DragSortTracker {
         StringBuilder mBuilder = new StringBuilder();
-
         File mFile;
 
         private int mNumInBuffer = 0;

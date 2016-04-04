@@ -1,3 +1,18 @@
+43
+Add test landscape mode
+Extend quick goto edittext
+Adjust field name size in nav drawer
+Fix a bug that crashed the app if spaces were included in column names
+Include app manual in git
+Update strings
+Add 720dp dimens
+Fix bug with min/max numeric
+Change all dialogs to alertdialogs
+Update all buttons to use default material theme
+Update trait layouts
+Fix bug with dragsortlistview (in trait list)
+Added person and location to usertraits table in database
+
 42
 Fixed a bug causing crashes in onPause
 Fixed a bug causing multicat data not to save

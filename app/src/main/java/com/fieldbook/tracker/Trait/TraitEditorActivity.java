@@ -1,8 +1,7 @@
 package com.fieldbook.tracker.Trait;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
+import android.support.v7.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -21,6 +20,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -41,8 +41,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.fieldbook.tracker.CSVReader;
-import com.fieldbook.tracker.CSVWriter;
+import com.fieldbook.tracker.CSV.CSVReader;
+import com.fieldbook.tracker.CSV.CSVWriter;
 import com.fieldbook.tracker.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
@@ -51,6 +51,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.Tutorial.TutorialTraitsActivity;
 import com.fieldbook.tracker.Dragsort.DragSortListView;
 import com.fieldbook.tracker.Dragsort.DragSortListView.DropListener;
+import com.fieldbook.tracker.Dragsort.DragSortController;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -83,7 +84,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     private static OnItemClickListener traitListener;
 
-    private Dialog createDialog;
+    private AlertDialog createDialog;
 
     String currentId;
 
@@ -138,82 +139,17 @@ public class TraitEditorActivity extends AppCompatActivity {
         loadData();
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    private static DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
 
-        ep = getSharedPreferences("Settings", 0);
+        @Override
+        public void drop(int from, int to) {
 
-        // Enforce internal language change
-        String local = ep.getString("language", "en");
-        String region = ep.getString("region", "");
-        Locale locale2 = new Locale(local, region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
-                .getDisplayMetrics());
+            // The new logic is that the drop point is now the center of the list. Any items before / after are reordered based on the drop point's position.
+            // This means while the realposition may not start from zero, the ordering will always be correct.
 
-        setContentView(R.layout.draglist_activity);
+            Log.w("ReorderStart", "start");
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-
-        //Button mainCloseBtn = (Button) findViewById(R.id.closeBtn);
-        //mainCloseBtn.setVisibility(View.GONE);
-
-        if (getActionBar() != null) {
-            getActionBar().setHomeButtonEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-
-        thisActivity = this;
-
-        final String[] data = new String[11];
-        final String[] enData = new String[11];
-
-        data[0] = getString(R.string.numeric);
-        data[1] = getString(R.string.qualitative);
-        data[2] = getString(R.string.date);
-        data[3] = getString(R.string.percent);
-        data[4] = getString(R.string.bool);
-        data[5] = getString(R.string.text);
-        data[6] = getString(R.string.photo);
-        data[7] = getString(R.string.audio);
-        data[8] = getString(R.string.counter);
-        data[9] = getString(R.string.rustrating);
-        data[10] = getString(R.string.multicategorical);
-
-        enData[0] = "Numeric";
-        enData[1] = "Categorical";
-        enData[2] = "Date";
-        enData[3] = "Percent";
-        enData[4] = "Boolean";
-        enData[5] = "Text";
-        enData[6] = "Photo";
-        enData[7] = "Audio";
-        enData[8] = "Counter";
-        enData[9] = "Rust Rating";
-        enData[10] = "Multicat";
-
-        traitList = (DragSortListView) findViewById(R.id.myList);
-
-        //TODO clean this up
-        traitList.setDropListener(new DropListener() {
-
-            @Override
-            public void drop(int from, int to) {
-
-                // The new logic is that the drop point is now the center of the list. Any items before / after are reordered based on the drop point's position.
-                // This means while the realposition may not start from zero, the ordering will always be correct.
-
-                Log.w("ReorderStart","start");
-                // downward drag
+            if(from!=to) {
                 if (to > from) {
                     Log.w("Downward", "drag");
 
@@ -304,21 +240,125 @@ public class TraitEditorActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-                MainActivity.reloadData = true;
-                loadData();
-            }
-        });
 
-        createDialog = new Dialog(this, R.style.AppDialog);
-        createDialog.setContentView(R.layout.trait);
-        createDialog.setTitle(getString(R.string.addtrait));
-        createDialog.setCancelable(true);
-        createDialog.setCanceledOnTouchOutside(true);
+            }
+
+            MainActivity.reloadData = true;
+            loadData();
+        }
+    };
+
+    private static DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener()
+    {
+        @Override
+        public void remove(int which)
+        {
+            mAdapter.list.remove(which);
+        }
+    };
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ep = getSharedPreferences("Settings", 0);
+
+        // Enforce internal language change
+        String local = ep.getString("language", "en");
+        String region = ep.getString("region", "");
+        Locale locale2 = new Locale(local, region);
+        Locale.setDefault(locale2);
+        Configuration config2 = new Configuration();
+        config2.locale = locale2;
+        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
+                .getDisplayMetrics());
+
+        setContentView(R.layout.draglist_activity);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().getThemedContext();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        //Button mainCloseBtn = (Button) findViewById(R.id.closeBtn);
+        //mainCloseBtn.setVisibility(View.GONE);
+
+        if (getActionBar() != null) {
+            getActionBar().setHomeButtonEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        thisActivity = this;
+
+        final String[] data = new String[11];
+        final String[] enData = new String[11];
+
+        data[0] = getString(R.string.numeric);
+        data[1] = getString(R.string.qualitative);
+        data[2] = getString(R.string.date);
+        data[3] = getString(R.string.percent);
+        data[4] = getString(R.string.bool);
+        data[5] = getString(R.string.text);
+        data[6] = getString(R.string.photo);
+        data[7] = getString(R.string.audio);
+        data[8] = getString(R.string.counter);
+        data[9] = getString(R.string.rustrating);
+        data[10] = getString(R.string.multicategorical);
+
+        enData[0] = "Numeric";
+        enData[1] = "Categorical";
+        enData[2] = "Date";
+        enData[3] = "Percent";
+        enData[4] = "Boolean";
+        enData[5] = "Text";
+        enData[6] = "Photo";
+        enData[7] = "Audio";
+        enData[8] = "Counter";
+        enData[9] = "Rust Rating";
+        enData[10] = "Multicat";
+
+        HashMap visibility = MainActivity.dt.getTraitVisibility();
+        traitList = (DragSortListView) findViewById(R.id.myList);
+
+        if (!traitList.isShown())
+            traitList.setVisibility(ListView.VISIBLE);
+
+        mAdapter = new TraitAdapter(thisActivity, R.layout.traitline, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
+
+        traitList.setAdapter(mAdapter);
+        traitList.setDropListener(onDrop);
+        traitList.setRemoveListener(onRemove);
+
+        DragSortController controller = new DragSortController(traitList);
+        controller.setDragHandleId(R.id.dragSort);
+        controller.setRemoveEnabled(false);
+        controller.setSortEnabled(true);
+        controller.setDragInitMode(1);
+
+        traitList.setFloatViewManager(controller);
+        traitList.setOnTouchListener(controller);
+        traitList.setDragEnabled(true);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.trait, null);
+
+        builder.setTitle(R.string.addtrait)
+                .setCancelable(true)
+                .setView(layout);
+
+        createDialog = builder.create();
 
         android.view.WindowManager.LayoutParams params = createDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
 
         createDialog.getWindow().setAttributes(params);
+
         createDialog.setOnCancelListener(new OnCancelListener() {
 
             public void onCancel(DialogInterface arg0) {
@@ -332,24 +372,24 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
 
-        trait = (EditText) createDialog.findViewById(R.id.trait);
-        format = (Spinner) createDialog.findViewById(R.id.format);
-        def = (EditText) createDialog.findViewById(R.id.def);
-        minimum = (EditText) createDialog.findViewById(R.id.minimum);
-        maximum = (EditText) createDialog.findViewById(R.id.maximum);
-        details = (EditText) createDialog.findViewById(R.id.details);
-        categories = (EditText) createDialog.findViewById(R.id.categories);
+        trait = (EditText) layout.findViewById(R.id.trait);
+        format = (Spinner) layout.findViewById(R.id.format);
+        def = (EditText) layout.findViewById(R.id.def);
+        minimum = (EditText) layout.findViewById(R.id.minimum);
+        maximum = (EditText) layout.findViewById(R.id.maximum);
+        details = (EditText) layout.findViewById(R.id.details);
+        categories = (EditText) layout.findViewById(R.id.categories);
 
-        defBox = (LinearLayout) createDialog.findViewById(R.id.defbox);
-        minBox = (LinearLayout) createDialog.findViewById(R.id.minbox);
-        maxBox = (LinearLayout) createDialog.findViewById(R.id.maxbox);
-        categoryBox = (LinearLayout) createDialog.findViewById(R.id.categorybox);
+        defBox = (LinearLayout) layout.findViewById(R.id.defbox);
+        minBox = (LinearLayout) layout.findViewById(R.id.minbox);
+        maxBox = (LinearLayout) layout.findViewById(R.id.maxbox);
+        categoryBox = (LinearLayout) layout.findViewById(R.id.categorybox);
 
-        bool = (ToggleButton) createDialog.findViewById(R.id.boolBtn);
-        defTv = (TextView) createDialog.findViewById(R.id.defTv);
+        bool = (ToggleButton) layout.findViewById(R.id.boolBtn);
+        defTv = (TextView) layout.findViewById(R.id.defTv);
 
-        Button saveBtn = (Button) createDialog.findViewById(R.id.saveBtn);
-        Button closeBtn = (Button) createDialog.findViewById(R.id.closeBtn);
+        Button saveBtn = (Button) layout.findViewById(R.id.saveBtn);
+        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         trait.isFocused();
 
@@ -424,7 +464,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 // Prompt the user if fields have been edited
 
                 if (dataChanged()) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this, R.style.AppAlertDialog);
 
                     builder.setTitle(getString(R.string.close));
                     builder.setMessage(getString(R.string.areyousure));
@@ -770,9 +810,12 @@ public class TraitEditorActivity extends AppCompatActivity {
             if (!traitList.isShown())
                 traitList.setVisibility(ListView.VISIBLE);
 
-            mAdapter = new TraitAdapter(thisActivity, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
+            mAdapter = new TraitAdapter(thisActivity, R.layout.traitline, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
 
             traitList.setAdapter(mAdapter);
+            traitList.setDropListener(onDrop);
+            traitList.setRemoveListener(onRemove);
+
         } catch (Exception e) {
             ErrorLog("LoadDataError.txt", "" + e.getMessage());
             e.printStackTrace();
@@ -860,21 +903,24 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void importExportDialog() {
-        final Dialog importExport = new Dialog(TraitEditorActivity.this,
-                R.style.AppDialog);
-        importExport.setTitle(getString(R.string.importexport));
-        importExport.setContentView(R.layout.config);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.config, null);
+
+        builder.setTitle(R.string.traits)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog importExport = builder.create();
+
 
         android.view.WindowManager.LayoutParams params = importExport.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
         params.height = LayoutParams.WRAP_CONTENT;
         importExport.getWindow().setAttributes(params);
 
-        importExport.setCancelable(true);
-        importExport.setCanceledOnTouchOutside(true);
-
-        ListView myList = (ListView) importExport
-                .findViewById(R.id.myList);
+        ListView myList = (ListView) layout.findViewById(R.id.myList);
 
         String[] sortOptions = new String[2];
 
@@ -897,8 +943,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, sortOptions);
         myList.setAdapter(adapter);
-        Button sortCloseBtn = (Button) importExport
-                .findViewById(R.id.closeBtn);
+        Button sortCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         sortCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -916,21 +961,23 @@ public class TraitEditorActivity extends AppCompatActivity {
             return;
         }
 
-        final Dialog sortDialog = new Dialog(TraitEditorActivity.this,
-                R.style.AppDialog);
-        sortDialog.setTitle(getString(R.string.sort));
-        sortDialog.setContentView(R.layout.config);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.config, null);
+
+        builder.setTitle(R.string.sort)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog sortDialog = builder.create();
 
         android.view.WindowManager.LayoutParams params = sortDialog.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
         params.height = LayoutParams.WRAP_CONTENT;
         sortDialog.getWindow().setAttributes(params);
 
-        sortDialog.setCancelable(true);
-        sortDialog.setCanceledOnTouchOutside(true);
-
-        ListView myList = (ListView) sortDialog
-                .findViewById(R.id.myList);
+        ListView myList = (ListView) layout.findViewById(R.id.myList);
 
         String[] sortOptions = new String[3];
 
@@ -957,8 +1004,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, sortOptions);
         myList.setAdapter(adapter);
-        Button sortCloseBtn = (Button) sortDialog
-                .findViewById(R.id.closeBtn);
+        Button sortCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         sortCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -1010,18 +1056,22 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void showExportDialog() {
-        final Dialog exportDialog = new Dialog(this, R.style.AppDialog);
-        exportDialog.setTitle(getString(R.string.export));
-        exportDialog.setContentView(R.layout.savedb);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
-        exportDialog.setCancelable(true);
-        exportDialog.setCanceledOnTouchOutside(true);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.savedb, null);
+
+        builder.setTitle(R.string.export)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog exportDialog = builder.create();
 
         android.view.WindowManager.LayoutParams langParams = exportDialog.getWindow().getAttributes();
         langParams.width = LayoutParams.MATCH_PARENT;
         exportDialog.getWindow().setAttributes(langParams);
 
-        Button closeBtn = (Button) exportDialog.findViewById(R.id.closeBtn);
+        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         closeBtn.setOnClickListener(new OnClickListener() {
 
@@ -1044,7 +1094,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 .format(Calendar.getInstance().getTime())
                 + ".trt");
 
-        Button exportButton = (Button) exportDialog.findViewById(R.id.saveBtn);
+        Button exportButton = (Button) layout.findViewById(R.id.saveBtn);
 
         exportButton.setOnClickListener(new OnClickListener() {
 
@@ -1065,7 +1115,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this, R.style.AppAlertDialog);
 
         builder.setTitle(getString(R.string.deletealltraits));
         builder.setMessage(getString(R.string.areyousure));
@@ -1121,8 +1171,8 @@ public class TraitEditorActivity extends AppCompatActivity {
         intent.setClassName(thisActivity,
                 FileExploreActivity.class.getName());
         intent.putExtra("path", Constants.TRAITPATH);
-        intent.putExtra("include", new String[] {"trt"});
-        intent.putExtra("title",getString(R.string.import_title));
+        intent.putExtra("include", new String[]{"trt"});
+        intent.putExtra("title", getString(R.string.import_title));
         startActivityForResult(intent, 1);
     }
 
@@ -1294,7 +1344,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
 
-        if (!ep.getBoolean("DisableShare", true)) {
+        if (!ep.getBoolean("DisableShare", false)) {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");

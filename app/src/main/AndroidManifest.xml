@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fieldbook.tracker"
-    android:versionCode="311"
-    android:versionName="3.1.1">
+    android:versionCode="320"
+    android:versionName="3.2.0">
 
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -45,14 +45,14 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
+            android:theme="@style/ActivityDialog" />
 
         <activity
             android:name="DatagridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
+            android:theme="@style/ActivityDialog" />
 
         <activity
             android:name="ConfigActivity"
@@ -73,7 +73,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
+            android:theme="@style/ActivityDialog" />
 
         <activity
             android:name=".Trait.TraitEditorActivity"
@@ -83,6 +83,12 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
+
+        <activity
+            android:name="ChangelogActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:screenOrientation="portrait"
+            android:theme="@style/ActivityDialog" />
 
         <activity
             android:name=".Tutorial.TutorialMainActivity"
@@ -106,9 +112,11 @@
             android:theme="@style/AppDialog" />
 
         <activity
-            android:name="ChangelogActivity"
+            android:name=".Tutorial.TutorialFieldActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppDialog" />
+
     </application>
 </manifest>

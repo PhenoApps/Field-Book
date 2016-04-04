@@ -1,3 +1,12 @@
+24/3.2.0
+Fixed several bugs causing crashes
+Fixed a bug with numeric traits
+Fixed bug with rearranging traits
+Updated dialog design
+Updated button design
+Updated internal database
+Added Bengali language option
+
 23/3.1.1
 Fixed a bug with the new multicat trait
 Fixed the trait creation layout

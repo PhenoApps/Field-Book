@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.Search;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,6 +8,8 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -32,7 +33,7 @@ import com.fieldbook.tracker.R;
 import java.util.Arrays;
 import java.util.Locale;
 
-public class SearchActivity extends Activity {
+public class SearchActivity extends AppCompatActivity {
     private SharedPreferences ep;
 
     private LinearLayout parent;
@@ -192,44 +193,48 @@ public class SearchActivity extends Activity {
 
                     final SearchData[] data = MainActivity.dt.getRangeBySql(sql);
 
-                    final Dialog resultDialog = new Dialog(SearchActivity.this, R.style.AppDialog);
-                    resultDialog.setContentView(R.layout.searchlist);
-                    resultDialog.setTitle(getString(R.string.results));
-                    resultDialog.setCancelable(true);
-                    resultDialog.setCanceledOnTouchOutside(true);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this, R.style.AppAlertDialog);
 
-                    TextView primaryTitle = (TextView) resultDialog.findViewById(R.id.range);
-                    TextView secondaryTitle = (TextView) resultDialog.findViewById(R.id.plot);
+                    LayoutInflater inflater = SearchActivity.this.getLayoutInflater();
+                    View layout = inflater.inflate(R.layout.searchlist, null);
+
+                    builder.setTitle(R.string.results)
+                            .setCancelable(true)
+                            .setView(layout);
+
+                    final AlertDialog dialog = builder.create();
+
+                    android.view.WindowManager.LayoutParams params2 = dialog.getWindow().getAttributes();
+                    params2.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    params2.width = WindowManager.LayoutParams.MATCH_PARENT;
+                    dialog.getWindow().setAttributes(params2);
+
+                    TextView primaryTitle = (TextView) layout.findViewById(R.id.range);
+                    TextView secondaryTitle = (TextView) layout.findViewById(R.id.plot);
 
                     primaryTitle.setText(ep.getString("ImportFirstName", getString(R.string.range)));
                     secondaryTitle.setText(ep.getString("ImportSecondName", getString(R.string.plot)));
 
-                    WindowManager.LayoutParams params = resultDialog.getWindow().getAttributes();
-                    params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                    params.width = WindowManager.LayoutParams.MATCH_PARENT;
+                    Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+                    ListView myList = (ListView) layout.findViewById(R.id.myList);
 
-                    resultDialog.getWindow().setAttributes(params);
-
-                    ListView myList = (ListView) resultDialog.findViewById(R.id.myList);
-                    Button closeBtn = (Button) resultDialog.findViewById(R.id.closeBtn);
                     closeBtn.setTransformationMethod(null);
 
                     myList.setOnItemClickListener(new OnItemClickListener() {
 
                         public void onItemClick(AdapterView<?> arg0, View arg1,
                                                 int position, long arg3) {
-
                             // When you click on an item, send the data back to the main screen
                             MainActivity.searchRange = data[position].range;
                             MainActivity.searchPlot = data[position].plot;
                             MainActivity.searchReload = true;
 
-                            resultDialog.dismiss();
+                            dialog.dismiss();
                             finish();
                         }
                     });
 
-                    resultDialog.setOnCancelListener(new OnCancelListener() {
+                    dialog.setOnCancelListener(new OnCancelListener() {
 
                         public void onCancel(DialogInterface arg0) {
                             finish();
@@ -239,7 +244,7 @@ public class SearchActivity extends Activity {
                     closeBtn.setOnClickListener(new OnClickListener() {
 
                         public void onClick(View arg0) {
-                            resultDialog.dismiss();
+                            dialog.dismiss();
                             finish();
                         }
                     });
@@ -248,7 +253,7 @@ public class SearchActivity extends Activity {
                     if (data != null) {
                         myList.setAdapter(new SearchAdapter(SearchActivity.this, data));
 
-                        resultDialog.show();
+                        dialog.show();
                     } else {
                         Toast.makeText(SearchActivity.this, getString(R.string.searchempty), Toast.LENGTH_LONG).show();
                     }

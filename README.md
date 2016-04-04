@@ -1,4 +1,8 @@
-# Field Book [![Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_45.png)](https://play.google.com/store/apps/details?id=com.fieldbook.tracker)
+# Field Book
+<a href="https://play.google.com/store/apps/details?id=com.fieldbook.tracker">
+    <img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="60">
+</a>
+
 Field Book is an Android application that can be used to collect field data. It uses a novel collection system that only displays a single cell to be collected at a time.
 
 ### Acknowledgements

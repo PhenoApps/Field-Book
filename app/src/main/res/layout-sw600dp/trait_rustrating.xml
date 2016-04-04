@@ -3,12 +3,9 @@
     android:id="@+id/rustLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:visibility="gone"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:visibility="gone">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -25,16 +22,15 @@
             <Button
                 android:id="@+id/rust0"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="0"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -44,16 +40,15 @@
             <Button
                 android:id="@+id/rust5"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="5"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -63,16 +58,15 @@
             <Button
                 android:id="@+id/rust10"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="10"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -82,16 +76,15 @@
             <Button
                 android:id="@+id/rust15"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
-                android:visibility="gone"
                 android:minWidth="75dp"
                 android:text="15"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -101,16 +94,15 @@
             <Button
                 android:id="@+id/rust20"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="20"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -120,16 +112,15 @@
             <Button
                 android:id="@+id/rust25"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
                 android:text="25"
-                android:visibility="gone"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -139,16 +130,15 @@
             <Button
                 android:id="@+id/rust30"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
                 android:text="30"
-                android:visibility="gone"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
 
         </LinearLayout>
@@ -163,16 +153,15 @@
             <Button
                 android:id="@+id/rust35"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
-                android:visibility="gone"
                 android:minWidth="75dp"
                 android:text="35"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -182,16 +171,15 @@
             <Button
                 android:id="@+id/rust40"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="40"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -201,16 +189,15 @@
             <Button
                 android:id="@+id/rust45"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
                 android:text="45"
-                android:visibility="gone"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -220,16 +207,15 @@
             <Button
                 android:id="@+id/rust50"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
                 android:text="50"
-                android:visibility="gone"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -239,16 +225,15 @@
             <Button
                 android:id="@+id/rust55"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="55"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -258,16 +243,15 @@
             <Button
                 android:id="@+id/rust60"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
                 android:text="60"
-                android:visibility="gone"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -277,16 +261,15 @@
             <Button
                 android:id="@+id/rust65"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="65"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -300,16 +283,15 @@
             <Button
                 android:id="@+id/rust70"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="70"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -319,16 +301,15 @@
             <Button
                 android:id="@+id/rust75"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="75"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -338,16 +319,15 @@
             <Button
                 android:id="@+id/rust80"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
                 android:text="80"
-                android:visibility="gone"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -357,16 +337,15 @@
             <Button
                 android:id="@+id/rust85"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="85"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -376,16 +355,15 @@
             <Button
                 android:id="@+id/rust90"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
-                android:visibility="gone"
                 android:text="90"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -395,16 +373,15 @@
             <Button
                 android:id="@+id/rust95"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
-                android:visibility="gone"
                 android:minWidth="75dp"
                 android:text="95"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="10dp"
@@ -414,16 +391,15 @@
             <Button
                 android:id="@+id/rust100"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
                 android:text="100"
-                android:visibility="gone"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
 
         <LinearLayout
@@ -436,9 +412,8 @@
             <Button
                 android:id="@+id/rustR"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="130dp"
                 android:text="R"
@@ -454,9 +429,8 @@
             <Button
                 android:id="@+id/rustMR"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="130dp"
                 android:text="MR"
@@ -472,9 +446,8 @@
             <Button
                 android:id="@+id/rustMS"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="130dp"
                 android:text="MS"
@@ -490,9 +463,8 @@
             <Button
                 android:id="@+id/rustS"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="130dp"
                 android:text="S"
@@ -506,25 +478,25 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:paddingTop="10dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingTop="10dp">
+
             <Button
                 android:id="@+id/rustDelim"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="75dp"
                 android:text="/"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
                 android:textStyle="bold" />
+
             <Button
                 android:id="@+id/clearRustBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
-                android:background="@android:drawable/btn_default"
+                android:layout_height="wrap_content"
                 android:gravity="center"
                 android:minWidth="130dp"
                 android:text="@string/clear"
@@ -534,5 +506,4 @@
 
         </LinearLayout>
     </LinearLayout>
-    </ScrollView>
 </LinearLayout>

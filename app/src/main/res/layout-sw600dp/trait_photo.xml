@@ -37,9 +37,8 @@
             <Button
                 android:id="@+id/capture"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="120dp"
                 android:text="@string/capture"
@@ -50,9 +49,8 @@
             <Button
                 android:id="@+id/clearPhoto"
                 android:layout_width="wrap_content"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:drawable/btn_default"
                 android:gravity="center"
                 android:minWidth="120dp"
                 android:text="@string/clear"

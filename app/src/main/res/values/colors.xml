@@ -8,4 +8,8 @@
     <color name="main_primaryDark">#689F38</color>
     <color name="main_colorAccent">#795548</color>
 
+    <color name="main_details">#595959</color>
+
+    <color name="button_normal">#ffd6d7d7</color>
+    <color name="button_pressed">#33b5e5</color>
 </resources>

@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
  */
 public class DataHelper {
     private static final String DATABASE_NAME = "fieldbook.db";
-    public static final int DATABASE_VERSION = 5;
+    public static final int DATABASE_VERSION = 6;
 
     private static String TAG = "Field Book";
 
@@ -47,6 +47,8 @@ public class DataHelper {
     public static final String TRAITS = "traits";
 
     public static final String USER_TRAITS = "user_traits";
+
+    public static String TICK = "`";
 
     private Context context;
     private static SQLiteDatabase db;
@@ -60,7 +62,7 @@ public class DataHelper {
             + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?)";
 
     private static final String INSERTUSERTRAITS = "insert into " + USER_TRAITS
-            + "(rid, parent, trait, userValue, timeTaken) values (?,?,?,?,?)";
+            + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id) values (?,?,?,?,?,?,?,?,?,?)";
 
     private SimpleDateFormat timeStamp;
 
@@ -99,9 +101,9 @@ public class DataHelper {
 
             for (int i = 0; i < columns.length; i++) {
                 if (i == (columns.length - 1)) {
-                    fields += columns[i] + ")";
+                    fields += TICK +columns[i] +TICK + ")";
                 } else {
-                    fields += columns[i] + ",";
+                    fields += TICK +columns[i] +TICK + ",";
                 }
             }
 
@@ -136,15 +138,22 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertUserTraits(String rid, String parent, String trait, String userValue) {
+    public long insertUserTraits(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id) {
+
+        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
+        int rep = cursor.getCount() + 1;
 
         try {
             this.insertUserTraits.bindString(1, rid);
             this.insertUserTraits.bindString(2, parent);
             this.insertUserTraits.bindString(3, trait);
             this.insertUserTraits.bindString(4, userValue);
-            this.insertUserTraits.bindString(5,
-                    timeStamp.format(Calendar.getInstance().getTime()));
+            this.insertUserTraits.bindString(5, timeStamp.format(Calendar.getInstance().getTime()));
+            this.insertUserTraits.bindString(6, person);
+            this.insertUserTraits.bindString(7, location);
+            this.insertUserTraits.bindString(8, Integer.toString(rep));
+            this.insertUserTraits.bindString(9, notes);
+            this.insertUserTraits.bindString(10, exp_id);
 
             return this.insertUserTraits.executeInsert();
         } catch (Exception e) {
@@ -223,8 +232,9 @@ public class DataHelper {
         String activeTraits = arrayToLikeString(traits);
 
         String query = "select " + fields + ", traits.trait, user_traits.userValue, " +
-                "user_traits.timeTaken from user_traits, range, traits where " +
-                "user_traits.rid = range." + ep.getString("ImportUniqueName", "") +
+                "user_traits.timeTaken, user_traits.person, user_traits.location, user_traits.rep" +
+                " from user_traits, range, traits where " +
+                "user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK +
                 " and user_traits.parent = traits.trait and " +
                 "user_traits.trait = traits.format and user_traits.userValue is not null and " + activeTraits;
 
@@ -233,8 +243,9 @@ public class DataHelper {
         Cursor cursor = db
                 .rawQuery(
                         "select " + fields + ", traits.trait, user_traits.userValue, " +
-                                "user_traits.timeTaken from user_traits, range, traits where " +
-                                "user_traits.rid = range." + ep.getString("ImportUniqueName", "") +
+                                "user_traits.timeTaken, user_traits.person, user_traits.location, user_traits.rep" +
+                                " from user_traits, range, traits where " +
+                                "user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK +
                                 " and user_traits.parent = traits.trait and " +
                                 "user_traits.trait = traits.format and user_traits.userValue is not null and " + activeTraits,
                         null
@@ -274,12 +285,12 @@ public class DataHelper {
 
         for (int i = 0; i < traits.length; i++) {
             traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
-            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + ep.getString("ImportUniqueName", "")
-                    + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
+            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + TICK +ep.getString("ImportUniqueName", "")
+                    +TICK + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
         }
 
         query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
-                " FROM range range " + joinArgs + "GROUP BY range." + ep.getString("ImportUniqueName", "");
+                " FROM range range " + joinArgs + "GROUP BY range." +TICK + ep.getString("ImportUniqueName", "")+TICK;
 
         Log.e("DH", query);
 
@@ -587,7 +598,7 @@ public class DataHelper {
         Cursor cursor = db
                 .rawQuery(
                         "select range.id, user_traits.userValue from user_traits, range where " +
-                                "user_traits.rid = range." + ep.getString("ImportUniqueName", "") +
+                                "user_traits.rid = range." + TICK +ep.getString("ImportUniqueName", "") +TICK +
                                 " and range.id = ? and user_traits.parent like ? and user_traits.trait like ?",
                         new String[]{String.valueOf(id), parent, trait}
                 );
@@ -684,9 +695,9 @@ public class DataHelper {
         data.plot_id = "";
         data.range = "";
 
-        Cursor cursor = db.query(RANGE, new String[]{ep.getString("ImportFirstName", ""),
-                        ep.getString("ImportSecondName", ""),
-                        ep.getString("ImportUniqueName", ""), "id"}, "id = ?",
+        Cursor cursor = db.query(RANGE, new String[]{TICK + ep.getString("ImportFirstName", "")+TICK,
+                        TICK +ep.getString("ImportSecondName", "")+TICK,
+                        TICK +ep.getString("ImportUniqueName", "")+TICK, "id"}, "id = ?",
                 new String[]{String.valueOf(id)}, null, null, null
         );
 
@@ -710,8 +721,8 @@ public class DataHelper {
      */
     public String getRangeFromId(String plot_id) {
         try {
-            Cursor cursor = db.query(RANGE, new String[]{ep.getString("ImportFirstName", "")},
-                    ep.getString("ImportUniqueName", "") + " like ? ", new String[]{plot_id},
+            Cursor cursor = db.query(RANGE, new String[]{TICK +ep.getString("ImportFirstName", "")+TICK},
+                    TICK +ep.getString("ImportUniqueName", "")+TICK + " like ? ", new String[]{plot_id},
                     null, null, null);
 
             String myList = null;
@@ -784,7 +795,7 @@ public class DataHelper {
 
         try {
             Cursor cursor = db.query(RANGE, new String[]{trait},
-                    ep.getString("ImportUniqueName", "") + " like ? ", new String[]{plotId},
+                    TICK +ep.getString("ImportUniqueName", "")+TICK + " like ? ", new String[]{plotId},
                     null, null, null);
 
             String[] myList = null;
@@ -847,8 +858,8 @@ public class DataHelper {
      */
     public String getPlotFromId(String plot_id) {
         try {
-            Cursor cursor = db.query(RANGE, new String[]{ep.getString("ImportSecondName", "")},
-                    ep.getString("ImportUniqueName", "") + " like ?", new String[]{plot_id},
+            Cursor cursor = db.query(RANGE, new String[]{TICK +ep.getString("ImportSecondName", "")+TICK},
+                    TICK +ep.getString("ImportUniqueName", "")+ TICK + " like ?", new String[]{plot_id},
                     null, null, null);
 
             String myList = null;
@@ -919,9 +930,9 @@ public class DataHelper {
 
         for (int i = 0; i < data.length; i++) {
             if (i == data.length - 1) {
-                sql += data[i] + " TEXT)";
+                sql += TICK +data[i] +TICK + " TEXT)";
             } else {
-                sql += data[i] + " TEXT,";
+                sql += TICK +data[i] +TICK + " TEXT,";
             }
         }
 
@@ -1104,7 +1115,7 @@ public class DataHelper {
 
             db.execSQL("CREATE TABLE "
                     + USER_TRAITS
-                    + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT)");
+                    + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT)");
 
             try {
                 db.execSQL("CREATE TABLE android_metadata (locale TEXT)");
@@ -1117,7 +1128,7 @@ public class DataHelper {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w("FieldBook",
-                    "Upgrading database, this will drop tables and recreate.");
+                    "Upgrading database.");
 
             if (oldVersion < 5) {
                 db.execSQL("DROP TABLE IF EXISTS " + RANGE);
@@ -1127,14 +1138,19 @@ public class DataHelper {
 
             if (oldVersion == 5 & newVersion == 6) {
                 // add columns to tables
+                db.execSQL("ALTER TABLE user_traits ADD COLUMN person TEXT");
+                db.execSQL("ALTER TABLE user_traits ADD COLUMN location TEXT");
+                db.execSQL("ALTER TABLE user_traits ADD COLUMN rep TEXT");
+                db.execSQL("ALTER TABLE user_traits ADD COLUMN notes TEXT");
+                db.execSQL("ALTER TABLE user_traits ADD COLUMN exp_id TEXT");
+            }
 
+            if (oldVersion == 6 & newVersion == 7) {
                 // make table for all fields
 
                 // move current range table to a new table
 
             }
-
-            onCreate(db);
         }
     }
 

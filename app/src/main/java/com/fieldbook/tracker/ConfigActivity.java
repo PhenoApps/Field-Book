@@ -1,8 +1,7 @@
 package com.fieldbook.tracker;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
+import android.support.v7.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,7 +17,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -46,11 +44,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.CSV.CSVReader;
+import com.fieldbook.tracker.CSV.CSVWriter;
 import com.fieldbook.tracker.Trait.TraitEditorActivity;
 import com.fieldbook.tracker.Tutorial.TutorialSettingsActivity;
 
@@ -86,19 +85,13 @@ public class ConfigActivity extends AppCompatActivity {
 
     private SharedPreferences ep;
 
-    private Dialog personDialog;
-    private Dialog locationDialog;
-    private Dialog saveDialog;
-
-    private Dialog fieldDialog2;
-
-    private Dialog advancedDialog;
-
-    private Dialog setupDialog;
-
-    private Dialog importFieldDialog;
-
-    private Dialog dbSaveDialog;
+    private AlertDialog personDialog;
+    private AlertDialog locationDialog;
+    private AlertDialog saveDialog;
+    private AlertDialog advancedDialog;
+    private AlertDialog setupDialog;
+    private AlertDialog importFieldDialog;
+    private AlertDialog dbSaveDialog;
 
     private String[] importColumns;
 
@@ -121,7 +114,6 @@ public class ConfigActivity extends AppCompatActivity {
     private Boolean checkDbBool = false;
     private Boolean checkExcelBool = false;
     private Boolean checkOverwriteBool = false;
-
 
     private boolean isCSV;
     private int idColPosition;
@@ -231,42 +223,28 @@ public class ConfigActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         //setup
-        setupDialog = new Dialog(this, R.style.AppDialog);
-        setupDialog.setTitle(getString(R.string.profile));
-        setupDialog.setContentView(R.layout.config);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.config, null);
+
+        builder.setTitle(R.string.profile)
+                .setCancelable(true)
+                .setView(layout);
+
+        setupDialog = builder.create();
 
         android.view.WindowManager.LayoutParams params = setupDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params = setupDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
         params.height = LayoutParams.WRAP_CONTENT;
         setupDialog.getWindow().setAttributes(params);
 
-        setupDialog.setCancelable(true);
-        setupDialog.setCanceledOnTouchOutside(true);
-
         // This is the list of items shown on the settings screen itself
-        setupList = (ListView) setupDialog.findViewById(R.id.myList);
-        Button setupCloseBtn = (Button) setupDialog.findViewById(R.id.closeBtn);
+        setupList = (ListView) layout.findViewById(R.id.myList);
+        Button setupCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
         setupCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 setupDialog.dismiss();
-            }
-        });
-
-        fieldDialog2 = new Dialog(this, R.style.AppDialog);
-        fieldDialog2.setTitle(getString(R.string.fields));
-        fieldDialog2.setContentView(R.layout.config);
-
-        fieldDialog2.setCancelable(true);
-        fieldDialog2.setCanceledOnTouchOutside(true);
-
-        Button fdCloseBtn2 = (Button) fieldDialog2.findViewById(R.id.closeBtn);
-
-        fdCloseBtn2.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                fieldDialog2.dismiss();
             }
         });
 
@@ -417,7 +395,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showTipsDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
         builder.setTitle(getString(R.string.tutorial));
         builder.setMessage(getString(R.string.tipsdesc));
@@ -465,7 +443,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void loadSampleDataDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this,R.style.AppAlertDialog);
 
         builder.setTitle(getString(R.string.sampledata));
         builder.setMessage(getString(R.string.loadsampledata));
@@ -524,24 +502,25 @@ public class ConfigActivity extends AppCompatActivity {
             versionName = null;
         }
 
-        final Dialog aboutDialog = new Dialog(ConfigActivity.this,
-                R.style.AppDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
-        aboutDialog.setTitle(R.string.about);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.about, null);
 
-        aboutDialog.setContentView(R.layout.about);
+        builder.setTitle(R.string.about)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog aboutDialog = builder.create();
 
         android.view.WindowManager.LayoutParams langParams = aboutDialog.getWindow().getAttributes();
         langParams.width = LayoutParams.MATCH_PARENT;
         aboutDialog.getWindow().setAttributes(langParams);
 
-        aboutDialog.setCancelable(true);
-        aboutDialog.setCanceledOnTouchOutside(true);
-
-        TextView versionText = (TextView) aboutDialog.findViewById(R.id.tvVersion);
+        TextView versionText = (TextView) layout.findViewById(R.id.tvVersion);
         versionText.setText(getString(R.string.version) + " " + versionName);
 
-        TextView otherApps = (TextView) aboutDialog.findViewById(R.id.tvOtherApps);
+        TextView otherApps = (TextView) layout.findViewById(R.id.tvOtherApps);
 
         versionText.setOnClickListener(new OnClickListener() {
             @Override
@@ -559,8 +538,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        Button closeBtn = (Button) aboutDialog
-                .findViewById(R.id.closeBtn);
+        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         closeBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -572,21 +550,24 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showOtherAppsDialog() {
-        final Dialog otherAppsDialog = new Dialog(ConfigActivity.this,
-                R.style.AppDialog);
-        otherAppsDialog.setTitle(getString(R.string.otherapps));
-        otherAppsDialog.setContentView(R.layout.config);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.config, null);
+
+        builder.setTitle(R.string.otherapps)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog otherAppsDialog = builder.create();
 
         android.view.WindowManager.LayoutParams params = otherAppsDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
         params.height = LayoutParams.WRAP_CONTENT;
         otherAppsDialog.getWindow().setAttributes(params);
 
-        otherAppsDialog.setCancelable(true);
-        otherAppsDialog.setCanceledOnTouchOutside(true);
-
-        ListView myList = (ListView) otherAppsDialog
-                .findViewById(R.id.myList);
+        ListView myList = (ListView) layout.findViewById(R.id.myList);
 
         String[] appsArray = new String[3];
 
@@ -598,8 +579,8 @@ public class ConfigActivity extends AppCompatActivity {
 
         Integer app_images[] = {R.drawable.other_ic_inventory, R.drawable.other_ic_coordinate, R.drawable.other_ic_1kk};
         final String[] links = {"https://play.google.com/store/apps/details?id=org.wheatgenetics.inventory",
-                "http://wheatgenetics.org/apps",
-                "http://wheatgenetics.org/apps"}; //TODO update these links
+                "https://play.google.com/store/apps/details?id=org.wheatgenetics.coordinate",
+                "https://play.google.com/store/apps/details?id=org.wheatgenetics.onekk"};
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -626,8 +607,7 @@ public class ConfigActivity extends AppCompatActivity {
         CustomListAdapter adapterImg = new CustomListAdapter(this, app_images, appsArray);
         myList.setAdapter(adapterImg);
 
-        Button langCloseBtn = (Button) otherAppsDialog
-                .findViewById(R.id.closeBtn);
+        Button langCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         langCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -694,13 +674,12 @@ public class ConfigActivity extends AppCompatActivity {
                 Log.i("Field Book : Traits : ", j);
             }
 
-
             if (exportData.getCount() == 0) {
                 noData = true;
                 return (0);
             }
 
-            if (checkDbBool & !checkExcelBool) {
+            if (checkDbBool) {
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
@@ -711,11 +690,8 @@ public class ConfigActivity extends AppCompatActivity {
                         }
 
                         FileWriter fw = new FileWriter(file);
-
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
-
-                        csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
-                                + ep.getString("LastName", ""), ep.getString("Location", ""));
+                        csvWriter.writeDatabaseFormat(newRange);
 
                         System.out.println(exportFileString);
                         shareFile(file);
@@ -724,54 +700,9 @@ public class ConfigActivity extends AppCompatActivity {
                         fail = true;
                     }
                 }
-            } else if (checkExcelBool & !checkDbBool) {
-                if (exportData.getCount() > 0) {
-                    try {
-                        File file = new File(Constants.FIELDEXPORTPATH,
-                                exportFileString + "_table.csv");
+            }
 
-                        if (file.exists()) {
-                            file.delete();
-                        }
-
-                        FileWriter fw = new FileWriter(file);
-
-                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, exportTraits);
-                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
-
-                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
-                        shareFile(file);
-                    } catch (Exception e) {
-                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
-                        fail = true;
-                    }
-                }
-            } else {
-                if (exportData.getCount() > 0) {
-                    try {
-                        File file = new File(Constants.FIELDEXPORTPATH,
-                                exportFileString + "_database.csv");
-
-                        if (file.exists()) {
-                            file.delete();
-                        }
-
-                        FileWriter fw = new FileWriter(file);
-
-                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
-
-                        csvWriter.writeDatabaseFormat(newRange, ep.getString("FirstName", "") + "_"
-                                + ep.getString("LastName", ""), ep.getString("Location", ""));
-                        shareFile(file);
-                    } catch (Exception e) {
-                        ErrorLog("ExportDataError.txt", "" + e.getMessage());
-                        fail = true;
-                    }
-                }
-
-                if (fail)
-                    return 0;
-
+            if (checkExcelBool) {
                 if (exportData.getCount() > 0) {
                     try {
                         File file = new File(Constants.FIELDEXPORTPATH,
@@ -794,6 +725,7 @@ public class ConfigActivity extends AppCompatActivity {
                     }
                 }
             }
+
             return 0;
         }
 
@@ -906,9 +838,7 @@ public class ConfigActivity extends AppCompatActivity {
             } catch (Exception e) {
                 ErrorLog("ImportDatabase.txt", "" + e.getMessage());
                 e.printStackTrace();
-
                 error = "" + e.getMessage();
-
                 fail = true;
             }
             return 0;
@@ -1022,32 +952,36 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showAdvancedDialog() {
-        advancedDialog = new Dialog(this, R.style.AppDialog);
-        advancedDialog.setTitle(getString(R.string.advanced));
-        advancedDialog.setContentView(R.layout.advanced);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.advanced, null);
+
+        builder.setTitle(R.string.advanced)
+                .setCancelable(true)
+                .setView(layout);
+
+        advancedDialog = builder.create();
 
         android.view.WindowManager.LayoutParams params = advancedDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
         advancedDialog.getWindow().setAttributes(params);
 
-        advancedDialog.setCancelable(true);
-        advancedDialog.setCanceledOnTouchOutside(true);
+        CheckBox tips = (CheckBox) layout.findViewById(R.id.tipsCheckbox);
+        CheckBox cycle = (CheckBox) layout.findViewById(R.id.cycleTraitsCheckbox);
+        CheckBox ignoreEntries = (CheckBox) layout.findViewById(R.id.ignoreExistingCheckbox);
+        CheckBox useDay = (CheckBox) layout.findViewById(R.id.useDayCheckbox);
+        CheckBox rangeSound = (CheckBox) layout.findViewById(R.id.rangeSoundCheckbox);
+        CheckBox jumpToPlot = (CheckBox) layout.findViewById(R.id.jumpToPlotCheckbox);
+        CheckBox barcodeScan = (CheckBox) layout.findViewById(R.id.barcodeScanCheckbox);
+        CheckBox nextEmptyPlot = (CheckBox) layout.findViewById(R.id.nextEmptyPlotCheckbox);
+        CheckBox quickGoTo = (CheckBox) layout.findViewById(R.id.quickGoToCheckbox);
+        CheckBox disableShare = (CheckBox) layout.findViewById(R.id.disableShareCheckbox);
+        CheckBox disableEntryNavLeft = (CheckBox) layout.findViewById(R.id.disableEntryNavLeftCheckbox);
+        CheckBox disableEntryNavRight = (CheckBox) layout.findViewById(R.id.disableEntryNavRightCheckbox);
+        CheckBox dataGrid = (CheckBox) layout.findViewById(R.id.dataGridCheckbox);
 
-        CheckBox tips = (CheckBox) advancedDialog.findViewById(R.id.tipsCheckbox);
-        CheckBox cycle = (CheckBox) advancedDialog.findViewById(R.id.cycleTraitsCheckbox);
-        CheckBox ignoreEntries = (CheckBox) advancedDialog.findViewById(R.id.ignoreExistingCheckbox);
-        CheckBox useDay = (CheckBox) advancedDialog.findViewById(R.id.useDayCheckbox);
-        CheckBox rangeSound = (CheckBox) advancedDialog.findViewById(R.id.rangeSoundCheckbox);
-        CheckBox jumpToPlot = (CheckBox) advancedDialog.findViewById(R.id.jumpToPlotCheckbox);
-        CheckBox barcodeScan = (CheckBox) advancedDialog.findViewById(R.id.barcodeScanCheckbox);
-        CheckBox nextEmptyPlot = (CheckBox) advancedDialog.findViewById(R.id.nextEmptyPlotCheckbox);
-        CheckBox quickGoTo = (CheckBox) advancedDialog.findViewById(R.id.quickGoToCheckbox);
-        CheckBox disableShare = (CheckBox) advancedDialog.findViewById(R.id.disableShareCheckbox);
-        CheckBox disableEntryNavLeft = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNavLeftCheckbox);
-        CheckBox disableEntryNavRight = (CheckBox) advancedDialog.findViewById(R.id.disableEntryNavRightCheckbox);
-        CheckBox dataGrid = (CheckBox) advancedDialog.findViewById(R.id.dataGridCheckbox);
-
-        Button advCloseBtn = (Button) advancedDialog.findViewById(R.id.closeBtn);
+        Button advCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         advCloseBtn.setOnClickListener(new OnClickListener() {
 
@@ -1213,10 +1147,16 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showLanguageDialog() {
-        final Dialog languageDialog = new Dialog(ConfigActivity.this,
-                R.style.AppDialog);
-        languageDialog.setTitle(getString(R.string.language));
-        languageDialog.setContentView(R.layout.config);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.config, null);
+
+        builder.setTitle(R.string.language)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog languageDialog = builder.create();
 
         final float scale = this.getResources().getDisplayMetrics().density;
         int pixels = (int) (500 * scale + 0.5f);
@@ -1226,19 +1166,15 @@ public class ConfigActivity extends AppCompatActivity {
         params.height = LayoutParams.WRAP_CONTENT;
         languageDialog.getWindow().setAttributes(params);
 
-        languageDialog.setCancelable(true);
-        languageDialog.setCanceledOnTouchOutside(true);
-
-        ListView myList = (ListView) languageDialog
+        ListView myList = (ListView) layout
                 .findViewById(R.id.myList);
 
         ViewGroup.LayoutParams params2 = myList.getLayoutParams();
         params2.height = pixels;
         myList.setLayoutParams(params2);
 
-
         region = "";
-        String[] langArray = new String[12];
+        String[] langArray = new String[13];
 
         langArray[0] = getString(R.string.english);
         langArray[1] = getString(R.string.spanish);
@@ -1252,10 +1188,11 @@ public class ConfigActivity extends AppCompatActivity {
         langArray[9] = getString(R.string.russian);
         langArray[10] = getString(R.string.oromo);
         langArray[11] = getString(R.string.amharic);
+        langArray[12] = getString(R.string.bengali);
 
         Integer image_id[] = {R.drawable.ic_us, R.drawable.ic_mx, R.drawable.ic_fr, R.drawable.ic_in,
                 R.drawable.ic_de, R.drawable.ic_jp, R.drawable.ic_ar, R.drawable.ic_cn, R.drawable.ic_br,
-                R.drawable.ic_ru, R.drawable.ic_et, R.drawable.ic_et};
+                R.drawable.ic_ru, R.drawable.ic_et, R.drawable.ic_et, R.drawable.ic_bn};
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -1299,6 +1236,9 @@ public class ConfigActivity extends AppCompatActivity {
                     case 11:
                         local = "am";
                         break;
+                    case 12:
+                        local = "bn";
+                        break;
                 }
                 Editor ed = ep.edit();
                 ed.putString("language", local);
@@ -1325,8 +1265,7 @@ public class ConfigActivity extends AppCompatActivity {
         CustomListAdapter adapterImg = new CustomListAdapter(this, image_id, langArray);
         myList.setAdapter(adapterImg);
 
-        Button langCloseBtn = (Button) languageDialog
-                .findViewById(R.id.closeBtn);
+        Button langCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         langCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -1401,19 +1340,23 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showSaveDialog() {
-        // Export Field book
-        saveDialog = new Dialog(this, R.style.AppDialog);
-        saveDialog.setTitle(getString(R.string.export));
-        saveDialog.setContentView(R.layout.savefile);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.savefile, null);
+
+        builder.setTitle(R.string.export)
+                .setCancelable(true)
+                .setView(layout);
+
+        saveDialog = builder.create();
 
         android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
         params2.width = LayoutParams.MATCH_PARENT;
         saveDialog.getWindow().setAttributes(params2);
 
-        saveDialog.setCancelable(true);
-        saveDialog.setCanceledOnTouchOutside(true);
 
-        Button closeBtn = (Button) saveDialog.findViewById(R.id.closeBtn);
+        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         closeBtn.setOnClickListener(new OnClickListener() {
 
@@ -1422,11 +1365,10 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        exportFile = (EditText) saveDialog.findViewById(R.id.fileName);
-
-        checkDB = (CheckBox) saveDialog.findViewById(R.id.formatDB);
-        checkExcel = (CheckBox) saveDialog.findViewById(R.id.formatExcel);
-        checkOverwrite = (CheckBox) saveDialog.findViewById(R.id.overwrite);
+        exportFile = (EditText) layout.findViewById(R.id.fileName);
+        checkDB = (CheckBox) layout.findViewById(R.id.formatDB);
+        checkExcel = (CheckBox) layout.findViewById(R.id.formatExcel);
+        checkOverwrite = (CheckBox) layout.findViewById(R.id.overwrite);
 
         if (ep.getBoolean("Overwrite", false) ) {
             checkOverwrite.setChecked(true);
@@ -1447,12 +1389,12 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        allColumns = (RadioButton) saveDialog.findViewById(R.id.allColumns);
-        onlyUnique = (RadioButton) saveDialog.findViewById(R.id.onlyUnique);
-        allTraits = (RadioButton) saveDialog.findViewById(R.id.allTraits);
-        activeTraits = (RadioButton) saveDialog.findViewById(R.id.activeTraits);
+        allColumns = (RadioButton) layout.findViewById(R.id.allColumns);
+        onlyUnique = (RadioButton) layout.findViewById(R.id.onlyUnique);
+        allTraits = (RadioButton) layout.findViewById(R.id.allTraits);
+        activeTraits = (RadioButton) layout.findViewById(R.id.activeTraits);
 
-        Button exportButton = (Button) saveDialog.findViewById(R.id.saveBtn);
+        Button exportButton = (Button) layout.findViewById(R.id.saveBtn);
 
         exportButton.setOnClickListener(new OnClickListener() {
 
@@ -1560,18 +1502,23 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showPersonDialog() {
-        // To configure first name, last name
-        personDialog = new Dialog(this, R.style.AppDialog);
-        personDialog.setTitle(getString(R.string.personsetup));
-        personDialog.setContentView(R.layout.person);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
-        personDialog.setCancelable(true);
-        personDialog.setCanceledOnTouchOutside(true);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.person, null);
 
-        final EditText firstName = (EditText) personDialog
-                .findViewById(R.id.firstName);
-        final EditText lastName = (EditText) personDialog
-                .findViewById(R.id.lastName);
+        builder.setTitle(R.string.personsetup)
+                .setCancelable(true)
+                .setView(layout);
+
+        personDialog = builder.create();
+
+        android.view.WindowManager.LayoutParams langParams = personDialog.getWindow().getAttributes();
+        langParams.width = LayoutParams.MATCH_PARENT;
+        personDialog.getWindow().setAttributes(langParams);
+
+        final EditText firstName = (EditText) layout.findViewById(R.id.firstName);
+        final EditText lastName = (EditText) layout.findViewById(R.id.lastName);
 
         firstName.setText(ep.getString("FirstName",""));
         lastName.setText(ep.getString("LastName",""));
@@ -1579,7 +1526,7 @@ public class ConfigActivity extends AppCompatActivity {
         firstName.setSelectAllOnFocus(true);
         lastName.setSelectAllOnFocus(true);
 
-        Button yesButton = (Button) personDialog.findViewById(R.id.saveBtn);
+        Button yesButton = (Button) layout.findViewById(R.id.saveBtn);
 
         yesButton.setOnClickListener(new OnClickListener() {
 
@@ -1602,16 +1549,20 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showLocationDialog() {
-        locationDialog = new Dialog(this, R.style.AppDialog);
-        locationDialog.setTitle(getString(R.string.locationsetup));
-        locationDialog.setContentView(R.layout.location);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.location, null);
+
+        builder.setTitle(R.string.locationsetup)
+                .setCancelable(true)
+                .setView(layout);
+
+        locationDialog = builder.create();
 
         android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
         langParams.width = LayoutParams.MATCH_PARENT;
         locationDialog.getWindow().setAttributes(langParams);
-
-        locationDialog.setCancelable(true);
-        locationDialog.setCanceledOnTouchOutside(true);
 
         GPSTracker gps = new GPSTracker(this);
         if (gps.canGetLocation()) { //GPS enabled
@@ -1623,13 +1574,13 @@ public class ConfigActivity extends AppCompatActivity {
             startActivity(intent);
         }
 
-        Button findLocation = (Button) locationDialog
+        Button findLocation = (Button) layout
                 .findViewById(R.id.getLctnBtn);
-        Button yesLocation = (Button) locationDialog.findViewById(R.id.saveBtn);
+        Button yesLocation = (Button) layout.findViewById(R.id.saveBtn);
 
-        final EditText longitude = (EditText) locationDialog
+        final EditText longitude = (EditText) layout
                 .findViewById(R.id.longitude);
-        final EditText latitude = (EditText) locationDialog
+        final EditText latitude = (EditText) layout
                 .findViewById(R.id.latitude);
 
         longitude.setText(ep.getString("Longitude", ""));
@@ -1665,7 +1616,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showClearSettingsDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
         builder.setTitle(getString(R.string.clearsettings));
         builder.setMessage(getString(R.string.areyousure));
@@ -1813,18 +1764,22 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void importDialog(String[] columns) {
-        importFieldDialog = new Dialog(this, R.style.AppDialog);
-        importFieldDialog.setTitle(getString(R.string.importfields));
-        importFieldDialog.setContentView(R.layout.importdialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.importdialog, null);
+
+        builder.setTitle(R.string.importfields)
+                .setCancelable(true)
+                .setView(layout);
+
+        importFieldDialog = builder.create();
 
         android.view.WindowManager.LayoutParams params2 = importFieldDialog.getWindow().getAttributes();
         params2.width = LayoutParams.MATCH_PARENT;
         importFieldDialog.getWindow().setAttributes(params2);
 
-        importFieldDialog.setCancelable(true);
-        importFieldDialog.setCanceledOnTouchOutside(false);
-
-        Button startImport = (Button) importFieldDialog.findViewById(R.id.okBtn);
+        Button startImport = (Button) layout.findViewById(R.id.okBtn);
 
         startImport.setOnClickListener(new OnClickListener() {
 
@@ -1839,9 +1794,9 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        unique = (Spinner) importFieldDialog.findViewById(R.id.uniqueSpin);
-        primary = (Spinner) importFieldDialog.findViewById(R.id.primarySpin);
-        secondary = (Spinner) importFieldDialog.findViewById(R.id.secondarySpin);
+        unique = (Spinner) layout.findViewById(R.id.uniqueSpin);
+        primary = (Spinner) layout.findViewById(R.id.primarySpin);
+        secondary = (Spinner) layout.findViewById(R.id.secondarySpin);
 
         setSpinner(unique, columns, "ImportUniqueName");
         setSpinner(primary, columns, "ImportFirstName");
@@ -1893,10 +1848,6 @@ public class ConfigActivity extends AppCompatActivity {
                 CSVReader cr = new CSVReader(fr);
 
                 columns = cr.readNext();
-
-                for (int i = 0; i < columns.length; i++) {
-                    columns[i] = columns[i].replaceAll(" ", "_");
-                }
 
                 MainActivity.dt.dropRange();
                 MainActivity.dt.createRange(columns);
@@ -2153,21 +2104,26 @@ public class ConfigActivity extends AppCompatActivity {
         items[0] = getString(R.string.dbexport);
         items[1] = getString(R.string.dbimport);
         items[2] = getString(R.string.dbreset);
-        final Dialog chooseBackupDialog = new Dialog(ConfigActivity.this, R.style.AppDialog);
-        chooseBackupDialog.setTitle(getString(R.string.dbbackup));
-        chooseBackupDialog.setContentView(R.layout.config);
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.config, null);
+
+        builder.setTitle(R.string.dbbackup)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog chooseBackupDialog = builder.create();
 
         android.view.WindowManager.LayoutParams params = chooseBackupDialog.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
         params.height = LayoutParams.WRAP_CONTENT;
         chooseBackupDialog.getWindow().setAttributes(params);
 
-        chooseBackupDialog.setCancelable(true);
-        chooseBackupDialog.setCanceledOnTouchOutside(true);
-
-        setupList = (ListView) chooseBackupDialog.findViewById(R.id.myList);
-
-        Button setupCloseBtn = (Button) chooseBackupDialog.findViewById(R.id.closeBtn);
+        setupList = (ListView) layout.findViewById(R.id.myList);
+        Button setupCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         setupCloseBtn.setOnClickListener(new OnClickListener() {
 
@@ -2212,20 +2168,24 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showDatabaseExportDialog() {
-        dbSaveDialog = new Dialog(ConfigActivity.this, R.style.AppDialog);
-        dbSaveDialog.setTitle(getString(R.string.dbbackup));
-        dbSaveDialog.setContentView(R.layout.savedb);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.savedb, null);
+
+        builder.setTitle(R.string.dbbackup)
+                .setCancelable(true)
+                .setView(layout);
+
+        dbSaveDialog = builder.create();
 
         android.view.WindowManager.LayoutParams params2 = dbSaveDialog.getWindow().getAttributes();
         params2.width = LayoutParams.MATCH_PARENT;
         dbSaveDialog.getWindow().setAttributes(params2);
 
-        dbSaveDialog.setCancelable(true);
-        dbSaveDialog.setCanceledOnTouchOutside(true);
+        exportFile = (EditText) layout.findViewById(R.id.fileName);
 
-        exportFile = (EditText) dbSaveDialog.findViewById(R.id.fileName);
-
-        Button closeBtn = (Button) dbSaveDialog.findViewById(R.id.closeBtn);
+        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
 
         closeBtn.setOnClickListener(new OnClickListener() {
 
@@ -2234,7 +2194,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        Button exportButton = (Button) dbSaveDialog.findViewById(R.id.saveBtn);
+        Button exportButton = (Button) layout.findViewById(R.id.saveBtn);
 
         exportButton.setOnClickListener(new OnClickListener() {
 
@@ -2255,7 +2215,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     // First confirmation
     private void showDatabaseResetDialog1() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
         builder.setTitle(getString(R.string.warning));
         builder.setMessage(getString(R.string.resetwarning1));
@@ -2284,7 +2244,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     // Second confirmation
     private void showDatabaseResetDialog2() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
         builder.setTitle(getString(R.string.warning));
         builder.setMessage(getString(R.string.resetwarning2));

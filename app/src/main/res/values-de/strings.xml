@@ -268,6 +268,7 @@
     <string name="amharic">አማርኛ፤</string>
     <string name="oromo">Afaan Oromoo</string>
     <string name="swahili">Swahili</string>
+    <string name="bengali">বাংলা</string>
     <string name="jumptoplotid">Aktiviert die Option zu einem bestimmten einzigartigen Zuordnungsmerkmal zu navigieren</string>
     <string name="jumptoplotidbutton">Gehe zu ID</string>
     <string name="corner1">Ecke 1 (der Versuchsparzelle)</string>

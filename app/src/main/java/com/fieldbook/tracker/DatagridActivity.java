@@ -1,12 +1,12 @@
 package com.fieldbook.tracker;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
 
-public class DatagridActivity extends Activity {
+public class DatagridActivity extends AppCompatActivity {
 
     private String plotId;
     private int previousView = 0;
