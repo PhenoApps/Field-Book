@@ -3,18 +3,18 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_settings"
-            android:title="@string/settings"
-            android:icon="@drawable/ic_settings"/>
+            android:icon="@drawable/ic_settings"
+            android:title="@string/settings" />
 
         <item
             android:id="@+id/nav_fields"
-            android:title="@string/fields"
-            android:icon="@drawable/ic_fields"/>
+            android:icon="@drawable/ic_fields"
+            android:title="@string/fields" />
 
         <item
             android:id="@+id/nav_traits"
-            android:title="@string/traits"
-            android:icon="@drawable/ic_list"/>
+            android:icon="@drawable/ic_list"
+            android:title="@string/traits" />
 
     </group>
 
@@ -22,18 +22,18 @@
         <menu>
             <item
                 android:id="@+id/nav_person"
-                android:title="@string/person"
-                android:icon="@drawable/ic_person"/>
+                android:icon="@drawable/ic_person"
+                android:title="@string/person" />
 
             <item
                 android:id="@+id/nav_location"
-                android:title="@string/location"
-                android:icon="@drawable/ic_my_location"/>
+                android:icon="@drawable/ic_my_location"
+                android:title="@string/location" />
 
             <item
                 android:id="@+id/nav_language"
-                android:title="@string/language"
-                android:icon="@drawable/ic_translate"/>
+                android:icon="@drawable/ic_translate"
+                android:title="@string/language" />
 
         </menu>
     </item>

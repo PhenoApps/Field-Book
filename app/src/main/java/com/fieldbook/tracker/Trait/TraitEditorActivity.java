@@ -1080,7 +1080,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
 
-        final EditText exportFile = (EditText) exportDialog.findViewById(R.id.fileName);
+        final EditText exportFile = (EditText) layout.findViewById(R.id.fileName);
 
         // As the export filename uses the import file name as well,
         // we parse it out here
@@ -1088,11 +1088,11 @@ public class TraitEditorActivity extends AppCompatActivity {
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
-        exportFile.setText(fName
-                + "_export_"
-                + timeStamp
-                .format(Calendar.getInstance().getTime())
-                + ".trt");
+        String exportName = "trait_export_"
+                + timeStamp.format(Calendar.getInstance().getTime())
+                + ".trt";
+
+        exportFile.setText(exportName);
 
         Button exportButton = (Button) layout.findViewById(R.id.saveBtn);
 

@@ -212,7 +212,7 @@ public class DataHelper {
 
         for (int i = 0; i < s.length; i++) {
             if (table.length() > 0)
-                value += table + "." + s[i];
+                value += table + "." + TICK + s[i] + TICK;
             else
                 value += s[i];
 
@@ -794,7 +794,7 @@ public class DataHelper {
             return null;
 
         try {
-            Cursor cursor = db.query(RANGE, new String[]{trait},
+            Cursor cursor = db.query(RANGE, new String[]{TICK +trait+TICK},
                     TICK +ep.getString("ImportUniqueName", "")+TICK + " like ? ", new String[]{plotId},
                     null, null, null);
 

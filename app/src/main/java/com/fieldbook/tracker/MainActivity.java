@@ -3202,7 +3202,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
         dt.deleteTrait(cRange.plot_id, parent);
-        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName","") + " " + ep.getString("LastName",""), ep.getString("Location",""),"",""); //TODO add notes and exp_id
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", ""); //TODO add notes and exp_id
     }
 
     // Delete trait, including from database
@@ -4304,7 +4304,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             int currentServerVersionInt = 0;
 
             if(!currentServerVersion.equals("")) {
-                currentServerVersionInt = Integer.parseInt(currentServerVersion.replace(".",""));
+                currentServerVersionInt = Integer.parseInt(currentServerVersion.replace(".", ""));
             }
 
             System.out.println("Field.Book." + currentServerVersion + ".apk" + "\t" + versionName);
