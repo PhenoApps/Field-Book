@@ -1121,7 +1121,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         rangeLeft.setImageResource(R.drawable.ml_arrows);
                         rangeLeft.performClick();
 
-                        if (repeatHandler != null) return true;
+                        if (repeatHandler != null) {
+                            return true;
+                        }
                         repeatHandler = new Handler();
                         repeatHandler.postDelayed(mActionLeft, 750);
 
@@ -1134,13 +1136,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     case MotionEvent.ACTION_UP:
                         rangeLeft.setImageResource(R.drawable.ml_arrow);
 
-                        if (repeatHandler == null) return true;
+                        if (repeatHandler == null) {
+                            return true;
+                        }
                         repeatHandler.removeCallbacks(mActionLeft);
                         repeatHandler = null;
 
                         repeatUpdate();
                         break;
                     case MotionEvent.ACTION_CANCEL:
+                        rangeLeft.setImageResource(R.drawable.ml_arrow);
+
+                        repeatHandler.removeCallbacks(mActionLeft);
+                        repeatHandler = null;
+
                         v.setTag(null); // mark btn as not pressed
                         break;
                 }
@@ -1262,6 +1271,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         repeatUpdate();
                         break;
                     case MotionEvent.ACTION_CANCEL:
+                        rangeRight.setImageResource(R.drawable.mr_arrow);
+
+                        repeatHandler.removeCallbacks(mActionRight);
+                        repeatHandler = null;
+
                         v.setTag(null); // mark btn as not pressed
                         break;
                 }
@@ -1553,7 +1567,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
             count++;
-            repeatHandler.postDelayed(this, delay);
+            if(repeatHandler!=null) {
+                repeatHandler.postDelayed(this, delay);
+            }
         }
     };
 
@@ -1568,7 +1584,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
             count++;
-            repeatHandler.postDelayed(this, delay);
+
+            if(repeatHandler!=null) {
+                repeatHandler.postDelayed(this, delay);
+            }
         }
     };
 

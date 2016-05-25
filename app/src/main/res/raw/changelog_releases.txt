@@ -1,3 +1,11 @@
+29/3.2.5
+Fixed a visual bug with search
+Fixed a bug causing crashes when both plot arrows pressed simultaneously
+Fixed a bug causing repeated scrolling when no buttons pressed
+
+28/3.2.4
+Fixed a bug that restricted some trait names
+
 27/3.2.3
 Fixed a crash when exporting data
 

@@ -299,7 +299,6 @@ public class SearchActivity extends AppCompatActivity {
 
         Spinner c = (Spinner) v.findViewById(R.id.columns);
         Spinner s = (Spinner) v.findViewById(R.id.like);
-
         EditText e = (EditText) v.findViewById(R.id.searchText);
 
         String[] likes = new String[6];
@@ -312,6 +311,7 @@ public class SearchActivity extends AppCompatActivity {
         likes[5] = getString(R.string.lessthan);
 
         ArrayAdapter adapter = new ArrayAdapter(SearchActivity.this, R.layout.spinnerlayout, likes);
+        //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(adapter);
 
         String[] col = MainActivity.dt.getRangeColumns();
@@ -321,7 +321,7 @@ public class SearchActivity extends AppCompatActivity {
 
             ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.spinnerlayout,
                     concat(col, MainActivity.dt.getVisibleTrait()));
-
+            //adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             c.setAdapter(adapter2);
 
             if (text.length() > 0)

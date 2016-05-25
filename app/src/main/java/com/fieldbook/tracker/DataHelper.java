@@ -258,7 +258,7 @@ public class DataHelper {
         String value = "(";
 
         for (int i = 0; i < visibleTrait.length; i++) {
-            value += "user_traits.parent like \"" + visibleTrait[i] + "\"";
+            value += "user_traits.parent like '" + visibleTrait[i] + "'";
             if (i != visibleTrait.length - 1) {
                 value += " or ";
             }
@@ -292,7 +292,7 @@ public class DataHelper {
         query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
                 " FROM range range " + joinArgs + "GROUP BY range." +TICK + ep.getString("ImportUniqueName", "")+TICK;
 
-        Log.e("DH", query);
+        Log.i("DH", query);
 
         Cursor cursor = db.rawQuery(query, null);
 

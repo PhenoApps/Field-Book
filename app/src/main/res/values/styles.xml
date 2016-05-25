@@ -35,7 +35,6 @@
         <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
         <item name="android:windowTitleStyle">@style/MyTitleTextStyle</item>
         <item name="android:background">@android:color/white</item>
-
     </style>
 
     <style name="AppAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
