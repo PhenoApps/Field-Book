@@ -394,6 +394,33 @@ public class ConfigActivity extends AppCompatActivity {
         return v;
     }
 
+    private void showCitationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
+
+        builder.setTitle(getString(R.string.citation_title));
+        builder.setMessage(getString(R.string.citation_string) + "\n\n" + getString(R.string.citation_text));
+
+        builder.setPositiveButton(getString(R.string.okay), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+
+                invalidateOptionsMenu();
+
+                Intent intent = new Intent();
+                intent.setClassName(ConfigActivity.this,
+                        ConfigActivity.class.getName());
+                startActivity(intent);
+
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
     private void showTipsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
@@ -736,6 +763,8 @@ public class ConfigActivity extends AppCompatActivity {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
+
+            showCitationDialog();
 
             if (fail) {
                 makeToast(getString(R.string.exporterror));

@@ -1,3 +1,6 @@
+47
+Added citation dialog
+
 46
 Fixed a visual bug with search
 Fixed a bug causing crashes when both plot arrows pressed simultaneously

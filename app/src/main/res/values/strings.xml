@@ -310,6 +310,11 @@
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
 
+    <!-- Citation strings -->
+    <string name="citation_title">Citation</string>
+    <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
+    <string name="citation_text">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
+
 
     <!-- Strings below here have not been integrated into the app -->
 
