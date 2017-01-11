@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/traitline"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/listmimic"
-    android:gravity="center_vertical"
     android:focusable="false"
     android:focusableInTouchMode="false"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingBottom="4dp"
     android:paddingTop="4dp">
@@ -51,8 +52,8 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/spacer2"
         android:ellipsize="end"
-        android:singleLine="true"
         android:minWidth="80dp"
+        android:singleLine="true"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small" />
 

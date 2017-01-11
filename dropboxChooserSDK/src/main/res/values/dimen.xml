@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <dimen name="buttonTextSize">15sp</dimen>
+    
+    <dimen name="appStoreInterstitialMargin">25dp</dimen>
+    
+    <dimen name="fileChooserButtonsPadding">4dp</dimen>
+    <dimen name="fileChooserButtonLeft">2dp</dimen>
+    <dimen name="fileChooserButtonRight">2dp</dimen>
+    <dimen name="fileChooserPaddingRight">8dp</dimen>
+    <dimen name="fileChooserPaddingLeft">8dp</dimen>
+    <dimen name="fileChooserPaddingTop">12dp</dimen>
+    <dimen name="fileChooserPaddingBottom">8dp</dimen>
+    <dimen name="fileChooserTitleText">20sp</dimen>
+    
+</resources>

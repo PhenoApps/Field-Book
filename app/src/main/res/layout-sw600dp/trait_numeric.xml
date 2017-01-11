@@ -215,9 +215,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:gravity="center"
             android:minWidth="120dp"
-            android:text="@string/clear"
+            android:drawableLeft="@drawable/ic_backspace"
+            android:paddingLeft="45dp"
+            android:gravity="center"
+            android:text=" "
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><resources xmlns:dbx="https://android.dropbox.com/StringsSchema">
+    <string name="dbx_install_main">Instale o aplicativo do Dropbox</string>
+    <string name="dbx_install_sub">Com o Dropbox instalado você pode acessar todos os seus arquivos em seus aplicativos favoritos, como este!</string>
+    <string name="dbx_install">Instalar Dropbox</string>
+    <string name="dbx_install_button_ok">Instalar</string>
+    <string name="dbx_install_button_cancel">Cancelar</string>
+    <string name="dbx_update_main">Atualize o aplicativo do Dropbox</string>
+    <string name="dbx_update_sub">Com o novo aplicativo do Dropbox, é possível acessar todos os seus arquivos em seus aplicativos favoritos, como este aqui!</string>
+    <string name="dbx_update">Atualizar Dropbox</string>
+    <string name="dbx_update_button_ok">Atualizar</string>
+</resources>

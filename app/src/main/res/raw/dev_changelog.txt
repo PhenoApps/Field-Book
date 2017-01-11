@@ -1,3 +1,12 @@
+49
+Added Utils class to be expanded in the future
+Fixed issue with toasts in Datagrid and Search
+Changed numeric clear to backspace (long press to clear)
+Changed drag and drop area traitline
+Changed 'Rust rating' trait to 'Disease rating'
+Changed disease rating buttons from R/MS/MR/S to R/M/S
+Added ability to download files directly from Dropbox
+
 48
 Fixed a bug with spaces in column names
 Added a "No photo available" resource

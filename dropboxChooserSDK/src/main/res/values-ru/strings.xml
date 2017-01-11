@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><resources xmlns:dbx="https://android.dropbox.com/StringsSchema">
+    <string name="dbx_install_main">Пожалуйста, установите приложение Dropbox</string>
+    <string name="dbx_install_sub">Приложение Dropbox позволит вам использовать ваши документы во всех ваших любимых приложения! Например, в этом!</string>
+    <string name="dbx_install">Установить Dropbox</string>
+    <string name="dbx_install_button_ok">Установить</string>
+    <string name="dbx_install_button_cancel">Отмена</string>
+    <string name="dbx_update_main">Пожалуйста, обновите приложение Dropbox</string>
+    <string name="dbx_update_sub">Новое приложение Dropbox позволит вам использовать ваши файлы в ваших любимых приложениях, как, например, это!</string>
+    <string name="dbx_update">Обновить Dropbox</string>
+    <string name="dbx_update_button_ok">Обновить</string>
+</resources>

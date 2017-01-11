@@ -25,6 +25,7 @@
         <item name="android:actionMenuTextAppearance">@style/AppMenuText</item>
         <item name="android:windowTitleStyle">@style/MyTitleTextStyle</item>
         <item name="android:background">@android:color/white</item>
+
     </style>
 
     <style name="ActivityDialog" parent="Theme.AppCompat.Light.Dialog">

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><resources xmlns:dbx="https://android.dropbox.com/StringsSchema">
+    <string name="dbx_install_main">請安裝 Dropbox 應用程式</string>
+    <string name="dbx_install_sub">只要安裝 Dropbox，您就可以透過您最喜歡的應用程式 (就像這個！)，存取您所有的資料。</string>
+    <string name="dbx_install">安裝 Dropbox</string>
+    <string name="dbx_install_button_ok">安裝</string>
+    <string name="dbx_install_button_cancel">取消</string>
+    <string name="dbx_update_main">請更新 Dropbox 應用程式</string>
+    <string name="dbx_update_sub">有了新的 Dropbox 應用程式，您就可以透過您最喜歡的應用程式 (就像這個！)，存取您所有的資料。</string>
+    <string name="dbx_update">更新 Dropbox</string>
+    <string name="dbx_update_button_ok">更新</string>
+</resources>

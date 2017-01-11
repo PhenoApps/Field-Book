@@ -125,7 +125,7 @@ public class DatagridActivity extends AppCompatActivity {
                                     int position, long id) {
                 gridView.getChildAt(previousView).setBackgroundColor(Color.WHITE);
                 previousView = position;
-                v.setBackgroundColor(Color.rgb(0, 128, 0));
+                v.setBackgroundColor(getResources().getColor(R.color.main_primary));
                 try {
                     plotId = plotIdData[(position / cols) - 1];
                 } catch (ArrayIndexOutOfBoundsException e) {
@@ -153,6 +153,6 @@ public class DatagridActivity extends AppCompatActivity {
     }
 
     public void makeToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 }

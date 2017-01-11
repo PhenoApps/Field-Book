@@ -43,9 +43,6 @@ public class FileExploreActivity extends AppCompatActivity {
     private String chosenFile;
     private ListAdapter adapter;
 
-    private String local;
-    private String region;
-
     private SharedPreferences ep;
 
     @Override

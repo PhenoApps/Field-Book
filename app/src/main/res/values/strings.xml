@@ -71,7 +71,7 @@
     <string name="date">Date</string>
     <string name="percent">Percent</string>
     <string name="counter">Counter</string>
-    <string name="rustrating">Rust Rating</string>
+    <string name="rustrating">Disease Rating</string>
     <string name="bool">Boolean</string>
     <string name="text">Text</string>
     <string name="photo">Photo</string>
@@ -260,6 +260,10 @@
     <string name="resetwarning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
 
     <!-- Import dialog -->
+    <string name="importlocal">Local</string>
+    <string name="importdropbox">Dropbox</string>
+    <string name="importgoogle">Google Drive</string>
+
     <string name="importfields">Import field</string>
     <string name="importunique">Unique identifier</string>
     <string name="importfirst">Primary order</string>

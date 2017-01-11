@@ -42,22 +42,32 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.CSV.CSVReader;
 import com.fieldbook.tracker.CSV.CSVWriter;
 import com.fieldbook.tracker.Trait.TraitEditorActivity;
 import com.fieldbook.tracker.Tutorial.TutorialSettingsActivity;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -251,14 +261,8 @@ public class ConfigActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 switch (position) {
                     case 0:
-                        intent.setClassName(ConfigActivity.this,
-                                FileExploreActivity.class.getName());
-                        intent.putExtra("path", Constants.FIELDIMPORTPATH);
-                        intent.putExtra("include", new String[]{"csv", "xls"});
-                        intent.putExtra("title",getString(R.string.importfields));
-                        startActivityForResult(intent, 1);
+                        showFileDialog();
                         break;
-
                     case 1:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
                             makeToast(getString(R.string.importtraitwarning));
@@ -330,6 +334,7 @@ public class ConfigActivity extends AppCompatActivity {
         }
     }
 
+
     private String getOverwriteFile(String filename) {
         String[] fileArray;
         File dir = new File(Constants.FIELDEXPORTPATH);
@@ -381,6 +386,53 @@ public class ConfigActivity extends AppCompatActivity {
                 mHandler.post(importDB);
             }
         }
+
+        if (requestCode == 3) {
+            if (resultCode == RESULT_OK) {
+                DbxChooser.Result result = new DbxChooser.Result(data);
+                saveFileFromUri(result.getLink(),result.getName());
+                mChosenFile = Constants.FIELDIMPORTPATH + "/" + result.getName();
+                showFieldFileDialog();
+            }
+        }
+
+        if (requestCode == 4) {
+            if (resultCode == RESULT_OK) {
+
+            }
+        }
+    }
+
+    private void saveFileFromUri(Uri sourceUri, String fileName) {
+        String sourceFilename= sourceUri.getPath();
+        String destinationFilename = Constants.FIELDIMPORTPATH + File.separatorChar + fileName;
+
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+
+        try {
+            bis = new BufferedInputStream(new FileInputStream(sourceFilename));
+            bos = new BufferedOutputStream(new FileOutputStream(destinationFilename, false));
+            byte[] buf = new byte[1024];
+            int length ;
+
+            while((length=bis.read(buf)) > 0) {
+                bos.write(buf,0,length);
+            }
+
+        } catch (IOException e) {
+
+        } finally {
+            try {
+                if (bis != null) bis.close();
+                if (bos != null) bos.close();
+            } catch (IOException e) {
+
+            }
+        }
+
+        File tempFile = new File(destinationFilename);
+        scanFile(tempFile);
     }
 
     public int getVersion() {
@@ -979,7 +1031,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     public void makeToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     private void showAdvancedDialog() {
@@ -1175,6 +1227,68 @@ public class ConfigActivity extends AppCompatActivity {
         });
 
         advancedDialog.show();
+    }
+
+    private void showFileDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.config, null);
+
+        builder.setTitle(R.string.importfields)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog importDialog = builder.create();
+
+        android.view.WindowManager.LayoutParams params = setupDialog.getWindow().getAttributes();
+        params.width = LayoutParams.MATCH_PARENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        importDialog.getWindow().setAttributes(params);
+
+        ListView myList = (ListView) layout.findViewById(R.id.myList);
+
+        String[] importArray = new String[3];
+        importArray[0] = getString(R.string.importlocal);
+        importArray[1] = getString(R.string.importdropbox);
+        importArray[2] = getString(R.string.importgoogle);
+
+        myList.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                Intent intent = new Intent();
+                switch (which) {
+                    case 0:
+                        intent.setClassName(ConfigActivity.this,
+                                FileExploreActivity.class.getName());
+                        intent.putExtra("path", Constants.FIELDIMPORTPATH);
+                        intent.putExtra("include", new String[]{"csv", "xls"});
+                        intent.putExtra("title",getString(R.string.importfields));
+                        startActivityForResult(intent, 1);
+                        break;
+                    case 1:
+                        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
+                        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
+                        break;
+                    case 2:
+                        makeToast("Coming soon!");
+                        break;
+                }
+                importDialog.dismiss();
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, importArray);
+        myList.setAdapter(adapter);
+
+        Button importCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
+
+        importCloseBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                importDialog.dismiss();
+            }
+        });
+
+        importDialog.show();
     }
 
     private void showLanguageDialog() {
@@ -1439,20 +1553,17 @@ public class ConfigActivity extends AppCompatActivity {
             public void onClick(View arg0) {
                 // Ensure at least one export type is checked
                 if (!checkDB.isChecked() & !checkExcel.isChecked()) {
-                    Toast.makeText(ConfigActivity.this, getString(R.string.noexportcheck),
-                            Toast.LENGTH_LONG).show();
+                    makeToast(getString(R.string.noexportcheck));
                     return;
                 }
 
                 if (!onlyUnique.isChecked() & !allColumns.isChecked()) {
-                    Toast.makeText(ConfigActivity.this, getString(R.string.nofieldcheck),
-                            Toast.LENGTH_LONG).show();
+                    makeToast(getString(R.string.nofieldcheck));
                     return;
                 }
 
                 if (!activeTraits.isChecked() & !allTraits.isChecked()) {
-                    Toast.makeText(ConfigActivity.this, getString(R.string.notraitcheck),
-                            Toast.LENGTH_LONG).show();
+                    makeToast(getString(R.string.notraitcheck));
                     return;
                 }
 
@@ -1698,8 +1809,8 @@ public class ConfigActivity extends AppCompatActivity {
         }
 
         if (mChosenFile.toLowerCase().contains(".csv")) {
-            action = DIALOG_LOAD_FIELDFILECSV;
             isCSV = true;
+            action = DIALOG_LOAD_FIELDFILECSV;
         }
 
         if (!mChosenFile.toLowerCase().contains(".csv") && !mChosenFile.toLowerCase().contains(".xls")) {
@@ -1741,7 +1852,6 @@ public class ConfigActivity extends AppCompatActivity {
 
             try {
                 wb = Workbook.getWorkbook(new File(mChosenFile), wbSettings);
-
                 importColumns = new String[wb.getSheet(0).getColumns()];
 
                 for (int s = 0; s < wb.getSheet(0).getColumns(); s++) {
@@ -1757,9 +1867,7 @@ public class ConfigActivity extends AppCompatActivity {
             try {
                 FileReader fr = new FileReader(mChosenFile);
                 CSVReader cr = new CSVReader(fr);
-
                 importColumns = cr.readNext();
-
             } catch (Exception n) {
                 ErrorLog("CSVError.txt", "" + n.getMessage());
             }
@@ -1786,12 +1894,12 @@ public class ConfigActivity extends AppCompatActivity {
         for (String s : importColumns) {
             if (DataHelper.hasSpecialChars(s)) {
                 columnFail = true;
-                Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
+                makeToast(getString(R.string.columnfail) + " (\"" + s + "\")");
                 break;
             }
             if (list.contains(s.toLowerCase())) {
                 columnFail = true;
-                Toast.makeText(ConfigActivity.this, getString(R.string.columnfail) + " (\"" + s + "\")", Toast.LENGTH_LONG).show();
+                makeToast(getString(R.string.columnfail) + " (\"" + s + "\")");
                 break;
             }
         }
@@ -1948,11 +2056,9 @@ public class ConfigActivity extends AppCompatActivity {
                 dialog.dismiss();
 
             if (fail)
-                Toast.makeText(ConfigActivity.this, getString(R.string.importerror),
-                        Toast.LENGTH_LONG).show();
+                makeToast(getString(R.string.importerror));
             else if (uniqueFail)
-                Toast.makeText(ConfigActivity.this, getString(R.string.importuniqueerror),
-                        Toast.LENGTH_LONG).show();
+                makeToast(getString(R.string.importuniqueerror));
             else {
                 Editor ed = ep.edit();
                 ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
@@ -2086,11 +2192,9 @@ public class ConfigActivity extends AppCompatActivity {
                 dialog.dismiss();
 
             if (fail)
-                Toast.makeText(ConfigActivity.this, getString(R.string.importerror),
-                        Toast.LENGTH_LONG).show();
+                makeToast(getString(R.string.importerror));
             else if (uniqueFail)
-                Toast.makeText(ConfigActivity.this, getString(R.string.importuniqueerror),
-                        Toast.LENGTH_LONG).show();
+                makeToast(getString(R.string.importuniqueerror));
             else {
                 Editor ed = ep.edit();
                 ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
@@ -2299,9 +2403,7 @@ public class ConfigActivity extends AppCompatActivity {
                 ed.apply();
 
                 dialog.dismiss();
-
-                Toast toast = Toast.makeText(ConfigActivity.this, getString(R.string.resetcomplete), Toast.LENGTH_LONG);
-                toast.show();
+                makeToast(getString(R.string.resetcomplete));
 
                 try {
                     ConfigActivity.thisActivity.finish();

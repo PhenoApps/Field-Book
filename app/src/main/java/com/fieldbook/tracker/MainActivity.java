@@ -41,7 +41,6 @@ import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -226,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private TextView counterTv;
 
-    Button rust0, rust5, rust10, rust15, rust20, rust25, rust30, rust35, rust40, rust45, rust50, rust55, rust60, rust65, rust70, rust75, rust80, rust85, rust90, rust95, rust100, rustR, rustMR, rustMS, rustS, rustDelim, rustClear;
+    Button rust0, rust5, rust10, rust15, rust20, rust25, rust30, rust35, rust40, rust45, rust50, rust55, rust60, rust65, rust70, rust75, rust80, rust85, rust90, rust95, rust100, rustR, rustM, rustS, rustDelim, rustClear;
 
     final Button buttonArray[] = new Button[12];
 
@@ -255,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     LinearLayout traitPhoto;
     LinearLayout traitCounter;
     LinearLayout traitAudio;
-    LinearLayout traitRustRating;
+    LinearLayout traitDiseaseRating;
     LinearLayout traitMulticat;
 
     /**
@@ -397,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         traitText = (LinearLayout) findViewById(R.id.textLayout);
         traitPhoto = (LinearLayout) findViewById(R.id.photoLayout);
         traitCounter = (LinearLayout) findViewById(R.id.counterLayout);
-        traitRustRating = (LinearLayout) findViewById(R.id.rustLayout);
+        traitDiseaseRating = (LinearLayout) findViewById(R.id.diseaseLayout);
         traitMulticat = (LinearLayout) findViewById(R.id.multicatLayout);
 
         traitType = (Spinner) findViewById(R.id.traitType);
@@ -435,6 +434,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 }
 
                 return false;
+            }
+        });
+
+        plot.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                plot.setCursorVisible(true);
+            }
+        });
+
+        range.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                range.setCursorVisible(true);
             }
         });
 
@@ -502,12 +515,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                     if (currentTrait.maximum.length() > 0) {
                         if (val > Double.parseDouble(currentTrait.maximum)) {
-                            Toast.makeText(
-                                    MainActivity.this,
-                                    getString(R.string.valuemore) + " "
-                                            + currentTrait.maximum,
-                                    Toast.LENGTH_LONG).show();
-
+                            makeToast(getString(R.string.valuemore) + " " + currentTrait.maximum);
                             en.clear();
                             removeTrait(currentTrait.trait);
                             return;
@@ -660,33 +668,43 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         k15.setOnClickListener(this);
         k16.setOnClickListener(this);
 
-        rust0=(Button)traitRustRating.findViewById(R.id.rust0);
-        rust5=(Button)traitRustRating.findViewById(R.id.rust5);
-        rust10=(Button)traitRustRating.findViewById(R.id.rust10);
-        rust15=(Button)traitRustRating.findViewById(R.id.rust15);
-        rust20=(Button)traitRustRating.findViewById(R.id.rust20);
-        rust25=(Button)traitRustRating.findViewById(R.id.rust25);
-        rust30=(Button)traitRustRating.findViewById(R.id.rust30);
-        rust35=(Button)traitRustRating.findViewById(R.id.rust35);
-        rust40=(Button)traitRustRating.findViewById(R.id.rust40);
-        rust45=(Button)traitRustRating.findViewById(R.id.rust45);
-        rust50=(Button)traitRustRating.findViewById(R.id.rust50);
-        rust55=(Button)traitRustRating.findViewById(R.id.rust55);
-        rust60=(Button)traitRustRating.findViewById(R.id.rust60);
-        rust65=(Button)traitRustRating.findViewById(R.id.rust65);
-        rust70=(Button)traitRustRating.findViewById(R.id.rust70);
-        rust75=(Button)traitRustRating.findViewById(R.id.rust75);
-        rust80=(Button)traitRustRating.findViewById(R.id.rust80);
-        rust85=(Button)traitRustRating.findViewById(R.id.rust85);
-        rust90=(Button)traitRustRating.findViewById(R.id.rust90);
-        rust95=(Button)traitRustRating.findViewById(R.id.rust95);
-        rust100=(Button)traitRustRating.findViewById(R.id.rust100);
-        rustR=(Button)traitRustRating.findViewById(R.id.rustR);
-        rustMR=(Button)traitRustRating.findViewById(R.id.rustMR);
-        rustMS=(Button)traitRustRating.findViewById(R.id.rustMS);
-        rustS=(Button)traitRustRating.findViewById(R.id.rustS);
-        rustDelim = (Button) traitRustRating.findViewById(R.id.rustDelim);
-        rustClear = (Button) traitRustRating.findViewById(R.id.clearRustBtn);
+        k16.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                eNum.removeTextChangedListener(eNumUpdate);
+                eNum.setText("");
+                removeTrait(currentTrait.trait);
+                eNum.addTextChangedListener(eNumUpdate);
+                return false;
+            }
+        });
+
+        rust0=(Button) traitDiseaseRating.findViewById(R.id.rust0);
+        rust5=(Button) traitDiseaseRating.findViewById(R.id.rust5);
+        rust10=(Button) traitDiseaseRating.findViewById(R.id.rust10);
+        rust15=(Button) traitDiseaseRating.findViewById(R.id.rust15);
+        rust20=(Button) traitDiseaseRating.findViewById(R.id.rust20);
+        rust25=(Button) traitDiseaseRating.findViewById(R.id.rust25);
+        rust30=(Button) traitDiseaseRating.findViewById(R.id.rust30);
+        rust35=(Button) traitDiseaseRating.findViewById(R.id.rust35);
+        rust40=(Button) traitDiseaseRating.findViewById(R.id.rust40);
+        rust45=(Button) traitDiseaseRating.findViewById(R.id.rust45);
+        rust50=(Button) traitDiseaseRating.findViewById(R.id.rust50);
+        rust55=(Button) traitDiseaseRating.findViewById(R.id.rust55);
+        rust60=(Button) traitDiseaseRating.findViewById(R.id.rust60);
+        rust65=(Button) traitDiseaseRating.findViewById(R.id.rust65);
+        rust70=(Button) traitDiseaseRating.findViewById(R.id.rust70);
+        rust75=(Button) traitDiseaseRating.findViewById(R.id.rust75);
+        rust80=(Button) traitDiseaseRating.findViewById(R.id.rust80);
+        rust85=(Button) traitDiseaseRating.findViewById(R.id.rust85);
+        rust90=(Button) traitDiseaseRating.findViewById(R.id.rust90);
+        rust95=(Button) traitDiseaseRating.findViewById(R.id.rust95);
+        rust100=(Button) traitDiseaseRating.findViewById(R.id.rust100);
+        rustR=(Button) traitDiseaseRating.findViewById(R.id.rustR);
+        rustM=(Button) traitDiseaseRating.findViewById(R.id.rustM);
+        rustS=(Button) traitDiseaseRating.findViewById(R.id.rustS);
+        rustDelim = (Button) traitDiseaseRating.findViewById(R.id.rustDelim);
+        rustClear = (Button) traitDiseaseRating.findViewById(R.id.clearRustBtn);
 
         Button[] rustBtnArray = new Button[]{rust0,rust5,rust10,rust15,rust20,rust25,rust30,rust35,rust40,rust45,rust50,rust55,rust60,rust65,rust70,rust75,rust80,rust85,rust90,rust95,rust100};
         List<String> temps = new ArrayList<String>();
@@ -697,7 +715,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         try {
             inFile1 = new Scanner(new File(Constants.TRAITPATH + "/severity.txt"));
         } catch (FileNotFoundException e) {
-            ErrorLog("RustError.txt", "" + e.getMessage());
+            ErrorLog("DiseaseError.txt", "" + e.getMessage());
             e.printStackTrace();
         }
 
@@ -728,8 +746,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         rustR.setOnClickListener(this);
-        rustMR.setOnClickListener(this);
-        rustMS.setOnClickListener(this);
+        rustM.setOnClickListener(this);
         rustS.setOnClickListener(this);
         rustDelim.setOnClickListener(this);
         rustClear.setOnClickListener(this);
@@ -1858,6 +1875,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         range.setText(cRange.range);
         plot.setText(cRange.plot);
 
+        range.setCursorVisible(false);
+        plot.setCursorVisible(false);
+
         tvRange.setText(cRange.range);
         tvPlot.setText(cRange.plot);
 
@@ -2104,7 +2124,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.VISIBLE);
@@ -2166,7 +2186,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
@@ -2222,7 +2242,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
@@ -2304,7 +2324,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
 
                         tNum.setEnabled(false);
@@ -2372,7 +2392,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
@@ -2430,7 +2450,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
@@ -2467,7 +2487,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.VISIBLE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
@@ -2496,7 +2516,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.VISIBLE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
@@ -2553,7 +2573,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.VISIBLE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
@@ -2569,7 +2589,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             counterTv.setText(newTraits.get(currentTrait.trait).toString());
                         }
 
-                    } else if(currentTrait.format.equals("rust rating")) {
+                    } else if(currentTrait.format.equals("rust rating") | currentTrait.format.equals("disease rating")) {
                         traitText.setVisibility(View.GONE);
                         traitNumeric.setVisibility(View.GONE);
                         traitPercent.setVisibility(View.GONE);
@@ -2579,7 +2599,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.VISIBLE);
+                        traitDiseaseRating.setVisibility(View.VISIBLE);
                         traitMulticat.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
@@ -2618,7 +2638,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.VISIBLE);
 
                         tNum.setVisibility(EditText.GONE);
@@ -2701,7 +2721,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitAudio.setVisibility(View.GONE);
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
-                        traitRustRating.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.GONE);
@@ -2885,9 +2905,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         if (!haveData)
-            Toast.makeText(MainActivity.this,
-                    getString(R.string.nomatches), Toast.LENGTH_LONG)
-                    .show();
+            makeToast(getString(R.string.nomatches));
     }
 
     // Moving to a range will obey the usual settings, such as ignore existing
@@ -2957,9 +2975,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         if (!haveData)
-            Toast.makeText(MainActivity.this,
-                    getString(R.string.nomatches), Toast.LENGTH_LONG)
-                    .show();
+            makeToast(getString(R.string.nomatches));
     }
 
     // Moving to a plot will obey the usual settings, such as ignore existing
@@ -3029,9 +3045,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         if (!haveData)
-            Toast.makeText(MainActivity.this,
-                    getString(R.string.nomatches), Toast.LENGTH_LONG)
-                    .show();
+            makeToast(getString(R.string.nomatches));
     }
 
     @Override
@@ -3405,7 +3419,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private void lockData(Boolean lock) {
         LinearLayout[] traitViews = {traitText, traitNumeric, traitPercent, traitDate, traitCategorical,
-                traitBoolean, traitAudio, traitPhoto, traitCounter, traitRustRating, traitMulticat};
+                traitBoolean, traitAudio, traitPhoto, traitCounter, traitDiseaseRating, traitMulticat};
 
         if(lock) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock);
@@ -3503,7 +3517,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     public void makeToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     public void nextEmptyPlot() {
@@ -3629,15 +3643,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     if (m == 0 || photoLocation.size() < m) {
                         takePicture();
                     } else
-                        Toast.makeText(MainActivity.this, getString(R.string.maxphotos), Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.maxphotos));
                 } catch (Exception e) {
                     e.printStackTrace();
-
                     ErrorLog("CameraError.txt", "" + e.getMessage());
-
-                    Toast toast = Toast.makeText(MainActivity.this, getString(R.string.hardwaremissing), Toast.LENGTH_LONG);
-                    toast.show();
-
+                    makeToast(getString(R.string.hardwaremissing));
                 }
                 break;
 
@@ -3835,11 +3845,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case R.id.rustR:
                 v = "R";
                 break;
-            case R.id.rustMR:
-                v = "MR";
-                break;
-            case R.id.rustMS:
-                v = "MS";
+            case R.id.rustM:
+                v = "M";
                 break;
             case R.id.rustS:
                 v = "S";
@@ -3849,18 +3856,35 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 break;
             }
 
-        if (traitRustRating.getVisibility() == View.VISIBLE && eNum.getText().length() > 0 && !v.equals("/") && !eNum.getText().toString().substring(eNum.getText().length() - 1).equals("/")) {
-            v = ":" + v;
+        if (traitDiseaseRating.getVisibility() == View.VISIBLE && eNum.getText().length() > 0 && !v.equals("/") && !eNum.getText().toString().substring(eNum.getText().length() - 1).equals("/")) {
+            String lastChar = eNum.getText().toString().substring(eNum.getText().toString().length()-1);
+
+            if(!lastChar.matches("^[a-zA-Z]*$")) {
+                v = ":" + v;
+            }
         }
 
-        if (b.getId() == R.id.k16 || b.getId() == R.id.clearRustBtn) {
+        if (b.getId() == R.id.k16) {
+            if(eNum.getText().toString().length()>0) {
+                eNum.setText(eNum.getText().toString().substring(0, eNum.getText().toString().length()-1));
+            }
+
+            if(eNum.getText().toString().length()==0) {
+                eNum.removeTextChangedListener(eNumUpdate);
+                eNum.setText("");
+                removeTrait(currentTrait.trait);
+                eNum.addTextChangedListener(eNumUpdate);
+            }
+        }
+
+        if (b.getId() == R.id.clearRustBtn) {
             //eNum.setText(eNum.getText().toString().substring(0, eNum.getText().toString().length()-1));
             eNum.removeTextChangedListener(eNumUpdate);
             eNum.setText("");
             removeTrait(currentTrait.trait);
             eNum.addTextChangedListener(eNumUpdate);
         } else {
-            if (eNum.getText().toString().matches(".*\\d.*") && v.matches(".*\\d.*") && traitRustRating.getVisibility() == View.VISIBLE && !eNum.getText().toString().contains("/")) {
+            if (eNum.getText().toString().matches(".*\\d.*") && v.matches(".*\\d.*") && traitDiseaseRating.getVisibility() == View.VISIBLE && !eNum.getText().toString().contains("/")) {
                 makeToast(getString(R.string.rustwarning));
             } else {
                 eNum.setText(eNum.getText().toString() + v);
@@ -4126,8 +4150,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private Bitmap displayScaledSavedPhoto(String path) {
         if (path == null) {
-            Toast toast = Toast.makeText(MainActivity.this, getString(R.string.photomissing), Toast.LENGTH_LONG);
-            toast.show();
+            makeToast(getString(R.string.photomissing));
             return null;
         }
 

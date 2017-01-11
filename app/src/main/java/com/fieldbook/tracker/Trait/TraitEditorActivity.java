@@ -117,7 +117,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         try {
-            TutorialTraitsActivity.thisActivity.finish();
+            thisActivity.finish();
         } catch (Exception e) {
             Log.e(TAG, "" + e.getMessage());
         }
@@ -319,7 +319,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         enData[6] = "Photo";
         enData[7] = "Audio";
         enData[8] = "Counter";
-        enData[9] = "Rust Rating";
+        enData[9] = "Disease Rating";
         enData[10] = "Multicat";
 
         HashMap visibility = MainActivity.dt.getTraitVisibility();
@@ -335,7 +335,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         traitList.setRemoveListener(onRemove);
 
         DragSortController controller = new DragSortController(traitList);
-        controller.setDragHandleId(R.id.dragSort);
+        controller.setDragHandleId(R.id.traitline);
         controller.setRemoveEnabled(false);
         controller.setSortEnabled(true);
         controller.setDragInitMode(1);
@@ -501,8 +501,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             public void onClick(View arg0) {
                 // Trait name is mandatory
                 if (trait.getText().toString().length() == 0) {
-                    Toast.makeText(TraitEditorActivity.this, getString(R.string.mandatorytrait),
-                            Toast.LENGTH_LONG).show();
+                    makeToast(getString(R.string.mandatorytrait));
                     return;
                 }
 
@@ -511,14 +510,12 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 if (!edit) {
                     if (exists) {
-                        Toast.makeText(TraitEditorActivity.this, getString(R.string.traitexists),
-                                Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.traitexists));
                         return;
                     }
                 } else {
                     if (exists & !oldTrait.toLowerCase().equals(trait.getText().toString().trim().toLowerCase())) {
-                        Toast.makeText(TraitEditorActivity.this, getString(R.string.traitexists),
-                                Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.traitexists));
                         return;
                     }
                 }
@@ -527,20 +524,17 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 if (format.getSelectedItemPosition() == 0) {
                     if (def.getText().toString().length() > 0 & !isNumeric(def.getText().toString(), false)) {
-                        Toast.makeText(TraitEditorActivity.this, getString(R.string.notanumber),
-                                Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.notanumber));
                         return;
                     }
 
                     if (minimum.getText().toString().length() > 0 & !isNumeric(minimum.getText().toString(), false)) {
-                        Toast.makeText(TraitEditorActivity.this, getString(R.string.notanumber),
-                                Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.notanumber));
                         return;
                     }
 
                     if (maximum.getText().toString().length() > 0 & !isNumeric(maximum.getText().toString(), false)) {
-                        Toast.makeText(TraitEditorActivity.this, getString(R.string.notanumber),
-                                Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.notanumber));
                         return;
                     }
 
@@ -548,28 +542,24 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 if (format.getSelectedItemPosition() == 1) {
                     if (categories.getText().toString().length() == 0) {
-                        Toast.makeText(TraitEditorActivity.this, getString(R.string.notemptycategory),
-                                Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.notemptycategory));
                         return;
                     }
                 }
 
                 if (format.getSelectedItemPosition() == 3) {
                     if (def.getText().toString().length() == 0 | !isNumeric(def.getText().toString(), true)) {
-                        Toast.makeText(TraitEditorActivity.this, getString(R.string.notanumber),
-                                Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.notanumber));
                         return;
                     }
 
                     if (minimum.getText().toString().length() == 0 | !isNumeric(minimum.getText().toString(), true)) {
-                        Toast.makeText(TraitEditorActivity.this, getString(R.string.notanumber),
-                                Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.notanumber));
                         return;
                     }
 
                     if (maximum.getText().toString().length() == 0 | !isNumeric(maximum.getText().toString(), true)) {
-                        Toast.makeText(TraitEditorActivity.this, getString(R.string.notanumber),
-                                Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.notanumber));
                         return;
                     }
 
@@ -1206,20 +1196,20 @@ public class TraitEditorActivity extends AppCompatActivity {
         shareFile(file);
     }
 
-    public static void importData(String fileName) {
+    public void importData(String fileName) {
         mChosenFile = fileName;
         mHandler.post(importCSV);
     }
 
     // Creates a new thread to do importing
-    private static Runnable importCSV = new Runnable() {
+    private Runnable importCSV = new Runnable() {
         public void run() {
             new ImportCSVTask().execute(0);
         }
 
     };
 
-    private static class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
+    private class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
         ProgressDialog dialog;
 
         boolean fail;
@@ -1306,8 +1296,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 dialog.dismiss();
 
             if (fail)
-                Toast.makeText(thisActivity, thisActivity.getString(R.string.importerror),
-                        Toast.LENGTH_LONG).show();
+                makeToast(thisActivity.getString(R.string.importerror));
         }
     }
 
@@ -1330,9 +1319,8 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
     }
 
-    public static void makeToast(String message) {
-
-        Toast.makeText(TraitEditorActivity.thisActivity, message, Toast.LENGTH_SHORT).show();
+    public void makeToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     private static void scanFile(File filePath) {

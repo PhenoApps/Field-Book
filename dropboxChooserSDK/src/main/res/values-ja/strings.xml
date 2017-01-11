@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><resources xmlns:dbx="https://android.dropbox.com/StringsSchema">
+    <string name="dbx_install_main">Dropbox アプリをインストールしてください</string>
+    <string name="dbx_install_sub">Dropbox をインストールすれば、お気に入りのアプリから自分のアイテムにアクセスできます！</string>
+    <string name="dbx_install">Dropbox をインストールする</string>
+    <string name="dbx_install_button_ok">インストール</string>
+    <string name="dbx_install_button_cancel">キャンセル</string>
+    <string name="dbx_update_main">Dropbox アプリを更新してください</string>
+    <string name="dbx_update_sub">新しい Dropbox アプリをお使いになると、こちらのようなお気に入りのアプリにあるすべてのアイテムにアクセスすることができます！</string>
+    <string name="dbx_update">Dropbox の更新</string>
+    <string name="dbx_update_button_ok">更新</string>
+</resources>

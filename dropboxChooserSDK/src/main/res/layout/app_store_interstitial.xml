@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <FrameLayout
+        android:id="@+id/dbx_button_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
+
+        <include
+            android:id="@+id/dbx_button_bar"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            layout="@layout/bottom_bar_light" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/dbx_main_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/dbx_button_container"
+        android:background="@color/lightBlueBackground"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/dbx_install_title"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/dbx_action_bar_default_height"
+            android:background="@color/actionBarBackground"
+            android:drawableLeft="@drawable/tab_dropbox"
+            android:drawablePadding="3dp"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/dbx_action_bar_title_text_size" >
+        </TextView>
+        
+        <View
+            android:id="@+id/dbx_separator"
+            android:layout_width="fill_parent"
+            android:layout_height="0.5dp"
+            android:background="#000000" />
+
+        <View
+            android:id="@+id/dbx_top_space"
+            android:layout_width="fill_parent"
+            android:layout_height="0.5dp"
+            android:layout_weight="7" />
+
+        <ImageView
+            android:id="@+id/dbx_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="7"
+            android:src="@drawable/icon_new" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/dbx_install_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="5dp"
+                android:gravity="center"
+                android:paddingLeft="30dp"
+                android:paddingRight="30dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/dbx_install_sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.25"
+                android:paddingLeft="30dp"
+                android:paddingRight="30dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/dbx_bottom_space"
+            android:layout_width="fill_parent"
+            android:layout_height="0.5dp"
+            android:layout_weight="10" />
+
+    </LinearLayout>
+
+</RelativeLayout>

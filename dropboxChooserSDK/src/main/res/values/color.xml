@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:dbxbuild="https://android.dropbox.com/StringsSchema">
+    <color name="red">#FFFF0000</color>
+    <color name="green">#FF00FF00</color>
+    <color name="blue">#FF0000FF</color>
+
+    <color name="whiteBackground">#FFFFFF</color>
+    <color name="blueBackground">#1865a9</color>
+    <color name="dialogBoxTitleBackground">#DD000000</color>
+    <color name="buttonHighlight">#ffa443</color>
+    <color name="textFieldStroke">#359cf8</color>
+
+    <color name="filelistBackground">#ffffff</color>
+    <color name="filelistItemFocused">#d3e7fa</color>
+    <color name="filelistItemPressed">#f4faff</color>
+    <color name="fileListMediumGrayText">#666666</color>
+    <color name="listEmptyText">#666</color>
+
+    <color name="galleryItemSelectedOverlay"
+        dbxbuild:default="#55007ee5"
+        dbxbuild:samsung="#00000000">#55007ee5</color>
+	 <color name="galleryChromeBackground"
+	 	 dbxbuild:default="#000000"
+	 	 dbxbuild:samsung="#ff2b2b2b">#000000</color>
+	 <color name="galleryChromeTransparencyBackgroundLight"
+	 	 dbxbuild:default="#99000000"
+	 	 dbxbuild:samsung="#ff0d0d0d">#99000000</color>
+	 <color name="galleryChromeTransparencyBackgroundDark"
+	 	 dbxbuild:default="#cc000000"
+	 	 dbxbuild:samsung="#ff000000">#cc000000</color>
+
+    <color name="localFilelistBackground">#000000</color>
+    <color name="localListEmptyText">#999999</color>
+
+    <color name="textHighlight">#1865a9</color>
+    <color name="text">#FF000000</color>
+
+    <color name="loginText">#FFFFFF</color>
+    <color name="grayBlueishText">#768195</color>
+	<!--<color name="darkBlueText">#2a405c</color>-->
+
+    <color name="ssLoginText">#354045</color>
+
+    <color name="loginButtonText">#FF000000</color>
+
+    <color name="greenButtonText">#FFFFFF</color>
+    <color name="redButtonText">#FFFFFF</color>
+    <color name="grayButtonText">#111</color>
+    <color name="darkButtonText">#FFFFFF</color>
+
+    <color name="lightBlueBackground">#F4FAFF</color>
+    <!-- slightly more blueish -->
+    <color name="lightBlueBackground2">#f2f8fc</color>
+    <color name="darkBlueText">#2B405C</color>
+    <color name="mediumGrayText">#738499</color>
+    <color name="darkGrayText">#323436</color>
+    <color name="tourText">#718297</color>
+    <color name="tourTitleText">#2a405c</color>
+    <color name="tourGrayBorder">#999999</color>
+    <color name="tourBoxText">#000000</color>
+
+   <color name="titleBarText">#333333</color>
+   <color name="titleBarTextWhite">#FFFFFF</color>
+
+   <color name="errorText">#bb0000</color>
+
+   <color name="passcodeBackgroundOverride">#ff454545</color>
+
+   <color name="actionBarHighlight">#000000</color>
+   <color name="actionBarBackground">#007de3</color>
+
+
+   <color name="actionModeHighlight">#FF000000</color>
+   <color name="actionModeBackground">#FFFFFFFF</color>
+
+   <color name="photoTabBackground">#ffffff</color>
+   <color name="blackBackground">#000000</color>
+   <color name="whiteText">#ffffff</color>
+
+   <color name="feature_popover_border">#000000</color>
+   <color name="feature_popover_bg">#EAF3FF</color>
+
+   <color name="statusBarSeparator">#333333</color>
+
+   <color name="folderTitleBackground">#e6e7e8</color>
+   <color name="folderTitleBackgroundBorder">#a9a9a9</color>
+	<color name="translucentWhiteBackground"
+		dbxbuild:default="#E6FFFFFF"
+		dbxbuild:samsung="#FFFFFFFF">#E6FFFFFF</color>
+	<color name="translucentBlackBackground"
+		dbxbuild:default="#E6000000"
+		dbxbuild:samsung="#FF000000">#E6000000</color>
+   <color name="translucentWhiteText">#E6FFFFFF</color>
+   <color name="translucentFileListMediumGrayText">#E6666666</color>
+
+   <color name="passwordStrengthText">#58C473</color>
+   <color name="passwordStrengthMeterUnlit">#e7e7e7</color>
+   <color name="passwordStrengthMeterLit">#ff00ff</color>
+   <color name="passwordStrengthUnlitPhone">#e7e7e7</color>
+   <color name="passwordStrength1">#ad1a11</color>
+   <color name="passwordStrength2">#ecab1a</color>
+   <color name="passwordStrength3">#adc061</color>
+   <color name="passwordStrength4">#68b321</color>
+
+
+   <color name="ss_passwordStrengthText">#96a5b2</color>
+   <color name="ss_passwordStrengthMeterUnlit">#ffffff</color>
+   <color name="ss_passwordStrengthMeterLit">#96a5b2</color>
+
+   <color name="album_list_cover_image_frame">#FF000000</color>
+
+	<color name="videoIconDetailsBackground"
+		dbxbuild:default="#AA000000"
+		dbxbuild:samsung="#ff000000">#AA000000</color>
+
+   <color name="barDark">#444</color>
+   <color name="barDarkBorder">#666</color>
+   <color name="barLight">#dcdcdc</color>
+   <color name="barLightBorder">#c1c1c1</color>
+</resources>

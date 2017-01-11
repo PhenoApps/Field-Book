@@ -256,7 +256,7 @@ public class SearchActivity extends AppCompatActivity {
 
                         dialog.show();
                     } else {
-                        Toast.makeText(SearchActivity.this, getString(R.string.searchempty), Toast.LENGTH_LONG).show();
+                        makeToast(getString(R.string.searchempty));
                     }
                 } catch (Exception z) {
                     Log.e(TAG, "" +z.getMessage());
@@ -350,4 +350,7 @@ public class SearchActivity extends AppCompatActivity {
         return super.onTouchEvent(event);
     }
 
+    public void makeToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
 }

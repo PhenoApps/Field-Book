@@ -1,0 +1,11 @@
+<resources>
+    <string name="dbx_install_main">Please Install the Dropbox App</string>
+    <string name="dbx_install_sub">With Dropbox installed, you can access all your stuff in your favorite apps, like this one!</string>
+    <string name="dbx_install">Install Dropbox</string>
+    <string name="dbx_install_button_ok">Install</string>
+    <string name="dbx_install_button_cancel">Cancel</string>
+    <string name="dbx_update_main">Please Update the Dropbox App</string>
+    <string name="dbx_update_sub">With the new Dropbox app, you can access all your stuff in your favorite apps, like this one!</string>
+    <string name="dbx_update">Update Dropbox</string>
+    <string name="dbx_update_button_ok">Update</string>
+</resources>

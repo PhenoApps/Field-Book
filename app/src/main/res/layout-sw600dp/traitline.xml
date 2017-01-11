@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/traitline"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:background="#FFFFFF"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:background="#FFFFFF"
     android:paddingBottom="4dp"
     android:paddingTop="4dp">
 
