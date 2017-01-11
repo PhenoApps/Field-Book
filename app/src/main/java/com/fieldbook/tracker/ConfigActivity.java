@@ -172,14 +172,10 @@ public class ConfigActivity extends AppCompatActivity {
         }
         //Device default language : Locale.getDefault().getLanguage()
         // This allows dynamic language change without exiting the app
-        local = ep.getString("language", Locale.getDefault().toString());
-        region = ep.getString("region", "");
-        Locale locale2 = new Locale(local, region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2,
-                getBaseContext().getResources().getDisplayMetrics());
+        local = ep.getString("language", Locale.getDefault().getCountry());
+        region = ep.getString("region",Locale.getDefault().getLanguage());
+        updateLanguage(local, region);
+
         invalidateOptionsMenu();
         loadScreen();
     }
@@ -191,16 +187,12 @@ public class ConfigActivity extends AppCompatActivity {
         ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
-        local = "en";
         thisActivity = this;
 
-        local = ep.getString("language", Locale.getDefault().toString());
-        Locale locale2 = new Locale(local);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2,
-                getBaseContext().getResources().getDisplayMetrics());
+        local = ep.getString("language",Locale.getDefault().getCountry());
+        region = ep.getString("region",Locale.getDefault().getLanguage());
+
+        updateLanguage(local, region);
 
         invalidateOptionsMenu();
         loadScreen();
@@ -324,6 +316,13 @@ public class ConfigActivity extends AppCompatActivity {
             startActivity(intent);
         }
         if (!ep.getBoolean("TipsConfigured", false)) {
+            local = ep.getString("language",Locale.getDefault().getCountry());
+            region = ep.getString("region",Locale.getDefault().getLanguage());
+
+            ed.putString("language", local);
+            ed.putString("region", region);
+            ed.apply();
+
             ed.putBoolean("TipsConfigured", true);
             ed.apply();
             showTipsDialog();
@@ -399,6 +398,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         builder.setTitle(getString(R.string.citation_title));
         builder.setMessage(getString(R.string.citation_string) + "\n\n" + getString(R.string.citation_text));
+        builder.setCancelable(false);
 
         builder.setPositiveButton(getString(R.string.okay), new DialogInterface.OnClickListener() {
 
@@ -764,7 +764,9 @@ public class ConfigActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
 
-            showCitationDialog();
+            if (!fail) {
+                showCitationDialog();
+            }
 
             if (fail) {
                 makeToast(getString(R.string.exporterror));
@@ -1203,7 +1205,7 @@ public class ConfigActivity extends AppCompatActivity {
         myList.setLayoutParams(params2);
 
         region = "";
-        String[] langArray = new String[13];
+        String[] langArray = new String[14];
 
         langArray[0] = getString(R.string.english);
         langArray[1] = getString(R.string.spanish);
@@ -1218,10 +1220,11 @@ public class ConfigActivity extends AppCompatActivity {
         langArray[10] = getString(R.string.oromo);
         langArray[11] = getString(R.string.amharic);
         langArray[12] = getString(R.string.bengali);
+        langArray[13] = getString(R.string.italian);
 
         Integer image_id[] = {R.drawable.ic_us, R.drawable.ic_mx, R.drawable.ic_fr, R.drawable.ic_in,
                 R.drawable.ic_de, R.drawable.ic_jp, R.drawable.ic_ar, R.drawable.ic_cn, R.drawable.ic_br,
-                R.drawable.ic_ru, R.drawable.ic_et, R.drawable.ic_et, R.drawable.ic_bn};
+                R.drawable.ic_ru, R.drawable.ic_et, R.drawable.ic_et, R.drawable.ic_bn, R.drawable.ic_it};
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -1268,20 +1271,16 @@ public class ConfigActivity extends AppCompatActivity {
                     case 12:
                         local = "bn";
                         break;
+                    case 13:
+                        local = "it";
+                        break;
                 }
                 Editor ed = ep.edit();
                 ed.putString("language", local);
                 ed.putString("region", region);
                 ed.apply();
 
-                Locale locale2 = new Locale(local, region);
-                Locale.setDefault(locale2);
-                Configuration config2 = new Configuration();
-                config2.locale = locale2;
-                getBaseContext().getResources().
-                        updateConfiguration(config2, getBaseContext().getResources()
-                                .getDisplayMetrics());
-
+                updateLanguage(local, region);
                 invalidateOptionsMenu();
                 loadScreen();
 
@@ -1303,6 +1302,16 @@ public class ConfigActivity extends AppCompatActivity {
         });
 
         languageDialog.show();
+    }
+
+    private void updateLanguage(String loc, String reg) {
+        Locale locale2 = new Locale(loc, reg);
+        Locale.setDefault(locale2);
+        Configuration config2 = new Configuration();
+        config2.locale = locale2;
+        getBaseContext().getResources().
+                updateConfiguration(config2, getBaseContext().getResources()
+                        .getDisplayMetrics());
     }
 
     public class CustomListAdapter extends ArrayAdapter<String> {

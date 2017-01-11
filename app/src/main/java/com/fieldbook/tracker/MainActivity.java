@@ -277,8 +277,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
-        local = ep.getString("language", "en");
-        region = ep.getString("region", "");
+        local = ep.getString("language", Locale.getDefault().getCountry());
+        region = ep.getString("region",Locale.getDefault().getLanguage());
+
+        if(region == null) {
+            region = "";
+        }
+
         Locale locale2 = new Locale(local,region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
@@ -2430,9 +2435,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
-
                         pNum.setVisibility(EditText.GONE);
-
                         eNum.setVisibility(EditText.GONE);
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
@@ -2470,9 +2473,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.VISIBLE);
                         tNum.setEnabled(false);
-
                         pNum.setVisibility(EditText.GONE);
-
                         eNum.setVisibility(EditText.GONE);
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
@@ -2501,9 +2502,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
-
                         pNum.setVisibility(EditText.GONE);
-
                         eNum.setVisibility(EditText.GONE);
 
                         // Always set to null as default, then fill in with trait value
@@ -2527,7 +2526,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 @Override
                                 public void onItemClick(AdapterView<?> arg0,
                                                         View arg1, int pos, long arg3) {
-
                                     displayPlotImage(photoLocation.get(photo.getSelectedItemPosition()));
                                 }
                             });
@@ -3122,8 +3120,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         // This allows dynamic language change without exiting the app
-        local = ep.getString("language", "en");
-        region = ep.getString("region", "");
+        local = ep.getString("language", Locale.getDefault().getCountry());
+        region = ep.getString("region",Locale.getDefault().getLanguage());
+
         Locale locale2 = new Locale(local,region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
@@ -3933,7 +3932,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         dir.mkdirs();
 
-        String generatedName = MainActivity.cRange.plot_id + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
+        String generatedName = MainActivity.cRange.plot_id + "_" + currentTrait.trait + "_" + getRep() + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
         mCurrentPhotoPath = generatedName;
 
         Log.w("File", Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/" + generatedName);
@@ -3949,6 +3948,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     Uri.fromFile(file));
             startActivityForResult(takePictureIntent, 252);
         }
+    }
+
+    private String getRep() {
+        int repInt = MainActivity.dt.getRep(MainActivity.cRange.plot_id,currentTrait.trait);
+        String rep = String.valueOf(repInt);
+        return rep;
     }
 
     private void makeImage(String photoName) {
@@ -4122,10 +4127,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Bitmap displayScaledSavedPhoto(String path) {
         if (path == null) {
             Toast toast = Toast.makeText(MainActivity.this, getString(R.string.photomissing), Toast.LENGTH_LONG);
-
-            toast.setGravity(Gravity.TOP, 0, 0);
             toast.show();
-
             return null;
         }
 
@@ -4140,9 +4142,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             int targetW;
             int targetH;
 
-            // landscape photo
             if (photoW > photoH) {
-                // Get the dimensions of the View
+                // landscape
                 targetW = 800;
                 targetH = 600;
             } else {
@@ -4157,9 +4158,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             bmOptions.inJustDecodeBounds = false;
             bmOptions.inSampleSize = scaleFactor;
             bmOptions.inPurgeable = true;
-
-            DisplayMetrics metrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
             Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
             Bitmap correctBmp = bitmap;
@@ -4185,11 +4183,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 mat.postRotate(angle);
 
                 correctBmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mat, true);
-
             }
+
             catch (IOException e) {
                 Log.e(TAG, "-- Error in setting image");
             }
+
             catch(OutOfMemoryError oom) {
                 Log.e(TAG, "-- OOM Error in setting image");
             }
@@ -4197,10 +4196,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             return correctBmp;
 
         } catch (Exception e) {
-            ErrorLog("CameraError.txt", "" + e.getMessage());
-            e.printStackTrace();
-            makeToast(getString(R.string.photodecodefail));
-            return null;
+            Bitmap emptyBmp = BitmapFactory.decodeResource(getResources(), R.drawable.photo_missing);
+            return emptyBmp;
         }
     }
 

@@ -40,8 +40,9 @@ public class ChangelogActivity extends AppCompatActivity {
         SharedPreferences ep = getSharedPreferences("Settings", 0);
 
         // Enforce language
-        String local = ep.getString("language", "en");
-        String region = ep.getString("region", "");
+        String local = ep.getString("language", Locale.getDefault().getCountry());
+        String region = ep.getString("region",Locale.getDefault().getLanguage());
+
         Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();

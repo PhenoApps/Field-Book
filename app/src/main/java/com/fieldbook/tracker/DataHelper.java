@@ -162,6 +162,16 @@ public class DataHelper {
         }
     }
 
+    /**
+     * Get rep of current plot/trait combination
+     */
+    public int getRep(String plot, String trait) {
+        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{plot, trait});
+        int rep = cursor.getCount() + 1;
+        return rep;
+    }
+
+
     public int getMaxPositionFromTraits() {
 
         int largest = 0;
@@ -240,16 +250,7 @@ public class DataHelper {
 
         Log.i("Field Book", query);
 
-        Cursor cursor = db
-                .rawQuery(
-                        "select " + fields + ", traits.trait, user_traits.userValue, " +
-                                "user_traits.timeTaken, user_traits.person, user_traits.location, user_traits.rep" +
-                                " from user_traits, range, traits where " +
-                                "user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK +
-                                " and user_traits.parent = traits.trait and " +
-                                "user_traits.trait = traits.format and user_traits.userValue is not null and " + activeTraits,
-                        null
-                );
+        Cursor cursor = db.rawQuery(query,null);
 
         return cursor;
     }
@@ -280,7 +281,7 @@ public class DataHelper {
         String joinArgs = "";
 
         for (int i = 0; i < col.length; i++) {
-            rangeArgs[i] = "range." + col[i];
+            rangeArgs[i] = "range." + TICK + col[i] + TICK;
         }
 
         for (int i = 0; i < traits.length; i++) {

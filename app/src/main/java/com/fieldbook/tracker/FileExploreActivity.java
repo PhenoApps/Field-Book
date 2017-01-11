@@ -70,8 +70,9 @@ public class FileExploreActivity extends AppCompatActivity {
         setContentView(mainListView);
 
         // Enforce internal language change
-        local = ep.getString("language", "en");
-        region = ep.getString("region", "");
+        String local = ep.getString("language", Locale.getDefault().getCountry());
+        String region = ep.getString("region",Locale.getDefault().getLanguage());
+
         Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();

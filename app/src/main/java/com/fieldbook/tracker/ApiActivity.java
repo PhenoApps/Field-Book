@@ -38,8 +38,6 @@ public class ApiActivity extends Activity {
 
     TextView etResponse;
 
-    private String local;
-
     public static Activity thisActivity;
 
 
@@ -61,13 +59,13 @@ public class ApiActivity extends Activity {
         ep = getSharedPreferences("Settings", 0);
         etResponse = (TextView) findViewById(R.id.etResponse);
 
-
-        // Enforce internal language change
-        local = "en";
         thisActivity = this;
 
-        local = ep.getString("language", Locale.getDefault().toString());
-        Locale locale2 = new Locale(local);
+        // Enforce internal language change
+        String local = ep.getString("language", Locale.getDefault().getCountry());
+        String region = ep.getString("region",Locale.getDefault().getLanguage());
+
+        Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
         config2.locale = locale2;

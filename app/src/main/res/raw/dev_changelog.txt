@@ -1,3 +1,11 @@
+48
+Fixed a bug with spaces in column names
+Added a "No photo available" resource
+Fixed language setup to automatically use device language by default
+Fixed issue with location usage
+Added trait name to captured pictures
+Added rep to captured pictures
+
 47
 Added citation dialog
 

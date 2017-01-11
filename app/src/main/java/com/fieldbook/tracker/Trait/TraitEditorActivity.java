@@ -265,8 +265,9 @@ public class TraitEditorActivity extends AppCompatActivity {
         ep = getSharedPreferences("Settings", 0);
 
         // Enforce internal language change
-        String local = ep.getString("language", "en");
-        String region = ep.getString("region", "");
+        String local = ep.getString("language", Locale.getDefault().getCountry());
+        String region = ep.getString("region",Locale.getDefault().getLanguage());
+
         Locale locale2 = new Locale(local, region);
         Locale.setDefault(locale2);
         Configuration config2 = new Configuration();
