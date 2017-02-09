@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="center_horizontal"
     android:orientation="vertical"
+    android:theme="@style/AppTheme"
     android:padding="5dp">
 
     <ScrollView

@@ -83,4 +83,9 @@
         <item name="color">#343434</item>
     </style>
 
+    <style name="SearchSpinner" parent="android:style/Widget.ListView.DropDown">
+        <item name="android:divider">#FFEEEEEE</item>
+        <item name="android:dividerHeight">1dp</item>
+    </style>
+
 </resources>

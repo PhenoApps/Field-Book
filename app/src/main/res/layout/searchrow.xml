@@ -5,7 +5,6 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingLeft="10dp"
-    android:theme="@style/ActivityDialog"
     android:paddingRight="10dp"
     android:paddingTop="5dp">
 

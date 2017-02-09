@@ -87,6 +87,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:background="#FFFFFF"
+        android:paddingRight="5dp"
         android:padding="3dp"
         android:src="@drawable/ic_reorder" />
 

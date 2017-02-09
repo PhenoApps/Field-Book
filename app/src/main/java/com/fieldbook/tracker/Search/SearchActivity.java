@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.Search;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -39,6 +40,7 @@ public class SearchActivity extends AppCompatActivity {
     private LinearLayout parent;
     private static String TAG = "Field Book";
     private int rangeUntil;
+    public static String TICK = "`";
 
     @Override
     public void onDestroy() {
@@ -90,9 +92,10 @@ public class SearchActivity extends AppCompatActivity {
 
                 try {
                     // Create the sql query based on user selection
+                    //TODO add ticks
 
-                    String sql1 = "select range.id, range." + ep.getString("ImportFirstName", "") + ", range." + ep.getString("ImportSecondName", "") + " from range where range.id is not null ";
-                    String sql2 = "select range.id, range." + ep.getString("ImportFirstName", "") + ", range." + ep.getString("ImportSecondName", "") + " from traits, range, user_traits where user_traits.rid = range." + ep.getString("ImportUniqueName", "") + " and user_traits.parent = traits.trait and user_traits.trait = traits.format ";
+                    String sql1 = "select range.id, range." + TICK + ep.getString("ImportFirstName", "") + TICK + "," + " range." + TICK + ep.getString("ImportSecondName", "") + TICK + " from range where range.id is not null ";
+                    String sql2 = "select range.id, range." + TICK + ep.getString("ImportFirstName", "") + TICK + "," +  "range." + TICK + ep.getString("ImportSecondName", "") + TICK + " from traits, range, user_traits where user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK + " and user_traits.parent = traits.trait and user_traits.trait = traits.format ";
 
                     String sql = "";
 
@@ -133,41 +136,41 @@ public class SearchActivity extends AppCompatActivity {
                             // 0: Equals to
                             case 0:
                                 if (before)
-                                    value = prefix + c.getSelectedItem().toString() + " = " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " = " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
                                 else
-                                    value = prefix + c.getSelectedItem().toString() + "' and userValue = " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and userValue = " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
                                 break;
 
                             // 1: Not equals to
                             case 1:
                                 if (before)
-                                    value = prefix + c.getSelectedItem().toString() + " != " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " != " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
                                 else
-                                    value = prefix + c.getSelectedItem().toString() + "' and userValue != " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and userValue != " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
                                 break;
 
                             // 2: Is Like
                             case 2:
                                 if (before)
-                                    value = prefix + c.getSelectedItem().toString() + " like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
                                 else
-                                    value = prefix + c.getSelectedItem().toString() + "' and user_traits.userValue like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and user_traits.userValue like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
                                 break;
 
                             // 3: Not is like
                             case 3:
                                 if (before)
-                                    value = prefix + c.getSelectedItem().toString() + " not like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " not like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
                                 else
-                                    value = prefix + c.getSelectedItem().toString() + "' and user_traits.userValue not like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and user_traits.userValue not like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
                                 break;
 
                             // 4: More than
                             case 4:
                                 if (before)
-                                    value = prefix + c.getSelectedItem().toString() + " > " + trunc;
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " > " + trunc;
                                 else
-                                    value = prefix + c.getSelectedItem().toString() + "' and userValue > " + trunc;
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and userValue > " + trunc;
                                 break;
 
                             // 5: less than
@@ -175,7 +178,7 @@ public class SearchActivity extends AppCompatActivity {
                                 if (before)
                                     value = prefix + c.getSelectedItem().toString() + " < " + trunc;
                                 else
-                                    value = prefix + c.getSelectedItem().toString() + "' and userValue < " + trunc;
+                                    value = prefix + c.getSelectedItem().toString() + " and userValue < " + trunc;
                                 break;
 
                         }
@@ -295,7 +298,7 @@ public class SearchActivity extends AppCompatActivity {
 
     // Helper function to add row
     public void addRow(String text, String colName) {
-        LayoutInflater vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater vi = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = vi.inflate(R.layout.searchrow, null);
 
         Spinner c = (Spinner) v.findViewById(R.id.columns);
@@ -322,7 +325,7 @@ public class SearchActivity extends AppCompatActivity {
 
             ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.spinnerlayout,
                     concat(col, MainActivity.dt.getVisibleTrait()));
-            //adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             c.setAdapter(adapter2);
 
             if (text.length() > 0)

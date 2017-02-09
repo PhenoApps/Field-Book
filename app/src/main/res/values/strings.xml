@@ -77,6 +77,9 @@
     <string name="photo">Photo</string>
     <string name="audio">Audio</string>
     <string name="multicategorical">Multicat</string>
+    <string name="angle">Angle</string>
+    <string name="video">Video</string>
+    <string name="location_trait">Location</string>
 
     <string name="trait">Trait</string>
     <string name="format">Format</string>

@@ -335,7 +335,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         traitList.setRemoveListener(onRemove);
 
         DragSortController controller = new DragSortController(traitList);
-        controller.setDragHandleId(R.id.traitline);
+        controller.setDragHandleId(R.id.dragSort);
         controller.setRemoveEnabled(false);
         controller.setSortEnabled(true);
         controller.setDragInitMode(1);
@@ -359,7 +359,6 @@ public class TraitEditorActivity extends AppCompatActivity {
         params.width = LayoutParams.MATCH_PARENT;
 
         createDialog.getWindow().setAttributes(params);
-
         createDialog.setOnCancelListener(new OnCancelListener() {
 
             public void onCancel(DialogInterface arg0) {
@@ -401,9 +400,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 // When a trait is selected, alter the layout of the edit dialog accordingly
 
                 o = mAdapter.getItem(position);
-
                 currentId = o.id;
-
                 trait.setText(o.trait);
                 oldTrait = o.trait;
 

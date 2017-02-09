@@ -1248,10 +1248,12 @@ public class ConfigActivity extends AppCompatActivity {
 
         ListView myList = (ListView) layout.findViewById(R.id.myList);
 
-        String[] importArray = new String[3];
+        String[] importArray = new String[2];
         importArray[0] = getString(R.string.importlocal);
         importArray[1] = getString(R.string.importdropbox);
-        importArray[2] = getString(R.string.importgoogle);
+
+        //TODO add google drive (requires Google Play Services)
+        //importArray[2] = getString(R.string.importgoogle);
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -1268,9 +1270,6 @@ public class ConfigActivity extends AppCompatActivity {
                     case 1:
                         DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
                         mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
-                        break;
-                    case 2:
-                        makeToast("Coming soon!");
                         break;
                 }
                 importDialog.dismiss();

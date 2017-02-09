@@ -13,4 +13,5 @@ public class TraitObject {
     public String categories;
     public String realPosition;
     public String id;
+    public Boolean visible;
 }

@@ -91,10 +91,12 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormatSymbols;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -216,9 +218,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private boolean mRecording;
     private boolean mListening = false;
 
-    private int tempMonth;
     private TextView month;
     private TextView day;
+    private String date = "2000-01-01";
+    SimpleDateFormat dayFormat = new SimpleDateFormat("dd");
+    SimpleDateFormat monthFormat = new SimpleDateFormat("MM");
+    SimpleDateFormat monthAlphFormat = new SimpleDateFormat("MMM");
+    SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
+    final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private SeekBar seekBar;
     private OnSeekBarChangeListener seekListener;
@@ -618,7 +625,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         Button minusDayBtn = (Button) traitDate.findViewById(R.id.minusDateBtn);
         Button saveDayBtn = (Button) traitDate.findViewById(R.id.enterBtn);
         Button clearDate = (Button) traitDate.findViewById(R.id.clearDateBtn);
-        Button noDateBtn = (Button) traitDate.findViewById(R.id.noDateBtn);
 
         Button addCounterBtn = (Button) traitCounter.findViewById(R.id.addBtn);
         Button minusCounterBtn = (Button) traitCounter.findViewById(R.id.minusBtn);
@@ -782,53 +788,38 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 removeTrait(currentTrait.trait);
 
                 final Calendar c = Calendar.getInstance();
+                date = dateFormat.format(c.getTime());
 
                 month.setTextColor(Color.BLACK);
                 day.setTextColor(Color.BLACK);
 
-                if (currentTrait.defaultValue.trim().length() > 0) {
-                    String[] d = currentTrait.defaultValue.split("\\.");
-
-                    //This is used to persist moving between months
-                    tempMonth = Integer.parseInt(d[1]) - 1;
-
-                    month.setText(getMonthForInt(Integer.parseInt(d[1]) - 1));
-                    day.setText(d[2]);
-                } else {
-                    //This is used to persist moving between months
-                    tempMonth = c.get(Calendar.MONTH);
-
-                    month.setText(getMonthForInt(c.get(Calendar.MONTH)));
-                    day.setText(String.format("%02d", c
-                            .get(Calendar.DAY_OF_MONTH)));
-                }
-
+                //This is used to persist moving between months
+                month.setText(getMonthForInt(c.get(Calendar.MONTH)));
+                day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
             }
         });
-
 
         // Add day
         addDayBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.MONTH, tempMonth);
-                int max = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-                Integer i = Integer.parseInt(day.getText().toString());
-
-                if (i + 1 > max) {
-                    tempMonth += 1;
-
-                    if (tempMonth > 11)
-                        tempMonth = 0;
-
-                    day.setText(String.format("%02d", 1));
-                    month.setText(getMonthForInt(tempMonth));
-                } else {
-                    day.setText(String.format("%02d", i + 1));
+                //Parse date
+                try {
+                    calendar.setTime(dateFormat.parse(date));
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
 
-                // Change the text color accordingly
+                // Add day
+                calendar.add(Calendar.DATE, 1);
+                date = dateFormat.format(calendar.getTime());
+
+                // Set text
+                day.setText(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)));
+                month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
+
+                // Change text color
                 if (newTraits.containsKey(currentTrait.trait)) {
                     month.setTextColor(Color.BLUE);
                     day.setTextColor(Color.BLUE);
@@ -842,24 +833,24 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Minus day
         minusDayBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                Integer i = Integer.parseInt(day.getText().toString());
-                if (i - 1 <= 0) {
-                    tempMonth -= 1;
+                Calendar calendar = Calendar.getInstance();
 
-                    if (tempMonth <= 0)
-                        tempMonth = 11;
-
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.set(Calendar.MONTH, tempMonth);
-                    int max = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-
-                    day.setText(String.format("%02d", max));
-                    month.setText(getMonthForInt(tempMonth));
-                } else {
-                    day.setText(String.format("%02d", i - 1));
+                //Parse date
+                try {
+                    calendar.setTime(dateFormat.parse(date));
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
 
-                // Change the text color accordingly
+                //Subtract day, rewrite date
+                calendar.add(Calendar.DATE,-1);
+                date = dateFormat.format(calendar.getTime());
+
+                //Set text
+                day.setText(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)));
+                month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
+
+                // Change text color
                 if (newTraits.containsKey(currentTrait.trait)) {
                     month.setTextColor(Color.BLUE);
                     day.setTextColor(Color.BLUE);
@@ -870,50 +861,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
-        //No Day Button
-        noDateBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.MONTH, 0);
-                calendar.set(Calendar.DAY_OF_MONTH, 1);
-                calendar.set(Calendar.YEAR, 2000);
-
-                day.setText(String.format("%02d", 1));
-                month.setText(getMonthForInt(0));
-
-                tempMonth = 0;
-
-                if (ep.getBoolean("UseDay", false)) {
-                    updateTrait(currentTrait.trait, "date",String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
-                } else {
-                    updateTrait(currentTrait.trait, "date",
-                            calendar.get(Calendar.YEAR) + "."
-                                    + (calendar.get(Calendar.MONTH) + 1) + "."
-                                    + calendar.get(Calendar.DAY_OF_MONTH));
-                }
-
-                // Change the text color accordingly
-                month.setTextColor(Color.parseColor(displayColor));
-                day.setTextColor(Color.parseColor(displayColor));
-            }
-        });
-
         // Saving date data
         saveDayBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.MONTH, tempMonth);
-                calendar.set(Calendar.MONTH, tempMonth);
-                Integer i = Integer.parseInt(day.getText().toString());
-                calendar.set(Calendar.DAY_OF_MONTH, i);
+
+                //Parse date
+                try {
+                    calendar.setTime(dateFormat.parse(date));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
 
                 if (ep.getBoolean("UseDay", false)) {
                     updateTrait(currentTrait.trait, "date",String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
                 } else {
-                    updateTrait(currentTrait.trait, "date",
-                            calendar.get(Calendar.YEAR) + "."
-                                    + (calendar.get(Calendar.MONTH) + 1) + "."
-                                    + calendar.get(Calendar.DAY_OF_MONTH));
+                    updateTrait(currentTrait.trait, "date",dateFormat.format(calendar.getTime()));
                 }
 
                 // Change the text color accordingly
@@ -2333,54 +2296,60 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         eNum.setVisibility(View.GONE);
 
                         final Calendar c = Calendar.getInstance();
+                        date = dateFormat.format(c.getTime());
 
                         if (newTraits.containsKey(currentTrait.trait)) {
-                            if(!newTraits.get(currentTrait.trait).toString().contains(".")) { // no period means it was stored as a day of the year
-                                Calendar b = Calendar.getInstance();
-                                b.set(Calendar.DAY_OF_YEAR, Integer.parseInt(newTraits.get(currentTrait.trait).toString()));
+                            if(newTraits.get(currentTrait.trait).toString().length() < 4 && newTraits.get(currentTrait.trait).toString().length() > 0) {
+                                Calendar calendar = Calendar.getInstance();
 
-                                String[] e = {Integer.toString(b.get(Calendar.MONTH)),Integer.toString(b.get(Calendar.DAY_OF_MONTH))};
+                                //convert day of year to yyyy-mm-dd string
+                                date = newTraits.get(currentTrait.trait).toString();
+                                calendar.set(Calendar.DAY_OF_YEAR, Integer.parseInt(date));
+                                date = dateFormat.format(calendar.getTime());
 
+                                //set month/day text and color
                                 month.setTextColor(Color.parseColor(displayColor));
                                 day.setTextColor(Color.parseColor(displayColor));
 
-                                tempMonth = Integer.parseInt(e[0]);
+                                month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
+                                day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
 
-                                month.setText(getMonthForInt(Integer.parseInt(e[0])));
-                                day.setText(e[1]);
+                            } else if (newTraits.get(currentTrait.trait).toString().contains(".")) {
+                                //convert from yyyy.mm.dd to yyyy-mm-dd
+                                String[] oldDate = newTraits.get(currentTrait.trait).toString().split("\\.");
+                                date = oldDate[0] + "-" + String.format("%02d", Integer.parseInt(oldDate[1])) + "-" + String.format("%02d", Integer.parseInt(oldDate[2]));
+
+                                //set month/day text and color
+                                month.setText(getMonthForInt(Integer.parseInt(oldDate[1])-1));
+                                day.setText(oldDate[2]);
+                                month.setTextColor(Color.parseColor(displayColor));
+                                day.setTextColor(Color.parseColor(displayColor));
+
                             } else {
-                                String[] d = newTraits.get(currentTrait.trait).toString()
-                                        .split("\\.");
+                                Calendar calendar = Calendar.getInstance();
+
+                                //new format
+                                date = newTraits.get(currentTrait.trait).toString();
+
+                                //Parse date
+                                try {
+                                    calendar.setTime(dateFormat.parse(date));
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+
+                                //set month/day text and color
+                                month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
+                                day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
 
                                 month.setTextColor(Color.parseColor(displayColor));
                                 day.setTextColor(Color.parseColor(displayColor));
-
-                                //This is used to persist moving between months
-                                tempMonth = Integer.parseInt(d[1]) - 1;
-
-                                month.setText(getMonthForInt(Integer.parseInt(d[1])-1));
-                                day.setText(d[2]);
                             }
-
                         } else {
                             month.setTextColor(Color.BLACK);
                             day.setTextColor(Color.BLACK);
-
-                            if (currentTrait.defaultValue.trim().length() > 0) {
-                                String[] d = currentTrait.defaultValue.split("\\.");
-
-                                //This is used to persist moving between months
-                                tempMonth = Integer.parseInt(d[1]) - 1;
-
-                                month.setText(getMonthForInt(Integer.parseInt(d[1]) - 1));
-                                day.setText(d[2]);
-                            } else {
-                                //This is used to persist moving between months
-                                tempMonth = c.get(Calendar.MONTH);
-
-                                month.setText(getMonthForInt(c.get(Calendar.MONTH)));
-                                day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
-                            }
+                            month.setText(getMonthForInt(c.get(Calendar.MONTH)));
+                            day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
                         }
                     } else if (currentTrait.format.equals("qualitative") | currentTrait.format.equals("categorical")) {
                         traitText.setVisibility(View.GONE);
@@ -2409,24 +2378,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         String[] cat = currentTrait.categories.split("/");
 
-                        // Hide all unused buttons
-                        // For example, there are only 7 items
-                        // items 10, 11, 12 will be removed totally
+                        // Hide unused buttons
                         for (int i = cat.length; i < 12; i++) {
                             buttonArray[i].setVisibility(Button.GONE);
                         }
 
                         // Reset button visibility for items in the last row
-                        // For example, there are only 7 items
-                        // items 8, 9 will be invisible
                         if (12 - cat.length > 0) {
                             for (int i = 11; i >= cat.length; i--) {
                                 buttonArray[i].setVisibility(Button.INVISIBLE);
                             }
                         }
 
-                        // Set the textcolor and visibility for the right
-                        // buttons
+                        // Set the color and visibility for the right buttons
                         for (int i = 0; i < cat.length; i++) {
                             if (cat[i].equals(lastQualitative)) {
                                 buttonArray[i].setVisibility(Button.VISIBLE);

@@ -1,3 +1,8 @@
+50
+Fixed search and tutorial layout on Samsung devices
+Fixed an issue with trait list recycling views
+Fixed an issue with spaces in column names ands search
+
 49
 Added Utils class to be expanded in the future
 Fixed issue with toasts in Datagrid and Search

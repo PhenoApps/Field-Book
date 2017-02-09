@@ -3,11 +3,8 @@ package com.fieldbook.tracker.Trait;
 import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.media.Image;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -20,10 +17,8 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.fieldbook.tracker.Dragsort.DragSortController;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.Dragsort.DragSortListView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,11 +30,11 @@ import java.util.HashMap;
 public class TraitAdapter extends BaseAdapter {
 
     ArrayList<TraitObject> list;
-    Context context;
-    OnItemClickListener listener;
-    HashMap visibility;
+    private Context context;
+    private OnItemClickListener listener;
+    private HashMap visibility;
 
-    public TraitAdapter(Context context, int resource, ArrayList<TraitObject> list, OnItemClickListener listener, HashMap visibility) {
+    TraitAdapter(Context context, int resource, ArrayList<TraitObject> list, OnItemClickListener listener, HashMap visibility) {
         this.context = context;
         this.list = list;
         this.listener = listener;
@@ -94,7 +89,6 @@ public class TraitAdapter extends BaseAdapter {
 
         holder.id = getItem(position).id;
         holder.realPosition = getItem(position).realPosition;
-
         holder.name.setText(getItem(position).trait);
         holder.format.setText(getItem(position).format);
 
@@ -103,20 +97,22 @@ public class TraitAdapter extends BaseAdapter {
             if (visibility.get(holder.name.getText().toString()) != null) {
                 if (visibility.get(holder.name.getText().toString()).equals("true")) {
                     holder.visible.setChecked(true);
-                } else
+                } else {
                     holder.visible.setChecked(false);
+                }
             }
         }
 
         holder.visible.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
-            public void onCheckedChanged(CompoundButton arg0, boolean position) {
-
+            public void onCheckedChanged(CompoundButton arg0, boolean isChecked) {
                 if (holder.visible.isChecked()) {
                     MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(), true);
+                    visibility.put(holder.name.getText().toString(),"true");
                 } else {
                     MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(), false);
+                    visibility.put(holder.name.getText().toString(),false);
                 }
             }
         });
@@ -200,5 +196,4 @@ public class TraitAdapter extends BaseAdapter {
 
         return convertView;
     }
-
 }
