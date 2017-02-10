@@ -1,3 +1,9 @@
+51
+Replaced lots of words with icons
+Fixed an issue where default trait value wasn't being saved
+Added a dialog when importing trait lists and current list hasn't been exported
+Added location trait
+
 50
 Fixed search and tutorial layout on Samsung devices
 Fixed an issue with trait list recycling views

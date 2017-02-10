@@ -92,8 +92,6 @@ public class SearchActivity extends AppCompatActivity {
 
                 try {
                     // Create the sql query based on user selection
-                    //TODO add ticks
-
                     String sql1 = "select range.id, range." + TICK + ep.getString("ImportFirstName", "") + TICK + "," + " range." + TICK + ep.getString("ImportSecondName", "") + TICK + " from range where range.id is not null ";
                     String sql2 = "select range.id, range." + TICK + ep.getString("ImportFirstName", "") + TICK + "," +  "range." + TICK + ep.getString("ImportSecondName", "") + TICK + " from traits, range, user_traits where user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK + " and user_traits.parent = traits.trait and user_traits.trait = traits.format ";
 

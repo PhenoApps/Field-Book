@@ -102,6 +102,8 @@
     <string name="notanumber">Default, minimum, and maximum must be numeric</string>
     <string name="notemptycategory">Category cannot be empty</string>
 
+    <string name="trait_export_check">Would you like to export the current trait list before importing a new list?</string>
+
     <!-- Advanced settings -->
     <string name="tips">Tutorial</string>
     <string name="quickgoto">Quick GoTo</string>

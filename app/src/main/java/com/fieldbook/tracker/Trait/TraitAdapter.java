@@ -60,7 +60,7 @@ public class TraitAdapter extends BaseAdapter {
 
     private class ViewHolder {
         TextView name;
-        TextView format;
+        ImageView format;
         CheckBox visible;
         ImageView dragSort;
         ImageView menuPopup;
@@ -77,7 +77,7 @@ public class TraitAdapter extends BaseAdapter {
 
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.text1);
-            holder.format = (TextView) convertView.findViewById(R.id.text2);
+            holder.format = (ImageView) convertView.findViewById(R.id.traitType);
             holder.visible = (CheckBox) convertView.findViewById(R.id.visible);
             holder.dragSort = (ImageView) convertView.findViewById(R.id.dragSort);
             holder.menuPopup = (ImageView) convertView.findViewById(R.id.popupMenu);
@@ -90,7 +90,51 @@ public class TraitAdapter extends BaseAdapter {
         holder.id = getItem(position).id;
         holder.realPosition = getItem(position).realPosition;
         holder.name.setText(getItem(position).trait);
-        holder.format.setText(getItem(position).format);
+
+        switch (getItem(position).format) {
+            case "numeric":
+                holder.format.setBackgroundResource(R.drawable.ic_numeric);
+                break;
+            case "categorical":
+                holder.format.setBackgroundResource(R.drawable.ic_categorical);
+                break;
+            case "date":
+                holder.format.setBackgroundResource(R.drawable.ic_today);
+                break;
+            case "percent":
+                holder.format.setBackgroundResource(R.drawable.ic_percent);
+                break;
+            case "boolean":
+                holder.format.setBackgroundResource(R.drawable.ic_cancel);
+                break;
+            case "text":
+                holder.format.setBackgroundResource(R.drawable.ic_text);
+                break;
+            case "photo":
+                holder.format.setBackgroundResource(R.drawable.ic_camera);
+                break;
+            case "audio":
+                holder.format.setBackgroundResource(R.drawable.ic_audio);
+                break;
+            case "counter":
+                holder.format.setBackgroundResource(R.drawable.ic_counter);
+                break;
+            case "disease rating":
+                holder.format.setBackgroundResource(R.drawable.ic_bug);
+                break;
+            case "rust rating":
+                holder.format.setBackgroundResource(R.drawable.ic_bug);
+                break;
+            case "multicat":
+                holder.format.setBackgroundResource(R.drawable.ic_multicat);
+                break;
+            case "location":
+                holder.format.setBackgroundResource(R.drawable.ic_location);
+                break;
+            default:
+                holder.format.setBackgroundResource(R.drawable.ic_reorder);
+                break;
+        }
 
         // Check or uncheck the list items
         if (visibility != null) {

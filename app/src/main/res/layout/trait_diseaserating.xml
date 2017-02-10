@@ -323,7 +323,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal"
-                android:paddingTop="10dp">
+                android:paddingTop="5dp">
 
                 <Button
                     android:id="@+id/rustR"
@@ -368,12 +368,12 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal"
-                android:paddingTop="10dp">
+                android:paddingTop="5dp">
 
                 <Button
                     android:id="@+id/rustDelim"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:minWidth="60dp"
@@ -382,17 +382,15 @@
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
 
-                <Button
+                <ImageButton
                     android:id="@+id/clearRustBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:minWidth="@dimen/button_default_width"
-                    android:text="@string/clear"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
-                    android:textStyle="bold" />
-
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:scaleType="fitXY"
+                    android:padding="10dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_delete_forever"
+                    android:gravity="center" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

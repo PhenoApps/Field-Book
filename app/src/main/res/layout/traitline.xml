@@ -45,23 +45,20 @@
         android:layout_toRightOf="@+id/visible" />
 
 
-    <TextView
-        android:id="@+id/text2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/traitType"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/spacer2"
-        android:ellipsize="end"
-        android:minWidth="80dp"
-        android:singleLine="true"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_small" />
+        android:padding="3dp"
+        android:background="@drawable/ic_reorder"  />
 
     <View
         android:id="@+id/spacer3"
         android:layout_width="15dp"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/text2" />
+        android:layout_toRightOf="@+id/traitType" />
 
     <TextView
         android:id="@+id/text1"

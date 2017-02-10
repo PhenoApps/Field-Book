@@ -2,6 +2,7 @@ package com.fieldbook.tracker;
 
 import android.app.Activity;
 import android.graphics.PorterDuff;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -59,6 +60,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Gallery;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -213,8 +215,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private MediaRecorder mRecorder;
     private MediaPlayer mPlayer;
     private File mRecordingLocation;
-    private Button doRecord;
-    private Button clearRecord;
+    private ImageButton doRecord;
+    private ImageButton clearRecord;
     private boolean mRecording;
     private boolean mListening = false;
 
@@ -232,7 +234,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private TextView counterTv;
 
-    Button rust0, rust5, rust10, rust15, rust20, rust25, rust30, rust35, rust40, rust45, rust50, rust55, rust60, rust65, rust70, rust75, rust80, rust85, rust90, rust95, rust100, rustR, rustM, rustS, rustDelim, rustClear;
+    Button rust0, rust5, rust10, rust15, rust20, rust25, rust30, rust35, rust40, rust45, rust50, rust55, rust60, rust65, rust70, rust75, rust80, rust85, rust90, rust95, rust100, rustR, rustM, rustS, rustDelim;
+    ImageButton rustClear;
 
     final Button buttonArray[] = new Button[12];
 
@@ -263,6 +266,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     LinearLayout traitAudio;
     LinearLayout traitDiseaseRating;
     LinearLayout traitMulticat;
+    LinearLayout traitLocation;
 
     /**
      * Test area
@@ -405,6 +409,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         traitCounter = (LinearLayout) findViewById(R.id.counterLayout);
         traitDiseaseRating = (LinearLayout) findViewById(R.id.diseaseLayout);
         traitMulticat = (LinearLayout) findViewById(R.id.multicatLayout);
+        traitLocation = (LinearLayout) findViewById(R.id.locationLayout);
 
         traitType = (Spinner) findViewById(R.id.traitType);
         newTraits = new HashMap();
@@ -468,16 +473,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         pNum = (EditText) findViewById(R.id.pNum);
 
         // Clear button for most traits
-        doRecord = (Button) traitAudio.findViewById(R.id.record);
+        doRecord = (ImageButton) traitAudio.findViewById(R.id.record);
         doRecord.setOnClickListener(this);
 
-        clearRecord = (Button) traitAudio.findViewById(R.id.clearRecord);
+        clearRecord = (ImageButton) traitAudio.findViewById(R.id.clearRecord);
         clearRecord.setOnClickListener(this);
 
-        Button capture = (Button) traitPhoto.findViewById(R.id.capture);
+        ImageButton capture = (ImageButton) traitPhoto.findViewById(R.id.capture);
         capture.setOnClickListener(this);
 
-        Button captureClear = (Button) traitPhoto.findViewById(R.id.clearPhoto);
+        ImageButton captureClear = (ImageButton) traitPhoto.findViewById(R.id.clearPhoto);
         captureClear.setOnClickListener(this);
 
         photo = (Gallery) traitPhoto.findViewById(R.id.photo);
@@ -582,7 +587,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // Progress bar
         seekBar = (SeekBar) traitPercent.findViewById(R.id.seekbar);
-        Button clearPercent = (Button) traitPercent.findViewById(R.id.clearPercent);
+        ImageButton clearPercent = (ImageButton) traitPercent.findViewById(R.id.clearPercent);
         seekBar.setMax(100);
 
         seekListener = new OnSeekBarChangeListener() {
@@ -621,24 +626,27 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         rangeName = (TextView) findViewById(R.id.rangeName);
         plotName = (TextView) findViewById(R.id.plotName);
 
+        ImageButton getLocation = (ImageButton) traitLocation.findViewById(R.id.getLocationBtn);
+        ImageButton clearLocation = (ImageButton) traitLocation.findViewById(R.id.clearLocationBtn);
+
         Button addDayBtn = (Button) traitDate.findViewById(R.id.addDateBtn);
         Button minusDayBtn = (Button) traitDate.findViewById(R.id.minusDateBtn);
-        Button saveDayBtn = (Button) traitDate.findViewById(R.id.enterBtn);
-        Button clearDate = (Button) traitDate.findViewById(R.id.clearDateBtn);
+        ImageButton saveDayBtn = (ImageButton) traitDate.findViewById(R.id.enterBtn);
+        ImageButton clearDate = (ImageButton) traitDate.findViewById(R.id.clearDateBtn);
 
         Button addCounterBtn = (Button) traitCounter.findViewById(R.id.addBtn);
         Button minusCounterBtn = (Button) traitCounter.findViewById(R.id.minusBtn);
-        Button clearCounterBtn = (Button) traitCounter.findViewById(R.id.clearCounterBtn);
+        ImageButton clearCounterBtn = (ImageButton) traitCounter.findViewById(R.id.clearCounterBtn);
         counterTv = (TextView) traitCounter.findViewById(R.id.curCount);
 
         // Multicat
-        Button clearMultiCat = (Button) traitMulticat.findViewById(R.id.clearMultiCatBtn);
+        ImageButton clearMultiCat = (ImageButton) traitMulticat.findViewById(R.id.clearMultiCatBtn);
         gridMultiCat = (ExpandableHeightGridView) traitMulticat.findViewById(R.id.catGrid);
         gridMultiCat.setExpanded(true);
         buttonsCreated = false;
 
         //Button clearBtn = (Button) findViewById(R.id.clearBtn);
-        Button clearCat = (Button) traitCategorical.findViewById(R.id.clearCatBtn);
+        ImageButton clearCat = (ImageButton) traitCategorical.findViewById(R.id.clearCatBtn);
 
         Button k1 = (Button) traitNumeric.findViewById(R.id.k1);
         Button k2 = (Button) traitNumeric.findViewById(R.id.k2);
@@ -710,7 +718,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         rustM=(Button) traitDiseaseRating.findViewById(R.id.rustM);
         rustS=(Button) traitDiseaseRating.findViewById(R.id.rustS);
         rustDelim = (Button) traitDiseaseRating.findViewById(R.id.rustDelim);
-        rustClear = (Button) traitDiseaseRating.findViewById(R.id.clearRustBtn);
+        rustClear = (ImageButton) traitDiseaseRating.findViewById(R.id.clearRustBtn);
 
         Button[] rustBtnArray = new Button[]{rust0,rust5,rust10,rust15,rust20,rust25,rust30,rust35,rust40,rust45,rust50,rust55,rust60,rust65,rust70,rust75,rust80,rust85,rust90,rust95,rust100};
         List<String> temps = new ArrayList<String>();
@@ -757,8 +765,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         rustDelim.setOnClickListener(this);
         rustClear.setOnClickListener(this);
 
-        rangeName.setText(ep.getString("ImportFirstName", getString(R.string.range)) + ":");
-        plotName.setText(ep.getString("ImportSecondName", getString(R.string.plot)) + ":");
+        String primaryName = ep.getString("ImportFirstName", getString(R.string.range)) + ":";
+        String secondaryName = ep.getString("ImportSecondName", getString(R.string.plot)) + ":";
+
+        rangeName.setText(primaryName);
+        plotName.setText(secondaryName);
 
         clearPercent.setOnClickListener(new OnClickListener() {
             @Override
@@ -882,6 +893,38 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 // Change the text color accordingly
                 month.setTextColor(Color.parseColor(displayColor));
                 day.setTextColor(Color.parseColor(displayColor));
+            }
+        });
+
+        // Get Location
+        getLocation.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                GPSTracker gps = new GPSTracker(thisActivity);
+                String fullLocation = "";
+                double lat;
+                double lng;
+
+                if (gps.canGetLocation()) { //GPS enabled
+                    lat = gps.getLatitude(); // returns latitude
+                    lng = gps.getLongitude(); // returns longitude
+                    fullLocation = truncateDecimalString(String.valueOf(lat)) + "; " + truncateDecimalString(String.valueOf(lng));
+                } else {
+                    Intent intent = new Intent(
+                            Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(intent);
+                }
+                eNum.setText(fullLocation);
+                updateTrait(currentTrait.trait, "location", fullLocation);
+            }
+        });
+
+        // Clear location
+        clearLocation.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                eNum.removeTextChangedListener(eNumUpdate);
+                eNum.setText("");
+                removeTrait(currentTrait.trait);
+                eNum.addTextChangedListener(eNumUpdate);
             }
         });
 
@@ -1062,7 +1105,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         });
 
         eImg = (ImageView) traitBoolean.findViewById(R.id.eImg);
-        Button clearBoolean = (Button) traitBoolean.findViewById(R.id.clearBoolean);
+        ImageButton clearBoolean = (ImageButton) traitBoolean.findViewById(R.id.clearBoolean);
 
         // Boolean
         eImg.setOnClickListener(new OnClickListener() {
@@ -2071,6 +2114,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         }
                     }
 
+                    //Save default if it exists
+                    if (currentTrait.defaultValue != null && currentTrait.defaultValue.length() > 0) {
+                        updateTrait(currentTrait.trait, currentTrait.format, currentTrait.defaultValue);
+                    }
+
                     // All the logic is here
                     // What it does is hide all other controls except the
                     // current displayed trait
@@ -2089,6 +2137,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.VISIBLE);
                         tNum.setSelection(tNum.getText().length());
@@ -2122,7 +2171,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                             tNum.addTextChangedListener(tNumUpdate);
                             tNum.setSelection(tNum.getText().length());
-
                         }
 
                         // This is needed to fix the keyboard bug
@@ -2151,6 +2199,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
@@ -2207,6 +2256,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
@@ -2289,6 +2339,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.setEnabled(false);
                         tNum.setVisibility(View.GONE);
@@ -2363,6 +2414,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
@@ -2416,6 +2468,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
@@ -2453,6 +2506,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.VISIBLE);
@@ -2461,12 +2515,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         eNum.setVisibility(EditText.GONE);
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
-                            doRecord.setText(getString(R.string.record));
+                            //doRecord.setText(getString(R.string.record));
+                            doRecord.setImageResource(R.drawable.ic_audio);
                             tNum.setText("");
                             //tNum.setText(R.string.nodata);
                         } else {
                             mRecordingLocation = new File(newTraits.get(currentTrait.trait).toString());
-                            doRecord.setText(getString(R.string.play));
+                            //doRecord.setText(getString(R.string.play));
+                            doRecord.setImageResource(R.drawable.ic_play_arrow);
                             tNum.setText(getString(R.string.stored));
                         }
 
@@ -2482,6 +2538,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.GONE);
@@ -2539,6 +2596,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.VISIBLE);
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.GONE);
@@ -2565,6 +2623,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.VISIBLE);
                         traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.GONE);
@@ -2604,6 +2663,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.VISIBLE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
@@ -2675,6 +2735,47 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             }
                         });
 
+                    } else if(currentTrait.format.equals("location")) {
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.VISIBLE);
+
+                        tNum.setVisibility(EditText.GONE);
+                        tNum.setEnabled(false);
+
+                        eNum.setVisibility(EditText.VISIBLE);
+                        eNum.setEnabled(true);
+                        eNum.setCursorVisible(false);
+
+                        pNum.setVisibility(EditText.GONE);
+
+                        if (newTraits.containsKey(currentTrait.trait)) {
+                            eNum.removeTextChangedListener(eNumUpdate);
+                            eNum.setText(newTraits.get(currentTrait.trait).toString());
+                            eNum.setTextColor(Color.parseColor(displayColor));
+                            eNum.addTextChangedListener(eNumUpdate);
+                        } else {
+                            eNum.removeTextChangedListener(eNumUpdate);
+
+                            eNum.setText("");
+                            eNum.setTextColor(Color.BLACK);
+
+                            if (currentTrait.defaultValue != null
+                                    && currentTrait.defaultValue.length() > 0)
+                                eNum.setText(currentTrait.defaultValue);
+
+                            eNum.addTextChangedListener(eNumUpdate);
+                        }
+
                     } else {
                         traitText.setVisibility(View.GONE);
                         traitNumeric.setVisibility(View.GONE);
@@ -2686,6 +2787,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitPhoto.setVisibility(View.GONE);
                         traitCounter.setVisibility(View.GONE);
                         traitDiseaseRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
                         tNum.setVisibility(EditText.GONE);
@@ -2769,7 +2872,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void beginPlayback()
     {
         mListening = true;
-        doRecord.setText(R.string.stop);
+        //doRecord.setText(R.string.stop);
+        doRecord.setImageResource(R.drawable.ic_stop);
         mPlayer = new MediaPlayer();
         mPlayer = MediaPlayer.create(MainActivity.this, Uri.parse(mRecordingLocation.getAbsolutePath()));
 
@@ -2786,7 +2890,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
                     mListening = false;
-                    doRecord.setText(R.string.play);
+                    //doRecord.setText(R.string.play);
+                    doRecord.setImageResource(R.drawable.ic_play_arrow);
+
                     clearRecord.setEnabled(true);
                 }
             });
@@ -3132,8 +3238,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 plot.setVisibility(EditText.GONE);
             }
 
-            rangeName.setText(ep.getString("ImportFirstName", getString(R.string.range)) + ":");
-            plotName.setText(ep.getString("ImportSecondName", getString(R.string.plot)) + ":");
+            String primaryName = ep.getString("ImportFirstName", getString(R.string.range)) + ":";
+            String secondaryName = ep.getString("ImportSecondName", getString(R.string.plot)) + ":";
+
+            rangeName.setText(primaryName);
+            plotName.setText(secondaryName);
 
             paging = 1;
 
@@ -3626,7 +3735,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 if (mListening) {
                     mPlayer.stop();
-                    doRecord.setText(R.string.play);
+                    //doRecord.setText(R.string.play);
+                    doRecord.setImageResource(R.drawable.ic_play_arrow);
+
                     mListening = false;
                     clearRecord.setEnabled(true);
                     break;
@@ -3650,7 +3761,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     tNum.setText(getString(R.string.stored));
 
                     mRecording = false;
-                    doRecord.setText(R.string.play);
+                    //doRecord.setText(R.string.play);
+                    doRecord.setImageResource(R.drawable.ic_play_arrow);
 
                     rangeLeft.setEnabled(true);
                     rangeRight.setEnabled(true);
@@ -3681,7 +3793,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     mRecorder.start();
                     mRecording = true;
 
-                    doRecord.setText(R.string.stop);
+                    //doRecord.setText(R.string.stop);
+                    doRecord.setImageResource(R.drawable.ic_stop);
                 }
                 break;
 
@@ -3690,7 +3803,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 removeTrait(currentTrait.trait);
                 tNum.setText("");
                 mRecording = false;
-                doRecord.setText(R.string.record);
+                //doRecord.setText(R.string.record);
+                doRecord.setImageResource(R.drawable.ic_audio);
+
                 mListening = false;
                 mRecording = false;
                 break;
@@ -4418,5 +4533,30 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             app_installed = false;
         }
         return app_installed;
+    }
+
+    public String truncateDecimalString(String v) {
+        int count = 0;
+
+        boolean found = false;
+
+        String truncated = "";
+
+        for (int i = 0; i < v.length(); i++) {
+            if (found) {
+                count += 1;
+
+                if (count == 5)
+                    break;
+            }
+
+            if (v.charAt(i) == '.') {
+                found = true;
+            }
+
+            truncated += v.charAt(i);
+        }
+
+        return truncated;
     }
 }

@@ -295,8 +295,8 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         thisActivity = this;
 
-        final String[] data = new String[11];
-        final String[] enData = new String[11];
+        final String[] data = new String[12];
+        final String[] enData = new String[12];
 
         data[0] = getString(R.string.numeric);
         data[1] = getString(R.string.qualitative);
@@ -309,6 +309,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         data[8] = getString(R.string.counter);
         data[9] = getString(R.string.rustrating);
         data[10] = getString(R.string.multicategorical);
+        data[11] = getString(R.string.location_trait);
 
         enData[0] = "Numeric";
         enData[1] = "Categorical";
@@ -321,6 +322,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         enData[8] = "Counter";
         enData[9] = "Disease Rating";
         enData[10] = "Multicat";
+        enData[11] = "Location";
 
         HashMap visibility = MainActivity.dt.getTraitVisibility();
         traitList = (DragSortListView) findViewById(R.id.myList);
@@ -585,6 +587,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 Editor ed = ep.edit();
                 ed.putBoolean("CreateTraitFinished", true);
+                ed.putBoolean("TraitsExported", false);
                 ed.apply();
 
                 loadData();
@@ -769,6 +772,13 @@ public class TraitEditorActivity extends AppCompatActivity {
                 maxBox.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.VISIBLE);
                 break;
+            case 11: //location
+                defBox.setVisibility(View.GONE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.GONE);
+                break;
         }
     }
 
@@ -919,7 +929,11 @@ public class TraitEditorActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 switch (which) {
                     case 0:
-                        showImportDialog();
+                        if(ep.getBoolean("TraitsExported",false)) {
+                            showImportDialog();
+                        } else {
+                            checkTraitExportDialog();
+                        }
                         break;
                     case 1:
                         showExportDialog();
@@ -939,6 +953,38 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
         importExport.show();
+    }
+
+    private void checkTraitExportDialog() {
+        String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
+
+        if (allTraits == null) {
+            makeToast(getString(R.string.createtraitserror));
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this, R.style.AppAlertDialog);
+        builder.setMessage(getString(R.string.trait_export_check));
+
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                showExportDialog();
+                dialog.dismiss();
+            }
+
+        });
+
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                showImportDialog();
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private void sortDialog() {
@@ -1088,6 +1134,9 @@ public class TraitEditorActivity extends AppCompatActivity {
 
             public void onClick(View arg0) {
                 exportTable(exportFile.getText().toString());
+                Editor ed = ep.edit();
+                ed.putBoolean("TraitsExported", true);
+                ed.apply();
                 exportDialog.dismiss();
             }
         });

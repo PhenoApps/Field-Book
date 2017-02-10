@@ -286,12 +286,12 @@ public class DataHelper {
 
         for (int i = 0; i < traits.length; i++) {
             traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
-            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + TICK +ep.getString("ImportUniqueName", "")
-                    +TICK + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
+            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + TICK + ep.getString("ImportUniqueName", "")
+                    + TICK + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
         }
 
         query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
-                " FROM range range " + joinArgs + "GROUP BY range." +TICK + ep.getString("ImportUniqueName", "")+TICK;
+                " FROM range range " + joinArgs + "GROUP BY range." + TICK + ep.getString("ImportUniqueName", "") + TICK + "ORDER BY range.id";
 
         Log.i("DH", query);
 

@@ -546,7 +546,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     // Only used for truncating lat long values
-    private String truncateDecimalString(String v) {
+    public String truncateDecimalString(String v) {
         int count = 0;
 
         boolean found = false;

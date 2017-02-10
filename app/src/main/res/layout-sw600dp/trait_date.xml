@@ -65,7 +65,7 @@
                 <Button
                     android:id="@+id/minusDateBtn"
                     android:layout_width="130dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="75dp"
                     android:gravity="center|center_vertical"
                     android:text="@string/minusday"
                     android:textColor="#000000"
@@ -76,16 +76,15 @@
                     android:layout_width="10dp"
                     android:layout_height="wrap_content" />
 
-                <Button
+                <ImageButton
                     android:id="@+id/enterBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center|center_vertical"
-                    android:minWidth="130dp"
-                    android:text="@string/enter"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
-                    android:textStyle="bold" />
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:scaleType="fitXY"
+                    android:padding="10dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_save"
+                    android:gravity="center" />
 
                 <View
                     android:layout_width="10dp"
@@ -94,7 +93,7 @@
                 <Button
                     android:id="@+id/addDateBtn"
                     android:layout_width="130dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="75dp"
                     android:gravity="center"
                     android:minWidth="130dp"
                     android:text="@string/plusday"
@@ -111,16 +110,15 @@
                 android:orientation="horizontal"
                 android:paddingTop="10dp">
 
-                <Button
+                <ImageButton
                     android:id="@+id/clearDateBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:minWidth="130dp"
-                    android:text="@string/clear"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
-                    android:textStyle="bold" />
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:scaleType="fitXY"
+                    android:padding="10dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_delete_forever"
+                    android:gravity="center" />
 
             </LinearLayout>
         </LinearLayout>

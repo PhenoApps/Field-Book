@@ -236,6 +236,7 @@
                                         android:gravity="right"
                                         android:paddingRight="10dp"
                                         android:text="@string/range"
+                                        android:maxLength="10"
                                         android:textColor="@color/s_text"
                                         android:textSize="@dimen/text_size_xlarge"
                                         android:textStyle="bold" />
@@ -259,6 +260,7 @@
                                         android:layout_height="wrap_content"
                                         android:gravity="center"
                                         android:padding="0dp"
+                                        android:maxLength="10"
                                         android:singleLine="true"
                                         android:text=""
                                         android:textColor="#000000"
@@ -438,6 +440,11 @@
 
                             <include
                                 layout="@layout/trait_multicat"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
+                            <include
+                                layout="@layout/trait_location"
                                 android:layout_width="fill_parent"
                                 android:layout_height="wrap_content" />
                         </LinearLayout>
