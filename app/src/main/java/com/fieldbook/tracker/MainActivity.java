@@ -3,6 +3,7 @@ package com.fieldbook.tracker;
 import android.app.Activity;
 import android.graphics.PorterDuff;
 import android.provider.Settings;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -765,11 +766,35 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         rustDelim.setOnClickListener(this);
         rustClear.setOnClickListener(this);
 
-        String primaryName = ep.getString("ImportFirstName", getString(R.string.range)) + ":";
-        String secondaryName = ep.getString("ImportSecondName", getString(R.string.plot)) + ":";
+        String primaryName = ep.getString("ImportFirstName", getString(R.string.range));
+        String secondaryName = ep.getString("ImportSecondName", getString(R.string.plot));
+
+        if(primaryName.length()>10) {
+            primaryName = primaryName.substring(0,9) + ":";
+        }
+
+        if(secondaryName.length()>10) {
+            secondaryName = secondaryName.substring(0,9) + ":";
+        }
 
         rangeName.setText(primaryName);
         plotName.setText(secondaryName);
+
+        rangeName.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                makeToast(ep.getString("ImportFirstName", getString(R.string.range)));
+                return false;
+            }
+        });
+
+        plotName.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                makeToast(ep.getString("ImportSecondName", getString(R.string.range)));
+                return false;
+            }
+        });
 
         clearPercent.setOnClickListener(new OnClickListener() {
             @Override
@@ -1508,6 +1533,31 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 traitType.setSelection(pos);
             }
         });
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.missingData);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateTrait(currentTrait.trait, currentTrait.format, "NA");
+
+                tNum.setText("NA");
+                eNum.setText("NA");
+                pNum.setText("NA");
+
+                if (currentTrait.format.equals("date")) {
+                    month.setText("");
+                    day.setText("NA");
+                }
+
+                if (currentTrait.format.equals("photo")) {
+
+                }
+
+                if (currentTrait.format.equals("counter")) {
+                    counterTv.setText("NA");
+                }
+            }
+        });
     }
 
     private void setupDrawer() {
@@ -1623,10 +1673,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         for (Button aButtonList : buttonList) {
             if (aButtonList == choice) {
                 aButtonList.setTextColor(Color.parseColor(displayColor));
-                aButtonList.getBackground().setColorFilter(getResources().getColor(R.color.button_pressed), PorterDuff.Mode.SRC);
+                aButtonList.setBackgroundColor(getResources().getColor(R.color.button_pressed));
             } else {
                 aButtonList.setTextColor(Color.BLACK);
-                aButtonList.getBackground().setColorFilter(getResources().getColor(R.color.button_normal), PorterDuff.Mode.SRC);
+                aButtonList.setBackgroundColor(getResources().getColor(R.color.button_normal));
             }
         }
     }
@@ -1993,6 +2043,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         ErrorLog("DropdownError.txt", "" + e.getMessage());
                         e.printStackTrace();
                     }
+
                 }
 
                 @Override
@@ -2023,8 +2074,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     } catch (Exception e) {
                         ErrorLog("DropdownError.txt", "" + e.getMessage());
                         e.printStackTrace();
-
                     }
+
                 }
 
                 @Override
@@ -2267,7 +2318,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         eNum.removeTextChangedListener(eNumUpdate);
                         eNum.setEnabled(false);
 
-                        if (newTraits.containsKey(currentTrait.trait)) {
+                        if (newTraits.containsKey(currentTrait.trait) && !newTraits.get(currentTrait.trait).toString().equals("NA")) {
 
                             pNum.setTextColor(Color.BLACK);
 
@@ -2305,6 +2356,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                             seekBar.setOnSeekBarChangeListener(seekListener);
 
+                        } else if (newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                            pNum.setText("NA");
+                            pNum.setTextColor(Color.parseColor(displayColor));
                         } else {
                             seekBar.setOnSeekBarChangeListener(null);
 
@@ -2323,7 +2377,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             }
 
                             updateTrait(currentTrait.trait, "percent", String.valueOf(seekBar.getProgress()));
-
                             seekBar.setOnSeekBarChangeListener(seekListener);
                         }
 
@@ -2349,7 +2402,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         final Calendar c = Calendar.getInstance();
                         date = dateFormat.format(c.getTime());
 
-                        if (newTraits.containsKey(currentTrait.trait)) {
+                        if (newTraits.containsKey(currentTrait.trait) && !newTraits.get(currentTrait.trait).toString().equals("NA")) {
                             if(newTraits.get(currentTrait.trait).toString().length() < 4 && newTraits.get(currentTrait.trait).toString().length() > 0) {
                                 Calendar calendar = Calendar.getInstance();
 
@@ -2396,6 +2449,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 month.setTextColor(Color.parseColor(displayColor));
                                 day.setTextColor(Color.parseColor(displayColor));
                             }
+                        } else if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                            month.setText("");
+                            day.setText("NA");
                         } else {
                             month.setTextColor(Color.BLACK);
                             day.setTextColor(Color.BLACK);
@@ -2448,12 +2504,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 buttonArray[i].setVisibility(Button.VISIBLE);
                                 buttonArray[i].setText(cat[i]);
                                 buttonArray[i].setTextColor(Color.parseColor(displayColor));
-                                buttonArray[i].getBackground().setColorFilter(getResources().getColor(R.color.button_pressed), PorterDuff.Mode.SRC);
+                                buttonArray[i].setBackgroundColor(getResources().getColor(R.color.button_pressed));
                             } else {
                                 buttonArray[i].setVisibility(Button.VISIBLE);
                                 buttonArray[i].setText(cat[i]);
                                 buttonArray[i].setTextColor(Color.BLACK);
-                                buttonArray[i].getBackground().setColorFilter(getResources().getColor(R.color.button_normal), PorterDuff.Mode.SRC);
+                                buttonArray[i].setBackgroundColor(getResources().getColor(R.color.button_normal));
                             }
                         }
                     } else if (currentTrait.format.equals("boolean")) {
@@ -2515,13 +2571,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         eNum.setVisibility(EditText.GONE);
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
-                            //doRecord.setText(getString(R.string.record));
                             doRecord.setImageResource(R.drawable.ic_audio);
                             tNum.setText("");
-                            //tNum.setText(R.string.nodata);
+                        } else if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                            tNum.setText("NA");
                         } else {
                             mRecordingLocation = new File(newTraits.get(currentTrait.trait).toString());
-                            //doRecord.setText(getString(R.string.play));
                             doRecord.setImageResource(R.drawable.ic_play_arrow);
                             tNum.setText(getString(R.string.stored));
                         }
@@ -2555,11 +2610,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             photoLocation = dt.getPlotPhotos(cRange.plot_id);
 
                            for (int i = 0; i < photoLocation.size(); i++) {
-                                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
+                               drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
                            }
 
                             photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
-
                             photo.setAdapter(photoAdapter);
                             photo.setSelection(photo.getCount() - 1);
                             photo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -2709,7 +2763,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 public View getView(int position, View convertView, ViewGroup parent) {
                                     final Button newButton = (Button) LayoutInflater.from(MainActivity.this).inflate(R.layout.multicat_button, null);
                                     newButton.setText(cat[position]);
-
                                     newButton.setOnClickListener(new OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
@@ -3240,6 +3293,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             String primaryName = ep.getString("ImportFirstName", getString(R.string.range)) + ":";
             String secondaryName = ep.getString("ImportSecondName", getString(R.string.plot)) + ":";
+
+            if(primaryName.length()>8) {
+                primaryName = primaryName.substring(0,7) + ":";
+            }
+
+            if(secondaryName.length()>8) {
+                secondaryName = secondaryName.substring(0,7) + ":";
+            }
 
             rangeName.setText(primaryName);
             plotName.setText(secondaryName);
@@ -4289,6 +4350,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             catch (IOException e) {
                 Log.e(TAG, "-- Error in setting image");
+                Bitmap emptyBmp = BitmapFactory.decodeResource(getResources(), R.drawable.photo_missing);
+                return emptyBmp;
             }
 
             catch(OutOfMemoryError oom) {

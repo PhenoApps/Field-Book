@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fieldbook.tracker"
-    android:versionCode="325"
-    android:versionName="3.2.5">
+    android:versionCode="330"
+    android:versionName="3.0.0">
 
     <uses-feature android:name="android.hardware.location" android:required="false"/>
 

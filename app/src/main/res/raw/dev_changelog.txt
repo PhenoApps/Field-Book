@@ -3,6 +3,8 @@ Replaced lots of words with icons
 Fixed an issue where default trait value wasn't being saved
 Added a dialog when importing trait lists and current list hasn't been exported
 Added location trait
+Changed trait button shapes
+Added a button for missing values
 
 50
 Fixed search and tutorial layout on Samsung devices

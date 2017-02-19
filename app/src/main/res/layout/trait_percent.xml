@@ -27,6 +27,7 @@
         android:layout_height="65dp"
         android:scaleType="fitXY"
         android:padding="10dp"
+        android:background="@drawable/round_button"
         android:layout_gravity="center"
         android:src="@drawable/ic_delete_forever"
         android:gravity="center" />

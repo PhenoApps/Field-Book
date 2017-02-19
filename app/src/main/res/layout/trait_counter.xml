@@ -48,10 +48,14 @@
                 <Button
                     android:id="@+id/minusBtn"
                     android:layout_width="65dp"
+                    android:background="@drawable/round_button"
                     android:layout_height="65dp"
                     android:gravity="center|center_vertical"
                     android:text="@string/minusday"
                     android:minWidth="@dimen/button_default_width"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="5dp"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_large"
                     android:textStyle="bold" />
@@ -60,7 +64,11 @@
                     android:id="@+id/clearCounterBtn"
                     android:layout_width="65dp"
                     android:layout_height="65dp"
+                    android:background="@drawable/round_button"
                     android:scaleType="fitXY"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="5dp"
                     android:padding="10dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_delete_forever"
@@ -69,11 +77,11 @@
 
             <Button
                 android:id="@+id/addBtn"
-                android:layout_width="130dp"
-                android:layout_height="130dp"
+                android:layout_width="145dp"
+                android:layout_height="145dp"
                 android:gravity="center"
-                android:minWidth="@dimen/button_default_width"
                 android:text="@string/plusday"
+                android:background="@drawable/rounded_button"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_xxlarge"
                 android:textStyle="bold" />

@@ -24,13 +24,15 @@
                 android:columnCount="6"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal"
-                android:paddingTop="10dp">
+                android:paddingTop="2dp">
 
                 <Button
                     android:id="@+id/rust0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="0"
@@ -39,12 +41,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="5"
@@ -53,12 +56,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust10"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="10"
@@ -72,6 +76,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="15"
@@ -80,12 +86,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="20"
@@ -94,12 +101,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust25"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="25"
@@ -113,6 +121,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="30"
@@ -121,12 +131,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust35"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="35"
@@ -135,12 +146,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust40"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="40"
@@ -149,12 +161,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust45"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="45"
@@ -168,6 +181,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="50"
@@ -176,12 +191,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust55"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="55"
@@ -190,12 +206,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust60"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="60"
@@ -204,12 +221,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust65"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="65"
@@ -218,12 +236,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust70"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="70"
@@ -232,12 +251,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust75"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="75"
@@ -246,12 +266,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust80"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="80"
@@ -260,12 +281,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust85"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="85"
@@ -274,12 +296,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust90"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="90"
@@ -288,12 +311,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust95"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="95"
@@ -302,12 +326,13 @@
                     android:textStyle="bold"
                     android:visibility="gone" />
 
-
                 <Button
                     android:id="@+id/rust100"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="100"
@@ -330,6 +355,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="85dp"
                     android:text="R"
@@ -342,6 +369,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="85dp"
                     android:text="M"
@@ -354,6 +383,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/rounded_button"
                     android:gravity="center"
                     android:minWidth="85dp"
                     android:text="S"
@@ -375,6 +406,10 @@
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_gravity="center"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/round_button"
                     android:gravity="center"
                     android:minWidth="60dp"
                     android:text="/"
@@ -386,11 +421,15 @@
                     android:id="@+id/clearRustBtn"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:scaleType="fitXY"
-                    android:padding="10dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_delete_forever"
-                    android:gravity="center" />
+                    android:layout_marginTop="2dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/round_button"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_delete_forever" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

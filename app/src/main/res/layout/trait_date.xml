@@ -67,17 +67,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="65dp"
                     android:gravity="center|center_vertical"
+                    android:layout_margin="10dp"
                     android:minWidth="@dimen/button_default_width"
                     android:text="@string/minusday"
+                    android:background="@drawable/rounded_button"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_xxlarge"
                     android:textStyle="bold" />
 
                 <ImageButton
                     android:id="@+id/enterBtn"
                     android:layout_width="65dp"
                     android:layout_height="65dp"
+                    android:layout_margin="10dp"
                     android:scaleType="fitXY"
+                    android:background="@drawable/round_button"
                     android:padding="10dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_save"
@@ -89,9 +93,11 @@
                     android:layout_height="65dp"
                     android:gravity="center"
                     android:minWidth="@dimen/button_default_width"
+                    android:layout_margin="10dp"
                     android:text="@string/plusday"
+                    android:background="@drawable/rounded_button"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_large"
+                    android:textSize="@dimen/text_size_xxlarge"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -107,6 +113,8 @@
                     android:id="@+id/clearDateBtn"
                     android:layout_width="65dp"
                     android:layout_height="65dp"
+                    android:background="@drawable/round_button"
+                    android:layout_margin="10dp"
                     android:scaleType="fitXY"
                     android:padding="10dp"
                     android:layout_gravity="center"

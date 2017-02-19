@@ -19,6 +19,8 @@
         android:layout_width="65dp"
         android:layout_height="65dp"
         android:scaleType="fitXY"
+        android:layout_margin="10dp"
+        android:background="@drawable/round_button"
         android:padding="10dp"
         android:layout_gravity="center"
         android:src="@drawable/ic_delete_forever"
