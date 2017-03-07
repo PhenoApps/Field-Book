@@ -1,3 +1,9 @@
+52
+Fixed a bug with editing traits in non-English languages
+Fixed a bug that automatically disabled file sharing
+Fixed a bug with audio format interaction to NA
+Fixed an interaction between language changes and main screen
+
 51
 Replaced lots of words with icons
 Fixed an issue where default trait value wasn't being saved

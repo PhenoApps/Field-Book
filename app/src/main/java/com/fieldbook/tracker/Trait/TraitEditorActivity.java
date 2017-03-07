@@ -581,7 +581,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                             "true", String.valueOf(pos));
                 else
                     MainActivity.dt.editTraits(currentId, trait.getText().toString().trim(),
-                            format.getSelectedItem().toString().toLowerCase(), def.getText().toString(),
+                            enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
                             minimum.getText().toString(), maximum.getText().toString(),
                             details.getText().toString(), categories.getText().toString());
 

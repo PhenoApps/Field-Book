@@ -1,6 +1,7 @@
 package com.fieldbook.tracker;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
@@ -2565,20 +2566,24 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitLocation.setVisibility(View.GONE);
 
                         tNum.removeTextChangedListener(tNumUpdate);
-                        tNum.setVisibility(EditText.VISIBLE);
+                        tNum.setVisibility(EditText.GONE);
                         tNum.setEnabled(false);
+
+                        eNum.setVisibility(EditText.VISIBLE);
+                        eNum.setEnabled(true);
+
                         pNum.setVisibility(EditText.GONE);
-                        eNum.setVisibility(EditText.GONE);
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
                             doRecord.setImageResource(R.drawable.ic_audio);
-                            tNum.setText("");
+                            eNum.setText("");
                         } else if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
-                            tNum.setText("NA");
+                            doRecord.setImageResource(R.drawable.ic_audio);
+                            eNum.setText("NA");
                         } else {
                             mRecordingLocation = new File(newTraits.get(currentTrait.trait).toString());
                             doRecord.setImageResource(R.drawable.ic_play_arrow);
-                            tNum.setText(getString(R.string.stored));
+                            eNum.setText(getString(R.string.stored));
                         }
 
                     } else if (currentTrait.format.equals("photo")) {
@@ -2625,8 +2630,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 }
                             });
 
-                        } else
-                        {
+                        } else {
                             photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
                             photo.setAdapter(photoAdapter);
                         }
@@ -3268,10 +3272,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 .getDisplayMetrics());
         invalidateOptionsMenu();
 
-        if(ConfigActivity.languageChange) {
-            ConfigActivity.languageChange = false;
-            loadScreen();
-        }
+        nvDrawer.getMenu().clear();
+        nvDrawer.inflateMenu(R.menu.drawer_view);
 
         // If reload data is true, it means there was an import operation, and
         // the screen should refresh
@@ -3796,7 +3798,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 if (mListening) {
                     mPlayer.stop();
-                    //doRecord.setText(R.string.play);
                     doRecord.setImageResource(R.drawable.ic_play_arrow);
 
                     mListening = false;
@@ -3819,7 +3820,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                     updateTrait(currentTrait.trait, "audio", mRecordingLocation.getAbsolutePath());
 
-                    tNum.setText(getString(R.string.stored));
+                    eNum.setText(getString(R.string.stored));
 
                     mRecording = false;
                     //doRecord.setText(R.string.play);
@@ -3841,7 +3842,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     deleteRecording();
                     clearRecord.setEnabled(false);
                     removeTrait(currentTrait.trait);
-                    tNum.setText("");
+                    eNum.setText("");
 
                     prepareRecorder();
 
@@ -3854,7 +3855,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     mRecorder.start();
                     mRecording = true;
 
-                    //doRecord.setText(R.string.stop);
                     doRecord.setImageResource(R.drawable.ic_stop);
                 }
                 break;
@@ -3862,16 +3862,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case R.id.clearRecord:
                 deleteRecording();
                 removeTrait(currentTrait.trait);
-                tNum.setText("");
+
+                eNum.setText("");
                 mRecording = false;
-                //doRecord.setText(R.string.record);
                 doRecord.setImageResource(R.drawable.ic_audio);
 
                 mListening = false;
                 mRecording = false;
                 break;
-
-            // Below this point are for the custom keypad
 
             case R.id.k1:
                 v = ";";

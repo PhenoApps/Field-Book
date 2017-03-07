@@ -258,6 +258,16 @@
         android:paddingRight="10dp">
 
         <Button
+            android:id="@+id/closeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="@dimen/button_default_width"
+            android:text="@string/close"
+            android:textColor="#000000"
+            android:textSize="@dimen/text_size_large"
+            android:textStyle="bold" />
+
+        <Button
             android:id="@+id/saveBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -267,15 +277,6 @@
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/closeBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_default_width"
-            android:text="@string/close"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
 
     </LinearLayout>
 

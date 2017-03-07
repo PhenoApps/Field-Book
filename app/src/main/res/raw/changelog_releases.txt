@@ -2,18 +2,22 @@
 Added a location trait
 Added a button for missing values
 Added a citation dialog
-Photo names include rep and trait name
-Fixed a bug with spaces in column names
+Added a dialog when importing trait lists and current list hasn't been exported
 Added ability to download files from Dropbox
+Photo names include rep and trait name
 Replaced lots of words with icons
 Updated trait button appearance
 Changed 'Rust rating' trait to 'Disease rating'
 Changed disease rating buttons from R/MS/MR/S to R/M/S
 Changed numeric clear to backspace (long press to clear)
 Fixed a bug where default trait value wasn't saved
-Added a dialog when importing trait lists and current list hasn't been exported
+Fixed a bug with spaces in column names
 Fixed an issue where changing trait visibility wouldn't be saved
 Fixed an issue with spaces in column names ands search
+Fixed a bug with editing traits in non-English languages
+Fixed a bug that automatically disabled file sharing
+Fixed a bug with audio format interaction to NA
+Fixed an interaction between language changes and main screen
 
 29/3.2.5
 Fixed a visual bug with search

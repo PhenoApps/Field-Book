@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -74,7 +74,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -87,7 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -100,7 +100,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -113,7 +113,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -126,7 +126,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -139,7 +139,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -152,7 +152,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -165,7 +165,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"
+
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"

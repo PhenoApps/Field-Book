@@ -81,7 +81,7 @@
                 android:layout_height="145dp"
                 android:gravity="center"
                 android:text="@string/plusday"
-                android:background="@drawable/rounded_button"
+
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_xxlarge"
                 android:textStyle="bold" />

@@ -951,7 +951,7 @@ public class ConfigActivity extends AppCompatActivity {
     private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
 
-        if (!ep.getBoolean("DisableShare", true)) {
+        if (!ep.getBoolean("DisableShare", false)) {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");

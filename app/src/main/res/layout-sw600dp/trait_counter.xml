@@ -79,7 +79,7 @@
                 android:gravity="center"
                 android:layout_margin="10dp"
                 android:text="@string/plusday"
-                android:background="@drawable/rounded_button"
+
                 android:layout_marginLeft="15dp"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_xxlarge"

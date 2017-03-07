@@ -69,8 +69,7 @@
                     android:gravity="center|center_vertical"
                     android:layout_margin="10dp"
                     android:minWidth="@dimen/button_default_width"
-                    android:text="@string/minusday"
-                    android:background="@drawable/rounded_button"
+                    android:text="-1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_xxlarge"
                     android:textStyle="bold" />
@@ -94,8 +93,7 @@
                     android:gravity="center"
                     android:minWidth="@dimen/button_default_width"
                     android:layout_margin="10dp"
-                    android:text="@string/plusday"
-                    android:background="@drawable/rounded_button"
+                    android:text="+1"
                     android:textColor="#000000"
                     android:textSize="@dimen/text_size_xxlarge"
                     android:textStyle="bold" />
