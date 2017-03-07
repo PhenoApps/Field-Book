@@ -1,4 +1,4 @@
-30/3.3.0
+30/3.3.1
 Added a location trait
 Added a button for missing values
 Added a citation dialog
