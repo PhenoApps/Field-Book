@@ -4260,15 +4260,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         newTraits.put(parent, value);
 
         dt.deleteTraitByValue(cRange.plot_id, parent, value);
-
         dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName","") + " " + ep.getString("LastName",""), ep.getString("Location",""),"",""); //TODO add notes and exp_id
 
-        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss",
-                Locale.getDefault());
-
-        Editor ed = ep.edit();
-        ed.putString("Dataset_" + ep.getString("FieldFile", "") + "_" + cRange.range + "_" + cRange.plot, timeStamp.format(Calendar.getInstance().getTime()));
-        ed.apply();
     }
 
     private void displayPlotImage(String path) {
