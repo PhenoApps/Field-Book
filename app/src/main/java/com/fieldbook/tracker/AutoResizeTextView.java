@@ -16,7 +16,7 @@ import android.widget.TextView;
  * Several changes were made in the resizeText() function to make it
  * compatible with Android 4.0 and above
  */
-public class AutoResizeTextView extends TextView {
+public class AutoResizeTextView extends android.support.v7.widget.AppCompatTextView {
 
     // Minimum text size for this text view
     public static final float MIN_TEXT_SIZE = 22;

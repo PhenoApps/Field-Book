@@ -1,3 +1,9 @@
+54
+Updated NA button to bottom toolbar and included delete button
+
+53
+Added Alice to translator list
+
 52
 Fixed a bug with editing traits in non-English languages
 Fixed a bug that automatically disabled file sharing

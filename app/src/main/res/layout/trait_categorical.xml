@@ -20,7 +20,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -33,7 +32,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -46,7 +44,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -59,7 +56,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -72,7 +68,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -85,7 +80,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -98,7 +92,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -111,7 +104,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -124,7 +116,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -137,7 +128,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -150,7 +140,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -163,7 +152,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-
             android:gravity="center"
             android:minWidth="@dimen/button_default_width"
             android:textColor="#000000"
@@ -171,17 +159,4 @@
             android:textStyle="bold" />
 
     </GridLayout>
-
-    <ImageButton
-        android:id="@+id/clearCatBtn"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_gravity="center"
-        android:layout_margin="5dp"
-        android:background="@drawable/round_button"
-        android:gravity="center"
-        android:padding="10dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_delete_forever" />
-
 </LinearLayout>

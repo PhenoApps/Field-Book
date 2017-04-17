@@ -13,18 +13,6 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/clearRecord"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:background="@drawable/round_button"
-            android:gravity="center"
-            android:padding="10dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_delete_forever" />
-
-        <ImageButton
             android:id="@+id/record"
             android:layout_width="75dp"
             android:layout_height="75dp"
@@ -35,6 +23,5 @@
             android:padding="10dp"
             android:scaleType="fitXY"
             android:src="@drawable/ic_delete_forever" />
-
     </LinearLayout>
 </LinearLayout>

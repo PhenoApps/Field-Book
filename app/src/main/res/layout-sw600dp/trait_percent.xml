@@ -20,17 +20,4 @@
         android:progressDrawable="@drawable/custom_seek_bar"
         android:thumb="@drawable/custom_seek_bar_thumb"
         android:thumbOffset="0dp" />
-
-    <ImageButton
-        android:id="@+id/clearPercent"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:background="@drawable/round_button"
-        android:scaleType="fitXY"
-        android:padding="10dp"
-        android:layout_margin="10dp"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_delete_forever"
-        android:gravity="center" />
-
 </LinearLayout>
