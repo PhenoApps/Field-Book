@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.CSV;
+package com.fieldbook.tracker.io;
 
 import android.database.Cursor;
 
@@ -24,33 +24,33 @@ public class CSVWriter {
     /**
      * The character used for escaping quotes.
      */
-    public static final char DEFAULT_ESCAPE_CHARACTER = '"';
+    private static final char DEFAULT_ESCAPE_CHARACTER = '"';
 
     /**
      * The default separator to use if none is supplied to the constructor.
      */
-    public static final char DEFAULT_SEPARATOR = ',';
+    private static final char DEFAULT_SEPARATOR = ',';
 
     /**
      * The default quote character to use if none is supplied to the
      * constructor.
      */
-    public static final char DEFAULT_QUOTE_CHARACTER = '"';
+    private static final char DEFAULT_QUOTE_CHARACTER = '"';
 
     /**
      * The quote constant to use when you wish to suppress all quoting.
      */
-    public static final char NO_QUOTE_CHARACTER = '\u0000';
+    private static final char NO_QUOTE_CHARACTER = '\u0000';
 
     /**
      * The escape constant to use when you wish to suppress all escaping.
      */
-    public static final char NO_ESCAPE_CHARACTER = '\u0000';
+    private static final char NO_ESCAPE_CHARACTER = '\u0000';
 
     /**
      * Default line terminator uses platform encoding.
      */
-    public static final String DEFAULT_LINE_END = "\n";
+    private static final String DEFAULT_LINE_END = "\n";
 
     /**
      * Constructs CSVWriter using a comma for the separator.
@@ -64,8 +64,8 @@ public class CSVWriter {
      * Constructs CSVWriter with supplied separator, quote char, escape char and
      * line ending.
      */
-    public CSVWriter(Writer writer, char separator, char quotechar,
-                     char escapechar, String lineEnd, Cursor c) {
+    private CSVWriter(Writer writer, char separator, char quotechar,
+                      char escapechar, String lineEnd, Cursor c) {
         this.pw = new PrintWriter(writer);
         this.separator = separator;
         this.quotechar = quotechar;
@@ -170,7 +170,7 @@ public class CSVWriter {
     /**
      * Writes the next line to the file.
      */
-    public void writeNext(String[] nextLine) {
+    private void writeNext(String[] nextLine) {
 
         if (nextLine == null)
             return;

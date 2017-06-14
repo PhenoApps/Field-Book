@@ -28,7 +28,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/text1"
+            android:id="@+id/field_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -44,22 +44,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/text2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:minWidth="60dp"
-                android:singleLine="true"
-                android:textColor="@color/main_details"
-                android:textSize="@dimen/text_size_small" />
-
-            <View
-                android:id="@+id/spacer4"
-                android:layout_width="45dp"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/text3"
+                android:id="@+id/field_import_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
@@ -73,7 +58,7 @@
                 android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/text4"
+                android:id="@+id/field_edit_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
@@ -87,7 +72,7 @@
                 android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/text5"
+                android:id="@+id/field_export_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
@@ -95,6 +80,16 @@
                 android:textColor="@color/main_details"
                 android:textSize="@dimen/text_size_small" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/field_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:minWidth="60dp"
+            android:singleLine="true"
+            android:textColor="@color/main_details"
+            android:textSize="@dimen/text_size_small" />
 
     </LinearLayout>
 

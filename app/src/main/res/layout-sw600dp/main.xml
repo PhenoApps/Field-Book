@@ -82,106 +82,91 @@
                     android:layout_height="fill_parent"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/dpi"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="high"
-                        android:visibility="gone" />
-
                     <LinearLayout
                         android:id="@+id/infoBarLayout"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
 
-                        <TableLayout
+                        <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
 
-                            <TableRow
-                                android:id="@+id/tableRow1"
+                            <Spinner
+                                android:id="@+id/drop1prefix"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content">
+                                android:layout_height="wrap_content"
+                                android:text="@string/drop1"
+                                android:textColor="@color/s_text"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
 
-                                <Spinner
-                                    android:id="@+id/drop1prefix"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/drop1"
-                                    android:textColor="@color/s_text"
-                                    android:textSize="@dimen/text_size_large"
-                                    android:textStyle="bold" />
-
-                                <com.fieldbook.tracker.AutoResizeTextView
-                                    android:id="@+id/drop1"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="left|center_vertical"
-                                    android:ellipsize="none"
-                                    android:paddingLeft="10dp"
-                                    android:singleLine="true"
-                                    android:textColor="#000000"
-                                    android:textSize="@dimen/text_size_large"
-                                    android:textStyle="bold" />
-                            </TableRow>
-
-                            <TableRow
-                                android:id="@+id/tableRow2"
+                            <TextView
+                                android:id="@+id/drop1"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content">
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:paddingLeft="10dp"
+                                android:textColor="#000000"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold"
+                                android:maxLines="1" />
+                        </LinearLayout>
 
-                                <Spinner
-                                    android:id="@+id/drop2prefix"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/drop2"
-                                    android:textColor="@color/s_text"
-                                    android:textSize="@dimen/text_size_large"
-                                    android:textStyle="bold" />
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
 
-                                <com.fieldbook.tracker.AutoResizeTextView
-                                    android:id="@+id/drop2"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="left|center_vertical"
-                                    android:ellipsize="none"
-                                    android:paddingLeft="10dp"
-                                    android:singleLine="true"
-                                    android:textColor="#000000"
-                                    android:textSize="@dimen/text_size_large"
-                                    android:textStyle="bold" />
-
-                            </TableRow>
-
-                            <TableRow
-                                android:id="@+id/tableRow3"
+                            <Spinner
+                                android:id="@+id/drop2prefix"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content">
+                                android:layout_height="wrap_content"
+                                android:text="@string/drop2"
+                                android:textColor="@color/s_text"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
 
-                                <Spinner
-                                    android:id="@+id/drop3prefix"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/drop3"
-                                    android:textColor="@color/s_text"
-                                    android:textSize="@dimen/text_size_large"
-                                    android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/drop2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:paddingLeft="10dp"
+                                android:textColor="#000000"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold"
+                                android:maxLines="1" />
 
-                                <com.fieldbook.tracker.AutoResizeTextView
-                                    android:id="@+id/drop3"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="left|center_vertical"
-                                    android:ellipsize="none"
-                                    android:paddingLeft="10dp"
-                                    android:singleLine="true"
-                                    android:textColor="#000000"
-                                    android:textSize="@dimen/text_size_large"
-                                    android:textStyle="bold" />
-                            </TableRow>
-                        </TableLayout>
+                        </LinearLayout>
 
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <Spinner
+                                android:id="@+id/drop3prefix"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/drop3"
+                                android:textColor="@color/s_text"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/drop3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:paddingLeft="10dp"
+                                android:textColor="#000000"
+                                android:textSize="@dimen/text_size_large"
+                                android:textStyle="bold"
+                                android:maxLines="1" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout

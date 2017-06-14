@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.CSV;
+package com.fieldbook.tracker.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,18 +24,18 @@ public class CSVReader {
 
     private boolean linesSkiped;
 
-    public static final char DEFAULT_SEPARATOR = ',';
+    private static final char DEFAULT_SEPARATOR = ',';
 
-    public static final char DEFAULT_QUOTE_CHARACTER = '"';
+    private static final char DEFAULT_QUOTE_CHARACTER = '"';
 
-    public static final int DEFAULT_SKIP_LINES = 0;
+    private static final int DEFAULT_SKIP_LINES = 0;
 
     public CSVReader(Reader reader) {
         this(reader, DEFAULT_SEPARATOR, DEFAULT_QUOTE_CHARACTER,
                 DEFAULT_SKIP_LINES);
     }
 
-    public CSVReader(Reader reader, char separator, char quotechar, int line) {
+    private CSVReader(Reader reader, char separator, char quotechar, int line) {
         this.br = new BufferedReader(reader);
         this.separator = separator;
         this.quotechar = quotechar;
@@ -75,7 +75,7 @@ public class CSVReader {
             return null;
         }
 
-        List<String> tokensOnThisLine = new ArrayList<String>();
+        List<String> tokensOnThisLine = new ArrayList<>();
         StringBuffer sb = new StringBuffer();
         boolean inQuotes = false;
 

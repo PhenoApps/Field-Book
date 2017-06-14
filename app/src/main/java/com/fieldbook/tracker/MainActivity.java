@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -20,11 +19,7 @@ import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.media.MediaScannerConnection;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -38,9 +33,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -49,7 +42,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
@@ -74,24 +66,23 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.fieldbook.tracker.Barcodes.*;
-import com.fieldbook.tracker.Search.*;
-import com.fieldbook.tracker.Trait.*;
-import com.fieldbook.tracker.Tutorial.*;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import com.fieldbook.tracker.barcodes.*;
+import com.fieldbook.tracker.fields.FieldEditorActivity;
+import com.fieldbook.tracker.search.*;
+import com.fieldbook.tracker.traits.*;
+import com.fieldbook.tracker.tutorial.*;
+import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.utilities.ExpandableHeightGridView;
+import com.fieldbook.tracker.utilities.GPSTracker;
+import com.fieldbook.tracker.utilities.GalleryImageAdapter;
+import com.fieldbook.tracker.utilities.RangeObject;
+import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -127,10 +118,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     int delay = 100;
     int count = 1;
 
-    private String currentServerVersion = "";
-    String versionName;
-    int versionNum;
-
     public static DataHelper dt;
 
     public static boolean searchReload;
@@ -161,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
      * Main screen elements
      */
 
-    private TextView dpi;
     private Menu systemMenu;
 
     private String[] prefixTraits;
@@ -179,9 +165,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private int drop2Selection;
     private int drop3Selection;
 
-    private AutoResizeTextView drop3;
-    private AutoResizeTextView drop2;
-    private AutoResizeTextView drop1;
+    private TextView drop3;
+    private TextView drop2;
+    private TextView drop1;
 
     private TextView rangeName;
     private TextView plotName;
@@ -270,7 +256,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
      */
 
     private DrawerLayout mDrawer;
-    private Toolbar toolbar;
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private String mActivityTitle;
@@ -299,7 +284,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 .getDisplayMetrics());
 
         loadScreen();
-        //checkNewVersion(); TODO fix this
 
         // If the user hasn't configured range and traits, open settings screen
         if (!ep.getBoolean("ImportFieldFinished", false) | !ep.getBoolean("CreateTraitFinished", false)) {
@@ -374,24 +358,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         tvRange = (TextView) findViewById(R.id.tvRange);
         tvPlot = (TextView) findViewById(R.id.tvPlot);
 
-        drop3 = (AutoResizeTextView) findViewById(R.id.drop3);
-        drop2 = (AutoResizeTextView) findViewById(R.id.drop2);
-        drop1 = (AutoResizeTextView) findViewById(R.id.drop1);
+        drop3 = (TextView) findViewById(R.id.drop3);
+        drop2 = (TextView) findViewById(R.id.drop2);
+        drop1 = (TextView) findViewById(R.id.drop1);
 
         drop1prefix = (Spinner) findViewById(R.id.drop1prefix);
         drop2prefix = (Spinner) findViewById(R.id.drop2prefix);
         drop3prefix = (Spinner) findViewById(R.id.drop3prefix);
-
-        dpi = (TextView) findViewById(R.id.dpi);
-        int pixelSize = getPixelSize();
-
-        drop1.setTextSize(pixelSize);
-        drop2.setTextSize(pixelSize);
-        drop3.setTextSize(pixelSize);
-
-        drop1.setAddEllipsis(true);
-        drop2.setAddEllipsis(true);
-        drop3.setAddEllipsis(true);
 
         traitBoolean = (LinearLayout) findViewById(R.id.booleanLayout);
         traitAudio = (LinearLayout) findViewById(R.id.audioLayout);
@@ -417,8 +390,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     try {
                         moveRangeTo(rangeID, range.getText().toString(), false);
                         imm.hideSoftInputFromWindow(range.getWindowToken(), 0);
-                    } catch (Exception e) {
-                        ErrorLog("MainScreenError.txt", "" + e.getMessage());
+                    } catch (Exception ignore) {
                     }
                     return true;
                 }
@@ -434,8 +406,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     try {
                         movePlotTo(rangeID, plot.getText().toString(), false);
                         imm.hideSoftInputFromWindow(plot.getWindowToken(), 0);
-                    } catch (Exception e) {
-                        ErrorLog("MainScreenError.txt", "" + e.getMessage());
+                    } catch (Exception ignore) {
                     }
                     return true;
                 }
@@ -679,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         rustDelim = (Button) traitDiseaseRating.findViewById(R.id.rustDelim);
 
         Button[] rustBtnArray = new Button[]{rust0,rust5,rust10,rust15,rust20,rust25,rust30,rust35,rust40,rust45,rust50,rust55,rust60,rust65,rust70,rust75,rust80,rust85,rust90,rust95,rust100};
-        List<String> temps = new ArrayList<String>();
+        List<String> temps = new ArrayList<>();
         List<String> tempsNoFile = Arrays.asList("0","5","10","15","20","25","30","35","40","45","50","55","60","65","70","75","80","85","90","95","100");
         String token1;
         Scanner inFile1 = null;
@@ -687,7 +658,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         try {
             inFile1 = new Scanner(new File(Constants.TRAITPATH + "/severity.txt"));
         } catch (FileNotFoundException e) {
-            ErrorLog("DiseaseError.txt", "" + e.getMessage());
             e.printStackTrace();
         }
 
@@ -1017,7 +987,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             public void onClick(View arg0) {
                 String val = newTraits.get(currentTrait.trait).toString();
 
-                if (val.equals("false")) {
+                if (val.equalsIgnoreCase("false")) {
                     val = "true";
                     eImg.setImageResource(R.drawable.boolean_true);
                 } else {
@@ -1091,8 +1061,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 mp.release();
                             }
                         });
-                    } catch (Exception e) {
-                        ErrorLog("SoundError.txt", "" + e.getMessage());
+                    } catch (Exception ignore) {
                     }
 
                 } else {
@@ -1145,8 +1114,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                             mp.release();
                                         }
                                     });
-                                } catch (Exception e) {
-                                    ErrorLog("SoundError.txt", "" + e.getMessage());
+                                } catch (Exception ignore) {
                                 }
                             }
                         }
@@ -1217,8 +1185,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 mp.release();
                             };
                         });
-                    } catch (Exception e) {
-                        ErrorLog("SoundError.txt", "" + e.getMessage());
+                    } catch (Exception ignore) {
                     }
 
                 } else {
@@ -1277,8 +1244,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                             mp.release();
                                         }
                                     });
-                                } catch (Exception e) {
-                                    ErrorLog("SoundError.txt", "" + e.getMessage());
+                                } catch (Exception ignore) {
                                 }
                             }
                         }
@@ -1324,14 +1290,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 // This is meant to handle the keyboard bug
                 try {
                     imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
-                } catch (Exception e) {
-                    ErrorLog("MainScreenError.txt", "" + e.getMessage());
+                } catch (Exception ignore) {
                 }
 
                 try {
                     imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
-                } catch (Exception e) {
-                    ErrorLog("MainScreenError.txt", "" + e.getMessage());
+                } catch (Exception ignore) {
                 }
 
                 int pos = traitType.getSelectedItemPosition() - 1;
@@ -1376,14 +1340,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 // This is meant to handle the keyboard bug
                 try {
                     imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
-                } catch (Exception e) {
-                    ErrorLog("MainScreenError.txt", "" + e.getMessage());
+                } catch (Exception ignore) {
                 }
 
                 try {
                     imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
-                } catch (Exception e) {
-                    ErrorLog("MainScreenError.txt", "" + e.getMessage());
+                } catch (Exception ignore) {
                 }
 
                 int pos = traitType.getSelectedItemPosition() + 1;
@@ -1401,7 +1363,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private void initToolbars() {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         Toolbar toolbarBottom = (Toolbar) findViewById(R.id.toolbarBottom);
@@ -1468,8 +1430,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
                         break;
                     case "boolean":
-                        if (currentTrait.defaultValue.trim().toLowerCase()
-                                .equals("true")) {
+                        if (currentTrait.defaultValue.trim().toLowerCase().equals("true")) {
                             updateTrait(currentTrait.trait, "boolean", "true");
                             eImg.setImageResource(R.drawable.boolean_true);
                         } else {
@@ -1558,8 +1519,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 break;
 
             case R.id.nav_fields:
-                Intent b = new Intent(this, ConfigActivity.class);
-                b.putExtra("dialog","fields");
+                MainActivity.dt.updateExpTable(false,true,false,0);
+                Intent b = new Intent(this, FieldEditorActivity.class);
                 startActivity(b);
                 break;
 
@@ -1652,31 +1613,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         return false;
     }
 
-    // Auto Sizing TextView defaults change with resolution
-    // The reported resolution and the layout the device picks mismatch on some devices
-    // So what we do is embed the sizing we want into the layout file itself
-    // And follow the layout instead of using screenMetrics.density
-    private int getPixelSize() {
-        if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_SMALL) {
-            return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 16,
-                    getResources().getDisplayMetrics());
-        } else if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
-            return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 25,
-                    getResources().getDisplayMetrics());
-        } else if ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE) {
-            return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 30,
-                    getResources().getDisplayMetrics());
-        } else {
-            return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 30,
-                    getResources().getDisplayMetrics());
-        }
-    }
-
-    public static float dipToPixels(Context context, float dipValue) {
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
-    }
-
     // Create all necessary directories and subdirectories
     private void createDirs() {
         createDir(Constants.MPATH.getAbsolutePath());
@@ -1686,7 +1622,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         createDir(Constants.FIELDIMPORTPATH);
         createDir(Constants.FIELDEXPORTPATH);
         createDir(Constants.BACKUPPATH);
-        createDir(Constants.ERRORPATH);
         createDir(Constants.UPDATEPATH);
         createDir(Constants.ARCHIVEPATH);
 
@@ -1699,7 +1634,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         for (String aFileList : fileList) {
             File temp = new File(aFileList);
             if (temp.exists()) {
-                scanFile(temp);
+                Utils.scanFile(MainActivity.this,temp);
             }
         }
     }
@@ -1715,9 +1650,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             try {
                 blankFile.getParentFile().mkdirs();
                 blankFile.createNewFile();
-                scanFile(blankFile);
-            } catch (IOException e) {
-                ErrorLog("DirectoryError.txt", "" + e.getMessage());
+                Utils.scanFile(MainActivity.this,blankFile);
+            } catch (IOException ignore) {
             }
         }
     }
@@ -1775,8 +1709,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                             ;
                         });
-                    } catch (Exception e) {
-                        ErrorLog("SoundError.txt", "" + e.getMessage());
+                    } catch (Exception ignore) {
                     }
                 }
             }
@@ -1848,8 +1781,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 mp.release();
                             }
                         });
-                    } catch (Exception e) {
-                        ErrorLog("SoundError.txt", "" + e.getMessage());
+                    } catch (Exception ignore) {
                     }
                 }
             }
@@ -1892,13 +1824,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         tvRange.setText(cRange.range);
         tvPlot.setText(cRange.plot);
-
-        //TODO change to dp
-        int pixelSize = getPixelSize();
-
-        drop1.setTextSize(pixelSize);
-        drop2.setTextSize(pixelSize);
-        drop3.setTextSize(pixelSize);
     }
 
     // This is central to the application
@@ -1907,16 +1832,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
-        int pixelSize = getPixelSize();
-
-        drop1.setTextSize(pixelSize);
-        drop2.setTextSize(pixelSize);
-        drop3.setTextSize(pixelSize);
-
         if (prefixTraits != null) {
             savePrefix = false;
 
-            ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<String>(
+            ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(
                     this, R.layout.spinnerlayout, prefixTraits);
 
             drop1prefix.setAdapter(prefixArrayAdapter);
@@ -1963,7 +1882,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             e.putString("DROP1", prefixTraits[pos]);
                             e.apply();
                     } catch (Exception e) {
-                        ErrorLog("DropdownError.txt", "" + e.getMessage());
                         e.printStackTrace();
                     }
 
@@ -1996,7 +1914,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             e.putString("DROP2", prefixTraits[pos]);
                             e.apply();
                     } catch (Exception e) {
-                        ErrorLog("DropdownError.txt", "" + e.getMessage());
                         e.printStackTrace();
                     }
 
@@ -2028,7 +1945,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             e.putString("DROP3", prefixTraits[pos]);
                             e.apply();
                     } catch (Exception e) {
-                        ErrorLog("DropdownError.txt", "" + e.getMessage());
                         e.printStackTrace();
                     }
 
@@ -2042,30 +1958,50 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             savePrefix = true;
 
-            drop1.setOnLongClickListener(new View.OnLongClickListener() {
+            drop1.setOnTouchListener(new OnTouchListener() {
                 @Override
-                public boolean onLongClick(View v) {
-                    makeToast(drop1.getText().toString());
-                    return false;
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch(event.getAction()){
+                        case MotionEvent.ACTION_DOWN:
+                            drop1.setMaxLines(5);
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            drop1.setMaxLines(1);
+                            break;
+                    }
+                    return true;
                 }
             });
 
-            drop2.setOnLongClickListener(new View.OnLongClickListener() {
+            drop2.setOnTouchListener(new OnTouchListener() {
                 @Override
-                public boolean onLongClick(View v) {
-                    makeToast(drop2.getText().toString());
-                    return false;
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch(event.getAction()){
+                        case MotionEvent.ACTION_DOWN:
+                            drop2.setMaxLines(5);
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            drop2.setMaxLines(1);
+                            break;
+                    }
+                    return true;
                 }
             });
 
-            drop3.setOnLongClickListener(new View.OnLongClickListener() {
+            drop3.setOnTouchListener(new OnTouchListener() {
                 @Override
-                public boolean onLongClick(View v) {
-                    makeToast(drop3.getText().toString());
-                    return false;
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch(event.getAction()){
+                        case MotionEvent.ACTION_DOWN:
+                            drop3.setMaxLines(5);
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            drop3.setMaxLines(1);
+                            break;
+                    }
+                    return true;
                 }
             });
-
         }
 
         // trait is unique, format is not
@@ -2077,12 +2013,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         try {
             traitPosition = traitType.getSelectedItemPosition();
         } catch (Exception f) {
-            ErrorLog("MainScreenTraitError.txt", "" + f.getMessage());
             traitPosition = 0;
         }
 
         if (traits != null) {
-            ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<String>(
+            ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<>(
                     this, R.layout.spinnerlayout, traits);
             directionArrayAdapter
                     .setDropDownViewResource(R.layout.spinnerlayout);
@@ -2101,14 +2036,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     if (!currentTrait.format.equals("text")) {
                         try {
                             imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
-                        } catch (Exception e) {
-                            ErrorLog("KeyboardError.txt", "" + e.getMessage());
+                        } catch (Exception ignore) {
                         }
 
                         try {
                             imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
-                        } catch (Exception e) {
-                            ErrorLog("KeyboardError.txt", "" + e.getMessage());
+                        } catch (Exception ignore) {
                         }
                     }
 
@@ -2121,17 +2054,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         }
                     }
 
-                    //Save default if it exists
-                    if (currentTrait.defaultValue != null && currentTrait.defaultValue.length() > 0) {
-                        updateTrait(currentTrait.trait, currentTrait.format, currentTrait.defaultValue);
-                    }
-
-                    // All the logic is here
-                    // What it does is hide all other controls except the
-                    // current displayed trait
-                    // Checks the in memory hashmap
-                    // If there is existing data, then populate the control with
-                    // the data
+                    // All the logic is here to hide controls except for the current trait
+                    // Checks in-memory hashmap
+                    // Populate screen with in saved data
                     if (currentTrait.format.equals("text")) {
                         traitText.setVisibility(View.VISIBLE);
                         traitNumeric.setVisibility(View.GONE);
@@ -2152,29 +2077,25 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         if (newTraits.containsKey(currentTrait.trait)) {
                             etCurVal.removeTextChangedListener(cvText);
-
                             etCurVal.setText(newTraits.get(currentTrait.trait).toString());
-
                             etCurVal.setTextColor(Color.parseColor(displayColor));
-
                             etCurVal.addTextChangedListener(cvText);
                             etCurVal.setSelection(etCurVal.getText().length());
-
                         } else {
                             etCurVal.removeTextChangedListener(cvText);
-
                             etCurVal.setText("");
                             etCurVal.setTextColor(Color.BLACK);
 
-                            if (currentTrait.defaultValue != null
-                                    && currentTrait.defaultValue.length() > 0)
+                            if (currentTrait.defaultValue != null && currentTrait.defaultValue.length() > 0) {
                                 etCurVal.setText(currentTrait.defaultValue);
+                                updateTrait(currentTrait.trait, currentTrait.format, etCurVal.getText().toString());
+                            }
 
                             etCurVal.addTextChangedListener(cvText);
                             etCurVal.setSelection(etCurVal.getText().length());
                         }
 
-                        // This is needed to fix the keyboard bug
+                        // This is needed to fix a keyboard bug
                         mHandler.postDelayed(new Runnable() {
                             public void run() {
                                 etCurVal.dispatchTouchEvent(MotionEvent.obtain(
@@ -2214,9 +2135,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             etCurVal.setText("");
                             etCurVal.setTextColor(Color.BLACK);
 
-                            if (currentTrait.defaultValue != null
-                                    && currentTrait.defaultValue.length() > 0)
+                            if (currentTrait.defaultValue != null && currentTrait.defaultValue.length() > 0) {
                                 etCurVal.setText(currentTrait.defaultValue);
+                                updateTrait(currentTrait.trait, currentTrait.format, etCurVal.getText().toString());
+                            }
 
                             etCurVal.addTextChangedListener(cvNum);
                         }
@@ -2442,8 +2364,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         etCurVal.setEnabled(false);
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
-                            if (currentTrait.defaultValue.trim().toLowerCase()
-                                    .equals("true")) {
+                            if (currentTrait.defaultValue.trim().equalsIgnoreCase("true")) {
                                 updateTrait(currentTrait.trait, "boolean", "true");
                                 eImg.setImageResource(R.drawable.boolean_true);
                             } else {
@@ -2453,7 +2374,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         } else {
                             String bval = newTraits.get(currentTrait.trait).toString();
 
-                            if (bval.equals("false")) {
+                            if (bval.equalsIgnoreCase("false")) {
                                 eImg.setImageResource(R.drawable.boolean_false);
                             } else {
                                 eImg.setImageResource(R.drawable.boolean_true);
@@ -2503,6 +2424,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitLocation.setVisibility(View.GONE);
 
                         etCurVal.removeTextChangedListener(cvText);
+                        etCurVal.removeTextChangedListener(cvNum);
                         etCurVal.setVisibility(EditText.GONE);
                         etCurVal.setEnabled(false);
 
@@ -2512,7 +2434,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         File img = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/" + "/photos/");
                         if (img.listFiles() != null) {
-                            photoLocation = dt.getPlotPhotos(cRange.plot_id);
+                            photoLocation = dt.getPlotPhotos(cRange.plot_id, currentTrait.trait);
 
                            for (int i = 0; i < photoLocation.size(); i++) {
                                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
@@ -2536,8 +2458,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         }
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
-                            etCurVal.setText("");
-
                             if (!img.exists()) {
                                 img.mkdirs();
                             }
@@ -2770,7 +2690,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         try {
             mGeneratedName = MainActivity.cRange.plot_id + " " + timeStamp.format(c.getTime());
         } catch (Exception e) {
-            ErrorLog("AudioError.txt", "" + e.getMessage());
             mGeneratedName = "error " + timeStamp.format(c.getTime());
         }
 
@@ -2779,11 +2698,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         try {
             mRecorder.prepare();
-        } catch (IllegalStateException e) {
-            ErrorLog("AudioError.txt", "" + e.getMessage());
-            e.printStackTrace();
-        } catch (IOException e) {
-            ErrorLog("AudioError.txt", "" + e.getMessage());
+        } catch (IllegalStateException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -2800,7 +2715,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void beginPlayback()
     {
         mListening = true;
-        //doRecord.setText(R.string.stop);
         doRecord.setImageResource(R.drawable.ic_stop);
         mPlayer = new MediaPlayer();
         mPlayer = MediaPlayer.create(MainActivity.this, Uri.parse(mRecordingLocation.getAbsolutePath()));
@@ -2809,7 +2723,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             mPlayer.prepare();
         }
         catch (Exception e) {
-            ErrorLog("AudioError.txt", "" + e.getMessage());
             e.printStackTrace();
         }
 
@@ -2818,7 +2731,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
                     mListening = false;
-                    //doRecord.setText(R.string.play);
                     doRecord.setImageResource(R.drawable.ic_play_arrow);
 
                     deleteValue.setEnabled(true);
@@ -2879,7 +2791,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 cRange.plot_id).clone();
 
                         initWidgets(false);
-
                         haveData = true;
 
                         break;
@@ -2894,7 +2805,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             cRange.plot_id).clone();
 
                     initWidgets(false);
-
                     haveData = true;
 
                     break;
@@ -3061,10 +2971,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Backup database
         try {
             dt.exportDatabase("backup");
-            File exportedDb = new File(Constants.BACKUPPATH + "/" + "backup" + ".db");
-            File exportedSp = new File(Constants.BACKUPPATH + "/" + "backup" + "_sharedpref.xml");
-            scanFile(exportedDb);
-            scanFile(exportedSp);
+            File exportedDb = new File(Constants.BACKUPPATH + "/" + "backup.db");
+            File exportedSp = new File(Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
+            Utils.scanFile(MainActivity.this,exportedDb);
+            Utils.scanFile(MainActivity.this,exportedSp);
         } catch (Exception e) {
             Log.e(TAG,e.getMessage());
         }
@@ -3084,8 +2994,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         try {
             TutorialMainActivity.thisActivity.finish();
-        } catch (Exception e) {
-            ErrorLog("TutorialError.txt", "" + e.getMessage());
+        } catch (Exception ignore) {
         }
 
         // Always close the database connection when the app ends
@@ -3241,7 +3150,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
         dt.deleteTrait(cRange.plot_id, parent);
-        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", ""); //TODO add notes and exp_id
+
+        String exp_id = Integer.toString(ep.getInt("ExpID", 0));
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id); //TODO add notes and exp_id
     }
 
     // Delete trait, including from database
@@ -3442,7 +3353,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_unlock);
             missingValue.setEnabled(true);
             deleteValue.setEnabled(true);
-            etCurVal.setEnabled(true);
 
             for(LinearLayout traitLayout : traitViews) {
                 enableViews(traitLayout);
@@ -3659,7 +3569,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         makeToast(getString(R.string.maxphotos));
                 } catch (Exception e) {
                     e.printStackTrace();
-                    ErrorLog("CameraError.txt", "" + e.getMessage());
                     makeToast(getString(R.string.hardwaremissing));
                 }
                 break;
@@ -3682,9 +3591,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     try {
                         mRecorder.stop();
                         File storedAudio = new File(mRecordingLocation.getAbsolutePath());
-                        scanFile(storedAudio);
+                        Utils.scanFile(MainActivity.this,storedAudio);
                     } catch (Exception e) {
-                        ErrorLog("AudioError.txt", "" + e.getMessage());
                         e.printStackTrace();
                     }
 
@@ -3900,7 +3808,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                     File f = new File(item);
                     f.delete();
-                    scanFile(f);
+                    Utils.scanFile(MainActivity.this,f);
 
                     // Remove individual images
                     dt.deleteTraitByValue(cRange.plot_id, currentTrait.trait, item);
@@ -3964,15 +3872,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private String getRep() {
         int repInt = MainActivity.dt.getRep(MainActivity.cRange.plot_id,currentTrait.trait);
-        String rep = String.valueOf(repInt);
-        return rep;
+        return String.valueOf(repInt);
     }
 
     private void makeImage(String photoName) {
         File file = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/",
                 photoName);
 
-        scanFile(file.getAbsoluteFile());
+        Utils.scanFile(MainActivity.this,file.getAbsoluteFile());
 
         photoLocation.add(file.getAbsolutePath());
 
@@ -4009,7 +3916,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         dialog.getWindow().setAttributes(params2);
 
         Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
-        TextView summaryText = (TextView) layout.findViewById(R.id.text1);
+        TextView summaryText = (TextView) layout.findViewById(R.id.field_name);
 
         closeBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -4097,12 +4004,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private void updateTraitAllowDuplicates(String parent, String trait, String value) {
 
-        if (cRange == null || cRange.plot_id.length() == 0)
-        {
+        if (cRange == null || cRange.plot_id.length() == 0) {
             return;
         }
 
-        Log.w(trait, value);
+        Log.d("Field Book",trait + " " + value);
 
         if (newTraits.containsKey(parent))
             newTraits.remove(parent);
@@ -4110,8 +4016,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         newTraits.put(parent, value);
 
         dt.deleteTraitByValue(cRange.plot_id, parent, value);
-        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName","") + " " + ep.getString("LastName",""), ep.getString("Location",""),"",""); //TODO add notes and exp_id
 
+        String exp_id = Integer.toString(ep.getInt("ExpID", 0));
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName","") + " " + ep.getString("LastName",""), ep.getString("Location",""),"",exp_id); //TODO add notes and exp_id
     }
 
     private void displayPlotImage(String path) {
@@ -4124,8 +4031,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             intent.setAction(Intent.ACTION_VIEW);
             intent.setDataAndType(Uri.fromFile(f), "image/*");
             startActivity(intent);
-        } catch (Exception e) {
-            ErrorLog("PhotoError.txt", "" + e.getMessage());
+        } catch (Exception ignore) {
         }
     }
 
@@ -4191,8 +4097,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             catch (IOException e) {
                 Log.e(TAG, "-- Error in setting image");
-                Bitmap emptyBmp = BitmapFactory.decodeResource(getResources(), R.drawable.photo_missing);
-                return emptyBmp;
+                return BitmapFactory.decodeResource(getResources(), R.drawable.photo_missing);
             }
 
             catch(OutOfMemoryError oom) {
@@ -4202,8 +4107,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             return correctBmp;
 
         } catch (Exception e) {
-            Bitmap emptyBmp = BitmapFactory.decodeResource(getResources(), R.drawable.photo_missing);
-            return emptyBmp;
+            return BitmapFactory.decodeResource(getResources(), R.drawable.photo_missing);
         }
     }
 
@@ -4250,193 +4154,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 goToId.dismiss();
             }
         }
-    }
-
-    public void ErrorLog(String sFileName, String sErrMsg)
-    {
-        try
-        {
-            SimpleDateFormat lv_parser = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
-
-            File file = new File(Constants.ERRORPATH, sFileName);
-
-            FileWriter filewriter = new FileWriter(file, true);
-            BufferedWriter out = new BufferedWriter(filewriter);
-
-            out.write(lv_parser.format(Calendar.getInstance().getTime()) + " " + sErrMsg + "\n");
-            out.flush();
-            out.close();
-
-            scanFile(file);
-        }
-        catch (Exception e)
-        {
-            Log.e(TAG,"" + e.getMessage());
-        }
-    }
-
-    private void scanFile(File filePath) {
-        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
-    }
-
-    private void checkNewVersion() {
-        final PackageManager packageManager = this.getPackageManager();
-
-        try {
-            PackageInfo packageInfo = packageManager.getPackageInfo(this.getPackageName(), 0);
-            versionName = packageInfo.versionName;
-            versionNum = packageInfo.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            versionName = null;
-        }
-
-        new checkVersion().execute();
-    }
-
-    private class checkVersion extends AsyncTask<Void, Void, Void> {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
-                try {
-                    Document doc = Jsoup
-                            .connect("http://wheatgenetics.org/appupdates/fieldbook/currentversion.html"
-                            )
-                            .get();
-                    Elements spans = doc.select("div[itemprop=softwareVersion]");
-                    currentServerVersion = spans.first().ownText();
-                } catch (IOException e) {
-                    ErrorLog("VersionCheckError.txt", "" + e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            int currentServerVersionInt = 0;
-
-            if(!currentServerVersion.equals("")) {
-                currentServerVersionInt = Integer.parseInt(currentServerVersion.replace(".", ""));
-            }
-
-            System.out.println("Field.Book." + currentServerVersion + ".apk" + "\t" + versionName);
-            if (activeNetworkInfo != null && activeNetworkInfo.isConnected() && currentServerVersionInt>versionNum && currentServerVersion.length()>0) {
-                downloadUpdate();
-            }
-        }
-    }
-
-    private void downloadUpdate() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-        builder.setTitle(getString(R.string.update));
-        builder.setMessage(getString(R.string.newversion));
-
-        if(isGooglePlayInstalled(this)) {
-            builder.setPositiveButton(getString(R.string.googleplay), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + "com.fieldbook.tracker")));
-                }
-            });
-        } else {
-            builder.setPositiveButton(getString(R.string.installnow), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    new downloadUpdate().execute();
-                }
-            });
-        }
-
-        builder.setNeutralButton(getString(R.string.later), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-
-                //TODO add shared pref thats used to later check again
-                dialog.dismiss();
-            }
-
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    private class downloadUpdate extends AsyncTask<Void, Void, Void> {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
-                try {
-                    URL u = new URL("http://wheatgenetics.org/appupdates/fieldbook/" + "Field.Book."+ currentServerVersion +".apk");
-                    HttpURLConnection c = (HttpURLConnection) u.openConnection();
-                    c.setRequestMethod("GET");
-                    c.setDoOutput(true);
-                    c.connect();
-                    FileOutputStream f = new FileOutputStream(new File(Constants.UPDATEPATH,"/Field.Book."+ currentServerVersion +".apk"));
-
-                    InputStream in = c.getInputStream();
-
-                    byte[] buffer = new byte[1024];
-                    int len1;
-                    while ( (len1 = in.read(buffer)) > 0 ) {
-                        f.write(buffer,0, len1);
-                    }
-                    f.close();
-                } catch (Exception e) {
-                    ErrorLog("VersionUpdateError.txt", "" + e.getMessage());
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            scanFile(new File(Constants.UPDATEPATH,"/Field.Book."+ currentServerVersion +".apk"));
-            installUpdate();
-        }
-    }
-
-    private void installUpdate() {
-        if (new File(Constants.UPDATEPATH, "/Field.Book."+ currentServerVersion + ".apk").exists()) {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.fromFile(new File(Constants.UPDATEPATH + "/Field.Book."+ currentServerVersion +".apk")), "application/vnd.android.package-archive");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // without this flag android returned a intent error!
-            startActivity(intent);
-        }
-
-        //TODO delete downloaded apk
-    }
-
-    public static boolean isGooglePlayInstalled(Context context) {
-        PackageManager pm = context.getPackageManager();
-        boolean app_installed;
-        try
-        {
-            PackageInfo info = pm.getPackageInfo("com.android.vending", PackageManager.GET_ACTIVITIES);
-            String label = (String) info.applicationInfo.loadLabel(pm);
-            app_installed = (label != null && !label.equals("Market"));
-        }
-        catch (PackageManager.NameNotFoundException e)
-        {
-            app_installed = false;
-        }
-        return app_installed;
     }
 
     public String truncateDecimalString(String v) {

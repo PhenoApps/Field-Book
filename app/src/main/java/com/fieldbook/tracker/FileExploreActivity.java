@@ -141,7 +141,7 @@ public class FileExploreActivity extends AppCompatActivity {
     private void loadFileList() {
         try {
             path.mkdirs();
-        } catch (SecurityException e) {
+        } catch (SecurityException ignored) {
         }
 
         // Checks whether path exists
@@ -156,20 +156,11 @@ public class FileExploreActivity extends AppCompatActivity {
                     }
 
                     if (include != null && include.length > 0) {
-                        if (Arrays.asList(include).contains(getFileExtension(sel))) {
-                            return true;
-                        } else if (sel.isDirectory()) {
-                            return true;
-                        } else {
-                            return false;
-                        }
+                        return Arrays.asList(include).contains(getFileExtension(sel)) || sel.isDirectory();
                     }
 
-                    if (sel.toString().contains(".fieldbook") || sel.toString().contains("severity.txt") || sel.toString().contains("sharedpref.xml")) {
-                        return false;
-                    }
+                    return !(sel.toString().contains(".fieldbook") || sel.toString().contains("severity.txt") || sel.toString().contains("sharedpref.xml"));
 
-                    return true;
                 }
             });
 
@@ -271,7 +262,7 @@ public class FileExploreActivity extends AppCompatActivity {
         public String file;
         public int icon;
 
-        public Item(String file, Integer icon) {
+        Item(String file, Integer icon) {
             this.file = file;
             this.icon = icon;
         }

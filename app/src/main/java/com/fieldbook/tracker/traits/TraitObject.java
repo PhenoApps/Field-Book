@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.Trait;
+package com.fieldbook.tracker.traits;
 
 /**
  * Simple wrapper class for trait data

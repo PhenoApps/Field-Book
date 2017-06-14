@@ -1,5 +1,18 @@
+55
+Added field management
+Organization changes
+
 54
 Updated NA button to bottom toolbar and included delete button
+Fixed an issue with the automatic backup database
+Changed how InfoBar text works
+Shortened InfoBar prefix size on phones
+Fixed a bug with Boolean trait not being set correctly
+Fixed a bug that interfered with trait defaults
+Fixed a bug with multiple photo traits
+Fixed a bug with photo trait interactions
+Added warning for more than 64 traits
+Fixed a trait import bug when no traits existed
 
 53
 Added Alice to translator list

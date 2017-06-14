@@ -1,6 +1,5 @@
 package com.fieldbook.tracker;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -22,8 +21,6 @@ import java.util.Locale;
 
 
 public class ChangelogActivity extends AppCompatActivity {
-
-    private static String TAG = "Field Book";
 
     WindowManager.LayoutParams params;
     private LinearLayout parent;
@@ -80,6 +77,7 @@ public class ChangelogActivity extends AppCompatActivity {
         try {
             v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
+            String TAG = "Field Book";
             Log.e(TAG, "" + e.getMessage());
         }
         return v;

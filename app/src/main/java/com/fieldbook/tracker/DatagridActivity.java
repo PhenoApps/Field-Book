@@ -30,7 +30,7 @@ public class DatagridActivity extends AppCompatActivity {
     Cursor databaseData;
     public GridView gridView;
     ArrayAdapter<String> adapter;
-    public ArrayList<String> ArrayofName = new ArrayList<String>();
+    public ArrayList<String> ArrayofName = new ArrayList<>();
 
     @Override
     public void onDestroy() {
@@ -115,7 +115,7 @@ public class DatagridActivity extends AppCompatActivity {
         //gridView.setVerticalScrollbarPosition(GridView.SCROLLBAR_POSITION_LEFT);
         gridView.setFastScrollEnabled(true);
 
-        adapter = new ArrayAdapter<String>(this,
+        adapter = new ArrayAdapter<>(this,
                 R.layout.simple_list_item, ArrayofName);
 
         gridView.setAdapter(adapter);

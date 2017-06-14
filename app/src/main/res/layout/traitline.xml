@@ -12,12 +12,28 @@
     android:paddingTop="4dp">
 
     <ImageView
+        android:id="@+id/dragSort"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:background="#FFFFFF"
+        android:padding="3dp"
+        android:paddingRight="5dp"
+        android:src="@drawable/ic_reorder" />
+
+    <View
+        android:id="@+id/spacer4"
+        android:layout_width="5dp"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/dragSort" />
+
+    <ImageView
         android:id="@+id/popupMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:paddingLeft="5dp"
+        android:layout_toRightOf="@+id/spacer4"
         android:paddingTop="4dp"
         android:src="@drawable/ic_more_vert" />
 
@@ -51,8 +67,8 @@
         android:layout_height="20dp"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/spacer2"
-        android:padding="3dp"
-        android:background="@drawable/ic_reorder"  />
+        android:background="@drawable/ic_reorder"
+        android:padding="3dp" />
 
     <View
         android:id="@+id/spacer3"
@@ -61,7 +77,7 @@
         android:layout_toRightOf="@+id/traitType" />
 
     <TextView
-        android:id="@+id/text1"
+        android:id="@+id/field_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -70,22 +86,5 @@
         android:singleLine="true"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small" />
-
-    <View
-        android:id="@+id/spacer4"
-        android:layout_width="5dp"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/text1" />
-
-    <ImageView
-        android:id="@+id/dragSort"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:background="#FFFFFF"
-        android:paddingRight="5dp"
-        android:padding="3dp"
-        android:src="@drawable/ic_reorder" />
 
 </RelativeLayout>

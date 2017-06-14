@@ -9,28 +9,28 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.fieldbook.tracker.Search.SearchData;
-import com.fieldbook.tracker.Trait.TraitObject;
+import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.fields.FieldObject;
+import com.fieldbook.tracker.utilities.RangeObject;
+import com.fieldbook.tracker.search.SearchData;
+import com.fieldbook.tracker.traits.TraitObject;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,19 +39,22 @@ import java.util.regex.Pattern;
  */
 public class DataHelper {
     private static final String DATABASE_NAME = "fieldbook.db";
-    public static final int DATABASE_VERSION = 6;
+    static final int DATABASE_VERSION = 7;
 
     private static String TAG = "Field Book";
 
-    public static final String RANGE = "range";
+    private static final String RANGE = "range";
     public static final String TRAITS = "traits";
+    private static final String USER_TRAITS = "user_traits";
+    private static final String EXP_INDEX = "exp_id";
+    private static final String PLOTS = "plots";
+    private static final String PLOT_ATTRIBUTES = "plot_attributes";
+    private static final String PLOT_VALUES = "plot_values";
 
-    public static final String USER_TRAITS = "user_traits";
-
-    public static String TICK = "`";
+    private static String TICK = "`";
 
     private Context context;
-    private static SQLiteDatabase db;
+    public static SQLiteDatabase db;
 
     private SQLiteStatement insertTraits;
     private SQLiteStatement insertUserTraits;
@@ -70,12 +73,11 @@ public class DataHelper {
 
     private SharedPreferences ep;
 
-    public DataHelper(Context context) {
+    DataHelper(Context context) {
         try {
             this.context = context;
             openHelper = new OpenHelper(this.context);
             db = openHelper.getWritableDatabase();
-
             ep = context.getSharedPreferences("Settings", 0);
 
             this.insertTraits = db.compileStatement(INSERTTRAITS);
@@ -87,38 +89,6 @@ public class DataHelper {
         } catch (Exception e) {
             e.printStackTrace();
             Log.w("FieldBook", "Unable to create or open database");
-        }
-    }
-
-    /**
-     * As the fields in the CSV file can vary, we recreate the table based on
-     * the field names and column data
-     */
-    public void insertRange(String[] columns, String[] data) {
-        try {
-            String fields = "";
-            String values = "";
-
-            for (int i = 0; i < columns.length; i++) {
-                if (i == (columns.length - 1)) {
-                    fields += TICK +columns[i] +TICK + ")";
-                } else {
-                    fields += TICK +columns[i] +TICK + ",";
-                }
-            }
-
-            for (int j = 0; j < data.length; j++) {
-                if (j == (data.length - 1)) {
-                    values += "" + DatabaseUtils.sqlEscapeString(data[j]) + ")";
-                } else {
-                    values += "" + DatabaseUtils.sqlEscapeString(data[j]) + ",";
-                }
-            }
-
-            db.execSQL("insert into RANGE (" + fields + " values ("
-                    + values);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -235,7 +205,6 @@ public class DataHelper {
 
     /**
      * Retrieves the columns needed for export using a join statement
-     * v1.6 - Amended to consider both trait and format
      */
     public Cursor getExportDBData(String[] fieldList, String[] traits) {
         String fields = arrayToString("range", fieldList);
@@ -467,11 +436,46 @@ public class DataHelper {
     }
 
     /**
+     * V4 - Get all traits in the system, in order, as TraitObjects
+     */
+    public ArrayList<FieldObject> getAllFieldObjects() {
+
+        ArrayList<FieldObject> list = new ArrayList<>();
+
+        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
+                        "secondary_id", "date_import", "date_edit", "date_export", "count"},
+                null, null, null, null, "exp_id"
+        );
+
+        if (cursor.moveToFirst()) {
+            do {
+                FieldObject o = new FieldObject();
+                o.exp_id = cursor.getInt(0);
+                o.exp_name = cursor.getString(1);
+                o.unique_id = cursor.getString(2);
+                o.primary_id = cursor.getString(3);
+                o.secondary_id = cursor.getString(4);
+                o.date_import = cursor.getString(5);
+                o.date_edit = cursor.getString(6);
+                o.date_export = cursor.getString(7);
+                o.count = cursor.getString(8);
+                list.add(o);
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return list;
+    }
+
+    /**
      * V2 - Get all traits in the system, in order, as TraitObjects
      */
     public ArrayList<TraitObject> getAllTraitObjects() {
 
-        ArrayList<TraitObject> list = new ArrayList<TraitObject>();
+        ArrayList<TraitObject> list = new ArrayList<>();
 
         Cursor cursor = db.query(TRAITS, new String[]{"id", "trait", "format", "defaultValue",
                         "minimum", "maximum", "details", "categories", "isVisible", "realPosition"},
@@ -760,12 +764,17 @@ public class DataHelper {
      * Returns list of files associated with a specific plot
      */
 
-    public ArrayList<String> getPlotPhotos(String plot) {
+    public ArrayList<String> getPlotPhotos(String plot, String trait) {
         try {
-            Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"}, "rid like ? and trait like ?", new String[]{plot, "photo"},
-                    null, null, null);
+            //Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"}, "rid like ? and trait like ?", new String[]{plot, trait},
+             //       null, null, null);
 
-            ArrayList<String> photoList = new ArrayList<String>();
+            Cursor cursor = db.rawQuery(
+                            "select userValue FROM user_traits where user_traits.rid = ? and user_traits.parent like ?",
+                            new String[]{plot, trait}
+                    );
+
+            ArrayList<String> photoList = new ArrayList<>();
             Log.d("Field", Integer.toString(cursor.getCount()));
 
             if (cursor.moveToFirst()) {
@@ -1084,25 +1093,16 @@ public class DataHelper {
     }
 
     /**
-     * V2 - Helper function to recreate default table
-     */
-    public void defaultFieldTable() {
-        db.execSQL("DROP TABLE IF EXISTS " + RANGE);
-
-        db.execSQL("CREATE TABLE "
-                + RANGE
-                + "(id INTEGER PRIMARY KEY, range TEXT, plot TEXT, entry TEXT, plot_id TEXT, pedigree TEXT)");
-    }
-
-    /**
      * When the version number changes, this class will recreate the entire
      * database
      * v1.6 - Amended to add new parent field. It is called parent in consideration to the enhanced search
      */
     private static class OpenHelper extends SQLiteOpenHelper {
+        SharedPreferences ep2;
 
         OpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
+            ep2 = context.getSharedPreferences("Settings", 0);
         }
 
         @Override
@@ -1113,11 +1113,21 @@ public class DataHelper {
             db.execSQL("CREATE TABLE "
                     + TRAITS
                     + "(id INTEGER PRIMARY KEY, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
-
             db.execSQL("CREATE TABLE "
                     + USER_TRAITS
                     + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT)");
-
+            db.execSQL("CREATE TABLE "
+                    + PLOTS
+                    + "(plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR)");
+            db.execSQL("CREATE TABLE "
+                    + PLOT_ATTRIBUTES
+                    + "(attribute_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_name VARCHAR, exp_id INTEGER)");
+            db.execSQL("CREATE TABLE "
+                    + PLOT_VALUES
+                    + "(attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_id INTEGER, attribute_value VARCHAR, plot_id INTEGER, exp_id INTEGER)");
+            db.execSQL("CREATE TABLE "
+                    + EXP_INDEX
+                    + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER)");
             try {
                 db.execSQL("CREATE TABLE android_metadata (locale TEXT)");
                 db.execSQL("INSERT INTO android_metadata(locale) VALUES('en_US')");
@@ -1128,8 +1138,7 @@ public class DataHelper {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w("FieldBook",
-                    "Upgrading database.");
+            Log.w("Field Book", "Upgrading database.");
 
             if (oldVersion < 5) {
                 db.execSQL("DROP TABLE IF EXISTS " + RANGE);
@@ -1137,7 +1146,7 @@ public class DataHelper {
                 db.execSQL("DROP TABLE IF EXISTS " + USER_TRAITS);
             }
 
-            if (oldVersion == 5 & newVersion == 6) {
+            if (oldVersion <= 5 & newVersion >= 5) {
                 // add columns to tables
                 db.execSQL("ALTER TABLE user_traits ADD COLUMN person TEXT");
                 db.execSQL("ALTER TABLE user_traits ADD COLUMN location TEXT");
@@ -1146,20 +1155,277 @@ public class DataHelper {
                 db.execSQL("ALTER TABLE user_traits ADD COLUMN exp_id TEXT");
             }
 
-            if (oldVersion == 6 & newVersion == 7) {
-                // make table for all fields
+            if (oldVersion <= 6 & newVersion >= 6) {
+                // create new tables: plots, plotAttributes, plotAttributeValues, exp_index
+                db.execSQL("CREATE TABLE "
+                        + PLOTS
+                        + "(plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR)");
 
-                // move current range table to a new table
+                db.execSQL("CREATE TABLE "
+                        + PLOT_ATTRIBUTES
+                        + "(attribute_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_name VARCHAR, exp_id INTEGER)");
 
+                db.execSQL("CREATE TABLE "
+                        + PLOT_VALUES
+                        + "(attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_id INTEGER, attribute_value VARCHAR, plot_id INTEGER, exp_id INTEGER)");
+
+                db.execSQL("CREATE TABLE "
+                        + EXP_INDEX
+                        + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER)");
+
+                // add current range info to exp_index
+                db.execSQL("insert into " + EXP_INDEX + "(exp_name, exp_alias, unique_id, primary_id, secondary_id) values (?,?,?,?,?)",
+                        new String[]{ep2.getString("FieldFile", ""), ep2.getString("FieldFile", ""), ep2.getString("ImportUniqueName", ""), ep2.getString("ImportFirstName", ""), ep2.getString("ImportSecondName", "")});
+
+                // convert current range table to plots
+                Cursor cursor = db.rawQuery("SELECT * from range", null);
+
+                // columns into attributes
+                String[] columnNames = cursor.getColumnNames();
+                List<String> list = new ArrayList<>(Arrays.asList(columnNames));
+                list.remove("id");
+                columnNames = list.toArray(new String[0]);
+
+                for (String columnName1 : columnNames) {
+                    ContentValues insertValues = new ContentValues();
+                    insertValues.put("attribute_name", columnName1);
+                    insertValues.put("exp_id", 1);
+                    db.insert(PLOT_ATTRIBUTES, null, insertValues);
+                }
+
+                // plots into plots
+                String cur2 = "SELECT " + TICK + ep2.getString("ImportUniqueName", "") + TICK + ", " + TICK + ep2.getString("ImportFirstName", "") + TICK + ", " + TICK + ep2.getString("ImportSecondName", "") + TICK + " from range";
+                Cursor cursor2 = db.rawQuery(cur2, null);
+
+                if (cursor2.moveToFirst()) {
+                    do {
+                        ContentValues insertValues = new ContentValues();
+                        insertValues.put("unique_id", cursor2.getString(0));
+                        insertValues.put("primary_id", cursor2.getString(1));
+                        insertValues.put("secondary_id", cursor2.getString(2));
+                        insertValues.put("exp_id", 1);
+                        db.insert(PLOTS, null, insertValues);
+                    } while (cursor2.moveToNext());
+                }
+
+                // plot values into plot values
+                for (String columnName : columnNames) {
+                    String att_id = "select plot_attributes.attribute_id from plot_attributes where plot_attributes.attribute_name = " + "'" + columnName + "'" + " and plot_attributes.exp_id = ";
+                    Cursor attribute_id = db.rawQuery(att_id + 1, null);
+                    Integer attId = 0;
+
+                    if (attribute_id.moveToFirst()) {
+                        attId = attribute_id.getInt(0);
+                    }
+
+                    String att_val = "select range." + "'" + columnName + "'" + ", plots.plot_id from range inner join plots on range." + "'" + ep2.getString("ImportUniqueName", "") + "'" + "=plots.unique_id";
+                    Cursor attribute_val = db.rawQuery(att_val, null);
+
+                    if (attribute_val.moveToFirst()) {
+                        do {
+                            ContentValues insertValues = new ContentValues();
+                            insertValues.put("attribute_id", attId);
+                            insertValues.put("attribute_value", attribute_val.getString(0));
+                            insertValues.put("plot_id", attribute_val.getInt(1));
+                            insertValues.put("exp_id", 1);
+                            db.insert(PLOT_VALUES, null, insertValues);
+                        } while (attribute_val.moveToNext());
+                    }
+                }
             }
         }
+    }
+
+    public boolean checkUnique(HashMap<String, String> values) {
+        Cursor cursor = db.rawQuery("SELECT unique_id from " + PLOTS, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                if(values.containsKey(cursor.getString(0))) {
+                    return false;
+                }
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return true;
+    }
+
+    public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int exp_id) {
+        Cursor cursor = db.rawQuery("SELECT * from " + EXP_INDEX, null);
+        cursor.moveToFirst();
+
+        if(imp) {
+            // get import date and count of plots
+            Cursor cursor2 = db.rawQuery("SELECT * from plots where exp_id = " + exp_id, null);
+            int count = cursor2.getCount();
+
+            ContentValues cv = new ContentValues();
+            cv.put("count",count);
+            cv.put("date_import",timeStamp.format(Calendar.getInstance().getTime()));
+            db.update(EXP_INDEX, cv, "exp_id="+exp_id, null);
+        }
+
+        if(ed) {
+            // get and save edit date
+            for (int i = 0; i < cursor.getCount(); i++) {
+                int experimental_id = cursor.getInt(0);
+                String expIdString = Integer.toString(experimental_id);
+                Cursor cursor3 = db.rawQuery("SELECT timeTaken from user_traits WHERE user_traits.exp_id = " + expIdString + " ORDER BY datetime(substr(timeTaken,1,19)) DESC", null);
+
+                if(cursor3.moveToFirst()) {
+                    String date_edited = cursor3.getString(0);
+                    ContentValues cv = new ContentValues();
+                    cv.put("date_edit",date_edited);
+                    db.update(EXP_INDEX, cv, "exp_id="+experimental_id, null);
+                    Log.d("date_edit",date_edited);
+                }
+                Log.d("date_edit2",Integer.toString(cursor3.getCount()));
+
+                cursor3.close();
+                cursor.moveToNext();
+            }
+        }
+
+        if(ex) {
+            // get export date
+            ContentValues cv = new ContentValues();
+            cv.put("date_export",timeStamp.format(Calendar.getInstance().getTime()));
+            db.update(EXP_INDEX, cv, "exp_id="+exp_id, null);
+        }
+
+        cursor.close();
+    }
+
+    public void deleteField(int exp_id) {
+        String query;
+
+        query = "DELETE FROM " + EXP_INDEX + " WHERE exp_id = " + exp_id;
+        db.execSQL(query);
+
+        query = "DELETE FROM " + PLOTS + " WHERE exp_id = " + exp_id;
+        db.execSQL(query);
+
+        query = "DELETE FROM " + PLOT_ATTRIBUTES + " WHERE exp_id = " + exp_id;
+        db.execSQL(query);
+
+        query = "DELETE FROM " + PLOT_VALUES + " WHERE exp_id = " + exp_id;
+        db.execSQL(query);
+
+        query = "DELETE FROM " + USER_TRAITS + " WHERE exp_id = " + exp_id;
+        db.execSQL(query);
+    }
+
+    public void switchField(int exp_id) {
+        // get array of plot attributes
+        Cursor cursor = db.rawQuery("SELECT plot_attributes.attribute_name FROM plot_attributes WHERE plot_attributes.exp_id = " + exp_id, null);
+        cursor.moveToFirst();
+        String[] plotAttr = new String[cursor.getCount()];
+
+        for (int i = 0; i < cursor.getCount(); i++) {
+            plotAttr[i] = cursor.getString(0);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+
+        // create query to get data for range
+        String args = "";
+
+        for (String aPlotAttr : plotAttr) {
+            args = args + ", MAX(CASE WHEN plot_attributes.attribute_name = '" + aPlotAttr + "' THEN plot_values.attribute_value ELSE NULL END) AS \"" + aPlotAttr + "\"";
+        }
+
+        String query = "CREATE TABLE "+ RANGE +" AS SELECT plots.plot_id as id" + args +
+                " FROM plots " +
+                "LEFT JOIN plot_values USING (plot_id) " +
+                "LEFT JOIN plot_attributes USING (attribute_id) " +
+                "WHERE plots.exp_id = '" + exp_id +
+                "' GROUP BY plots.plot_id";
+
+        // drop range table and import new query into range table
+        dropRange();
+        db.execSQL(query);
+    }
+
+    public boolean checkFieldName(String name) {
+        Cursor c = db.rawQuery("SELECT 1 FROM " + EXP_INDEX + " WHERE exp_name=?", new String[] {name});
+        return c.moveToFirst();
+    }
+
+    public int createField(String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns) {
+        // add to exp_index
+        ContentValues insertExp = new ContentValues();
+        insertExp.put("exp_name", exp_name);
+        insertExp.put("exp_alias", exp_alias);
+        insertExp.put("unique_id", unique_id);
+        insertExp.put("primary_id", primary_id);
+        insertExp.put("secondary_id", secondary_id);
+        long exp_id = db.insert(EXP_INDEX, null, insertExp);
+
+        // columns to plot_attributes
+        String[] columnNames = columns;
+        List<String> list = new ArrayList<>(Arrays.asList(columnNames));
+        list.remove("id");
+        columnNames = list.toArray(new String[0]);
+
+        for (String columnName : columnNames) {
+            ContentValues insertAttr = new ContentValues();
+            insertAttr.put("attribute_name", columnName);
+            insertAttr.put("exp_id", (int) exp_id);
+            db.insert(PLOT_ATTRIBUTES, null, insertAttr);
+        }
+
+        return (int) exp_id;
+    }
+
+    public void createFieldData(int exp_id, String[] columns, String[] data) {
+        // get unique_id, primary_id, secondary_id names from exp_id
+        Cursor cursor = db.rawQuery("SELECT exp_id.unique_id, exp_id.primary_id, exp_id.secondary_id from exp_id where exp_id.exp_id = " + exp_id, null);
+        cursor.moveToFirst();
+
+        // extract unique_id, primary_id, secondary_id indices
+        int[] plotIndices = new int[3];
+        plotIndices[0] = Arrays.asList(columns).indexOf(cursor.getString(0));
+        plotIndices[1] = Arrays.asList(columns).indexOf(cursor.getString(1));
+        plotIndices[2] = Arrays.asList(columns).indexOf(cursor.getString(2));
+
+        // add plot to plots table
+        ContentValues insertValues = new ContentValues();
+        insertValues.put("exp_id", exp_id);
+        insertValues.put("unique_id", data[plotIndices[0]]);
+        insertValues.put("primary_id", data[plotIndices[1]]);
+        insertValues.put("secondary_id", data[plotIndices[2]]);
+        long plot_id = db.insert(PLOTS, null, insertValues);
+
+        // add plot data plot_values table
+        for (int i = 0; i < columns.length; i++) {
+            Cursor attribute_id = db.rawQuery("select plot_attributes.attribute_id from plot_attributes where plot_attributes.attribute_name = " + "'" + columns[i] + "'" + " and plot_attributes.exp_id = " + exp_id, null);
+            Integer attId = 0;
+
+            if(attribute_id.moveToFirst()) {
+                attId = attribute_id.getInt(0);
+            }
+
+            ContentValues plotValuesInsert = new ContentValues();
+            plotValuesInsert.put("attribute_id",attId);
+            plotValuesInsert.put("attribute_value", data[i]);
+            plotValuesInsert.put("plot_id", (int) plot_id);
+            plotValuesInsert.put("exp_id", exp_id);
+            db.insert(PLOT_VALUES, null, plotValuesInsert);
+
+            attribute_id.close();
+        }
+
+        cursor.close();
     }
 
     /**
      * Delete all tables
      */
 
-    public void deleteDatabase() {
+    void deleteDatabase() {
         context.deleteDatabase(DATABASE_NAME);
     }
 
@@ -1167,7 +1433,7 @@ public class DataHelper {
      * Import database
      */
 
-    public void importDatabase(String filename) throws IOException {
+    void importDatabase(String filename) throws IOException {
         String internalDbPath = getDatabasePath(this.context);
         String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
 
@@ -1192,7 +1458,7 @@ public class DataHelper {
     /**
      * Export database
      */
-    public void exportDatabase(String filename) throws IOException {
+    void exportDatabase(String filename) throws IOException {
         String internalDbPath = getDatabasePath(this.context);
         String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
         close();
@@ -1201,7 +1467,7 @@ public class DataHelper {
             File newDb = new File(Constants.BACKUPPATH + "/" + filename + ".db");
             File oldDb = new File(internalDbPath);
 
-            File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
+            File newSp = new File(Constants.BACKUPPATH + "/" + filename + ".db_sharedpref.xml");
             File oldSp = new File(internalSpPath);
 
             copyFile(oldDb, newDb);

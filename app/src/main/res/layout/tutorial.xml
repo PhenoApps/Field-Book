@@ -18,7 +18,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/text2"
+        android:id="@+id/field_count"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/header"
@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/text2"
+        android:layout_below="@+id/field_count"
         android:text="@string/prev"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small"
@@ -43,7 +43,7 @@
         android:id="@+id/close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/text2"
+        android:layout_below="@+id/field_count"
         android:layout_centerHorizontal="true"
         android:text="@string/close"
         android:textColor="#000000"
@@ -55,7 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/text2"
+        android:layout_below="@+id/field_count"
         android:text="@string/next"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small"

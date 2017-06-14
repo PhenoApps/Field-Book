@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.Trait;
+package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
 import android.support.v7.app.AlertDialog;
@@ -41,17 +41,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.fieldbook.tracker.CSV.CSVReader;
-import com.fieldbook.tracker.CSV.CSVWriter;
-import com.fieldbook.tracker.Constants;
+import com.fieldbook.tracker.io.CSVReader;
+import com.fieldbook.tracker.io.CSVWriter;
+import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.Tutorial.TutorialTraitsActivity;
-import com.fieldbook.tracker.Dragsort.DragSortListView;
-import com.fieldbook.tracker.Dragsort.DragSortListView.DropListener;
-import com.fieldbook.tracker.Dragsort.DragSortController;
+import com.fieldbook.tracker.tutorial.TutorialTraitsActivity;
+import com.fieldbook.tracker.dragsort.DragSortListView;
+import com.fieldbook.tracker.dragsort.DragSortController;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -112,8 +111,6 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     private Menu systemMenu;
 
-    private Toolbar toolbar;
-
     @Override
     public void onDestroy() {
         try {
@@ -156,7 +153,6 @@ public class TraitEditorActivity extends AppCompatActivity {
                     try {
                         // e.g. 4
                         String prevID = mAdapter.getItem(from).id;
-                        String prevPosition = mAdapter.getItem(from).realPosition;
 
                         // e.g. 6
                         String currentID = mAdapter.getItem(to).id;
@@ -184,10 +180,8 @@ public class TraitEditorActivity extends AppCompatActivity {
                         // upward drag
                         // e.g. 4
                         String prevID = mAdapter.getItem(from).id;
-                        String prevPosition = mAdapter.getItem(from).realPosition;
 
                         // e.g. 6
-                        String currentID = mAdapter.getItem(to).id;
                         String currentPosition = mAdapter.getItem(to).realPosition;
 
                         if (Integer.parseInt(currentPosition) - to >= 0) {
@@ -277,7 +271,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         setContentView(R.layout.draglist_activity);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setTitle(null);
@@ -362,13 +356,11 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         createDialog.getWindow().setAttributes(params);
         createDialog.setOnCancelListener(new OnCancelListener() {
-
             public void onCancel(DialogInterface arg0) {
                 createVisible = false;
             }
         });
         createDialog.setOnDismissListener(new OnDismissListener() {
-
             public void onDismiss(DialogInterface arg0) {
                 createVisible = false;
             }
@@ -455,7 +447,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
 
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, R.layout.spinnerlayout, data);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.spinnerlayout, data);
         format.setAdapter(itemsAdapter);
 
         closeBtn.setOnClickListener(new OnClickListener() {
@@ -815,7 +807,6 @@ public class TraitEditorActivity extends AppCompatActivity {
             traitList.setRemoveListener(onRemove);
 
         } catch (Exception e) {
-            ErrorLog("LoadDataError.txt", "" + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -959,7 +950,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
-            makeToast(getString(R.string.createtraitserror));
+            showImportDialog();
             return;
         }
 
@@ -1067,14 +1058,14 @@ public class TraitEditorActivity extends AppCompatActivity {
         loadData();
     }
 
-    public class ArrayIndexComparator implements Comparator<Integer> {
+    private class ArrayIndexComparator implements Comparator<Integer> {
         private final String[] array;
 
-        public ArrayIndexComparator(String[] array) {
+        ArrayIndexComparator(String[] array) {
             this.array = array;
         }
 
-        public Integer[] createIndexArray() {
+        Integer[] createIndexArray() {
             Arrays.sort(array);
             Integer[] indexes = new Integer[array.length];
             for (int i = 0; i < array.length; i++) {
@@ -1118,7 +1109,6 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         // As the export filename uses the import file name as well,
         // we parse it out here
-        String fName = "trait";
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
@@ -1235,16 +1225,10 @@ public class TraitEditorActivity extends AppCompatActivity {
             csvWriter.writeTraitFile(MainActivity.dt.getTraitColumns());
 
             csvWriter.close();
-        } catch (Exception sqlEx) {
-            ErrorLog("ExportTraitError.txt", "" + sqlEx.getMessage());
+        } catch (Exception ignore) {
         }
 
         shareFile(file);
-    }
-
-    public void importData(String fileName) {
-        mChosenFile = fileName;
-        mHandler.post(importCSV);
     }
 
     // Creates a new thread to do importing
@@ -1252,7 +1236,6 @@ public class TraitEditorActivity extends AppCompatActivity {
         public void run() {
             new ImportCSVTask().execute(0);
         }
-
     };
 
     private class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
@@ -1302,14 +1285,12 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 try {
                     cr.close();
-                } catch (Exception e) {
-                    ErrorLog("TraitImportError.txt", "" + e.getMessage());
+                } catch (Exception ignore) {
                 }
 
                 try {
                     fr.close();
-                } catch (Exception e) {
-                    ErrorLog("TraitImportError.txt", "" + e.getMessage());
+                } catch (Exception ignore) {
                 }
 
                 MainActivity.dt.close();
@@ -1320,7 +1301,6 @@ public class TraitEditorActivity extends AppCompatActivity {
                 newDir.mkdirs();
 
             } catch (Exception e) {
-                ErrorLog("TraitImportError.txt", "" + e.getMessage());
                 e.printStackTrace();
                 fail = true;
             }
@@ -1346,25 +1326,6 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
     }
 
-    public static void ErrorLog(String sFileName, String sErrMsg) {
-        try {
-            SimpleDateFormat lv_parser = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
-
-            File file = new File(Constants.ERRORPATH, sFileName);
-
-            FileWriter filewriter = new FileWriter(file, true);
-            BufferedWriter out = new BufferedWriter(filewriter);
-
-            out.write(lv_parser.format(Calendar.getInstance().getTime()) + " " + sErrMsg + "\n");
-            out.flush();
-            out.close();
-
-            scanFile(file);
-        } catch (Exception e) {
-            Log.e(TAG, "" + e.getMessage());
-        }
-    }
-
     public void makeToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
@@ -1384,11 +1345,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
-            try {
-                startActivity(Intent.createChooser(intent, "Sending File..."));
-            } finally {
-
-            }
+            startActivity(Intent.createChooser(intent, "Sending File..."));
         }
     }
 }

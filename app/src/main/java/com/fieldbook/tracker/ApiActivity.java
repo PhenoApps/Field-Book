@@ -7,13 +7,14 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,25 +22,27 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
  * API test Screen
  */
-public class ApiActivity extends Activity {
+public class ApiActivity extends AppCompatActivity {
 
     ListView settingsList;
-    private SharedPreferences ep;
-
-    TextView etResponse;
+    ListView resultsList;
 
     public static Activity thisActivity;
-
 
     @Override
     public void onDestroy() {
@@ -56,8 +59,7 @@ public class ApiActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.api_test);
 
-        ep = getSharedPreferences("Settings", 0);
-        etResponse = (TextView) findViewById(R.id.etResponse);
+        SharedPreferences ep = getSharedPreferences("Settings", 0);
 
         thisActivity = this;
 
@@ -72,44 +74,47 @@ public class ApiActivity extends Activity {
         getBaseContext().getResources().updateConfiguration(config2,
                 getBaseContext().getResources().getDisplayMetrics());
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().getThemedContext();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+
         loadScreen();
     }
 
     private void loadScreen() {
-        if(getActionBar()!=null) {
-            getActionBar().setHomeButtonEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-
         settingsList = (ListView) findViewById(R.id.myList);
 
-        String[] items2 = new String[]{ "Get crops","Get programs","Get studies","Get all traits","Get observation units"}; //TODO cleanup
+        String[] items2 = new String[]{ "Get crops","Get studies","Get all traits"};
 
         settingsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
                 switch (position) {
                     case 0:
-                        new HttpAsyncTask().execute("http://private-anon-33b7a6b43-brapi.apiary-mock.com/brapi/v1/crops");
+                        new HttpAsyncTask().execute("https://private-anon-cf3f621d16-brapi.apiary-mock.com/brapi/v1/crops");
                         break;
                     case 1:
-                        new HttpAsyncTask().execute("http://private-anon-33b7a6b43-brapi.apiary-mock.com/brapi/v1/programs");
+                        new HttpAsyncTask().execute("https://private-anon-cf3f621d16-brapi.apiary-mock.com/brapi/v1/studies-search");
                         break;
                     case 2:
-                        new HttpAsyncTask().execute("http://private-anon-33b7a6b43-brapi.apiary-mock.com/brapi/v1/studies?programId=1");
-                        break;
-                    case 3:
-                        new HttpAsyncTask().execute("http://private-anon-33b7a6b43-brapi.apiary-mock.com/brapi/v1/traits");
-                        break;
-                    case 4:
-                        new HttpAsyncTask().execute("http://private-anon-33b7a6b43-brapi.apiary-mock.com/brapi/v1/study/1/observationunits?observationLevel=plot&studyInstance=1");
+                        new HttpAsyncTask().execute("https://private-anon-cf3f621d16-brapi.apiary-mock.com/brapi/v1/studies/ST012/observationVariables");
                         break;
                 }
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, items2);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, items2);
         settingsList.setAdapter(adapter);
+    }
 
+    private void createList(String[] items3) {
+        resultsList = (ListView) findViewById(R.id.myList2);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, items3);
+        resultsList.setAdapter(adapter);
     }
 
     @Override
@@ -123,7 +128,7 @@ public class ApiActivity extends Activity {
     }
 
     public static String GET(String url){
-        InputStream inputStream = null;
+        InputStream inputStream;
         String result = "";
         try {
 
@@ -151,7 +156,7 @@ public class ApiActivity extends Activity {
 
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-        String line = "";
+        String line;
         String result = "";
         while((line = bufferedReader.readLine()) != null)
             result += line;
@@ -169,17 +174,31 @@ public class ApiActivity extends Activity {
         else
             return false;
     }
+
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
 
             return GET(urls[0]);
         }
-        // onPostExecute displays the results of the AsyncTask.
+
         @Override
         protected void onPostExecute(String result) {
-            Toast.makeText(getBaseContext(), "Received!", Toast.LENGTH_LONG).show();
-            etResponse.setText(formatString(result));
+            try {
+                JSONObject jsonObj = new JSONObject(result);
+                JSONObject results = jsonObj.getJSONObject("result");
+                JSONArray data = results.getJSONArray("data");
+
+                String[] crops=new String[data.length()];
+                for(int i=0; i<crops.length; i++) {
+                    crops[i]=formatString(data.optString(i));
+                }
+
+                createList(crops);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 

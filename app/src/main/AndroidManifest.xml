@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fieldbook.tracker"
-    android:versionCode="331"
-    android:versionName="3.3.1">
+    android:versionCode="400"
+    android:versionName="4.0.0">
 
     <uses-feature android:name="android.hardware.location" android:required="false"/>
 
@@ -43,7 +43,7 @@
         </activity>
 
         <activity
-            android:name=".Search.SearchActivity"
+            android:name=".search.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -79,7 +79,16 @@
             android:theme="@style/ActivityDialog" />
 
         <activity
-            android:name=".Trait.TraitEditorActivity"
+            android:name=".traits.TraitEditorActivity"
+            android:alwaysRetainTaskState="false"
+            android:configChanges="keyboardHidden|orientation"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+
+        <activity
+            android:name=".fields.FieldEditorActivity"
             android:alwaysRetainTaskState="false"
             android:configChanges="keyboardHidden|orientation"
             android:finishOnTaskLaunch="true"
@@ -94,28 +103,28 @@
             android:theme="@style/ActivityDialog" />
 
         <activity
-            android:name=".Tutorial.TutorialMainActivity"
+            android:name=".tutorial.TutorialMainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppDialog" />
 
         <activity
-            android:name=".Tutorial.TutorialSettingsActivity"
+            android:name=".tutorial.TutorialSettingsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppDialog" />
 
         <activity
-            android:name=".Tutorial.TutorialTraitsActivity"
+            android:name=".tutorial.TutorialTraitsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppDialog" />
 
         <activity
-            android:name=".Tutorial.TutorialFieldActivity"
+            android:name=".tutorial.TutorialFieldActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"

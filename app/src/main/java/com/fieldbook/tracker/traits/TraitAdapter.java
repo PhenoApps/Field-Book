@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.Trait;
+package com.fieldbook.tracker.traits;
 
 import android.support.v7.app.AlertDialog;
 import android.content.Context;
@@ -27,7 +27,7 @@ import java.util.HashMap;
 /**
  * Loads data on trait editor screen
  */
-public class TraitAdapter extends BaseAdapter {
+class TraitAdapter extends BaseAdapter {
 
     ArrayList<TraitObject> list;
     private Context context;
@@ -76,7 +76,7 @@ public class TraitAdapter extends BaseAdapter {
             convertView = vi.inflate(R.layout.traitline, parent, false);
 
             holder = new ViewHolder();
-            holder.name = (TextView) convertView.findViewById(R.id.text1);
+            holder.name = (TextView) convertView.findViewById(R.id.field_name);
             holder.format = (ImageView) convertView.findViewById(R.id.traitType);
             holder.visible = (CheckBox) convertView.findViewById(R.id.visible);
             holder.dragSort = (ImageView) convertView.findViewById(R.id.dragSort);

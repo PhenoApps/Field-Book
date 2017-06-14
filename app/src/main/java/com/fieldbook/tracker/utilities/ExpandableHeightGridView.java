@@ -1,13 +1,10 @@
-package com.fieldbook.tracker;
+package com.fieldbook.tracker.utilities;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
-/**
- * Created by Trevor on 11/28/2015.
- */
 public class ExpandableHeightGridView extends GridView
 {
 

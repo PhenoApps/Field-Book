@@ -1,4 +1,4 @@
-package com.fieldbook.tracker;
+package com.fieldbook.tracker.utilities;
 
 import android.os.Environment;
 
@@ -25,9 +25,6 @@ public class Constants {
 
     public static String BACKUPPATH = Environment.getExternalStorageDirectory()
             + "/fieldBook/database";
-
-    public static String ERRORPATH = Environment.getExternalStorageDirectory()
-            + "/fieldBook/errors";
 
     public static String UPDATEPATH = Environment.getExternalStorageDirectory()
             + "/fieldBook/updates";
