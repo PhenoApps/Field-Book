@@ -54,7 +54,7 @@ public class DatagridActivity extends AppCompatActivity {
         getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
                 .getDisplayMetrics());
 
-        setContentView(R.layout.datagrid);
+        setContentView(R.layout.activity_datagrid);
         setTitle(R.string.datagrid);
 
         gridView = (GridView) findViewById(R.id.tableLayout1);
@@ -116,7 +116,7 @@ public class DatagridActivity extends AppCompatActivity {
         gridView.setFastScrollEnabled(true);
 
         adapter = new ArrayAdapter<>(this,
-                R.layout.simple_list_item, ArrayofName);
+                R.layout.listitem_datagrid, ArrayofName);
 
         gridView.setAdapter(adapter);
 

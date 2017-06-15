@@ -3,19 +3,19 @@
     <item
         android:id="@+id/help"
         android:title="@string/tutorial"
-        android:icon="@drawable/ic_help"
+        android:icon="@drawable/ic_tb_help"
         android:showAsAction="always" />
 
     <item
         android:id="@+id/database"
         android:title="@string/dbformat"
-        android:icon="@drawable/ic_database"
+        android:icon="@drawable/ic_tb_database"
         android:showAsAction="ifRoom" />"
 
     <item
         android:id="@+id/about"
         android:title="@string/about"
-        android:icon="@drawable/ic_info"
+        android:icon="@drawable/ic_tb_info"
         android:showAsAction="ifRoom" />"
 
 	</menu>

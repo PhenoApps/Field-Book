@@ -72,7 +72,7 @@ class FieldAdapter extends BaseAdapter {
 
         if (convertView == null) {
             holder = new ViewHolder();
-            convertView = mLayoutInflater.inflate(R.layout.fieldline, null);
+            convertView = mLayoutInflater.inflate(R.layout.listitem_field, null);
 
             holder.fieldName = (TextView) convertView.findViewById(R.id.field_name);
             holder.count = (TextView) convertView.findViewById(R.id.field_count);
@@ -160,7 +160,7 @@ class FieldAdapter extends BaseAdapter {
             public void onClick(final View v) {
                 PopupMenu popup = new PopupMenu(FieldEditorActivity.thisActivity, v);
                 //Inflating the Popup using xml file
-                popup.getMenuInflater().inflate(R.menu.fielditemmenu, popup.getMenu());
+                popup.getMenuInflater().inflate(R.menu.menu_field_listitem, popup.getMenu());
 
                 //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {

@@ -460,7 +460,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="75dp"
                 android:layout_gravity="center"
-                android:background="@drawable/round_button"
+                android:background="@drawable/custom_round_button"
                 android:gravity="center"
                 android:minWidth="75dp"
                 android:text="/"

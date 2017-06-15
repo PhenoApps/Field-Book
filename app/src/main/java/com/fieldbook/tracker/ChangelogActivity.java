@@ -52,7 +52,7 @@ public class ChangelogActivity extends AppCompatActivity {
         ed.apply();
 
 
-        setContentView(R.layout.changelog);
+        setContentView(R.layout.activity_changelog);
         setTitle(R.string.updatemsg);
 
         params = getWindow().getAttributes();

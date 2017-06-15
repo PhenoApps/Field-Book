@@ -1,6 +1,10 @@
 package com.fieldbook.tracker;
 
 import android.app.Activity;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.content.Context;
@@ -78,10 +82,8 @@ import com.fieldbook.tracker.utilities.GalleryImageAdapter;
 import com.fieldbook.tracker.utilities.RangeObject;
 import com.fieldbook.tracker.utilities.Utils;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -235,6 +237,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     ImageButton deleteValue;
     ImageButton missingValue;
 
+    SensorManager sensorManager ;
+    Sensor accelerometer;
+    Sensor magnetometer;
+
+    TextView pitchTv;
+    TextView rollTv;
+    TextView azimutTv;
+    SensorEventListener mEventListener;
+
     /**
      * Trait layouts
      */
@@ -250,6 +261,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     LinearLayout traitDiseaseRating;
     LinearLayout traitMulticat;
     LinearLayout traitLocation;
+    LinearLayout traitAngle;
 
     /**
      * Test area
@@ -315,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private void loadScreen() {
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
 
         initToolbars();
 
@@ -378,6 +390,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         traitDiseaseRating = (LinearLayout) findViewById(R.id.diseaseLayout);
         traitMulticat = (LinearLayout) findViewById(R.id.multicatLayout);
         traitLocation = (LinearLayout) findViewById(R.id.locationLayout);
+        traitAngle = (LinearLayout) findViewById(R.id.angleLayout);
 
         traitType = (Spinner) findViewById(R.id.traitType);
         newTraits = new HashMap();
@@ -563,6 +576,48 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         plotName = (TextView) findViewById(R.id.plotName);
 
         ImageButton getLocation = (ImageButton) traitLocation.findViewById(R.id.getLocationBtn);
+
+        sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        pitchTv = (TextView) traitAngle.findViewById(R.id.pitch);
+        rollTv = (TextView) traitAngle.findViewById(R.id.roll);
+        azimutTv = (TextView) traitAngle.findViewById(R.id.azimuth);
+
+        mEventListener = new SensorEventListener() {
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            }
+
+            float[] mGravity;
+            float[] mGeomagnetic;
+            Float azimut;
+            Float pitch;
+            Float roll;
+
+            public void onSensorChanged(SensorEvent event) {
+                if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                    mGravity = event.values;
+                if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+                    mGeomagnetic = event.values;
+                if (mGravity != null && mGeomagnetic != null) {
+                    float R[] = new float[9];
+                    float I[] = new float[9];
+                    boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+                    if (success) {
+                        float orientation[] = new float[3];
+                        SensorManager.getOrientation(R, orientation);
+                        azimut = orientation[0]; // orientation contains: azimut, pitch and roll
+                        pitch = orientation[1];
+                        roll = orientation[2];
+
+                        pitchTv.setText(Double.toString(Math.toDegrees(pitch)));
+                        rollTv.setText(Double.toString(Math.toDegrees(roll)));
+                        azimutTv.setText(Double.toString(Math.toDegrees(azimut)));
+                    }
+                }
+            }
+        };
 
         Button addDayBtn = (Button) traitDate.findViewById(R.id.addDateBtn);
         Button minusDayBtn = (Button) traitDate.findViewById(R.id.minusDateBtn);
@@ -989,10 +1044,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 if (val.equalsIgnoreCase("false")) {
                     val = "true";
-                    eImg.setImageResource(R.drawable.boolean_true);
+                    eImg.setImageResource(R.drawable.trait_boolean_true);
                 } else {
                     val = "false";
-                    eImg.setImageResource(R.drawable.boolean_false);
+                    eImg.setImageResource(R.drawable.trait_boolean_false);
                 }
 
                 updateTrait(currentTrait.trait, "boolean", val);
@@ -1006,7 +1061,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        rangeLeft.setImageResource(R.drawable.ml_arrows);
+                        rangeLeft.setImageResource(R.drawable.main_entry_left_pressed);
                         rangeLeft.performClick();
 
                         if (repeatHandler != null) {
@@ -1022,7 +1077,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
-                        rangeLeft.setImageResource(R.drawable.ml_arrow);
+                        rangeLeft.setImageResource(R.drawable.main_entry_left_unpressed);
 
                         if (repeatHandler == null) {
                             return true;
@@ -1033,7 +1088,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         repeatUpdate();
                         break;
                     case MotionEvent.ACTION_CANCEL:
-                        rangeLeft.setImageResource(R.drawable.ml_arrow);
+                        rangeLeft.setImageResource(R.drawable.main_entry_left_unpressed);
 
                         repeatHandler.removeCallbacks(mActionLeft);
                         repeatHandler = null;
@@ -1134,7 +1189,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 switch (event.getAction()) {
 
                     case MotionEvent.ACTION_DOWN:
-                        rangeRight.setImageResource(R.drawable.mr_arrows);
+                        rangeRight.setImageResource(R.drawable.main_entry_right_pressed);
                         rangeRight.performClick();
 
                         if (repeatHandler != null) return true;
@@ -1148,7 +1203,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
-                        rangeRight.setImageResource(R.drawable.mr_arrow);
+                        rangeRight.setImageResource(R.drawable.main_entry_right_unpressed);
 
                         if (repeatHandler == null) return true;
                         repeatHandler.removeCallbacks(mActionRight);
@@ -1157,7 +1212,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         repeatUpdate();
                         break;
                     case MotionEvent.ACTION_CANCEL:
-                        rangeRight.setImageResource(R.drawable.mr_arrow);
+                        rangeRight.setImageResource(R.drawable.main_entry_right_unpressed);
 
                         repeatHandler.removeCallbacks(mActionRight);
                         repeatHandler = null;
@@ -1268,12 +1323,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 switch (event.getAction()) {
 
                     case MotionEvent.ACTION_DOWN:
-                        traitLeft.setImageResource(R.drawable.l_arrows);
+                        traitLeft.setImageResource(R.drawable.main_trait_left_arrow_pressed);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
-                        traitLeft.setImageResource(R.drawable.l_arrow);
+                        traitLeft.setImageResource(R.drawable.main_trait_left_arrow_unpressed);
                     case MotionEvent.ACTION_CANCEL:
                         break;
                 }
@@ -1318,12 +1373,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 switch (event.getAction()) {
 
                     case MotionEvent.ACTION_DOWN:
-                        traitRight.setImageResource(R.drawable.r_arrows);
+                        traitRight.setImageResource(R.drawable.main_trait_right_pressed);
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
-                        traitRight.setImageResource(R.drawable.r_arrow);
+                        traitRight.setImageResource(R.drawable.main_trait_right_unpressed);
                     case MotionEvent.ACTION_CANCEL:
                         break;
                 }
@@ -1432,10 +1487,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     case "boolean":
                         if (currentTrait.defaultValue.trim().toLowerCase().equals("true")) {
                             updateTrait(currentTrait.trait, "boolean", "true");
-                            eImg.setImageResource(R.drawable.boolean_true);
+                            eImg.setImageResource(R.drawable.trait_boolean_true);
                         } else {
                             updateTrait(currentTrait.trait, "boolean", "false");
-                            eImg.setImageResource(R.drawable.boolean_false);
+                            eImg.setImageResource(R.drawable.trait_boolean_false);
                         }
                         break;
                     case "photo":
@@ -1462,7 +1517,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         removeTrait(currentTrait.trait);
                         etCurVal.setText("");
                         mRecording = false;
-                        doRecord.setImageResource(R.drawable.ic_audio);
+                        doRecord.setImageResource(R.drawable.trait_audio);
                         mListening = false;
                         mRecording = false;
                         break;
@@ -1629,7 +1684,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private void scanSampleFiles() {
-        String[] fileList = {Constants.TRAITPATH + "/trait_sample.trt", Constants.FIELDIMPORTPATH + "/field_sample.csv", Constants.FIELDIMPORTPATH + "/field_sample.xls", Constants.TRAITPATH + "/severity.txt"};
+        String[] fileList = {Constants.TRAITPATH + "/trait_sample.trt", Constants.FIELDIMPORTPATH + "/field_sample.csv", Constants.FIELDIMPORTPATH + "/field_sample2.csv", Constants.FIELDIMPORTPATH + "/field_sample3.csv" , Constants.TRAITPATH + "/severity.txt"};
 
         for (String aFileList : fileList) {
             File temp = new File(aFileList);
@@ -1836,7 +1891,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             savePrefix = false;
 
             ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(
-                    this, R.layout.spinnerlayout, prefixTraits);
+                    this, R.layout.custom_spinnerlayout, prefixTraits);
 
             drop1prefix.setAdapter(prefixArrayAdapter);
             drop1prefix.setSelection(drop1Selection);
@@ -2018,9 +2073,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         if (traits != null) {
             ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<>(
-                    this, R.layout.spinnerlayout, traits);
+                    this, R.layout.custom_spinnerlayout, traits);
             directionArrayAdapter
-                    .setDropDownViewResource(R.layout.spinnerlayout);
+                    .setDropDownViewResource(R.layout.custom_spinnerlayout);
             traitType.setAdapter(directionArrayAdapter);
 
             traitType.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -2070,6 +2125,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
                         etCurVal.setSelection(etCurVal.getText().length());
@@ -2122,6 +2178,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
 
@@ -2156,6 +2213,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
                         etCurVal.removeTextChangedListener(cvNum);
@@ -2231,6 +2289,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.setEnabled(false);
                         etCurVal.setVisibility(View.GONE);
@@ -2307,6 +2366,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.setVisibility(EditText.GONE);
                         etCurVal.setEnabled(false);
@@ -2359,6 +2419,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.setVisibility(EditText.GONE);
                         etCurVal.setEnabled(false);
@@ -2366,18 +2427,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         if (!newTraits.containsKey(currentTrait.trait)) {
                             if (currentTrait.defaultValue.trim().equalsIgnoreCase("true")) {
                                 updateTrait(currentTrait.trait, "boolean", "true");
-                                eImg.setImageResource(R.drawable.boolean_true);
+                                eImg.setImageResource(R.drawable.trait_boolean_true);
                             } else {
                                 updateTrait(currentTrait.trait, "boolean", "false");
-                                eImg.setImageResource(R.drawable.boolean_false);
+                                eImg.setImageResource(R.drawable.trait_boolean_false);
                             }
                         } else {
                             String bval = newTraits.get(currentTrait.trait).toString();
 
                             if (bval.equalsIgnoreCase("false")) {
-                                eImg.setImageResource(R.drawable.boolean_false);
+                                eImg.setImageResource(R.drawable.trait_boolean_false);
                             } else {
-                                eImg.setImageResource(R.drawable.boolean_true);
+                                eImg.setImageResource(R.drawable.trait_boolean_true);
                             }
 
                         }
@@ -2394,18 +2455,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
 
                         if (!newTraits.containsKey(currentTrait.trait)) {
-                            doRecord.setImageResource(R.drawable.ic_audio);
+                            doRecord.setImageResource(R.drawable.trait_audio);
                             etCurVal.setText("");
                         } else if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
-                            doRecord.setImageResource(R.drawable.ic_audio);
+                            doRecord.setImageResource(R.drawable.trait_audio);
                             etCurVal.setText("NA");
                         } else {
                             mRecordingLocation = new File(newTraits.get(currentTrait.trait).toString());
-                            doRecord.setImageResource(R.drawable.ic_play_arrow);
+                            doRecord.setImageResource(R.drawable.trait_audio_play);
                             etCurVal.setText(getString(R.string.stored));
                         }
 
@@ -2422,6 +2484,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.removeTextChangedListener(cvText);
                         etCurVal.removeTextChangedListener(cvNum);
@@ -2475,6 +2538,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.setVisibility(EditText.GONE);
                         etCurVal.setEnabled(false);
@@ -2498,6 +2562,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.VISIBLE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.removeTextChangedListener(cvText);
                         etCurVal.setVisibility(EditText.VISIBLE);
@@ -2532,6 +2597,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.VISIBLE);
                         traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
 
@@ -2568,7 +2634,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                                 @Override
                                 public View getView(int position, View convertView, ViewGroup parent) {
-                                    final Button newButton = (Button) LayoutInflater.from(MainActivity.this).inflate(R.layout.multicat_button, null);
+                                    final Button newButton = (Button) LayoutInflater.from(MainActivity.this).inflate(R.layout.custom_button_multicat, null);
                                     newButton.setText(cat[position]);
                                     newButton.setOnClickListener(new OnClickListener() {
                                         @Override
@@ -2608,6 +2674,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitDiseaseRating.setVisibility(View.GONE);
                         traitMulticat.setVisibility(View.GONE);
                         traitLocation.setVisibility(View.VISIBLE);
+                        traitAngle.setVisibility(View.GONE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
 
@@ -2629,6 +2696,39 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             etCurVal.addTextChangedListener(cvNum);
                         }
 
+                    } else if(currentTrait.format.equals("angle")) {
+                        traitText.setVisibility(View.GONE);
+                        traitNumeric.setVisibility(View.GONE);
+                        traitPercent.setVisibility(View.GONE);
+                        traitDate.setVisibility(View.GONE);
+                        traitCategorical.setVisibility(View.GONE);
+                        traitBoolean.setVisibility(View.GONE);
+                        traitAudio.setVisibility(View.GONE);
+                        traitPhoto.setVisibility(View.GONE);
+                        traitCounter.setVisibility(View.GONE);
+                        traitDiseaseRating.setVisibility(View.GONE);
+                        traitMulticat.setVisibility(View.GONE);
+                        traitLocation.setVisibility(View.GONE);
+                        traitAngle.setVisibility(View.VISIBLE);
+
+                        etCurVal.setVisibility(EditText.VISIBLE);
+
+                        if (newTraits.containsKey(currentTrait.trait)) {
+                            etCurVal.removeTextChangedListener(cvNum);
+                            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
+                            etCurVal.setTextColor(Color.parseColor(displayColor));
+                            etCurVal.addTextChangedListener(cvNum);
+                        } else {
+                            etCurVal.removeTextChangedListener(cvNum);
+                            etCurVal.setText("");
+                            etCurVal.setTextColor(Color.BLACK);
+                            etCurVal.addTextChangedListener(cvNum);
+
+                            sensorManager.registerListener(mEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                                    SensorManager.SENSOR_DELAY_NORMAL);
+                            sensorManager.registerListener(mEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+                                    SensorManager.SENSOR_DELAY_NORMAL);
+                        }
                     } else {
                         traitText.setVisibility(View.GONE);
                         traitNumeric.setVisibility(View.GONE);
@@ -2715,7 +2815,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void beginPlayback()
     {
         mListening = true;
-        doRecord.setImageResource(R.drawable.ic_stop);
+        doRecord.setImageResource(R.drawable.trait_audio_stop);
         mPlayer = new MediaPlayer();
         mPlayer = MediaPlayer.create(MainActivity.this, Uri.parse(mRecordingLocation.getAbsolutePath()));
 
@@ -2731,7 +2831,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mp) {
                     mListening = false;
-                    doRecord.setImageResource(R.drawable.ic_play_arrow);
+                    doRecord.setImageResource(R.drawable.trait_audio_play);
 
                     deleteValue.setEnabled(true);
                 }
@@ -3053,7 +3153,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         invalidateOptionsMenu();
 
         nvDrawer.getMenu().clear();
-        nvDrawer.inflateMenu(R.menu.drawer_view);
+        nvDrawer.inflateMenu(R.menu.nav_drawer_view);
 
         // If reload data is true, it means there was an import operation, and
         // the screen should refresh
@@ -3212,7 +3312,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        new MenuInflater(MainActivity.this).inflate(R.menu.mainmenu, menu);
+        new MenuInflater(MainActivity.this).inflate(R.menu.menu_main, menu);
 
         systemMenu = menu;
 
@@ -3340,7 +3440,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 traitBoolean, traitAudio, traitPhoto, traitCounter, traitDiseaseRating, traitMulticat};
 
         if(lock) {
-            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock);
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
             missingValue.setEnabled(false);
             deleteValue.setEnabled(false);
             etCurVal.setEnabled(false);
@@ -3350,7 +3450,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
         } else {
-            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_unlock);
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
             missingValue.setEnabled(true);
             deleteValue.setEnabled(true);
 
@@ -3393,7 +3493,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.gotobarcode, null);
+        View layout = inflater.inflate(R.layout.dialog_gotobarcode, null);
 
         builder.setTitle(R.string.jumptoplotidbutton)
                 .setCancelable(true)
@@ -3579,7 +3679,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 if (mListening) {
                     mPlayer.stop();
-                    doRecord.setImageResource(R.drawable.ic_play_arrow);
+                    doRecord.setImageResource(R.drawable.trait_audio_play);
 
                     mListening = false;
                     deleteValue.setEnabled(true);
@@ -3604,7 +3704,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                     mRecording = false;
                     //doRecord.setText(R.string.play);
-                    doRecord.setImageResource(R.drawable.ic_play_arrow);
+                    doRecord.setImageResource(R.drawable.trait_audio_play);
 
                     rangeLeft.setEnabled(true);
                     rangeRight.setEnabled(true);
@@ -3635,7 +3735,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     mRecorder.start();
                     mRecording = true;
 
-                    doRecord.setImageResource(R.drawable.ic_stop);
+                    doRecord.setImageResource(R.drawable.trait_audio_stop);
                 }
                 break;
 
@@ -3903,7 +4003,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.summary, null);
+        View layout = inflater.inflate(R.layout.dialog_summary, null);
 
         builder.setTitle(R.string.mapsummary)
                 .setCancelable(true)
@@ -4097,7 +4197,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             catch (IOException e) {
                 Log.e(TAG, "-- Error in setting image");
-                return BitmapFactory.decodeResource(getResources(), R.drawable.photo_missing);
+                return BitmapFactory.decodeResource(getResources(), R.drawable.trait_photo_missing);
             }
 
             catch(OutOfMemoryError oom) {
@@ -4107,7 +4207,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             return correctBmp;
 
         } catch (Exception e) {
-            return BitmapFactory.decodeResource(getResources(), R.drawable.photo_missing);
+            return BitmapFactory.decodeResource(getResources(), R.drawable.trait_photo_missing);
         }
     }
 

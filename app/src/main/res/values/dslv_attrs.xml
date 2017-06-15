@@ -36,10 +36,4 @@
         <attr name="sort_enabled" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="DragSortListPreference">
-        <attr name="array_adapter_view" format="integer" />
-        <attr name="pref_layout" format="integer" />
-        <attr name="text_field" format="integer" />
-    </declare-styleable>
-
 </resources>

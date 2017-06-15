@@ -1299,22 +1299,11 @@ public class DataHelper {
     }
 
     public void deleteField(int exp_id) {
-        String query;
-
-        query = "DELETE FROM " + EXP_INDEX + " WHERE exp_id = " + exp_id;
-        db.execSQL(query);
-
-        query = "DELETE FROM " + PLOTS + " WHERE exp_id = " + exp_id;
-        db.execSQL(query);
-
-        query = "DELETE FROM " + PLOT_ATTRIBUTES + " WHERE exp_id = " + exp_id;
-        db.execSQL(query);
-
-        query = "DELETE FROM " + PLOT_VALUES + " WHERE exp_id = " + exp_id;
-        db.execSQL(query);
-
-        query = "DELETE FROM " + USER_TRAITS + " WHERE exp_id = " + exp_id;
-        db.execSQL(query);
+        db.execSQL("DELETE FROM " + EXP_INDEX + " WHERE exp_id = " + exp_id);
+        db.execSQL("DELETE FROM " + PLOTS + " WHERE exp_id = " + exp_id);
+        db.execSQL("DELETE FROM " + PLOT_ATTRIBUTES + " WHERE exp_id = " + exp_id);
+        db.execSQL("DELETE FROM " + PLOT_VALUES + " WHERE exp_id = " + exp_id);
+        db.execSQL("DELETE FROM " + USER_TRAITS + " WHERE exp_id = " + exp_id);
     }
 
     public void switchField(int exp_id) {

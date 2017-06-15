@@ -3,7 +3,6 @@
     android:id="@+id/traitline"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/listmimic"
     android:focusable="false"
     android:focusableInTouchMode="false"
     android:gravity="center_vertical"

@@ -62,7 +62,7 @@ public class SearchActivity extends AppCompatActivity {
         getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
                 .getDisplayMetrics());
 
-        setContentView(R.layout.search);
+        setContentView(R.layout.activity_search);
 
         setTitle(R.string.search);
 
@@ -196,7 +196,7 @@ public class SearchActivity extends AppCompatActivity {
                     AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this, R.style.AppAlertDialog);
 
                     LayoutInflater inflater = SearchActivity.this.getLayoutInflater();
-                    View layout = inflater.inflate(R.layout.searchlist, null);
+                    View layout = inflater.inflate(R.layout.dialog_search_results, null);
 
                     builder.setTitle(R.string.results)
                             .setCancelable(true)
@@ -295,7 +295,7 @@ public class SearchActivity extends AppCompatActivity {
     // Helper function to add row
     public void addRow(String text) {
         LayoutInflater vi = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = vi.inflate(R.layout.searchrow, null);
+        View v = vi.inflate(R.layout.listitem_search_constructor, null);
 
         Spinner c = (Spinner) v.findViewById(R.id.columns);
         Spinner s = (Spinner) v.findViewById(R.id.like);
@@ -310,7 +310,7 @@ public class SearchActivity extends AppCompatActivity {
         likes[4] = getString(R.string.morethan);
         likes[5] = getString(R.string.lessthan);
 
-        ArrayAdapter adapter = new ArrayAdapter(SearchActivity.this, R.layout.spinnerlayout, likes);
+        ArrayAdapter adapter = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinnerlayout, likes);
         //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(adapter);
 
@@ -319,7 +319,7 @@ public class SearchActivity extends AppCompatActivity {
         if (col != null) {
             rangeUntil = col.length;
 
-            ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.spinnerlayout,
+            ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinnerlayout,
                     concat(col, MainActivity.dt.getVisibleTrait()));
             adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             c.setAdapter(adapter2);

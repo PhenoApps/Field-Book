@@ -80,10 +80,10 @@
                     android:layout_height="65dp"
                     android:layout_margin="10dp"
                     android:scaleType="fitXY"
-                    android:background="@drawable/round_button"
+                    android:background="@drawable/custom_round_button"
                     android:padding="10dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_save"
+                    android:src="@drawable/trait_date_save"
                     android:gravity="center" />
 
                 <Button

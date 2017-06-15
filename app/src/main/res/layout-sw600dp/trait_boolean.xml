@@ -13,5 +13,5 @@
         android:padding="10dp"
         android:scaleType="fitXY"
         android:layout_gravity="center_horizontal"
-        android:src="@drawable/boolean_true" />
+        android:src="@drawable/trait_boolean_true" />
 </LinearLayout>

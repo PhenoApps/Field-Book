@@ -110,30 +110,30 @@ package com.fieldbook.tracker.barcodes;
  */
 public class IntentIntegrator {
 
-    public static final int REQUEST_CODE = 0x0000c0de; // Only use bottom 16 bits
+    private static final int REQUEST_CODE = 0x0000c0de; // Only use bottom 16 bits
     private static final String TAG = IntentIntegrator.class.getSimpleName();
 
-    public static final String DEFAULT_TITLE = "Install Barcode Scanner?";
-    public static final String DEFAULT_MESSAGE =
+    private static final String DEFAULT_TITLE = "Install Barcode Scanner?";
+    private static final String DEFAULT_MESSAGE =
             "This application requires Barcode Scanner. Would you like to install it?";
-    public static final String DEFAULT_YES = "Yes";
-    public static final String DEFAULT_NO = "No";
+    private static final String DEFAULT_YES = "Yes";
+    private static final String DEFAULT_NO = "No";
 
     private static final String BS_PACKAGE = "com.google.zxing.client.android";
     private static final String BSPLUS_PACKAGE = "com.srowen.bs.android";
 
     // supported barcode formats
-    public static final Collection<String> PRODUCT_CODE_TYPES = list("UPC_A", "UPC_E", "EAN_8", "EAN_13", "RSS_14");
+    private static final Collection<String> PRODUCT_CODE_TYPES = list("UPC_A", "UPC_E", "EAN_8", "EAN_13", "RSS_14");
     public static final Collection<String> ONE_D_CODE_TYPES =
             list("UPC_A", "UPC_E", "EAN_8", "EAN_13", "CODE_39", "CODE_93", "CODE_128",
                     "ITF", "RSS_14", "RSS_EXPANDED");
     public static final Collection<String> QR_CODE_TYPES = Collections.singleton("QR_CODE");
     public static final Collection<String> DATA_MATRIX_TYPES = Collections.singleton("DATA_MATRIX");
 
-    public static final Collection<String> ALL_CODE_TYPES = null;
+    private static final Collection<String> ALL_CODE_TYPES = null;
 
-    public static final List<String> TARGET_BARCODE_SCANNER_ONLY = Collections.singletonList(BS_PACKAGE);
-    public static final List<String> TARGET_ALL_KNOWN = list(
+    private static final List<String> TARGET_BARCODE_SCANNER_ONLY = Collections.singletonList(BS_PACKAGE);
+    private static final List<String> TARGET_ALL_KNOWN = list(
             BSPLUS_PACKAGE,             // Barcode Scanner+
             BSPLUS_PACKAGE + ".simple", // Barcode Scanner+ Simple
             BS_PACKAGE                  // Barcode Scanner
@@ -186,7 +186,7 @@ public class IntentIntegrator {
         this.title = title;
     }
 
-    public void setTitleByID(int titleID) {
+    private void setTitleByID(int titleID) {
         title = activity.getString(titleID);
     }
 
@@ -230,7 +230,7 @@ public class IntentIntegrator {
         return targetApplications;
     }
 
-    public final void setTargetApplications(List<String> targetApplications) {
+    private void setTargetApplications(List<String> targetApplications) {
         if (targetApplications.isEmpty()) {
             throw new IllegalArgumentException("No target applications");
         }
@@ -245,7 +245,7 @@ public class IntentIntegrator {
         return moreExtras;
     }
 
-    public final void addExtra(String key, Object value) {
+    private void addExtra(String key, Object value) {
         moreExtras.put(key, value);
     }
 
@@ -279,7 +279,7 @@ public class IntentIntegrator {
      * @return the {@link AlertDialog} that was shown to the user prompting them to download the app
      *   if a prompt was needed, or null otherwise.
      */
-    public final AlertDialog initiateScan(Collection<String> desiredBarcodeFormats) {
+    private AlertDialog initiateScan(Collection<String> desiredBarcodeFormats) {
         return initiateScan(desiredBarcodeFormats, -1);
     }
 
@@ -293,7 +293,7 @@ public class IntentIntegrator {
      * @return the {@link AlertDialog} that was shown to the user prompting them to download the app
      *   if a prompt was needed, or null otherwise
      */
-    public final AlertDialog initiateScan(Collection<String> desiredBarcodeFormats, int cameraId) {
+    private AlertDialog initiateScan(Collection<String> desiredBarcodeFormats, int cameraId) {
         Intent intentScan = new Intent(BS_PACKAGE + ".SCAN");
         intentScan.addCategory(Intent.CATEGORY_DEFAULT);
 
@@ -336,7 +336,7 @@ public class IntentIntegrator {
      * @see android.app.Activity#startActivityForResult(Intent, int)
      * @see android.app.Fragment#startActivityForResult(Intent, int)
      */
-    protected void startActivityForResult(Intent intent, int code) {
+    private void startActivityForResult(Intent intent, int code) {
         if (fragment == null) {
             activity.startActivityForResult(intent, code);
         } else {
@@ -442,7 +442,7 @@ public class IntentIntegrator {
      *   if a prompt was needed, or null otherwise
      * @see #shareText(CharSequence, CharSequence)
      */
-    public final AlertDialog shareText(CharSequence text) {
+    private AlertDialog shareText(CharSequence text) {
         return shareText(text, "TEXT_TYPE");
     }
 
@@ -455,7 +455,7 @@ public class IntentIntegrator {
      * @return the {@link AlertDialog} that was shown to the user prompting them to download the app
      *   if a prompt was needed, or null otherwise
      */
-    public final AlertDialog shareText(CharSequence text, CharSequence type) {
+    private AlertDialog shareText(CharSequence text, CharSequence type) {
         Intent intent = new Intent();
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setAction(BS_PACKAGE + ".ENCODE");

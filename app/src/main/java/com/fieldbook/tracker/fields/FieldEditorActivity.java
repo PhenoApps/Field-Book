@@ -45,18 +45,12 @@ import com.fieldbook.tracker.tutorial.TutorialFieldActivity;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 import jxl.Workbook;
@@ -150,7 +144,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
                 .getDisplayMetrics());
 
-        setContentView(R.layout.fields_activity);
+        setContentView(R.layout.activity_fields);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -183,7 +177,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.config, null);
+        View layout = inflater.inflate(R.layout.dialog_list, null);
 
         builder.setTitle(R.string.importfields)
                 .setCancelable(true)
@@ -252,7 +246,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        new MenuInflater(com.fieldbook.tracker.fields.FieldEditorActivity.this).inflate(R.menu.fieldmenu, menu);
+        new MenuInflater(com.fieldbook.tracker.fields.FieldEditorActivity.this).inflate(R.menu.menu_fields, menu);
 
         systemMenu = menu;
 
@@ -474,7 +468,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.importdialog, null);
+        View layout = inflater.inflate(R.layout.dialog_import, null);
 
         builder.setTitle(R.string.importfields)
                 .setCancelable(true)
@@ -726,7 +720,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     // Helper function to set spinner adapter and listener
     private void setSpinner(Spinner spinner, String[] data, String pref) {
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.spinnerlayout, data);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.custom_spinnerlayout, data);
         spinner.setAdapter(itemsAdapter);
         int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(0)));
         spinner.setSelection(spinnerPosition);

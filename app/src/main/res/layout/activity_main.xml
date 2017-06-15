@@ -53,7 +53,7 @@
                         android:layout_weight="0.4"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
-                        android:src="@drawable/ic_missing"
+                        android:src="@drawable/main_ic_missing"
                         android:textColor="#FFFFFF" />
 
                     <ImageButton
@@ -66,7 +66,7 @@
                         android:layout_weight="0.4"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
-                        android:src="@drawable/ic_delete_forever"
+                        android:src="@drawable/main_ic_delete_forever"
                         android:textColor="#FFFFFF" />
 
                 </LinearLayout>
@@ -192,7 +192,7 @@
                                 android:layout_weight=".1"
                                 android:paddingRight="5dp"
                                 android:scaleType="fitCenter"
-                                android:src="@drawable/l_arrow" />
+                                android:src="@drawable/main_trait_left_arrow_unpressed" />
 
                             <Spinner
                                 android:id="@+id/traitType"
@@ -210,7 +210,7 @@
                                 android:adjustViewBounds="true"
                                 android:paddingLeft="5dp"
                                 android:scaleType="fitCenter"
-                                android:src="@drawable/r_arrow" />
+                                android:src="@drawable/main_trait_right_unpressed" />
                         </TableRow>
                     </TableLayout>
 
@@ -252,7 +252,7 @@
                                     android:layout_height="80dp"
                                     android:adjustViewBounds="true"
                                     android:scaleType="fitCenter"
-                                    android:src="@drawable/ml_arrow" />
+                                    android:src="@drawable/main_entry_left_unpressed" />
 
                                 <GridLayout
                                     android:layout_width="match_parent"
@@ -344,7 +344,7 @@
                                     android:layout_height="80dp"
                                     android:adjustViewBounds="true"
                                     android:scaleType="fitCenter"
-                                    android:src="@drawable/mr_arrow" />
+                                    android:src="@drawable/main_entry_right_unpressed" />
                             </TableRow>
                         </TableLayout>
                     </LinearLayout>
@@ -444,6 +444,11 @@
                                 android:layout_width="fill_parent"
                                 android:layout_height="wrap_content" />
 
+                            <include
+                                layout="@layout/trait_angle"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content" />
+
                         </LinearLayout>
                     </ScrollView>
                 </LinearLayout>
@@ -459,5 +464,5 @@
         android:layout_gravity="start"
         android:background="@android:color/white"
         app:headerLayout="@layout/nav_header"
-        app:menu="@menu/drawer_view" />
+        app:menu="@menu/nav_drawer_view" />
 </android.support.v4.widget.DrawerLayout>

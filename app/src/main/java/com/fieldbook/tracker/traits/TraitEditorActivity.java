@@ -52,7 +52,6 @@ import com.fieldbook.tracker.tutorial.TutorialTraitsActivity;
 import com.fieldbook.tracker.dragsort.DragSortListView;
 import com.fieldbook.tracker.dragsort.DragSortController;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -269,7 +268,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
                 .getDisplayMetrics());
 
-        setContentView(R.layout.draglist_activity);
+        setContentView(R.layout.activity_traits);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -289,8 +288,8 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         thisActivity = this;
 
-        final String[] data = new String[12];
-        final String[] enData = new String[12];
+        final String[] data = new String[13];
+        final String[] enData = new String[13];
 
         data[0] = getString(R.string.numeric);
         data[1] = getString(R.string.qualitative);
@@ -304,6 +303,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         data[9] = getString(R.string.rustrating);
         data[10] = getString(R.string.multicategorical);
         data[11] = getString(R.string.location_trait);
+        data[12] = getString(R.string.angle);
 
         enData[0] = "Numeric";
         enData[1] = "Categorical";
@@ -317,6 +317,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         enData[9] = "Disease Rating";
         enData[10] = "Multicat";
         enData[11] = "Location";
+        enData[12] = "Angle";
 
         HashMap visibility = MainActivity.dt.getTraitVisibility();
         traitList = (DragSortListView) findViewById(R.id.myList);
@@ -324,7 +325,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         if (!traitList.isShown())
             traitList.setVisibility(ListView.VISIBLE);
 
-        mAdapter = new TraitAdapter(thisActivity, R.layout.traitline, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
+        mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
 
         traitList.setAdapter(mAdapter);
         traitList.setDropListener(onDrop);
@@ -343,7 +344,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.trait, null);
+        View layout = inflater.inflate(R.layout.dialog_new_trait, null);
 
         builder.setTitle(R.string.addtrait)
                 .setCancelable(true)
@@ -447,7 +448,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
 
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.spinnerlayout, data);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.custom_spinnerlayout, data);
         format.setAdapter(itemsAdapter);
 
         closeBtn.setOnClickListener(new OnClickListener() {
@@ -771,6 +772,13 @@ public class TraitEditorActivity extends AppCompatActivity {
                 bool.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.GONE);
                 break;
+            case 12: //angle
+                defBox.setVisibility(View.GONE);
+                minBox.setVisibility(View.GONE);
+                maxBox.setVisibility(View.GONE);
+                bool.setVisibility(View.GONE);
+                categoryBox.setVisibility(View.GONE);
+                break;
         }
     }
 
@@ -800,7 +808,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             if (!traitList.isShown())
                 traitList.setVisibility(ListView.VISIBLE);
 
-            mAdapter = new TraitAdapter(thisActivity, R.layout.traitline, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
+            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
 
             traitList.setAdapter(mAdapter);
             traitList.setDropListener(onDrop);
@@ -813,7 +821,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        new MenuInflater(TraitEditorActivity.this).inflate(R.menu.traitmenu, menu);
+        new MenuInflater(TraitEditorActivity.this).inflate(R.menu.menu_traits, menu);
 
         systemMenu = menu;
 
@@ -895,7 +903,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.config, null);
+        View layout = inflater.inflate(R.layout.dialog_list, null);
 
         builder.setTitle(R.string.traits)
                 .setCancelable(true)
@@ -989,7 +997,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.config, null);
+        View layout = inflater.inflate(R.layout.dialog_list, null);
 
         builder.setTitle(R.string.sort)
                 .setCancelable(true)
@@ -1084,7 +1092,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.savedb, null);
+        View layout = inflater.inflate(R.layout.dialog_save_database, null);
 
         builder.setTitle(R.string.export)
                 .setCancelable(true)

@@ -53,7 +53,6 @@ import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
@@ -100,7 +99,6 @@ public class ConfigActivity extends AppCompatActivity {
     private CheckBox checkOverwrite;
     private Boolean checkDbBool = false;
     private Boolean checkExcelBool = false;
-    private Boolean checkOverwriteBool = false;
 
     public static boolean languageChange = false;
 
@@ -173,7 +171,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void loadScreen() {
-        setContentView(R.layout.config_activity);
+        setContentView(R.layout.activity_config);
 
         // Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -188,7 +186,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.config, null);
+        View layout = inflater.inflate(R.layout.dialog_list, null);
 
         builder.setTitle(R.string.profile)
                 .setCancelable(true)
@@ -262,7 +260,7 @@ public class ConfigActivity extends AppCompatActivity {
                         break;
                     case 6:
                         intent.setClassName(ConfigActivity.this,
-                                ApiActivity.class.getName());
+                                BrapiActivity.class.getName());
                         startActivity(intent);
                         break;
                 }
@@ -490,7 +488,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.about, null);
+        View layout = inflater.inflate(R.layout.dialog_about, null);
 
         builder.setTitle(R.string.about)
                 .setCancelable(true)
@@ -539,7 +537,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.config, null);
+        View layout = inflater.inflate(R.layout.dialog_list, null);
 
         builder.setTitle(R.string.otherapps)
                 .setCancelable(true)
@@ -875,7 +873,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.advanced, null);
+        View layout = inflater.inflate(R.layout.dialog_advanced_settings, null);
 
         builder.setTitle(R.string.advanced)
                 .setCancelable(true)
@@ -1070,7 +1068,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.config, null);
+        View layout = inflater.inflate(R.layout.dialog_list, null);
 
         builder.setTitle(R.string.language)
                 .setCancelable(true)
@@ -1111,9 +1109,9 @@ public class ConfigActivity extends AppCompatActivity {
         langArray[12] = getString(R.string.bengali);
         langArray[13] = getString(R.string.italian);
 
-        Integer image_id[] = {R.drawable.ic_us, R.drawable.ic_mx, R.drawable.ic_fr, R.drawable.ic_in,
-                R.drawable.ic_de, R.drawable.ic_jp, R.drawable.ic_ar, R.drawable.ic_cn, R.drawable.ic_br,
-                R.drawable.ic_ru, R.drawable.ic_et, R.drawable.ic_et, R.drawable.ic_bn, R.drawable.ic_it};
+        Integer image_id[] = {R.drawable.locale_ic_us, R.drawable.locale_ic_mx, R.drawable.locale_ic_fr, R.drawable.locale_ic_in,
+                R.drawable.locale_ic_de, R.drawable.locale_ic_jp, R.drawable.locale_ic_ar, R.drawable.locale_ic_cn, R.drawable.locale_ic_br,
+                R.drawable.locale_ic_ru, R.drawable.locale_ic_et, R.drawable.locale_ic_et, R.drawable.locale_ic_bn, R.drawable.locale_ic_it};
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -1209,7 +1207,7 @@ public class ConfigActivity extends AppCompatActivity {
         Context context;
 
         CustomListAdapter(Activity context, Integer[] image_id, String[] text) {
-            super(context, R.layout.languageline, text);
+            super(context, R.layout.listitem_language, text);
             this.color_names = text;
             this.image_id = image_id;
             this.context = context;
@@ -1219,7 +1217,7 @@ public class ConfigActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View single_row = inflater.inflate(R.layout.languageline, null, true);
+            View single_row = inflater.inflate(R.layout.listitem_language, null, true);
             TextView textView = (TextView) single_row.findViewById(R.id.txt);
             ImageView imageView = (ImageView) single_row.findViewById(R.id.img);
             textView.setText(color_names[position]);
@@ -1270,7 +1268,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.savefile, null);
+        View layout = inflater.inflate(R.layout.dialog_export, null);
 
         builder.setTitle(R.string.export)
                 .setCancelable(true)
@@ -1428,7 +1426,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.person, null);
+        View layout = inflater.inflate(R.layout.dialog_person, null);
 
         builder.setTitle(R.string.personsetup)
                 .setCancelable(true)
@@ -1475,7 +1473,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.location, null);
+        View layout = inflater.inflate(R.layout.dialog_location, null);
 
         builder.setTitle(R.string.locationsetup)
                 .setCancelable(true)
@@ -1602,7 +1600,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.config, null);
+        View layout = inflater.inflate(R.layout.dialog_list, null);
 
         builder.setTitle(R.string.dbbackup)
                 .setCancelable(true)
@@ -1663,7 +1661,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.savedb, null);
+        View layout = inflater.inflate(R.layout.dialog_save_database, null);
 
         builder.setTitle(R.string.dbbackup)
                 .setCancelable(true)
@@ -1782,7 +1780,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        new MenuInflater(ConfigActivity.this).inflate(R.menu.configmenu, menu);
+        new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
 
         systemMenu = menu;
 

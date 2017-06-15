@@ -1,3 +1,8 @@
+31/4.0.0
+New field management
+New main screen layout
+Lots of bug fixes
+
 30/3.3.1
 Added a location trait
 Added a button for missing values

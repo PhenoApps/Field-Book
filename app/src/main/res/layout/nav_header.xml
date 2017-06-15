@@ -18,7 +18,7 @@
         <ImageView
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:src="@drawable/ic_account_white" />
+            android:src="@drawable/ic_nav_header_account_white" />
 
         <TextView
             android:id="@+id/nameLabel"
@@ -41,7 +41,7 @@
         <ImageView
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:src="@drawable/ic_field" />
+            android:src="@drawable/ic_nav_header_current_field_white" />
 
         <TextView
             android:id="@+id/currentField"

@@ -65,7 +65,7 @@
             android:theme="@style/AppTheme" />
 
         <activity
-            android:name="ApiActivity"
+            android:name=".BrapiActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"

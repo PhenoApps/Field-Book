@@ -73,7 +73,7 @@ class TraitAdapter extends BaseAdapter {
 
         if (convertView == null) {
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = vi.inflate(R.layout.traitline, parent, false);
+            convertView = vi.inflate(R.layout.listitem_trait, parent, false);
 
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.field_name);
@@ -93,43 +93,43 @@ class TraitAdapter extends BaseAdapter {
 
         switch (getItem(position).format) {
             case "numeric":
-                holder.format.setBackgroundResource(R.drawable.ic_numeric);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_numeric);
                 break;
             case "categorical":
-                holder.format.setBackgroundResource(R.drawable.ic_categorical);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_categorical);
                 break;
             case "date":
-                holder.format.setBackgroundResource(R.drawable.ic_today);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_date);
                 break;
             case "percent":
-                holder.format.setBackgroundResource(R.drawable.ic_percent);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_percent);
                 break;
             case "boolean":
-                holder.format.setBackgroundResource(R.drawable.ic_cancel);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_boolean);
                 break;
             case "text":
-                holder.format.setBackgroundResource(R.drawable.ic_text);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_text);
                 break;
             case "photo":
-                holder.format.setBackgroundResource(R.drawable.ic_camera);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_camera);
                 break;
             case "audio":
-                holder.format.setBackgroundResource(R.drawable.ic_audio);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_audio);
                 break;
             case "counter":
-                holder.format.setBackgroundResource(R.drawable.ic_counter);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_counter);
                 break;
             case "disease rating":
-                holder.format.setBackgroundResource(R.drawable.ic_bug);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_disease_rating);
                 break;
             case "rust rating":
-                holder.format.setBackgroundResource(R.drawable.ic_bug);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_disease_rating);
                 break;
             case "multicat":
-                holder.format.setBackgroundResource(R.drawable.ic_multicat);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_multicat);
                 break;
             case "location":
-                holder.format.setBackgroundResource(R.drawable.ic_location);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_location);
                 break;
             default:
                 holder.format.setBackgroundResource(R.drawable.ic_reorder);
@@ -166,7 +166,7 @@ class TraitAdapter extends BaseAdapter {
             public void onClick(final View v) {
                 PopupMenu popup = new PopupMenu(TraitEditorActivity.thisActivity, v);
                 //Inflating the Popup using xml file
-                popup.getMenuInflater().inflate(R.menu.traititemmenu, popup.getMenu());
+                popup.getMenuInflater().inflate(R.menu.menu_trait_listitem, popup.getMenu());
 
                 //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {

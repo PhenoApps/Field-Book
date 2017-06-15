@@ -15,13 +15,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,14 +24,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Locale;
 
 /**
  * API test Screen
  */
-public class ApiActivity extends AppCompatActivity {
+public class BrapiActivity extends AppCompatActivity {
 
     ListView settingsList;
     ListView resultsList;
@@ -57,7 +51,7 @@ public class ApiActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.api_test);
+        setContentView(R.layout.activity_brapi);
 
         SharedPreferences ep = getSharedPreferences("Settings", 0);
 
@@ -132,14 +126,9 @@ public class ApiActivity extends AppCompatActivity {
         String result = "";
         try {
 
-            // create HttpClient
-            HttpClient httpclient = new DefaultHttpClient();
-
-            // make GET request to the given URL
-            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
-
-            // receive response as inputStream
-            inputStream = httpResponse.getEntity().getContent();
+            URL urlObj = new URL(url);
+            HttpURLConnection urlConnection = (HttpURLConnection) urlObj.openConnection();
+            inputStream = urlConnection.getInputStream();
 
             // convert inputstream to string
             if(inputStream != null)

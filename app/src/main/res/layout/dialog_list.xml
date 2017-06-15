@@ -14,7 +14,7 @@
         android:choiceMode="singleChoice"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:divider="@drawable/list_divider"
+        android:divider="@drawable/custom_list_divider"
         android:layout_weight="1" />
 
     <LinearLayout

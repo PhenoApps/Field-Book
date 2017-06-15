@@ -62,7 +62,7 @@ public class TutorialFieldActivity extends Activity {
         getWindow().setGravity(Gravity.BOTTOM);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
-        setContentView(R.layout.tutorial);
+        setContentView(R.layout.activity_tutorial);
 
         Button close = (Button) findViewById(R.id.close);
         Button prev = (Button) findViewById(R.id.prev);

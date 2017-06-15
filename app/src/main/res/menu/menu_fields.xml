@@ -2,12 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/help"
-        android:icon="@drawable/ic_help"
+        android:icon="@drawable/ic_tb_help"
         android:showAsAction="always"
         android:title="@string/tutorial" />
     <item
         android:id="@+id/importField"
-        android:icon="@drawable/ic_add_circle"
+        android:icon="@drawable/ic_tb_add_circle"
         android:showAsAction="ifRoom"
         android:title="@string/addtrait" />
 </menu>

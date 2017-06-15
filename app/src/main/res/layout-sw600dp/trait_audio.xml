@@ -18,10 +18,10 @@
             android:layout_height="75dp"
             android:layout_margin="10dp"
             android:layout_gravity="center"
-            android:background="@drawable/round_button"
+            android:background="@drawable/custom_round_button"
             android:gravity="center"
             android:padding="10dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_delete_forever" />
+            android:src="@drawable/main_ic_delete_forever" />
     </LinearLayout>
 </LinearLayout>

@@ -34,11 +34,11 @@
             android:layout_height="65dp"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            android:background="@drawable/round_button"
+            android:background="@drawable/custom_round_button"
             android:gravity="center"
             android:padding="10dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_camera" />
+            android:src="@drawable/ic_trait_camera" />
 
     </LinearLayout>
 </LinearLayout>

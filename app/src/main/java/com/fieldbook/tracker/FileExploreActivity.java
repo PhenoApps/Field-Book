@@ -174,22 +174,22 @@ public class FileExploreActivity extends AppCompatActivity {
             fileList = new Item[fList.length];
 
             for (int i = 0; i < fList.length; i++) {
-                fileList[i] = new Item(fList[i], R.drawable.ic_document);
+                fileList[i] = new Item(fList[i], R.drawable.ic_file_generic);
 
                 // Convert into file path
                 File sel = new File(path, fList[i]);
 
                 // Set drawables
                 if (sel.isDirectory()) {
-                    fileList[i].icon = R.drawable.ic_directory;
+                    fileList[i].icon = R.drawable.ic_file_directory;
                     Log.d("DIRECTORY", fileList[i].file);
                 }
                 if (sel.toString().toLowerCase().contains(".csv")) {
-                    fileList[i].icon = R.drawable.ic_csv;
+                    fileList[i].icon = R.drawable.ic_file_csv;
                 }
 
                 if (sel.toString().toLowerCase().contains(".xls")) {
-                    fileList[i].icon = R.drawable.ic_xls;
+                    fileList[i].icon = R.drawable.ic_file_xls;
                 } else {
                     Log.d("FILE", fileList[i].file);
                 }
@@ -200,13 +200,13 @@ public class FileExploreActivity extends AppCompatActivity {
                 for (int i = 0; i < fileList.length; i++) {
                     temp[i + 1] = fileList[i];
                 }
-                temp[0] = new Item("Up", R.drawable.ic_up_dir);
+                temp[0] = new Item("Up", R.drawable.ic_file_up_dir);
                 fileList = temp;
             }
         }
 
         adapter = new ArrayAdapter<Item>(this,
-                R.layout.select_dialog_item, android.R.id.text1,
+                R.layout.custom_dialog_item_select, android.R.id.text1,
                 fileList) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
