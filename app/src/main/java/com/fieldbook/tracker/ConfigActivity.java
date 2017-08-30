@@ -212,7 +212,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         String[] items2 = new String[]{getString(R.string.fields),
                 getString(R.string.traits), getString(R.string.profile), getString(R.string.export), getString(R.string.advanced),
-                getString(R.string.language), "API Test"};
+                getString(R.string.language)}; //, "API Test"};
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
@@ -258,11 +258,11 @@ public class ConfigActivity extends AppCompatActivity {
                     case 5:
                         showLanguageDialog();
                         break;
-                    case 6:
-                        intent.setClassName(ConfigActivity.this,
-                                BrapiActivity.class.getName());
-                        startActivity(intent);
-                        break;
+                    //case 6:
+                    //    intent.setClassName(ConfigActivity.this,
+                    //            BrapiActivity.class.getName());
+                    //    startActivity(intent);
+                    //    break;
                 }
             }
         });

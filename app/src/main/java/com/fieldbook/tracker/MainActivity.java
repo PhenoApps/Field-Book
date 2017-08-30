@@ -888,7 +888,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Add counter
         addCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) + 1));
+                if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                    counterTv.setText("1");
+                } else {
+                    counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) + 1));
+                }
                 updateTrait(currentTrait.trait, "counter", counterTv.getText().toString());
             }
         });
@@ -896,7 +900,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Minus counter
         minusCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) - 1));
+                if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                    counterTv.setText("-1");
+                } else {
+                    counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) - 1));
+                }
                 updateTrait(currentTrait.trait, "counter", counterTv.getText().toString());
             }
         });

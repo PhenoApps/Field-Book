@@ -14,7 +14,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
@@ -51,7 +51,7 @@
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
                         android:layout_weight="0.4"
-                        android:background="@color/main_primaryDark"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
                         android:src="@drawable/main_ic_missing"
                         android:textColor="#FFFFFF" />
@@ -64,7 +64,7 @@
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
                         android:layout_weight="0.4"
-                        android:background="@color/main_primaryDark"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
                         android:src="@drawable/main_ic_delete_forever"
                         android:textColor="#FFFFFF" />
@@ -73,8 +73,10 @@
             </android.support.v7.widget.Toolbar>
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_above="@id/toolbarBottom"
+                android:layout_below="@id/toolbar"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -107,11 +109,11 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:ellipsize="end"
+                                android:maxLines="1"
                                 android:paddingLeft="10dp"
                                 android:textColor="#000000"
                                 android:textSize="@dimen/text_size_large"
-                                android:textStyle="bold"
-                                android:maxLines="1" />
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -133,11 +135,11 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:ellipsize="end"
+                                android:maxLines="1"
                                 android:paddingLeft="10dp"
                                 android:textColor="#000000"
                                 android:textSize="@dimen/text_size_large"
-                                android:textStyle="bold"
-                                android:maxLines="1" />
+                                android:textStyle="bold" />
 
                         </LinearLayout>
 
@@ -160,11 +162,11 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:ellipsize="end"
+                                android:maxLines="1"
                                 android:paddingLeft="10dp"
                                 android:textColor="#000000"
                                 android:textSize="@dimen/text_size_large"
-                                android:textStyle="bold"
-                                android:maxLines="1" />
+                                android:textStyle="bold" />
 
                         </LinearLayout>
                     </LinearLayout>
@@ -364,8 +366,8 @@
                             android:id="@+id/etCurVal"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:enabled="false"
                             android:layout_gravity="center_horizontal"
+                            android:enabled="false"
                             android:gravity="center"
                             android:inputType="textNoSuggestions"
                             android:maxLines="1"
@@ -470,7 +472,6 @@
         android:layout_gravity="start"
         android:background="@android:color/white"
         app:headerLayout="@layout/nav_header"
-        app:menu="@menu/nav_drawer_view"
-        app:theme="@style/NavigationDrawerTheme" />
+        app:menu="@menu/nav_drawer_view"/>
 
 </android.support.v4.widget.DrawerLayout>

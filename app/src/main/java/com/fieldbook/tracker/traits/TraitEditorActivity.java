@@ -288,36 +288,11 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         thisActivity = this;
 
-        final String[] data = new String[13];
-        final String[] enData = new String[13];
+        final String[] data = new String[]{getString(R.string.numeric), getString(R.string.qualitative), getString(R.string.date), getString(R.string.percent), getString(R.string.bool),
+                getString(R.string.text), getString(R.string.photo), getString(R.string.audio), getString(R.string.counter), getString(R.string.rustrating), getString(R.string.multicategorical),
+                getString(R.string.location_trait)};
 
-        data[0] = getString(R.string.numeric);
-        data[1] = getString(R.string.qualitative);
-        data[2] = getString(R.string.date);
-        data[3] = getString(R.string.percent);
-        data[4] = getString(R.string.bool);
-        data[5] = getString(R.string.text);
-        data[6] = getString(R.string.photo);
-        data[7] = getString(R.string.audio);
-        data[8] = getString(R.string.counter);
-        data[9] = getString(R.string.rustrating);
-        data[10] = getString(R.string.multicategorical);
-        data[11] = getString(R.string.location_trait);
-        data[12] = getString(R.string.angle);
-
-        enData[0] = "Numeric";
-        enData[1] = "Categorical";
-        enData[2] = "Date";
-        enData[3] = "Percent";
-        enData[4] = "Boolean";
-        enData[5] = "Text";
-        enData[6] = "Photo";
-        enData[7] = "Audio";
-        enData[8] = "Counter";
-        enData[9] = "Disease Rating";
-        enData[10] = "Multicat";
-        enData[11] = "Location";
-        enData[12] = "Angle";
+        final String[] enData = new String[]{"Numeric", "Categorical", "Date", "Percent", "Boolean", "Text", "Photo", "Audio", "Counter", "Disease Rating", "Multicat", "Location"};
 
         HashMap visibility = MainActivity.dt.getTraitVisibility();
         traitList = (DragSortListView) findViewById(R.id.myList);
@@ -766,13 +741,6 @@ public class TraitEditorActivity extends AppCompatActivity {
                 categoryBox.setVisibility(View.VISIBLE);
                 break;
             case 11: //location
-                defBox.setVisibility(View.GONE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.GONE);
-                break;
-            case 12: //angle
                 defBox.setVisibility(View.GONE);
                 minBox.setVisibility(View.GONE);
                 maxBox.setVisibility(View.GONE);
