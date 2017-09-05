@@ -1,3 +1,6 @@
+32/4.0.2
+Fixed a bug with database import
+
 31/4.0.1
 New field management
 New main screen layout

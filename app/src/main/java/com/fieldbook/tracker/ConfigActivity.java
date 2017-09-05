@@ -337,6 +337,14 @@ public class ConfigActivity extends AppCompatActivity {
 
             }
         }
+
+        if (requestCode == 2) {
+            if (resultCode == RESULT_OK) {
+                mChosenFile = data.getStringExtra("result");
+                mChosenFile = mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.length());
+                mHandler.post(importDB);
+            }
+        }
     }
 
     public int getVersion() {
@@ -1595,7 +1603,6 @@ public class ConfigActivity extends AppCompatActivity {
         items[0] = getString(R.string.dbexport);
         items[1] = getString(R.string.dbimport);
         items[2] = getString(R.string.dbreset);
-
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
