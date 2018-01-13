@@ -526,7 +526,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 if (en.toString().length() >= 0) {
                     if (newTraits != null & currentTrait != null)
-                        updateTrait(currentTrait.trait, "text", en.toString());
+                        updateTrait(currentTrait.trait, currentTrait.format, en.toString());
                 } else {
                     if (newTraits != null & currentTrait != null)
                         newTraits.remove(currentTrait.trait);
