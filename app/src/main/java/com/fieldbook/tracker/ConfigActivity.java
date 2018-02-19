@@ -900,6 +900,7 @@ public class ConfigActivity extends AppCompatActivity {
         CheckBox rangeSound = (CheckBox) layout.findViewById(R.id.rangeSoundCheckbox);
         CheckBox jumpToPlot = (CheckBox) layout.findViewById(R.id.jumpToPlotCheckbox);
         CheckBox barcodeScan = (CheckBox) layout.findViewById(R.id.barcodeScanCheckbox);
+        CheckBox printLabel = (CheckBox) layout.findViewById(R.id.printLabelCheckbox);
         CheckBox nextEmptyPlot = (CheckBox) layout.findViewById(R.id.nextEmptyPlotCheckbox);
         CheckBox quickGoTo = (CheckBox) layout.findViewById(R.id.quickGoToCheckbox);
         CheckBox disableShare = (CheckBox) layout.findViewById(R.id.disableShareCheckbox);
@@ -1053,6 +1054,16 @@ public class ConfigActivity extends AppCompatActivity {
                                          boolean checked) {
                 Editor e = ep.edit();
                 e.putBoolean("BarcodeScan", checked);
+                e.apply();
+                MainActivity.reloadData = true;
+            }
+        });
+
+        printLabel.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean checked) {
+                Editor e = ep.edit();
+                e.putBoolean("PrintLabel", checked);
                 e.apply();
                 MainActivity.reloadData = true;
             }

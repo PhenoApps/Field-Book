@@ -258,6 +258,52 @@
                 android:paddingTop="10dp">
 
                 <TextView
+                    android:id="@+id/printLabelTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/printLabelCheckbox"
+                    android:text="@string/printlabel"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/printLabelDescription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/printLabelTitle"
+                    android:layout_toLeftOf="@+id/printLabelCheckbox"
+                    android:text="@string/printlabel_desc"
+                    android:textColor="#595959"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/printLabelCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
+                    android:checked="false"
+                    android:padding="5dp"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_large"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp">
+
+                <TextView
                     android:id="@+id/jumpToPlotTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

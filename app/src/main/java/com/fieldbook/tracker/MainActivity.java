@@ -3140,6 +3140,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             } else {
                 systemMenu.findItem(R.id.barcodeScan).setVisible(false);
             }
+            if (ep.getBoolean("PrintLabel", false)) {
+                systemMenu.findItem(R.id.printLabel).setVisible(true);
+            } else {
+                systemMenu.findItem(R.id.printLabel).setVisible(false);
+            }
             if (ep.getBoolean("DataGrid", false)) {
                 systemMenu.findItem(R.id.datagrid).setVisible(true);
             } else {
@@ -3348,6 +3353,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             systemMenu.findItem(R.id.barcodeScan).setVisible(false);
         }
 
+        if (ep.getBoolean("PrintLabel", false)) {
+            systemMenu.findItem(R.id.printLabel).setVisible(true);
+        } else {
+            systemMenu.findItem(R.id.printLabel).setVisible(false);
+        }
+
         if (ep.getBoolean("DataGrid", false)) {
             systemMenu.findItem(R.id.datagrid).setVisible(true);
         } else {
@@ -3420,6 +3431,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 break;
             case R.id.barcodeScan:
                 barcodeScan();
+                break;
+            case R.id.printLabel:
+                printLabel();
                 break;
             case R.id.summary:
                 showSummary();
@@ -4046,6 +4060,51 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 data += s + ": " + newTraits.get(s).toString() + "\n";
             }
         }
+
+        summaryText.setText(data);
+
+        dialog.show();
+    }
+
+    private void printLabel() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.dialog_print, null);
+
+        builder.setTitle(R.string.mapsummary)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog dialog = builder.create();
+
+        android.view.WindowManager.LayoutParams params2 = dialog.getWindow().getAttributes();
+        params2.width = LayoutParams.MATCH_PARENT;
+        dialog.getWindow().setAttributes(params2);
+
+        Button closeBtn = (Button) layout.findViewById(R.id.printBtn);
+        TextView summaryText = (TextView) layout.findViewById(R.id.field_name);
+
+        closeBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+//        String[] traitList = dt.getAllTraits();
+        String data = "";
+
+        if (cRange != null) {
+            for (String s : prefixTraits) {
+                data += s + ": " + dt.getDropDownRange(s, cRange.plot_id)[0] + "\n";
+            }
+        }
+
+//        for (String s : traitList) {
+//            if (newTraits.containsKey(s)) {
+//                data += s + ": " + newTraits.get(s).toString() + "\n";
+//            }
+//        }
 
         summaryText.setText(data);
 

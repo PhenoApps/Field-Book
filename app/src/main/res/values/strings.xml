@@ -9,6 +9,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="close">Close</string>
+    <string name="print">Print</string>
     <string name="areyousure">Are you sure?</string>
     <string name="importdb">Import</string>
     <string name="warning">Warning</string>
@@ -114,6 +115,7 @@
     <string name="disableentrynavleft">Disable left entry arrow</string>
     <string name="disableentrynavright">Disable right entry arrow</string>
     <string name="barcodescan">Camera barcode scanner</string>
+    <string name="printlabel">Zebra label printer</string>
     <string name="rangechime">Primary order sound</string>
     <string name="nextmissingenable">Next entry with no data</string>
     <string name="jumptoplotid">Move to unique identifier</string>
@@ -128,6 +130,7 @@
     <string name="disableentrynavleft_desc">If no data has been collected, disables left entry arrow</string>
     <string name="disableentrynavright_desc">If no data has been collected, disables right entry arrow</string>
     <string name="barcodescan_desc">Opens camera to scan barcode and move to the specific entry</string>
+    <string name="printlabel_desc">Sends plot data and label template to Zebra printer app</string>
     <string name="rangechime_desc">Notification sound when the primary order changes</string>
     <string name="nextmissingenable_desc">Adds a button to the toolbar that jumps to the next entry with no data for the current trait</string>
     <string name="jumptoplotid_desc">Opens dialog to input unique id and move to specific entry</string>
@@ -138,6 +141,7 @@
     <string name="nextmissingbutton">Next empty entry</string>
     <string name="jumptoplotidbutton">Go to ID</string>
     <string name="barcodescantitle">Scan barcode</string>
+    <string name="printlabeltitle">Print label</string>
     <string name="scan">Scan</string>
     <string name="disableentryanavwarning">Data must be collected before you can go to the next entry</string>
 

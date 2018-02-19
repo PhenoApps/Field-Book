@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/help"
+        android:layout_width="wrap_content"
         android:icon="@drawable/ic_tb_help"
         android:showAsAction="always"
-        android:title="@string/tutorial" />
+        android:title="@string/tutorial"
+        app:showAsAction="always" />
     <item
         android:id="@+id/nextEmptyPlot"
         android:icon="@drawable/ic_tb_forward"
@@ -20,6 +23,11 @@
         android:icon="@drawable/ic_tb_barcode_scan"
         android:showAsAction="always"
         android:title="@string/barcodescantitle" />
+    <item
+        android:id="@+id/printLabel"
+        android:icon="@drawable/ic_tb_print"
+        android:title="@string/printlabeltitle"
+        app:showAsAction="always" />
     <item
         android:id="@+id/datagrid"
         android:icon="@drawable/ic_tb_datagrid"
