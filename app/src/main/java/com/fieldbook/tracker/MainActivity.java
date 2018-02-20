@@ -1,12 +1,7 @@
 package com.fieldbook.tracker;
 
 import android.app.Activity;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.provider.Settings;
-import android.support.v7.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,6 +15,10 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -27,12 +26,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -40,6 +43,9 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -66,15 +72,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
-import com.fieldbook.tracker.barcodes.*;
+import com.fieldbook.tracker.barcodes.IntentIntegrator;
+import com.fieldbook.tracker.barcodes.IntentResult;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
-import com.fieldbook.tracker.search.*;
-import com.fieldbook.tracker.traits.*;
-import com.fieldbook.tracker.tutorial.*;
+import com.fieldbook.tracker.search.SearchActivity;
+import com.fieldbook.tracker.traits.TraitEditorActivity;
+import com.fieldbook.tracker.traits.TraitObject;
+import com.fieldbook.tracker.tutorial.TutorialMainActivity;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.ExpandableHeightGridView;
 import com.fieldbook.tracker.utilities.GPSTracker;
@@ -140,6 +145,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public static boolean partialReload;
 
     public static Activity thisActivity;
+
+    public static ResultReceiver receiverForSending(ResultReceiver actualReceiver) {
+        Parcel parcel = Parcel.obtain();
+        actualReceiver.writeToParcel(parcel,0);
+        parcel.setDataPosition(0);
+        ResultReceiver receiverForSending = ResultReceiver.CREATOR.createFromParcel(parcel);
+        parcel.recycle();
+        return receiverForSending;
+    }
 
     private TraitObject currentTrait;
 
@@ -1687,6 +1701,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         createDir(Constants.BACKUPPATH);
         createDir(Constants.UPDATEPATH);
         createDir(Constants.ARCHIVEPATH);
+        createDir(Constants.TEMPLATEPATH);
 
         scanSampleFiles();
     }
@@ -4082,8 +4097,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         params2.width = LayoutParams.MATCH_PARENT;
         dialog.getWindow().setAttributes(params2);
 
-        Button closeBtn = (Button) layout.findViewById(R.id.printBtn);
-        TextView summaryText = (TextView) layout.findViewById(R.id.field_name);
+        Button printBtn = (Button) layout.findViewById(R.id.printBtn);
+        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+        final TextView printStatus = (TextView) layout.findViewById(R.id.field_name);
 
         closeBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -4091,7 +4107,42 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
-//        String[] traitList = dt.getAllTraits();
+        printBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Define a hash map of variable data
+                // Strings used for keys will be replaced by their corresponding values in your template file's ZPL
+                HashMap<String, String> variableData = new HashMap<>();
+                variableData.put("%PLOT_ID%", inputPlotId);
+                Intent printIntent = new Intent();
+                printIntent.setComponent(new ComponentName("com.zebra.printconnect","com.zebra.printconnect.print.TemplatePrintService"));
+                printIntent.putExtra("com.zebra.printconnect.PrintService.TEMPLATE_FILE_NAME", "default.zpl");
+                printIntent.putExtra("com.zebra.printconnect.PrintService.VARIABLE_DATA", variableData);
+
+
+                ResultReceiver buildIPCSafeReceiver = new ResultReceiver(null) {
+                            @Override
+                            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                                if (resultCode == 0) {
+                                    // Result code 0 indicates success
+                                    // Handle successful print
+                                    printStatus.setText("Label printed!");
+                                } else {
+                                    // Error message (null on successful print)
+                                    // Handle unsuccessful print
+                                    String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
+                                    Log.e(TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
+                                    printStatus.setText("Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
+                                }
+                            }
+                        };
+
+                printIntent.setExtrasClassLoader(getClassLoader());
+                printIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver));
+                startService(printIntent);
+            }
+        });
+
         String data = "";
 
         if (cRange != null) {
@@ -4100,14 +4151,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         }
 
-//        for (String s : traitList) {
-//            if (newTraits.containsKey(s)) {
-//                data += s + ": " + newTraits.get(s).toString() + "\n";
-//            }
-//        }
-
-        summaryText.setText(data);
-
+        printStatus.setText(data);
         dialog.show();
     }
 

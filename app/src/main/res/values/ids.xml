@@ -14,6 +14,7 @@
     <item type="id" name="translatorMsg">false</item>
     <item type="id" name="translatorList">false</item>
     <item type="id" name="closeBtn">false</item>
+    <item type="id" name="printBtn">false</item>
     <item type="id" name="tips">false</item>
     <item type="id" name="cycle">false</item>
     <item type="id" name="enableMap">false</item>

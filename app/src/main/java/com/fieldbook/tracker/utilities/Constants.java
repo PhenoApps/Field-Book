@@ -14,6 +14,9 @@ public class Constants {
     public static String TRAITPATH = Environment.getExternalStorageDirectory()
             + "/fieldBook/trait";
 
+    public static String TEMPLATEPATH = Environment.getExternalStorageDirectory()
+            + "/fieldBook/templates";
+
     public static String FIELDIMPORTPATH = Environment.getExternalStorageDirectory()
             + "/fieldBook/field_import";
 
