@@ -4113,12 +4113,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 // Define a hash map of variable data
                 // Strings used for keys will be replaced by their corresponding values in your template file's ZPL
                 HashMap<String, String> variableData = new HashMap<>();
-                variableData.put("%PLOT_ID%", inputPlotId);
+                String plotName = dt.getDropDownRange(prefixTraits[0], cRange.plot_id)[0];
+                Log.e(TAG, "Plot name is: "+plotName);
+                variableData.put("var_plot", plotName);
                 Intent printIntent = new Intent();
                 printIntent.setComponent(new ComponentName("com.zebra.printconnect","com.zebra.printconnect.print.TemplatePrintService"));
-                printIntent.putExtra("com.zebra.printconnect.PrintService.TEMPLATE_FILE_NAME", "default.zpl");
+                printIntent.putExtra("com.zebra.printconnect.PrintService.TEMPLATE_FILE_NAME", "default_template.prn");
                 printIntent.putExtra("com.zebra.printconnect.PrintService.VARIABLE_DATA", variableData);
-
 
                 ResultReceiver buildIPCSafeReceiver = new ResultReceiver(null) {
                             @Override
