@@ -1,5 +1,5 @@
 ^XA
-^LL254.7^PW407.52
-^FO20,20^AA,36^FH\^FDvar_name^FS
-^FO115,65^BQ,,6^FDvar_name^FS
+^PW406^LL0254
+^FO0,12^FB406,2,0,C,0^A0,54,42^FH\^FDvar_plot^FS
+^FO135,70^BQ,,6^FDMA,var_plot^FS
 ^XZ

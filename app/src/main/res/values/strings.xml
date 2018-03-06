@@ -247,6 +247,9 @@
     <string name="drop1">InfoBar 1</string>
     <string name="drop2">InfoBar 2</string>
     <string name="drop3">InfoBar 3</string>
+    <string name="labelsizedefault">3"x2"</string>
+    <string name="labelfielddefault">plot_id</string>
+    <string name="labelcopiesdefault">1</string>
     <string name="clearsettings">Clear settings</string>
 
     <string name="personsetup">Set person</string>

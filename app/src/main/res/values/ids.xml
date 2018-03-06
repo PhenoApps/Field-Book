@@ -41,6 +41,9 @@
     <item type="id" name="drop1prefix">false</item>
     <item type="id" name="drop2prefix">false</item>
     <item type="id" name="drop3prefix">false</item>
+    <item type="id" name="labelsize">false</item>
+    <item type="id" name="labelfield">false</item>
+    <item type="id" name="labelcopies">false</item>
     <item type="id" name="drop1">false</item>
     <item type="id" name="drop2">false</item>
     <item type="id" name="drop3">false</item>

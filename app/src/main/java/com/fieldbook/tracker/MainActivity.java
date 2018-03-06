@@ -90,6 +90,7 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -99,6 +100,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -3448,6 +3450,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 barcodeScan();
                 break;
             case R.id.printLabel:
+//                Intent printIntent = new Intent();
+//                printIntent.setClassName(MainActivity.this,
+//                        PrintLabelActivity.class.getName());
+//                startActivity(printIntent);
                 printLabel();
                 break;
             case R.id.summary:
@@ -4087,7 +4093,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_print, null);
 
-        builder.setTitle(R.string.mapsummary)
+        builder.setTitle("")
                 .setCancelable(true)
                 .setView(layout);
 
@@ -4097,9 +4103,59 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         params2.width = LayoutParams.MATCH_PARENT;
         dialog.getWindow().setAttributes(params2);
 
+        prefixTraits = MainActivity.dt.getRangeColumnNames();
+        if (prefixTraits != null) {
+            ArrayAdapter<String> labelArrayAdapter = new ArrayAdapter<>(
+                    this, R.layout.custom_spinnerlayout, prefixTraits);
+
+            Spinner labelfield = (Spinner) layout.findViewById(R.id.labelfield);
+            labelfield.setAdapter(labelArrayAdapter);
+            labelfield.setSelection(labelfield.getSelectedItemPosition());
+
+            if (!labelfield.equals(null)) {
+                int spinnerPosition = labelArrayAdapter.getPosition(ep.getString("DROP1", prefixTraits[0]));
+                labelfield.setSelection(spinnerPosition);
+            }
+        }
+
+        final TextView printStatus = (TextView) layout.findViewById(R.id.printStatus);
+        Intent statusIntent = new Intent();
+        statusIntent.setComponent(new ComponentName("com.zebra.printconnect",
+                "com.zebra.printconnect.print.GetPrinterStatusService"));
+
+        ResultReceiver buildIPCSafeReceiver2 = new
+                ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == 0) { // Result code 0 indicates success
+                            // Handle successful printer status retrieval
+                            // Hash map of printer status conditions (null when no printer selected)
+                            HashMap<String, String> printerStatusMap = (HashMap<String, String>)
+                                    resultData.getSerializable("PrinterStatusMap");
+                            for (Map.Entry<String,String> entry : printerStatusMap.entrySet()) {
+                                String key = entry.getKey();
+                                String value = entry.getValue();
+                                // do stuff
+                                printStatus.setText(key+" : "+value);
+                            }
+//                            printStatus.setText(printerStatusMap);
+                        } else {
+                            // Handle unsuccessful printer status retrieval
+                            // Error message (null on successful printer status retrieval)
+                            String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
+                            printStatus.setText(errorMessage);
+                        }
+                    }
+                };
+
+        statusIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver2));
+        startService(statusIntent);
+
+
+
+
         Button printBtn = (Button) layout.findViewById(R.id.printBtn);
         Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
-        final TextView printStatus = (TextView) layout.findViewById(R.id.field_name);
 
         closeBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -4110,16 +4166,26 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         printBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Define a hash map of variable data
-                // Strings used for keys will be replaced by their corresponding values in your template file's ZPL
-                HashMap<String, String> variableData = new HashMap<>();
+
                 String plotName = dt.getDropDownRange(prefixTraits[0], cRange.plot_id)[0];
-                Log.e(TAG, "Plot name is: "+plotName);
-                variableData.put("var_plot", plotName);
+                String labelText = "^FO0,25^FB599,2,0,C,0^A0,90,75^FH^FD"+plotName+"^FS";
+                String labelBarcode = "^FO200,120^BQ,,10^FDMA,"+plotName+"^FS";
+                String passthroughData = "^XA^PW609^LL0406"+labelText+labelBarcode+"^XZ";
+
+//                String labelText = "^FB406,2,0,C,0^A0,54,42^FH^FD"+plotName+"^FS";
+//                String labelBarcode = "^FO135,70^BQ,,6^FDMA,"+plotName+"^FS";
+//                String passthroughData = "^XA^PW406^LL0254^FO0,12"+labelText+labelBarcode+"^XZ";
+                byte[] passthroughBytes = null;
+
+                try {
+                    passthroughBytes = passthroughData.getBytes("UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    // Handle exception
+                }
+
                 Intent printIntent = new Intent();
-                printIntent.setComponent(new ComponentName("com.zebra.printconnect","com.zebra.printconnect.print.TemplatePrintService"));
-                printIntent.putExtra("com.zebra.printconnect.PrintService.TEMPLATE_FILE_NAME", "default_template.prn");
-                printIntent.putExtra("com.zebra.printconnect.PrintService.VARIABLE_DATA", variableData);
+                printIntent.setComponent(new ComponentName("com.zebra.printconnect","com.zebra.printconnect.print.PassthroughService"));
+                printIntent.putExtra("com.zebra.printconnect.PrintService.PASSTHROUGH_DATA", passthroughBytes);
 
                 ResultReceiver buildIPCSafeReceiver = new ResultReceiver(null) {
                             @Override
@@ -4144,15 +4210,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
-        String data = "";
-
-        if (cRange != null) {
-            for (String s : prefixTraits) {
-                data += s + ": " + dt.getDropDownRange(s, cRange.plot_id)[0] + "\n";
-            }
-        }
-
-        printStatus.setText(data);
         dialog.show();
     }
 

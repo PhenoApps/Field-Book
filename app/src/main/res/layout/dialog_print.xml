@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="#FFFFFF"
@@ -9,22 +10,124 @@
     android:paddingTop="5dp"
     android:paddingBottom="5dp">
 
-    <ScrollView
+    <ImageView
+        android:id="@+id/labelPreview"
         android:layout_width="match_parent"
-        android:layout_height="450dp"
-        android:layout_weight="1">
+        android:layout_height="153dp"
+        android:src="@drawable/label_example" />
 
-        <TextView
-            android:id="@+id/field_name"
+    <!--<TextView-->
+        <!--android:id="@+id/labelImgInstructions"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_weight="1" />-->
+
+
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:text=""
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/labelsizetext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TextView" />
+
+            <Spinner
+                android:id="@+id/labelsize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/drop1"
+                android:textColor="@color/s_text"
+                android:textSize="@dimen/text_size_xlarge"
+                android:textStyle="bold" />
+
+            <!--<TextView-->
+                <!--android:id="@+id/labelsizetext"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:ellipsize="end"-->
+                <!--android:maxLines="1"-->
+                <!--android:paddingLeft="10dp"-->
+                <!--android:scrollHorizontally="true"-->
+                <!--android:textColor="#000000"-->
+                <!--android:textSize="@dimen/text_size_xlarge"-->
+                <!--android:textStyle="bold" />-->
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/labelfieldtext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TextView" />
+
+            <Spinner
+                android:id="@+id/labelfield"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/drop2"
+                android:textColor="@color/s_text"
+                android:textSize="@dimen/text_size_xlarge"
+                android:textStyle="bold" />
+
+            <!--<TextView-->
+                <!--android:id="@+id/labelfieldtext"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:ellipsize="end"-->
+                <!--android:maxLines="1"-->
+                <!--android:paddingLeft="10dp"-->
+                <!--android:textColor="#000000"-->
+                <!--android:textSize="@dimen/text_size_xlarge"-->
+                <!--android:textStyle="bold" />-->
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/labelcopiestext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="TextView" />
+
+        <Spinner
+            android:id="@+id/labelcopies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/drop3"
+            android:textColor="@color/s_text"
+            android:textSize="@dimen/text_size_xlarge"
             android:textStyle="bold" />
-    </ScrollView>
+
+        <!--<TextView-->
+            <!--android:id="@+id/numCopies"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:ellipsize="end"-->
+            <!--android:maxLines="1"-->
+            <!--android:paddingLeft="10dp"-->
+            <!--android:textColor="#000000"-->
+            <!--android:textSize="@dimen/text_size_xlarge"-->
+            <!--android:textStyle="bold" />-->
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/printStatus"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_weight="1" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -54,5 +157,4 @@
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
     </LinearLayout>
-
 </LinearLayout>
