@@ -12,10 +12,13 @@
 
     <ImageView
         android:id="@+id/labelPreview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:src="@drawable/label_example" />
+        android:layout_width="300dp"
+        android:layout_height="200dp"
+        android:scaleType="centerInside"
+        android:adjustViewBounds="false"
+        android:background="@drawable/label_simple"
+        android:layout_gravity="center"
+        android:layout_margin="15dip" />
 
     <LinearLayout
             android:layout_width="fill_parent"
