@@ -1,6 +1,7 @@
 package com.fieldbook.tracker;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -100,7 +101,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -4088,130 +4088,408 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private void printLabel() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_print, null);
-
-        builder.setTitle("")
-                .setCancelable(true)
-                .setView(layout);
-
-        final AlertDialog dialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params2 = dialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        dialog.getWindow().setAttributes(params2);
-
-        prefixTraits = MainActivity.dt.getRangeColumnNames();
-        if (prefixTraits != null) {
-            ArrayAdapter<String> labelArrayAdapter = new ArrayAdapter<>(
-                    this, R.layout.custom_spinnerlayout, prefixTraits);
-
-            Spinner labelfield = (Spinner) layout.findViewById(R.id.labelfield);
-            labelfield.setAdapter(labelArrayAdapter);
-            labelfield.setSelection(labelfield.getSelectedItemPosition());
-
-            if (!labelfield.equals(null)) {
-                int spinnerPosition = labelArrayAdapter.getPosition(ep.getString("DROP1", prefixTraits[0]));
-                labelfield.setSelection(spinnerPosition);
-            }
+        PackageManager pm = getPackageManager();
+        try {
+            pm.getPackageInfo("com.zebra.printconnect", PackageManager.GET_ACTIVITIES);
+            showPrintDialog();
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "Print Connect package not found");
+            showDownloadDialog();
         }
+    }
 
-        final TextView printStatus = (TextView) layout.findViewById(R.id.printStatus);
-        Intent statusIntent = new Intent();
-        statusIntent.setComponent(new ComponentName("com.zebra.printconnect",
-                "com.zebra.printconnect.print.GetPrinterStatusService"));
+//        Intent appIntent = new Intent("com.zebra.printconnect.SCAN");
+//        appIntent.addCategory(Intent.CATEGORY_DEFAULT);
+//        intentScan.addCategory(Intent.CATEGORY_DEFAULT);
+//
+//        Intent appIntent = new Intent();
+//        appIntent.setComponent(new ComponentName("com.zebra.printconnect","com.zebra.printconnect.print.GetPrinterStatusService"));
 
-        ResultReceiver buildIPCSafeReceiver2 = new
-                ResultReceiver(null) {
-                    @Override
-                    protected void onReceiveResult(int resultCode, Bundle resultData) {
-                        if (resultCode == 0) { // Result code 0 indicates success
-                            // Handle successful printer status retrieval
-                            // Hash map of printer status conditions (null when no printer selected)
-                            HashMap<String, String> printerStatusMap = (HashMap<String, String>)
-                                    resultData.getSerializable("PrinterStatusMap");
-                            for (Map.Entry<String,String> entry : printerStatusMap.entrySet()) {
-                                String key = entry.getKey();
-                                String value = entry.getValue();
-                                // do stuff
-                                printStatus.setText(key+" : "+value);
-                            }
-//                            printStatus.setText(printerStatusMap);
-                        } else {
-                            // Handle unsuccessful printer status retrieval
-                            // Error message (null on successful printer status retrieval)
-                            String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
-                            printStatus.setText(errorMessage);
-                        }
-                    }
-                };
+//        String targetAppPackage = findTargetAppPackage(appIntent);
+//        Log.d(TAG, "Checking for package...");
+//        if (targetAppPackage == null) {
+//            Log.d(TAG, "Print Connect package not found");
+//            showDownloadDialog();
+//        } else {
+        private AlertDialog showPrintDialog() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
-        statusIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver2));
-        startService(statusIntent);
+            LayoutInflater inflater = this.getLayoutInflater();
+            final View layout = inflater.inflate(R.layout.dialog_print, null);
 
+//            builder.setTitle(R.string.printlabeltitle)
+            builder.setCancelable(true)
+                    .setView(layout);
 
+//            AlertDialog dialog = builder.create();
+//
+//            android.view.WindowManager.LayoutParams params2 = dialog.getWindow().getAttributes();
+//            params2.width = LayoutParams.MATCH_PARENT;
+//            dialog.getWindow().setAttributes(params2);
 
+            ArrayList<String> optionsList = new ArrayList<>(Arrays.asList(prefixTraits));
+            optionsList.add("date");
+            optionsList.add("trial_name");
+            final String[] options = new String[ optionsList.size() ];
+            optionsList.toArray( options );
+//        if (prefixTraits != null) {
+            //dateFormat.format(calendar.getTime());
+            final String[] labelSizeArray = {"3\" x 2\" simple", "3\" x 2\" detailed", "2\" x 1.25\" simple"};
+            ArrayAdapter<String> sizeArrayAdapter = new ArrayAdapter<>(
+                    this, R.layout.custom_spinnerlayout, labelSizeArray);
 
-        Button printBtn = (Button) layout.findViewById(R.id.printBtn);
-        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+            ArrayAdapter<String> fieldArrayAdapter = new ArrayAdapter<>(
+                    this, R.layout.custom_spinnerlayout, options);
 
-        closeBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                dialog.dismiss();
+            final String[] labelCopiesArray = {"One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"};
+            ArrayAdapter<String> copiesArrayAdapter = new ArrayAdapter<>(
+                    this, R.layout.custom_spinnerlayout, labelCopiesArray);
+//
+//            Integer[] labelCopiesArray = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+//            ArrayAdapter<Integer> copiesArrayAdapter = new ArrayAdapter<Integer>(
+//                    this, R.layout.custom_spinnerlayout, labelCopiesArray);
+
+            final Spinner labelsize = (Spinner) layout.findViewById(R.id.labelsize);
+            final Spinner textfield1 = (Spinner) layout.findViewById(R.id.textfield);
+            final Spinner textfield2 = (Spinner) layout.findViewById(R.id.textfield2);
+            final Spinner textfield3 = (Spinner) layout.findViewById(R.id.textfield3);
+            final Spinner textfield4 = (Spinner) layout.findViewById(R.id.textfield4);
+            final Spinner barcodefield = (Spinner) layout.findViewById(R.id.barcodefield);
+            final Spinner labelcopies = (Spinner) layout.findViewById(R.id.labelcopies);
+
+            labelsize.setAdapter(sizeArrayAdapter);
+            textfield1.setAdapter(fieldArrayAdapter);
+            textfield2.setAdapter(fieldArrayAdapter);
+            textfield3.setAdapter(fieldArrayAdapter);
+            textfield4.setAdapter(fieldArrayAdapter);
+            barcodefield.setAdapter(fieldArrayAdapter);
+            labelcopies.setAdapter(copiesArrayAdapter);
+
+            if (!labelsize.equals(null)) {
+                int spinnerPosition = sizeArrayAdapter.getPosition(ep.getString("SIZE", labelSizeArray[0]));
+                labelsize.setSelection(spinnerPosition);
+                //if extra text, make extra text spinners visible
+                if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed")) {
+                    ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
+                    ((View) textfield3.getParent()).setVisibility(View.VISIBLE);
+                    ((View) textfield4.getParent()).setVisibility(View.VISIBLE);
+                } else { //else setVisibility(View.GONE) for text spinners=
+                    ((View) textfield2.getParent()).setVisibility(View.GONE);
+                    ((View) textfield3.getParent()).setVisibility(View.GONE);
+                    ((View) textfield4.getParent()).setVisibility(View.GONE);
+                }
             }
-        });
+            if (!textfield1.equals(null)) {
+                int spinnerPosition = fieldArrayAdapter.getPosition(ep.getString("TEXT", options[0]));
+                textfield1.setSelection(spinnerPosition);
+            }
+            if (!textfield2.equals(null)) {
+                int spinnerPosition = fieldArrayAdapter.getPosition(ep.getString("TEXT2", options[0]));
+                textfield2.setSelection(spinnerPosition);
+            }
+            if (!textfield3.equals(null)) {
+                int spinnerPosition = fieldArrayAdapter.getPosition(ep.getString("TEXT3", options[0]));
+                textfield3.setSelection(spinnerPosition);
+            }
+            if (!textfield4.equals(null)) {
+                int spinnerPosition = fieldArrayAdapter.getPosition(ep.getString("TEXT4", options[0]));
+                textfield4.setSelection(spinnerPosition);
+            }
+            if (!barcodefield.equals(null)) {
+                int spinnerPosition = fieldArrayAdapter.getPosition(ep.getString("BARCODE", options[0]));
+                barcodefield.setSelection(spinnerPosition);
+            }
+            if (!labelcopies.equals(null)) {
+                int spinnerPosition = copiesArrayAdapter.getPosition(ep.getString("COPIES", labelCopiesArray[0]));
+                labelcopies.setSelection(spinnerPosition);
+            }
 
-        printBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            labelsize.setOnItemSelectedListener(new OnItemSelectedListener() {
 
-                String plotName = dt.getDropDownRange(prefixTraits[0], cRange.plot_id)[0];
-                String labelText = "^FO0,25^FB599,2,0,C,0^A0,90,75^FH^FD"+plotName+"^FS";
-                String labelBarcode = "^FO200,120^BQ,,10^FDMA,"+plotName+"^FS";
-                String passthroughData = "^XA^PW609^LL0406"+labelText+labelBarcode+"^XZ";
+                @Override
+                public void onItemSelected(AdapterView<?> arg0, View arg1,
+                                           int pos, long arg3) {
+                    Log.d(TAG, labelsize.getSelectedItem().toString());
+//                    Log.d(TAG, labelsize.getSelectedItemPosition());
+                    if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed")) {
+                        ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
+                        ((View) textfield3.getParent()).setVisibility(View.VISIBLE);
+                        ((View) textfield4.getParent()).setVisibility(View.VISIBLE);
+                    } else { //else setVisibility(View.GONE) for text spinners=
+                        ((View) textfield2.getParent()).setVisibility(View.GONE);
+                        ((View) textfield3.getParent()).setVisibility(View.GONE);
+                        ((View) textfield4.getParent()).setVisibility(View.GONE);
+                    }
 
-//                String labelText = "^FB406,2,0,C,0^A0,54,42^FH^FD"+plotName+"^FS";
-//                String labelBarcode = "^FO135,70^BQ,,6^FDMA,"+plotName+"^FS";
-//                String passthroughData = "^XA^PW406^LL0254^FO0,12"+labelText+labelBarcode+"^XZ";
-                byte[] passthroughBytes = null;
-
-                try {
-                    passthroughBytes = passthroughData.getBytes("UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    // Handle exception
                 }
 
-                Intent printIntent = new Intent();
-                printIntent.setComponent(new ComponentName("com.zebra.printconnect","com.zebra.printconnect.print.PassthroughService"));
-                printIntent.putExtra("com.zebra.printconnect.PrintService.PASSTHROUGH_DATA", passthroughBytes);
+                @Override
+                public void onNothingSelected(AdapterView<?> arg0) {
 
-                ResultReceiver buildIPCSafeReceiver = new ResultReceiver(null) {
-                            @Override
-                            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                                if (resultCode == 0) {
-                                    // Result code 0 indicates success
-                                    // Handle successful print
-                                    printStatus.setText("Label printed!");
-                                } else {
-                                    // Error message (null on successful print)
-                                    // Handle unsuccessful print
-                                    String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
-                                    Log.e(TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
-                                    printStatus.setText("Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
-                                }
+                }
+            });
+
+            final TextView printStatus = (TextView) layout.findViewById(R.id.printStatus);
+            Intent statusIntent = new Intent();
+            statusIntent.setComponent(new ComponentName("com.zebra.printconnect",
+                    "com.zebra.printconnect.print.GetPrinterStatusService"));
+
+            ResultReceiver buildIPCSafeReceiver2 = new
+                    ResultReceiver(null) {
+                        @Override
+                        protected void onReceiveResult(int resultCode, Bundle resultData) {
+                            if (resultCode == 0) { // Result code 0 indicates success
+                                // Handle successful printer status retrieval
+                                HashMap<String, String> printerStatusMap = (HashMap<String, String>)
+                                        resultData.getSerializable("PrinterStatusMap");
+                                final String successMessage = printerStatusMap.get("friendlyName") + " is connected.";
+                                Log.d(TAG, successMessage);
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        printStatus.setText(successMessage);
+                                    }
+                                });
+                            } else {
+                                // Handle unsuccessful printer status retrieval
+                                final String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
+                                Log.e(TAG, errorMessage);
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        printStatus.setText(errorMessage);
+                                    }
+                                });
                             }
-                        };
 
-                printIntent.setExtrasClassLoader(getClassLoader());
-                printIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver));
-                startService(printIntent);
+                        }
+                    };
+
+            statusIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver2));
+            startService(statusIntent);
+
+
+//            Button printBtn = (Button) layout.findViewById(R.id.printBtn);
+//            Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+
+            builder.setNegativeButton("Close", null);
+
+//            closeBtn.setOnClickListener(new OnClickListener() {
+//                public void onClick(View v) {
+//                    dialog.dismiss();
+//                }
+//            });
+
+            builder.setPositiveButton("Print", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+
+//                }
+//            });
+//
+//            printBtn.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+
+                    HashMap<String, String> labelSizes = new HashMap<String, String>();
+                    labelSizes.put(labelSizeArray[0], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,90,75^FH^FDtext1^FS^FO180,120^BQ,,size^FDMA,barcode^FS^XZ");
+                    labelSizes.put(labelSizeArray[1], "^XA^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,90,75^FH^FDtext1^FS^FO30,120^BQ,,size^FDMA,barcode^FS^FO260,140^FB349,2,0,C,0^A0,120,100^FH^FDtext2^FS^FO260,270^FB349,2,0,C,0^A0,42,35^FH^FDtext3^FS^FO260,320^FB349,2,0,C,0^A0,48,40^FH^FDtext4^FS^XZ");
+                    labelSizes.put(labelSizeArray[2], "^XA^POI^PW406^LL0254^FO0,18^FB399,2,0,C,0^A0,60,50^FH^FDtext1^FS^FO125,75^BQ,,size^FDMA,barcode^FS^XZ");
+
+
+                    //get and handle selected items from dropdowns
+                    Calendar calendar = Calendar.getInstance();
+                    String size = labelsize.getSelectedItem().toString();
+                    String text1 = "";
+                    if(textfield1.getSelectedItem().toString().equals("date")) {
+                        text1 = dateFormat.format(calendar.getTime());
+                    } else if (textfield1.getSelectedItem().toString().equals("trial_name")) {
+                        text1 = ep.getString("FieldFile","");
+                    } else {
+                        Integer textpos = textfield1.getSelectedItemPosition();
+                        text1 = dt.getDropDownRange(options[textpos], cRange.plot_id)[0];
+                    }
+
+                    String text2 = "";
+                    if(textfield2.getSelectedItem().toString().equals("date")) {
+                        text2 = dateFormat.format(calendar.getTime());
+                    } else if (textfield2.getSelectedItem().toString().equals("trial_name")) {
+                        text2 = ep.getString("FieldFile","");
+                    } else {
+                        Integer textpos2 = textfield2.getSelectedItemPosition();
+                        text2 = dt.getDropDownRange(options[textpos2], cRange.plot_id)[0];
+                    }
+
+//                    Integer textpos2 = textfield2.getSelectedItemPosition();
+//                    String text2 = dt.getDropDownRange(options[textpos2], cRange.plot_id)[0];
+                    String text3 = "";
+                    if(textfield3.getSelectedItem().toString().equals("date")) {
+                        text3 = dateFormat.format(calendar.getTime());
+                    } else if (textfield3.getSelectedItem().toString().equals("trial_name")) {
+                        text3 = ep.getString("FieldFile","");
+                    } else {
+                        Integer textpos3 = textfield3.getSelectedItemPosition();
+                        text3 = dt.getDropDownRange(options[textpos3], cRange.plot_id)[0];
+                    }
+
+//                    Integer textpos3 = textfield3.getSelectedItemPosition();
+//                    String text3 = dt.getDropDownRange(options[textpos3], cRange.plot_id)[0];
+                    String text4 = "";
+                    if(textfield4.getSelectedItem().toString().equals("date")) {
+                        text4 = dateFormat.format(calendar.getTime());
+                    } else if (textfield4.getSelectedItem().toString().equals("trial_name")) {
+                        text4 = ep.getString("FieldFile","");
+                    } else {
+                        Integer textpos4 = textfield4.getSelectedItemPosition();
+                        text4 = dt.getDropDownRange(options[textpos4], cRange.plot_id)[0];
+                    }
+
+//                    Integer textpos4 = textfield4.getSelectedItemPosition();
+//                    String text4 = dt.getDropDownRange(options[textpos4], cRange.plot_id)[0];
+
+                    Integer barcodepos = barcodefield.getSelectedItemPosition();
+                    String barcode = dt.getDropDownRange(options[barcodepos], cRange.plot_id)[0];
+                    Integer copiespos = labelcopies.getSelectedItemPosition();
+                    String copies = labelcopies.getSelectedItem().toString();
+
+                    Editor ed = ep.edit();
+                    ed.putString("SIZE", size);
+                    ed.putString("TEXT", textfield1.getSelectedItem().toString());
+                    ed.putString("TEXT2", textfield2.getSelectedItem().toString());
+                    ed.putString("TEXT3", textfield3.getSelectedItem().toString());
+                    ed.putString("TEXT4", textfield4.getSelectedItem().toString());
+                    ed.putString("BARCODE", barcodefield.getSelectedItem().toString());
+                    ed.putString("COPIES", copies);
+                    ed.apply();
+
+                    Integer length = barcode.length();
+                    Integer barcode_size = 6;
+
+                    if (size.equals("3\" x 2\" simple")) {
+                        barcode_size = 10 - (length/15);
+                    } else if (size.equals("3\" x 2\" detailed")) {
+                        barcode_size = 9 - (length/15);
+                    } else if (size.equals("2\" x 1.25\" simple")) {
+                        barcode_size = 6 - (length/15);
+                    } else {
+                        Log.d(TAG, "Matched no sizes");
+                    }
+
+//                    String allData = "size: "+size+" text1: "+text1+" text2: "+barcode_size+" text3: "+text3+" text4: "+text4+" barcode: "+barcode;
+//                    Log.d(TAG, "                                  Logging data now");
+//                    Log.e(TAG, allData);
+//                    Log.d(TAG, allData);
+
+                    String labelData = labelSizes.get(size);
+                    labelData = labelData.replace("text1", text1);
+                    labelData = labelData.replace("text2", text2);
+                    labelData = labelData.replace("text3", text3);
+                    labelData = labelData.replace("text4", text4);
+                    labelData = labelData.replace("barcode", barcode);
+                    labelData = labelData.replace("size", Integer.toString(barcode_size));
+
+                    String passthroughData = "";
+                    for (int j = 0; j <= copiespos; j++) {
+                        passthroughData += labelData;
+                    }
+
+                    byte[] passthroughBytes = null;
+
+                    try {
+                        passthroughBytes = passthroughData.getBytes("UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        // Handle exception
+                    }
+
+                    Intent printIntent = new Intent();
+                    printIntent.setComponent(new ComponentName("com.zebra.printconnect", "com.zebra.printconnect.print.PassthroughService"));
+                    printIntent.putExtra("com.zebra.printconnect.PrintService.PASSTHROUGH_DATA", passthroughBytes);
+
+                    ResultReceiver buildIPCSafeReceiver = new ResultReceiver(null) {
+                        @Override
+                        protected void onReceiveResult(int resultCode, Bundle resultData) {
+                            if (resultCode == 0) {
+                                // Handle successful print
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        printStatus.setText("Label printed!");
+                                    }
+                                });
+                            } else {
+                                // Error message (null on successful print)
+                                // Handle unsuccessful print
+                                String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
+                                Log.e(TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        printStatus.setText("Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
+
+                                    }
+                                });
+                            }
+                        }
+                    };
+
+                    printIntent.setExtrasClassLoader(getClassLoader());
+                    printIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver));
+                    startService(printIntent);
+                }
+            });
+
+//            dialog.show();
+            return builder.show();
+    }
+
+    private AlertDialog showDownloadDialog() {
+        Log.d(TAG, "Building Download dialog");
+        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+        String title = "Install PrintConnect?";
+        String message = "This application requires PrintConnect. Would you like to install it?";
+        String buttonYes = "Yes";
+        String buttonNo = "No";
+        final String PC_PACKAGE = "com.zebra.printconnect";
+
+        downloadDialog.setTitle(title);
+        downloadDialog.setMessage(message);
+        downloadDialog.setPositiveButton(buttonYes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                Uri uri = Uri.parse("market://details?id=" + PC_PACKAGE);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException anfe) {
+                    // Hmm, market is not installed
+                    Log.w(TAG, "Google Play is not installed; cannot install " + PC_PACKAGE);
+                }
             }
         });
-
-        dialog.show();
+        downloadDialog.setNegativeButton(buttonNo, null);
+        downloadDialog.setCancelable(true);
+        return downloadDialog.show();
     }
+
+//    private String findTargetAppPackage(Intent intent) {
+//        String PC_PACKAGE = "com.zebra.printconnect";
+//        PackageManager pm = getPackageManager();
+//        List<ResolveInfo> availableApps = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+//        if (availableApps != null) {
+//            if (contains(availableApps, PC_PACKAGE)) {
+//                return PC_PACKAGE;
+//            }
+//        }
+//        return null;
+//    }
+//
+//    private static boolean contains(Iterable<ResolveInfo> availableApps, String targetApp) {
+//        for (ResolveInfo availableApp : availableApps) {
+//            String packageName = availableApp.activityInfo.packageName;
+//            if (targetApp.equals(packageName)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     public int getVersion() {
         int v = 0;

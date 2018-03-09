@@ -141,7 +141,9 @@
     <string name="nextmissingbutton">Next empty entry</string>
     <string name="jumptoplotidbutton">Go to ID</string>
     <string name="barcodescantitle">Scan barcode</string>
-    <string name="printlabeltitle">Print label</string>
+    <string name="printlabeltitle">Print Label</string>
+    <string name="printstatustitle">Printer status</string>
+    <string name="printstatus">Retrieving connection status...</string>
     <string name="scan">Scan</string>
     <string name="disableentryanavwarning">Data must be collected before you can go to the next entry</string>
 
@@ -247,9 +249,13 @@
     <string name="drop1">InfoBar 1</string>
     <string name="drop2">InfoBar 2</string>
     <string name="drop3">InfoBar 3</string>
-    <string name="labelsizedefault">3"x2"</string>
-    <string name="labelfielddefault">plot_id</string>
-    <string name="labelcopiesdefault">1</string>
+    <string name="labelsizetitle">Size:</string>
+    <string name="textfieldtitle">Text:</string>
+    <string name="textfieldtitle2">Text2:</string>
+    <string name="textfieldtitle3">Text3:</string>
+    <string name="textfieldtitle4">Text4:</string>
+    <string name="barcodefieldtitle">Barcode:</string>
+    <string name="labelcopiestitle">Copies:</string>
     <string name="clearsettings">Clear settings</string>
 
     <string name="personsetup">Set person</string>

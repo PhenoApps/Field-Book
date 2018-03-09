@@ -26,8 +26,8 @@
     <item
         android:id="@+id/printLabel"
         android:icon="@drawable/ic_tb_print"
-        android:title="@string/printlabeltitle"
-        app:showAsAction="always" />
+        android:showAsAction="always"
+        android:title="@string/printlabeltitle"/>
     <item
         android:id="@+id/datagrid"
         android:icon="@drawable/ic_tb_datagrid"
