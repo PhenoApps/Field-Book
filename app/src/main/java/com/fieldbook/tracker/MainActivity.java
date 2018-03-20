@@ -4114,7 +4114,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         final String[] options = new String[ optionsList.size() ];
         optionsList.toArray( options );
 
-        final String[] labelSizeArray = {"3\" x 2\" simple", "3\" x 2\" detailed", "2\" x 1.25\" simple"};
+        final String[] labelSizeArray = {"3\" x 2\" simple", "3\" x 2\" detailed", "2\" x 1\" simple", "2\" x 1\" detailed"};
         ArrayAdapter<String> sizeArrayAdapter = new ArrayAdapter<>(
                 this, R.layout.custom_spinnerlayout, labelSizeArray);
 
@@ -4146,7 +4146,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             int spinnerPosition = sizeArrayAdapter.getPosition(ep.getString("SIZE", labelSizeArray[0]));
             labelsize.setSelection(spinnerPosition);
 
-            if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed")) { //if extra text, make extra text spinners visible
+            if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed") || labelsize.getSelectedItem().toString().equals("2\" x 1\" detailed")) { //if extra text, make extra text spinners visible
                 ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
                 ((View) textfield3.getParent()).setVisibility(View.VISIBLE);
                 ((View) textfield4.getParent()).setVisibility(View.VISIBLE);
@@ -4191,7 +4191,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                        int pos, long arg3) {
                 Log.d(TAG, labelsize.getSelectedItem().toString());
 
-                if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed")) {
+                if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed") || labelsize.getSelectedItem().toString().equals("2\" x 1\" detailed")) {
                     ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
                     ((View) textfield3.getParent()).setVisibility(View.VISIBLE);
                     ((View) textfield4.getParent()).setVisibility(View.VISIBLE);
@@ -4260,6 +4260,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 labelSizes.put(labelSizeArray[0], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO180,120^BQ,,sizeb^FDMA,barcode^FS^XZ");
                 labelSizes.put(labelSizeArray[1], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO30,120^BQ,,sizeb^FDMA,barcode^FS^FO260,140^FB349,2,0,C,0^A0,size2,^FDtext2^FS^FO260,270^FB349,2,0,C,0^A0,size3,^FDtext3^FS^FO260,320^FB349,2,0,C,0^A0,size4,^FDtext4^FS^XZ");
                 labelSizes.put(labelSizeArray[2], "^XA^POI^PW406^LL0254^FO0,18^FB399,2,0,C,0^A0,size1,^FDtext1^FS^FO125,75^BQ,,sizeb^FDMA,barcode^FS^XZ");
+                labelSizes.put(labelSizeArray[3], "^XA^PW406^LL0203^FO15,55^BQ,,sizeb^FDMA,barcode^FS^FO0,10^FB406,1,0,C,0^A0,size1,^FDtext1^FS^FO155,60^FB250,1,0,C,0^A0,size2,^FDtext2^FS^FO155,140^FB250,1,0,C,0^A0,size3,^FDtext3^FS^FO155,165^FB250,1,0,C,0^A0,size4,^FDtext4^FS^XZ");
 
                 //get and handle selected items from dropdowns
                 String size = labelsize.getSelectedItem().toString();
@@ -4291,27 +4292,29 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     barcode_size = 10 - (length/15);
                 } else if (size.equals("3\" x 2\" detailed")) {
                     barcode_size = 9 - (length/15);
-                } else if (size.equals("2\" x 1.25\" simple")) {
-                    barcode_size = 6 - (length/15);
+                } else if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
+                    barcode_size = 6 - (length / 15);
                 } else {
                     Log.d(TAG, "Matched no sizes");
                 }
 
                 Integer dotsAvailable1;
+                Integer dotsAvailable2;
 
                 // Scale text based on label size and variable field length
-                if (size.equals("2\" x 1.25\" simple")) {
+                if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
                     dotsAvailable1 = 399;
+                    dotsAvailable2 = 250;
 
                 } else {
                     dotsAvailable1 = 599;
+                    dotsAvailable2 = 349;
                 }
 
-                Integer dotsAvailable2 = 349;
-                String size1 = Integer.toString(dotsAvailable1 * 2 / (text1.length() + 3));
-                String size2 = Integer.toString(dotsAvailable2 * 2 / (text2.length() + 3));
-                String size3 = Integer.toString(dotsAvailable2 * 2 / (text3.length() + 3));
-                String size4 = Integer.toString(dotsAvailable2 * 2 / (text4.length() + 3));
+                String size1 = Integer.toString(dotsAvailable1 * 3 / (text1.length() + 13));
+                String size2 = Integer.toString(dotsAvailable2 * 2 / (text2.length() + 5));
+                String size3 = Integer.toString(dotsAvailable2 * 2 / (text3.length() + 5));
+                String size4 = Integer.toString(dotsAvailable2 * 2 / (text4.length() + 5));
 
                 // Replace placeholders in zpl code
                 String labelData = labelSizes.get(size);
