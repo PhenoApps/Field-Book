@@ -4259,8 +4259,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 HashMap<String, String> labelSizes = new HashMap<String, String>();
                 labelSizes.put(labelSizeArray[0], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO180,120^BQ,,sizeb^FDMA,barcode^FS^XZ");
                 labelSizes.put(labelSizeArray[1], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO30,120^BQ,,sizeb^FDMA,barcode^FS^FO260,140^FB349,2,0,C,0^A0,size2,^FDtext2^FS^FO260,270^FB349,2,0,C,0^A0,size3,^FDtext3^FS^FO260,320^FB349,2,0,C,0^A0,size4,^FDtext4^FS^XZ");
-                labelSizes.put(labelSizeArray[2], "^XA^POI^PW406^LL0254^FO0,10^FB399,2,0,C,0^A0,size1,^FDtext1^FS^FO125,60^BQ,,sizeb^FDMA,barcode^FS^XZ");
-                labelSizes.put(labelSizeArray[3], "^XA^POI^PW406^LL0203^FO15,60^BQ,,sizeb^FDMA,barcode^FS^FO0,10^FB406,1,0,C,0^A0,size1,^FDtext1^FS^FO155,60^FB250,1,0,C,0^A0,size2,^FDtext2^FS^FO155,140^FB250,1,0,C,0^A0,size3,^FDtext3^FS^FO155,165^FB250,1,0,C,0^A0,size4,^FDtext4^FS^XZ");
+                labelSizes.put(labelSizeArray[2], "^XA^POI^PW406^LL0203^FO0,10^FB399,2,0,C,0^A0,size1,^FDtext1^FS^FO125,50^BQ,,sizeb^FDMA,barcode^FS^XZ");
+                labelSizes.put(labelSizeArray[3], "^XA^POI^PW406^LL0203^FO15,50^BQ,,sizeb^FDMA,barcode^FS^FO0,10^FB406,1,0,C,0^A0,size1,^FDtext1^FS^FO155,60^FB250,1,0,C,0^A0,size2,^FDtext2^FS^FO155,130^FB250,1,0,C,0^A0,size3,^FDtext3^FS^FO155,155^FB250,1,0,C,0^A0,size4,^FDtext4^FS^XZ");
 
                 //get and handle selected items from dropdowns
                 String size = labelsize.getSelectedItem().toString();
@@ -4293,7 +4293,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 } else if (size.equals("3\" x 2\" detailed")) {
                     barcode_size = 9 - (length/15);
                 } else if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
-                    barcode_size = 6 - (length / 15);
+                    barcode_size = 5 - (length / 15);
                 } else {
                     Log.d(TAG, "Matched no sizes");
                 }
