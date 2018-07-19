@@ -73,7 +73,7 @@ public class DataHelper {
 
     private SharedPreferences ep;
 
-    DataHelper(Context context) {
+    public DataHelper(Context context) {
         try {
             this.context = context;
             openHelper = new OpenHelper(this.context);
