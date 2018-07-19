@@ -73,6 +73,12 @@ import android.view.MenuItem;
 import com.fieldbook.tracker.barcodes.*;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
 import com.fieldbook.tracker.search.*;
+import com.fieldbook.tracker.traitLayouts.DateTraitLayout;
+import com.fieldbook.tracker.traitLayouts.DataWrapper;
+import com.fieldbook.tracker.traitLayouts.NumericTraitLayout;
+import com.fieldbook.tracker.traitLayouts.PercentTraitLayout;
+import com.fieldbook.tracker.traitLayouts.TextTraitLayout;
+import com.fieldbook.tracker.traitLayouts.TraitLayout;
 import com.fieldbook.tracker.traits.*;
 import com.fieldbook.tracker.tutorial.*;
 import com.fieldbook.tracker.utilities.Constants;
@@ -94,6 +100,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -249,12 +256,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     /**
      * Trait layouts
      */
-    LinearLayout traitNumeric;
+    NumericTraitLayout traitNumeric;
     LinearLayout traitCategorical;
-    LinearLayout traitPercent;
-    LinearLayout traitDate;
+    PercentTraitLayout traitPercent;
+    DateTraitLayout traitDate;
     LinearLayout traitBoolean;
-    LinearLayout traitText;
+    TextTraitLayout traitText;
     LinearLayout traitPhoto;
     LinearLayout traitCounter;
     LinearLayout traitAudio;
@@ -381,9 +388,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         traitBoolean = (LinearLayout) findViewById(R.id.booleanLayout);
         traitAudio = (LinearLayout) findViewById(R.id.audioLayout);
         traitCategorical = (LinearLayout) findViewById(R.id.categoricalLayout);
-        traitDate = (LinearLayout) findViewById(R.id.dateLayout);
+        traitDate = (DateTraitLayout) findViewById(R.id.dateLayout);
         traitNumeric = (LinearLayout) findViewById(R.id.numericLayout);
-        traitPercent = (LinearLayout) findViewById(R.id.percentLayout);
+        traitPercent = (PercentTraitLayout) findViewById(R.id.percentLayout);
         traitText = (LinearLayout) findViewById(R.id.textLayout);
         traitPhoto = (LinearLayout) findViewById(R.id.photoLayout);
         traitCounter = (LinearLayout) findViewById(R.id.counterLayout);
@@ -2117,6 +2124,38 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         }
                     }
 
+
+                    //This map relates a String value to a specific trait layout implementation object
+                    Map<String, TraitLayout> traitLayoutMap = new HashMap<>();
+                    traitLayoutMap.put("text", traitText);
+                    traitLayoutMap.put("numeric", traitNumeric);
+                    traitLayoutMap.put("percent", traitPercent);
+                    traitLayoutMap.put("date", traitDate);
+
+                    //Clear all layouts
+                    for(TraitLayout layout: traitLayoutMap.values()){
+                        layout.setVisibility(View.GONE);
+                    }
+
+                    //Get current layout object from map and make it visible
+                    TraitLayout currentTraitLayout = traitLayoutMap.get(currentTrait.format);
+                    currentTraitLayout.setVisibility(View.VISIBLE);
+
+                    //Wrap date related parameters into an object
+                    DataWrapper dataWrapper = new DataWrapper();
+                    dataWrapper.setDate(date);
+                    dataWrapper.setDay(day);
+                    dataWrapper.setMonth(month);
+
+                    //Call specific load layout code for the current trait layout
+                    currentTraitLayout.loadLayout(etCurVal, dataWrapper, newTraits, currentTrait, displayColor, cvNum,
+                            cvText, seekBar, seekListener, mHandler);
+
+                    date = dataWrapper.getDate();
+                    day = dataWrapper.getDay();
+                    month = dataWrapper.getMonth();
+
+
                     // All the logic is here to hide controls except for the current trait
                     // Checks in-memory hashmap
                     // Populate screen with in saved data
@@ -2135,44 +2174,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitLocation.setVisibility(View.GONE);
                         traitAngle.setVisibility(View.GONE);
 
-                        etCurVal.setVisibility(EditText.VISIBLE);
-                        etCurVal.setSelection(etCurVal.getText().length());
-                        etCurVal.setEnabled(true);
+                        traitText.loadLayout(etCurVal, null, newTraits, currentTrait, displayColor, cvNum,
+                                cvText, seekBar, seekListener, mHandler);
 
-                        if (newTraits.containsKey(currentTrait.trait)) {
-                            etCurVal.removeTextChangedListener(cvText);
-                            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
-                            etCurVal.setTextColor(Color.parseColor(displayColor));
-                            etCurVal.addTextChangedListener(cvText);
-                            etCurVal.setSelection(etCurVal.getText().length());
-                        } else {
-                            etCurVal.removeTextChangedListener(cvText);
-                            etCurVal.setText("");
-                            etCurVal.setTextColor(Color.BLACK);
-
-                            if (currentTrait.defaultValue != null && currentTrait.defaultValue.length() > 0) {
-                                etCurVal.setText(currentTrait.defaultValue);
-                                updateTrait(currentTrait.trait, currentTrait.format, etCurVal.getText().toString());
-                            }
-
-                            etCurVal.addTextChangedListener(cvText);
-                            etCurVal.setSelection(etCurVal.getText().length());
-                        }
-
-                        // This is needed to fix a keyboard bug
-                        mHandler.postDelayed(new Runnable() {
-                            public void run() {
-                                etCurVal.dispatchTouchEvent(MotionEvent.obtain(
-                                        SystemClock.uptimeMillis(),
-                                        SystemClock.uptimeMillis(),
-                                        MotionEvent.ACTION_DOWN, 0, 0, 0));
-                                etCurVal.dispatchTouchEvent(MotionEvent.obtain(
-                                        SystemClock.uptimeMillis(),
-                                        SystemClock.uptimeMillis(),
-                                        MotionEvent.ACTION_UP, 0, 0, 0));
-                                etCurVal.setSelection(etCurVal.getText().length());
-                            }
-                        }, 300);
                     } else if (currentTrait.format.equals("numeric")) {
                         traitText.setVisibility(View.GONE);
                         traitNumeric.setVisibility(View.VISIBLE);
@@ -2188,25 +2192,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitLocation.setVisibility(View.GONE);
                         traitAngle.setVisibility(View.GONE);
 
-                        etCurVal.setVisibility(EditText.VISIBLE);
-
-                        if (newTraits.containsKey(currentTrait.trait)) {
-                            etCurVal.removeTextChangedListener(cvNum);
-                            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
-                            etCurVal.setTextColor(Color.parseColor(displayColor));
-                            etCurVal.addTextChangedListener(cvNum);
-                        } else {
-                            etCurVal.removeTextChangedListener(cvNum);
-                            etCurVal.setText("");
-                            etCurVal.setTextColor(Color.BLACK);
-
-                            if (currentTrait.defaultValue != null && currentTrait.defaultValue.length() > 0) {
-                                etCurVal.setText(currentTrait.defaultValue);
-                                updateTrait(currentTrait.trait, currentTrait.format, etCurVal.getText().toString());
-                            }
-
-                            etCurVal.addTextChangedListener(cvNum);
-                        }
+                        traitNumeric.loadLayout(etCurVal, null, newTraits, currentTrait, displayColor, cvNum,
+                                cvText, seekBar, seekListener, mHandler);
 
                     } else if (currentTrait.format.equals("percent")) {
                         traitText.setVisibility(View.GONE);
@@ -2223,66 +2210,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitLocation.setVisibility(View.GONE);
                         traitAngle.setVisibility(View.GONE);
 
-                        etCurVal.setVisibility(EditText.VISIBLE);
-                        etCurVal.removeTextChangedListener(cvNum);
-                        etCurVal.removeTextChangedListener(cvText);
+                        traitPercent.loadLayout(etCurVal, null, newTraits, currentTrait, displayColor, cvNum,
+                                cvText, seekBar, seekListener, mHandler);
 
-                        if (newTraits.containsKey(currentTrait.trait) && !newTraits.get(currentTrait.trait).toString().equals("NA")) {
-
-                            etCurVal.setTextColor(Color.BLACK);
-                            seekBar.setMax(Integer.parseInt(currentTrait.maximum));
-                            seekBar.setOnSeekBarChangeListener(null);
-
-                            if (currentTrait.defaultValue != null) {
-
-                                if (currentTrait.defaultValue.length() > 0) {
-                                    if (newTraits.get(currentTrait.trait).toString()
-                                            .equals(currentTrait.defaultValue))
-                                        etCurVal.setTextColor(Color.BLACK);
-                                    else
-                                        etCurVal.setTextColor(Color.parseColor(displayColor));
-                                } else {
-                                    if (newTraits.get(currentTrait.trait).toString().equals("0"))
-                                        etCurVal.setTextColor(Color.BLACK);
-                                    else
-                                        etCurVal.setTextColor(Color.parseColor(displayColor));
-                                }
-                            } else {
-                                if (newTraits.get(currentTrait.trait).toString().equals("0"))
-                                    etCurVal.setTextColor(Color.BLACK);
-                                else
-                                    etCurVal.setTextColor(Color.parseColor(displayColor));
-                            }
-
-                            String curVal = newTraits.get(currentTrait.trait).toString() + "%";
-                            etCurVal.setText(curVal);
-                            seekBar.setProgress(Integer.parseInt(newTraits.get(currentTrait.trait).toString()));
-                            seekBar.setOnSeekBarChangeListener(seekListener);
-
-                        } else if (newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
-                            etCurVal.setText("NA");
-                            etCurVal.setTextColor(Color.parseColor(displayColor));
-                            seekBar.setProgress(0);
-                        } else {
-                            seekBar.setOnSeekBarChangeListener(null);
-
-                            etCurVal.setText("");
-                            seekBar.setProgress(0);
-                            etCurVal.setTextColor(Color.BLACK);
-
-                            seekBar.setMax(Integer
-                                    .parseInt(currentTrait.maximum));
-
-                            if (currentTrait.defaultValue != null
-                                    && currentTrait.defaultValue.length() > 0) {
-                                etCurVal.setText(currentTrait.defaultValue);
-                                seekBar.setProgress(Integer
-                                        .valueOf(currentTrait.defaultValue));
-                            }
-
-                            updateTrait(currentTrait.trait, "percent", String.valueOf(seekBar.getProgress()));
-                            seekBar.setOnSeekBarChangeListener(seekListener);
-                        }
+                        updateTrait(currentTrait.trait, "percent", String.valueOf(seekBar.getProgress()));
 
                     } else if (currentTrait.format.equals("date")) {
                         traitText.setVisibility(View.GONE);
@@ -2299,68 +2230,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         traitLocation.setVisibility(View.GONE);
                         traitAngle.setVisibility(View.GONE);
 
-                        etCurVal.setEnabled(false);
-                        etCurVal.setVisibility(View.GONE);
+                        DataWrapper dataWrapper = new DataWrapper();
+                        dataWrapper.setDate(date);
+                        dataWrapper.setDay(day);
+                        dataWrapper.setMonth(month);
 
-                        final Calendar c = Calendar.getInstance();
-                        date = dateFormat.format(c.getTime());
+                        traitDate.loadLayout(etCurVal, dataWrapper, newTraits, currentTrait, displayColor, cvNum,
+                                cvText, seekBar, seekListener, mHandler);
 
-                        if (newTraits.containsKey(currentTrait.trait) && !newTraits.get(currentTrait.trait).toString().equals("NA")) {
-                            if(newTraits.get(currentTrait.trait).toString().length() < 4 && newTraits.get(currentTrait.trait).toString().length() > 0) {
-                                Calendar calendar = Calendar.getInstance();
+                        date = dataWrapper.getDate();
+                        day = dataWrapper.getDay();
+                        month = dataWrapper.getMonth();
 
-                                //convert day of year to yyyy-mm-dd string
-                                date = newTraits.get(currentTrait.trait).toString();
-                                calendar.set(Calendar.DAY_OF_YEAR, Integer.parseInt(date));
-                                date = dateFormat.format(calendar.getTime());
-
-                                //set month/day text and color
-                                month.setTextColor(Color.parseColor(displayColor));
-                                day.setTextColor(Color.parseColor(displayColor));
-
-                                month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
-                                day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
-
-                            } else if (newTraits.get(currentTrait.trait).toString().contains(".")) {
-                                //convert from yyyy.mm.dd to yyyy-mm-dd
-                                String[] oldDate = newTraits.get(currentTrait.trait).toString().split("\\.");
-                                date = oldDate[0] + "-" + String.format("%02d", Integer.parseInt(oldDate[1])) + "-" + String.format("%02d", Integer.parseInt(oldDate[2]));
-
-                                //set month/day text and color
-                                month.setText(getMonthForInt(Integer.parseInt(oldDate[1])-1));
-                                day.setText(oldDate[2]);
-                                month.setTextColor(Color.parseColor(displayColor));
-                                day.setTextColor(Color.parseColor(displayColor));
-
-                            } else {
-                                Calendar calendar = Calendar.getInstance();
-
-                                //new format
-                                date = newTraits.get(currentTrait.trait).toString();
-
-                                //Parse date
-                                try {
-                                    calendar.setTime(dateFormat.parse(date));
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-
-                                //set month/day text and color
-                                month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
-                                day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
-
-                                month.setTextColor(Color.parseColor(displayColor));
-                                day.setTextColor(Color.parseColor(displayColor));
-                            }
-                        } else if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
-                            month.setText("");
-                            day.setText("NA");
-                        } else {
-                            month.setTextColor(Color.BLACK);
-                            day.setTextColor(Color.BLACK);
-                            month.setText(getMonthForInt(c.get(Calendar.MONTH)));
-                            day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
-                        }
                     } else if (currentTrait.format.equals("qualitative") | currentTrait.format.equals("categorical")) {
                         traitText.setVisibility(View.GONE);
                         traitNumeric.setVisibility(View.GONE);
