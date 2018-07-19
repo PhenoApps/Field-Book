@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.fields;
 
+
 import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -66,21 +67,21 @@ class FieldAdapter extends BaseAdapter {
     }
 
     public View getView(final int position, View convertView, final ViewGroup parent) {
-        final ViewHolder holder;
 
         ep = context.getSharedPreferences("Settings", 0);
 
+        ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = mLayoutInflater.inflate(R.layout.listitem_field, null);
 
-            holder.fieldName = (TextView) convertView.findViewById(R.id.field_name);
-            holder.count = (TextView) convertView.findViewById(R.id.field_count);
-            holder.importDate = (TextView) convertView.findViewById(R.id.field_import_date);
-            holder.editDate = (TextView) convertView.findViewById(R.id.field_edit_date);
-            holder.exportDate = (TextView) convertView.findViewById(R.id.field_export_date);
-            holder.active = (RadioButton) convertView.findViewById(R.id.fieldRadio);
-            holder.menuPopup = (ImageView) convertView.findViewById(R.id.popupMenu);
+            holder.fieldName = convertView.findViewById(R.id.field_name);
+            holder.count = convertView.findViewById(R.id.field_count);
+            holder.importDate = convertView.findViewById(R.id.field_import_date);
+            holder.editDate = convertView.findViewById(R.id.field_edit_date);
+            holder.exportDate = convertView.findViewById(R.id.field_export_date);
+            holder.active = convertView.findViewById(R.id.fieldRadio);
+            holder.menuPopup = convertView.findViewById(R.id.popupMenu);
 
             convertView.setTag(holder);
         } else {
@@ -100,8 +101,8 @@ class FieldAdapter extends BaseAdapter {
                 ed.putString("DROP3", null);
                 ed.apply();
 
+                MainActivity.dt.switchField(getItem(position).exp_id);
                 MainActivity.reloadData = true;
-
                 notifyDataSetChanged();
             }
         });
@@ -114,11 +115,11 @@ class FieldAdapter extends BaseAdapter {
             importDate = importDate.split(" ")[0];
         }
 
-        if(editDate != null) {
+        if (editDate != null) {
             editDate = editDate.split(" ")[0];
         }
 
-        if(exportDate != null) {
+        if (exportDate != null) {
             exportDate = exportDate.split(" ")[0];
         }
 
@@ -146,10 +147,11 @@ class FieldAdapter extends BaseAdapter {
                 MainActivity.dt.switchField(getItem(position).exp_id);
                 MainActivity.reloadData = true;
                 notifyDataSetChanged();
+
             }
         });
 
-        if (ep.getString("FieldFile","").equals(holder.fieldName.getText())) {
+        if (ep.getString("FieldFile", "").contentEquals(holder.fieldName.getText())) {
             holder.active.setChecked(true);
         } else {
             holder.active.setChecked(false);
@@ -178,11 +180,11 @@ class FieldAdapter extends BaseAdapter {
 
                                     MainActivity.dt.deleteField(getItem(position).exp_id);
 
-                                    if(getItem(position).exp_name.equals(ep.getString("FieldFile",""))) {
+                                    if (getItem(position).exp_name.equals(ep.getString("FieldFile", ""))) {
                                         SharedPreferences.Editor ed = ep.edit();
                                         ed.putString("FieldFile", null);
                                         ed.putBoolean("ImportFieldFinished", false);
-                                        ed.putString("ImportID",null);
+                                        ed.putString("ImportID", null);
                                         ed.putString("ImportUniqueName", null);
                                         ed.putString("ImportFirstName", null);
                                         ed.putString("ImportSecondName", null);
@@ -209,7 +211,7 @@ class FieldAdapter extends BaseAdapter {
                             alert.show();
                         }
 
-                        if(item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.statistics))) {
+                        if (item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.statistics))) {
                             Toast.makeText(FieldEditorActivity.thisActivity, "Coming soon!", Toast.LENGTH_SHORT).show();
                         }
 
@@ -223,4 +225,5 @@ class FieldAdapter extends BaseAdapter {
 
         return convertView;
     }
+
 }

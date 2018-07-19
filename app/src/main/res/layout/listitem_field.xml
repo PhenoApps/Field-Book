@@ -8,6 +8,15 @@
     android:paddingBottom="4dp"
     android:paddingTop="4dp">
 
+    <RadioButton
+        android:id="@+id/fieldRadio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|end"
+        android:checked="false"
+        android:scaleX="1.1"
+        android:scaleY="1.1" />
+
     <ImageView
         android:id="@+id/popupMenu"
         android:layout_width="wrap_content"
@@ -91,19 +100,5 @@
             android:textColor="@color/main_details"
             android:textSize="@dimen/text_size_small" />
     </LinearLayout>
-
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <RadioButton
-        android:id="@+id/fieldRadio"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
-        android:checked="false"
-        android:scaleX="1.1"
-        android:scaleY="1.1" />
 
 </LinearLayout>

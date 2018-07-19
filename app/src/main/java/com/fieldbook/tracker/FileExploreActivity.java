@@ -1,8 +1,6 @@
 package com.fieldbook.tracker;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -22,7 +20,6 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Locale;
 
 public class FileExploreActivity extends AppCompatActivity {
 
@@ -38,12 +35,8 @@ public class FileExploreActivity extends AppCompatActivity {
     private String[] include = new String[0];
     private String[] exclude = new String[0];
 
-    private String title = "";
-
     private String chosenFile;
     private ListAdapter adapter;
-
-    private SharedPreferences ep;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,11 +44,10 @@ public class FileExploreActivity extends AppCompatActivity {
         String data = getIntent().getExtras().getString("path");
         include = getIntent().getExtras().getStringArray("include");
         exclude = getIntent().getExtras().getStringArray("exclude");
-        title = getIntent().getExtras().getString("title");
+        String title = getIntent().getExtras().getString("title");
         path = new File(data);
 
         super.onCreate(savedInstanceState);
-        ep = getSharedPreferences("Settings", 0);
 
         mainListView = new ListView(this);
 
@@ -66,21 +58,10 @@ public class FileExploreActivity extends AppCompatActivity {
 
         setContentView(mainListView);
 
-        // Enforce internal language change
-        String local = ep.getString("language", Locale.getDefault().getCountry());
-        String region = ep.getString("region",Locale.getDefault().getLanguage());
-
-        Locale locale2 = new Locale(local, region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
-                .getDisplayMetrics());
-
         loadFileList();
         mainListView.setAdapter(adapter);
 
-        if(title!=null && title.length()>0) {
+        if(title !=null && title.length()>0) {
             this.setTitle(title);
         }
 
@@ -212,8 +193,7 @@ public class FileExploreActivity extends AppCompatActivity {
             public View getView(int position, View convertView, ViewGroup parent) {
                 // creates view
                 View view = super.getView(position, convertView, parent);
-                TextView textView = (TextView) view
-                        .findViewById(android.R.id.text1);
+                TextView textView = view.findViewById(android.R.id.text1);
 
                 // put the image on the text view
                 textView.setCompoundDrawablesWithIntrinsicBounds(

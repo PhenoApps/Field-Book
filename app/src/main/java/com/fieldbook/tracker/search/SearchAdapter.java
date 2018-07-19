@@ -49,8 +49,8 @@ class SearchAdapter extends BaseAdapter {
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = mLayoutInflater.inflate(R.layout.listitem_search_results, null);
-            holder.range = (TextView) convertView.findViewById(R.id.range);
-            holder.plot = (TextView) convertView.findViewById(R.id.plot);
+            holder.range = convertView.findViewById(R.id.range);
+            holder.plot = convertView.findViewById(R.id.plot);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();

@@ -76,11 +76,11 @@ class TraitAdapter extends BaseAdapter {
             convertView = vi.inflate(R.layout.listitem_trait, parent, false);
 
             holder = new ViewHolder();
-            holder.name = (TextView) convertView.findViewById(R.id.field_name);
-            holder.format = (ImageView) convertView.findViewById(R.id.traitType);
-            holder.visible = (CheckBox) convertView.findViewById(R.id.visible);
-            holder.dragSort = (ImageView) convertView.findViewById(R.id.dragSort);
-            holder.menuPopup = (ImageView) convertView.findViewById(R.id.popupMenu);
+            holder.name = convertView.findViewById(R.id.field_name);
+            holder.format = convertView.findViewById(R.id.traitType);
+            holder.visible = convertView.findViewById(R.id.visible);
+            holder.dragSort = convertView.findViewById(R.id.dragSort);
+            holder.menuPopup = convertView.findViewById(R.id.popupMenu);
 
             convertView.setTag(holder);
         } else {
@@ -200,7 +200,7 @@ class TraitAdapter extends BaseAdapter {
                             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
 
                             builder.setTitle(context.getString(R.string.deletetrait));
-                            builder.setMessage(context.getString(R.string.areyousure));
+                            builder.setMessage(context.getString(R.string.delete_trait_warning));
 
                             builder.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() {
 

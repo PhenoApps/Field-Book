@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -30,7 +29,6 @@ import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 public class SearchActivity extends AppCompatActivity {
     private SharedPreferences ep;
@@ -51,17 +49,6 @@ public class SearchActivity extends AppCompatActivity {
 
         ep = getSharedPreferences("Settings", 0);
 
-        // Enforce internal language change
-        String local = ep.getString("language", Locale.getDefault().getCountry());
-        String region = ep.getString("region",Locale.getDefault().getLanguage());
-
-        Locale locale2 = new Locale(local, region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
-                .getDisplayMetrics());
-
         setContentView(R.layout.activity_search);
 
         setTitle(R.string.search);
@@ -72,12 +59,12 @@ public class SearchActivity extends AppCompatActivity {
 
         this.getWindow().setAttributes(params);
 
-        parent = (LinearLayout) findViewById(R.id.rowParent);
+        parent = findViewById(R.id.rowParent);
 
-        Button start = (Button) findViewById(R.id.startBtn);
-        Button close = (Button) findViewById(R.id.closeBtn);
-        Button clear = (Button) findViewById(R.id.clearBtn);
-        Button add = (Button) findViewById(R.id.addBtn);
+        Button start = findViewById(R.id.startBtn);
+        Button close = findViewById(R.id.closeBtn);
+        Button clear = findViewById(R.id.clearBtn);
+        Button add = findViewById(R.id.addBtn);
 
         start.setTransformationMethod(null);
         close.setTransformationMethod(null);
@@ -100,10 +87,10 @@ public class SearchActivity extends AppCompatActivity {
                     for (int i = 0; i < parent.getChildCount(); i++) {
                         LinearLayout child = (LinearLayout) parent.getChildAt(i);
 
-                        EditText t = (EditText) child.findViewById(R.id.searchText);
+                        EditText t = child.findViewById(R.id.searchText);
 
-                        Spinner c = (Spinner) child.findViewById(R.id.columns);
-                        Spinner s = (Spinner) child.findViewById(R.id.like);
+                        Spinner c = child.findViewById(R.id.columns);
+                        Spinner s = child.findViewById(R.id.like);
 
                         String value = "";
                         String prefix;
@@ -209,14 +196,14 @@ public class SearchActivity extends AppCompatActivity {
                     params2.width = WindowManager.LayoutParams.MATCH_PARENT;
                     dialog.getWindow().setAttributes(params2);
 
-                    TextView primaryTitle = (TextView) layout.findViewById(R.id.range);
-                    TextView secondaryTitle = (TextView) layout.findViewById(R.id.plot);
+                    TextView primaryTitle = layout.findViewById(R.id.range);
+                    TextView secondaryTitle = layout.findViewById(R.id.plot);
 
                     primaryTitle.setText(ep.getString("ImportFirstName", getString(R.string.range)));
                     secondaryTitle.setText(ep.getString("ImportSecondName", getString(R.string.plot)));
 
-                    Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
-                    ListView myList = (ListView) layout.findViewById(R.id.myList);
+                    Button closeBtn = layout.findViewById(R.id.closeBtn);
+                    ListView myList = layout.findViewById(R.id.myList);
 
                     closeBtn.setTransformationMethod(null);
 
@@ -297,9 +284,9 @@ public class SearchActivity extends AppCompatActivity {
         LayoutInflater vi = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = vi.inflate(R.layout.listitem_search_constructor, null);
 
-        Spinner c = (Spinner) v.findViewById(R.id.columns);
-        Spinner s = (Spinner) v.findViewById(R.id.like);
-        EditText e = (EditText) v.findViewById(R.id.searchText);
+        Spinner c = v.findViewById(R.id.columns);
+        Spinner s = v.findViewById(R.id.like);
+        EditText e = v.findViewById(R.id.searchText);
 
         String[] likes = new String[6];
 
@@ -333,6 +320,7 @@ public class SearchActivity extends AppCompatActivity {
 
     // Helper function to merge arrays
     public static <T> T[] concat(T[] first, T[] second) {
+        //TODO NullPointerException
         T[] result = Arrays.copyOf(first, first.length + second.length);
         System.arraycopy(second, 0, result, first.length, second.length);
         return result;

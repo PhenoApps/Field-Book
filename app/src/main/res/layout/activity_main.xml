@@ -22,8 +22,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/main_primary"
-                android:fitsSystemWindows="true"
-                android:minHeight="?attr/actionBarSize"
                 app:popupTheme="@style/AppToolbar"
                 app:theme="@style/AppToolbar" />
 
@@ -158,8 +156,7 @@
                             android:id="@+id/drop3"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:ellipsize="none"
-                            android:maxLines="1"
+                            android:singleLine="true"
                             android:paddingLeft="10dp"
                             android:textColor="#000000"
                             android:textSize="@dimen/text_size_xlarge"
@@ -226,6 +223,8 @@
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
+                            android:maxLines="1"
+                            android:ellipsize="end"
                             android:text="@string/traitdetails"
                             android:textColor="#000000"
                             android:textSize="@dimen/text_size_small"

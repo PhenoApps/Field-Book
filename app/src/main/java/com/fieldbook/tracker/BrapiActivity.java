@@ -2,7 +2,6 @@ package com.fieldbook.tracker;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -26,7 +25,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Locale;
 
 /**
  * API test Screen
@@ -57,18 +55,7 @@ public class BrapiActivity extends AppCompatActivity {
 
         thisActivity = this;
 
-        // Enforce internal language change
-        String local = ep.getString("language", Locale.getDefault().getCountry());
-        String region = ep.getString("region",Locale.getDefault().getLanguage());
-
-        Locale locale2 = new Locale(local, region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2,
-                getBaseContext().getResources().getDisplayMetrics());
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setTitle(null);
@@ -81,7 +68,7 @@ public class BrapiActivity extends AppCompatActivity {
     }
 
     private void loadScreen() {
-        settingsList = (ListView) findViewById(R.id.myList);
+        settingsList = findViewById(R.id.myList);
 
         String[] items2 = new String[]{ "Get crops","Get studies","Get all traits"};
 
@@ -106,7 +93,7 @@ public class BrapiActivity extends AppCompatActivity {
     }
 
     private void createList(String[] items3) {
-        resultsList = (ListView) findViewById(R.id.myList2);
+        resultsList = findViewById(R.id.myList2);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, items3);
         resultsList.setAdapter(adapter);
     }

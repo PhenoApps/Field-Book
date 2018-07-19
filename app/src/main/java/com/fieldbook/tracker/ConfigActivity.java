@@ -1,6 +1,7 @@
 package com.fieldbook.tracker;
 
 import android.app.Activity;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -10,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -45,11 +45,13 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
 import com.fieldbook.tracker.traits.TraitEditorActivity;
 import com.fieldbook.tracker.tutorial.TutorialSettingsActivity;
 import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.utilities.CustomListAdapter;
 import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -70,14 +72,12 @@ public class ConfigActivity extends AppCompatActivity {
     Handler mHandler = new Handler();
 
     public static boolean helpActive;
-    public static Activity thisActivity;
 
     private SharedPreferences ep;
 
     private AlertDialog personDialog;
     private AlertDialog locationDialog;
     private AlertDialog saveDialog;
-    private AlertDialog advancedDialog;
     private AlertDialog setupDialog;
     private AlertDialog dbSaveDialog;
 
@@ -96,11 +96,8 @@ public class ConfigActivity extends AppCompatActivity {
 
     private CheckBox checkDB;
     private CheckBox checkExcel;
-    private CheckBox checkOverwrite;
     private Boolean checkDbBool = false;
     private Boolean checkExcelBool = false;
-
-    public static boolean languageChange = false;
 
     private RadioButton onlyUnique;
     private RadioButton allColumns;
@@ -110,9 +107,6 @@ public class ConfigActivity extends AppCompatActivity {
 
     private ArrayList<String> newRange;
     private ArrayList<String> exportTrait;
-
-    private String local;
-    private String region;
 
     private Menu systemMenu;
 
@@ -132,17 +126,12 @@ public class ConfigActivity extends AppCompatActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            if (ep.getBoolean("Tips", false)) {
+            if (ep.getBoolean(PreferencesActivity.TUTORIAL_MODE, false)) {
                 systemMenu.findItem(R.id.help).setVisible(true);
             } else {
                 systemMenu.findItem(R.id.help).setVisible(false);
             }
         }
-        //Device default language : Locale.getDefault().getLanguage()
-        // This allows dynamic language change without exiting the app
-        local = ep.getString("language", Locale.getDefault().getCountry());
-        region = ep.getString("region",Locale.getDefault().getLanguage());
-        updateLanguage(local, region);
 
         invalidateOptionsMenu();
         loadScreen();
@@ -154,18 +143,13 @@ public class ConfigActivity extends AppCompatActivity {
 
         ep = getSharedPreferences("Settings", 0);
 
-        // Enforce internal language change
-        thisActivity = this;
-
-        local = ep.getString("language",Locale.getDefault().getCountry());
-        region = ep.getString("region",Locale.getDefault().getLanguage());
-
-        updateLanguage(local, region);
-
         invalidateOptionsMenu();
         loadScreen();
 
         helpActive = false;
+
+        // request permissions
+        ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
         checkIntent();
     }
@@ -174,7 +158,7 @@ public class ConfigActivity extends AppCompatActivity {
         setContentView(R.layout.activity_config);
 
         // Toolbar
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setTitle(null);
@@ -200,15 +184,15 @@ public class ConfigActivity extends AppCompatActivity {
         setupDialog.getWindow().setAttributes(params);
 
         // This is the list of items shown on the settings screen itself
-        setupList = (ListView) layout.findViewById(R.id.myList);
-        Button setupCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
+        setupList = layout.findViewById(R.id.myList);
+        Button setupCloseBtn = layout.findViewById(R.id.closeBtn);
         setupCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 setupDialog.dismiss();
             }
         });
 
-        ListView settingsList = (ListView) findViewById(R.id.myList);
+        ListView settingsList = findViewById(R.id.myList);
 
         String[] items2 = new String[]{getString(R.string.fields),
                 getString(R.string.traits), getString(R.string.profile), getString(R.string.export), getString(R.string.advanced),
@@ -253,10 +237,15 @@ public class ConfigActivity extends AppCompatActivity {
                         showSaveDialog();
                         break;
                     case 4:
-                        showAdvancedDialog();
+                        intent.setClassName(ConfigActivity.this,
+                                PreferencesActivity.class.getName());
+                        startActivity(intent);
                         break;
                     case 5:
-                        showLanguageDialog();
+                        //showLanguageDialog();
+
+                        Intent i = new Intent(android.provider.Settings.ACTION_LOCALE_SETTINGS);
+                        startActivity(i);
                         break;
                     //case 6:
                     //    intent.setClassName(ConfigActivity.this,
@@ -272,28 +261,20 @@ public class ConfigActivity extends AppCompatActivity {
 
         SharedPreferences.Editor ed = ep.edit();
 
-        if (ep.getInt("UpdateVersion", -1) < getVersion()) {
-            ed.putInt("UpdateVersion", getVersion());
+        if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
+            ed.putInt("UpdateVersion", Utils.getVersion(this));
             ed.apply();
             Intent intent = new Intent();
             intent.setClass(ConfigActivity.this, ChangelogActivity.class);
             startActivity(intent);
         }
         if (!ep.getBoolean("TipsConfigured", false)) {
-            local = ep.getString("language",Locale.getDefault().getCountry());
-            region = ep.getString("region",Locale.getDefault().getLanguage());
-
-            ed.putString("language", local);
-            ed.putString("region", region);
-            ed.apply();
-
             ed.putBoolean("TipsConfigured", true);
             ed.apply();
             showTipsDialog();
             loadSampleDataDialog();
         }
     }
-
 
     private String getOverwriteFile(String filename) {
         String[] fileArray;
@@ -332,6 +313,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //TODO change all request codes
         if (requestCode == 4) {
             if (resultCode == RESULT_OK) {
 
@@ -345,16 +327,6 @@ public class ConfigActivity extends AppCompatActivity {
                 mHandler.post(importDB);
             }
         }
-    }
-
-    public int getVersion() {
-        int v = 0;
-        try {
-            v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e("Field Book", "" + e.getMessage());
-        }
-        return v;
     }
 
     private void showCitationDialog() {
@@ -407,7 +379,6 @@ public class ConfigActivity extends AppCompatActivity {
                 intent.setClassName(ConfigActivity.this,
                         ConfigActivity.class.getName());
                 startActivity(intent);
-
             }
 
         });
@@ -463,7 +434,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         boolean found = false;
 
-        String truncated = "";
+        StringBuilder truncated = new StringBuilder();
 
         for (int i = 0; i < v.length(); i++) {
             if (found) {
@@ -477,10 +448,10 @@ public class ConfigActivity extends AppCompatActivity {
                 found = true;
             }
 
-            truncated += v.charAt(i);
+            truncated.append(v.charAt(i));
         }
 
-        return truncated;
+        return truncated.toString();
     }
 
     private void showAboutDialog() {
@@ -511,7 +482,7 @@ public class ConfigActivity extends AppCompatActivity {
         TextView versionText = (TextView) layout.findViewById(R.id.tvVersion);
         versionText.setText(getString(R.string.version) + " " + versionName);
 
-        TextView otherApps = (TextView) layout.findViewById(R.id.tvOtherApps);
+        TextView otherApps = layout.findViewById(R.id.tvOtherApps);
 
         versionText.setOnClickListener(new OnClickListener() {
             @Override
@@ -529,7 +500,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+        Button closeBtn = layout.findViewById(R.id.closeBtn);
 
         closeBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -558,7 +529,7 @@ public class ConfigActivity extends AppCompatActivity {
         params.height = LayoutParams.WRAP_CONTENT;
         otherAppsDialog.getWindow().setAttributes(params);
 
-        ListView myList = (ListView) layout.findViewById(R.id.myList);
+        ListView myList = layout.findViewById(R.id.myList);
 
         String[] appsArray = new String[3];
 
@@ -596,7 +567,7 @@ public class ConfigActivity extends AppCompatActivity {
         CustomListAdapter adapterImg = new CustomListAdapter(this, app_images, appsArray);
         myList.setAdapter(adapterImg);
 
-        Button langCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
+        Button langCloseBtn = layout.findViewById(R.id.closeBtn);
 
         langCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -851,7 +822,7 @@ public class ConfigActivity extends AppCompatActivity {
     private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
 
-        if (!ep.getBoolean("DisableShare", false)) {
+        if (!ep.getBoolean(PreferencesActivity.DISABLE_SHARE, false)) {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
@@ -875,363 +846,6 @@ public class ConfigActivity extends AppCompatActivity {
 
     public void makeToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    private void showAdvancedDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_advanced_settings, null);
-
-        builder.setTitle(R.string.advanced)
-                .setCancelable(true)
-                .setView(layout);
-
-        advancedDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params = advancedDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        advancedDialog.getWindow().setAttributes(params);
-
-        CheckBox tips = (CheckBox) layout.findViewById(R.id.tipsCheckbox);
-        CheckBox cycle = (CheckBox) layout.findViewById(R.id.cycleTraitsCheckbox);
-        CheckBox ignoreEntries = (CheckBox) layout.findViewById(R.id.ignoreExistingCheckbox);
-        CheckBox useDay = (CheckBox) layout.findViewById(R.id.useDayCheckbox);
-        CheckBox rangeSound = (CheckBox) layout.findViewById(R.id.rangeSoundCheckbox);
-        CheckBox jumpToPlot = (CheckBox) layout.findViewById(R.id.jumpToPlotCheckbox);
-        CheckBox barcodeScan = (CheckBox) layout.findViewById(R.id.barcodeScanCheckbox);
-        CheckBox nextEmptyPlot = (CheckBox) layout.findViewById(R.id.nextEmptyPlotCheckbox);
-        CheckBox quickGoTo = (CheckBox) layout.findViewById(R.id.quickGoToCheckbox);
-        CheckBox disableShare = (CheckBox) layout.findViewById(R.id.disableShareCheckbox);
-        CheckBox disableEntryNavLeft = (CheckBox) layout.findViewById(R.id.disableEntryNavLeftCheckbox);
-        CheckBox disableEntryNavRight = (CheckBox) layout.findViewById(R.id.disableEntryNavRightCheckbox);
-        CheckBox dataGrid = (CheckBox) layout.findViewById(R.id.dataGridCheckbox);
-
-        Button advCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
-
-        advCloseBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                advancedDialog.dismiss();
-            }
-        });
-
-        // Set default values for advanced settings
-        tips.setChecked(ep.getBoolean("Tips", false));
-        cycle.setChecked(ep.getBoolean("CycleTraits", false));
-        ignoreEntries.setChecked(ep.getBoolean("IgnoreExisting", false));
-        useDay.setChecked(ep.getBoolean("UseDay", false));
-        rangeSound.setChecked(ep.getBoolean("RangeSound", false));
-        jumpToPlot.setChecked(ep.getBoolean("JumpToPlot", false));
-        barcodeScan.setChecked(ep.getBoolean("BarcodeScan", false));
-        nextEmptyPlot.setChecked(ep.getBoolean("NextEmptyPlot", false));
-        quickGoTo.setChecked(ep.getBoolean("QuickGoTo", false));
-        disableShare.setChecked(ep.getBoolean("DisableShare", false));
-        disableEntryNavLeft.setChecked(ep.getBoolean("DisableEntryNavLeft", false));
-        disableEntryNavRight.setChecked(ep.getBoolean("DisableEntryNavRight", false));
-        dataGrid.setChecked(ep.getBoolean("DataGrid", false));
-
-        tips.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("Tips", checked);
-                e.apply();
-                invalidateOptionsMenu();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        cycle.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("CycleTraits", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        ignoreEntries.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("IgnoreExisting", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        useDay.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("UseDay", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        rangeSound.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("RangeSound", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        jumpToPlot.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("JumpToPlot", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        nextEmptyPlot.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0, boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("NextEmptyPlot", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        quickGoTo.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("QuickGoTo", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        disableShare.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("DisableShare", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        disableEntryNavLeft.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("DisableEntryNavLeft", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        disableEntryNavRight.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("DisableEntryNavRight", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        barcodeScan.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("BarcodeScan", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        dataGrid.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("DataGrid", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        advancedDialog.show();
-    }
-
-    private void showLanguageDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list, null);
-
-        builder.setTitle(R.string.language)
-                .setCancelable(true)
-                .setView(layout);
-
-        final AlertDialog languageDialog = builder.create();
-
-        final float scale = this.getResources().getDisplayMetrics().density;
-        int pixels = (int) (500 * scale + 0.5f);
-
-        android.view.WindowManager.LayoutParams params = languageDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        languageDialog.getWindow().setAttributes(params);
-
-        ListView myList = (ListView) layout
-                .findViewById(R.id.myList);
-
-        ViewGroup.LayoutParams params2 = myList.getLayoutParams();
-        params2.height = pixels;
-        myList.setLayoutParams(params2);
-
-        region = "";
-        String[] langArray = new String[14];
-
-        langArray[0] = getString(R.string.english);
-        langArray[1] = getString(R.string.spanish);
-        langArray[2] = getString(R.string.french);
-        langArray[3] = getString(R.string.hindi);
-        langArray[4] = getString(R.string.german);
-        langArray[5] = getString(R.string.japanese);
-        langArray[6] = getString(R.string.arabic);
-        langArray[7] = getString(R.string.chinese);
-        langArray[8] = getString(R.string.portuguesebr);
-        langArray[9] = getString(R.string.russian);
-        langArray[10] = getString(R.string.oromo);
-        langArray[11] = getString(R.string.amharic);
-        langArray[12] = getString(R.string.bengali);
-        langArray[13] = getString(R.string.italian);
-
-        Integer image_id[] = {R.drawable.locale_ic_us, R.drawable.locale_ic_mx, R.drawable.locale_ic_fr, R.drawable.locale_ic_in,
-                R.drawable.locale_ic_de, R.drawable.locale_ic_jp, R.drawable.locale_ic_ar, R.drawable.locale_ic_cn, R.drawable.locale_ic_br,
-                R.drawable.locale_ic_ru, R.drawable.locale_ic_et, R.drawable.locale_ic_et, R.drawable.locale_ic_bn, R.drawable.locale_ic_it};
-
-        myList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                switch (which) {
-                    case 0:
-                        local = "en";
-                        break;
-                    case 1:
-                        local = "es";
-                        break;
-                    case 2:
-                        local = "fr";
-                        break;
-                    case 3:
-                        local = "hi";
-                        break;
-                    case 4:
-                        local = "de";
-                        break;
-                    case 5:
-                        local = "ja";
-                        break;
-                    case 6:
-                        local = "ar";
-                        break;
-                    case 7:
-                        local = "zh";
-                        region = "CN";
-                        break;
-                    case 8:
-                        local = "pt";
-                        region = "BR";
-                        break;
-                    case 9:
-                        local = "ru";
-                        break;
-                    case 10:
-                        local = "om";
-                        region = "ET";
-                        break;
-                    case 11:
-                        local = "am";
-                        break;
-                    case 12:
-                        local = "bn";
-                        break;
-                    case 13:
-                        local = "it";
-                        break;
-                }
-                Editor ed = ep.edit();
-                ed.putString("language", local);
-                ed.putString("region", region);
-                ed.apply();
-
-                updateLanguage(local, region);
-                invalidateOptionsMenu();
-                loadScreen();
-
-                languageChange = true;
-
-                languageDialog.dismiss();
-            }
-        });
-
-        CustomListAdapter adapterImg = new CustomListAdapter(this, image_id, langArray);
-        myList.setAdapter(adapterImg);
-
-        Button langCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
-
-        langCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                languageDialog.dismiss();
-            }
-        });
-
-        languageDialog.show();
-    }
-
-    private void updateLanguage(String loc, String reg) {
-        Locale locale2 = new Locale(loc, reg);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().
-                updateConfiguration(config2, getBaseContext().getResources()
-                        .getDisplayMetrics());
-    }
-
-    private class CustomListAdapter extends ArrayAdapter<String> {
-        String[] color_names;
-        Integer[] image_id;
-        Context context;
-
-        CustomListAdapter(Activity context, Integer[] image_id, String[] text) {
-            super(context, R.layout.listitem_language, text);
-            this.color_names = text;
-            this.image_id = image_id;
-            this.context = context;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View single_row = inflater.inflate(R.layout.listitem_language, null, true);
-            TextView textView = (TextView) single_row.findViewById(R.id.txt);
-            ImageView imageView = (ImageView) single_row.findViewById(R.id.img);
-            textView.setText(color_names[position]);
-            imageView.setImageResource(image_id[position]);
-            return single_row;
-        }
     }
 
     private String[] prepareSetup() {
@@ -1289,7 +903,7 @@ public class ConfigActivity extends AppCompatActivity {
         saveDialog.getWindow().setAttributes(params2);
 
 
-        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+        Button closeBtn = layout.findViewById(R.id.closeBtn);
 
         closeBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -1297,10 +911,10 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        exportFile = (EditText) layout.findViewById(R.id.fileName);
-        checkDB = (CheckBox) layout.findViewById(R.id.formatDB);
-        checkExcel = (CheckBox) layout.findViewById(R.id.formatExcel);
-        checkOverwrite = (CheckBox) layout.findViewById(R.id.overwrite);
+        exportFile = layout.findViewById(R.id.fileName);
+        checkDB = layout.findViewById(R.id.formatDB);
+        checkExcel = layout.findViewById(R.id.formatExcel);
+        CheckBox checkOverwrite = layout.findViewById(R.id.overwrite);
 
         if (ep.getBoolean("Overwrite", false) ) {
             checkOverwrite.setChecked(true);
@@ -1321,12 +935,12 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        allColumns = (RadioButton) layout.findViewById(R.id.allColumns);
-        onlyUnique = (RadioButton) layout.findViewById(R.id.onlyUnique);
-        allTraits = (RadioButton) layout.findViewById(R.id.allTraits);
-        activeTraits = (RadioButton) layout.findViewById(R.id.activeTraits);
+        allColumns = layout.findViewById(R.id.allColumns);
+        onlyUnique = layout.findViewById(R.id.onlyUnique);
+        allTraits = layout.findViewById(R.id.allTraits);
+        activeTraits = layout.findViewById(R.id.activeTraits);
 
-        Button exportButton = (Button) layout.findViewById(R.id.saveBtn);
+        Button exportButton = layout.findViewById(R.id.saveBtn);
 
         exportButton.setOnClickListener(new OnClickListener() {
 
@@ -1402,8 +1016,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void showSetupDialog() {
         String[] array = prepareSetup();
-        ArrayList<String> lst = new ArrayList<>();
-        lst.addAll(Arrays.asList(array));
+        ArrayList<String> lst = new ArrayList<>(Arrays.asList(array));
 
         setupList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -1446,8 +1059,8 @@ public class ConfigActivity extends AppCompatActivity {
         langParams.width = LayoutParams.MATCH_PARENT;
         personDialog.getWindow().setAttributes(langParams);
 
-        final EditText firstName = (EditText) layout.findViewById(R.id.firstName);
-        final EditText lastName = (EditText) layout.findViewById(R.id.lastName);
+        final EditText firstName = layout.findViewById(R.id.firstName);
+        final EditText lastName = layout.findViewById(R.id.lastName);
 
         firstName.setText(ep.getString("FirstName",""));
         lastName.setText(ep.getString("LastName",""));
@@ -1455,7 +1068,7 @@ public class ConfigActivity extends AppCompatActivity {
         firstName.setSelectAllOnFocus(true);
         lastName.setSelectAllOnFocus(true);
 
-        Button yesButton = (Button) layout.findViewById(R.id.saveBtn);
+        Button yesButton = layout.findViewById(R.id.saveBtn);
 
         yesButton.setOnClickListener(new OnClickListener() {
 
@@ -1503,13 +1116,13 @@ public class ConfigActivity extends AppCompatActivity {
             startActivity(intent);
         }
 
-        Button findLocation = (Button) layout
+        Button findLocation = layout
                 .findViewById(R.id.getLctnBtn);
-        Button yesLocation = (Button) layout.findViewById(R.id.saveBtn);
+        Button yesLocation = layout.findViewById(R.id.saveBtn);
 
-        final EditText longitude = (EditText) layout
+        final EditText longitude = layout
                 .findViewById(R.id.longitude);
-        final EditText latitude = (EditText) layout
+        final EditText latitude = layout
                 .findViewById(R.id.latitude);
 
         longitude.setText(ep.getString("Longitude", ""));
@@ -1591,10 +1204,6 @@ public class ConfigActivity extends AppCompatActivity {
             if (dialog.equals("location")) {
                 showLocationDialog();
             }
-
-            if (dialog.equals("language")) {
-                showLanguageDialog();
-            }
         }
     }
 
@@ -1620,8 +1229,8 @@ public class ConfigActivity extends AppCompatActivity {
         params.height = LayoutParams.WRAP_CONTENT;
         chooseBackupDialog.getWindow().setAttributes(params);
 
-        setupList = (ListView) layout.findViewById(R.id.myList);
-        Button setupCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
+        setupList = layout.findViewById(R.id.myList);
+        Button setupCloseBtn = layout.findViewById(R.id.closeBtn);
 
         setupCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -1680,9 +1289,9 @@ public class ConfigActivity extends AppCompatActivity {
         params2.width = LayoutParams.MATCH_PARENT;
         dbSaveDialog.getWindow().setAttributes(params2);
 
-        exportFile = (EditText) layout.findViewById(R.id.fileName);
+        exportFile = layout.findViewById(R.id.fileName);
 
-        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+        Button closeBtn = layout.findViewById(R.id.closeBtn);
 
         closeBtn.setOnClickListener(new OnClickListener() {
 
@@ -1691,7 +1300,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        Button exportButton = (Button) layout.findViewById(R.id.saveBtn);
+        Button exportButton = layout.findViewById(R.id.saveBtn);
 
         exportButton.setOnClickListener(new OnClickListener() {
 
@@ -1759,7 +1368,7 @@ public class ConfigActivity extends AppCompatActivity {
                 makeToast(getString(R.string.resetcomplete));
 
                 try {
-                    ConfigActivity.thisActivity.finish();
+                    ConfigActivity.this.finish();
                 } catch (Exception e) {
                     Log.e("Field Book", "" + e.getMessage());
                 }
@@ -1793,7 +1402,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         if (systemMenu != null) {
 
-            if (ep.getBoolean("Tips", false)) {
+            if (ep.getBoolean(PreferencesActivity.TUTORIAL_MODE, false)) {
                 systemMenu.findItem(R.id.help).setVisible(true);
             } else {
                 systemMenu.findItem(R.id.help).setVisible(false);

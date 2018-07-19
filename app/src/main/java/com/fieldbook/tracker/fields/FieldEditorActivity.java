@@ -6,13 +6,11 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
@@ -50,8 +48,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.List;
 
 import jxl.Workbook;
 import jxl.WorkbookSettings;
@@ -59,8 +58,6 @@ import jxl.WorkbookSettings;
 public class FieldEditorActivity extends AppCompatActivity {
 
     private static Handler mHandler = new Handler();
-
-    private static String TAG = "Field Book";
 
     public static ListView fieldList;
     public static FieldAdapter mAdapter;
@@ -74,9 +71,8 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     private Menu systemMenu;
 
-    private Toolbar toolbar;
-
     private boolean columnFail;
+    private boolean specialCharactersFail = false;
     private boolean isCSV;
     private boolean isXLS;
 
@@ -107,7 +103,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         try {
             TutorialFieldActivity.thisActivity.finish();
         } catch (Exception e) {
-            Log.e(TAG, "" + e.getMessage());
+            Log.e(Constants.TAG, "" + e.getMessage());
         }
 
         super.onDestroy();
@@ -133,20 +129,9 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         ep = getSharedPreferences("Settings", 0);
 
-        // Enforce internal language change
-        String local = ep.getString("language", Locale.getDefault().getCountry());
-        String region = ep.getString("region",Locale.getDefault().getLanguage());
-
-        Locale locale2 = new Locale(local, region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
-                .getDisplayMetrics());
-
         setContentView(R.layout.activity_fields);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setTitle(null);
@@ -159,18 +144,14 @@ public class FieldEditorActivity extends AppCompatActivity {
             getActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        MainActivity.dt.updateExpTable(false,true,false,0);
+        MainActivity.dt.updateExpTable(false, true, false, 0);
 
         thisActivity = this;
-        fieldList = (ListView) findViewById(R.id.myList);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.newTrait);
-        fab.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showFileDialog();
-            }
-        });
+        fieldList = findViewById(R.id.myList);
+        mAdapter = new FieldAdapter(thisActivity, MainActivity.dt.getAllFieldObjects());
+        fieldList.setAdapter(mAdapter);
+
     }
 
     private void showFileDialog() {
@@ -190,7 +171,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         params.height = LayoutParams.WRAP_CONTENT;
         importDialog.getWindow().setAttributes(params);
 
-        ListView myList = (ListView) layout.findViewById(R.id.myList);
+        ListView myList = layout.findViewById(R.id.myList);
 
         String[] importArray = new String[2];
         importArray[0] = getString(R.string.importlocal);
@@ -208,7 +189,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                                 FileExploreActivity.class.getName());
                         intent.putExtra("path", Constants.FIELDIMPORTPATH);
                         intent.putExtra("include", new String[]{"csv", "xls"});
-                        intent.putExtra("title",getString(R.string.importfields));
+                        intent.putExtra("title", getString(R.string.importfields));
                         startActivityForResult(intent, 1);
                         break;
                     case 1:
@@ -222,15 +203,12 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, importArray);
         myList.setAdapter(adapter);
-
-        Button importCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
-
+        Button importCloseBtn = layout.findViewById(R.id.closeBtn);
         importCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 importDialog.dismiss();
             }
         });
-
         importDialog.show();
     }
 
@@ -273,7 +251,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 break;
 
             case R.id.importField:
-                importFieldDialog();
+                showFileDialog();
                 break;
 
             case android.R.id.home:
@@ -283,24 +261,13 @@ public class FieldEditorActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void fieldCheck(){
-        if(ep.getString("FieldFile",null)==null || !ep.getBoolean("ImportFieldFinished", false)) {
+    private void fieldCheck() {
+        if (ep.getString("FieldFile", null) == null || !ep.getBoolean("ImportFieldFinished", false)) {
             makeToast(getString(R.string.choose_new_default));
         } else {
             MainActivity.reloadData = true;
             finish();
         }
-    }
-
-    private void importFieldDialog() {
-        Intent intent = new Intent();
-
-        intent.setClassName(FieldEditorActivity.this,
-                FileExploreActivity.class.getName());
-        intent.putExtra("path", Constants.FIELDIMPORTPATH);
-        intent.putExtra("include", new String[]{"csv", "xls"});
-        intent.putExtra("title", getString(R.string.importfields));
-        startActivityForResult(intent, 2);
     }
 
     public void onBackPressed() {
@@ -326,7 +293,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         if (requestCode == 3) {
             if (resultCode == RESULT_OK) {
                 DbxChooser.Result result = new DbxChooser.Result(data);
-                saveFileFromUri(result.getLink(),result.getName());
+                saveFileFromUri(result.getLink(), result.getName());
                 mChosenFile = Constants.FIELDIMPORTPATH + "/" + result.getName();
                 showFieldFileDialog();
             }
@@ -334,7 +301,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     private void saveFileFromUri(Uri sourceUri, String fileName) {
-        String sourceFilename= sourceUri.getPath();
+        String sourceFilename = sourceUri.getPath();
         String destinationFilename = Constants.FIELDIMPORTPATH + File.separatorChar + fileName;
 
         BufferedInputStream bis = null;
@@ -344,10 +311,10 @@ public class FieldEditorActivity extends AppCompatActivity {
             bis = new BufferedInputStream(new FileInputStream(sourceFilename));
             bos = new BufferedOutputStream(new FileOutputStream(destinationFilename, false));
             byte[] buf = new byte[1024];
-            int length ;
+            int length;
 
-            while((length=bis.read(buf)) > 0) {
-                bos.write(buf,0,length);
+            while ((length = bis.read(buf)) > 0) {
+                bos.write(buf, 0, length);
             }
 
         } catch (IOException ignore) {
@@ -371,7 +338,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         e.putString("FieldFile", mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.lastIndexOf(".")));
         e.apply();
 
-        if(MainActivity.dt.checkFieldName(ep.getString("FieldFile",""))) {
+        if (MainActivity.dt.checkFieldName(ep.getString("FieldFile", ""))) {
             makeToast(getString(R.string.field_exists_message));
             SharedPreferences.Editor ed = ep.edit();
             ed.putString("FieldFile", null);
@@ -451,10 +418,21 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         }
 
+        String[] reservedNames = new String[]{"id"};
+
+        List<String> list = Arrays.asList(reservedNames);
+
+        //TODO causing crash
         for (String s : importColumns) {
             if (DataHelper.hasSpecialChars(s)) {
                 columnFail = true;
                 makeToast(getString(R.string.columnfail) + " (\"" + s + "\")");
+                break;
+            }
+
+            if (list.contains(s.toLowerCase())) {
+                columnFail = true;
+                makeToast(getString(R.string.illegal_import_column) + " \"" + s + "\"");
                 break;
             }
         }
@@ -480,7 +458,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         params2.width = LayoutParams.MATCH_PARENT;
         importFieldDialog.getWindow().setAttributes(params2);
 
-        Button startImport = (Button) layout.findViewById(R.id.okBtn);
+        Button startImport = layout.findViewById(R.id.okBtn);
 
         startImport.setOnClickListener(new OnClickListener() {
 
@@ -492,9 +470,9 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         });
 
-        unique = (Spinner) layout.findViewById(R.id.uniqueSpin);
-        primary = (Spinner) layout.findViewById(R.id.primarySpin);
-        secondary = (Spinner) layout.findViewById(R.id.secondarySpin);
+        unique = layout.findViewById(R.id.uniqueSpin);
+        primary = layout.findViewById(R.id.primarySpin);
+        secondary = layout.findViewById(R.id.secondarySpin);
 
         setSpinner(unique, columns, "ImportUniqueName");
         setSpinner(primary, columns, "ImportFirstName");
@@ -502,6 +480,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         importFieldDialog.show();
     }
+
     // Creates a new thread to do importing
     private Runnable importRunnable = new Runnable() {
         public void run() {
@@ -532,9 +511,13 @@ public class FieldEditorActivity extends AppCompatActivity {
                 String[] data;
                 String[] columns;
 
-                if(isCSV) {
-                    if (!verifyUniqueColumnCSV(mChosenFile)) {
+                if (isCSV) {
+                    if (!verifyUniqueColumn(true, false, mChosenFile, null)) {
                         uniqueFail = true;
+                        return 0;
+                    }
+
+                    if (specialCharactersFail) {
                         return 0;
                     }
 
@@ -543,7 +526,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                     columns = cr.readNext();
 
-                    exp_id = MainActivity.dt.createField(ep.getString("FieldFile", ""),ep.getString("FieldFile", ""),
+                    exp_id = MainActivity.dt.createField(ep.getString("FieldFile", ""), ep.getString("FieldFile", ""),
                             uniqueS, primaryS, secondaryS, columns);
 
                     data = columns;
@@ -577,9 +560,13 @@ public class FieldEditorActivity extends AppCompatActivity {
                     newDir.mkdirs();
                 }
 
-                if(isXLS) {
-                    if (!verifyUniqueColumnExcel(wb)) {
+                if (isXLS) {
+                    if (!verifyUniqueColumn(false, true, null, wb)) {
                         uniqueFail = true;
+                        return 0;
+                    }
+
+                    if (specialCharactersFail) {
                         return 0;
                     }
 
@@ -589,7 +576,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                         columns[s] = wb.getSheet(0).getCell(s, 0).getContents();
                     }
 
-                    exp_id = MainActivity.dt.createField(ep.getString("FieldFile", ""),ep.getString("FieldFile", ""),
+                    exp_id = MainActivity.dt.createField(ep.getString("FieldFile", ""), ep.getString("FieldFile", ""),
                             uniqueS, primaryS, secondaryS, columns);
 
                     int row = 1;
@@ -621,7 +608,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                     newDir.mkdirs();
                 }
 
-                MainActivity.dt.updateExpTable(true,false,false,exp_id);
+                MainActivity.dt.updateExpTable(true, false, false, exp_id);
 
                 Editor e = ep.edit();
                 e.putString("DROP1", null);
@@ -645,7 +632,7 @@ public class FieldEditorActivity extends AppCompatActivity {
             if (dialog.isShowing())
                 dialog.dismiss();
 
-            if (fail | uniqueFail) {
+            if (fail | uniqueFail | specialCharactersFail) {
                 MainActivity.dt.deleteField(exp_id);
                 SharedPreferences.Editor ed = ep.edit();
                 ed.putString("FieldFile", null);
@@ -656,6 +643,8 @@ public class FieldEditorActivity extends AppCompatActivity {
                 makeToast(getString(R.string.importerror));
             } else if (uniqueFail) {
                 makeToast(getString(R.string.importuniqueerror));
+            } else if (specialCharactersFail) {
+                makeToast(getString(R.string.illegal_unique_column_characters));
             } else {
                 Editor ed = ep.edit();
                 ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
@@ -671,51 +660,60 @@ public class FieldEditorActivity extends AppCompatActivity {
         }
     }
 
-    //TODO merge with verifyUniqueColumnCSV
-    private boolean verifyUniqueColumnExcel(Workbook wb) {
-        HashMap<String, String> check = new HashMap<>();
-
-        for (int s = 0; s < wb.getSheet(0).getRows(); s++) {
-            String value = wb.getSheet(0).getCell(idColPosition, s).getContents();
-
-            if (check.containsKey(value)) {
-                return false;
-            } else {
-                check.put(value, value);
-            }
-        }
-
-        return MainActivity.dt.checkUnique(check);
-
-    }
-
-    private boolean verifyUniqueColumnCSV(String path) {
-        try {
+    private boolean verifyUniqueColumn(Boolean csv, Boolean excel, String path, Workbook wb) {
+        if (excel) {
             HashMap<String, String> check = new HashMap<>();
-            FileReader fr = new FileReader(path);
-            CSVReader cr = new CSVReader(fr);
-            String[] columns = cr.readNext();
-            System.out.println(idColPosition);
 
-            while (columns != null) {
-                columns = cr.readNext();
+            for (int s = 0; s < wb.getSheet(0).getRows(); s++) {
+                String value = wb.getSheet(0).getCell(idColPosition, s).getContents();
 
-                if (columns != null) {
-                    if (check.containsKey(columns[idColPosition])) {
-                        cr.close();
-                        return false;
-                    } else {
-                        check.put(columns[idColPosition], columns[idColPosition]);
-                    }
+                if (check.containsKey(value)) {
+                    return false;
+                } else {
+                    check.put(value, value);
+                }
+
+                if (value.contains("/") || value.contains("\\")) {
+                    specialCharactersFail = true;
                 }
             }
 
             return MainActivity.dt.checkUnique(check);
-
-        } catch (Exception n) {
-            n.printStackTrace();
-            return false;
         }
+
+        if (csv) {
+            try {
+                HashMap<String, String> check = new HashMap<>();
+                FileReader fr = new FileReader(path);
+                CSVReader cr = new CSVReader(fr);
+                String[] columns = cr.readNext();
+
+                while (columns != null) {
+                    columns = cr.readNext();
+
+                    if (columns != null) {
+                        if (check.containsKey(columns[idColPosition])) {
+                            cr.close();
+                            return false;
+                        } else {
+                            check.put(columns[idColPosition], columns[idColPosition]);
+                        }
+
+                        if (columns[idColPosition].contains("/") || columns[idColPosition].contains("\\")) {
+                            specialCharactersFail = true;
+                        }
+                    }
+                }
+
+                return MainActivity.dt.checkUnique(check);
+
+            } catch (Exception n) {
+                n.printStackTrace();
+                return false;
+            }
+        }
+
+        return false;
     }
 
     // Helper function to set spinner adapter and listener

@@ -2,7 +2,6 @@ package com.fieldbook.tracker;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -19,7 +18,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Locale;
 
 public class DatagridActivity extends AppCompatActivity {
 
@@ -43,22 +41,11 @@ public class DatagridActivity extends AppCompatActivity {
 
         ep = getSharedPreferences("Settings", 0);
 
-        // Enforce internal language change
-        String local = ep.getString("language", Locale.getDefault().getCountry());
-        String region = ep.getString("region",Locale.getDefault().getLanguage());
-
-        Locale locale2 = new Locale(local, region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
-                .getDisplayMetrics());
-
         setContentView(R.layout.activity_datagrid);
         setTitle(R.string.datagrid);
 
-        gridView = (GridView) findViewById(R.id.tableLayout1);
-        Button close = (Button) findViewById(R.id.closeBtn);
+        gridView = findViewById(R.id.tableLayout1);
+        Button close = findViewById(R.id.closeBtn);
         close.setTransformationMethod(null);
         gridViewTable();
 
@@ -123,6 +110,7 @@ public class DatagridActivity extends AppCompatActivity {
         gridView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
+                //TODO NullPointerException
                 gridView.getChildAt(previousView).setBackgroundColor(Color.WHITE);
                 previousView = position;
                 v.setBackgroundColor(getResources().getColor(R.color.main_primary));

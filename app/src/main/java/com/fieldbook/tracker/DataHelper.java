@@ -5,15 +5,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.fields.FieldObject;
-import com.fieldbook.tracker.utilities.RangeObject;
+import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.search.SearchData;
 import com.fieldbook.tracker.traits.TraitObject;
 
@@ -137,8 +137,7 @@ public class DataHelper {
      */
     public int getRep(String plot, String trait) {
         Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{plot, trait});
-        int rep = cursor.getCount() + 1;
-        return rep;
+        return cursor.getCount() + 1;
     }
 
 
@@ -187,7 +186,7 @@ public class DataHelper {
     /**
      * V2 - Convert array to String
      */
-    public String arrayToString(String table, String[] s) {
+    private String arrayToString(String table, String[] s) {
         String value = "";
 
         for (int i = 0; i < s.length; i++) {
@@ -219,15 +218,14 @@ public class DataHelper {
 
         Log.i("Field Book", query);
 
-        Cursor cursor = db.rawQuery(query,null);
-
-        return cursor;
+        return db.rawQuery(query,null);
     }
 
     private String arrayToLikeString(String[] visibleTrait) {
         String value = "(";
 
         for (int i = 0; i < visibleTrait.length; i++) {
+            //TODO replace apostrophes with ticks
             value += "user_traits.parent like '" + visibleTrait[i] + "'";
             if (i != visibleTrait.length - 1) {
                 value += " or ";
@@ -264,9 +262,7 @@ public class DataHelper {
 
         Log.i("DH", query);
 
-        Cursor cursor = db.rawQuery(query, null);
-
-        return cursor;
+        return db.rawQuery(query, null);
     }
 
 
@@ -625,6 +621,7 @@ public class DataHelper {
      * Returns the primary key for all ranges
      */
     public int[] getAllRangeID() {
+        //TODO check for range table, if not exist create
         Cursor cursor = db.query(RANGE, new String[]{"id"}, null, null,
                 null, null, "id");
 
@@ -692,30 +689,37 @@ public class DataHelper {
     /**
      * Returns range data based on the primary key for range Used when moving
      * between ranges on screen
+     * //TODO add catch here for sqlite error
      */
     public RangeObject getRange(int id) {
         RangeObject data = new RangeObject();
+        Cursor cursor;
 
         data.plot = "";
         data.plot_id = "";
         data.range = "";
 
-        Cursor cursor = db.query(RANGE, new String[]{TICK + ep.getString("ImportFirstName", "")+TICK,
-                        TICK +ep.getString("ImportSecondName", "")+TICK,
-                        TICK +ep.getString("ImportUniqueName", "")+TICK, "id"}, "id = ?",
-                new String[]{String.valueOf(id)}, null, null, null
-        );
+        try {
+            cursor = db.query(RANGE, new String[]{TICK + ep.getString("ImportFirstName", "") + TICK,
+                            TICK + ep.getString("ImportSecondName", "") + TICK,
+                            TICK + ep.getString("ImportUniqueName", "") + TICK, "id"}, "id = ?",
+                    new String[]{String.valueOf(id)}, null, null, null
+            );
 
-        if (cursor.moveToFirst()) {
-            //data.entry = cursor.getString(0);
-            data.range = cursor.getString(0);
-            data.plot = cursor.getString(1);
-            data.plot_id = cursor.getString(2);
+            if (cursor.moveToFirst()) {
+                //data.entry = cursor.getString(0);
+                data.range = cursor.getString(0);
+                data.plot = cursor.getString(1);
+                data.plot_id = cursor.getString(2);
 
-        }
+            }
 
-        if (!cursor.isClosed()) {
-            cursor.close();
+            if (!cursor.isClosed()) {
+                cursor.close();
+            }
+        } catch(SQLiteException e) {
+            switchField(-1);
+            return null;
         }
 
         return data;
@@ -1253,6 +1257,7 @@ public class DataHelper {
     }
 
     public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int exp_id) {
+        MainActivity.dt.open();
         Cursor cursor = db.rawQuery("SELECT * from " + EXP_INDEX, null);
         cursor.moveToFirst();
 
@@ -1307,9 +1312,17 @@ public class DataHelper {
     }
 
     public void switchField(int exp_id) {
+        Cursor cursor;
+
         // get array of plot attributes
-        Cursor cursor = db.rawQuery("SELECT plot_attributes.attribute_name FROM plot_attributes WHERE plot_attributes.exp_id = " + exp_id, null);
-        cursor.moveToFirst();
+        if(exp_id == -1) {
+            cursor = db.rawQuery("SELECT plot_attributes.attribute_name FROM plot_attributes limit 1", null);
+            cursor.moveToFirst();
+        } else {
+            cursor = db.rawQuery("SELECT plot_attributes.attribute_name FROM plot_attributes WHERE plot_attributes.exp_id = " + exp_id, null);
+            cursor.moveToFirst();
+        }
+
         String[] plotAttr = new String[cursor.getCount()];
 
         for (int i = 0; i < cursor.getCount(); i++) {
@@ -1469,7 +1482,7 @@ public class DataHelper {
     /**
      * Copy old file to new file
      */
-    private Boolean copyFile(File oldFile, File newFile) throws IOException {
+    private void copyFile(File oldFile, File newFile) throws IOException {
         if (oldFile.exists()) {
             try {
                 copyFileCall(new FileInputStream(oldFile), new FileOutputStream(newFile));
@@ -1479,7 +1492,6 @@ public class DataHelper {
                 e.printStackTrace();
             }
         }
-        return false;
     }
 
     /**
@@ -1512,7 +1524,7 @@ public class DataHelper {
     /**
      * V2 - Helper function to copy files from asset to SDCard
      */
-    public void copyFile(String fullPath, String filename) {
+    private void copyFile(String fullPath, String filename) {
         AssetManager assetManager = context.getAssets();
 
         InputStream in;
@@ -1541,7 +1553,7 @@ public class DataHelper {
     /**
      * Helper function to convert array to csv format
      */
-    public static String convertToCommaDelimited(String[] list) {
+    private static String convertToCommaDelimited(String[] list) {
         StringBuilder ret = new StringBuilder("");
         for (int i = 0; list != null && i < list.length; i++) {
             ret.append(list[i]);
@@ -1555,7 +1567,7 @@ public class DataHelper {
     /**
      * Helper function to copy database
      */
-    public static void copyFileCall(FileInputStream fromFile, FileOutputStream toFile) throws IOException {
+    private static void copyFileCall(FileInputStream fromFile, FileOutputStream toFile) throws IOException {
         FileChannel fromChannel = null;
         FileChannel toChannel = null;
 
@@ -1592,5 +1604,4 @@ public class DataHelper {
         }
         return false;
     }
-
 }
