@@ -929,126 +929,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         buttonArray[10] = (Button) traitCategorical.findViewById(R.id.q11);
         buttonArray[11] = (Button) traitCategorical.findViewById(R.id.q12);
 
-        // Functions to clear all other color except this button's
-        buttonArray[0].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[0])) {
-                    return;
+        for(final Button btn: buttonArray) {
+            // Functions to clear all other color except this button's
+            btn.setOnClickListener(new OnClickListener() {
+                public void onClick(View arg0) {
+                    if (checkButton(btn)) {
+                        return;
+                    }
+                    updateTrait(currentTrait.trait, currentTrait.format, btn.getText().toString());
+                    setCategoricalButtons(buttonArray, btn);
                 }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[0].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[0]);
-            }
-        });
-
-        buttonArray[1].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[1])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[1].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[1]);
-            }
-        });
-
-        buttonArray[2].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[2])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[2].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[2]);
-            }
-        });
-
-        buttonArray[3].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[3])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[3].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[3]);
-            }
-        });
-
-        buttonArray[4].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[4])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[4].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[4]);
-            }
-        });
-
-        buttonArray[5].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[5])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[5].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[5]);
-            }
-        });
-
-        buttonArray[6].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[6])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[6].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[6]);
-            }
-        });
-
-        buttonArray[7].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[7])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[7].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[7]);
-            }
-        });
-
-        buttonArray[8].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[8])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[8].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[8]);
-            }
-        });
-
-        buttonArray[9].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[9])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[9].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[9]);
-            }
-        });
-
-        buttonArray[10].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[10])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[10].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[10]);
-            }
-        });
-
-        buttonArray[11].setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (checkButton(buttonArray[11])) {
-                    return;
-                }
-                updateTrait(currentTrait.trait, currentTrait.format, buttonArray[11].getText().toString());
-                setCategoricalButtons(buttonArray, buttonArray[11]);
-            }
-        });
+            });
+        }
 
         eImg = (ImageView) traitBoolean.findViewById(R.id.eImg);
 
