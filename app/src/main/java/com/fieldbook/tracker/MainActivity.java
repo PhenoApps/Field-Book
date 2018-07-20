@@ -33,6 +33,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -71,6 +72,7 @@ import android.view.MenuItem;
 
 import com.fieldbook.tracker.barcodes.*;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
+import com.fieldbook.tracker.layoutConfig.SelectorLayoutConfigurator;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.search.*;
 import com.fieldbook.tracker.traits.*;
@@ -153,21 +155,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private String[] prefixTraits;
     private boolean savePrefix;
 
-    private Spinner drop1prefix;
-    private Spinner drop2prefix;
-    private Spinner drop3prefix;
+    private SelectorLayoutConfigurator selectorLayoutConfigurator;
 
     private String[] myList1;
     private String[] myList2;
     private String[] myList3;
-
-    private int drop1Selection;
-    private int drop2Selection;
-    private int drop3Selection;
-
-    private TextView drop3;
-    private TextView drop2;
-    private TextView drop1;
 
     private TextView rangeName;
     private TextView plotName;
@@ -370,13 +362,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         tvRange = findViewById(R.id.tvRange);
         tvPlot = findViewById(R.id.tvPlot);
 
-        drop3 = findViewById(R.id.drop3);
-        drop2 = findViewById(R.id.drop2);
-        drop1 = findViewById(R.id.drop1);
-
-        drop1prefix = findViewById(R.id.drop1prefix);
-        drop2prefix = findViewById(R.id.drop2prefix);
-        drop3prefix = findViewById(R.id.drop3prefix);
+        selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, 1, (RecyclerView) findViewById(R.id.selectorList));
 
         traitBoolean = findViewById(R.id.booleanLayout);
         traitAudio = findViewById(R.id.audioLayout);
@@ -1866,9 +1852,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                 .clone();
 
-        drop1Selection = drop1prefix.getSelectedItemPosition();
-        drop2Selection = drop2prefix.getSelectedItemPosition();
-        drop3Selection = drop3prefix.getSelectedItemPosition();
+        //for(DropDownSelector selector: selectorList) {
+        //    selector.setDropSelection(selector.getPrefix().getSelectedItemPosition());
+        //}
 
         initWidgets(true);
     }
@@ -1895,177 +1881,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
+        selectorLayoutConfigurator.configureDropdownArray(cRange.plot_id);
         if (prefixTraits != null) {
-            savePrefix = false;
-
-            ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(
-                    this, R.layout.custom_spinnerlayout, prefixTraits);
-
-            drop1prefix.setAdapter(prefixArrayAdapter);
-            drop1prefix.setSelection(drop1Selection);
-
-            if (!drop1prefix.equals(null)) {
-                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP1", prefixTraits[0]));
-                drop1prefix.setSelection(spinnerPosition);
-            }
-
-            drop2prefix.setAdapter(prefixArrayAdapter);
-            drop2prefix.setSelection(drop2Selection);
-
-            if (!drop2prefix.equals(null)) {
-                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP2", prefixTraits[1]));
-                drop2prefix.setSelection(spinnerPosition);
-            }
-
-            drop3prefix.setAdapter(prefixArrayAdapter);
-            drop3prefix.setSelection(drop3Selection);
-
-            if (!drop3prefix.equals(null)) {
-                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP3",prefixTraits[2]));
-                drop3prefix.setSelection(spinnerPosition);
-            }
-
-            drop1prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-                @Override
-                public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                           int pos, long arg3) {
-                    try {
-
-                        if (savePrefix)
-                            drop1Selection = pos;
-
-                        myList1 = dt.getDropDownRange(prefixTraits[pos], cRange.plot_id);
-
-                        if (myList1 == null) {
-                            drop1.setText(getString(R.string.nodata));
-                        } else
-                            drop1.setText(myList1[0]);
-                            Editor e = ep.edit();
-                            e.putString("DROP1", prefixTraits[pos]);
-                            e.apply();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    drop1prefix.requestFocus();
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> arg0) {
-
-                }
-            });
-
-            drop2prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-                @Override
-                public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                           int pos, long arg3) {
-
-                    try {
-                        if (savePrefix)
-                            drop2Selection = pos;
-
-                        myList2 = dt.getDropDownRange(prefixTraits[pos], cRange.plot_id);
-
-                        if (myList2 == null) {
-                            drop2.setText(getString(R.string.nodata));
-                        } else
-                            drop2.setText(myList2[0]);
-                            Editor e = ep.edit();
-                            e.putString("DROP2", prefixTraits[pos]);
-                            e.apply();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> arg0) {
-
-                }
-            });
-
-            drop3prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-                @Override
-                public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                           int pos, long arg3) {
-
-                    try {
-                        if (savePrefix)
-                            drop3Selection = pos;
-
-                        myList3 = dt.getDropDownRange(prefixTraits[pos], cRange.plot_id);
-
-                        if (myList3 == null) {
-                            drop3.setText(getString(R.string.nodata));
-                        } else
-                            drop3.setText(myList3[0]);
-                            Editor e = ep.edit();
-                            e.putString("DROP3", prefixTraits[pos]);
-                            e.apply();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> arg0) {
-
-                }
-            });
-
-            savePrefix = true;
-
-            drop1.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch(event.getAction()){
-                        case MotionEvent.ACTION_DOWN:
-                            drop1.setMaxLines(5);
-                            break;
-                        case MotionEvent.ACTION_UP:
-                            drop1.setMaxLines(1);
-                            break;
-                    }
-                    return true;
-                }
-            });
-
-            drop2.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch(event.getAction()){
-                        case MotionEvent.ACTION_DOWN:
-                            drop2.setMaxLines(5);
-                            break;
-                        case MotionEvent.ACTION_UP:
-                            drop2.setMaxLines(1);
-                            break;
-                    }
-                    return true;
-                }
-            });
-
-            drop3.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch(event.getAction()){
-                        case MotionEvent.ACTION_DOWN:
-                            drop3.setMaxLines(5);
-                            break;
-                        case MotionEvent.ACTION_UP:
-                            drop3.setMaxLines(1);
-                            break;
-                    }
-                    return true;
-                }
-            });
-
             final TextView traitDetails =  findViewById(R.id.traitDetails);
 
             traitDetails.setOnTouchListener(new OnTouchListener() {
