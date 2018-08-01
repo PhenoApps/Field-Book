@@ -153,13 +153,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Menu systemMenu;
 
     private String[] prefixTraits;
-    private boolean savePrefix;
 
     private SelectorLayoutConfigurator selectorLayoutConfigurator;
-
-    private String[] myList1;
-    private String[] myList2;
-    private String[] myList3;
 
     private TextView rangeName;
     private TextView plotName;
@@ -266,6 +261,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         ep = getSharedPreferences("Settings", 0);
 
+        loadNavUI();
         loadScreen();
 
         // display intro tutorial
@@ -311,14 +307,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }).start();
     }
 
-    private void updateAssets() {
-        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "field_import");
-        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "resources");
-        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "trait");
-        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
-    }
-
-    private void loadScreen() {
+    private void loadNavUI() {
         setContentView(R.layout.activity_main);
 
         initToolbars();
@@ -339,6 +328,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         setupDrawerContent(nvDrawer);
         setupDrawer();
+    }
+
+    private void updateAssets() {
+        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "field_import");
+        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "resources");
+        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "trait");
+        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
+    }
+
+    private void loadScreen() {
+
         //lockData(dataLocked);
 
         // If the app is just starting up, we must always allow refreshing of
@@ -362,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         tvRange = findViewById(R.id.tvRange);
         tvPlot = findViewById(R.id.tvPlot);
 
-        selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, 1, (RecyclerView) findViewById(R.id.selectorList));
+        selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 3), (RecyclerView) findViewById(R.id.selectorList));
 
         traitBoolean = findViewById(R.id.booleanLayout);
         traitAudio = findViewById(R.id.audioLayout);
@@ -1882,6 +1882,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Reset dropdowns
 
         selectorLayoutConfigurator.configureDropdownArray(cRange.plot_id);
+
         if (prefixTraits != null) {
             final TextView traitDetails =  findViewById(R.id.traitDetails);
 
@@ -3015,6 +3016,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
+
+        loadScreen();
 
         // Update menu item visibility
         if (systemMenu != null) {
