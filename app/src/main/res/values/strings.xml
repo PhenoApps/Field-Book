@@ -140,6 +140,7 @@
     <string name="nextmissingenable">Next entry with no data</string>
     <string name="jumptoplotid">Move to unique identifier</string>
     <string name="datagrid">Datagrid</string>
+    <string name="infobar_number">Number of InfoBars</string>
 
     <string name="language_desc">Language set by system</string>
     <string name="tips_desc">Adds a tutorial icon to the main, settings, fields, and traits screens</string>
@@ -155,6 +156,7 @@
     <string name="nextmissingenable_desc">Adds a button to the toolbar that jumps to the next entry with no data for the current trait</string>
     <string name="jumptoplotid_desc">Opens dialog to input unique id and move to specific entry</string>
     <string name="datagrid_desc">Displays a spreadsheet of plots and traits showing collected data</string>
+    <string name="infobar_number_desc">Adjust the number of Infobars displayed on the main screen</string>
 
     <!-- Advanced settings titles and messages -->
     <string name="nomatches">No matching value</string>
@@ -355,7 +357,6 @@
 
     <!-- Customization strings TODO -->
     <string name="customize">Customize</string>
-    <string name="infobar_number">Number of InfoBars</string>
     <string name="export_name">Exported file names</string>
     <string name="photo_name">Photo names</string>
     <string name="toolbar">Toolbar</string>

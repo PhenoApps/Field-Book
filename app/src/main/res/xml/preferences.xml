@@ -6,7 +6,7 @@
         android:title="@string/preferences_ui">
 
         <Preference
-            android:icon="@drawable/ic_adv_language"
+            android:icon="@drawable/ic_nav_draweer_translate"
             android:key="language"
             android:summary="@string/language_desc"
             android:title="@string/language">
@@ -16,6 +16,15 @@
                 android:targetClass="com.android.settings.LanguageSettings"
                 android:targetPackage="com.android.settings" />
         </Preference>
+
+        <com.fieldbook.tracker.preferences.IntEditTextPreference
+            android:icon="@drawable/ic_adv_infobar_count"
+            android:key="INFOBAR_NUMBER"
+            android:summary="@string/infobar_number_desc"
+            android:title="@string/infobar_number"
+            android:numeric="integer"
+            android:maxLength="2"
+            />
 
     </PreferenceCategory>
 

@@ -11,6 +11,7 @@ public class PreferencesActivity extends AppCompatActivity {
     // UI
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
     public static String LANGUAGE = "language";
+    public static String INFOBAR_NUMBER = "INFOBAR_NUMBER";
 
     // UX
     public static String RETURN_CHARACTER = "RETURN_CHARACTER";
