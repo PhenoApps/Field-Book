@@ -45,7 +45,7 @@ import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.io.CSVReader;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.utilities.ApiKeys;
+//import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
@@ -950,8 +950,8 @@ public class TraitEditorActivity extends AppCompatActivity {
                         startActivityForResult(intent, 1);
                         break;
                     case 1:
-                        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
-                        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
+                        //DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
+                        //mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
                         break;
                 }
                 importDialog.dismiss();
