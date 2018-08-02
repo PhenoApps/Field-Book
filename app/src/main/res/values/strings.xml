@@ -141,6 +141,12 @@
     <string name="jumptoplotid">Move to unique identifier</string>
     <string name="datagrid">Datagrid</string>
     <string name="infobar_number">Number of InfoBars</string>
+    <string name="customize_toolbar">Customize toolbar icons</string>
+    <string name="toolbar_search">Search</string>
+    <string name="toolbar_resources">Resources</string>
+    <string name="toolbar_summary">Summary</string>
+    <string name="toolbar_lock">Lock</string>
+    <string name="navigate_volume_buttons">Remap volume keys for navigation</string>
 
     <string name="language_desc">Language set by system</string>
     <string name="tips_desc">Adds a tutorial icon to the main, settings, fields, and traits screens</string>
@@ -157,6 +163,8 @@
     <string name="jumptoplotid_desc">Opens dialog to input unique id and move to specific entry</string>
     <string name="datagrid_desc">Displays a spreadsheet of plots and traits showing collected data</string>
     <string name="infobar_number_desc">Adjust the number of Infobars displayed on the main screen</string>
+    <string name="navigate_volume_buttons_desc">Volume keys go to next or last entry</string>
+
 
     <!-- Advanced settings titles and messages -->
     <string name="nomatches">No matching value</string>

@@ -261,6 +261,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         ep = getSharedPreferences("Settings", 0);
 
+        cRange = new RangeObject();
+        cRange.plot = "";
+        cRange.plot_id = "";
+        cRange.range = "";
+
         loadNavUI();
         loadScreen();
 
@@ -362,7 +367,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         tvRange = findViewById(R.id.tvRange);
         tvPlot = findViewById(R.id.tvPlot);
 
-        selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 3), (RecyclerView) findViewById(R.id.selectorList));
+        if (cRange != null) {
+            selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 3), (RecyclerView) findViewById(R.id.selectorList));
+        }
 
         traitBoolean = findViewById(R.id.booleanLayout);
         traitAudio = findViewById(R.id.audioLayout);
@@ -1100,83 +1107,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Go to previous range
         rangeLeft.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT,false) && !newTraits.containsKey(currentTrait.trait)) {
-
-                    try {
-                        int resID = getResources().getIdentifier("error", "raw", getPackageName());
-                        MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                        chimePlayer.start();
-
-                        chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            public void onCompletion(MediaPlayer mp) {
-                                mp.release();
-                            }
-                        });
-                    } catch (Exception ignore) {
-                    }
-
-                } else {
-                    if (rangeID != null && rangeID.length > 0) {
-                        //index.setEnabled(true);
-
-                        // If ignore existing data is enabled, then skip accordingly
-                        if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
-                            int pos = paging;
-
-                            while (pos >= 0) {
-                                pos -= 1;
-
-                                if (pos < 1)
-                                    return;
-
-                                if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                                        currentTrait.format)) {
-                                    paging = pos;
-                                    break;
-                                }
-                            }
-                        } else {
-                            paging -= 1;
-
-                            if (paging < 1)
-                                paging = rangeID.length;
-                        }
-
-                        // Refresh onscreen controls
-                        cRange = dt.getRange(rangeID[paging - 1]);
-
-                        Editor ed = ep.edit();
-                        ed.putString("lastplot",cRange.plot_id);
-                        ed.apply();
-
-                        displayRange(cRange);
-
-                        if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
-                            if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                                lastRange = cRange.range;
-
-                                try {
-                                    int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                                    MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                                    chimePlayer.start();
-
-                                    chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                        public void onCompletion(MediaPlayer mp) {
-                                            mp.release();
-                                        }
-                                    });
-                                } catch (Exception ignore) {
-                                }
-                            }
-                        }
-
-                        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                                .clone();
-
-                        initWidgets(true);
-                    }
-                }
-
+                moveLeft();
             }
         });
 
@@ -1223,91 +1154,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Go to next range
         rangeRight.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-
-                if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false) && !newTraits.containsKey(currentTrait.trait)) {
-
-                    try {
-                        int resID = getResources().getIdentifier("error", "raw", getPackageName());
-                        MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                        chimePlayer.start();
-
-                        chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            public void onCompletion(MediaPlayer mp) {
-                                mp.release();
-                            };
-                        });
-                    } catch (Exception ignore) {
-                    }
-
-                } else {
-                    if (rangeID != null && rangeID.length > 0) {
-                        //index.setEnabled(true);
-
-                        // If ignore existing data is enabled, then skip accordingly
-                        if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
-                            int pos = paging;
-
-                            if (pos == rangeID.length) {
-                                pos = 1;
-                                return;
-                            }
-
-                            while (pos <= rangeID.length) {
-                                pos += 1;
-
-                                if (pos > rangeID.length) {
-                                    pos = 1;
-                                    return;
-                                }
-
-                                if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                                        currentTrait.format)) {
-                                    paging = pos;
-                                    break;
-                                }
-                            }
-                        } else {
-                            paging += 1;
-
-                            if (paging > rangeID.length)
-                                paging = 1;
-                        }
-
-                        // Refresh onscreen controls
-                        cRange = dt.getRange(rangeID[paging - 1]);
-
-                        Editor ed = ep.edit();
-                        ed.putString("lastplot",cRange.plot_id);
-                        ed.apply();
-
-                        displayRange(cRange);
-                        if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
-                            if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                                lastRange = cRange.range;
-
-                                try {
-                                    int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                                    MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                                    chimePlayer.start();
-
-                                    chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                        public void onCompletion(MediaPlayer mp) {
-                                            mp.release();
-                                        }
-                                    });
-                                } catch (Exception ignore) {
-                                }
-                            }
-                        }
-                        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                                .clone();
-
-                        initWidgets(true);
-                    }
-                }
+                moveRight();
             }
         });
-
 
         traitLeft = findViewById(R.id.traitLeft);
         traitRight = findViewById(R.id.traitRight);
@@ -1411,6 +1260,169 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 traitType.setSelection(pos);
             }
         });
+    }
+
+    private void moveLeft() {
+        if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT,false) && !newTraits.containsKey(currentTrait.trait)) {
+
+            try {
+                int resID = getResources().getIdentifier("error", "raw", getPackageName());
+                MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                chimePlayer.start();
+
+                chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    public void onCompletion(MediaPlayer mp) {
+                        mp.release();
+                    }
+                });
+            } catch (Exception ignore) {
+            }
+
+        } else {
+            if (rangeID != null && rangeID.length > 0) {
+                //index.setEnabled(true);
+
+                // If ignore existing data is enabled, then skip accordingly
+                if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
+                    int pos = paging;
+
+                    while (pos >= 0) {
+                        pos -= 1;
+
+                        if (pos < 1)
+                            return;
+
+                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                                currentTrait.format)) {
+                            paging = pos;
+                            break;
+                        }
+                    }
+                } else {
+                    paging -= 1;
+
+                    if (paging < 1)
+                        paging = rangeID.length;
+                }
+
+                // Refresh onscreen controls
+                cRange = dt.getRange(rangeID[paging - 1]);
+
+                Editor ed = ep.edit();
+                ed.putString("lastplot",cRange.plot_id);
+                ed.apply();
+
+                displayRange(cRange);
+
+                if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
+                    if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
+                        lastRange = cRange.range;
+
+                        try {
+                            int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+                            MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                            chimePlayer.start();
+
+                            chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                public void onCompletion(MediaPlayer mp) {
+                                    mp.release();
+                                }
+                            });
+                        } catch (Exception ignore) {
+                        }
+                    }
+                }
+
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                        .clone();
+
+                initWidgets(true);
+            }
+        }
+    }
+
+    private void moveRight() {
+        if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false) && !newTraits.containsKey(currentTrait.trait)) {
+
+            try {
+                int resID = getResources().getIdentifier("error", "raw", getPackageName());
+                MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                chimePlayer.start();
+
+                chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    public void onCompletion(MediaPlayer mp) {
+                        mp.release();
+                    };
+                });
+            } catch (Exception ignore) {
+            }
+
+        } else {
+            if (rangeID != null && rangeID.length > 0) {
+                //index.setEnabled(true);
+
+                // If ignore existing data is enabled, then skip accordingly
+                if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
+                    int pos = paging;
+
+                    if (pos == rangeID.length) {
+                        pos = 1;
+                        return;
+                    }
+
+                    while (pos <= rangeID.length) {
+                        pos += 1;
+
+                        if (pos > rangeID.length) {
+                            pos = 1;
+                            return;
+                        }
+
+                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                                currentTrait.format)) {
+                            paging = pos;
+                            break;
+                        }
+                    }
+                } else {
+                    paging += 1;
+
+                    if (paging > rangeID.length)
+                        paging = 1;
+                }
+
+                // Refresh onscreen controls
+                cRange = dt.getRange(rangeID[paging - 1]);
+
+                Editor ed = ep.edit();
+                ed.putString("lastplot",cRange.plot_id);
+                ed.apply();
+
+                displayRange(cRange);
+                if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
+                    if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
+                        lastRange = cRange.range;
+
+                        try {
+                            int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+                            MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                            chimePlayer.start();
+
+                            chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                public void onCompletion(MediaPlayer mp) {
+                                    mp.release();
+                                }
+                            });
+                        } catch (Exception ignore) {
+                        }
+                    }
+                }
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                        .clone();
+
+                initWidgets(true);
+            }
+        }
     }
 
     private void initToolbars() {
@@ -1881,7 +1893,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
+        if (cRange != null) {
         selectorLayoutConfigurator.configureDropdownArray(cRange.plot_id);
+        }
 
         if (prefixTraits != null) {
             final TextView traitDetails =  findViewById(R.id.traitDetails);
@@ -3942,51 +3956,29 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int action = event.getAction();
+        int keyCode = event.getKeyCode();
         switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                return true;
-
-            case 92:
-                if (rangeID != null && rangeID.length > 0) {
-
-                    paging -= 1;
-
-                    if (paging < 1)
-                        paging = rangeID.length;
-
-                    cRange = dt.getRange(rangeID[paging - 1]);
-
-                    displayRange(cRange);
-
-                    newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                            .clone();
-
-                    initWidgets(true);
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                if(ep.getBoolean(PreferencesActivity.VOLUME_NAVIGATION,false)) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        moveRight();
+                    }
+                    return true;
                 }
-
-                break;
-
-            case 93:
-                if (rangeID != null && rangeID.length > 0) {
-                    paging += 1;
-
-                    if (paging > rangeID.length)
-                        paging = 1;
-
-                    cRange = dt.getRange(rangeID[paging - 1]);
-
-                    displayRange(cRange);
-
-                    newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                            .clone();
-
-                    initWidgets(true);
+                return false;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if(ep.getBoolean(PreferencesActivity.VOLUME_NAVIGATION,false)) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        moveLeft();
+                    }
+                    return true;
                 }
-                break;
+                return false;
+            default:
+                return super.dispatchKeyEvent(event);
         }
-
-        return super.onKeyDown(keyCode, event);
     }
 
     private void updateTraitAllowDuplicates(String parent, String trait, String value) {

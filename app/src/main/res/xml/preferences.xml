@@ -42,6 +42,19 @@
 
 
     <PreferenceCategory
+        android:key="pref_key_ux_settings"
+        android:title="@string/preferences_ux">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_primary_order_sound"
+            android:key="VOLUME_NAVIGATION"
+            android:title="@string/navigate_volume_buttons"
+            android:summary="@string/navigate_volume_buttons_desc"/>
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
         android:key="pref_key_general_settings"
         android:title="@string/preferences_general">
 
@@ -131,9 +144,6 @@
     </PreferenceCategory>
 
     <!--
-<PreferenceCategory
-    android:key="pref_key_ux_settings"
-    android:title="@string/preferences_ux"></PreferenceCategory>
 
 <PreferenceCategory
     android:title="@string/preferences_files_naming"

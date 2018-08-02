@@ -45,4 +45,21 @@
         <item>right</item>
         <item>both</item>
     </string-array>
+
+    <string-array name="pref_toolbar_customize_title">
+        <item>@string/toolbar_search</item>
+        <item>@string/toolbar_resources</item>
+        <item>@string/toolbar_summary</item>
+        <item>@string/toolbar_lock</item>
+    </string-array>
+
+    <string-array name="pref_toolbar_customize_key">
+        <item></item>
+        <item>@string/toolbar_resources</item>
+        <item>@string/toolbar_summary</item>
+        <item>@string/toolbar_lock</item>
+    </string-array>
+
+    <string-array name="pref_toolbar_customize_default">
+    </string-array>
 </resources>

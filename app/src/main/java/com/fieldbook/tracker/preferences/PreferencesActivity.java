@@ -12,9 +12,14 @@ public class PreferencesActivity extends AppCompatActivity {
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
     public static String LANGUAGE = "language";
     public static String INFOBAR_NUMBER = "INFOBAR_NUMBER";
+    public static String TOOLBAR_SEARCH = "TOOLBAR_SEARCH";
+    public static String TOOLBAR_RESOURCES = "TOOLBAR_RESOURCES";
+    public static String TOOLBAR_SUMMARY = "TOOLBAR_SUMMARY";
+    public static String TOOLBAR_LOCK = "TOOLBAR_LOCK";
 
     // UX
     public static String RETURN_CHARACTER = "RETURN_CHARACTER";
+    public static String VOLUME_NAVIGATION = "VOLUME_NAVIGATION";
 
     // General
     public static String TUTORIAL_MODE = "Tips";
@@ -55,7 +60,7 @@ public class PreferencesActivity extends AppCompatActivity {
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new PreferencesFragment())
                 .commit();
-    }
+        }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
