@@ -530,17 +530,29 @@ public class TraitEditorActivity extends AppCompatActivity {
                         def.setText("false");
                 }
 
-                if (!edit)
-                    MainActivity.dt.insertTraits(trait.getText().toString().trim(),
+                if (!edit) {
+                    /*MainActivity.dt.insertTraits(trait.getText().toString().trim(),
                             enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
                             minimum.getText().toString(), maximum.getText().toString(),
                             details.getText().toString(), categories.getText().toString(),
-                            "true", String.valueOf(pos));
-                else
+                            "true", String.valueOf(pos));*/
+                    TraitObject t = new TraitObject();
+                    t.trait = trait.getText().toString().trim();
+                    t.format = enData[format.getSelectedItemPosition()].toLowerCase();
+                    t.defaultValue = def.getText().toString();
+                    t.minimum = minimum.getText().toString();
+                    t.maximum = maximum.getText().toString();
+                    t.details = details.getText().toString();
+                    t.categories = categories.getText().toString();
+                    t.visible = true;
+                    t.realPosition = String.valueOf(pos);
+                    MainActivity.dt.insertTraits(t);
+                } else {
                     MainActivity.dt.editTraits(currentId, trait.getText().toString().trim(),
                             enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
                             minimum.getText().toString(), maximum.getText().toString(),
                             details.getText().toString(), categories.getText().toString());
+                }
 
                 Editor ed = ep.edit();
                 ed.putBoolean("CreateTraitFinished", true);
@@ -1290,9 +1302,22 @@ public class TraitEditorActivity extends AppCompatActivity {
                     data = cr.readNext();
 
                     if (data != null) {
-                        MainActivity.dt.insertTraits(data[0], data[1],
-                                data[2], data[3], data[4], data[5],
-                                data[6], data[7].toLowerCase(), data[8]);
+                        TraitObject t = new TraitObject();
+                        t.trait = data[0];
+                        t.format = data[1];
+                        t.defaultValue = data[2];
+                        t.minimum = data[3];
+                        t.maximum = data[4];
+                        t.details = data[5];
+                        t.categories = data[6];
+                        //t.visible = data[7].toLowerCase();
+                        t.realPosition = data[8];
+                        if (data[7].toLowerCase().equals("true")) {
+                            t.visible = true;
+                        } else {
+                            t.visible = false;
+                        }
+                        MainActivity.dt.insertTraits(t);
                     }
                 }
 

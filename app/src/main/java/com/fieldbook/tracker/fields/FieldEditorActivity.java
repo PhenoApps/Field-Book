@@ -526,8 +526,14 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                     columns = cr.readNext();
 
-                    exp_id = MainActivity.dt.createField(ep.getString("FieldFile", ""), ep.getString("FieldFile", ""),
-                            uniqueS, primaryS, secondaryS, columns);
+                    FieldObject f = new FieldObject();
+                    f.exp_name = ep.getString("FieldFile", "");
+                    f.exp_alias = ep.getString("FieldFile", "");
+                    f.unique_id = uniqueS;
+                    f.primary_id = primaryS;
+                    f.secondary_id = secondaryS;
+
+                    exp_id = MainActivity.dt.createField(f, Arrays.asList(columns));
 
                     data = columns;
 
@@ -538,7 +544,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                             data = cr.readNext();
 
                             if (data != null) {
-                                MainActivity.dt.createFieldData(exp_id, columns, data);
+                                MainActivity.dt.createFieldData(exp_id, Arrays.asList(columns), Arrays.asList(data));
                             }
                         }
 
@@ -576,8 +582,13 @@ public class FieldEditorActivity extends AppCompatActivity {
                         columns[s] = wb.getSheet(0).getCell(s, 0).getContents();
                     }
 
-                    exp_id = MainActivity.dt.createField(ep.getString("FieldFile", ""), ep.getString("FieldFile", ""),
-                            uniqueS, primaryS, secondaryS, columns);
+                    FieldObject ftmp = new FieldObject();
+                    ftmp.exp_name = ep.getString("FieldFile", "");
+                    ftmp.exp_alias = ep.getString("FieldFile", "");
+                    ftmp.unique_id = uniqueS;
+                    ftmp.primary_id = primaryS;
+                    ftmp.secondary_id = secondaryS;
+                    exp_id = MainActivity.dt.createField(ftmp, Arrays.asList(columns));
 
                     int row = 1;
 
@@ -593,7 +604,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                             row += 1;
 
-                            MainActivity.dt.createFieldData(exp_id, columns, data);
+                            MainActivity.dt.createFieldData(exp_id, Arrays.asList(columns), Arrays.asList(data));
                         }
 
                         DataHelper.db.setTransactionSuccessful();

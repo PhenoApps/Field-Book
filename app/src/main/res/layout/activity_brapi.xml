@@ -32,4 +32,31 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:choiceMode="singleChoice" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Load Studies"
+        android:textSize="20dp"
+        android:textColor="@color/s_text"
+        android:id="@+id/loadStudies"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:onClick="buttonClicked"/>
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/brapiStudies"
+        android:layout_marginTop="5dp"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save to Database"
+        android:textSize="20dp"
+        android:textColor="@color/s_text"
+        android:id="@+id/save"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:onClick="buttonClicked"/>
+
 </LinearLayout>

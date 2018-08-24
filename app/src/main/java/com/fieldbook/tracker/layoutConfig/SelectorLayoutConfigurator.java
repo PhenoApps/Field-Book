@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -85,6 +86,12 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
     private void configureSpinner(final Spinner spinner, final TextView text, final int position) {
 
         final String[] prefixTraits = dataHelper.getRangeColumnNames();
+
+        //When install Field book, prefixTraits is null, it will case the program crash.
+        if (prefixTraits == null) {
+            Log.e("error", "When install Field book, prefixTraits is null.");
+            return;
+        }
 
         ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<String>(this.context, R.layout.custom_spinnerlayout, prefixTraits);
         spinner.setAdapter(prefixArrayAdapter);
