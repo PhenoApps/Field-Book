@@ -147,7 +147,6 @@ public class FieldEditorActivity extends AppCompatActivity {
         MainActivity.dt.updateExpTable(false, true, false, 0);
 
         thisActivity = this;
-
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, MainActivity.dt.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
@@ -338,7 +337,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         e.putString("FieldFile", mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.lastIndexOf(".")));
         e.apply();
 
-        if (MainActivity.dt.checkFieldName(ep.getString("FieldFile", ""))) {
+        if (MainActivity.dt.checkFieldName(ep.getString("FieldFile", ""))!= -1) {
             makeToast(getString(R.string.field_exists_message));
             SharedPreferences.Editor ed = ep.edit();
             ed.putString("FieldFile", null);

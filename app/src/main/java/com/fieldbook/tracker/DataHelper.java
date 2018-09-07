@@ -1015,6 +1015,11 @@ public class DataHelper {
             /*String trait, String format, String defaultValue,
                              String minimum, String maximum, String details, String categories,
                              String isVisible, String realPosition) {*/
+
+        if (hasTrait(t.trait)) {
+            return -1;
+        }
+
         try {
             this.insertTraits.bindString(1, t.trait);
             this.insertTraits.bindString(2, t.format);
@@ -1135,6 +1140,10 @@ public class DataHelper {
             db.execSQL("CREATE TABLE "
                     + EXP_INDEX
                     + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER)");
+
+            //Do not know why the unique constraint does not work
+            //db.execSQL("CREATE UNIQUE INDEX expname ON " + EXP_INDEX +"(exp_name);");
+
             try {
                 db.execSQL("CREATE TABLE android_metadata (locale TEXT)");
                 db.execSQL("INSERT INTO android_metadata(locale) VALUES('en_US')");
@@ -1171,7 +1180,6 @@ public class DataHelper {
                 db.execSQL("CREATE TABLE "
                         + PLOT_ATTRIBUTES
                         + "(attribute_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_name VARCHAR, exp_id INTEGER)");
-
                 db.execSQL("CREATE TABLE "
                         + PLOT_VALUES
                         + "(attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_id INTEGER, attribute_value VARCHAR, plot_id INTEGER, exp_id INTEGER)");
@@ -1354,13 +1362,23 @@ public class DataHelper {
         db.execSQL(query);
     }
 
-    public boolean checkFieldName(String name) {
-        Cursor c = db.rawQuery("SELECT 1 FROM " + EXP_INDEX + " WHERE exp_name=?", new String[] {name});
-        return c.moveToFirst();
+    public int checkFieldName(String name) {
+        Cursor c = db.rawQuery("SELECT exp_id FROM " + EXP_INDEX + " WHERE exp_name=?", new String[] {name});
+
+        if (c.moveToFirst()) {
+            return c.getInt(0);
+        }
+
+        return -1;
     }
 
     public int createField(FieldObject e,  List<String> columns) {
         // String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns){
+
+        long exp_id = checkFieldName(e.exp_name);
+        if (exp_id != -1) {
+            return (int)exp_id;
+        }
 
         // add to exp_index
         ContentValues insertExp = new ContentValues();
@@ -1369,7 +1387,7 @@ public class DataHelper {
         insertExp.put("unique_id", e.unique_id);
         insertExp.put("primary_id", e.primary_id);
         insertExp.put("secondary_id", e.secondary_id);
-        long exp_id = db.insert(EXP_INDEX, null, insertExp);
+        exp_id = db.insert(EXP_INDEX, null, insertExp);
 
         /* columns to plot_attributes
         String[] columnNames = columns;
