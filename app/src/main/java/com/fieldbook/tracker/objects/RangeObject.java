@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.utilities;
+package com.fieldbook.tracker.objects;
 
 /**
  * Simple wrapper class for range data

@@ -1,3 +1,11 @@
+34/4.1.0
+Updated introduction and permission management
+Advanced settings overhauled
+Lots of bug fixes
+
+33/4.0.3
+Fixed a bug when switching fields
+
 32/4.0.2
 Fixed a bug with database import
 

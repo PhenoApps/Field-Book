@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fieldbook.tracker"
-    android:versionCode="402"
-    android:versionName="4.0.2">
+    android:versionCode="404"
+    android:versionName="4.0.4">
 
     <uses-feature android:name="android.hardware.location" android:required="false"/>
 
@@ -129,6 +129,20 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppDialog" />
+
+        <activity
+            android:name="IntroActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+
+        <activity
+            android:name=".preferences.PreferencesActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeAction" />
 
     </application>
 </manifest>

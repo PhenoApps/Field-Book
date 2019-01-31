@@ -32,15 +32,5 @@
             android:dividerHeight="1px"
             android:padding="3dp" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/newTrait"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_add_white"
-            app:borderWidth="0dp"
-            app:elevation="6dp"
-            app:pressedTranslationZ="12dp" />
     </android.support.design.widget.CoordinatorLayout>
 </LinearLayout>

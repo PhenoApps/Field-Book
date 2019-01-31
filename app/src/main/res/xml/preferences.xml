@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="pref_key_ui_settings"
+        android:title="@string/preferences_ui">
+
+        <Preference
+            android:icon="@drawable/ic_nav_draweer_translate"
+            android:key="language"
+            android:summary="@string/language_desc"
+            android:title="@string/language">
+
+            <intent
+                android:action="android.intent.action.MAIN"
+                android:targetClass="com.android.settings.LanguageSettings"
+                android:targetPackage="com.android.settings" />
+        </Preference>
+
+        <com.fieldbook.tracker.preferences.IntEditTextPreference
+            android:icon="@drawable/ic_adv_infobar_count"
+            android:key="INFOBAR_NUMBER"
+            android:summary="@string/infobar_number_desc"
+            android:title="@string/infobar_number"
+            android:numeric="integer"
+            android:maxLength="2"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="pref_key_sounds_settings"
+        android:title="@string/preferences_sounds">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_primary_order_sound"
+            android:key="RangeSound"
+            android:summary="@string/rangechime_desc"
+            android:title="@string/rangechime" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:key="pref_key_ux_settings"
+        android:title="@string/preferences_ux">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_primary_order_sound"
+            android:key="VOLUME_NAVIGATION"
+            android:title="@string/navigate_volume_buttons"
+            android:summary="@string/navigate_volume_buttons_desc"/>
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:key="pref_key_general_settings"
+        android:title="@string/preferences_general">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tb_help"
+            android:key="Tips"
+            android:summary="@string/tips_desc"
+            android:title="@string/tutorial" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_quick_goto"
+            android:key="QuickGoTo"
+            android:summary="@string/quickgoto_desc"
+            android:title="@string/quickgoto" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_cycle_traits_advances"
+            android:key="CycleTraits"
+            android:summary="@string/cycle_desc"
+            android:title="@string/cycle" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_use_day"
+            android:key="UseDay"
+            android:summary="@string/useday_desc"
+            android:title="@string/useday" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_hide_entries"
+            android:key="IgnoreExisting"
+            android:summary="@string/ignoreentries_desc"
+            android:title="@string/ignoreentries" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_disable_file_sharing"
+            android:key="DisableShare"
+            android:summary="@string/disableshare_desc"
+            android:title="@string/disableshare" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_action_ic_adv_disable_left"
+            android:key="DisableEntryNavLeft"
+            android:summary="@string/disableentrynavleft_desc"
+            android:title="@string/disableentrynavleft" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_action_ic_adv_disable_right"
+            android:key="DisableEntryNavRight"
+            android:summary="@string/disableentrynavright_desc"
+            android:title="@string/disableentrynavright" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tb_barcode_scan"
+            android:key="BarcodeScan"
+            android:summary="@string/barcodescan_desc"
+            android:title="@string/barcodescan" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tb_forward"
+            android:key="NextEmptyPlot"
+            android:summary="@string/nextmissingenable_desc"
+            android:title="@string/nextmissingenable" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tb_datagrid"
+            android:key="DataGrid"
+            android:summary="@string/datagrid_desc"
+            android:title="@string/datagrid" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_unique"
+            android:key="JumpToPlot"
+            android:summary="@string/jumptoplotid_desc"
+            android:title="@string/jumptoplotid" />
+    </PreferenceCategory>
+
+    <!--
+
+<PreferenceCategory
+    android:title="@string/preferences_files_naming"
+    android:key="pref_key_files_settings">
+</PreferenceCategory>
+-->
+</PreferenceScreen>

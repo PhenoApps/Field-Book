@@ -1,8 +1,6 @@
 package com.fieldbook.tracker.tutorial;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -16,8 +14,6 @@ import android.widget.TextView;
 
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.R;
-
-import java.util.Locale;
 
 public class TutorialSettingsActivity extends Activity {
     public static Activity thisActivity;
@@ -38,19 +34,6 @@ public class TutorialSettingsActivity extends Activity {
 
         ConfigActivity.helpActive = true;
 
-        SharedPreferences ep = getSharedPreferences("Settings", 0);
-
-        // This allows dynamic language change without exiting the app
-        String local = ep.getString("language", Locale.getDefault().getCountry());
-        String region = ep.getString("region",Locale.getDefault().getLanguage());
-
-        Locale locale2 = new Locale(local, region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
-                .getDisplayMetrics());
-
         thisActivity = this;
 
         // Makes the screen a system alert, so it can "float" above other screens
@@ -64,12 +47,12 @@ public class TutorialSettingsActivity extends Activity {
 
         setContentView(R.layout.activity_tutorial);
 
-        Button close = (Button) findViewById(R.id.close);
-        Button prev = (Button) findViewById(R.id.prev);
-        Button next = (Button) findViewById(R.id.next);
+        Button close = findViewById(R.id.close);
+        Button prev = findViewById(R.id.prev);
+        Button next = findViewById(R.id.next);
 
-        final TextView header = (TextView) findViewById(R.id.header);
-        final TextView content = (TextView) findViewById(R.id.field_count);
+        final TextView header = findViewById(R.id.header);
+        final TextView content = findViewById(R.id.field_count);
 
         screen = 1;
 

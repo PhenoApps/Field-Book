@@ -2,7 +2,6 @@ package com.fieldbook.tracker;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,7 +16,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Locale;
 
 
 public class ChangelogActivity extends AppCompatActivity {
@@ -36,17 +34,6 @@ public class ChangelogActivity extends AppCompatActivity {
 
         SharedPreferences ep = getSharedPreferences("Settings", 0);
 
-        // Enforce language
-        String local = ep.getString("language", Locale.getDefault().getCountry());
-        String region = ep.getString("region",Locale.getDefault().getLanguage());
-
-        Locale locale2 = new Locale(local, region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
-                .getDisplayMetrics());
-
         SharedPreferences.Editor ed = ep.edit();
         ed.putInt("UpdateVersion", getVersion());
         ed.apply();
@@ -59,9 +46,9 @@ public class ChangelogActivity extends AppCompatActivity {
         params.width = LinearLayout.LayoutParams.MATCH_PARENT;
         this.getWindow().setAttributes(params);
 
-        parent = (LinearLayout) findViewById(R.id.data);
+        parent = findViewById(R.id.data);
 
-        Button close = (Button) findViewById(R.id.closeBtn);
+        Button close = findViewById(R.id.closeBtn);
 
         close.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {

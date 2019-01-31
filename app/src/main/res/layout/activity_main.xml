@@ -22,8 +22,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/main_primary"
-                android:fitsSystemWindows="true"
-                android:minHeight="?attr/actionBarSize"
                 app:popupTheme="@style/AppToolbar"
                 app:theme="@style/AppToolbar" />
 
@@ -85,87 +83,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+                    
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/selectorList"
+                        android:scrollbars="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <Spinner
-                            android:id="@+id/drop1prefix"
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:text="@string/drop1"
-                            android:textColor="@color/s_text"
-                            android:textSize="@dimen/text_size_xlarge"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/drop1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:paddingLeft="10dp"
-                            android:scrollHorizontally="true"
-                            android:textColor="#000000"
-                            android:textSize="@dimen/text_size_xlarge"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <Spinner
-                            android:id="@+id/drop2prefix"
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:text="@string/drop2"
-                            android:textColor="@color/s_text"
-                            android:textSize="@dimen/text_size_xlarge"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/drop2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:paddingLeft="10dp"
-                            android:textColor="#000000"
-                            android:textSize="@dimen/text_size_xlarge"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <Spinner
-                            android:id="@+id/drop3prefix"
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:text="@string/drop3"
-                            android:textColor="@color/s_text"
-                            android:textSize="@dimen/text_size_xlarge"
-                            android:textStyle="bold"
-                            android:visibility="gone" />
-
-                        <TextView
-                            android:id="@+id/drop3"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="none"
-                            android:maxLines="1"
-                            android:paddingLeft="10dp"
-                            android:textColor="#000000"
-                            android:textSize="@dimen/text_size_xlarge"
-                            android:textStyle="bold"
-                            android:visibility="gone" />
-                    </LinearLayout>
                 </LinearLayout>
 
                 <LinearLayout
@@ -226,6 +150,8 @@
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
+                            android:maxLines="1"
+                            android:ellipsize="end"
                             android:text="@string/traitdetails"
                             android:textColor="#000000"
                             android:textSize="@dimen/text_size_small"

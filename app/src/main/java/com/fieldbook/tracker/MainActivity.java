@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,11 +15,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.media.ExifInterface;
+import android.support.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -38,6 +33,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -77,15 +73,16 @@ import android.widget.Toast;
 import com.fieldbook.tracker.barcodes.IntentIntegrator;
 import com.fieldbook.tracker.barcodes.IntentResult;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
-import com.fieldbook.tracker.search.SearchActivity;
-import com.fieldbook.tracker.traits.TraitEditorActivity;
-import com.fieldbook.tracker.traits.TraitObject;
-import com.fieldbook.tracker.tutorial.TutorialMainActivity;
+import com.fieldbook.tracker.layoutConfig.SelectorLayoutConfigurator;
+import com.fieldbook.tracker.preferences.PreferencesActivity;
+import com.fieldbook.tracker.search.*;
+import com.fieldbook.tracker.traits.*;
+import com.fieldbook.tracker.tutorial.*;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.ExpandableHeightGridView;
 import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.GalleryImageAdapter;
-import com.fieldbook.tracker.utilities.RangeObject;
+import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.File;
@@ -113,8 +110,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     /**
      * Other variables
      */
-    private String local;
-    private String region;
 
     private SharedPreferences ep;
     private int paging;
@@ -169,23 +164,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Menu systemMenu;
 
     private String[] prefixTraits;
-    private boolean savePrefix;
 
-    private Spinner drop1prefix;
-    private Spinner drop2prefix;
-    private Spinner drop3prefix;
-
-    private String[] myList1;
-    private String[] myList2;
-    private String[] myList3;
-
-    private int drop1Selection;
-    private int drop2Selection;
-    private int drop3Selection;
-
-    private TextView drop3;
-    private TextView drop2;
-    private TextView drop1;
+    private SelectorLayoutConfigurator selectorLayoutConfigurator;
 
     private TextView rangeName;
     private TextView plotName;
@@ -225,10 +205,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private TextView month;
     private TextView day;
     private String date = "2000-01-01";
-    SimpleDateFormat dayFormat = new SimpleDateFormat("dd");
-    SimpleDateFormat monthFormat = new SimpleDateFormat("MM");
-    SimpleDateFormat monthAlphFormat = new SimpleDateFormat("MMM");
-    SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
     final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private SeekBar seekBar;
@@ -296,22 +272,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         ep = getSharedPreferences("Settings", 0);
 
-        // Enforce internal language change
-        local = ep.getString("language", Locale.getDefault().getCountry());
-        region = ep.getString("region",Locale.getDefault().getLanguage());
+        cRange = new RangeObject();
+        cRange.plot = "";
+        cRange.plot_id = "";
+        cRange.range = "";
 
-        if(region == null) {
-            region = "";
-        }
-
-        Locale locale2 = new Locale(local,region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
-                .getDisplayMetrics());
-
+        loadNavUI();
         loadScreen();
+
+        // display intro tutorial
+        if(ep.getBoolean("FirstRun",true)) {
+            //launchIntro();
+            ep.edit().putBoolean("FirstRun",false).apply();
+        }
 
         // If the user hasn't configured range and traits, open settings screen
         if (!ep.getBoolean("ImportFieldFinished", false) | !ep.getBoolean("CreateTraitFinished", false)) {
@@ -323,16 +296,54 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             startActivity(intent);
         }
 
-        SharedPreferences.Editor ed = ep.edit();
-
-        if (ep.getInt("UpdateVersion", -1) < getVersion()) {
-            ed.putInt("UpdateVersion", getVersion());
-            ed.apply();
+        if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
+            ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, ChangelogActivity.class);
             startActivity(intent);
             updateAssets();
         }
+    }
+
+
+    private void launchIntro() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                //  Launch app intro
+                final Intent i = new Intent(MainActivity.this, IntroActivity.class);
+
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        startActivity(i);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void loadNavUI() {
+        setContentView(R.layout.activity_main);
+
+        initToolbars();
+
+        mDrawer = findViewById(R.id.drawer_layout);
+
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().getThemedContext();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mActivityTitle = getTitle().toString();
+
+        nvDrawer = findViewById(R.id.nvView);
+
+        // Setup drawer view
+
+        setupDrawerContent(nvDrawer);
+        setupDrawer();
     }
 
     private void updateAssets() {
@@ -343,26 +354,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private void loadScreen() {
-        setContentView(R.layout.activity_main);
 
-        initToolbars();
-
-        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-
-        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        mActivityTitle = getTitle().toString();
-
-        nvDrawer = (NavigationView) findViewById(R.id.nvView);
-
-        // Setup drawer view
-
-        setupDrawerContent(nvDrawer);
-        setupDrawer();
         //lockData(dataLocked);
 
         // If the app is just starting up, we must always allow refreshing of
@@ -380,37 +372,33 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         createDirs();
 
-        range = (EditText) findViewById(R.id.range);
-        plot = (EditText) findViewById(R.id.plot);
+        range = findViewById(R.id.range);
+        plot = findViewById(R.id.plot);
 
-        tvRange = (TextView) findViewById(R.id.tvRange);
-        tvPlot = (TextView) findViewById(R.id.tvPlot);
+        tvRange = findViewById(R.id.tvRange);
+        tvPlot = findViewById(R.id.tvPlot);
 
-        drop3 = (TextView) findViewById(R.id.drop3);
-        drop2 = (TextView) findViewById(R.id.drop2);
-        drop1 = (TextView) findViewById(R.id.drop1);
+        if (cRange != null) {
+            selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 3), (RecyclerView) findViewById(R.id.selectorList));
+        }
 
-        drop1prefix = (Spinner) findViewById(R.id.drop1prefix);
-        drop2prefix = (Spinner) findViewById(R.id.drop2prefix);
-        drop3prefix = (Spinner) findViewById(R.id.drop3prefix);
+        traitBoolean = findViewById(R.id.booleanLayout);
+        traitAudio = findViewById(R.id.audioLayout);
+        traitCategorical = findViewById(R.id.categoricalLayout);
+        traitDate = findViewById(R.id.dateLayout);
+        traitNumeric = findViewById(R.id.numericLayout);
+        traitPercent = findViewById(R.id.percentLayout);
+        traitText = findViewById(R.id.textLayout);
+        traitPhoto = findViewById(R.id.photoLayout);
+        traitCounter = findViewById(R.id.counterLayout);
+        traitDiseaseRating = findViewById(R.id.diseaseLayout);
+        traitMulticat = findViewById(R.id.multicatLayout);
+        traitLocation = findViewById(R.id.locationLayout);
+        traitAngle = findViewById(R.id.angleLayout);
 
-        traitBoolean = (LinearLayout) findViewById(R.id.booleanLayout);
-        traitAudio = (LinearLayout) findViewById(R.id.audioLayout);
-        traitCategorical = (LinearLayout) findViewById(R.id.categoricalLayout);
-        traitDate = (LinearLayout) findViewById(R.id.dateLayout);
-        traitNumeric = (LinearLayout) findViewById(R.id.numericLayout);
-        traitPercent = (LinearLayout) findViewById(R.id.percentLayout);
-        traitText = (LinearLayout) findViewById(R.id.textLayout);
-        traitPhoto = (LinearLayout) findViewById(R.id.photoLayout);
-        traitCounter = (LinearLayout) findViewById(R.id.counterLayout);
-        traitDiseaseRating = (LinearLayout) findViewById(R.id.diseaseLayout);
-        traitMulticat = (LinearLayout) findViewById(R.id.multicatLayout);
-        traitLocation = (LinearLayout) findViewById(R.id.locationLayout);
-        traitAngle = (LinearLayout) findViewById(R.id.angleLayout);
-
-        traitType = (Spinner) findViewById(R.id.traitType);
+        traitType = findViewById(R.id.traitType);
         newTraits = new HashMap();
-        traitDetails = (TextView) findViewById(R.id.traitDetails);
+        traitDetails = findViewById(R.id.traitDetails);
 
         range.setOnEditorActionListener(new OnEditorActionListener() {
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
@@ -459,14 +447,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         });
 
         // Current value display
-        etCurVal = (EditText) findViewById(R.id.etCurVal);
+        etCurVal = findViewById(R.id.etCurVal);
 
-        doRecord = (ImageButton) traitAudio.findViewById(R.id.record);
+        doRecord = traitAudio.findViewById(R.id.record);
         doRecord.setOnClickListener(this);
 
-        ImageButton capture = (ImageButton) traitPhoto.findViewById(R.id.capture);
+        ImageButton capture = traitPhoto.findViewById(R.id.capture);
         capture.setOnClickListener(this);
-        photo = (Gallery) traitPhoto.findViewById(R.id.photo);
+        photo = traitPhoto.findViewById(R.id.photo);
 
         etCurVal.setOnEditorActionListener(new OnEditorActionListener() {
             public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
@@ -562,7 +550,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         };
 
         // Progress bar
-        seekBar = (SeekBar) traitPercent.findViewById(R.id.seekbar);
+        seekBar = traitPercent.findViewById(R.id.seekbar);
         seekBar.setMax(100);
 
         seekListener = new OnSeekBarChangeListener() {
@@ -585,21 +573,21 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Updates the progressbar value on screen and in memory hashmap
         seekBar.setOnSeekBarChangeListener(seekListener);
 
-        month = (TextView) traitDate.findViewById(R.id.mth);
-        day = (TextView) traitDate.findViewById(R.id.day);
+        month = traitDate.findViewById(R.id.mth);
+        day = traitDate.findViewById(R.id.day);
 
-        rangeName = (TextView) findViewById(R.id.rangeName);
-        plotName = (TextView) findViewById(R.id.plotName);
+        rangeName = findViewById(R.id.rangeName);
+        plotName = findViewById(R.id.plotName);
 
-        ImageButton getLocation = (ImageButton) traitLocation.findViewById(R.id.getLocationBtn);
+        ImageButton getLocation = traitLocation.findViewById(R.id.getLocationBtn);
 
         sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-        pitchTv = (TextView) traitAngle.findViewById(R.id.pitch);
-        rollTv = (TextView) traitAngle.findViewById(R.id.roll);
-        azimutTv = (TextView) traitAngle.findViewById(R.id.azimuth);
+        pitchTv = traitAngle.findViewById(R.id.pitch);
+        rollTv = traitAngle.findViewById(R.id.roll);
+        azimutTv = traitAngle.findViewById(R.id.azimuth);
 
         mEventListener = new SensorEventListener() {
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -635,36 +623,36 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         };
 
-        Button addDayBtn = (Button) traitDate.findViewById(R.id.addDateBtn);
-        Button minusDayBtn = (Button) traitDate.findViewById(R.id.minusDateBtn);
-        ImageButton saveDayBtn = (ImageButton) traitDate.findViewById(R.id.enterBtn);
+        Button addDayBtn = traitDate.findViewById(R.id.addDateBtn);
+        Button minusDayBtn = traitDate.findViewById(R.id.minusDateBtn);
+        ImageButton saveDayBtn = traitDate.findViewById(R.id.enterBtn);
 
-        Button addCounterBtn = (Button) traitCounter.findViewById(R.id.addBtn);
-        Button minusCounterBtn = (Button) traitCounter.findViewById(R.id.minusBtn);
-        counterTv = (TextView) traitCounter.findViewById(R.id.curCount);
+        Button addCounterBtn = traitCounter.findViewById(R.id.addBtn);
+        Button minusCounterBtn = traitCounter.findViewById(R.id.minusBtn);
+        counterTv = traitCounter.findViewById(R.id.curCount);
 
         // Multicat
-        gridMultiCat = (ExpandableHeightGridView) traitMulticat.findViewById(R.id.catGrid);
+        gridMultiCat = traitMulticat.findViewById(R.id.catGrid);
         gridMultiCat.setExpanded(true);
         buttonsCreated = false;
 
         // Numeric
-        Button k1 = (Button) traitNumeric.findViewById(R.id.k1);
-        Button k2 = (Button) traitNumeric.findViewById(R.id.k2);
-        Button k3 = (Button) traitNumeric.findViewById(R.id.k3);
-        Button k4 = (Button) traitNumeric.findViewById(R.id.k4);
-        Button k5 = (Button) traitNumeric.findViewById(R.id.k5);
-        Button k6 = (Button) traitNumeric.findViewById(R.id.k6);
-        Button k7 = (Button) traitNumeric.findViewById(R.id.k7);
-        Button k8 = (Button) traitNumeric.findViewById(R.id.k8);
-        Button k9 = (Button) traitNumeric.findViewById(R.id.k9);
-        Button k10 = (Button) traitNumeric.findViewById(R.id.k10);
-        Button k11 = (Button) traitNumeric.findViewById(R.id.k11);
-        Button k12 = (Button) traitNumeric.findViewById(R.id.k12);
-        Button k13 = (Button) traitNumeric.findViewById(R.id.k13);
-        Button k14 = (Button) traitNumeric.findViewById(R.id.k14);
-        Button k15 = (Button) traitNumeric.findViewById(R.id.k15);
-        Button k16 = (Button) traitNumeric.findViewById(R.id.k16);
+        Button k1 = traitNumeric.findViewById(R.id.k1);
+        Button k2 = traitNumeric.findViewById(R.id.k2);
+        Button k3 = traitNumeric.findViewById(R.id.k3);
+        Button k4 = traitNumeric.findViewById(R.id.k4);
+        Button k5 = traitNumeric.findViewById(R.id.k5);
+        Button k6 = traitNumeric.findViewById(R.id.k6);
+        Button k7 = traitNumeric.findViewById(R.id.k7);
+        Button k8 = traitNumeric.findViewById(R.id.k8);
+        Button k9 = traitNumeric.findViewById(R.id.k9);
+        Button k10 = traitNumeric.findViewById(R.id.k10);
+        Button k11 = traitNumeric.findViewById(R.id.k11);
+        Button k12 = traitNumeric.findViewById(R.id.k12);
+        Button k13 = traitNumeric.findViewById(R.id.k13);
+        Button k14 = traitNumeric.findViewById(R.id.k14);
+        Button k15 = traitNumeric.findViewById(R.id.k15);
+        Button k16 = traitNumeric.findViewById(R.id.k16);
 
         k1.setOnClickListener(this);
         k2.setOnClickListener(this);
@@ -694,31 +682,31 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
-        rust0=(Button) traitDiseaseRating.findViewById(R.id.rust0);
-        rust5=(Button) traitDiseaseRating.findViewById(R.id.rust5);
-        rust10=(Button) traitDiseaseRating.findViewById(R.id.rust10);
-        rust15=(Button) traitDiseaseRating.findViewById(R.id.rust15);
-        rust20=(Button) traitDiseaseRating.findViewById(R.id.rust20);
-        rust25=(Button) traitDiseaseRating.findViewById(R.id.rust25);
-        rust30=(Button) traitDiseaseRating.findViewById(R.id.rust30);
-        rust35=(Button) traitDiseaseRating.findViewById(R.id.rust35);
-        rust40=(Button) traitDiseaseRating.findViewById(R.id.rust40);
-        rust45=(Button) traitDiseaseRating.findViewById(R.id.rust45);
-        rust50=(Button) traitDiseaseRating.findViewById(R.id.rust50);
-        rust55=(Button) traitDiseaseRating.findViewById(R.id.rust55);
-        rust60=(Button) traitDiseaseRating.findViewById(R.id.rust60);
-        rust65=(Button) traitDiseaseRating.findViewById(R.id.rust65);
-        rust70=(Button) traitDiseaseRating.findViewById(R.id.rust70);
-        rust75=(Button) traitDiseaseRating.findViewById(R.id.rust75);
-        rust80=(Button) traitDiseaseRating.findViewById(R.id.rust80);
-        rust85=(Button) traitDiseaseRating.findViewById(R.id.rust85);
-        rust90=(Button) traitDiseaseRating.findViewById(R.id.rust90);
-        rust95=(Button) traitDiseaseRating.findViewById(R.id.rust95);
-        rust100=(Button) traitDiseaseRating.findViewById(R.id.rust100);
-        rustR=(Button) traitDiseaseRating.findViewById(R.id.rustR);
-        rustM=(Button) traitDiseaseRating.findViewById(R.id.rustM);
-        rustS=(Button) traitDiseaseRating.findViewById(R.id.rustS);
-        rustDelim = (Button) traitDiseaseRating.findViewById(R.id.rustDelim);
+        rust0= traitDiseaseRating.findViewById(R.id.rust0);
+        rust5= traitDiseaseRating.findViewById(R.id.rust5);
+        rust10= traitDiseaseRating.findViewById(R.id.rust10);
+        rust15= traitDiseaseRating.findViewById(R.id.rust15);
+        rust20= traitDiseaseRating.findViewById(R.id.rust20);
+        rust25= traitDiseaseRating.findViewById(R.id.rust25);
+        rust30= traitDiseaseRating.findViewById(R.id.rust30);
+        rust35= traitDiseaseRating.findViewById(R.id.rust35);
+        rust40= traitDiseaseRating.findViewById(R.id.rust40);
+        rust45= traitDiseaseRating.findViewById(R.id.rust45);
+        rust50= traitDiseaseRating.findViewById(R.id.rust50);
+        rust55= traitDiseaseRating.findViewById(R.id.rust55);
+        rust60= traitDiseaseRating.findViewById(R.id.rust60);
+        rust65= traitDiseaseRating.findViewById(R.id.rust65);
+        rust70= traitDiseaseRating.findViewById(R.id.rust70);
+        rust75= traitDiseaseRating.findViewById(R.id.rust75);
+        rust80= traitDiseaseRating.findViewById(R.id.rust80);
+        rust85= traitDiseaseRating.findViewById(R.id.rust85);
+        rust90= traitDiseaseRating.findViewById(R.id.rust90);
+        rust95= traitDiseaseRating.findViewById(R.id.rust95);
+        rust100= traitDiseaseRating.findViewById(R.id.rust100);
+        rustR= traitDiseaseRating.findViewById(R.id.rustR);
+        rustM= traitDiseaseRating.findViewById(R.id.rustM);
+        rustS= traitDiseaseRating.findViewById(R.id.rustS);
+        rustDelim =  traitDiseaseRating.findViewById(R.id.rustDelim);
 
         Button[] rustBtnArray = new Button[]{rust0,rust5,rust10,rust15,rust20,rust25,rust30,rust35,rust40,rust45,rust50,rust55,rust60,rust65,rust70,rust75,rust80,rust85,rust90,rust95,rust100};
         List<String> temps = new ArrayList<>();
@@ -867,7 +855,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     e.printStackTrace();
                 }
 
-                if (ep.getBoolean("UseDay", false)) {
+                if (ep.getBoolean(PreferencesActivity.USE_DAY_OF_YEAR, false)) {
                     updateTrait(currentTrait.trait, "date",String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
                 } else {
                     updateTrait(currentTrait.trait, "date",dateFormat.format(calendar.getTime()));
@@ -904,6 +892,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Add counter
         addCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
+                //TODO NullPointerException
                 if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
                     counterTv.setText("1");
                 } else {
@@ -916,6 +905,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Minus counter
         minusCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
+                //TODO NullPointerException
                 if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
                     counterTv.setText("-1");
                 } else {
@@ -925,18 +915,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
-        buttonArray[0] = (Button) traitCategorical.findViewById(R.id.q1);
-        buttonArray[1] = (Button) traitCategorical.findViewById(R.id.q2);
-        buttonArray[2] = (Button) traitCategorical.findViewById(R.id.q3);
-        buttonArray[3] = (Button) traitCategorical.findViewById(R.id.q4);
-        buttonArray[4] = (Button) traitCategorical.findViewById(R.id.q5);
-        buttonArray[5] = (Button) traitCategorical.findViewById(R.id.q6);
-        buttonArray[6] = (Button) traitCategorical.findViewById(R.id.q7);
-        buttonArray[7] = (Button) traitCategorical.findViewById(R.id.q8);
-        buttonArray[8] = (Button) traitCategorical.findViewById(R.id.q9);
-        buttonArray[9] = (Button) traitCategorical.findViewById(R.id.q10);
-        buttonArray[10] = (Button) traitCategorical.findViewById(R.id.q11);
-        buttonArray[11] = (Button) traitCategorical.findViewById(R.id.q12);
+        buttonArray[0] = traitCategorical.findViewById(R.id.q1);
+        buttonArray[1] = traitCategorical.findViewById(R.id.q2);
+        buttonArray[2] = traitCategorical.findViewById(R.id.q3);
+        buttonArray[3] = traitCategorical.findViewById(R.id.q4);
+        buttonArray[4] = traitCategorical.findViewById(R.id.q5);
+        buttonArray[5] = traitCategorical.findViewById(R.id.q6);
+        buttonArray[6] = traitCategorical.findViewById(R.id.q7);
+        buttonArray[7] = traitCategorical.findViewById(R.id.q8);
+        buttonArray[8] = traitCategorical.findViewById(R.id.q9);
+        buttonArray[9] = traitCategorical.findViewById(R.id.q10);
+        buttonArray[10] = traitCategorical.findViewById(R.id.q11);
+        buttonArray[11] = traitCategorical.findViewById(R.id.q12);
 
         // Functions to clear all other color except this button's
         buttonArray[0].setOnClickListener(new OnClickListener() {
@@ -1059,7 +1049,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
-        eImg = (ImageView) traitBoolean.findViewById(R.id.eImg);
+        eImg = traitBoolean.findViewById(R.id.eImg);
 
         // Boolean
         eImg.setOnClickListener(new OnClickListener() {
@@ -1078,8 +1068,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
-        rangeLeft = (ImageView) findViewById(R.id.rangeLeft);
-        rangeRight = (ImageView) findViewById(R.id.rangeRight);
+        rangeLeft = findViewById(R.id.rangeLeft);
+        rangeRight = findViewById(R.id.rangeRight);
 
         rangeLeft.setOnTouchListener(new OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
@@ -1128,83 +1118,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Go to previous range
         rangeLeft.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                if(ep.getBoolean("DisableEntryNavLeft",false) && !newTraits.containsKey(currentTrait.trait)) {
-
-                    try {
-                        int resID = getResources().getIdentifier("error", "raw", getPackageName());
-                        MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                        chimePlayer.start();
-
-                        chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            public void onCompletion(MediaPlayer mp) {
-                                mp.release();
-                            }
-                        });
-                    } catch (Exception ignore) {
-                    }
-
-                } else {
-                    if (rangeID != null && rangeID.length > 0) {
-                        //index.setEnabled(true);
-
-                        // If ignore existing data is enabled, then skip accordingly
-                        if (ep.getBoolean("IgnoreExisting", false)) {
-                            int pos = paging;
-
-                            while (pos >= 0) {
-                                pos -= 1;
-
-                                if (pos < 1)
-                                    return;
-
-                                if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                                        currentTrait.format)) {
-                                    paging = pos;
-                                    break;
-                                }
-                            }
-                        } else {
-                            paging -= 1;
-
-                            if (paging < 1)
-                                paging = rangeID.length;
-                        }
-
-                        // Refresh onscreen controls
-                        cRange = dt.getRange(rangeID[paging - 1]);
-
-                        Editor ed = ep.edit();
-                        ed.putString("lastplot",cRange.plot_id);
-                        ed.apply();
-
-                        displayRange(cRange);
-
-                        if (ep.getBoolean("RangeSound", false)) {
-                            if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                                lastRange = cRange.range;
-
-                                try {
-                                    int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                                    MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                                    chimePlayer.start();
-
-                                    chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                        public void onCompletion(MediaPlayer mp) {
-                                            mp.release();
-                                        }
-                                    });
-                                } catch (Exception ignore) {
-                                }
-                            }
-                        }
-
-                        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                                .clone();
-
-                        initWidgets(true);
-                    }
-                }
-
+                moveLeft();
             }
         });
 
@@ -1251,94 +1165,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Go to next range
         rangeRight.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-
-                if(ep.getBoolean("DisableEntryNavRight", false) && !newTraits.containsKey(currentTrait.trait)) {
-
-                    try {
-                        int resID = getResources().getIdentifier("error", "raw", getPackageName());
-                        MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                        chimePlayer.start();
-
-                        chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            public void onCompletion(MediaPlayer mp) {
-                                mp.release();
-                            };
-                        });
-                    } catch (Exception ignore) {
-                    }
-
-                } else {
-                    if (rangeID != null && rangeID.length > 0) {
-                        //index.setEnabled(true);
-
-                        // If ignore existing data is enabled, then skip accordingly
-                        if (ep.getBoolean("IgnoreExisting", false)) {
-                            int pos = paging;
-
-                            if (pos == rangeID.length) {
-                                pos = 1;
-                                return;
-                            }
-
-                            while (pos <= rangeID.length) {
-                                pos += 1;
-
-                                if (pos > rangeID.length) {
-                                    pos = 1;
-                                    return;
-                                }
-
-                                if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                                        currentTrait.format)) {
-                                    paging = pos;
-                                    break;
-                                }
-                            }
-                        } else {
-                            paging += 1;
-
-                            if (paging > rangeID.length)
-                                paging = 1;
-                        }
-
-                        // Refresh onscreen controls
-                        cRange = dt.getRange(rangeID[paging - 1]);
-
-                        Editor ed = ep.edit();
-                        ed.putString("lastplot",cRange.plot_id);
-                        ed.apply();
-
-                        displayRange(cRange);
-                        if (ep.getBoolean("RangeSound", false)) {
-                            if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                                lastRange = cRange.range;
-
-                                try {
-                                    int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                                    MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                                    chimePlayer.start();
-
-                                    chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                        public void onCompletion(MediaPlayer mp) {
-                                            mp.release();
-                                        }
-                                    });
-                                } catch (Exception ignore) {
-                                }
-                            }
-                        }
-                        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                                .clone();
-
-                        initWidgets(true);
-                    }
-                }
+                moveRight();
             }
         });
 
-
-        traitLeft = (ImageView) findViewById(R.id.traitLeft);
-        traitRight = (ImageView) findViewById(R.id.traitRight);
+        traitLeft = findViewById(R.id.traitLeft);
+        traitRight = findViewById(R.id.traitRight);
 
         traitLeft.setOnTouchListener(new OnTouchListener() {
 
@@ -1382,7 +1214,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 if (pos < 0) {
                     pos = traitType.getCount() - 1;
 
-                    if (ep.getBoolean("CycleTraits", false))
+                    if (ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false))
                         rangeLeft.performClick();
                 }
 
@@ -1432,7 +1264,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 if (pos > traitType.getCount() - 1) {
                     pos = 0;
 
-                    if (ep.getBoolean("CycleTraits", false))
+                    if (ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false))
                         rangeRight.performClick();
                 }
 
@@ -1441,13 +1273,176 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         });
     }
 
+    private void moveLeft() {
+        if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT,false) && !newTraits.containsKey(currentTrait.trait)) {
+
+            try {
+                int resID = getResources().getIdentifier("error", "raw", getPackageName());
+                MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                chimePlayer.start();
+
+                chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    public void onCompletion(MediaPlayer mp) {
+                        mp.release();
+                    }
+                });
+            } catch (Exception ignore) {
+            }
+
+        } else {
+            if (rangeID != null && rangeID.length > 0) {
+                //index.setEnabled(true);
+
+                // If ignore existing data is enabled, then skip accordingly
+                if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
+                    int pos = paging;
+
+                    while (pos >= 0) {
+                        pos -= 1;
+
+                        if (pos < 1)
+                            return;
+
+                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                                currentTrait.format)) {
+                            paging = pos;
+                            break;
+                        }
+                    }
+                } else {
+                    paging -= 1;
+
+                    if (paging < 1)
+                        paging = rangeID.length;
+                }
+
+                // Refresh onscreen controls
+                cRange = dt.getRange(rangeID[paging - 1]);
+
+                Editor ed = ep.edit();
+                ed.putString("lastplot",cRange.plot_id);
+                ed.apply();
+
+                displayRange(cRange);
+
+                if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
+                    if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
+                        lastRange = cRange.range;
+
+                        try {
+                            int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+                            MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                            chimePlayer.start();
+
+                            chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                public void onCompletion(MediaPlayer mp) {
+                                    mp.release();
+                                }
+                            });
+                        } catch (Exception ignore) {
+                        }
+                    }
+                }
+
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                        .clone();
+
+                initWidgets(true);
+            }
+        }
+    }
+
+    private void moveRight() {
+        if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false) && !newTraits.containsKey(currentTrait.trait)) {
+
+            try {
+                int resID = getResources().getIdentifier("error", "raw", getPackageName());
+                MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                chimePlayer.start();
+
+                chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    public void onCompletion(MediaPlayer mp) {
+                        mp.release();
+                    };
+                });
+            } catch (Exception ignore) {
+            }
+
+        } else {
+            if (rangeID != null && rangeID.length > 0) {
+                //index.setEnabled(true);
+
+                // If ignore existing data is enabled, then skip accordingly
+                if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
+                    int pos = paging;
+
+                    if (pos == rangeID.length) {
+                        pos = 1;
+                        return;
+                    }
+
+                    while (pos <= rangeID.length) {
+                        pos += 1;
+
+                        if (pos > rangeID.length) {
+                            pos = 1;
+                            return;
+                        }
+
+                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                                currentTrait.format)) {
+                            paging = pos;
+                            break;
+                        }
+                    }
+                } else {
+                    paging += 1;
+
+                    if (paging > rangeID.length)
+                        paging = 1;
+                }
+
+                // Refresh onscreen controls
+                cRange = dt.getRange(rangeID[paging - 1]);
+
+                Editor ed = ep.edit();
+                ed.putString("lastplot",cRange.plot_id);
+                ed.apply();
+
+                displayRange(cRange);
+                if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
+                    if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
+                        lastRange = cRange.range;
+
+                        try {
+                            int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+                            MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                            chimePlayer.start();
+
+                            chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                public void onCompletion(MediaPlayer mp) {
+                                    mp.release();
+                                }
+                            });
+                        } catch (Exception ignore) {
+                        }
+                    }
+                }
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                        .clone();
+
+                initWidgets(true);
+            }
+        }
+    }
+
     private void initToolbars() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Toolbar toolbarBottom = (Toolbar) findViewById(R.id.toolbarBottom);
+        Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
 
-        missingValue = (ImageButton) toolbarBottom.findViewById(R.id.missingValue);
+        missingValue = toolbarBottom.findViewById(R.id.missingValue);
         missingValue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1469,7 +1464,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
-        deleteValue = (ImageButton) toolbarBottom.findViewById(R.id.deleteValue);
+        deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
         deleteValue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1561,10 +1556,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 R.string.drawer_open, R.string.drawer_close) {
 
             public void onDrawerOpened(View drawerView) {
-                TextView person = (TextView) findViewById(R.id.nameLabel);
+                TextView person =  findViewById(R.id.nameLabel);
                 person.setText(ep.getString("FirstName","") + " " + ep.getString("LastName",""));
 
-                TextView template = (TextView) findViewById(R.id.currentField);
+                TextView template =  findViewById(R.id.currentField);
                 template.setText(ep.getString("FieldFile",""));
             }
 
@@ -1621,9 +1616,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 break;
 
             case R.id.nav_language:
-                Intent f = new Intent(this, ConfigActivity.class);
-                f.putExtra("dialog", "language");
-                startActivity(f);
+                Intent i = new Intent(android.provider.Settings.ACTION_LOCALE_SETTINGS);
+                startActivity(i);
                 break;
         }
 
@@ -1741,7 +1735,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (rangeID != null && rangeID.length > 0) {
 
             // If ignore existing data is enabled, then skip accordingly
-            if (ep.getBoolean("IgnoreExisting", false)) {
+            if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
                 int pos = paging;
 
                 while (pos >= 0) {
@@ -1773,7 +1767,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (cRange.plot_id.length() == 0)
                 return;
 
-            if (ep.getBoolean("RangeSound", false)) {
+            if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
                 if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                     lastRange = cRange.range;
 
@@ -1809,7 +1803,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             //index.setEnabled(true);
 
             // If ignore existing data is enabled, then skip accordingly
-            if (ep.getBoolean("IgnoreExisting", false)) {
+            if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
                 int pos = paging;
 
                 if (pos == rangeID.length) {
@@ -1847,7 +1841,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (cRange.plot_id.length() == 0)
                 return;
 
-            if (ep.getBoolean("RangeSound", false)) {
+            if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
                 if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                     lastRange = cRange.range;
 
@@ -1871,7 +1865,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     .clone();
 
             initWidgets(true);
-
         }
     }
 
@@ -1883,9 +1876,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                 .clone();
 
-        drop1Selection = drop1prefix.getSelectedItemPosition();
-        drop2Selection = drop2prefix.getSelectedItemPosition();
-        drop3Selection = drop3prefix.getSelectedItemPosition();
+        //for(DropDownSelector selector: selectorList) {
+        //    selector.setDropSelection(selector.getPrefix().getSelectedItemPosition());
+        //}
 
         initWidgets(true);
     }
@@ -1912,171 +1905,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
+        if (cRange != null) {
+        selectorLayoutConfigurator.configureDropdownArray(cRange.plot_id);
+        }
+
         if (prefixTraits != null) {
-            savePrefix = false;
+            final TextView traitDetails =  findViewById(R.id.traitDetails);
 
-            ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(
-                    this, R.layout.custom_spinnerlayout, prefixTraits);
-
-            drop1prefix.setAdapter(prefixArrayAdapter);
-            drop1prefix.setSelection(drop1Selection);
-
-            if (!drop1prefix.equals(null)) {
-                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP1", prefixTraits[0]));
-                drop1prefix.setSelection(spinnerPosition);
-            }
-
-            drop2prefix.setAdapter(prefixArrayAdapter);
-            drop2prefix.setSelection(drop2Selection);
-
-            if (!drop2prefix.equals(null)) {
-                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP2", prefixTraits[1]));
-                drop2prefix.setSelection(spinnerPosition);
-            }
-
-            drop3prefix.setAdapter(prefixArrayAdapter);
-            drop3prefix.setSelection(drop3Selection);
-
-            if (!drop3prefix.equals(null)) {
-                int spinnerPosition = prefixArrayAdapter.getPosition(ep.getString("DROP3",prefixTraits[2]));
-                drop3prefix.setSelection(spinnerPosition);
-            }
-
-            drop1prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-                @Override
-                public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                           int pos, long arg3) {
-                    try {
-
-                        if (savePrefix)
-                            drop1Selection = pos;
-
-                        myList1 = dt.getDropDownRange(prefixTraits[pos], cRange.plot_id);
-
-                        if (myList1 == null) {
-                            drop1.setText(getString(R.string.nodata));
-                        } else
-                            drop1.setText(myList1[0]);
-                            Editor e = ep.edit();
-                            e.putString("DROP1", prefixTraits[pos]);
-                            e.apply();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    drop1prefix.requestFocus();
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> arg0) {
-
-                }
-            });
-
-            drop2prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-                @Override
-                public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                           int pos, long arg3) {
-
-                    try {
-                        if (savePrefix)
-                            drop2Selection = pos;
-
-                        myList2 = dt.getDropDownRange(prefixTraits[pos], cRange.plot_id);
-
-                        if (myList2 == null) {
-                            drop2.setText(getString(R.string.nodata));
-                        } else
-                            drop2.setText(myList2[0]);
-                            Editor e = ep.edit();
-                            e.putString("DROP2", prefixTraits[pos]);
-                            e.apply();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> arg0) {
-
-                }
-            });
-
-            drop3prefix.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-                @Override
-                public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                           int pos, long arg3) {
-
-                    try {
-                        if (savePrefix)
-                            drop3Selection = pos;
-
-                        myList3 = dt.getDropDownRange(prefixTraits[pos], cRange.plot_id);
-
-                        if (myList3 == null) {
-                            drop3.setText(getString(R.string.nodata));
-                        } else
-                            drop3.setText(myList3[0]);
-                            Editor e = ep.edit();
-                            e.putString("DROP3", prefixTraits[pos]);
-                            e.apply();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> arg0) {
-
-                }
-            });
-
-            savePrefix = true;
-
-            drop1.setOnTouchListener(new OnTouchListener() {
+            traitDetails.setOnTouchListener(new OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     switch(event.getAction()){
                         case MotionEvent.ACTION_DOWN:
-                            drop1.setMaxLines(5);
+                            traitDetails.setMaxLines(10);
                             break;
                         case MotionEvent.ACTION_UP:
-                            drop1.setMaxLines(1);
-                            break;
-                    }
-                    return true;
-                }
-            });
-
-            drop2.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch(event.getAction()){
-                        case MotionEvent.ACTION_DOWN:
-                            drop2.setMaxLines(5);
-                            break;
-                        case MotionEvent.ACTION_UP:
-                            drop2.setMaxLines(1);
-                            break;
-                    }
-                    return true;
-                }
-            });
-
-            drop3.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch(event.getAction()){
-                        case MotionEvent.ACTION_DOWN:
-                            drop3.setMaxLines(5);
-                            break;
-                        case MotionEvent.ACTION_UP:
-                            drop3.setMaxLines(1);
+                            traitDetails.setMaxLines(1);
                             break;
                     }
                     return true;
@@ -2425,6 +2269,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 buttonArray[i].setTextColor(Color.parseColor(displayColor));
                                 buttonArray[i].setBackgroundColor(getResources().getColor(R.color.button_pressed));
                             } else {
+                                //TODO debug number of buttons, maybe add validation when creating categorical trait
                                 buttonArray[i].setVisibility(Button.VISIBLE);
                                 buttonArray[i].setText(cat[i]);
                                 buttonArray[i].setTextColor(Color.BLACK);
@@ -2522,6 +2367,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         File img = new File(Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/" + "/photos/");
                         if (img.listFiles() != null) {
+
+                            //TODO causes crash
                             photoLocation = dt.getPlotPhotos(cRange.plot_id, currentTrait.trait);
 
                            for (int i = 0; i < photoLocation.size(); i++) {
@@ -2903,7 +2750,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     haveData = true;
 
                     break;
-                } else if (ep.getBoolean("IgnoreExisting", false)) {
+                } else if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
                     if (!dt.getTraitExists(rangeID[j - 1], currentTrait.trait,
                             currentTrait.format)) {
                         paging = j;
@@ -2941,6 +2788,69 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             makeToast(getString(R.string.nomatches));
     }
 
+    private void moveToId(int[] rangeID, boolean alwaysShow, String plotId) {
+        if (rangeID == null)
+            return;
+
+        boolean haveData = false;
+
+        // Loop through all existing records
+        // Find the first one that matches plot
+        // However, if ignore existing data is enabled, then
+        // move to the appropriate plot
+        for (int j = 1; j <= rangeID.length; j++) {
+            cRange = dt.getRange(rangeID[j - 1]);
+
+            if (cRange.plot_id.equals(plotId)) {
+                if (alwaysShow) {
+                    paging = j;
+
+                    // Reload traits based on the selected plot
+                    displayRange(cRange);
+
+                    newTraits = (HashMap) dt.getUserDetail(
+                            cRange.plot_id).clone();
+
+                    initWidgets(false);
+
+                    haveData = true;
+
+                    break;
+                } else if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
+                    if (!dt.getTraitExists(rangeID[j - 1], currentTrait.trait,
+                            currentTrait.format)) {
+                        paging = j;
+
+                        // Reload traits based on the selected
+                        // plot
+                        displayRange(cRange);
+
+                        newTraits = (HashMap) dt.getUserDetail(
+                                cRange.plot_id).clone();
+
+                        initWidgets(false);
+                        haveData = true;
+
+                        break;
+                    }
+                } else {
+                    paging = j;
+
+                    // Reload traits based on the selected plot
+                    displayRange(cRange);
+
+                    newTraits = (HashMap) dt.getUserDetail(
+                            cRange.plot_id).clone();
+
+                    initWidgets(false);
+                    haveData = true;
+
+                    break;
+                }
+            }
+        }
+    }
+
     // Moving to a range will obey the usual settings, such as ignore existing
     // For search results, this is bypassed e.g. always show result regardless
     private void moveRangeTo(int[] rangeID, String range, boolean alwaysShow) {
@@ -2971,7 +2881,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     haveData = true;
 
                     break;
-                } else if (ep.getBoolean("IgnoreExisting", false)) {
+                } else if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
                     if (!dt.getTraitExists(rangeID[j - 1], currentTrait.trait,
                             currentTrait.format)) {
                         paging = j;
@@ -3041,7 +2951,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     haveData = true;
 
                     break;
-                } else if (ep.getBoolean("IgnoreExisting", false)) {
+                } else if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_NO_DATA, false)) {
                     if (!dt.getTraitExists(rangeID[j - 1], currentTrait.trait,
                             currentTrait.format)) {
                         paging = j;
@@ -3113,6 +3023,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         //save last plot id
         if (ep.getBoolean("ImportFieldFinished", false)) {
             Editor ed = ep.edit();
+            //TODO NullPointerException
             ed.putString("lastplot", cRange.plot_id);
             ed.apply();
         }
@@ -3132,6 +3043,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public void onResume() {
         super.onResume();
 
+        loadScreen();
+
         // Update menu item visibility
         if (systemMenu != null) {
 
@@ -3140,47 +3053,39 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             } else {
                 systemMenu.findItem(R.id.help).setVisible(false);
             }
-            if (ep.getBoolean("JumpToPlot", false)) {
+            if (ep.getBoolean(PreferencesActivity.UNIQUE_TEXT, false)) {
                 systemMenu.findItem(R.id.jumpToPlot).setVisible(true);
             } else {
                 systemMenu.findItem(R.id.jumpToPlot).setVisible(false);
             }
 
-            if (ep.getBoolean("NextEmptyPlot", false)) {
+            if (ep.getBoolean(PreferencesActivity.NEXT_ENTRY_NO_DATA, false)) {
                 systemMenu.findItem(R.id.nextEmptyPlot).setVisible(true);
             } else {
                 systemMenu.findItem(R.id.nextEmptyPlot).setVisible(false);
             }
 
-            if (ep.getBoolean("BarcodeScan", false)) {
+            if (ep.getBoolean(PreferencesActivity.UNIQUE_CAMERA,false)) {
                 systemMenu.findItem(R.id.barcodeScan).setVisible(true);
             } else {
                 systemMenu.findItem(R.id.barcodeScan).setVisible(false);
             }
+<<<<<<< HEAD
             if (ep.getBoolean("PrintLabel", false)) {
                 systemMenu.findItem(R.id.printLabel).setVisible(true);
             } else {
                 systemMenu.findItem(R.id.printLabel).setVisible(false);
             }
             if (ep.getBoolean("DataGrid", false)) {
+=======
+            if (ep.getBoolean(PreferencesActivity.DATAGRID_SETTING, false)) {
+>>>>>>> b37d7ed08a1137c3557e41959c63f46da14648c1
                 systemMenu.findItem(R.id.datagrid).setVisible(true);
             } else {
                 systemMenu.findItem(R.id.datagrid).setVisible(false);
             }
 
         }
-
-        // This allows dynamic language change without exiting the app
-        local = ep.getString("language", Locale.getDefault().getCountry());
-        region = ep.getString("region",Locale.getDefault().getLanguage());
-
-        Locale locale2 = new Locale(local,region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
-                .getDisplayMetrics());
-        invalidateOptionsMenu();
 
         nvDrawer.getMenu().clear();
         nvDrawer.inflateMenu(R.menu.nav_drawer_view);
@@ -3191,7 +3096,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             reloadData = false;
             partialReload = false;
 
-            if (ep.getBoolean("QuickGoTo", false)) {
+            if (ep.getBoolean(PreferencesActivity.QUICK_GOTO, false)) {
                 tvRange.setVisibility(TextView.GONE);
                 tvPlot.setVisibility(TextView.GONE);
                 range.setVisibility(EditText.VISIBLE);
@@ -3223,6 +3128,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             if (rangeID != null) {
                 cRange = dt.getRange(rangeID[0]);
+
+                //TODO NullPointerException
                 lastRange = cRange.range;
                 displayRange(cRange);
 
@@ -3236,10 +3143,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             // try to go to last saved plot
             if(ep.getString("lastplot",null)!=null) {
-                String plot = dt.getPlotFromId(ep.getString("lastplot",null));
-                String range = dt.getRangeFromId(ep.getString("lastplot",null));
                 rangeID = dt.getAllRangeID();
-                moveTo(rangeID, range, plot, true);
+                moveToId(rangeID,true,ep.getString("lastplot",null));
             }
 
         } else if (partialReload) {
@@ -3352,19 +3257,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             systemMenu.findItem(R.id.help).setVisible(false);
         }
 
-        if (ep.getBoolean("JumpToPlot", false)) {
+        if (ep.getBoolean(PreferencesActivity.UNIQUE_CAMERA, false)) {
             systemMenu.findItem(R.id.jumpToPlot).setVisible(true);
         } else {
             systemMenu.findItem(R.id.jumpToPlot).setVisible(false);
         }
 
-        if (ep.getBoolean("NextEmptyPlot", false)) {
+        if (ep.getBoolean(PreferencesActivity.NEXT_ENTRY_NO_DATA, false)) {
             systemMenu.findItem(R.id.nextEmptyPlot).setVisible(true);
         } else {
             systemMenu.findItem(R.id.nextEmptyPlot).setVisible(false);
         }
 
-        if (ep.getBoolean("BarcodeScan", false)) {
+        if (ep.getBoolean(PreferencesActivity.UNIQUE_CAMERA, false)) {
             systemMenu.findItem(R.id.barcodeScan).setVisible(true);
         } else {
             systemMenu.findItem(R.id.barcodeScan).setVisible(false);
@@ -3376,7 +3281,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             systemMenu.findItem(R.id.printLabel).setVisible(false);
         }
 
-        if (ep.getBoolean("DataGrid", false)) {
+        if (ep.getBoolean(PreferencesActivity.DATAGRID_SETTING, false)) {
             systemMenu.findItem(R.id.datagrid).setVisible(true);
         } else {
             systemMenu.findItem(R.id.datagrid).setVisible(false);
@@ -3447,7 +3352,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 moveToPlotID();
                 break;
             case R.id.barcodeScan:
-                barcodeScan();
+                IntentIntegrator integrator = new IntentIntegrator(thisActivity);
+                integrator.initiateScan();
                 break;
             case R.id.printLabel:
 //                Intent printIntent = new Intent();
@@ -3527,11 +3433,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
     }
 
-    private void barcodeScan() {
-        IntentIntegrator integrator = new IntentIntegrator(thisActivity);
-        integrator.initiateScan();
-    }
-
     private void moveToPlotID() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
@@ -3548,10 +3449,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         langParams.width = LayoutParams.MATCH_PARENT;
         goToId.getWindow().setAttributes(langParams);
 
-        final EditText barcodeId = (EditText) layout.findViewById(R.id.barcodeid);
-        Button exportButton = (Button) layout.findViewById(R.id.saveBtn);
-        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
-        Button camBtn = (Button) layout.findViewById(R.id.camBtn);
+        final EditText barcodeId = layout.findViewById(R.id.barcodeid);
+        Button exportButton =  layout.findViewById(R.id.saveBtn);
+        Button closeBtn =  layout.findViewById(R.id.closeBtn);
+        Button camBtn =  layout.findViewById(R.id.camBtn);
 
         camBtn.setOnClickListener(new OnClickListener() {
             @Override
@@ -3571,10 +3472,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         exportButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 inputPlotId = barcodeId.getText().toString();
-                String plot = dt.getPlotFromId(inputPlotId);
-                String range = dt.getRangeFromId(inputPlotId);
                 rangeID = dt.getAllRangeID();
-                moveTo(rangeID, range, plot, true);
+                moveToId(rangeID,true,inputPlotId);
                 goToId.dismiss();
             }
         });
@@ -3775,6 +3674,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     traitLeft.setEnabled(false);
                     traitRight.setEnabled(false);
 
+                    //TODO illegalstateexception
                     mRecorder.start();
                     mRecording = true;
 
@@ -3964,7 +3864,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                     photo.setAdapter(photoAdapter);
                 } else {
-                    ArrayList<Drawable> emptyList = new ArrayList<Drawable>();
+                    ArrayList<Drawable> emptyList = new ArrayList<>();
 
                     photoAdapter = new GalleryImageAdapter(MainActivity.this, emptyList);
 
@@ -4058,8 +3958,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         params2.width = LayoutParams.MATCH_PARENT;
         dialog.getWindow().setAttributes(params2);
 
-        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
-        TextView summaryText = (TextView) layout.findViewById(R.id.field_name);
+        Button closeBtn = layout.findViewById(R.id.closeBtn);
+        TextView summaryText =  layout.findViewById(R.id.field_name);
 
         closeBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -4068,21 +3968,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         });
 
         String[] traitList = dt.getAllTraits();
-        String data = "";
+        StringBuilder data = new StringBuilder();
 
+
+        //TODO this test crashes app
         if (cRange != null) {
             for (String s : prefixTraits) {
-                data += s + ": " + dt.getDropDownRange(s, cRange.plot_id)[0] + "\n";
+                data.append(s).append(": ").append(dt.getDropDownRange(s, cRange.plot_id)[0]).append("\n");
             }
         }
 
         for (String s : traitList) {
             if (newTraits.containsKey(s)) {
-                data += s + ": " + newTraits.get(s).toString() + "\n";
+                data.append(s).append(": ").append(newTraits.get(s).toString()).append("\n");
             }
         }
 
-        summaryText.setText(data);
+        summaryText.setText(data.toString());
 
         dialog.show();
     }
@@ -4439,51 +4341,29 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int action = event.getAction();
+        int keyCode = event.getKeyCode();
         switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                return true;
-
-            case 92:
-                if (rangeID != null && rangeID.length > 0) {
-
-                    paging -= 1;
-
-                    if (paging < 1)
-                        paging = rangeID.length;
-
-                    cRange = dt.getRange(rangeID[paging - 1]);
-
-                    displayRange(cRange);
-
-                    newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                            .clone();
-
-                    initWidgets(true);
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                if(ep.getBoolean(PreferencesActivity.VOLUME_NAVIGATION,false)) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        moveRight();
+                    }
+                    return true;
                 }
-
-                break;
-
-            case 93:
-                if (rangeID != null && rangeID.length > 0) {
-                    paging += 1;
-
-                    if (paging > rangeID.length)
-                        paging = 1;
-
-                    cRange = dt.getRange(rangeID[paging - 1]);
-
-                    displayRange(cRange);
-
-                    newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                            .clone();
-
-                    initWidgets(true);
+                return false;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if(ep.getBoolean(PreferencesActivity.VOLUME_NAVIGATION,false)) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        moveLeft();
+                    }
+                    return true;
                 }
-                break;
+                return false;
+            default:
+                return super.dispatchKeyEvent(event);
         }
-
-        return super.onKeyDown(keyCode, event);
     }
 
     private void updateTraitAllowDuplicates(String parent, String trait, String value) {
@@ -4614,10 +4494,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case 2:
                 if (resultCode == RESULT_OK) {
                     inputPlotId = data.getStringExtra("result");
-                    String plot = dt.getPlotFromId(inputPlotId);
-                    String range = dt.getRangeFromId(inputPlotId);
                     rangeID = dt.getAllRangeID();
-                    moveTo(rangeID, range, plot, true);
+                    moveToId(rangeID,true,inputPlotId);
                 }
                 break;
             case 252:
@@ -4630,10 +4508,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (scanResult != null) {
             inputPlotId = scanResult.getContents();
-            String plot = dt.getPlotFromId(inputPlotId);
-            String range = dt.getRangeFromId(inputPlotId);
             rangeID = dt.getAllRangeID();
-            moveTo(rangeID, range, plot, true);
+            moveToId(rangeID,true,inputPlotId);
             if(goToId!=null) {
                 goToId.dismiss();
             }
@@ -4645,7 +4521,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         boolean found = false;
 
-        String truncated = "";
+        StringBuilder truncated = new StringBuilder();
 
         for (int i = 0; i < v.length(); i++) {
             if (found) {
@@ -4659,9 +4535,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 found = true;
             }
 
-            truncated += v.charAt(i);
+            truncated.append(v.charAt(i));
         }
 
-        return truncated;
+        return truncated.toString();
     }
 }

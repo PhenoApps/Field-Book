@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.support.v7.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -9,7 +10,6 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -41,8 +41,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.io.CSVReader;
 import com.fieldbook.tracker.io.CSVWriter;
+import com.fieldbook.tracker.preferences.PreferencesActivity;
+//import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
@@ -66,8 +69,6 @@ import java.util.Locale;
 public class TraitEditorActivity extends AppCompatActivity {
 
     private static Handler mHandler = new Handler();
-
-    private static String TAG = "Field Book";
 
     public static DragSortListView traitList;
     public static TraitAdapter mAdapter;
@@ -115,6 +116,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         try {
             thisActivity.finish();
         } catch (Exception e) {
+            String TAG = "Field Book";
             Log.e(TAG, "" + e.getMessage());
         }
 
@@ -251,35 +253,22 @@ public class TraitEditorActivity extends AppCompatActivity {
     };
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ep = getSharedPreferences("Settings", 0);
 
-        // Enforce internal language change
-        String local = ep.getString("language", Locale.getDefault().getCountry());
-        String region = ep.getString("region",Locale.getDefault().getLanguage());
-
-        Locale locale2 = new Locale(local, region);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().updateConfiguration(config2, getBaseContext().getResources()
-                .getDisplayMetrics());
-
         setContentView(R.layout.activity_traits);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setTitle(null);
         getSupportActionBar().getThemedContext();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-
-        //Button mainCloseBtn = (Button) findViewById(R.id.closeBtn);
-        //mainCloseBtn.setVisibility(View.GONE);
 
         if (getActionBar() != null) {
             getActionBar().setHomeButtonEnabled(true);
@@ -295,7 +284,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         final String[] enData = new String[]{"Numeric", "Categorical", "Date", "Percent", "Boolean", "Text", "Photo", "Audio", "Counter", "Disease Rating", "Multicat", "Location"};
 
         HashMap visibility = MainActivity.dt.getTraitVisibility();
-        traitList = (DragSortListView) findViewById(R.id.myList);
+        traitList = findViewById(R.id.myList);
 
         if (!traitList.isShown())
             traitList.setVisibility(ListView.VISIBLE);
@@ -342,24 +331,24 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
 
-        trait = (EditText) layout.findViewById(R.id.trait);
-        format = (Spinner) layout.findViewById(R.id.format);
-        def = (EditText) layout.findViewById(R.id.def);
-        minimum = (EditText) layout.findViewById(R.id.minimum);
-        maximum = (EditText) layout.findViewById(R.id.maximum);
-        details = (EditText) layout.findViewById(R.id.details);
-        categories = (EditText) layout.findViewById(R.id.categories);
+        trait = layout.findViewById(R.id.trait);
+        format = layout.findViewById(R.id.format);
+        def = layout.findViewById(R.id.def);
+        minimum = layout.findViewById(R.id.minimum);
+        maximum = layout.findViewById(R.id.maximum);
+        details = layout.findViewById(R.id.details);
+        categories = layout.findViewById(R.id.categories);
 
-        defBox = (LinearLayout) layout.findViewById(R.id.defbox);
-        minBox = (LinearLayout) layout.findViewById(R.id.minbox);
-        maxBox = (LinearLayout) layout.findViewById(R.id.maxbox);
-        categoryBox = (LinearLayout) layout.findViewById(R.id.categorybox);
+        defBox = layout.findViewById(R.id.defbox);
+        minBox = layout.findViewById(R.id.minbox);
+        maxBox = layout.findViewById(R.id.maxbox);
+        categoryBox = layout.findViewById(R.id.categorybox);
 
-        bool = (ToggleButton) layout.findViewById(R.id.boolBtn);
-        defTv = (TextView) layout.findViewById(R.id.defTv);
+        bool = layout.findViewById(R.id.boolBtn);
+        defTv = layout.findViewById(R.id.defTv);
 
-        Button saveBtn = (Button) layout.findViewById(R.id.saveBtn);
-        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+        Button saveBtn = layout.findViewById(R.id.saveBtn);
+        Button closeBtn = layout.findViewById(R.id.closeBtn);
 
         trait.isFocused();
 
@@ -565,7 +554,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.newTrait);
+        FloatingActionButton fab = findViewById(R.id.newTrait);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -897,7 +886,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 switch (which) {
                     case 0:
                         if(ep.getBoolean("TraitsExported",false)) {
-                            showImportDialog();
+                            showFileDialog();
                         } else {
                             checkTraitExportDialog();
                         }
@@ -910,9 +899,9 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, sortOptions);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, sortOptions);
         myList.setAdapter(adapter);
-        Button sortCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
+        Button sortCloseBtn = layout.findViewById(R.id.closeBtn);
 
         sortCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -922,11 +911,69 @@ public class TraitEditorActivity extends AppCompatActivity {
         importExport.show();
     }
 
+    private void showFileDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.dialog_list, null);
+
+        builder.setTitle(R.string.importfields)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog importDialog = builder.create();
+
+        android.view.WindowManager.LayoutParams params = importDialog.getWindow().getAttributes();
+        params.width = LayoutParams.MATCH_PARENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        importDialog.getWindow().setAttributes(params);
+
+        ListView myList = layout.findViewById(R.id.myList);
+
+        String[] importArray = new String[2];
+        importArray[0] = getString(R.string.importlocal);
+        importArray[1] = getString(R.string.importdropbox);
+
+        //TODO add google drive (requires Google Play Services)
+        //importArray[2] = getString(R.string.importgoogle);
+
+        myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                Intent intent = new Intent();
+                switch (which) {
+                    case 0:
+                        intent.setClassName(thisActivity,
+                                FileExploreActivity.class.getName());
+                        intent.putExtra("path", Constants.TRAITPATH);
+                        intent.putExtra("include", new String[]{"trt"});
+                        intent.putExtra("title", getString(R.string.import_title));
+                        startActivityForResult(intent, 1);
+                        break;
+                    case 1:
+                        //DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
+                        //mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
+                        break;
+                }
+                importDialog.dismiss();
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, importArray);
+        myList.setAdapter(adapter);
+        Button importCloseBtn = layout.findViewById(R.id.closeBtn);
+        importCloseBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                importDialog.dismiss();
+            }
+        });
+        importDialog.show();
+    }
+
     private void checkTraitExportDialog() {
         String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
-            showImportDialog();
+            showFileDialog();
             return;
         }
 
@@ -944,7 +991,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
-                showImportDialog();
+                showFileDialog();
                 dialog.dismiss();
             }
 
@@ -978,7 +1025,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         params.height = LayoutParams.WRAP_CONTENT;
         sortDialog.getWindow().setAttributes(params);
 
-        ListView myList = (ListView) layout.findViewById(R.id.myList);
+        ListView myList = layout.findViewById(R.id.myList);
 
         String[] sortOptions = new String[3];
 
@@ -1003,9 +1050,9 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, sortOptions);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, sortOptions);
         myList.setAdapter(adapter);
-        Button sortCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
+        Button sortCloseBtn = layout.findViewById(R.id.closeBtn);
 
         sortCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -1072,7 +1119,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         langParams.width = LayoutParams.MATCH_PARENT;
         exportDialog.getWindow().setAttributes(langParams);
 
-        Button closeBtn = (Button) layout.findViewById(R.id.closeBtn);
+        Button closeBtn = layout.findViewById(R.id.closeBtn);
 
         closeBtn.setOnClickListener(new OnClickListener() {
 
@@ -1081,7 +1128,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
 
-        final EditText exportFile = (EditText) layout.findViewById(R.id.fileName);
+        final EditText exportFile = layout.findViewById(R.id.fileName);
 
         // As the export filename uses the import file name as well,
         // we parse it out here
@@ -1167,16 +1214,6 @@ public class TraitEditorActivity extends AppCompatActivity {
     public void onBackPressed() {
         MainActivity.reloadData = true;
         finish();
-    }
-
-    public void showImportDialog() {
-        Intent intent = new Intent();
-        intent.setClassName(thisActivity,
-                FileExploreActivity.class.getName());
-        intent.putExtra("path", Constants.TRAITPATH);
-        intent.putExtra("include", new String[]{"trt"});
-        intent.putExtra("title", getString(R.string.import_title));
-        startActivityForResult(intent, 1);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1316,7 +1353,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
 
-        if (!ep.getBoolean("DisableShare", false)) {
+        if (!ep.getBoolean(PreferencesActivity.DISABLE_SHARE, false)) {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");

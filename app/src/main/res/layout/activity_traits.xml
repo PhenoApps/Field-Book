@@ -33,7 +33,7 @@
             dslv:drag_enabled="true"
             dslv:drag_handle_id="@+id/drag_handle"
             dslv:drag_scroll_start="0.33"
-            dslv:drag_start_mode="onMove"
+            dslv:drag_start_mode="onLongPress"
             dslv:float_alpha="0.6"
             dslv:remove_enabled="false"
             dslv:remove_mode="clickRemove"
