@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,7 +16,10 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.media.ExifInterface;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -28,6 +32,7 @@ import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.design.widget.NavigationView;
+import android.support.media.ExifInterface;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -74,15 +79,16 @@ import com.fieldbook.tracker.barcodes.IntentIntegrator;
 import com.fieldbook.tracker.barcodes.IntentResult;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
 import com.fieldbook.tracker.layoutConfig.SelectorLayoutConfigurator;
+import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.search.*;
-import com.fieldbook.tracker.traits.*;
-import com.fieldbook.tracker.tutorial.*;
+import com.fieldbook.tracker.search.SearchActivity;
+import com.fieldbook.tracker.traits.TraitEditorActivity;
+import com.fieldbook.tracker.traits.TraitObject;
+import com.fieldbook.tracker.tutorial.TutorialMainActivity;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.ExpandableHeightGridView;
 import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.GalleryImageAdapter;
-import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.File;
@@ -1697,7 +1703,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         createDir(Constants.BACKUPPATH);
         createDir(Constants.UPDATEPATH);
         createDir(Constants.ARCHIVEPATH);
-        createDir(Constants.TEMPLATEPATH);
+//        createDir(Constants.TEMPLATEPATH);
 
         scanSampleFiles();
     }
@@ -3070,16 +3076,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             } else {
                 systemMenu.findItem(R.id.barcodeScan).setVisible(false);
             }
-<<<<<<< HEAD
+
             if (ep.getBoolean("PrintLabel", false)) {
                 systemMenu.findItem(R.id.printLabel).setVisible(true);
             } else {
                 systemMenu.findItem(R.id.printLabel).setVisible(false);
             }
-            if (ep.getBoolean("DataGrid", false)) {
-=======
+
             if (ep.getBoolean(PreferencesActivity.DATAGRID_SETTING, false)) {
->>>>>>> b37d7ed08a1137c3557e41959c63f46da14648c1
                 systemMenu.findItem(R.id.datagrid).setVisible(true);
             } else {
                 systemMenu.findItem(R.id.datagrid).setVisible(false);

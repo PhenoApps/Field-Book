@@ -1,8 +1,5 @@
 package com.fieldbook.tracker;
 
-import android.app.Activity;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,6 +15,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
@@ -28,7 +27,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -38,16 +36,15 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
+import com.fieldbook.tracker.io.CSVWriter;
+import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.TraitEditorActivity;
 import com.fieldbook.tracker.tutorial.TutorialSettingsActivity;
 import com.fieldbook.tracker.utilities.Constants;
@@ -846,374 +843,6 @@ public class ConfigActivity extends AppCompatActivity {
 
     public void makeToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    private void showAdvancedDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_advanced_settings, null);
-
-        builder.setTitle(R.string.advanced)
-                .setCancelable(true)
-                .setView(layout);
-
-        advancedDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params = advancedDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        advancedDialog.getWindow().setAttributes(params);
-
-        CheckBox tips = (CheckBox) layout.findViewById(R.id.tipsCheckbox);
-        CheckBox cycle = (CheckBox) layout.findViewById(R.id.cycleTraitsCheckbox);
-        CheckBox ignoreEntries = (CheckBox) layout.findViewById(R.id.ignoreExistingCheckbox);
-        CheckBox useDay = (CheckBox) layout.findViewById(R.id.useDayCheckbox);
-        CheckBox rangeSound = (CheckBox) layout.findViewById(R.id.rangeSoundCheckbox);
-        CheckBox jumpToPlot = (CheckBox) layout.findViewById(R.id.jumpToPlotCheckbox);
-        CheckBox barcodeScan = (CheckBox) layout.findViewById(R.id.barcodeScanCheckbox);
-        CheckBox printLabel = (CheckBox) layout.findViewById(R.id.printLabelCheckbox);
-        CheckBox nextEmptyPlot = (CheckBox) layout.findViewById(R.id.nextEmptyPlotCheckbox);
-        CheckBox quickGoTo = (CheckBox) layout.findViewById(R.id.quickGoToCheckbox);
-        CheckBox disableShare = (CheckBox) layout.findViewById(R.id.disableShareCheckbox);
-        CheckBox disableEntryNavLeft = (CheckBox) layout.findViewById(R.id.disableEntryNavLeftCheckbox);
-        CheckBox disableEntryNavRight = (CheckBox) layout.findViewById(R.id.disableEntryNavRightCheckbox);
-        CheckBox dataGrid = (CheckBox) layout.findViewById(R.id.dataGridCheckbox);
-
-        Button advCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
-
-        advCloseBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                advancedDialog.dismiss();
-            }
-        });
-
-        // Set default values for advanced settings
-        tips.setChecked(ep.getBoolean("Tips", false));
-        cycle.setChecked(ep.getBoolean("CycleTraits", false));
-        ignoreEntries.setChecked(ep.getBoolean("IgnoreExisting", false));
-        useDay.setChecked(ep.getBoolean("UseDay", false));
-        rangeSound.setChecked(ep.getBoolean("RangeSound", false));
-        jumpToPlot.setChecked(ep.getBoolean("JumpToPlot", false));
-        barcodeScan.setChecked(ep.getBoolean("BarcodeScan", false));
-        nextEmptyPlot.setChecked(ep.getBoolean("NextEmptyPlot", false));
-        quickGoTo.setChecked(ep.getBoolean("QuickGoTo", false));
-        disableShare.setChecked(ep.getBoolean("DisableShare", false));
-        disableEntryNavLeft.setChecked(ep.getBoolean("DisableEntryNavLeft", false));
-        disableEntryNavRight.setChecked(ep.getBoolean("DisableEntryNavRight", false));
-        dataGrid.setChecked(ep.getBoolean("DataGrid", false));
-
-        tips.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("Tips", checked);
-                e.apply();
-                invalidateOptionsMenu();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        cycle.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("CycleTraits", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        ignoreEntries.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("IgnoreExisting", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        useDay.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("UseDay", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        rangeSound.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("RangeSound", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        jumpToPlot.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("JumpToPlot", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        nextEmptyPlot.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0, boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("NextEmptyPlot", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        quickGoTo.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("QuickGoTo", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        disableShare.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("DisableShare", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        disableEntryNavLeft.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("DisableEntryNavLeft", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        disableEntryNavRight.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("DisableEntryNavRight", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        barcodeScan.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("BarcodeScan", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        printLabel.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("PrintLabel", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        dataGrid.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            public void onCheckedChanged(CompoundButton arg0,
-                                         boolean checked) {
-                Editor e = ep.edit();
-                e.putBoolean("DataGrid", checked);
-                e.apply();
-                MainActivity.reloadData = true;
-            }
-        });
-
-        advancedDialog.show();
-    }
-
-    private void showLanguageDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list, null);
-
-        builder.setTitle(R.string.language)
-                .setCancelable(true)
-                .setView(layout);
-
-        final AlertDialog languageDialog = builder.create();
-
-        final float scale = this.getResources().getDisplayMetrics().density;
-        int pixels = (int) (500 * scale + 0.5f);
-
-        android.view.WindowManager.LayoutParams params = languageDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        languageDialog.getWindow().setAttributes(params);
-
-        ListView myList = (ListView) layout
-                .findViewById(R.id.myList);
-
-        ViewGroup.LayoutParams params2 = myList.getLayoutParams();
-        params2.height = pixels;
-        myList.setLayoutParams(params2);
-
-        region = "";
-        String[] langArray = new String[14];
-
-        langArray[0] = getString(R.string.english);
-        langArray[1] = getString(R.string.spanish);
-        langArray[2] = getString(R.string.french);
-        langArray[3] = getString(R.string.hindi);
-        langArray[4] = getString(R.string.german);
-        langArray[5] = getString(R.string.japanese);
-        langArray[6] = getString(R.string.arabic);
-        langArray[7] = getString(R.string.chinese);
-        langArray[8] = getString(R.string.portuguesebr);
-        langArray[9] = getString(R.string.russian);
-        langArray[10] = getString(R.string.oromo);
-        langArray[11] = getString(R.string.amharic);
-        langArray[12] = getString(R.string.bengali);
-        langArray[13] = getString(R.string.italian);
-
-        Integer image_id[] = {R.drawable.locale_ic_us, R.drawable.locale_ic_mx, R.drawable.locale_ic_fr, R.drawable.locale_ic_in,
-                R.drawable.locale_ic_de, R.drawable.locale_ic_jp, R.drawable.locale_ic_ar, R.drawable.locale_ic_cn, R.drawable.locale_ic_br,
-                R.drawable.locale_ic_ru, R.drawable.locale_ic_et, R.drawable.locale_ic_et, R.drawable.locale_ic_bn, R.drawable.locale_ic_it};
-
-        myList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                switch (which) {
-                    case 0:
-                        local = "en";
-                        break;
-                    case 1:
-                        local = "es";
-                        break;
-                    case 2:
-                        local = "fr";
-                        break;
-                    case 3:
-                        local = "hi";
-                        break;
-                    case 4:
-                        local = "de";
-                        break;
-                    case 5:
-                        local = "ja";
-                        break;
-                    case 6:
-                        local = "ar";
-                        break;
-                    case 7:
-                        local = "zh";
-                        region = "CN";
-                        break;
-                    case 8:
-                        local = "pt";
-                        region = "BR";
-                        break;
-                    case 9:
-                        local = "ru";
-                        break;
-                    case 10:
-                        local = "om";
-                        region = "ET";
-                        break;
-                    case 11:
-                        local = "am";
-                        break;
-                    case 12:
-                        local = "bn";
-                        break;
-                    case 13:
-                        local = "it";
-                        break;
-                }
-                Editor ed = ep.edit();
-                ed.putString("language", local);
-                ed.putString("region", region);
-                ed.apply();
-
-                updateLanguage(local, region);
-                invalidateOptionsMenu();
-                loadScreen();
-
-                languageChange = true;
-
-                languageDialog.dismiss();
-            }
-        });
-
-        CustomListAdapter adapterImg = new CustomListAdapter(this, image_id, langArray);
-        myList.setAdapter(adapterImg);
-
-        Button langCloseBtn = (Button) layout.findViewById(R.id.closeBtn);
-
-        langCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                languageDialog.dismiss();
-            }
-        });
-
-        languageDialog.show();
-    }
-
-    private void updateLanguage(String loc, String reg) {
-        Locale locale2 = new Locale(loc, reg);
-        Locale.setDefault(locale2);
-        Configuration config2 = new Configuration();
-        config2.locale = locale2;
-        getBaseContext().getResources().
-                updateConfiguration(config2, getBaseContext().getResources()
-                        .getDisplayMetrics());
-    }
-
-    private class CustomListAdapter extends ArrayAdapter<String> {
-        String[] color_names;
-        Integer[] image_id;
-        Context context;
-
-        CustomListAdapter(Activity context, Integer[] image_id, String[] text) {
-            super(context, R.layout.listitem_language, text);
-            this.color_names = text;
-            this.image_id = image_id;
-            this.context = context;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View single_row = inflater.inflate(R.layout.listitem_language, null, true);
-            TextView textView = (TextView) single_row.findViewById(R.id.txt);
-            ImageView imageView = (ImageView) single_row.findViewById(R.id.img);
-            textView.setText(color_names[position]);
-            imageView.setImageResource(image_id[position]);
-            return single_row;
-        }
     }
 
     private String[] prepareSetup() {
