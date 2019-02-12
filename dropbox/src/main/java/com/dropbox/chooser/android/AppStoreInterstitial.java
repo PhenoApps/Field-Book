@@ -32,7 +32,7 @@ class AppStoreInterstitial {
     public static void showInterstitial(ActivityLike thing) {
         if (thing.getSupportFragmentManager() != null) {
             SupportFragment frag = SupportFragment.newInstance();
-            android.support.v4.app.FragmentManager fm = thing.getSupportFragmentManager();
+            androidx.fragment.app.FragmentManager fm = thing.getSupportFragmentManager();
             frag.show(fm, DIALOG_TAG);
         } else {
             NativeFragment frag = NativeFragment.newInstance();
@@ -81,7 +81,7 @@ class AppStoreInterstitial {
         }
     }
 
-    public static class SupportFragment extends android.support.v4.app.DialogFragment {
+    public static class SupportFragment extends androidx.fragment.app.DialogFragment {
         public static SupportFragment newInstance() {
             return new SupportFragment();
         }

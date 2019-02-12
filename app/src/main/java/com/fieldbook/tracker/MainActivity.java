@@ -29,12 +29,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
-import android.support.design.widget.NavigationView;
+import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
-import androidx.core.widget.DrawerLayout;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -274,7 +274,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // display intro tutorial
         if(ep.getBoolean("FirstRun",true)) {
-            //launchIntro();
             ep.edit().putBoolean("FirstRun",false).apply();
         }
 
@@ -295,23 +294,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             startActivity(intent);
             updateAssets();
         }
-    }
-
-    private void launchIntro() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                //  Launch app intro
-                final Intent i = new Intent(MainActivity.this, IntroActivity.class);
-
-                runOnUiThread(new Runnable() {
-                    @Override public void run() {
-                        startActivity(i);
-                    }
-                });
-            }
-        }).start();
     }
 
     private void loadNavUI() {
@@ -3319,7 +3301,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_summary, null);
 
-        builder.setTitle(R.string.mapsummary)
+        builder.setTitle(R.string.toolbar_summary)
                 .setCancelable(true)
                 .setView(layout);
 

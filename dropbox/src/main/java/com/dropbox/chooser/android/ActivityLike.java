@@ -19,5 +19,5 @@ interface ActivityLike {
     /** Might be null */
     FragmentManager getFragmentManager();
     /** Might be null */
-    android.support.v4.app.FragmentManager getSupportFragmentManager();
+    androidx.fragment.app.FragmentManager getSupportFragmentManager();
 }
