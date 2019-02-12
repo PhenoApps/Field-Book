@@ -39,7 +39,7 @@
         android:id="@+id/summary"
         android:icon="@drawable/ic_tb_details"
         android:showAsAction="always"
-        android:title="@string/mapsummary" />"
+        android:title="@string/toolbar_summary" />"
     <item
         android:id="@+id/lockData"
         android:icon="@drawable/ic_tb_lock"

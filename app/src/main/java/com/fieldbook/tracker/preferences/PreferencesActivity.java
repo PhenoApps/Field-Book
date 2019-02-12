@@ -1,7 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.R;
@@ -31,7 +31,7 @@ public class PreferencesActivity extends AppCompatActivity {
     public static String DISABLE_ENTRY_ARROW_LEFT = "DisableEntryNavLeft";
     public static String DISABLE_ENTRY_ARROW_RIGHT = "DisableEntryNavRight";
     public static String CYCLING_TRAITS_ADVANCES = "CycleTraits";
-    public static String HIDE_ENTRIES_NO_DATA = "IgnoreExisting";
+    public static String HIDE_ENTRIES_WITH_DATA = "IgnoreExisting";
     public static String USE_DAY_OF_YEAR = "UseDay";
     public static String DISABLE_SHARE = "DisableShare";
 

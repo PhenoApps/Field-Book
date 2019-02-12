@@ -1,7 +1,7 @@
 package com.fieldbook.tracker.fields;
 
 
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -96,6 +96,8 @@ class FieldAdapter extends BaseAdapter {
                 ed.putString("ImportFirstName", getItem(position).primary_id);
                 ed.putString("ImportSecondName", getItem(position).secondary_id);
                 ed.putBoolean("ImportFieldFinished", true);
+                ed.putBoolean("FieldSelected",true);
+                ed.putString("lastplot", null);
                 ed.putString("DROP1", null);
                 ed.putString("DROP2", null);
                 ed.putString("DROP3", null);
@@ -139,6 +141,8 @@ class FieldAdapter extends BaseAdapter {
                 ed.putString("ImportFirstName", getItem(position).primary_id);
                 ed.putString("ImportSecondName", getItem(position).secondary_id);
                 ed.putBoolean("ImportFieldFinished", true);
+                ed.putBoolean("FieldSelected",true);
+                ed.putString("lastplot", null);
                 ed.putString("DROP1", null);
                 ed.putString("DROP2", null);
                 ed.putString("DROP3", null);
@@ -147,7 +151,6 @@ class FieldAdapter extends BaseAdapter {
                 MainActivity.dt.switchField(getItem(position).exp_id);
                 MainActivity.reloadData = true;
                 notifyDataSetChanged();
-
             }
         });
 
@@ -184,6 +187,8 @@ class FieldAdapter extends BaseAdapter {
                                         SharedPreferences.Editor ed = ep.edit();
                                         ed.putString("FieldFile", null);
                                         ed.putBoolean("ImportFieldFinished", false);
+                                        ed.putBoolean("FieldSelected",false);
+                                        ed.putString("lastplot", null);
                                         ed.putString("ImportID", null);
                                         ed.putString("ImportUniqueName", null);
                                         ed.putString("ImportFirstName", null);
@@ -225,5 +230,4 @@ class FieldAdapter extends BaseAdapter {
 
         return convertView;
     }
-
 }

@@ -25,6 +25,32 @@ public class Utils {
         return v;
     }
 
+    // truncate string
+    public static String truncateDecimalString(String v, int digits) {
+        int count = 0;
+
+        boolean found = false;
+
+        StringBuilder truncated = new StringBuilder();
+
+        for (int i = 0; i < v.length(); i++) {
+            if (found) {
+                count += 1;
+
+                if (count == digits)
+                    break;
+            }
+
+            if (v.charAt(i) == '.') {
+                found = true;
+            }
+
+            truncated.append(v.charAt(i));
+        }
+
+        return truncated.toString();
+    }
+
     //TODO language
 
 

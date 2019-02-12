@@ -20,11 +20,17 @@
         <com.fieldbook.tracker.preferences.IntEditTextPreference
             android:icon="@drawable/ic_adv_infobar_count"
             android:key="INFOBAR_NUMBER"
-            android:summary="@string/infobar_number_desc"
-            android:title="@string/infobar_number"
-            android:numeric="integer"
             android:maxLength="2"
-            />
+            android:numeric="integer"
+            android:summary="@string/infobar_number_desc"
+            android:title="@string/infobar_number" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_quick_goto"
+            android:key="QuickGoTo"
+            android:summary="@string/quickgoto_desc"
+            android:title="@string/quickgoto" />
 
     </PreferenceCategory>
 
@@ -38,8 +44,8 @@
             android:key="RangeSound"
             android:summary="@string/rangechime_desc"
             android:title="@string/rangechime" />
-    </PreferenceCategory>
 
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:key="pref_key_ux_settings"
@@ -47,10 +53,20 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:icon="@drawable/ic_adv_primary_order_sound"
+            android:icon="@drawable/ic_remap_volume_buttons"
             android:key="VOLUME_NAVIGATION"
-            android:title="@string/navigate_volume_buttons"
-            android:summary="@string/navigate_volume_buttons_desc"/>
+            android:summary="@string/navigate_volume_buttons_desc"
+            android:title="@string/navigate_volume_buttons" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/pref_return_character"
+            android:entryValues="@array/pref_return_character_values"
+            android:icon="@drawable/ic_return_character"
+            android:key="RETURN_CHARACTER"
+            android:summary="%s"
+            android:title="@string/return_character" />
+        <!-- todo add measurement as an option-->
     </PreferenceCategory>
 
 
@@ -64,13 +80,6 @@
             android:key="Tips"
             android:summary="@string/tips_desc"
             android:title="@string/tutorial" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_quick_goto"
-            android:key="QuickGoTo"
-            android:summary="@string/quickgoto_desc"
-            android:title="@string/quickgoto" />
 
         <CheckBoxPreference
             android:defaultValue="false"

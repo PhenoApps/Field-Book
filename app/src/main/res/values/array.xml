@@ -46,6 +46,9 @@
         <item>both</item>
     </string-array>
 
+    <string-array name="pref_toolbar_customize_default">
+    </string-array>
+
     <string-array name="pref_toolbar_customize_title">
         <item>@string/toolbar_search</item>
         <item>@string/toolbar_resources</item>
@@ -54,12 +57,22 @@
     </string-array>
 
     <string-array name="pref_toolbar_customize_key">
-        <item></item>
+        <item>@string/toolbar_search</item>
         <item>@string/toolbar_resources</item>
         <item>@string/toolbar_summary</item>
         <item>@string/toolbar_lock</item>
     </string-array>
 
-    <string-array name="pref_toolbar_customize_default">
+    <string-array name="pref_return_character">
+        <item>@string/return_next_plot</item>
+        <item>@string/return_next_trait</item>
+        <item>@string/return_do_nothing</item>
     </string-array>
+
+    <string-array name="pref_return_character_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
 </resources>

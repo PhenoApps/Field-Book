@@ -11,8 +11,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,7 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -262,8 +262,8 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     private void fieldCheck() {
-        if (ep.getString("FieldFile", null) == null || !ep.getBoolean("ImportFieldFinished", false)) {
-            makeToast(getString(R.string.choose_new_default));
+        if (!ep.getBoolean("FieldSelected", true)) {
+            makeToast(getString(R.string.choose_new_field));
         } else {
             MainActivity.reloadData = true;
             finish();
@@ -343,6 +343,7 @@ public class FieldEditorActivity extends AppCompatActivity {
             SharedPreferences.Editor ed = ep.edit();
             ed.putString("FieldFile", null);
             ed.putBoolean("ImportFieldFinished", false);
+            ed.putBoolean("FieldSelected",false);
             ed.apply();
             return;
         }
@@ -651,6 +652,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 ed.putString("ImportFirstName", primary.getSelectedItem().toString());
                 ed.putString("ImportSecondName", secondary.getSelectedItem().toString());
                 ed.putBoolean("ImportFieldFinished", true);
+                ed.putBoolean("FieldSelected",true);
                 ed.apply();
 
                 MainActivity.reloadData = true;

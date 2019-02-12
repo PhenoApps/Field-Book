@@ -1,9 +1,11 @@
 package com.fieldbook.tracker.layoutConfig;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,12 +18,6 @@ import android.widget.TextView;
 
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
-
-import org.w3c.dom.Text;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLayoutConfigurator.ViewHolder>{
 
@@ -66,8 +62,8 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
 
-        Spinner spinner = (Spinner) holder.mTextView.findViewById(R.id.selectorSpinner);
-        TextView text = (TextView) holder.mTextView.findViewById(R.id.selectorText);
+        Spinner spinner = holder.mTextView.findViewById(R.id.selectorSpinner);
+        TextView text = holder.mTextView.findViewById(R.id.selectorText);
         configureSpinner(spinner, text, position);
         configureText(text);
     }
@@ -86,7 +82,7 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
 
         final String[] prefixTraits = dataHelper.getRangeColumnNames();
 
-        ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<String>(this.context, R.layout.custom_spinnerlayout, prefixTraits);
+        ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(this.context, R.layout.custom_spinnerlayout, prefixTraits);
         spinner.setAdapter(prefixArrayAdapter);
 
         int spinnerPosition = prefixArrayAdapter.getPosition(getSharedPref().getString("DROP" + position, prefixTraits[0]));
@@ -119,6 +115,7 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
         });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void configureText(final TextView text){
         text.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -139,10 +136,10 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        public LinearLayout mTextView;
-        public ViewHolder(LinearLayout v) {
+        LinearLayout mTextView;
+        ViewHolder(LinearLayout v) {
             super(v);
             mTextView = v;
         }
