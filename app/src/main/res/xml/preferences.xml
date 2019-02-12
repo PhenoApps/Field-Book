@@ -6,7 +6,7 @@
         android:title="@string/preferences_ui">
 
         <Preference
-            android:icon="@drawable/ic_nav_draweer_translate"
+            android:icon="@drawable/ic_nav_drawer_translate"
             android:key="language"
             android:summary="@string/language_desc"
             android:title="@string/language">

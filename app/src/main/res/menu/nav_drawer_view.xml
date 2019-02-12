@@ -33,7 +33,7 @@
 
         <item
             android:id="@+id/nav_language"
-            android:icon="@drawable/ic_nav_draweer_translate"
+            android:icon="@drawable/ic_nav_drawer_translate"
             android:title="@string/language" />
 
     </group>
