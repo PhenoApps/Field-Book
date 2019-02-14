@@ -2,6 +2,8 @@ package com.fieldbook.tracker;
 
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AlertDialog;
+
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,6 +21,8 @@ import android.os.Handler;
 import android.provider.Settings;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -232,6 +236,7 @@ public class ConfigActivity extends AppCompatActivity {
                         }
 
                         showSaveDialog();
+
                         break;
                     case 4:
                         intent.setClassName(ConfigActivity.this,
@@ -239,8 +244,6 @@ public class ConfigActivity extends AppCompatActivity {
                         startActivity(intent);
                         break;
                     case 5:
-                        //showLanguageDialog();
-
                         Intent i = new Intent(android.provider.Settings.ACTION_LOCALE_SETTINGS);
                         startActivity(i);
                         break;
