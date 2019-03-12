@@ -2,7 +2,9 @@ package com.fieldbook.tracker.traits;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+
 import androidx.appcompat.app.AlertDialog;
+
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -15,8 +17,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+
+import com.fieldbook.tracker.ConfigActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import androidx.appcompat.widget.Toolbar;
+
 import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
@@ -31,7 +37,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -146,7 +154,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
             Log.w("ReorderStart", "start");
 
-            if(from!=to) {
+            if (from != to) {
                 if (to > from) {
                     Log.w("Downward", "drag");
 
@@ -158,14 +166,14 @@ public class TraitEditorActivity extends AppCompatActivity {
                         String currentID = mAdapter.getItem(to).id;
                         String currentPosition = mAdapter.getItem(to).realPosition;
 
-                        MainActivity.dt.updateTraitPosition(currentID, currentPosition);
-                        MainActivity.dt.updateTraitPosition(prevID, String.valueOf(Integer.parseInt(currentPosition) + 1));
+                        ConfigActivity.dt.updateTraitPosition(currentID, currentPosition);
+                        ConfigActivity.dt.updateTraitPosition(prevID, String.valueOf(Integer.parseInt(currentPosition) + 1));
 
                         // Push everything below down by 1
                         int newCount = 2;
 
                         for (int i = to + 1; i < mAdapter.getCount(); i++) {
-                            MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
+                            ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
                             newCount++;
                         }
 
@@ -191,13 +199,13 @@ public class TraitEditorActivity extends AppCompatActivity {
                             int newCount = Integer.parseInt(currentPosition) - to;
 
                             for (int i = 0; i < to; i++) {
-                                MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(newCount));
+                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(newCount));
                                 newCount++;
                             }
 
                             Log.w("Reorder", "current");
 
-                            MainActivity.dt.updateTraitPosition(prevID, currentPosition);
+                            ConfigActivity.dt.updateTraitPosition(prevID, currentPosition);
 
                         } else {
                             // We hit a -1, might as well do a full zero based reorder
@@ -206,12 +214,12 @@ public class TraitEditorActivity extends AppCompatActivity {
                             Log.w("Reorder", "top2");
 
                             for (int i = 0; i < to; i++) {
-                                MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(i));
+                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(i));
                             }
 
                             Log.w("Reorder", "current");
 
-                            MainActivity.dt.updateTraitPosition(prevID, String.valueOf(to));
+                            ConfigActivity.dt.updateTraitPosition(prevID, String.valueOf(to));
 
                             // Reset current position as well, otherwise we don't know where it points to
                             currentPosition = String.valueOf(to);
@@ -226,7 +234,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                         for (int i = to; i < mAdapter.getCount(); i++) {
                             if (i != from) {
-                                MainActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
+                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
                                 newCount++;
                             }
                         }
@@ -242,11 +250,9 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
     };
 
-    private static DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener()
-    {
+    private static DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
         @Override
-        public void remove(int which)
-        {
+        public void remove(int which) {
             mAdapter.list.remove(which);
         }
     };
@@ -282,13 +288,13 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         final String[] enData = new String[]{"Numeric", "Categorical", "Date", "Percent", "Boolean", "Text", "Photo", "Audio", "Counter", "Disease Rating", "Multicat", "Location"};
 
-        HashMap visibility = MainActivity.dt.getTraitVisibility();
+        HashMap visibility = ConfigActivity.dt.getTraitVisibility();
         traitList = findViewById(R.id.myList);
 
         if (!traitList.isShown())
             traitList.setVisibility(ListView.VISIBLE);
 
-        mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
+        mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility);
 
         traitList.setAdapter(mAdapter);
         traitList.setDropListener(onDrop);
@@ -461,7 +467,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 }
 
                 // Disallow duplicate traits
-                boolean exists = MainActivity.dt.hasTrait(trait.getText().toString().trim());
+                boolean exists = ConfigActivity.dt.hasTrait(trait.getText().toString().trim());
 
                 if (!edit) {
                     if (exists) {
@@ -520,7 +526,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 }
 
-                int pos = MainActivity.dt.getMaxPositionFromTraits() + 1;
+                int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
 
                 if (format.getSelectedItemPosition() == 4) {
                     if (bool.isChecked())
@@ -530,13 +536,13 @@ public class TraitEditorActivity extends AppCompatActivity {
                 }
 
                 if (!edit)
-                    MainActivity.dt.insertTraits(trait.getText().toString().trim(),
+                    ConfigActivity.dt.insertTraits(trait.getText().toString().trim(),
                             enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
                             minimum.getText().toString(), maximum.getText().toString(),
                             details.getText().toString(), categories.getText().toString(),
                             "true", String.valueOf(pos));
                 else
-                    MainActivity.dt.editTraits(currentId, trait.getText().toString().trim(),
+                    ConfigActivity.dt.editTraits(currentId, trait.getText().toString().trim(),
                             enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
                             minimum.getText().toString(), maximum.getText().toString(),
                             details.getText().toString(), categories.getText().toString());
@@ -759,12 +765,12 @@ public class TraitEditorActivity extends AppCompatActivity {
     public static void loadData() {
         try {
 
-            HashMap visibility = MainActivity.dt.getTraitVisibility();
+            HashMap visibility = ConfigActivity.dt.getTraitVisibility();
 
             if (!traitList.isShown())
                 traitList.setVisibility(ListView.VISIBLE);
 
-            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, MainActivity.dt.getAllTraitObjects(), traitListener, visibility);
+            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility);
 
             traitList.setAdapter(mAdapter);
             traitList.setDropListener(onDrop);
@@ -835,7 +841,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     private void changeAllVisibility() {
         Boolean globalVis = ep.getBoolean("allTraitsVisible", false);
-        String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
+        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
             makeToast(getString(R.string.createtraitserror));
@@ -843,7 +849,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
 
         for (String allTrait : allTraits) {
-            MainActivity.dt.updateTraitVisibility(allTrait, globalVis);
+            ConfigActivity.dt.updateTraitVisibility(allTrait, globalVis);
             Log.d("Field", allTrait);
         }
 
@@ -884,7 +890,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 switch (which) {
                     case 0:
-                        if(ep.getBoolean("TraitsExported",false)) {
+                        if (ep.getBoolean("TraitsExported", false)) {
                             showFileDialog();
                         } else {
                             checkTraitExportDialog();
@@ -969,7 +975,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void checkTraitExportDialog() {
-        String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
+        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
             showFileDialog();
@@ -1001,7 +1007,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void sortDialog() {
-        String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
+        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
             makeToast(getString(R.string.createtraitserror));
@@ -1062,7 +1068,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void sortTraitList(String colName) {
-        String[] sortList = MainActivity.dt.getTraitColumnData(colName);
+        String[] sortList = ConfigActivity.dt.getTraitColumnData(colName);
 
         ArrayIndexComparator comparator = new ArrayIndexComparator(sortList);
         Integer[] indexes = comparator.createIndexArray();
@@ -1073,7 +1079,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
 
         for (int j = 0; j < indexes.length; j++) {
-            MainActivity.dt.writeNewPosition(colName, sortList[j], Integer.toString(indexes[j]));
+            ConfigActivity.dt.writeNewPosition(colName, sortList[j], Integer.toString(indexes[j]));
             Log.e("TRAIT", sortList[j] + " " + indexes[j].toString());
         }
 
@@ -1157,7 +1163,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void showDeleteTraitDialog() {
-        String[] allTraits = MainActivity.dt.getTraitColumnData("trait");
+        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
             makeToast(getString(R.string.createtraitserror));
@@ -1171,7 +1177,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                MainActivity.dt.deleteTable(DataHelper.TRAITS);
+                ConfigActivity.dt.deleteTable(DataHelper.TRAITS);
                 loadData();
                 dialog.dismiss();
             }
@@ -1233,8 +1239,8 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         try {
             FileWriter fw = new FileWriter(file);
-            CSVWriter csvWriter = new CSVWriter(fw, MainActivity.dt.getAllTraitsForExport());
-            csvWriter.writeTraitFile(MainActivity.dt.getTraitColumns());
+            CSVWriter csvWriter = new CSVWriter(fw, ConfigActivity.dt.getAllTraitsForExport());
+            csvWriter.writeTraitFile(ConfigActivity.dt.getTraitColumns());
 
             csvWriter.close();
         } catch (Exception ignore) {
@@ -1281,15 +1287,15 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 data = columns;
 
-                if (MainActivity.dt.isTableExists(DataHelper.TRAITS)) {
-                    MainActivity.dt.deleteTable(DataHelper.TRAITS);
+                if (ConfigActivity.dt.isTableExists(DataHelper.TRAITS)) {
+                    ConfigActivity.dt.deleteTable(DataHelper.TRAITS);
                 }
 
                 while (data != null) {
                     data = cr.readNext();
 
                     if (data != null) {
-                        MainActivity.dt.insertTraits(data[0], data[1],
+                        ConfigActivity.dt.insertTraits(data[0], data[1],
                                 data[2], data[3], data[4], data[5],
                                 data[6], data[7].toLowerCase(), data[8]);
                     }
@@ -1305,8 +1311,8 @@ public class TraitEditorActivity extends AppCompatActivity {
                 } catch (Exception ignore) {
                 }
 
-                MainActivity.dt.close();
-                MainActivity.dt.open();
+                ConfigActivity.dt.close();
+                ConfigActivity.dt.open();
 
                 File newDir = new File(mChosenFile);
 

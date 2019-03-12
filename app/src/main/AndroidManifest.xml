@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.fieldbook.tracker"
     android:versionCode="409"
     android:versionName="4.1.0">
@@ -26,7 +27,21 @@
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/field_book"
-        android:largeHeap="true">
+        android:largeHeap="true"
+        tools:ignore="GoogleAppIndexingWarning">
+
+        <activity
+            android:name="ConfigActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name="MainActivity"
@@ -34,13 +49,7 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustPan|stateHidden">
-
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:windowSoftInputMode="adjustPan|stateHidden"/>
 
         <activity
             android:name=".search.SearchActivity"
@@ -57,12 +66,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/ActivityDialog" />
 
-        <activity
-            android:name="ConfigActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
 
         <activity
             android:name=".BrapiActivity"
@@ -85,7 +88,7 @@
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"/>
 
         <activity
             android:name=".fields.FieldEditorActivity"

@@ -58,6 +58,7 @@ import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,6 +116,8 @@ public class ConfigActivity extends AppCompatActivity {
 
     private Menu systemMenu;
 
+    public static DataHelper dt;
+
     @Override
     public void onDestroy() {
         try {
@@ -123,6 +126,7 @@ public class ConfigActivity extends AppCompatActivity {
             Log.e("Field Book", "");
         }
 
+        ConfigActivity.dt.close();
         super.onDestroy();
     }
 
@@ -157,6 +161,72 @@ public class ConfigActivity extends AppCompatActivity {
         helpActive = false;
 
         checkIntent();
+
+        // display intro tutorial
+        if(ep.getBoolean("FirstRun",true)) {
+            ep.edit().putBoolean("FirstRun",false).apply();
+        }
+
+        if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
+            ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
+            Intent intent = new Intent();
+            intent.setClass(ConfigActivity.this, ChangelogActivity.class);
+            startActivity(intent);
+            updateAssets();
+        }
+
+        createDirs();
+
+        dt = new DataHelper(this);
+    }
+
+    private void createDirs() {
+        createDir(Constants.MPATH.getAbsolutePath());
+        createDir(Constants.RESOURCEPATH);
+        createDir(Constants.PLOTDATAPATH);
+        createDir(Constants.TRAITPATH);
+        createDir(Constants.FIELDIMPORTPATH);
+        createDir(Constants.FIELDEXPORTPATH);
+        createDir(Constants.BACKUPPATH);
+        createDir(Constants.UPDATEPATH);
+        createDir(Constants.ARCHIVEPATH);
+
+        scanSampleFiles();
+    }
+
+    // Helper function to create a single directory
+    private void createDir(String path) {
+        File dir = new File(path);
+        File blankFile = new File(path + "/.fieldbook");
+
+        if (!dir.exists()) {
+            dir.mkdirs();
+
+            try {
+                blankFile.getParentFile().mkdirs();
+                blankFile.createNewFile();
+                Utils.scanFile(ConfigActivity.this,blankFile);
+            } catch (IOException ignore) {
+            }
+        }
+    }
+
+    private void scanSampleFiles() {
+        String[] fileList = {Constants.TRAITPATH + "/trait_sample.trt", Constants.FIELDIMPORTPATH + "/field_sample.csv", Constants.FIELDIMPORTPATH + "/field_sample2.csv", Constants.FIELDIMPORTPATH + "/field_sample3.csv" , Constants.TRAITPATH + "/severity.txt"};
+
+        for (String aFileList : fileList) {
+            File temp = new File(aFileList);
+            if (temp.exists()) {
+                Utils.scanFile(ConfigActivity.this,temp);
+            }
+        }
+    }
+
+    private void updateAssets() {
+        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "field_import");
+        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "resources");
+        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "trait");
+        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
     }
 
     private void loadScreen() {
@@ -168,8 +238,8 @@ public class ConfigActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle(null);
         getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        getSupportActionBar().setHomeButtonEnabled(false);
 
         //setup
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
@@ -200,7 +270,7 @@ public class ConfigActivity extends AppCompatActivity {
         ListView settingsList = findViewById(R.id.myList);
 
         String[] items2 = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced)}; //, "API Test"};
+                getString(R.string.settings_traits),getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced)}; //, "API Test"};
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
@@ -231,14 +301,24 @@ public class ConfigActivity extends AppCompatActivity {
                             return;
                         }
 
-                        showSetupDialog();
+                        intent.setClassName(ConfigActivity.this,
+                                MainActivity.class.getName());
+                        startActivity(intent);
                         break;
                     case 3:
+                        if (!ep.getBoolean("ImportFieldFinished", false)) {
+                            makeToast(getString(R.string.nofieldloaded));
+                            return;
+                        }
+
+                        showSetupDialog();
+                        break;
+                    case 4:
                         if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_EXPORT_DATA)) {
                             if (!ep.getBoolean("ImportFieldFinished", false)) {
                                 makeToast(getString(R.string.nofieldloaded));
                                 return;
-                            } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
+                            } else if (dt.getTraitColumnsAsString() == null) {
                                 makeToast(getString(R.string.notraitloaded));
                                 return;
                             }
@@ -247,7 +327,7 @@ public class ConfigActivity extends AppCompatActivity {
                         }
 
                         break;
-                    case 4:
+                    case 5:
                         intent.setClassName(ConfigActivity.this,
                                 PreferencesActivity.class.getName());
                         startActivity(intent);
@@ -611,7 +691,7 @@ public class ConfigActivity extends AppCompatActivity {
             String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
 
             // Retrieves the data needed for export
-            Cursor exportData = MainActivity.dt.getExportDBData(newRanges, exportTraits);
+            Cursor exportData = dt.getExportDBData(newRanges, exportTraits);
 
             for (String i : newRanges) {
                 Log.i("Field Book : Ranges : ", i);
@@ -665,7 +745,7 @@ public class ConfigActivity extends AppCompatActivity {
 
                         FileWriter fw = new FileWriter(file);
 
-                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, exportTraits);
+                        exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
@@ -689,7 +769,7 @@ public class ConfigActivity extends AppCompatActivity {
 
             if (!fail) {
                 showCitationDialog();
-                MainActivity.dt.updateExpTable(false,false,true,ep.getInt("ExpID", 0));
+                dt.updateExpTable(false,false,true,ep.getInt("ExpID", 0));
             }
 
             if (fail) {
@@ -733,7 +813,7 @@ public class ConfigActivity extends AppCompatActivity {
         @Override
         protected Integer doInBackground(Integer... params) {
             try {
-                MainActivity.dt.exportDatabase(exportFileString);
+                dt.exportDatabase(exportFileString);
             } catch (Exception e) {
                 e.printStackTrace();
                 error = "" + e.getMessage();
@@ -791,7 +871,7 @@ public class ConfigActivity extends AppCompatActivity {
         @Override
         protected Integer doInBackground(Integer... params) {
             try {
-                MainActivity.dt.importDatabase(mChosenFile);
+                dt.importDatabase(mChosenFile);
             } catch (Exception e) {
                 e.printStackTrace();
                 error = "" + e.getMessage();
@@ -969,19 +1049,19 @@ public class ConfigActivity extends AppCompatActivity {
                 }
 
                 if (allColumns.isChecked()) {
-                    String[] columns = MainActivity.dt.getRangeColumns();
+                    String[] columns = dt.getRangeColumns();
                     Collections.addAll(newRange, columns);
                 }
 
                 exportTrait = new ArrayList<>();
 
                 if (activeTraits.isChecked()) {
-                    String[] traits = MainActivity.dt.getVisibleTrait();
+                    String[] traits = dt.getVisibleTrait();
                     Collections.addAll(exportTrait, traits);
                 }
 
                 if (allTraits.isChecked()) {
-                    String[] traits = MainActivity.dt.getAllTraits();
+                    String[] traits = dt.getAllTraits();
                     Collections.addAll(exportTrait, traits);
                 }
 
@@ -1362,7 +1442,7 @@ public class ConfigActivity extends AppCompatActivity {
 
             public void onClick(DialogInterface dialog, int which) {
                 // Delete database
-                MainActivity.dt.deleteDatabase();
+                dt.deleteDatabase();
 
                 // Clear all existing settings
                 Editor ed = ep.edit();
@@ -1444,7 +1524,7 @@ public class ConfigActivity extends AppCompatActivity {
             case android.R.id.home:
                 if (!ep.getBoolean("ImportFieldFinished", false)) {
                     makeToast(getString(R.string.nofieldloaded));
-                } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
+                } else if (dt.getTraitColumnsAsString() == null) {
                     makeToast(getString(R.string.notraitloaded));
                 } else
                     finish();
@@ -1550,12 +1630,5 @@ public class ConfigActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (!ep.getBoolean("ImportFieldFinished", false)) {
-            makeToast(getString(R.string.nofieldloaded));
-        } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
-            makeToast(getString(R.string.notraitloaded));
-        } else {
-            finish();
-        }
     }
 }

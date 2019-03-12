@@ -140,7 +140,6 @@ public class DataHelper {
         return cursor.getCount() + 1;
     }
 
-
     public int getMaxPositionFromTraits() {
 
         int largest = 0;
@@ -1257,7 +1256,7 @@ public class DataHelper {
     }
 
     public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int exp_id) {
-        MainActivity.dt.open();
+        ConfigActivity.dt.open();
         Cursor cursor = db.rawQuery("SELECT * from " + EXP_INDEX, null);
         cursor.moveToFirst();
 

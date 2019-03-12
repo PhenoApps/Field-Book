@@ -17,6 +17,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 
@@ -103,7 +104,7 @@ class FieldAdapter extends BaseAdapter {
                 ed.putString("DROP3", null);
                 ed.apply();
 
-                MainActivity.dt.switchField(getItem(position).exp_id);
+                ConfigActivity.dt.switchField(getItem(position).exp_id);
                 MainActivity.reloadData = true;
                 notifyDataSetChanged();
             }
@@ -148,7 +149,7 @@ class FieldAdapter extends BaseAdapter {
                 ed.putString("DROP3", null);
                 ed.apply();
 
-                MainActivity.dt.switchField(getItem(position).exp_id);
+                ConfigActivity.dt.switchField(getItem(position).exp_id);
                 MainActivity.reloadData = true;
                 notifyDataSetChanged();
             }
@@ -181,7 +182,7 @@ class FieldAdapter extends BaseAdapter {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
 
-                                    MainActivity.dt.deleteField(getItem(position).exp_id);
+                                    ConfigActivity.dt.deleteField(getItem(position).exp_id);
 
                                     if (getItem(position).exp_name.equals(ep.getString("FieldFile", ""))) {
                                         SharedPreferences.Editor ed = ep.edit();

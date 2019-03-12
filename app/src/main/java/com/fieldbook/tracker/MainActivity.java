@@ -29,10 +29,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
-import com.google.android.material.navigation.NavigationView;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
@@ -72,7 +68,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.barcodes.*;
-import com.fieldbook.tracker.fields.FieldEditorActivity;
 import com.fieldbook.tracker.layoutConfig.SelectorLayoutConfigurator;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.search.*;
@@ -122,9 +117,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     int delay = 100;
     int count = 1;
-
-    public static DataHelper dt;
-
+    
     public static boolean searchReload;
 
     private static String displayColor = "#d50000";
@@ -247,16 +240,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     LinearLayout traitLocation;
     LinearLayout traitAngle;
 
-    /**
-     * Test area
-     */
-
-    private DrawerLayout mDrawer;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private DrawerLayout mDrawerLayout;
-    private String mActivityTitle;
-    NavigationView nvDrawer;
-
     private Boolean dataLocked = false;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -269,77 +252,30 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         cRange.plot_id = "";
         cRange.range = "";
 
-        loadNavUI();
         loadScreen();
-
-        // display intro tutorial
-        if(ep.getBoolean("FirstRun",true)) {
-            ep.edit().putBoolean("FirstRun",false).apply();
-        }
-
-        // If the user hasn't configured range and traits, open settings screen
-        if (dt.isTableEmpty(dt.RANGE) | !ep.getBoolean("ImportFieldFinished", false) | !ep.getBoolean("CreateTraitFinished", false)) {
-            updateAssets();
-
-            Intent intent = new Intent();
-            intent.setClassName(MainActivity.this,
-                    ConfigActivity.class.getName());
-            startActivity(intent);
-        }
-
-        if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
-            ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
-            Intent intent = new Intent();
-            intent.setClass(MainActivity.this, ChangelogActivity.class);
-            startActivity(intent);
-            updateAssets();
-        }
     }
 
-    private void loadNavUI() {
+    private void loadScreen() {
         setContentView(R.layout.activity_main);
 
         initToolbars();
-
-        mDrawer = findViewById(R.id.drawer_layout);
-
+        
         getSupportActionBar().setTitle(null);
         getSupportActionBar().getThemedContext();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        mDrawerLayout = findViewById(R.id.drawer_layout);
-        mActivityTitle = getTitle().toString();
-
-        nvDrawer = findViewById(R.id.nvView);
-
-        // Setup drawer view
-
-        setupDrawerContent(nvDrawer);
-        setupDrawer();
-    }
-
-    private void updateAssets() {
-        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "field_import");
-        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "resources");
-        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "trait");
-        MainActivity.dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
-    }
-
-    private void loadScreen() {
         // If the app is just starting up, we must always allow refreshing of data onscreen
         reloadData = true;
 
         lock = new Object();
-
-        dt = new DataHelper(this);
-
+        
         thisActivity = this;
 
         // Keyboard service manager
         imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        createDirs();
+
 
         range = findViewById(R.id.range);
         plot = findViewById(R.id.plot);
@@ -347,9 +283,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         tvRange = findViewById(R.id.tvRange);
         tvPlot = findViewById(R.id.tvPlot);
 
-        if (!dt.isTableEmpty(DataHelper.RANGE)) {
-            selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 3), (RecyclerView) findViewById(R.id.selectorList));
-        }
+        selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 3), (RecyclerView) findViewById(R.id.selectorList));
 
         traitBoolean = findViewById(R.id.booleanLayout);
         traitAudio = findViewById(R.id.audioLayout);
@@ -1112,7 +1046,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         if (pos < 1)
                             return;
 
-                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                        if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
                                 currentTrait.format)) {
                             paging = pos;
                             break;
@@ -1126,7 +1060,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 }
 
                 // Refresh onscreen controls
-                cRange = dt.getRange(rangeID[paging - 1]);
+                cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
 
                 saveLastPlot();
 
@@ -1139,7 +1073,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     }
                 }
 
-                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
                         .clone();
 
                 initWidgets(true);
@@ -1171,7 +1105,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             return;
                         }
 
-                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                        if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
                                 currentTrait.format)) {
                             paging = pos;
                             break;
@@ -1185,7 +1119,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 }
 
                 // Refresh onscreen controls
-                cRange = dt.getRange(rangeID[paging - 1]);
+                cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
 
                 saveLastPlot();
 
@@ -1196,7 +1130,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         playSound("plonk");
                     }
                 }
-                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
                         .clone();
 
                 initWidgets(true);
@@ -1301,7 +1235,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 switch (currentTrait.format) {
                     case "categorical":
                         newTraits.remove(currentTrait.trait);
-                        dt.deleteTrait(cRange.plot_id, currentTrait.trait);
+                        ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.trait);
                         setCategoricalButtons(buttonArray, null);
                         break;
                     case "percent":
@@ -1372,81 +1306,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         break;
                     default:
                         newTraits.remove(currentTrait.trait);
-                        dt.deleteTrait(cRange.plot_id, currentTrait.trait);
+                        ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.trait);
                         etCurVal.setText("");
                         break;
                 }
             }
         });
 
-    }
-
-    private void setupDrawer() {
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.string.main_drawer_open, R.string.main_drawer_close) {
-
-            public void onDrawerOpened(View drawerView) {
-                TextView person =  findViewById(R.id.nameLabel);
-                person.setText(ep.getString("FirstName","") + " " + ep.getString("LastName",""));
-
-                TextView template =  findViewById(R.id.currentField);
-                template.setText(ep.getString("FieldFile",""));
-            }
-
-            public void onDrawerClosed(View view) {
-            }
-
-        };
-
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-    }
-
-    private void setupDrawerContent(NavigationView navigationView) {
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        selectDrawerItem(menuItem);
-                        return true;
-                    }
-                });
-    }
-
-    public void selectDrawerItem(MenuItem menuItem) {
-
-        switch(menuItem.getItemId()) {
-
-            case R.id.nav_settings:
-                Intent a = new Intent(this, ConfigActivity.class);
-                startActivity(a);
-                break;
-
-            case R.id.nav_fields:
-                MainActivity.dt.updateExpTable(false,true,false,0);
-                Intent b = new Intent(this, FieldEditorActivity.class);
-                startActivity(b);
-                break;
-
-            case R.id.nav_traits:
-                Intent c = new Intent(this, TraitEditorActivity.class);
-                startActivity(c);
-                break;
-
-            case R.id.nav_person:
-                Intent d = new Intent(this, ConfigActivity.class);
-                d.putExtra("dialog", "person");
-                startActivity(d);
-                break;
-
-            case R.id.nav_location:
-                Intent e = new Intent(this, ConfigActivity.class);
-                e.putExtra("dialog", "location");
-                startActivity(e);
-                break;
-        }
-
-        mDrawer.closeDrawers();
     }
 
     Runnable mActionRight = new Runnable() {
@@ -1504,54 +1370,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
         if (button.getText().toString().equals(curCat)) {
             newTraits.remove(currentTrait.trait);
-            dt.deleteTrait(cRange.plot_id, currentTrait.trait);
+            ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.trait);
             setCategoricalButtons(buttonArray, null);
             return true;
         }
         return false;
-    }
-
-    // Create all necessary directories and subdirectories
-    private void createDirs() {
-        createDir(Constants.MPATH.getAbsolutePath());
-        createDir(Constants.RESOURCEPATH);
-        createDir(Constants.PLOTDATAPATH);
-        createDir(Constants.TRAITPATH);
-        createDir(Constants.FIELDIMPORTPATH);
-        createDir(Constants.FIELDEXPORTPATH);
-        createDir(Constants.BACKUPPATH);
-        createDir(Constants.UPDATEPATH);
-        createDir(Constants.ARCHIVEPATH);
-
-        scanSampleFiles();
-    }
-
-    private void scanSampleFiles() {
-        String[] fileList = {Constants.TRAITPATH + "/trait_sample.trt", Constants.FIELDIMPORTPATH + "/field_sample.csv", Constants.FIELDIMPORTPATH + "/field_sample2.csv", Constants.FIELDIMPORTPATH + "/field_sample3.csv" , Constants.TRAITPATH + "/severity.txt"};
-
-        for (String aFileList : fileList) {
-            File temp = new File(aFileList);
-            if (temp.exists()) {
-                Utils.scanFile(MainActivity.this,temp);
-            }
-        }
-    }
-
-    // Helper function to create a single directory
-    private void createDir(String path) {
-        File dir = new File(path);
-        File blankFile = new File(path + "/.fieldbook");
-
-        if (!dir.exists()) {
-            dir.mkdirs();
-
-            try {
-                blankFile.getParentFile().mkdirs();
-                blankFile.createNewFile();
-                Utils.scanFile(MainActivity.this,blankFile);
-            } catch (IOException ignore) {
-            }
-        }
     }
 
     // Simulate range left key press
@@ -1568,7 +1391,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     if (pos < 1)
                         pos = rangeID.length;
 
-                    if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
                             currentTrait.format)) {
                         paging = pos;
                         break;
@@ -1582,7 +1405,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
             // Refresh onscreen controls
-            cRange = dt.getRange(rangeID[paging - 1]);
+            cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
 
             saveLastPlot();
 
@@ -1612,7 +1435,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             displayRange(cRange);
 
-            newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+            newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
                     .clone();
 
             initWidgets(true);
@@ -1641,7 +1464,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         return;
                     }
 
-                    if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
                             currentTrait.format)) {
                         paging = pos;
                         break;
@@ -1655,7 +1478,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
             // Refresh onscreen controls
-            cRange = dt.getRange(rangeID[paging - 1]);
+            cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
             saveLastPlot();
 
             if (cRange.plot_id.length() == 0)
@@ -1681,7 +1504,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
             displayRange(cRange);
-            newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+            newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
                     .clone();
 
             initWidgets(true);
@@ -1693,7 +1516,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (rangeID == null)
             return;
 
-        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+        newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
                 .clone();
 
         initWidgets(true);
@@ -1737,7 +1560,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
-        if (!dt.isTableEmpty(DataHelper.RANGE)) {
+        if (!ConfigActivity.dt.isTableEmpty(DataHelper.RANGE)) {
             selectorLayoutConfigurator.configureDropdownArray(cRange.plot_id);
         }
 
@@ -1762,7 +1585,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // trait is unique, format is not
 
-        String[] traits = dt.getVisibleTrait();
+        String[] traits = ConfigActivity.dt.getVisibleTrait();
 
         int traitPosition;
 
@@ -1785,7 +1608,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                            int arg2, long arg3) {
 
                     // This updates the in memory hashmap from database
-                    currentTrait = dt.getDetail(traitType.getSelectedItem()
+                    currentTrait = ConfigActivity.dt.getDetail(traitType.getSelectedItem()
                             .toString());
 
                     imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -2111,7 +1934,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         if (img.listFiles() != null) {
 
                             //TODO causes crash
-                            photoLocation = dt.getPlotPhotos(cRange.plot_id, currentTrait.trait);
+                            photoLocation = ConfigActivity.dt.getPlotPhotos(cRange.plot_id, currentTrait.trait);
 
                            for (int i = 0; i < photoLocation.size(); i++) {
                                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
@@ -2418,7 +2241,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // search moveto
         if(type.equals("search")) {
             for (int j = 1; j <= rangeID.length; j++) {
-                cRange = dt.getRange(rangeID[j - 1]);
+                cRange = ConfigActivity.dt.getRange(rangeID[j - 1]);
 
                 if (cRange.range.equals(range) & cRange.plot.equals(plot)) {
                     moveToResult(j);
@@ -2430,7 +2253,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         //move to plot
         if (type.equals("plot")) {
             for (int j = 1; j <= rangeID.length; j++) {
-                cRange = dt.getRange(rangeID[j - 1]);
+                cRange = ConfigActivity.dt.getRange(rangeID[j - 1]);
 
                 if (cRange.plot.equals(plot)) {
                     moveToResult(j);
@@ -2442,7 +2265,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         //move to range
         if(type.equals("range")) {
             for (int j = 1; j <= rangeID.length; j++) {
-                cRange = dt.getRange(rangeID[j - 1]);
+                cRange = ConfigActivity.dt.getRange(rangeID[j - 1]);
 
                 if (cRange.range.equals(range)) {
                     moveToResult(j);
@@ -2454,7 +2277,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         //move to plot id
         if(type.equals("id")) {
             for (int j = 1; j <= rangeID.length; j++) {
-                cRange = dt.getRange(rangeID[j - 1]);
+                cRange = ConfigActivity.dt.getRange(rangeID[j - 1]);
 
                 if (cRange.plot_id.equals(plotID)) {
                     moveToResult(j);
@@ -2469,7 +2292,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private void moveToResult(int j) {
         if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-            if (!dt.getTraitExists(rangeID[j - 1], currentTrait.trait,
+            if (!ConfigActivity.dt.getTraitExists(rangeID[j - 1], currentTrait.trait,
                     currentTrait.format)) {
                 paging = j;
 
@@ -2477,7 +2300,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 // plot
                 displayRange(cRange);
 
-                newTraits = (HashMap) dt.getUserDetail(
+                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(
                         cRange.plot_id).clone();
 
                 initWidgets(false);
@@ -2488,7 +2311,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             // Reload traits based on the selected plot
             displayRange(cRange);
 
-            newTraits = (HashMap) dt.getUserDetail(
+            newTraits = (HashMap) ConfigActivity.dt.getUserDetail(
                     cRange.plot_id).clone();
 
             initWidgets(false);
@@ -2499,7 +2322,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public void onPause() {
         // Backup database
         try {
-            dt.exportDatabase("backup");
+            ConfigActivity.dt.exportDatabase("backup");
             File exportedDb = new File(Constants.BACKUPPATH + "/" + "backup.db");
             File exportedSp = new File(Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
             Utils.scanFile(MainActivity.this,exportedDb);
@@ -2524,9 +2347,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         } catch (Exception ignore) {
         }
 
-        // Always close the database connection when the app ends
-        dt.close();
-
         super.onDestroy();
     }
 
@@ -2544,9 +2364,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(PreferencesActivity.UNIQUE_CAMERA, false));
             systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(PreferencesActivity.DATAGRID_SETTING, false));
         }
-
-        nvDrawer.getMenu().clear();
-        nvDrawer.inflateMenu(R.menu.nav_drawer_view);
 
         // If reload data is true, it means there was an import operation, and
         // the screen should refresh
@@ -2582,33 +2399,33 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             paging = 1;
 
-            rangeID = dt.getAllRangeID();
+            rangeID = ConfigActivity.dt.getAllRangeID();
 
             if (rangeID != null) {
-                cRange = dt.getRange(rangeID[0]);
+                cRange = ConfigActivity.dt.getRange(rangeID[0]);
 
                 //TODO NullPointerException
                 lastRange = cRange.range;
                 displayRange(cRange);
 
-                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id).clone();
+                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id).clone();
             }
 
-            prefixTraits = MainActivity.dt.getRangeColumnNames();
+            prefixTraits = ConfigActivity.dt.getRangeColumnNames();
 
             initWidgets(false);
             traitType.setSelection(0);
 
             // try to go to last saved plot
             if(ep.getString("lastplot",null)!=null) {
-                rangeID = dt.getAllRangeID();
+                rangeID = ConfigActivity.dt.getAllRangeID();
                 moveToSearch("id",rangeID,null,null,ep.getString("lastplot",null));
             }
 
         } else if (partialReload) {
             partialReload = false;
             displayRange(cRange);
-            prefixTraits = MainActivity.dt.getRangeColumnNames();
+            prefixTraits = ConfigActivity.dt.getRangeColumnNames();
             initWidgets(false);
 
         } else if (searchReload) {
@@ -2641,10 +2458,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        dt.deleteTrait(cRange.plot_id, parent);
+        ConfigActivity.dt.deleteTrait(cRange.plot_id, parent);
 
         String exp_id = Integer.toString(ep.getInt("ExpID", 0));
-        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id); //TODO add notes and exp_id
+        ConfigActivity.dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id); //TODO add notes and exp_id
     }
 
     // Delete trait, including from database
@@ -2659,7 +2476,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        dt.deleteTrait(cRange.plot_id, parent);
+        ConfigActivity.dt.deleteTrait(cRange.plot_id, parent);
     }
 
     /**
@@ -2722,13 +2539,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        mDrawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -2736,15 +2551,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
         switch (item.getItemId()) {
-            case android.R.id.home:
-                mDrawer.openDrawer(GravityCompat.START);
-                return true;
-
             case R.id.search:
                 try {
                     TutorialMainActivity.thisActivity.finish();
@@ -2892,7 +2699,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         exportButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 inputPlotId = barcodeId.getText().toString();
-                rangeID = dt.getAllRangeID();
+                rangeID = ConfigActivity.dt.getAllRangeID();
                 moveToSearch("id",rangeID,null,null,inputPlotId);
                 goToId.dismiss();
             }
@@ -2919,16 +2726,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 return;
             }
 
-            if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
+            if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
                     currentTrait.format)) {
                 paging = pos;
                 break;
             }
         }
-        cRange = dt.getRange(rangeID[paging - 1]);
+        cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
         displayRange(cRange);
         lastRange = cRange.range;
-        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+        newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
                 .clone();
         initWidgets(true);
     }
@@ -2967,7 +2774,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 break;
 
             case R.id.record:
-                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
+                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
                         .clone();
 
                 if (mListening) {
@@ -3203,7 +3010,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     Utils.scanFile(MainActivity.this,f);
 
                     // Remove individual images
-                    dt.deleteTraitByValue(cRange.plot_id, currentTrait.trait, item);
+                    ConfigActivity.dt.deleteTraitByValue(cRange.plot_id, currentTrait.trait, item);
 
                     // Only do a purge by trait when there are no more images left
                     if (photoLocation.size() == 0)
@@ -3262,7 +3069,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private String getRep() {
-        int repInt = MainActivity.dt.getRep(MainActivity.cRange.plot_id,currentTrait.trait);
+        int repInt = ConfigActivity.dt.getRep(MainActivity.cRange.plot_id,currentTrait.trait);
         return String.valueOf(repInt);
     }
 
@@ -3315,13 +3122,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
-        String[] traitList = dt.getAllTraits();
+        String[] traitList = ConfigActivity.dt.getAllTraits();
         StringBuilder data = new StringBuilder();
 
         //TODO this test crashes app
         if (cRange != null) {
             for (String s : prefixTraits) {
-                data.append(s).append(": ").append(dt.getDropDownRange(s, cRange.plot_id)[0]).append("\n");
+                data.append(s).append(": ").append(ConfigActivity.dt.getDropDownRange(s, cRange.plot_id)[0]).append("\n");
             }
         }
 
@@ -3393,10 +3200,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         newTraits.put(parent, value);
 
-        dt.deleteTraitByValue(cRange.plot_id, parent, value);
+        ConfigActivity.dt.deleteTraitByValue(cRange.plot_id, parent, value);
 
         String exp_id = Integer.toString(ep.getInt("ExpID", 0));
-        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName","") + " " + ep.getString("LastName",""), ep.getString("Location",""),"",exp_id); //TODO add notes and exp_id
+        ConfigActivity.dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName","") + " " + ep.getString("LastName",""), ep.getString("Location",""),"",exp_id); //TODO add notes and exp_id
     }
 
     private void displayPlotImage(String path) {
@@ -3508,7 +3315,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case 2:
                 if (resultCode == RESULT_OK) {
                     inputPlotId = data.getStringExtra("result");
-                    rangeID = dt.getAllRangeID();
+                    rangeID = ConfigActivity.dt.getAllRangeID();
                     moveToSearch("id",rangeID,null,null,inputPlotId);
                 }
                 break;
@@ -3522,11 +3329,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (scanResult != null) {
             inputPlotId = scanResult.getContents();
-            rangeID = dt.getAllRangeID();
+            rangeID = ConfigActivity.dt.getAllRangeID();
             moveToSearch("id",rangeID,null,null,inputPlotId);
             if(goToId!=null) {
                 goToId.dismiss();
             }
         }
+    }
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 }

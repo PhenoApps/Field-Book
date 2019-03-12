@@ -57,9 +57,10 @@
     <string name="settings_title">Settings</string>
     <string name="settings_fields">Fields</string>
     <string name="settings_traits">Traits</string>
+    <string name="settings_collect">Collect data</string>
+    <string name="settings_export">Export data</string>
+    <string name="settings_advanced">Settings</string>
     <string name="settings_profile">Profile</string>
-    <string name="settings_export">Export</string>
-    <string name="settings_advanced">Advanced</string>
 
     <!-- Traits Activity  -->
     <string name="traits_sort_trait_name">Name</string>

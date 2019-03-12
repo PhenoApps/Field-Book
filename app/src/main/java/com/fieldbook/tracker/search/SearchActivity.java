@@ -25,6 +25,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 
@@ -178,7 +179,7 @@ public class SearchActivity extends AppCompatActivity {
                     else
                         sql = sql1 + sql;
 
-                    final SearchData[] data = MainActivity.dt.getRangeBySql(sql);
+                    final SearchData[] data = ConfigActivity.dt.getRangeBySql(sql);
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this, R.style.AppAlertDialog);
 
@@ -301,13 +302,13 @@ public class SearchActivity extends AppCompatActivity {
         //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(adapter);
 
-        String[] col = MainActivity.dt.getRangeColumns();
+        String[] col = ConfigActivity.dt.getRangeColumns();
 
         if (col != null) {
             rangeUntil = col.length;
 
             ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinnerlayout,
-                    concat(col, MainActivity.dt.getVisibleTrait()));
+                    concat(col, ConfigActivity.dt.getVisibleTrait()));
             adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             c.setAdapter(adapter2);
 

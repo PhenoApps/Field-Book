@@ -60,9 +60,9 @@ public class DatagridActivity extends AppCompatActivity {
 
     private void gridViewTable() {
         String[] columns = {ep.getString("ImportUniqueName", "")};
-        String[] traits = MainActivity.dt.getVisibleTrait();
+        String[] traits = ConfigActivity.dt.getVisibleTrait();
 
-        databaseData = MainActivity.dt.convertDatabaseToTable(columns, traits);
+        databaseData = ConfigActivity.dt.convertDatabaseToTable(columns, traits);
         databaseData.moveToPosition(-1);
 
         int rows = databaseData.getCount();

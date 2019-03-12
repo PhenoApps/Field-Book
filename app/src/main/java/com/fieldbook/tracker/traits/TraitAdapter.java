@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 
@@ -152,10 +153,10 @@ class TraitAdapter extends BaseAdapter {
             @Override
             public void onCheckedChanged(CompoundButton arg0, boolean isChecked) {
                 if (holder.visible.isChecked()) {
-                    MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(), true);
+                    ConfigActivity.dt.updateTraitVisibility(holder.name.getText().toString(), true);
                     visibility.put(holder.name.getText().toString(),"true");
                 } else {
-                    MainActivity.dt.updateTraitVisibility(holder.name.getText().toString(), false);
+                    ConfigActivity.dt.updateTraitVisibility(holder.name.getText().toString(), false);
                     visibility.put(holder.name.getText().toString(),false);
                 }
             }
@@ -172,7 +173,7 @@ class TraitAdapter extends BaseAdapter {
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_copy))) {
-                            int pos = MainActivity.dt.getMaxPositionFromTraits() + 1;
+                            int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
 
                             String traitName = getItem(position).trait;
 
@@ -182,7 +183,7 @@ class TraitAdapter extends BaseAdapter {
 
                             String newTraitName = "";
 
-                            String[] allTraits = MainActivity.dt.getAllTraits();
+                            String[] allTraits = ConfigActivity.dt.getAllTraits();
 
                             for (int i = 0; i < allTraits.length; i++) {
                                 newTraitName = traitName + "-Copy-" + "(" + Integer.toString(i) + ")";
@@ -192,7 +193,7 @@ class TraitAdapter extends BaseAdapter {
                                 }
                             }
 
-                            MainActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
+                            ConfigActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
                             TraitEditorActivity.loadData();
                             MainActivity.reloadData = true;
 
@@ -207,7 +208,7 @@ class TraitAdapter extends BaseAdapter {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
 
-                                    MainActivity.dt.deleteTrait(holder.id);
+                                    ConfigActivity.dt.deleteTrait(holder.id);
                                     TraitEditorActivity.loadData();
                                     MainActivity.reloadData = true;
                                 }
