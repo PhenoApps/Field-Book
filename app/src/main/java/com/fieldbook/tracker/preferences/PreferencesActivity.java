@@ -51,7 +51,7 @@ public class PreferencesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         if(getSupportActionBar() != null){
-            getSupportActionBar().setTitle(getString(R.string.advanced));
+            getSupportActionBar().setTitle(getString(R.string.settings_advanced));
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);

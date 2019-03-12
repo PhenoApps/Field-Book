@@ -276,9 +276,9 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         thisActivity = this;
 
-        final String[] data = new String[]{getString(R.string.numeric), getString(R.string.qualitative), getString(R.string.date), getString(R.string.percent), getString(R.string.bool),
-                getString(R.string.text), getString(R.string.photo), getString(R.string.audio), getString(R.string.counter), getString(R.string.rustrating), getString(R.string.multicategorical),
-                getString(R.string.location_trait)};
+        final String[] data = new String[]{getString(R.string.traits_format_numeric), getString(R.string.traits_format_categorical), getString(R.string.traits_format_date), getString(R.string.traits_format_percent), getString(R.string.traits_format_boolean),
+                getString(R.string.traits_format_text), getString(R.string.traits_format_photo), getString(R.string.traits_format_audio), getString(R.string.traits_format_counter), getString(R.string.traits_format_disease_rating), getString(R.string.traits_format_multicategorical),
+                getString(R.string.traits_format_location)};
 
         final String[] enData = new String[]{"Numeric", "Categorical", "Date", "Percent", "Boolean", "Text", "Photo", "Audio", "Counter", "Disease Rating", "Multicat", "Location"};
 
@@ -309,7 +309,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_new_trait, null);
 
-        builder.setTitle(R.string.addtrait)
+        builder.setTitle(R.string.traits_toolbar_add_trait)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -422,10 +422,10 @@ public class TraitEditorActivity extends AppCompatActivity {
                 if (dataChanged()) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this, R.style.AppAlertDialog);
 
-                    builder.setTitle(getString(R.string.close));
-                    builder.setMessage(getString(R.string.areyousure));
+                    builder.setTitle(getString(R.string.dialog_close));
+                    builder.setMessage(getString(R.string.dialog_confirm));
 
-                    builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -434,7 +434,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                     });
 
-                    builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -456,7 +456,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             public void onClick(View arg0) {
                 // Trait name is mandatory
                 if (trait.getText().toString().length() == 0) {
-                    makeToast(getString(R.string.mandatorytrait));
+                    makeToast(getString(R.string.traits_create_warning_name_empty));
                     return;
                 }
 
@@ -465,12 +465,12 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 if (!edit) {
                     if (exists) {
-                        makeToast(getString(R.string.traitexists));
+                        makeToast(getString(R.string.traits_create_warning_duplicate));
                         return;
                     }
                 } else {
                     if (exists & !oldTrait.toLowerCase().equals(trait.getText().toString().trim().toLowerCase())) {
-                        makeToast(getString(R.string.traitexists));
+                        makeToast(getString(R.string.traits_create_warning_duplicate));
                         return;
                     }
                 }
@@ -479,17 +479,17 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 if (format.getSelectedItemPosition() == 0) {
                     if (def.getText().toString().length() > 0 & !isNumeric(def.getText().toString(), false)) {
-                        makeToast(getString(R.string.notanumber));
+                        makeToast(getString(R.string.traits_create_warning_numeric_required));
                         return;
                     }
 
                     if (minimum.getText().toString().length() > 0 & !isNumeric(minimum.getText().toString(), false)) {
-                        makeToast(getString(R.string.notanumber));
+                        makeToast(getString(R.string.traits_create_warning_numeric_required));
                         return;
                     }
 
                     if (maximum.getText().toString().length() > 0 & !isNumeric(maximum.getText().toString(), false)) {
-                        makeToast(getString(R.string.notanumber));
+                        makeToast(getString(R.string.traits_create_warning_numeric_required));
                         return;
                     }
 
@@ -497,24 +497,24 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 if (format.getSelectedItemPosition() == 1) {
                     if (categories.getText().toString().length() == 0) {
-                        makeToast(getString(R.string.notemptycategory));
+                        makeToast(getString(R.string.traits_create_warning_categories_required));
                         return;
                     }
                 }
 
                 if (format.getSelectedItemPosition() == 3) {
                     if (def.getText().toString().length() == 0 | !isNumeric(def.getText().toString(), true)) {
-                        makeToast(getString(R.string.notanumber));
+                        makeToast(getString(R.string.traits_create_warning_numeric_required));
                         return;
                     }
 
                     if (minimum.getText().toString().length() == 0 | !isNumeric(minimum.getText().toString(), true)) {
-                        makeToast(getString(R.string.notanumber));
+                        makeToast(getString(R.string.traits_create_warning_numeric_required));
                         return;
                     }
 
                     if (maximum.getText().toString().length() == 0 | !isNumeric(maximum.getText().toString(), true)) {
-                        makeToast(getString(R.string.notanumber));
+                        makeToast(getString(R.string.traits_create_warning_numeric_required));
                         return;
                     }
 
@@ -624,7 +624,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void prepareFields(int position) {
-        details.setHint(getString(R.string.optional));
+        details.setHint(getString(R.string.traits_create_optional));
         def.setHint(null);
         minimum.setHint(null);
         maximum.setHint(null);
@@ -644,9 +644,9 @@ public class TraitEditorActivity extends AppCompatActivity {
                 maxBox.setVisibility(View.VISIBLE);
                 categoryBox.setVisibility(View.GONE);
 
-                def.setHint(getString(R.string.optional));
-                minimum.setHint(getString(R.string.optional));
-                maximum.setHint(getString(R.string.optional));
+                def.setHint(getString(R.string.traits_create_optional));
+                minimum.setHint(getString(R.string.traits_create_optional));
+                maximum.setHint(getString(R.string.traits_create_optional));
                 break;
             case 1: //categorical
                 defBox.setVisibility(View.GONE);
@@ -691,7 +691,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 bool.setVisibility(View.GONE);
                 categoryBox.setVisibility(View.GONE);
 
-                def.setHint(getString(R.string.optional));
+                def.setHint(getString(R.string.traits_create_optional));
                 break;
             case 6: //photo
                 defBox.setVisibility(View.GONE);
@@ -861,7 +861,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.traits)
+        builder.setTitle(R.string.settings_traits)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -877,8 +877,8 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         String[] sortOptions = new String[2];
 
-        sortOptions[0] = getString(R.string.importdb);
-        sortOptions[1] = getString(R.string.export);
+        sortOptions[0] = getString(R.string.dialog_import);
+        sortOptions[1] = getString(R.string.traits_dialog_export);
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -945,7 +945,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                                 FileExploreActivity.class.getName());
                         intent.putExtra("path", Constants.TRAITPATH);
                         intent.putExtra("include", new String[]{"trt"});
-                        intent.putExtra("title", getString(R.string.import_title));
+                        intent.putExtra("title", getString(R.string.traits_dialog_import));
                         startActivityForResult(intent, 1);
                         break;
                     case 1:
@@ -977,9 +977,9 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this, R.style.AppAlertDialog);
-        builder.setMessage(getString(R.string.trait_export_check));
+        builder.setMessage(getString(R.string.traits_export_check));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 showExportDialog();
                 dialog.dismiss();
@@ -987,7 +987,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 showFileDialog();
@@ -1013,7 +1013,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.sort)
+        builder.setTitle(R.string.traits_sort_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1028,9 +1028,9 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         String[] sortOptions = new String[3];
 
-        sortOptions[0] = getString(R.string.traitname);
-        sortOptions[1] = getString(R.string.format);
-        sortOptions[2] = getString(R.string.visibility);
+        sortOptions[0] = getString(R.string.traits_sort_trait_name);
+        sortOptions[1] = getString(R.string.traits_sort_format);
+        sortOptions[2] = getString(R.string.traits_sort_visibility);
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -1108,7 +1108,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_save_database, null);
 
-        builder.setTitle(R.string.export)
+        builder.setTitle(R.string.traits_dialog_export)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1166,10 +1166,10 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this, R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.deletealltraits));
-        builder.setMessage(getString(R.string.areyousure));
+        builder.setTitle(getString(R.string.traits_toolbar_delete_all));
+        builder.setMessage(getString(R.string.dialog_confirm));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 MainActivity.dt.deleteTable(DataHelper.TRAITS);
                 loadData();
@@ -1178,7 +1178,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();

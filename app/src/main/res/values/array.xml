@@ -1,39 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="language_array">
-        <item>@string/english</item>
-        <item>@string/spanish</item>
-        <item>@string/french</item>
-        <item>@string/hindi</item>
-        <item>@string/german</item>
-        <item>@string/japanese</item>
-        <item>@string/arabic</item>
-        <item>@string/chinese</item>
-        <item>@string/portuguesebr</item>
-        <item>@string/russian</item>
-        <item>@string/oromo</item>
-        <item>@string/amharic</item>
-        <item>@string/bengali</item>
-        <item>@string/italian</item>
-    </string-array>
-
-    <string-array name="language_array_values">
-        <item>en</item>
-        <item>es</item>
-        <item>fr</item>
-        <item>hi</item>
-        <item>de</item>
-        <item>ja</item>
-        <item>ar</item>
-        <item>zh_CN</item>
-        <item>pt_BR</item>
-        <item>ru</item>
-        <item>om_ET</item>
-        <item>am</item>
-        <item>bn</item>
-        <item>it</item>
-    </string-array>
-
     <string-array name="disable_entry_arrows">
         <item>@string/entry_arrow_left</item>
         <item>@string/entry_arrow_right</item>

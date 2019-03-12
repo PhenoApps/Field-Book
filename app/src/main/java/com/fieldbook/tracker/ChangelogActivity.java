@@ -40,7 +40,7 @@ public class ChangelogActivity extends AppCompatActivity {
 
 
         setContentView(R.layout.activity_changelog);
-        setTitle(R.string.updatemsg);
+        setTitle(R.string.settings_changelog_title);
 
         params = getWindow().getAttributes();
         params.width = LinearLayout.LayoutParams.MATCH_PARENT;

@@ -14,7 +14,7 @@
 
     <item
         android:id="@+id/about"
-        android:title="@string/about"
+        android:title="@string/about_title"
         android:icon="@drawable/ic_tb_info"
         android:showAsAction="ifRoom" />"
 

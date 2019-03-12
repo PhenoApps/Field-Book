@@ -721,8 +721,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         rustS.setOnClickListener(this);
         rustDelim.setOnClickListener(this);
 
-        String primaryName = ep.getString("ImportFirstName", getString(R.string.range));
-        String secondaryName = ep.getString("ImportSecondName", getString(R.string.plot));
+        String primaryName = ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range));
+        String secondaryName = ep.getString("ImportSecondName", getString(R.string.search_results_dialog_plot));
 
         if(primaryName.length()>10) {
             primaryName = primaryName.substring(0,9) + ":";
@@ -738,7 +738,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         rangeName.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                makeToast(ep.getString("ImportFirstName", getString(R.string.range)));
+                makeToast(ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)));
                 return false;
             }
         });
@@ -746,7 +746,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         plotName.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                makeToast(ep.getString("ImportSecondName", getString(R.string.range)));
+                makeToast(ep.getString("ImportSecondName", getString(R.string.search_results_dialog_range)));
                 return false;
             }
         });
@@ -1383,7 +1383,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private void setupDrawer() {
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.string.drawer_open, R.string.drawer_close) {
+                R.string.main_drawer_open, R.string.main_drawer_close) {
 
             public void onDrawerOpened(View drawerView) {
                 TextView person =  findViewById(R.id.nameLabel);
@@ -1443,11 +1443,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 Intent e = new Intent(this, ConfigActivity.class);
                 e.putExtra("dialog", "location");
                 startActivity(e);
-                break;
-
-            case R.id.nav_language:
-                Intent i = new Intent(android.provider.Settings.ACTION_LOCALE_SETTINGS);
-                startActivity(i);
                 break;
         }
 
@@ -2469,7 +2464,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
 
         if (!haveData)
-            makeToast(getString(R.string.nomatches));
+            makeToast(getString(R.string.main_toolbar_moveto_no_match));
     }
 
     private void moveToResult(int j) {
@@ -2571,8 +2566,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 plot.setVisibility(EditText.GONE);
             }
 
-            String primaryName = ep.getString("ImportFirstName", getString(R.string.range)) + ":";
-            String secondaryName = ep.getString("ImportSecondName", getString(R.string.plot)) + ":";
+            String primaryName = ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)) + ":";
+            String secondaryName = ep.getString("ImportSecondName", getString(R.string.search_results_dialog_plot)) + ":";
 
             if(primaryName.length()>8) {
                 primaryName = primaryName.substring(0,7) + ":";
@@ -2767,7 +2762,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         FileExploreActivity.class.getName());
                 intent.putExtra("path", Constants.RESOURCEPATH);
                 intent.putExtra("exclude", new String[] {"fieldbook"});
-                intent.putExtra("title",getString(R.string.resources));
+                intent.putExtra("title",getString(R.string.main_toolbar_resources));
                 startActivityForResult(intent, 1);
                 break;
 
@@ -2864,7 +2859,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_gotobarcode, null);
 
-        builder.setTitle(R.string.jumptoplotidbutton)
+        builder.setTitle(R.string.main_toolbar_moveto)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -2964,7 +2959,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     if (m == 0 || photoLocation.size() < m) {
                         takePicture();
                     } else
-                        makeToast(getString(R.string.maxphotos));
+                        makeToast(getString(R.string.traits_create_photo_maximum));
                 } catch (Exception e) {
                     e.printStackTrace();
                     makeToast(getString(R.string.hardwaremissing));
@@ -3190,10 +3185,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void deletePhotoWarning() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
-        builder.setTitle(getString(R.string.warning));
+        builder.setTitle(getString(R.string.dialog_warning));
         builder.setMessage(getString(R.string.deletePhoto));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -3228,7 +3223,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();

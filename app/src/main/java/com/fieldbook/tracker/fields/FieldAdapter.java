@@ -170,13 +170,13 @@ class FieldAdapter extends BaseAdapter {
                 //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
-                        if (item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.delete))) {
+                        if (item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.fields_delete))) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
 
-                            builder.setTitle(context.getString(R.string.delete_field));
-                            builder.setMessage(context.getString(R.string.delete_field_confirmation));
+                            builder.setTitle(context.getString(R.string.fields_delete_study));
+                            builder.setMessage(context.getString(R.string.fields_delete_study_confirmation));
 
-                            builder.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() {
+                            builder.setPositiveButton(context.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
@@ -204,7 +204,7 @@ class FieldAdapter extends BaseAdapter {
                                 }
                             });
 
-                            builder.setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener() {
+                            builder.setNegativeButton(context.getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
@@ -216,7 +216,7 @@ class FieldAdapter extends BaseAdapter {
                             alert.show();
                         }
 
-                        if (item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.statistics))) {
+                        if (item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.fields_study_statistics))) {
                             Toast.makeText(FieldEditorActivity.thisActivity, "Coming soon!", Toast.LENGTH_SHORT).show();
                         }
 

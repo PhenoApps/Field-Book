@@ -171,7 +171,7 @@ class TraitAdapter extends BaseAdapter {
                 //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
-                        if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.copy))) {
+                        if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_copy))) {
                             int pos = MainActivity.dt.getMaxPositionFromTraits() + 1;
 
                             String traitName = getItem(position).trait;
@@ -196,13 +196,13 @@ class TraitAdapter extends BaseAdapter {
                             TraitEditorActivity.loadData();
                             MainActivity.reloadData = true;
 
-                        } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.delete))) {
+                        } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_delete))) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
 
-                            builder.setTitle(context.getString(R.string.deletetrait));
+                            builder.setTitle(context.getString(R.string.traits_options_delete_dialog_title));
                             builder.setMessage(context.getString(R.string.delete_trait_warning));
 
-                            builder.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() {
+                            builder.setPositiveButton(context.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
@@ -214,7 +214,7 @@ class TraitAdapter extends BaseAdapter {
 
                             });
 
-                            builder.setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener() {
+                            builder.setNegativeButton(context.getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
@@ -225,7 +225,7 @@ class TraitAdapter extends BaseAdapter {
                             AlertDialog alert = builder.create();
                             alert.show();
 
-                        } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.edit))) {
+                        } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_edit))) {
                             listener.onItemClick((AdapterView) parent, v, position, v.getId());
                         }
 

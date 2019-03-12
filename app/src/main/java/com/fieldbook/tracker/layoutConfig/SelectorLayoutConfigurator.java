@@ -95,7 +95,7 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
                     String[] traitTextArray = dataHelper.getDropDownRange(prefixTraits[pos], plotId);
 
                     if (traitTextArray == null) {
-                        text.setText(context.getString(R.string.nodata));
+                        text.setText(context.getString(R.string.main_infobar_no_data));
                     } else {
                         text.setText(traitTextArray[0]);
                     }

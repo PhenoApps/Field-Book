@@ -1,125 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- AppIntro -->
-    <string name="intro_1_title">Welcome to Field Book!</string>
-    <string name="intro_1_body">Field Book can be used to collect data in the field.</string>
-    <string name="intro_2_title">Fields</string>
-    <string name="intro_2_body">To use Field Book, you need a file with a unique identifier, a primary order, and a secondary order. Sample files are provided within the app.</string>
-    <string name="intro_3_title">Traits</string>
-    <string name="intro_3_body">After a file has been imported, you can create the traits of interest that you want to collect in the field.</string>
-    <string name="intro_4_title">Permissions</string>
-    <string name="intro_4_body">On the next screen, Field Book will ask you to accept several permissions it needs to access your files and fully function.</string>
-
     <!-- Common -->
-    <string name="app_name">Field Book</string>
-    <string name="cancel">Cancel</string>
-    <string name="okay">OK</string>
-    <string name="genericerror">Error</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="close">Close</string>
-    <string name="areyousure">Are you sure?</string>
-    <string name="importdb">Import</string>
-    <string name="warning">Warning</string>
-    <string name="later">Later</string>
+    <string name="field_book">Field Book</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
+    <string name="dialog_close">Close</string>
+    <string name="dialog_confirm">Are you sure?</string>
+    <string name="dialog_import">Import</string>
+    <string name="dialog_warning">Warning</string>
+    <string name="dialog_save">Save</string>
 
     <!-- Startup  -->
-    <string name="sampledata">Sample data</string>
-    <string name="loadsampledata">Would you like to load the sample data provided?</string>
+    <string name="startup_sample_data_title">Sample data</string>
+    <string name="startup_sample_data_message">Would you like to load the sample data provided?</string>
 
     <!-- Miscellaneous  -->
-    <string name="maxphotos">Maximum number of photos</string>
+    <string name="fields_name">Field Name</string>
+    <string name="fields_load">Load</string>
+    <string name="settings_customize_theme">Theme</string>
 
     <!-- Main Activity  -->
-    <string name="search">Search</string>
-    <string name="resources">Resources</string>
-    <string name="currentvalue">Current value</string>
-    <string name="traitdetails">Trait details</string>
-    <string name="nodata">No data</string>
-    <string name="theme">Theme</string>
-    <string name="lock_data">Lock data</string>
-    <string name="unlock_data">Unlock data</string>
-    <string name="nomatches">No matching value</string>
-    <string name="nextmissingbutton">Next empty entry</string>
-    <string name="jumptoplotidbutton">Go to ID</string>
-    <string name="barcodescantitle">Scan barcode</string>
-    <string name="scan">Scan</string>
-    <string name="drawer_open">Open navigation drawer</string>
-    <string name="drawer_close">Close navigation drawer</string>
+    <string name="main_toolbar_search">Search</string>
+    <string name="main_toolbar_resources">Resources</string>
+    <string name="main_trait_details">Trait details</string>
+    <string name="main_infobar_no_data">No data</string>
+    <string name="main_toolbar_lock_data">Lock data</string>
+    <string name="main_toolbar_unlock_data">Unlock data</string>
+    <string name="main_toolbar_moveto_no_match">No matching value</string>
+    <string name="main_toolbar_next_entry_no_data">Next empty entry</string>
+    <string name="main_toolbar_moveto">Go to ID</string>
+    <string name="main_toolbar_barcode_scan">Scan barcode</string>
+    <string name="main_toolbar_moveto_scan">Scan</string>
+    <string name="main_drawer_open">Open navigation drawer</string>
+    <string name="main_drawer_close">Close navigation drawer</string>
+    <string name="main_infobar_title">InfoBar</string>
 
     <!-- Fields Activity  -->
-    <string name="delete_field">Delete field</string>
-    <string name="delete_field_confirmation">Are you sure you want to delete this field? This will also delete all data associated with this field.</string>
-    <string name="field_exists">Field exists</string>
-    <string name="field_exists_message">A field with this name already exists.</string>
-    <string name="choose_new_default">Select or load a new field before collecting data.</string>
-    <string name="choose_new_field">Select or import a new field.</string>
-    <string name="dateimported">Import date</string>
-    <string name="dateedited">Edit date</string>
-    <string name="dateexported">Export date</string>
-    <string name="fieldsummary">Field summary</string>
-    <string name="options">Options</string>
-    <string name="walkingorder">Sort entries by:</string>
-    <string name="statistics">Stats</string>
+    <string name="fields_delete_study">Delete field</string>
+    <string name="fields_delete_study_confirmation">Are you sure you want to delete this field? This will also delete all data associated with this field.</string>
+    <string name="fields_study_exists_title">Field exists</string>
+    <string name="fields_study_exists_message">A field with this name already exists.</string>
+    <string name="fields_select_study">Select or import a field.</string>
+    <string name="fields_date_imported">Import date</string>
+    <string name="fields_date_edited">Edit date</string>
+    <string name="fields_date_exported">Export date</string>
+    <string name="fields_summary">Field summary</string>
+    <string name="fields_options">Options</string>
+    <string name="fields_study_statistics">Stats</string>
+    <string name="fields_sort">Sort</string>
+    <string name="fields_delete">Delete</string>
 
     <!-- Settings Activity  -->
-    <string name="settings">Settings</string>
-    <string name="fields">Fields</string>
-    <string name="traits">Traits</string>
-    <string name="profile">Profile</string>
-    <string name="export">Export</string>
-    <string name="advanced">Advanced</string>
-    <string name="language">Language</string>
-    <string name="updatemsg">Changelog</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_fields">Fields</string>
+    <string name="settings_traits">Traits</string>
+    <string name="settings_profile">Profile</string>
+    <string name="settings_export">Export</string>
+    <string name="settings_advanced">Advanced</string>
 
     <!-- Traits Activity  -->
-    <string name="traitname">Trait name</string>
-    <string name="sort">Sort</string>
-    <string name="delete">Delete</string>
-    <string name="visibility">Visibility</string>
-    <string name="optional">Optional</string>
-    <string name="addtrait">Add trait</string>
-    <string name="copy">Copy</string>
-    <string name="edit">Edit</string>
+    <string name="traits_sort_trait_name">Name</string>
+    <string name="traits_sort_title">Sort</string>
+    <string name="traits_sort_visibility">Visibility</string>
+    <string name="traits_sort_format">Format</string>
+    <string name="traits_toolbar_add_trait">Add trait</string>
+    <string name="traits_options_copy">Copy</string>
+    <string name="traits_options_edit">Edit</string>
+    <string name="traits_options_delete">Delete</string>
+    <string name="traits_options_delete_dialog_title">Delete trait</string>
 
-    <string name="numeric">Numeric</string>
-    <string name="qualitative">Categorical</string>
-    <string name="date">Date</string>
-    <string name="percent">Percent</string>
-    <string name="counter">Counter</string>
-    <string name="rustrating">Disease Rating</string>
-    <string name="bool">Boolean</string>
-    <string name="text">Text</string>
-    <string name="photo">Photo</string>
-    <string name="audio">Audio</string>
-    <string name="multicategorical">Multicat</string>
-    <string name="angle">Angle</string>
-    <string name="video">Video</string>
-    <string name="location_trait">Location</string>
+    <string name="traits_format_numeric">Numeric</string>
+    <string name="traits_format_categorical">Categorical</string>
+    <string name="traits_format_date">Date</string>
+    <string name="traits_format_percent">Percent</string>
+    <string name="traits_format_counter">Counter</string>
+    <string name="traits_format_disease_rating">Disease Rating</string>
+    <string name="traits_format_boolean">Boolean</string>
+    <string name="traits_format_text">Text</string>
+    <string name="traits_format_photo">Photo</string>
+    <string name="traits_format_audio">Audio</string>
+    <string name="traits_format_multicategorical">Multicat</string>
+    <string name="traits_format_angle">Angle</string>
+    <string name="traits_format_video">Video</string>
+    <string name="traits_format_location">Location</string>
 
-    <string name="trait">Trait</string>
-    <string name="format">Format</string>
-    <string name="def">Default</string>
-    <string name="minimum">Minimum</string>
-    <string name="maximum">Maximum</string>
-    <string name="details">Details</string>
-    <string name="categories">Categories</string>
-    <string name="save">Save</string>
-    <string name="importexport">Import/Export</string>
-    <string name="import_title">Import</string>
-    <string name="truevalue">True</string>
-    <string name="falsevalue">False</string>
-    <string name="catseparator">Use / to separate categories</string>
+    <string name="traits_create_trait">Trait</string>
+    <string name="traits_create_format">Format</string>
+    <string name="traits_create_value_default">Default</string>
+    <string name="traits_create_value_minimum">Minimum</string>
+    <string name="traits_create_value_maximum">Maximum</string>
+    <string name="traits_create_details">Details</string>
+    <string name="traits_create_optional">Optional</string>
+    <string name="traits_create_categories_title">Categories</string>
+    <string name="traits_toolbar_import_export">Import/Export</string>
+    <string name="traits_dialog_import">Import</string>
+    <string name="traits_dialog_export">Export</string>
+    <string name="traits_create_photo_maximum">Maximum number of photos</string>
+    <string name="traits_create_true">True</string>
+    <string name="traits_create_false">False</string>
+    <string name="traits_create_categories_text">Use / to separate categories</string>
 
-    <string name="mandatorytrait">Trait name cannot be empty</string>
-    <string name="traitexists">Trait already exists</string>
-    <string name="deletetrait">Delete trait</string>
-    <string name="deletealltraits">Delete all traits</string>
-    <string name="notanumber">Default, minimum, and maximum must be numeric</string>
-    <string name="notemptycategory">Category cannot be empty</string>
+    <string name="traits_create_warning_name_empty">Trait name cannot be empty</string>
+    <string name="traits_create_warning_duplicate">Trait already exists</string>
+    <string name="traits_toolbar_delete_all">Delete all traits</string>
+    <string name="traits_toolbar_sort">Sort</string>
+    <string name="traits_create_warning_numeric_required">Default, minimum, and maximum must be numeric</string>
+    <string name="traits_create_warning_categories_required">Category cannot be empty</string>
 
-    <string name="trait_export_check">Would you like to export the current trait list before importing a new list?</string>
+    <string name="traits_export_check">Would you like to export the current trait list before importing a new list?</string>
 
     <!-- Export  -->
     <string name="dbformat">Database</string>
@@ -140,11 +131,13 @@
     <string name="overwrite_previous_export">Overwrite previously exported file</string>
 
     <!-- Preferences Activity  -->
-    <string name="preferences_ui">Interface</string>
-    <string name="preferences_ux">Experience</string>
-    <string name="preferences_files_naming">Files and Naming</string>
+    <string name="preferences_interface">Interface</string>
+    <string name="preferences_experience">Experience</string>
+    <string name="preferences_naming">Files and Naming</string>
     <string name="preferences_sounds">Sounds</string>
     <string name="preferences_general">General</string>
+
+    <string name="preferences_interface_language">Language</string>
 
     <string name="entry_arrow_left">Left</string>
     <string name="entry_arrow_right">Right</string>
@@ -246,59 +239,36 @@
     <string name="fhelp4">To delete a field, open the menu on the left side of a field name and select Delete.</string>
 
     <!-- About dialog -->
-    <string name="about">About</string>
-    <string name="version">Version</string>
-    <string name="developers">Developers</string>
-    <string name="translators">Translators</string>
-    <string name="otherapps">Other Apps</string>
+    <string name="about_title">About</string>
+    <string name="about_version">Version</string>
+    <string name="about_developer_title">Developers</string>
+    <string name="about_translators_title">Translators</string>
+    <string name="about_other_apps_title">Other Apps</string>
 
-    <string name="versiontitle">Version: </string>
-    <string name="devr">Trevor Rife, Kansas State University</string>
-    <string name="devremail">trife@ksu.edu</string>
-    <string name="devrsite">https://github.com/trife/Field-Book</string>
-    <string name="devp">Jesse Poland, Kansas State University</string>
-    <string name="devpemail">jpoland@ksu.edu</string>
-    <string name="devpsite">http://wheatgenetics.org</string>
-    <string name="translist">Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa, Mokhlesur Rahman, Alice Brunazzi</string>
+    <string name="about_developer_trife">Trevor Rife, Kansas State University</string>
+    <string name="about_developer_trife_email">trife@ksu.edu</string>
+    <string name="about_developer_trife_website">https://github.com/PhenoApps/Field-Book</string>
+    <string name="about_developer_jpoland">Jesse Poland, Kansas State University</string>
+    <string name="about_developer_jpoland_email">jpoland@ksu.edu</string>
+    <string name="about_developer_jpoland_website">http://wheatgenetics.org</string>
+    <string name="about_translators_list">Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa, Mokhlesur Rahman, Alice Brunazzi</string>
 
-    <!-- Language dialog -->
-    <string name="english">English (US)</string>
-    <string name="spanish">Español (México)</string>
-    <string name="german">Deutsch</string>
-    <string name="chinese">汉语</string>
-    <string name="japanese">日本語</string>
-    <string name="french">Français</string>
-    <string name="korean">Korean</string>
-    <string name="italian">Italian</string>
-    <string name="russian">Русский</string>
-    <string name="arabic">العربية</string>
-    <string name="hindi">हिन्दी</string>
-    <string name="filipino">Filipino</string>
-    <string name="portuguesebr">Português (Brasil)</string>
-    <string name="amharic">አማርኛ፤</string>
-    <string name="oromo">Afaan Oromoo</string>
-    <string name="swahili">Swahili</string>
-    <string name="chiga">Chiga</string>
-    <string name="bengali">বাংলা</string>
-    <string name="swedish">Swedish</string>
+    <string name="settings_changelog_title">Changelog</string>
 
-    <!-- Setup dialog -->
-    <string name="person">Person</string>
-    <string name="location">Location</string>
-    <string name="drop1">InfoBar 1</string>
-    <string name="drop2">InfoBar 2</string>
-    <string name="drop3">InfoBar 3</string>
-    <string name="clearsettings">Clear settings</string>
+    <!-- Profile dialog -->
+    <string name="profile_person">Person</string>
+    <string name="profile_location">Location</string>
+    <string name="profile_reset">Clear settings</string>
 
-    <string name="personsetup">Set person</string>
-    <string name="firstname">First name</string>
-    <string name="lastname">Last name</string>
-    <string name="none">None</string>
+    <string name="profile_person_title">Set person</string>
+    <string name="profile_name_first">First name</string>
+    <string name="profile_name_last">Last name</string>
+    <string name="profile_missing">None</string>
 
-    <string name="locationsetup">Set location</string>
-    <string name="latitude">Latitude</string>
-    <string name="longitude">Longitude</string>
-    <string name="getlocation">Get location</string>
+    <string name="profile_location_title">Set location</string>
+    <string name="profile_location_latitude">Latitude</string>
+    <string name="profile_location_longitude">Longitude</string>
+    <string name="profile_location_get">Get location</string>
 
     <!-- Database dialog -->
     <string name="dbbackup">Database</string>
@@ -336,22 +306,25 @@
     <string name="exporttraiterror">No data exists to export</string>
 
     <!-- Search Activity -->
-    <string name="results">Search results</string>
-    <string name="range">Range</string>
-    <string name="plot">Plot</string>
-    <string name="add">Add</string>
-    <string name="clear">Clear</string>
-    <string name="equalsto">is equal to</string>
-    <string name="notequalsto">is not equal to</string>
-    <string name="islike">contains</string>
-    <string name="notislike">does not contain</string>
-    <string name="morethan">is more than</string>
-    <string name="lessthan">is less than</string>
-    <string name="searchempty">No results</string>
+    <string name="search_dialog_title">Search</string>
+    <string name="search_dialog_add">Add</string>
+    <string name="search_dialog_clear">Clear</string>
+    <string name="search_dialog_query_is_equal_to">is equal to</string>
+    <string name="search_dialog_query_is_not_equal_to">is not equal to</string>
+    <string name="search_dialog_query_contains">contains</string>
+    <string name="search_dialog_query_does_not_contain">does not contain</string>
+    <string name="search_dialog_query_is_more_than">is more than</string>
+    <string name="search_dialog_query_is_less_than">is less than</string>
+    <string name="search_results_dialog_title">Search results</string>
+    <string name="search_results_dialog_range">Range</string>
+    <string name="search_results_dialog_plot">Plot</string>
+    <string name="search_results_missing">No results</string>
 
     <!-- Citation strings -->
     <string name="citation_title">Citation</string>
     <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
     <string name="citation_text">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
+
+    <!-- BrAPI strings -->
 
 </resources>

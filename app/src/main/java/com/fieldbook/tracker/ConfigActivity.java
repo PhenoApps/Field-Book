@@ -105,6 +105,10 @@ public class ConfigActivity extends AppCompatActivity {
     private RadioButton allTraits;
     private RadioButton activeTraits;
 
+    private final int PERMISSIONS_REQUEST_EXPORT_DATA = 999;
+    private final int PERMISSIONS_REQUEST_IMPORT_FIELD = 998;
+    private final int PERMISSIONS_REQUEST_MANAGE_TRAITS = 997;
+    private final int PERMISSIONS_REQUEST_LOCATION = 996;
 
     private ArrayList<String> newRange;
     private ArrayList<String> exportTrait;
@@ -147,10 +151,10 @@ public class ConfigActivity extends AppCompatActivity {
         invalidateOptionsMenu();
         loadScreen();
 
-        helpActive = false;
-
         // request permissions
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+
+        helpActive = false;
 
         checkIntent();
     }
@@ -173,7 +177,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.profile)
+        builder.setTitle(R.string.settings_profile)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -195,28 +199,31 @@ public class ConfigActivity extends AppCompatActivity {
 
         ListView settingsList = findViewById(R.id.myList);
 
-        String[] items2 = new String[]{getString(R.string.fields),
-                getString(R.string.traits), getString(R.string.profile), getString(R.string.export), getString(R.string.advanced),
-                getString(R.string.language)}; //, "API Test"};
+        String[] items2 = new String[]{getString(R.string.settings_fields),
+                getString(R.string.settings_traits), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced)}; //, "API Test"};
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
                 Intent intent = new Intent();
                 switch (position) {
                     case 0:
-                        intent.setClassName(ConfigActivity.this,
-                                FieldEditorActivity.class.getName());
-                        startActivity(intent);
+                        if (checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_IMPORT_FIELD)) {
+                            intent.setClassName(ConfigActivity.this,
+                                    FieldEditorActivity.class.getName());
+                            startActivity(intent);
+                        }
                         break;
                     case 1:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.importtraitwarning));
-                            return;
-                        }
+                        if (checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_MANAGE_TRAITS)) {
+                            if (!ep.getBoolean("ImportFieldFinished", false)) {
+                                makeToast(getString(R.string.importtraitwarning));
+                                return;
+                            }
 
-                        intent.setClassName(ConfigActivity.this,
-                                TraitEditorActivity.class.getName());
-                        startActivity(intent);
+                            intent.setClassName(ConfigActivity.this,
+                                    TraitEditorActivity.class.getName());
+                            startActivity(intent);
+                        }
                         break;
                     case 2:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
@@ -227,15 +234,17 @@ public class ConfigActivity extends AppCompatActivity {
                         showSetupDialog();
                         break;
                     case 3:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.nofieldloaded));
-                            return;
-                        } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
-                            makeToast(getString(R.string.notraitloaded));
-                            return;
-                        }
+                        if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_EXPORT_DATA)) {
+                            if (!ep.getBoolean("ImportFieldFinished", false)) {
+                                makeToast(getString(R.string.nofieldloaded));
+                                return;
+                            } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
+                                makeToast(getString(R.string.notraitloaded));
+                                return;
+                            }
 
-                        showSaveDialog();
+                            showSaveDialog();
+                        }
 
                         break;
                     case 4:
@@ -243,15 +252,7 @@ public class ConfigActivity extends AppCompatActivity {
                                 PreferencesActivity.class.getName());
                         startActivity(intent);
                         break;
-                    case 5:
-                        Intent i = new Intent(android.provider.Settings.ACTION_LOCALE_SETTINGS);
-                        startActivity(i);
-                        break;
-                    //case 6:
-                    //    intent.setClassName(ConfigActivity.this,
-                    //            BrapiActivity.class.getName());
-                    //    startActivity(intent);
-                    //    break;
+
                 }
             }
         });
@@ -336,7 +337,7 @@ public class ConfigActivity extends AppCompatActivity {
         builder.setMessage(getString(R.string.citation_string) + "\n\n" + getString(R.string.citation_text));
         builder.setCancelable(false);
 
-        builder.setPositiveButton(getString(R.string.okay), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_ok), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
 
@@ -363,7 +364,7 @@ public class ConfigActivity extends AppCompatActivity {
         builder.setTitle(getString(R.string.tutorial));
         builder.setMessage(getString(R.string.tipsdesc));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
@@ -383,7 +384,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
@@ -407,10 +408,10 @@ public class ConfigActivity extends AppCompatActivity {
     private void loadSampleDataDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this,R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.sampledata));
-        builder.setMessage(getString(R.string.loadsampledata));
+        builder.setTitle(getString(R.string.startup_sample_data_title));
+        builder.setMessage(getString(R.string.startup_sample_data_message));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // Load database with sample data
                 mChosenFile = "sample.db";
@@ -418,7 +419,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
@@ -469,7 +470,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_about, null);
 
-        builder.setTitle(R.string.about)
+        builder.setTitle(R.string.about_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -480,7 +481,7 @@ public class ConfigActivity extends AppCompatActivity {
         aboutDialog.getWindow().setAttributes(langParams);
 
         TextView versionText = (TextView) layout.findViewById(R.id.tvVersion);
-        versionText.setText(getString(R.string.version) + " " + versionName);
+        versionText.setText(getString(R.string.about_version) + " " + versionName);
 
         TextView otherApps = layout.findViewById(R.id.tvOtherApps);
 
@@ -518,7 +519,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.otherapps)
+        builder.setTitle(R.string.about_other_apps_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -853,19 +854,19 @@ public class ConfigActivity extends AppCompatActivity {
         String tagLocation = "";
 
         if (ep.getString("FirstName", "").length() > 0 | ep.getString("LastName", "").length() > 0) {
-            tagName += getString(R.string.person) + ": " + ep.getString("FirstName", "")
+            tagName += getString(R.string.profile_person) + ": " + ep.getString("FirstName", "")
                     + " " + ep.getString("LastName", "");
         } else {
-            tagName += getString(R.string.person) + ": " + getString(R.string.none);
+            tagName += getString(R.string.profile_person) + ": " + getString(R.string.profile_missing);
         }
 
         if (ep.getString("Location", "").length() > 0) {
-            tagLocation += getString(R.string.location) + ": " + ep.getString("Location", "");
+            tagLocation += getString(R.string.profile_location) + ": " + ep.getString("Location", "");
         } else {
-            tagLocation += getString(R.string.location) + ": " + getString(R.string.none);
+            tagLocation += getString(R.string.profile_location) + ": " + getString(R.string.profile_missing);
         }
 
-        return new String[]{tagName, tagLocation, getString(R.string.clearsettings)};
+        return new String[]{tagName, tagLocation, getString(R.string.profile_reset)};
     }
 
     private void updateSetupList() {
@@ -892,7 +893,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_export, null);
 
-        builder.setTitle(R.string.export)
+        builder.setTitle(R.string.settings_export)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1026,7 +1027,9 @@ public class ConfigActivity extends AppCompatActivity {
                         break;
 
                     case 1:
-                        showLocationDialog();
+                        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION,PERMISSIONS_REQUEST_LOCATION)) {
+                            showLocationDialog();
+                        }
                         break;
 
                     case 2:
@@ -1049,7 +1052,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_person, null);
 
-        builder.setTitle(R.string.personsetup)
+        builder.setTitle(R.string.profile_person_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1096,7 +1099,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_location, null);
 
-        builder.setTitle(R.string.locationsetup)
+        builder.setTitle(R.string.profile_location_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1160,10 +1163,10 @@ public class ConfigActivity extends AppCompatActivity {
     private void showClearSettingsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.clearsettings));
-        builder.setMessage(getString(R.string.areyousure));
+        builder.setTitle(getString(R.string.profile_reset));
+        builder.setMessage(getString(R.string.dialog_confirm));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 setupDialog.dismiss();
@@ -1177,7 +1180,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
@@ -1202,7 +1205,9 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (dialog.equals("location")) {
-                showLocationDialog();
+                if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION,PERMISSIONS_REQUEST_LOCATION)) {
+                    showLocationDialog();
+                }
             }
         }
     }
@@ -1321,10 +1326,10 @@ public class ConfigActivity extends AppCompatActivity {
     private void showDatabaseResetDialog1() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.warning));
+        builder.setTitle(getString(R.string.dialog_warning));
         builder.setMessage(getString(R.string.resetwarning1));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -1333,7 +1338,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -1350,10 +1355,10 @@ public class ConfigActivity extends AppCompatActivity {
     private void showDatabaseResetDialog2() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.warning));
+        builder.setTitle(getString(R.string.dialog_warning));
         builder.setMessage(getString(R.string.resetwarning2));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 // Delete database
@@ -1382,7 +1387,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -1447,6 +1452,100 @@ public class ConfigActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private Boolean checkPermission(String permission, int resultCode) {
+        if (ContextCompat.checkSelfPermission(ConfigActivity.this,
+                permission)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(ConfigActivity.this,
+                    new String[]{permission},
+                    resultCode);
+        } else {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_EXPORT_DATA: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if (!ep.getBoolean("ImportFieldFinished", false)) {
+                        makeToast(getString(R.string.nofieldloaded));
+                        return;
+                    }
+
+                    showSaveDialog();
+                } else {
+                    // permission denied
+                    makeToast("Unable to export data without write permissions.");
+                }
+                return;
+            }
+
+            case PERMISSIONS_REQUEST_IMPORT_FIELD: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if (!ep.getBoolean("ImportFieldFinished", false)) {
+                        makeToast(getString(R.string.nofieldloaded));
+                        return;
+                    }
+
+                    Intent intent = new Intent();
+
+                    intent.setClassName(ConfigActivity.this,
+                            FieldEditorActivity.class.getName());
+                    startActivity(intent);
+                } else {
+                    // permission denied
+                    makeToast("Unable to import data without read permissions.");
+                }
+                return;
+            }
+
+            case PERMISSIONS_REQUEST_MANAGE_TRAITS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if (!ep.getBoolean("ImportFieldFinished", false)) {
+                        makeToast(getString(R.string.nofieldloaded));
+                        return;
+                    }
+
+                    Intent intent = new Intent();
+
+                    intent.setClassName(ConfigActivity.this,
+                            TraitEditorActivity.class.getName());
+                    startActivity(intent);
+                } else {
+                    // permission denied
+                    makeToast("Unable to manage traits without read permissions.");
+                }
+                return;
+            }
+
+            case PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    showLocationDialog();
+
+                } else {
+                    makeToast("Unable to acquire location without permission.");
+                }
+                return;
+            }
+        }
     }
 
     @Override

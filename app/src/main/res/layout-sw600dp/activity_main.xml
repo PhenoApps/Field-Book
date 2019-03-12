@@ -156,7 +156,7 @@
                                 android:ellipsize="end"
                                 android:gravity="center"
                                 android:maxLines="1"
-                                android:text="@string/traitdetails"
+                                android:text="@string/main_trait_details"
                                 android:textColor="#000000"
                                 android:textSize="@dimen/text_size_small"
                                 android:textStyle="bold" />
@@ -200,7 +200,7 @@
                                             android:gravity="right"
                                             android:maxLength="10"
                                             android:paddingRight="10dp"
-                                            android:text="@string/range"
+                                            android:text="@string/search_results_dialog_range"
                                             android:textColor="@color/s_text"
                                             android:textSize="@dimen/text_size_xlarge"
                                             android:textStyle="bold" />
@@ -239,7 +239,7 @@
                                             android:layout_gravity="center_vertical"
                                             android:gravity="right"
                                             android:paddingRight="10dp"
-                                            android:text="@string/plot"
+                                            android:text="@string/search_results_dialog_plot"
                                             android:textColor="@color/s_text"
                                             android:textSize="@dimen/text_size_xlarge"
                                             android:textStyle="bold" />

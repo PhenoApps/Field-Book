@@ -9,6 +9,6 @@
         android:id="@+id/importField"
         android:icon="@drawable/ic_tb_add_circle"
         android:showAsAction="ifRoom"
-        android:title="@string/addtrait" />
+        android:title="@string/traits_toolbar_add_trait" />
 </menu>
 

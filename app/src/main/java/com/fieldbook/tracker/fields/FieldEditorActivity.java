@@ -263,7 +263,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     private void fieldCheck() {
         if (!ep.getBoolean("FieldSelected", true)) {
-            makeToast(getString(R.string.choose_new_field));
+            makeToast(getString(R.string.fields_select_study));
         } else {
             MainActivity.reloadData = true;
             finish();
@@ -339,7 +339,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         e.apply();
 
         if (MainActivity.dt.checkFieldName(ep.getString("FieldFile", ""))) {
-            makeToast(getString(R.string.field_exists_message));
+            makeToast(getString(R.string.fields_study_exists_message));
             SharedPreferences.Editor ed = ep.edit();
             ed.putString("FieldFile", null);
             ed.putBoolean("ImportFieldFinished", false);

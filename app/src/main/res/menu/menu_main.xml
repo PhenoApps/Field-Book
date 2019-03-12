@@ -9,17 +9,17 @@
         android:id="@+id/nextEmptyPlot"
         android:icon="@drawable/ic_tb_forward"
         android:showAsAction="always"
-        android:title="@string/nextmissingbutton" />
+        android:title="@string/main_toolbar_next_entry_no_data" />
     <item
         android:id="@+id/jumpToPlot"
         android:icon="@drawable/ic_tb_barcode"
         android:showAsAction="always"
-        android:title="@string/jumptoplotidbutton" />
+        android:title="@string/main_toolbar_moveto" />
     <item
         android:id="@+id/barcodeScan"
         android:icon="@drawable/ic_tb_barcode_scan"
         android:showAsAction="always"
-        android:title="@string/barcodescantitle" />
+        android:title="@string/main_toolbar_barcode_scan" />
     <item
         android:id="@+id/datagrid"
         android:icon="@drawable/ic_tb_datagrid"
@@ -29,12 +29,12 @@
         android:id="@+id/search"
         android:icon="@drawable/ic_tb_search"
         android:showAsAction="always"
-        android:title="@string/search" />"
+        android:title="@string/main_toolbar_search" />"
     <item
         android:id="@+id/resources"
         android:icon="@drawable/ic_tb_folder"
         android:showAsAction="always"
-        android:title="@string/resources" />"
+        android:title="@string/main_toolbar_resources" />"
     <item
         android:id="@+id/summary"
         android:icon="@drawable/ic_tb_details"

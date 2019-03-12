@@ -3,13 +3,13 @@
 
     <PreferenceCategory
         android:key="pref_key_ui_settings"
-        android:title="@string/preferences_ui">
+        android:title="@string/preferences_interface">
 
         <Preference
             android:icon="@drawable/ic_nav_drawer_translate"
             android:key="language"
             android:summary="@string/language_desc"
-            android:title="@string/language">
+            android:title="@string/preferences_interface_language">
 
             <intent
                 android:action="android.intent.action.MAIN"
@@ -49,7 +49,7 @@
 
     <PreferenceCategory
         android:key="pref_key_ux_settings"
-        android:title="@string/preferences_ux">
+        android:title="@string/preferences_experience">
 
         <CheckBoxPreference
             android:defaultValue="false"
