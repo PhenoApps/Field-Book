@@ -848,7 +848,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 if (gps.canGetLocation()) { //GPS enabled
                     lat = gps.getLatitude(); // returns latitude
                     lng = gps.getLongitude(); // returns longitude
-                    fullLocation = Utils.truncateDecimalString(String.valueOf(lat),6) + "; " + Utils.truncateDecimalString(String.valueOf(lng),6);
+                    fullLocation = Utils.truncateDecimalString(String.valueOf(lat),8) + "; " + Utils.truncateDecimalString(String.valueOf(lng),8);
                 } else {
                     Intent intent = new Intent(
                             Settings.ACTION_LOCATION_SOURCE_SETTINGS);
