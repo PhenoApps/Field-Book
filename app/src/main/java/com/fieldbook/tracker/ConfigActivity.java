@@ -286,7 +286,7 @@ public class ConfigActivity extends AppCompatActivity {
                     case 1:
                         if (checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_MANAGE_TRAITS)) {
                             if (!ep.getBoolean("ImportFieldFinished", false)) {
-                                makeToast(getString(R.string.importtraitwarning));
+                                makeToast(getString(R.string.warning_field_before_traits));
                                 return;
                             }
 
@@ -297,7 +297,7 @@ public class ConfigActivity extends AppCompatActivity {
                         break;
                     case 2:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.nofieldloaded));
+                            makeToast(getString(R.string.warning_field_missing));
                             return;
                         }
 
@@ -307,7 +307,7 @@ public class ConfigActivity extends AppCompatActivity {
                         break;
                     case 3:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.nofieldloaded));
+                            makeToast(getString(R.string.warning_field_missing));
                             return;
                         }
 
@@ -316,10 +316,10 @@ public class ConfigActivity extends AppCompatActivity {
                     case 4:
                         if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_EXPORT_DATA)) {
                             if (!ep.getBoolean("ImportFieldFinished", false)) {
-                                makeToast(getString(R.string.nofieldloaded));
+                                makeToast(getString(R.string.warning_field_missing));
                                 return;
                             } else if (dt.getTraitColumnsAsString() == null) {
-                                makeToast(getString(R.string.notraitloaded));
+                                makeToast(getString(R.string.warning_traits_missing));
                                 return;
                             }
 
@@ -441,8 +441,8 @@ public class ConfigActivity extends AppCompatActivity {
     private void showTipsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.tutorial));
-        builder.setMessage(getString(R.string.tipsdesc));
+        builder.setTitle(getString(R.string.tutorial_dialog_title));
+        builder.setMessage(getString(R.string.tutorial_dialog_description));
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
@@ -681,7 +681,7 @@ public class ConfigActivity extends AppCompatActivity {
             dialog.setIndeterminate(true);
             dialog.setCancelable(false);
             dialog.setMessage(Html
-                    .fromHtml(getString(R.string.exportmsg)));
+                    .fromHtml(getString(R.string.export_progress)));
             dialog.show();
         }
 
@@ -773,11 +773,11 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (fail) {
-                makeToast(getString(R.string.exporterror));
+                makeToast(getString(R.string.export_error_general));
             }
 
             if (noData) {
-                makeToast(getString(R.string.exporttraiterror));
+                makeToast(getString(R.string.export_error_data_missing));
             }
 
             if (tooManyTraits) {
@@ -806,7 +806,7 @@ public class ConfigActivity extends AppCompatActivity {
             dialog.setIndeterminate(true);
             dialog.setCancelable(false);
             dialog.setMessage(Html
-                    .fromHtml(getString(R.string.exportmsg)));
+                    .fromHtml(getString(R.string.export_progress)));
             dialog.show();
         }
 
@@ -836,9 +836,9 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (fail) {
-                makeToast(getString(R.string.exporterror));
+                makeToast(getString(R.string.export_error_general));
             } else {
-                makeToast(getString(R.string.exportcomplete));
+                makeToast(getString(R.string.export_complete));
             }
 
         }
@@ -864,7 +864,7 @@ public class ConfigActivity extends AppCompatActivity {
             dialog.setIndeterminate(true);
             dialog.setCancelable(false);
             dialog.setMessage(Html
-                    .fromHtml(getString(R.string.importmsg)));
+                    .fromHtml(getString(R.string.import_dialog_importing)));
             dialog.show();
         }
 
@@ -886,7 +886,7 @@ public class ConfigActivity extends AppCompatActivity {
                 dialog.dismiss();
 
             if (fail) {
-                makeToast(getString(R.string.importerror));
+                makeToast(getString(R.string.import_error_general));
             }
 
             SharedPreferences prefs = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
@@ -1028,17 +1028,17 @@ public class ConfigActivity extends AppCompatActivity {
             public void onClick(View arg0) {
                 // Ensure at least one export type is checked
                 if (!checkDB.isChecked() & !checkExcel.isChecked()) {
-                    makeToast(getString(R.string.noexportcheck));
+                    makeToast(getString(R.string.export_error_missing_format));
                     return;
                 }
 
                 if (!onlyUnique.isChecked() & !allColumns.isChecked()) {
-                    makeToast(getString(R.string.nofieldcheck));
+                    makeToast(getString(R.string.export_error_missing_column));
                     return;
                 }
 
                 if (!activeTraits.isChecked() & !allTraits.isChecked()) {
-                    makeToast(getString(R.string.notraitcheck));
+                    makeToast(getString(R.string.export_error_missing_trait));
                     return;
                 }
 
@@ -1294,16 +1294,16 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void showDatabaseDialog() {
         String[] items = new String[3];
-        items[0] = getString(R.string.dbexport);
-        items[1] = getString(R.string.dbimport);
-        items[2] = getString(R.string.dbreset);
+        items[0] = getString(R.string.database_export);
+        items[1] = getString(R.string.database_import);
+        items[2] = getString(R.string.database_reset);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.dbbackup)
+        builder.setTitle(R.string.database_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1354,7 +1354,7 @@ public class ConfigActivity extends AppCompatActivity {
                 FileExploreActivity.class.getName());
         intent.putExtra("path", Constants.BACKUPPATH);
         intent.putExtra("include", new String[]{"db"});
-        intent.putExtra("title",getString(R.string.dbimport));
+        intent.putExtra("title",getString(R.string.database_import));
         startActivityForResult(intent, 2);
     }
 
@@ -1364,7 +1364,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_save_database, null);
 
-        builder.setTitle(R.string.dbbackup)
+        builder.setTitle(R.string.database_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1407,7 +1407,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
         builder.setTitle(getString(R.string.dialog_warning));
-        builder.setMessage(getString(R.string.resetwarning1));
+        builder.setMessage(getString(R.string.database_reset_warning1));
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
@@ -1436,7 +1436,7 @@ public class ConfigActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
         builder.setTitle(getString(R.string.dialog_warning));
-        builder.setMessage(getString(R.string.resetwarning2));
+        builder.setMessage(getString(R.string.database_reset_warning2));
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
@@ -1450,7 +1450,7 @@ public class ConfigActivity extends AppCompatActivity {
                 ed.apply();
 
                 dialog.dismiss();
-                makeToast(getString(R.string.resetcomplete));
+                makeToast(getString(R.string.database_reset_message));
 
                 try {
                     ConfigActivity.this.finish();
@@ -1523,9 +1523,9 @@ public class ConfigActivity extends AppCompatActivity {
 
             case android.R.id.home:
                 if (!ep.getBoolean("ImportFieldFinished", false)) {
-                    makeToast(getString(R.string.nofieldloaded));
+                    makeToast(getString(R.string.warning_field_missing));
                 } else if (dt.getTraitColumnsAsString() == null) {
-                    makeToast(getString(R.string.notraitloaded));
+                    makeToast(getString(R.string.warning_traits_missing));
                 } else
                     finish();
                 break;
@@ -1558,7 +1558,7 @@ public class ConfigActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     if (!ep.getBoolean("ImportFieldFinished", false)) {
-                        makeToast(getString(R.string.nofieldloaded));
+                        makeToast(getString(R.string.warning_field_missing));
                         return;
                     }
 
@@ -1576,7 +1576,7 @@ public class ConfigActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     if (!ep.getBoolean("ImportFieldFinished", false)) {
-                        makeToast(getString(R.string.nofieldloaded));
+                        makeToast(getString(R.string.warning_field_missing));
                         return;
                     }
 
@@ -1598,7 +1598,7 @@ public class ConfigActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     if (!ep.getBoolean("ImportFieldFinished", false)) {
-                        makeToast(getString(R.string.nofieldloaded));
+                        makeToast(getString(R.string.warning_field_missing));
                         return;
                     }
 

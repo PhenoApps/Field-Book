@@ -22,15 +22,15 @@
     <string name="main_toolbar_lock_data">Blocca dati</string>
     <string name="main_toolbar_unlock_data">Sblocca dati</string>
     <!-- Trait layouts and messages -->
-    <string name="minusday">-1 giorno</string>
+    <string name="trait_layout_date_minusday">-1 giorno</string>
     <string name="enter">Invio</string>
-    <string name="plusday">+1 giorno</string>
+    <string name="trait_layout_date_plusday">+1 giorno</string>
     <string name="nodate">Nessuna data</string>
     <string name="record">Registra</string>
     <string name="play">Ascolta</string>
     <string name="capture">Cattura</string>
     <string name="stop">Stop</string>
-    <string name="stored">I dati sono stati salvati</string>
+    <string name="trait_layout_data_stored">I dati sono stati salvati</string>
     <string name="hardwaremissing">Il tuo dispositivo non contiene l\'hardware necessario per questa funzione</string>
     <string name="photomissing">La foto non esiste</string>
     <string name="photodecodefail">Impossibile leggere la foto</string>
@@ -46,7 +46,7 @@
     <string name="settings_export">Esporta</string>
     <string name="settings_advanced">Avanzate</string>
     <string name="preferences_interface_language">Lingua</string>
-    <string name="settings_changelog_title">Diario di modifiche</string>
+    <string name="changelog_title">Diario di modifiche</string>
     <string name="startup_sample_data_title">Dati di prova</string>
     <string name="startup_sample_data_message">Vuoi caricare i dati di prova forniti?</string>
     <!-- Traits -->
@@ -89,7 +89,7 @@
     <string name="traits_create_warning_numeric_required">Default, minimo e massimo devono essere numerici</string>
     <string name="traits_create_warning_categories_required">La categoria non può essere vuota</string>
     <!-- Advanced settings -->
-    <string name="tips">Tutorial</string>
+    <string name="preferences_interface_tutorial">Tutorial</string>
     <string name="quickgoto">Tasto rapido</string>
     <string name="useday">Usa giorno dell\'anno</string>
     <string name="ignoreentries">Nascondi voci con dati</string>
@@ -120,33 +120,33 @@
     <string name="main_toolbar_barcode_scan_title">Scansiona il codice a barre</string>
     <string name="main_toolbar_moveto_scan">Scansiona</string>
     <!-- Tutorial -->
-    <string name="tutorial">Tutorial</string>
-    <string name="tipsdesc">Vuoi attivare il tutorial? Questa impostazione può essere cambiata in Impostazioni Avanzate</string>
-    <string name="prev">Precedente</string>
-    <string name="next">Successivo</string>
-    <string name="mhelp1">La barra di informazione nella parte superiore della schermata mostra dati aggiuntivi per ogni voce. Queste possono essere cambiate usando il menù a tendina</string>
-    <string name="mhelp2">La grande freccia nera si muove tra le voci. La freccia piccola e verde si muove tra i caratteri</string>
-    <string name="mhelp3">Una lista dei caratteri attivi viene mostrata quando un carattere viene compresso</string>
-    <string name="mhelp4">L\'icona sfoglia mostra la lista dei file presenti nella cartella Risorse</string>
-    <string name="mhelp5">L\'icona di ricerca consente di interrogare il database</string>
-    <string name="mhelp6">L\'icona documento mostra il sommario di tutti i dati per una data voce</string>
-    <string name="mhelp7">Tutte le altre opzioni sono a sinistra nel pannello di navigazione</string>
-    <string name="shelp1">Per importare e gestire i campi, selezionare Campi</string>
-    <string name="shelp2">Per aggiungere, importare o gestire i caratteri, selezionare Caratteri</string>
-    <string name="shelp3">Per inserire l\'operatore e la località, selezionare Profilo</string>
-    <string name="shelp4">Per esportare i dati, selezionare Esporta.
+    <string name="tutorial_dialog_title">Tutorial</string>
+    <string name="tutorial_dialog_description">Vuoi attivare il tutorial? Questa impostazione può essere cambiata in Impostazioni Avanzate</string>
+    <string name="tutorial_previous">Precedente</string>
+    <string name="tutorial_next">Successivo</string>
+    <string name="tutorial_main_1">La barra di informazione nella parte superiore della schermata mostra dati aggiuntivi per ogni voce. Queste possono essere cambiate usando il menù a tendina</string>
+    <string name="tutorial_main_2">La grande freccia nera si muove tra le voci. La freccia piccola e verde si muove tra i caratteri</string>
+    <string name="tutorial_main_3">Una lista dei caratteri attivi viene mostrata quando un carattere viene compresso</string>
+    <string name="tutorial_main_4">L\'icona sfoglia mostra la lista dei file presenti nella cartella Risorse</string>
+    <string name="tutorial_main_5">L\'icona di ricerca consente di interrogare il database</string>
+    <string name="tutorial_main_6">L\'icona documento mostra il sommario di tutti i dati per una data voce</string>
+    <string name="tutorial_main_7">Tutte le altre opzioni sono a sinistra nel pannello di navigazione</string>
+    <string name="tutorial_settings_1">Per importare e gestire i campi, selezionare Campi</string>
+    <string name="tutorial_settings_2">Per aggiungere, importare o gestire i caratteri, selezionare Caratteri</string>
+    <string name="tutorial_settings_3">Per inserire l\'operatore e la località, selezionare Profilo</string>
+    <string name="tutorial_settings_4">Per esportare i dati, selezionare Esporta.
 I dati possono essere esportati in due formati: database o tabella. Le colonne del file originale possono essere incluse o escluse dal file esportato.</string>
-    <string name="shelp5">Impostazioni Avanzate contiene impostazioni opzionali riguardo alle modalità di raccoglimento dati.</string>
-    <string name="shelp6">Una volta che i dati sono importati, il pulsante \"indietro\" in alto a sinistra ti porterà alla schermata principale</string>
-    <string name="thelp1">Aggiungi Carattere dal menù crea un nuovo carattere. Non è possibile usare la tastiera e il tutorial contemporaneamente. I caratteri con un formato diverso avranno strutture differenti</string>
-    <string name="thelp2">Per importare i caratteri, scegli Importa sulla barra degli strumenti</string>
-    <string name="thelp3">Consulta il manuale dell app per ulteriori informazioni riguardo alla creazione dei caratteri</string>
-    <string name="thelp4">Usa il box di controllo su ogni carattere per azionare la sua visibilità nella schermata principale. Deseleziona i caratteri che non vuoi selezionare</string>
-    <string name="thelp5">Premi il pulsante \"indietro\" in alto a sinistra per tornare alle Impostazioni</string>
-    <string name="fhelp1">Aggiungi Campo sulla barra degli strumenti permette di importare nuovi campi</string>
-    <string name="fhelp2">I file devono contenere tre colonne: l\'identificatore unico, l\'ordine primario e l\'ordine secondario. L\'ordine primario/secondario vengono usati per muoverti nel campo</string>
-    <string name="fhelp3">Il campo con il bottone marrone è il campo attualmente attivo</string>
-    <string name="fhelp4">Per cancellare un campo, aprire il menu a sinistra del nome del campo e selezionare Cancella</string>
+    <string name="tutorial_settings_5">Impostazioni Avanzate contiene impostazioni opzionali riguardo alle modalità di raccoglimento dati.</string>
+    <string name="tutorial_settings_6">Una volta che i dati sono importati, il pulsante \"indietro\" in alto a sinistra ti porterà alla schermata principale</string>
+    <string name="tutorial_traits_1">Aggiungi Carattere dal menù crea un nuovo carattere. Non è possibile usare la tastiera e il tutorial contemporaneamente. I caratteri con un formato diverso avranno strutture differenti</string>
+    <string name="tutorial_traits_2">Per importare i caratteri, scegli Importa sulla barra degli strumenti</string>
+    <string name="tutorial_traits_3">Consulta il manuale dell app per ulteriori informazioni riguardo alla creazione dei caratteri</string>
+    <string name="tutorial_traits_4">Usa il box di controllo su ogni carattere per azionare la sua visibilità nella schermata principale. Deseleziona i caratteri che non vuoi selezionare</string>
+    <string name="tutorial_traits_5">Premi il pulsante \"indietro\" in alto a sinistra per tornare alle Impostazioni</string>
+    <string name="tutorial_fields_1">Aggiungi Campo sulla barra degli strumenti permette di importare nuovi campi</string>
+    <string name="tutorial_fields_2">I file devono contenere tre colonne: l\'identificatore unico, l\'ordine primario e l\'ordine secondario. L\'ordine primario/secondario vengono usati per muoverti nel campo</string>
+    <string name="tutorial_fields_3">Il campo con il bottone marrone è il campo attualmente attivo</string>
+    <string name="tutorial_fields_4">Per cancellare un campo, aprire il menu a sinistra del nome del campo e selezionare Cancella</string>
     <!-- About dialog -->
     <string name="about_title">A proposito</string>
     <string name="about_version">Versione</string>
@@ -163,22 +163,22 @@ I dati possono essere esportati in due formati: database o tabella. Le colonne d
     <!-- Other Apps -->
     <string name="about_other_apps_title">Altre App</string>
     <!-- Export dialog -->
-    <string name="dbformat">Database</string>
-    <string name="tableformat">Tabella</string>
-    <string name="filename">Nome file</string>
-    <string name="headerformat">Formato</string>
-    <string name="allcolumns">Tutte le colonne importate</string>
-    <string name="fieldcolumns">Colonne campo</string>
-    <string name="onlyunique">Solo identificativi unici</string>
-    <string name="alltraits">Tutti i caratteri</string>
-    <string name="activetraits">Solo caratteri attivi</string>
-    <string name="exporterror">Errore durante esportazione file</string>
-    <string name="exportcomplete">Esportazione file completata</string>
-    <string name="exportmsg">Esportazione...</string>
-    <string name="noexportcheck">Il tipo di esportazione deve essere selezionato</string>
-    <string name="nofieldcheck">Il campo tipo di colonna deve essere selezionato</string>
-    <string name="notraitcheck">Il tipo di carattere deve essere selezionato</string>
-    <string name="overwrite_previous_export">Sovrascrivi i file esportati precedentemente</string>
+    <string name="export_format_database">Database</string>
+    <string name="export_format_table">Tabella</string>
+    <string name="export_file_name">Nome file</string>
+    <string name="export_format_title">Formato</string>
+    <string name="export_content_columns_all">Tutte le colonne importate</string>
+    <string name="export_content_columns_title">Colonne campo</string>
+    <string name="export_content_columns_unique">Solo identificativi unici</string>
+    <string name="export_content_traits_all">Tutti i caratteri</string>
+    <string name="export_content_traits_active">Solo caratteri attivi</string>
+    <string name="export_error_general">Errore durante esportazione file</string>
+    <string name="export_complete">Esportazione file completata</string>
+    <string name="export_progress">Esportazione...</string>
+    <string name="export_error_missing_format">Il tipo di esportazione deve essere selezionato</string>
+    <string name="export_error_missing_column">Il campo tipo di colonna deve essere selezionato</string>
+    <string name="export_error_missing_trait">Il tipo di carattere deve essere selezionato</string>
+    <string name="export_overwrite">Sovrascrivi i file esportati precedentemente</string>
     <!-- Language dialog -->
     <string name="english">English (US)</string>
     <string name="spanish">Español (México)</string>
@@ -216,30 +216,30 @@ I dati possono essere esportati in due formati: database o tabella. Le colonne d
     <string name="profile_location_longitude">Longitudine</string>
     <string name="profile_get_location">Ottieni località</string>
     <!-- Database dialog -->
-    <string name="dbbackup">Database</string>
-    <string name="resetcomplete">Il database è stato cancellato</string>
-    <string name="dbimport">Importa il database</string>
-    <string name="dbexport">Esporta il database</string>
-    <string name="dbreset">Resettare il database</string>
-    <string name="resetwarning1">Tramite il reset, tutti i dati verranno cancellati. Sei sicuro di voler procedere?</string>
-    <string name="resetwarning2">Un database cancellato non potrà essere ripristinato. L\'applicazione si chiuderà subito dopo. Sei sicuro di voler continuare?</string>
+    <string name="database_dialog_title">Database</string>
+    <string name="database_reset_message">Il database è stato cancellato</string>
+    <string name="database_import">Importa il database</string>
+    <string name="database_export">Esporta il database</string>
+    <string name="database_reset">Resettare il database</string>
+    <string name="database_reset_warning1">Tramite il reset, tutti i dati verranno cancellati. Sei sicuro di voler procedere?</string>
+    <string name="database_reset_warning2">Un database cancellato non potrà essere ripristinato. L\'applicazione si chiuderà subito dopo. Sei sicuro di voler continuare?</string>
     <!-- Import dialog -->
-    <string name="importfields">Importa campo</string>
-    <string name="importunique">Identificatore unico</string>
-    <string name="importfirst">Ordine primario</string>
-    <string name="importsecond">Ordine secondario</string>
-    <string name="importmsg">Attendere prego...</string>
-    <string name="importerror">Errore di importazione</string>
-    <string name="importuniqueerror">L\'identificatore unico contiene duplicati</string>
-    <string name="notsupported">Questo tipo di file non è attualmente supportato</string>
-    <string name="columnfail">La colonna dei nomi contiene caratteri o parole non consentite</string>
-    <string name="colnamesdif">Le colonne non possono essere utilizzate per la stessa assegnazione</string>
+    <string name="import_dialog_title">Importa campo</string>
+    <string name="import_dialog_unique">Identificatore unico</string>
+    <string name="import_dialog_primary">Ordine primario</string>
+    <string name="import_dialog_secondary">Ordine secondario</string>
+    <string name="import_dialog_importing">Attendere prego...</string>
+    <string name="import_error_general">Errore di importazione</string>
+    <string name="import_error_unique">L\'identificatore unico contiene duplicati</string>
+    <string name="import_error_unsupported">Questo tipo di file non è attualmente supportato</string>
+    <string name="import_error_columns">La colonna dei nomi contiene caratteri o parole non consentite</string>
+    <string name="import_error_column_choice">Le colonne non possono essere utilizzate per la stessa assegnazione</string>
     <!-- Warnings/Catches -->
-    <string name="importtraitwarning">Il campo deve essere importato prima di poter creare un carattere</string>
-    <string name="nofieldloaded">Nessun campo è stato caricato. Carica un campo prima di rilevare il dato</string>
-    <string name="notraitloaded">Il carattere non esiste. Crea un carattere prima di rilevare il dato</string>
-    <string name="createtraitserror">Crea un carattere prima di poterlo modificare</string>
-    <string name="exporttraiterror">Nessun dato da esportare</string>
+    <string name="warning_field_before_traits">Il campo deve essere importato prima di poter creare un carattere</string>
+    <string name="warning_field_missing">Nessun campo è stato caricato. Carica un campo prima di rilevare il dato</string>
+    <string name="warning_traits_missing">Il carattere non esiste. Crea un carattere prima di rilevare il dato</string>
+    <string name="warning_traits_missing_modify">Crea un carattere prima di poterlo modificare</string>
+    <string name="export_error_data_missing">Nessun dato da esportare</string>
     <!-- Search dialog -->
     <string name="search_results_dialog_title">Cerca risultati</string>
     <string name="search_results_dialog_range">Fila</string>

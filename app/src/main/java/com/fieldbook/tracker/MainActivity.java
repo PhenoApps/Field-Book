@@ -1914,7 +1914,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         } else {
                             mRecordingLocation = new File(newTraits.get(currentTrait.trait).toString());
                             doRecord.setImageResource(R.drawable.trait_audio_play);
-                            etCurVal.setText(getString(R.string.stored));
+                            etCurVal.setText(getString(R.string.trait_layout_data_stored));
                         }
 
                     } else if (currentTrait.format.equals("photo")) {
@@ -2800,7 +2800,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                     updateTrait(currentTrait.trait, "audio", mRecordingLocation.getAbsolutePath());
 
-                    etCurVal.setText(getString(R.string.stored));
+                    etCurVal.setText(getString(R.string.trait_layout_data_stored));
 
                     mRecording = false;
                     doRecord.setImageResource(R.drawable.trait_audio_play);

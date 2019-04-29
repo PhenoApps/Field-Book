@@ -844,7 +844,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
-            makeToast(getString(R.string.createtraitserror));
+            makeToast(getString(R.string.warning_traits_missing_modify));
             return;
         }
 
@@ -922,7 +922,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.importfields)
+        builder.setTitle(R.string.import_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -936,8 +936,8 @@ public class TraitEditorActivity extends AppCompatActivity {
         ListView myList = layout.findViewById(R.id.myList);
 
         String[] importArray = new String[2];
-        importArray[0] = getString(R.string.importlocal);
-        importArray[1] = getString(R.string.importdropbox);
+        importArray[0] = getString(R.string.import_source_local);
+        importArray[1] = getString(R.string.import_source_dropbox);
 
         //TODO add google drive (requires Google Play Services)
         //importArray[2] = getString(R.string.importgoogle);
@@ -1010,7 +1010,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
-            makeToast(getString(R.string.createtraitserror));
+            makeToast(getString(R.string.warning_traits_missing_modify));
             return;
         }
 
@@ -1166,7 +1166,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
-            makeToast(getString(R.string.createtraitserror));
+            makeToast(getString(R.string.warning_traits_missing_modify));
             return;
         }
 
@@ -1269,7 +1269,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             dialog.setIndeterminate(true);
             dialog.setCancelable(false);
             dialog.setMessage(Html
-                    .fromHtml(thisActivity.getString(R.string.importmsg)));
+                    .fromHtml(thisActivity.getString(R.string.import_dialog_importing)));
             dialog.show();
         }
 
@@ -1340,7 +1340,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 dialog.dismiss();
 
             if (fail)
-                makeToast(thisActivity.getString(R.string.importerror));
+                makeToast(thisActivity.getString(R.string.import_error_general));
         }
     }
 

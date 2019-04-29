@@ -33,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingRight="20dp"
-                android:text="@string/dbformat"
+                android:text="@string/export_format_database"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_medium" />
 
@@ -41,7 +41,7 @@
                 android:id="@+id/formatExcel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/tableformat"
+                android:text="@string/export_format_table"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_medium" />
 
@@ -65,7 +65,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/fieldcolumns"
+                        android:text="@string/export_content_columns_title"
                         android:textColor="@color/s_text"
                         android:textSize="@dimen/text_size_medium"
                         android:textStyle="bold" />
@@ -79,14 +79,14 @@
                             android:id="@+id/onlyUnique"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/onlyunique"
+                            android:text="@string/export_content_columns_unique"
                             android:textSize="@dimen/text_size_medium" />
 
                         <RadioButton
                             android:id="@+id/allColumns"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/allcolumns"
+                            android:text="@string/export_content_columns_all"
                             android:textSize="@dimen/text_size_medium" />
                     </RadioGroup>
                 </LinearLayout>
@@ -115,14 +115,14 @@
                             android:id="@+id/activeTraits"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/activetraits"
+                            android:text="@string/export_content_traits_active"
                             android:textSize="@dimen/text_size_medium" />
 
                         <RadioButton
                             android:id="@+id/allTraits"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/alltraits"
+                            android:text="@string/export_content_traits_all"
                             android:textSize="@dimen/text_size_medium" />
                     </RadioGroup>
                 </LinearLayout>
@@ -136,7 +136,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/filename"
+                android:text="@string/export_file_name"
                 android:textColor="@color/s_text"
                 android:textSize="@dimen/text_size_medium"
                 android:textStyle="bold" />
@@ -154,7 +154,7 @@
                 android:id="@+id/overwrite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/overwrite_previous_export"
+                android:text="@string/export_overwrite"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_medium" />
 

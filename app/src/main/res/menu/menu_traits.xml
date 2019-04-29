@@ -4,7 +4,7 @@
         android:id="@+id/help"
         android:icon="@drawable/ic_tb_help"
         android:showAsAction="always"
-        android:title="@string/tutorial" />
+        android:title="@string/tutorial_dialog_title" />
     <item
         android:id="@+id/sortTrait"
         android:icon="@drawable/ic_tb_sort"

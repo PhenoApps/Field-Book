@@ -161,7 +161,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.importfields)
+        builder.setTitle(R.string.import_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -175,8 +175,8 @@ public class FieldEditorActivity extends AppCompatActivity {
         ListView myList = layout.findViewById(R.id.myList);
 
         String[] importArray = new String[2];
-        importArray[0] = getString(R.string.importlocal);
-        importArray[1] = getString(R.string.importdropbox);
+        importArray[0] = getString(R.string.import_source_local);
+        importArray[1] = getString(R.string.import_source_dropbox);
 
         //TODO add google drive (requires Google Play Services)
         //importArray[2] = getString(R.string.importgoogle);
@@ -190,7 +190,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                                 FileExploreActivity.class.getName());
                         intent.putExtra("path", Constants.FIELDIMPORTPATH);
                         intent.putExtra("include", new String[]{"csv", "xls"});
-                        intent.putExtra("title", getString(R.string.importfields));
+                        intent.putExtra("title", getString(R.string.import_dialog_title));
                         startActivityForResult(intent, 1);
                         break;
                     case 1:
@@ -364,7 +364,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         }
 
         if (!mChosenFile.toLowerCase().contains(".csv") && !mChosenFile.toLowerCase().contains(".xls")) {
-            makeToast(getString(R.string.notsupported));
+            makeToast(getString(R.string.import_error_unsupported));
         } else {
             makeDirs();
             loadFile();
@@ -428,13 +428,13 @@ public class FieldEditorActivity extends AppCompatActivity {
         for (String s : importColumns) {
             if (DataHelper.hasSpecialChars(s)) {
                 columnFail = true;
-                makeToast(getString(R.string.columnfail) + " (\"" + s + "\")");
+                makeToast(getString(R.string.import_error_columns) + " (\"" + s + "\")");
                 break;
             }
 
             if (list.contains(s.toLowerCase())) {
                 columnFail = true;
-                makeToast(getString(R.string.illegal_import_column) + " \"" + s + "\"");
+                makeToast(getString(R.string.import_error_column_name) + " \"" + s + "\"");
                 break;
             }
         }
@@ -450,7 +450,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_import, null);
 
-        builder.setTitle(R.string.importfields)
+        builder.setTitle(R.string.import_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -502,7 +502,7 @@ public class FieldEditorActivity extends AppCompatActivity {
             dialog = new ProgressDialog(FieldEditorActivity.this);
             dialog.setIndeterminate(true);
             dialog.setCancelable(false);
-            dialog.setMessage(Html.fromHtml(getString(R.string.importmsg)));
+            dialog.setMessage(Html.fromHtml(getString(R.string.import_dialog_importing)));
             dialog.show();
         }
 
@@ -642,11 +642,11 @@ public class FieldEditorActivity extends AppCompatActivity {
                 ed.apply();
             }
             if (fail) {
-                makeToast(getString(R.string.importerror));
+                makeToast(getString(R.string.import_error_general));
             } else if (uniqueFail) {
-                makeToast(getString(R.string.importuniqueerror));
+                makeToast(getString(R.string.import_error_unique));
             } else if (specialCharactersFail) {
-                makeToast(getString(R.string.illegal_unique_column_characters));
+                makeToast(getString(R.string.import_error_unique_characters_illegal));
             } else {
                 Editor ed = ep.edit();
                 ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
@@ -736,7 +736,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         idColPosition = unique.getSelectedItemPosition();
 
         if (uniqueS.equals(primaryS) || uniqueS.equals(secondaryS) || primaryS.equals(secondaryS)) {
-            makeToast(getString(R.string.colnamesdif));
+            makeToast(getString(R.string.import_error_column_choice));
         }
 
         return true;

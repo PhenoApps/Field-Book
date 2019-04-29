@@ -49,7 +49,7 @@
 
     <PreferenceCategory
         android:key="pref_key_ux_settings"
-        android:title="@string/preferences_experience">
+        android:title="@string/preferences_behavior">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -79,7 +79,7 @@
             android:icon="@drawable/ic_tb_help"
             android:key="Tips"
             android:summary="@string/tips_desc"
-            android:title="@string/tutorial" />
+            android:title="@string/tutorial_dialog_title" />
 
         <CheckBoxPreference
             android:defaultValue="false"
