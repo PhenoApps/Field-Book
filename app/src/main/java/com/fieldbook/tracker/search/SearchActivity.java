@@ -6,8 +6,8 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.SharedPreferences;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,6 +25,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 
@@ -51,7 +52,7 @@ public class SearchActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_search);
 
-        setTitle(R.string.search);
+        setTitle(R.string.main_toolbar_search);
 
         WindowManager.LayoutParams params = getWindow().getAttributes();
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
@@ -178,14 +179,14 @@ public class SearchActivity extends AppCompatActivity {
                     else
                         sql = sql1 + sql;
 
-                    final SearchData[] data = MainActivity.dt.getRangeBySql(sql);
+                    final SearchData[] data = ConfigActivity.dt.getRangeBySql(sql);
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this, R.style.AppAlertDialog);
 
                     LayoutInflater inflater = SearchActivity.this.getLayoutInflater();
                     View layout = inflater.inflate(R.layout.dialog_search_results, null);
 
-                    builder.setTitle(R.string.results)
+                    builder.setTitle(R.string.search_results_dialog_title)
                             .setCancelable(true)
                             .setView(layout);
 
@@ -199,8 +200,8 @@ public class SearchActivity extends AppCompatActivity {
                     TextView primaryTitle = layout.findViewById(R.id.range);
                     TextView secondaryTitle = layout.findViewById(R.id.plot);
 
-                    primaryTitle.setText(ep.getString("ImportFirstName", getString(R.string.range)));
-                    secondaryTitle.setText(ep.getString("ImportSecondName", getString(R.string.plot)));
+                    primaryTitle.setText(ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)));
+                    secondaryTitle.setText(ep.getString("ImportSecondName", getString(R.string.search_results_dialog_plot)));
 
                     Button closeBtn = layout.findViewById(R.id.closeBtn);
                     ListView myList = layout.findViewById(R.id.myList);
@@ -242,7 +243,7 @@ public class SearchActivity extends AppCompatActivity {
 
                         dialog.show();
                     } else {
-                        makeToast(getString(R.string.searchempty));
+                        makeToast(getString(R.string.search_results_missing));
                     }
                 } catch (Exception z) {
                     Log.e(TAG, "" +z.getMessage());
@@ -290,24 +291,24 @@ public class SearchActivity extends AppCompatActivity {
 
         String[] likes = new String[6];
 
-        likes[0] = getString(R.string.equalsto);
-        likes[1] = getString(R.string.notequalsto);
-        likes[2] = getString(R.string.islike);
-        likes[3] = getString(R.string.notislike);
-        likes[4] = getString(R.string.morethan);
-        likes[5] = getString(R.string.lessthan);
+        likes[0] = getString(R.string.search_dialog_query_is_equal_to);
+        likes[1] = getString(R.string.search_dialog_query_is_not_equal_to);
+        likes[2] = getString(R.string.search_dialog_query_contains);
+        likes[3] = getString(R.string.search_dialog_query_does_not_contain);
+        likes[4] = getString(R.string.search_dialog_query_is_more_than);
+        likes[5] = getString(R.string.search_dialog_query_is_less_than);
 
         ArrayAdapter adapter = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinnerlayout, likes);
         //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(adapter);
 
-        String[] col = MainActivity.dt.getRangeColumns();
+        String[] col = ConfigActivity.dt.getRangeColumns();
 
         if (col != null) {
             rangeUntil = col.length;
 
             ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinnerlayout,
-                    concat(col, MainActivity.dt.getVisibleTrait()));
+                    concat(col, ConfigActivity.dt.getVisibleTrait()));
             adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             c.setAdapter(adapter2);
 

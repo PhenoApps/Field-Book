@@ -43,7 +43,7 @@ public class DataHelper {
 
     private static String TAG = "Field Book";
 
-    private static final String RANGE = "range";
+    public static final String RANGE = "range";
     public static final String TRAITS = "traits";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -139,7 +139,6 @@ public class DataHelper {
         Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{plot, trait});
         return cursor.getCount() + 1;
     }
-
 
     public int getMaxPositionFromTraits() {
 
@@ -1257,7 +1256,7 @@ public class DataHelper {
     }
 
     public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int exp_id) {
-        MainActivity.dt.open();
+        ConfigActivity.dt.open();
         Cursor cursor = db.rawQuery("SELECT * from " + EXP_INDEX, null);
         cursor.moveToFirst();
 
@@ -1603,5 +1602,22 @@ public class DataHelper {
             cursor.close();
         }
         return false;
+    }
+
+    public boolean isTableEmpty(String tableName) {
+        boolean empty = true;
+
+        if(!isTableExists(tableName)) {
+            return empty;
+        }
+
+        Cursor cur = db.rawQuery("SELECT COUNT(*) FROM " + tableName, null);
+        if (cur != null) {
+            if (cur != null && cur.moveToFirst()) {
+                empty = (cur.getInt(0) == 0);
+            }
+            cur.close();
+        }
+        return empty;
     }
 }

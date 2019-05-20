@@ -6,35 +6,30 @@
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_nav_drawer_settings"
-            android:title="@string/settings" />
+            android:title="@string/settings_title" />
 
         <item
             android:id="@+id/nav_fields"
             android:icon="@drawable/ic_nav_drawer_fields"
-            android:title="@string/fields" />
+            android:title="@string/settings_fields" />
 
         <item
             android:id="@+id/nav_traits"
             android:icon="@drawable/ic_nav_drawer_traits"
-            android:title="@string/traits" />
+            android:title="@string/settings_traits" />
     </group>
     <group
         android:id="@+id/navDrawer_secondary"
-        android:title="@string/profile">
+        android:title="@string/settings_profile">
         <item
             android:id="@+id/nav_person"
             android:icon="@drawable/ic_nav_drawer_person"
-            android:title="@string/person" />
+            android:title="@string/profile_person" />
 
         <item
             android:id="@+id/nav_location"
             android:icon="@drawable/ic_nav_drawer_location"
-            android:title="@string/location" />
-
-        <item
-            android:id="@+id/nav_language"
-            android:icon="@drawable/ic_nav_draweer_translate"
-            android:title="@string/language" />
+            android:title="@string/profile_location" />
 
     </group>
 </menu>

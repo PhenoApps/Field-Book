@@ -1,7 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.R;
@@ -11,9 +11,15 @@ public class PreferencesActivity extends AppCompatActivity {
     // UI
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
     public static String LANGUAGE = "language";
+    public static String INFOBAR_NUMBER = "INFOBAR_NUMBER";
+    public static String TOOLBAR_SEARCH = "TOOLBAR_SEARCH";
+    public static String TOOLBAR_RESOURCES = "TOOLBAR_RESOURCES";
+    public static String TOOLBAR_SUMMARY = "TOOLBAR_SUMMARY";
+    public static String TOOLBAR_LOCK = "TOOLBAR_LOCK";
 
     // UX
     public static String RETURN_CHARACTER = "RETURN_CHARACTER";
+    public static String VOLUME_NAVIGATION = "VOLUME_NAVIGATION";
 
     // General
     public static String TUTORIAL_MODE = "Tips";
@@ -25,7 +31,7 @@ public class PreferencesActivity extends AppCompatActivity {
     public static String DISABLE_ENTRY_ARROW_LEFT = "DisableEntryNavLeft";
     public static String DISABLE_ENTRY_ARROW_RIGHT = "DisableEntryNavRight";
     public static String CYCLING_TRAITS_ADVANCES = "CycleTraits";
-    public static String HIDE_ENTRIES_NO_DATA = "IgnoreExisting";
+    public static String HIDE_ENTRIES_WITH_DATA = "IgnoreExisting";
     public static String USE_DAY_OF_YEAR = "UseDay";
     public static String DISABLE_SHARE = "DisableShare";
 
@@ -45,7 +51,7 @@ public class PreferencesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         if(getSupportActionBar() != null){
-            getSupportActionBar().setTitle(getString(R.string.advanced));
+            getSupportActionBar().setTitle(getString(R.string.settings_advanced));
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
@@ -54,7 +60,7 @@ public class PreferencesActivity extends AppCompatActivity {
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new PreferencesFragment())
                 .commit();
-    }
+        }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

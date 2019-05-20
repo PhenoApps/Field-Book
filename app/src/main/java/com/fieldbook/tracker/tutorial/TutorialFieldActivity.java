@@ -62,12 +62,12 @@ public class TutorialFieldActivity extends Activity {
 
         // Load help strings        
         final String array[] = new String[max];
-        array[0] = getString(R.string.fhelp1);
-        array[1] = getString(R.string.fhelp2);
-        array[2] = getString(R.string.fhelp3);
-        array[3] = getString(R.string.fhelp4);
+        array[0] = getString(R.string.tutorial_fields_1);
+        array[1] = getString(R.string.tutorial_fields_2);
+        array[2] = getString(R.string.tutorial_fields_3);
+        array[3] = getString(R.string.tutorial_fields_4);
 
-        header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
+        header.setText(getString(R.string.tutorial_dialog_title) + " " + screen + "/" + max);
         content.setText(array[screen - 1]);
 
         // move one step back in the tutorial        
@@ -80,7 +80,7 @@ public class TutorialFieldActivity extends Activity {
                 if (screen < 1)
                     screen = 1;
 
-                header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
+                header.setText(getString(R.string.tutorial_dialog_title) + " " + screen + "/" + max);
                 content.setText(array[screen - 1]);
             }
         });
@@ -99,7 +99,7 @@ public class TutorialFieldActivity extends Activity {
                 if (screen > max)
                     screen = max;
 
-                header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
+                header.setText(getString(R.string.tutorial_dialog_title) + " " + screen + "/" + max);
                 content.setText(array[screen - 1]);
             }
         });

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/selector"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:orientation="horizontal">
+
+    <Spinner
+        android:id="@+id/selectorSpinner"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/main_infobar_title"
+        android:textColor="@color/s_text"
+        android:textSize="@dimen/text_size_xlarge"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/selectorText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingLeft="10dp"
+        android:scrollHorizontally="true"
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_xlarge"
+        android:textStyle="bold" />
+</LinearLayout>

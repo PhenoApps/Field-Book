@@ -47,7 +47,7 @@
                 android:layout_margin="5dp"
                 android:background="@drawable/custom_round_button"
                 android:gravity="center|center_vertical"
-                android:text="@string/minusday"
+                android:text="@string/trait_layout_date_minusday"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
                 android:textStyle="bold" />
@@ -60,7 +60,7 @@
                 android:layout_marginLeft="15dp"
                 android:background="@drawable/custom_round_button"
                 android:gravity="center"
-                android:text="@string/plusday"
+                android:text="@string/trait_layout_date_plusday"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_xxlarge"
                 android:textStyle="bold" />

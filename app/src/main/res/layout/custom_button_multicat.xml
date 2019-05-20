@@ -7,7 +7,7 @@
     android:minWidth="@dimen/button_default_width"
     android:focusable="false"
     android:focusableInTouchMode="false"
-    android:text="@string/clear"
+    android:text="@string/search_dialog_clear"
     android:textColor="#000000"
     android:textSize="@dimen/text_size_large"
     android:textStyle="bold" />

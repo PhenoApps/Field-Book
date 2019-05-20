@@ -3,19 +3,34 @@
 
     <PreferenceCategory
         android:key="pref_key_ui_settings"
-        android:title="@string/preferences_ui">
+        android:title="@string/preferences_interface">
 
         <Preference
-            android:icon="@drawable/ic_adv_language"
+            android:icon="@drawable/ic_nav_drawer_translate"
             android:key="language"
             android:summary="@string/language_desc"
-            android:title="@string/language">
+            android:title="@string/preferences_interface_language">
 
             <intent
                 android:action="android.intent.action.MAIN"
                 android:targetClass="com.android.settings.LanguageSettings"
                 android:targetPackage="com.android.settings" />
         </Preference>
+
+        <com.fieldbook.tracker.preferences.IntEditTextPreference
+            android:icon="@drawable/ic_adv_infobar_count"
+            android:key="INFOBAR_NUMBER"
+            android:maxLength="2"
+            android:numeric="integer"
+            android:summary="@string/infobar_number_desc"
+            android:title="@string/infobar_number" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_quick_goto"
+            android:key="QuickGoTo"
+            android:summary="@string/quickgoto_desc"
+            android:title="@string/quickgoto" />
 
     </PreferenceCategory>
 
@@ -29,6 +44,29 @@
             android:key="RangeSound"
             android:summary="@string/rangechime_desc"
             android:title="@string/rangechime" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="pref_key_ux_settings"
+        android:title="@string/preferences_behavior">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_remap_volume_buttons"
+            android:key="VOLUME_NAVIGATION"
+            android:summary="@string/navigate_volume_buttons_desc"
+            android:title="@string/navigate_volume_buttons" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/pref_return_character"
+            android:entryValues="@array/pref_return_character_values"
+            android:icon="@drawable/ic_return_character"
+            android:key="RETURN_CHARACTER"
+            android:summary="%s"
+            android:title="@string/return_character" />
+        <!-- todo add measurement as an option-->
     </PreferenceCategory>
 
 
@@ -41,14 +79,7 @@
             android:icon="@drawable/ic_tb_help"
             android:key="Tips"
             android:summary="@string/tips_desc"
-            android:title="@string/tutorial" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_quick_goto"
-            android:key="QuickGoTo"
-            android:summary="@string/quickgoto_desc"
-            android:title="@string/quickgoto" />
+            android:title="@string/tutorial_dialog_title" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -122,9 +153,6 @@
     </PreferenceCategory>
 
     <!--
-<PreferenceCategory
-    android:key="pref_key_ux_settings"
-    android:title="@string/preferences_ux"></PreferenceCategory>
 
 <PreferenceCategory
     android:title="@string/preferences_files_naming"
