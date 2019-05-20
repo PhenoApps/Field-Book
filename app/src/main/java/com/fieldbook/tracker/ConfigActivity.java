@@ -1,8 +1,9 @@
 package com.fieldbook.tracker;
 
-import android.app.Activity;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AlertDialog;
+
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,8 +19,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,7 +31,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -38,7 +40,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -57,6 +58,7 @@ import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,11 +106,17 @@ public class ConfigActivity extends AppCompatActivity {
     private RadioButton allTraits;
     private RadioButton activeTraits;
 
+    private final int PERMISSIONS_REQUEST_EXPORT_DATA = 999;
+    private final int PERMISSIONS_REQUEST_IMPORT_FIELD = 998;
+    private final int PERMISSIONS_REQUEST_MANAGE_TRAITS = 997;
+    private final int PERMISSIONS_REQUEST_LOCATION = 996;
 
     private ArrayList<String> newRange;
     private ArrayList<String> exportTrait;
 
     private Menu systemMenu;
+
+    public static DataHelper dt;
 
     @Override
     public void onDestroy() {
@@ -118,6 +126,7 @@ public class ConfigActivity extends AppCompatActivity {
             Log.e("Field Book", "");
         }
 
+        ConfigActivity.dt.close();
         super.onDestroy();
     }
 
@@ -146,12 +155,78 @@ public class ConfigActivity extends AppCompatActivity {
         invalidateOptionsMenu();
         loadScreen();
 
-        helpActive = false;
-
         // request permissions
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
+        helpActive = false;
+
         checkIntent();
+
+        // display intro tutorial
+        if(ep.getBoolean("FirstRun",true)) {
+            ep.edit().putBoolean("FirstRun",false).apply();
+        }
+
+        if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
+            ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
+            Intent intent = new Intent();
+            intent.setClass(ConfigActivity.this, ChangelogActivity.class);
+            startActivity(intent);
+            updateAssets();
+        }
+
+        createDirs();
+
+        dt = new DataHelper(this);
+    }
+
+    private void createDirs() {
+        createDir(Constants.MPATH.getAbsolutePath());
+        createDir(Constants.RESOURCEPATH);
+        createDir(Constants.PLOTDATAPATH);
+        createDir(Constants.TRAITPATH);
+        createDir(Constants.FIELDIMPORTPATH);
+        createDir(Constants.FIELDEXPORTPATH);
+        createDir(Constants.BACKUPPATH);
+        createDir(Constants.UPDATEPATH);
+        createDir(Constants.ARCHIVEPATH);
+
+        scanSampleFiles();
+    }
+
+    // Helper function to create a single directory
+    private void createDir(String path) {
+        File dir = new File(path);
+        File blankFile = new File(path + "/.fieldbook");
+
+        if (!dir.exists()) {
+            dir.mkdirs();
+
+            try {
+                blankFile.getParentFile().mkdirs();
+                blankFile.createNewFile();
+                Utils.scanFile(ConfigActivity.this,blankFile);
+            } catch (IOException ignore) {
+            }
+        }
+    }
+
+    private void scanSampleFiles() {
+        String[] fileList = {Constants.TRAITPATH + "/trait_sample.trt", Constants.FIELDIMPORTPATH + "/field_sample.csv", Constants.FIELDIMPORTPATH + "/field_sample2.csv", Constants.FIELDIMPORTPATH + "/field_sample3.csv" , Constants.TRAITPATH + "/severity.txt"};
+
+        for (String aFileList : fileList) {
+            File temp = new File(aFileList);
+            if (temp.exists()) {
+                Utils.scanFile(ConfigActivity.this,temp);
+            }
+        }
+    }
+
+    private void updateAssets() {
+        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "field_import");
+        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "resources");
+        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "trait");
+        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
     }
 
     private void loadScreen() {
@@ -163,8 +238,8 @@ public class ConfigActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle(null);
         getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        getSupportActionBar().setHomeButtonEnabled(false);
 
         //setup
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
@@ -172,7 +247,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.profile)
+        builder.setTitle(R.string.settings_profile)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -194,64 +269,78 @@ public class ConfigActivity extends AppCompatActivity {
 
         ListView settingsList = findViewById(R.id.myList);
 
-        String[] items2 = new String[]{getString(R.string.fields),
-                getString(R.string.traits), getString(R.string.profile), getString(R.string.export), getString(R.string.advanced),
-                getString(R.string.language)}; //, "API Test"};
+        String[] items2 = new String[]{getString(R.string.settings_fields),
+                getString(R.string.settings_traits),
+                getString(R.string.settings_collect),
+                getString(R.string.settings_profile),
+                getString(R.string.settings_export),
+                getString(R.string.settings_advanced), "Brapi"}; //, "API Test"};
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
                 Intent intent = new Intent();
                 switch (position) {
                     case 0:
-                        intent.setClassName(ConfigActivity.this,
-                                FieldEditorActivity.class.getName());
-                        startActivity(intent);
+                        if (checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_IMPORT_FIELD)) {
+                            intent.setClassName(ConfigActivity.this,
+                                    FieldEditorActivity.class.getName());
+                            startActivity(intent);
+                        }
                         break;
                     case 1:
+                        if (checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_MANAGE_TRAITS)) {
+                            if (!ep.getBoolean("ImportFieldFinished", false)) {
+                                makeToast(getString(R.string.warning_field_before_traits));
+                                return;
+                            }
+
+                            intent.setClassName(ConfigActivity.this,
+                                    TraitEditorActivity.class.getName());
+                            startActivity(intent);
+                        }
+                        break;
+                    case 2:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.importtraitwarning));
+                            makeToast(getString(R.string.warning_field_missing));
                             return;
                         }
 
                         intent.setClassName(ConfigActivity.this,
-                                TraitEditorActivity.class.getName());
+                                MainActivity.class.getName());
                         startActivity(intent);
                         break;
-                    case 2:
+                    case 3:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.nofieldloaded));
+                            makeToast(getString(R.string.warning_field_missing));
                             return;
                         }
 
                         showSetupDialog();
                         break;
-                    case 3:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.nofieldloaded));
-                            return;
-                        } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
-                            makeToast(getString(R.string.notraitloaded));
-                            return;
+                    case 4:
+                        if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_EXPORT_DATA)) {
+                            if (!ep.getBoolean("ImportFieldFinished", false)) {
+                                makeToast(getString(R.string.warning_field_missing));
+                                return;
+                            } else if (dt.getTraitColumnsAsString() == null) {
+                                makeToast(getString(R.string.warning_traits_missing));
+                                return;
+                            }
+
+                            showSaveDialog();
                         }
 
-                        showSaveDialog();
                         break;
-                    case 4:
+                    case 5:
                         intent.setClassName(ConfigActivity.this,
                                 PreferencesActivity.class.getName());
                         startActivity(intent);
                         break;
-                    case 5:
-                        //showLanguageDialog();
-
-                        Intent i = new Intent(android.provider.Settings.ACTION_LOCALE_SETTINGS);
-                        startActivity(i);
+                    case 6:
+                        intent.setClassName(ConfigActivity.this,
+                                BrapiActivity.class.getName());
+                        startActivity(intent);
                         break;
-                    //case 6:
-                    //    intent.setClassName(ConfigActivity.this,
-                    //            BrapiActivity.class.getName());
-                    //    startActivity(intent);
-                    //    break;
                 }
             }
         });
@@ -336,7 +425,7 @@ public class ConfigActivity extends AppCompatActivity {
         builder.setMessage(getString(R.string.citation_string) + "\n\n" + getString(R.string.citation_text));
         builder.setCancelable(false);
 
-        builder.setPositiveButton(getString(R.string.okay), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_ok), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
 
@@ -360,10 +449,10 @@ public class ConfigActivity extends AppCompatActivity {
     private void showTipsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.tutorial));
-        builder.setMessage(getString(R.string.tipsdesc));
+        builder.setTitle(getString(R.string.tutorial_dialog_title));
+        builder.setMessage(getString(R.string.tutorial_dialog_description));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
@@ -383,7 +472,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
@@ -407,10 +496,10 @@ public class ConfigActivity extends AppCompatActivity {
     private void loadSampleDataDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this,R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.sampledata));
-        builder.setMessage(getString(R.string.loadsampledata));
+        builder.setTitle(getString(R.string.startup_sample_data_title));
+        builder.setMessage(getString(R.string.startup_sample_data_message));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // Load database with sample data
                 mChosenFile = "sample.db";
@@ -418,7 +507,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
@@ -469,7 +558,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_about, null);
 
-        builder.setTitle(R.string.about)
+        builder.setTitle(R.string.about_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -480,7 +569,7 @@ public class ConfigActivity extends AppCompatActivity {
         aboutDialog.getWindow().setAttributes(langParams);
 
         TextView versionText = (TextView) layout.findViewById(R.id.tvVersion);
-        versionText.setText(getString(R.string.version) + " " + versionName);
+        versionText.setText(getString(R.string.about_version) + " " + versionName);
 
         TextView otherApps = layout.findViewById(R.id.tvOtherApps);
 
@@ -518,7 +607,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.otherapps)
+        builder.setTitle(R.string.about_other_apps_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -600,7 +689,7 @@ public class ConfigActivity extends AppCompatActivity {
             dialog.setIndeterminate(true);
             dialog.setCancelable(false);
             dialog.setMessage(Html
-                    .fromHtml(getString(R.string.exportmsg)));
+                    .fromHtml(getString(R.string.export_progress)));
             dialog.show();
         }
 
@@ -610,7 +699,7 @@ public class ConfigActivity extends AppCompatActivity {
             String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
 
             // Retrieves the data needed for export
-            Cursor exportData = MainActivity.dt.getExportDBData(newRanges, exportTraits);
+            Cursor exportData = dt.getExportDBData(newRanges, exportTraits);
 
             for (String i : newRanges) {
                 Log.i("Field Book : Ranges : ", i);
@@ -664,7 +753,7 @@ public class ConfigActivity extends AppCompatActivity {
 
                         FileWriter fw = new FileWriter(file);
 
-                        exportData = MainActivity.dt.convertDatabaseToTable(newRanges, exportTraits);
+                        exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
@@ -688,15 +777,15 @@ public class ConfigActivity extends AppCompatActivity {
 
             if (!fail) {
                 showCitationDialog();
-                MainActivity.dt.updateExpTable(false,false,true,ep.getInt("ExpID", 0));
+                dt.updateExpTable(false,false,true,ep.getInt("ExpID", 0));
             }
 
             if (fail) {
-                makeToast(getString(R.string.exporterror));
+                makeToast(getString(R.string.export_error_general));
             }
 
             if (noData) {
-                makeToast(getString(R.string.exporttraiterror));
+                makeToast(getString(R.string.export_error_data_missing));
             }
 
             if (tooManyTraits) {
@@ -725,14 +814,14 @@ public class ConfigActivity extends AppCompatActivity {
             dialog.setIndeterminate(true);
             dialog.setCancelable(false);
             dialog.setMessage(Html
-                    .fromHtml(getString(R.string.exportmsg)));
+                    .fromHtml(getString(R.string.export_progress)));
             dialog.show();
         }
 
         @Override
         protected Integer doInBackground(Integer... params) {
             try {
-                MainActivity.dt.exportDatabase(exportFileString);
+                dt.exportDatabase(exportFileString);
             } catch (Exception e) {
                 e.printStackTrace();
                 error = "" + e.getMessage();
@@ -755,9 +844,9 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (fail) {
-                makeToast(getString(R.string.exporterror));
+                makeToast(getString(R.string.export_error_general));
             } else {
-                makeToast(getString(R.string.exportcomplete));
+                makeToast(getString(R.string.export_complete));
             }
 
         }
@@ -783,14 +872,14 @@ public class ConfigActivity extends AppCompatActivity {
             dialog.setIndeterminate(true);
             dialog.setCancelable(false);
             dialog.setMessage(Html
-                    .fromHtml(getString(R.string.importmsg)));
+                    .fromHtml(getString(R.string.import_dialog_importing)));
             dialog.show();
         }
 
         @Override
         protected Integer doInBackground(Integer... params) {
             try {
-                MainActivity.dt.importDatabase(mChosenFile);
+                dt.importDatabase(mChosenFile);
             } catch (Exception e) {
                 e.printStackTrace();
                 error = "" + e.getMessage();
@@ -805,7 +894,7 @@ public class ConfigActivity extends AppCompatActivity {
                 dialog.dismiss();
 
             if (fail) {
-                makeToast(getString(R.string.importerror));
+                makeToast(getString(R.string.import_error_general));
             }
 
             SharedPreferences prefs = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
@@ -853,19 +942,19 @@ public class ConfigActivity extends AppCompatActivity {
         String tagLocation = "";
 
         if (ep.getString("FirstName", "").length() > 0 | ep.getString("LastName", "").length() > 0) {
-            tagName += getString(R.string.person) + ": " + ep.getString("FirstName", "")
+            tagName += getString(R.string.profile_person) + ": " + ep.getString("FirstName", "")
                     + " " + ep.getString("LastName", "");
         } else {
-            tagName += getString(R.string.person) + ": " + getString(R.string.none);
+            tagName += getString(R.string.profile_person) + ": " + getString(R.string.profile_missing);
         }
 
         if (ep.getString("Location", "").length() > 0) {
-            tagLocation += getString(R.string.location) + ": " + ep.getString("Location", "");
+            tagLocation += getString(R.string.profile_location) + ": " + ep.getString("Location", "");
         } else {
-            tagLocation += getString(R.string.location) + ": " + getString(R.string.none);
+            tagLocation += getString(R.string.profile_location) + ": " + getString(R.string.profile_missing);
         }
 
-        return new String[]{tagName, tagLocation, getString(R.string.clearsettings)};
+        return new String[]{tagName, tagLocation, getString(R.string.profile_reset)};
     }
 
     private void updateSetupList() {
@@ -892,7 +981,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_export, null);
 
-        builder.setTitle(R.string.export)
+        builder.setTitle(R.string.settings_export)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -947,17 +1036,17 @@ public class ConfigActivity extends AppCompatActivity {
             public void onClick(View arg0) {
                 // Ensure at least one export type is checked
                 if (!checkDB.isChecked() & !checkExcel.isChecked()) {
-                    makeToast(getString(R.string.noexportcheck));
+                    makeToast(getString(R.string.export_error_missing_format));
                     return;
                 }
 
                 if (!onlyUnique.isChecked() & !allColumns.isChecked()) {
-                    makeToast(getString(R.string.nofieldcheck));
+                    makeToast(getString(R.string.export_error_missing_column));
                     return;
                 }
 
                 if (!activeTraits.isChecked() & !allTraits.isChecked()) {
-                    makeToast(getString(R.string.notraitcheck));
+                    makeToast(getString(R.string.export_error_missing_trait));
                     return;
                 }
 
@@ -968,19 +1057,19 @@ public class ConfigActivity extends AppCompatActivity {
                 }
 
                 if (allColumns.isChecked()) {
-                    String[] columns = MainActivity.dt.getRangeColumns();
+                    String[] columns = dt.getRangeColumns();
                     Collections.addAll(newRange, columns);
                 }
 
                 exportTrait = new ArrayList<>();
 
                 if (activeTraits.isChecked()) {
-                    String[] traits = MainActivity.dt.getVisibleTrait();
+                    String[] traits = dt.getVisibleTrait();
                     Collections.addAll(exportTrait, traits);
                 }
 
                 if (allTraits.isChecked()) {
-                    String[] traits = MainActivity.dt.getAllTraits();
+                    String[] traits = dt.getAllTraits();
                     Collections.addAll(exportTrait, traits);
                 }
 
@@ -1026,7 +1115,9 @@ public class ConfigActivity extends AppCompatActivity {
                         break;
 
                     case 1:
-                        showLocationDialog();
+                        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION,PERMISSIONS_REQUEST_LOCATION)) {
+                            showLocationDialog();
+                        }
                         break;
 
                     case 2:
@@ -1049,7 +1140,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_person, null);
 
-        builder.setTitle(R.string.personsetup)
+        builder.setTitle(R.string.profile_person_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1096,7 +1187,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_location, null);
 
-        builder.setTitle(R.string.locationsetup)
+        builder.setTitle(R.string.profile_location_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1160,10 +1251,10 @@ public class ConfigActivity extends AppCompatActivity {
     private void showClearSettingsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.clearsettings));
-        builder.setMessage(getString(R.string.areyousure));
+        builder.setTitle(getString(R.string.profile_reset));
+        builder.setMessage(getString(R.string.dialog_confirm));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 setupDialog.dismiss();
@@ -1177,7 +1268,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
@@ -1202,23 +1293,25 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (dialog.equals("location")) {
-                showLocationDialog();
+                if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION,PERMISSIONS_REQUEST_LOCATION)) {
+                    showLocationDialog();
+                }
             }
         }
     }
 
     private void showDatabaseDialog() {
         String[] items = new String[3];
-        items[0] = getString(R.string.dbexport);
-        items[1] = getString(R.string.dbimport);
-        items[2] = getString(R.string.dbreset);
+        items[0] = getString(R.string.database_export);
+        items[1] = getString(R.string.database_import);
+        items[2] = getString(R.string.database_reset);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.dbbackup)
+        builder.setTitle(R.string.database_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1269,7 +1362,7 @@ public class ConfigActivity extends AppCompatActivity {
                 FileExploreActivity.class.getName());
         intent.putExtra("path", Constants.BACKUPPATH);
         intent.putExtra("include", new String[]{"db"});
-        intent.putExtra("title",getString(R.string.dbimport));
+        intent.putExtra("title",getString(R.string.database_import));
         startActivityForResult(intent, 2);
     }
 
@@ -1279,7 +1372,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_save_database, null);
 
-        builder.setTitle(R.string.dbbackup)
+        builder.setTitle(R.string.database_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -1321,10 +1414,10 @@ public class ConfigActivity extends AppCompatActivity {
     private void showDatabaseResetDialog1() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.warning));
-        builder.setMessage(getString(R.string.resetwarning1));
+        builder.setTitle(getString(R.string.dialog_warning));
+        builder.setMessage(getString(R.string.database_reset_warning1));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -1333,7 +1426,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -1350,14 +1443,14 @@ public class ConfigActivity extends AppCompatActivity {
     private void showDatabaseResetDialog2() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.warning));
-        builder.setMessage(getString(R.string.resetwarning2));
+        builder.setTitle(getString(R.string.dialog_warning));
+        builder.setMessage(getString(R.string.database_reset_warning2));
 
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 // Delete database
-                MainActivity.dt.deleteDatabase();
+                dt.deleteDatabase();
 
                 // Clear all existing settings
                 Editor ed = ep.edit();
@@ -1365,7 +1458,7 @@ public class ConfigActivity extends AppCompatActivity {
                 ed.apply();
 
                 dialog.dismiss();
-                makeToast(getString(R.string.resetcomplete));
+                makeToast(getString(R.string.database_reset_message));
 
                 try {
                     ConfigActivity.this.finish();
@@ -1382,7 +1475,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         });
 
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -1438,9 +1531,9 @@ public class ConfigActivity extends AppCompatActivity {
 
             case android.R.id.home:
                 if (!ep.getBoolean("ImportFieldFinished", false)) {
-                    makeToast(getString(R.string.nofieldloaded));
-                } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
-                    makeToast(getString(R.string.notraitloaded));
+                    makeToast(getString(R.string.warning_field_missing));
+                } else if (dt.getTraitColumnsAsString() == null) {
+                    makeToast(getString(R.string.warning_traits_missing));
                 } else
                     finish();
                 break;
@@ -1449,14 +1542,101 @@ public class ConfigActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private Boolean checkPermission(String permission, int resultCode) {
+        if (ContextCompat.checkSelfPermission(ConfigActivity.this,
+                permission)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(ConfigActivity.this,
+                    new String[]{permission},
+                    resultCode);
+        } else {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_EXPORT_DATA: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if (!ep.getBoolean("ImportFieldFinished", false)) {
+                        makeToast(getString(R.string.warning_field_missing));
+                        return;
+                    }
+
+                    showSaveDialog();
+                } else {
+                    // permission denied
+                    makeToast("Unable to export data without write permissions.");
+                }
+                return;
+            }
+
+            case PERMISSIONS_REQUEST_IMPORT_FIELD: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if (!ep.getBoolean("ImportFieldFinished", false)) {
+                        makeToast(getString(R.string.warning_field_missing));
+                        return;
+                    }
+
+                    Intent intent = new Intent();
+
+                    intent.setClassName(ConfigActivity.this,
+                            FieldEditorActivity.class.getName());
+                    startActivity(intent);
+                } else {
+                    // permission denied
+                    makeToast("Unable to import data without read permissions.");
+                }
+                return;
+            }
+
+            case PERMISSIONS_REQUEST_MANAGE_TRAITS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if (!ep.getBoolean("ImportFieldFinished", false)) {
+                        makeToast(getString(R.string.warning_field_missing));
+                        return;
+                    }
+
+                    Intent intent = new Intent();
+
+                    intent.setClassName(ConfigActivity.this,
+                            TraitEditorActivity.class.getName());
+                    startActivity(intent);
+                } else {
+                    // permission denied
+                    makeToast("Unable to manage traits without read permissions.");
+                }
+                return;
+            }
+
+            case PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    showLocationDialog();
+
+                } else {
+                    makeToast("Unable to acquire location without permission.");
+                }
+                return;
+            }
+        }
+    }
+
     @Override
     public void onBackPressed() {
-        if (!ep.getBoolean("ImportFieldFinished", false)) {
-            makeToast(getString(R.string.nofieldloaded));
-        } else if (MainActivity.dt.getTraitColumnsAsString() == null) {
-            makeToast(getString(R.string.notraitloaded));
-        } else {
-            finish();
-        }
     }
 }

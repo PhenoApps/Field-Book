@@ -1,170 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item type="id" name="tvVersion">false</item>
-    <item type="id" name="developerMsg">false</item>
-    <item type="id" name="developerTrevor">false</item>
-    <item type="id" name="developerTrevorEmail">false</item>
-    <item type="id" name="developerTrevorSite">false</item>
-    <item type="id" name="developerJesse">false</item>
-    <item type="id" name="developerJesseEmail">false</item>
-    <item type="id" name="developerJesseSite">false</item>
-    <item type="id" name="developerTp">false</item>
-    <item type="id" name="developerTpMsg">false</item>
-    <item type="id" name="developerTpEmail">false</item>
-    <item type="id" name="translatorMsg">false</item>
-    <item type="id" name="translatorList">false</item>
-    <item type="id" name="closeBtn">false</item>
-    <item type="id" name="tips">false</item>
-    <item type="id" name="cycle">false</item>
-    <item type="id" name="enableMap">false</item>
-    <item type="id" name="ignoreExisting">false</item>
-    <item type="id" name="useDay">false</item>
-    <item type="id" name="rangeSound">false</item>
-    <item type="id" name="jumpToPlot">false</item>
-    <item type="id" name="nextEmptyPlot">false</item>
-    <item type="id" name="data">false</item>
-    <item type="id" name="myList">false</item>
-    <item type="id" name="text">false</item>
-    <item type="id" name="main">false</item>
-    <item type="id" name="okBtn">false</item>
-    <item type="id" name="row">false</item>
-    <item type="id" name="column">false</item>
-    <item type="id" name="map">false</item>
-    <item type="id" name="spinnerTarget">false</item>
-    <item type="id" name="currentLocation">false</item>
-    <item type="id" name="latitude">false</item>
-    <item type="id" name="longitude">false</item>
-    <item type="id" name="getLctnBtn">false</item>
-    <item type="id" name="saveBtn">false</item>
-    <item type="id" name="dpi">false</item>
-    <item type="id" name="drop1prefix">false</item>
-    <item type="id" name="drop2prefix">false</item>
-    <item type="id" name="drop3prefix">false</item>
-    <item type="id" name="drop1">false</item>
-    <item type="id" name="drop2">false</item>
-    <item type="id" name="drop3">false</item>
-    <item type="id" name="traitLeft">false</item>
-    <item type="id" name="traitType">false</item>
-    <item type="id" name="traitRight">false</item>
-    <item type="id" name="traitDetails">false</item>
-    <item type="id" name="rangeLeft">false</item>
-    <item type="id" name="rangeName">false</item>
-    <item type="id" name="range">false</item>
-    <item type="id" name="plotName">false</item>
-    <item type="id" name="plot">false</item>
-    <item type="id" name="rangeRight">false</item>
-    <item type="id" name="tNum">false</item>
-    <item type="id" name="eNum">false</item>
-    <item type="id" name="pNum">false</item>
-    <item type="id" name="seekbar">false</item>
-    <item type="id" name="clearBtn4">false</item>
-    <item type="id" name="qPick">false</item>
-    <item type="id" name="q1">false</item>
-    <item type="id" name="q2">false</item>
-    <item type="id" name="q3">false</item>
-    <item type="id" name="q4">false</item>
-    <item type="id" name="q5">false</item>
-    <item type="id" name="q6">false</item>
-    <item type="id" name="q7">false</item>
-    <item type="id" name="q8">false</item>
-    <item type="id" name="q9">false</item>
-    <item type="id" name="q10">false</item>
-    <item type="id" name="q11">false</item>
-    <item type="id" name="q12">false</item>
-    <item type="id" name="clearBtn2">false</item>
-    <item type="id" name="datePick">false</item>
-    <item type="id" name="mth">false</item>
-    <item type="id" name="day">false</item>
-    <item type="id" name="minusDateBtn">false</item>
-    <item type="id" name="enterBtn">false</item>
-    <item type="id" name="addDateBtn">false</item>
-    <item type="id" name="clearDateBtn">false</item>
-    <item type="id" name="clearBtn">false</item>
-    <item type="id" name="eImg">false</item>
-    <item type="id" name="clearBtn5">false</item>
-    <item type="id" name="kb">false</item>
-    <item type="id" name="k1">false</item>
-    <item type="id" name="k2">false</item>
-    <item type="id" name="k3">false</item>
-    <item type="id" name="k4">false</item>
-    <item type="id" name="k5">false</item>
-    <item type="id" name="k6">false</item>
-    <item type="id" name="k7">false</item>
-    <item type="id" name="k8">false</item>
-    <item type="id" name="k9">false</item>
-    <item type="id" name="k10">false</item>
-    <item type="id" name="k11">false</item>
-    <item type="id" name="k12">false</item>
-    <item type="id" name="k13">false</item>
-    <item type="id" name="k14">false</item>
-    <item type="id" name="k15">false</item>
-    <item type="id" name="k16">false</item>
-    <item type="id" name="audio">false</item>
-    <item type="id" name="record">false</item>
-    <item type="id" name="clearRecord">false</item>
-    <item type="id" name="segmenth">false</item>
-    <item type="id" name="segment">false</item>
-    <item type="id" name="mapClose">false</item>
-    <item type="id" name="mapParameter">false</item>
-    <item type="id" name="mapAnalyze">false</item>
-    <item type="id" name="mapExport">false</item>
-    <item type="id" name="mapTrait">false</item>
-    <item type="id" name="upBtn">false</item>
-    <item type="id" name="leftBtn">false</item>
-    <item type="id" name="center">false</item>
-    <item type="id" name="rightBtn">false</item>
-    <item type="id" name="r1">false</item>
-    <item type="id" name="r2">false</item>
-    <item type="id" name="r3">false</item>
-    <item type="id" name="value">false</item>
-    <item type="id" name="mapSummary">false</item>
-    <item type="id" name="downBtn">false</item>
-    <item type="id" name="direction">false</item>
-    <item type="id" name="orientation">false</item>
-    <item type="id" name="currentPerson">false</item>
-    <item type="id" name="firstName">false</item>
-    <item type="id" name="lastName">false</item>
-    <item type="id" name="fileName">false</item>
-    <item type="id" name="formatDB">false</item>
-    <item type="id" name="formatExcel">false</item>
-    <item type="id" name="rowParent">false</item>
-    <item type="id" name="startBtn">false</item>
-    <item type="id" name="addBtn">false</item>
-    <item type="id" name="columns">false</item>
-    <item type="id" name="like">false</item>
-    <item type="id" name="searchText">false</item>
-    <item type="id" name="text1">false</item>
-    <item type="id" name="formatbox">false</item>
-    <item type="id" name="format">false</item>
-    <item type="id" name="traitbox">false</item>
-    <item type="id" name="trait">false</item>
-    <item type="id" name="defbox">false</item>
-    <item type="id" name="def">false</item>
-    <item type="id" name="boolBtn">false</item>
-    <item type="id" name="minbox">false</item>
-    <item type="id" name="minimum">false</item>
-    <item type="id" name="maxbox">false</item>
-    <item type="id" name="maximum">false</item>
-    <item type="id" name="detailsbox">false</item>
-    <item type="id" name="details">false</item>
-    <item type="id" name="categorybox">false</item>
-    <item type="id" name="categories">false</item>
-    <item type="id" name="visible">false</item>
-    <item type="id" name="copyBtn">false</item>
-    <item type="id" name="delBtn">false</item>
-    <item type="id" name="text2">false</item>
-    <item type="id" name="header">false</item>
-    <item type="id" name="prev">false</item>
-    <item type="id" name="close">false</item>
-    <item type="id" name="next">false</item>
-    <item type="id" name="help">false</item>
-    <item type="id" name="database">false</item>
-    <item type="id" name="about">false</item>
-    <item type="id" name="search">false</item>
-    <item type="id" name="resources">false</item>
-    <item type="id" name="settings">false</item>
-    <item type="id" name="addTrait">false</item>
-    <item type="id" name="deleteTrait">false</item>
-    <item type="id" name="importdb">false</item>
-    <item type="id" name="exportdb">false</item>
+    <item type="id" name="tvVersion" />
+    <item type="id" name="developerMsg" />
+    <item type="id" name="developerTrevor" />
+    <item type="id" name="developerTrevorEmail" />
+    <item type="id" name="developerTrevorSite" />
+    <item type="id" name="developerJesse" />
+    <item type="id" name="developerJesseEmail" />
+    <item type="id" name="developerJesseSite" />
+    <item type="id" name="developerTp" />
+    <item type="id" name="developerTpMsg" />
+    <item type="id" name="developerTpEmail" />
+    <item type="id" name="translatorMsg" />
+    <item type="id" name="translatorList" />
+    <item type="id" name="closeBtn" />
+    <item type="id" name="tips" />
+    <item type="id" name="cycle" />
+    <item type="id" name="enableMap" />
+    <item type="id" name="ignoreExisting" />
+    <item type="id" name="useDay" />
+    <item type="id" name="rangeSound" />
+    <item type="id" name="jumpToPlot" />
+    <item type="id" name="nextEmptyPlot" />
+    <item type="id" name="data" />
+    <item type="id" name="myList" />
+    <item type="id" name="text" />
+    <item type="id" name="main" />
+    <item type="id" name="okBtn" />
+    <item type="id" name="row" />
+    <item type="id" name="column" />
+    <item type="id" name="map" />
+    <item type="id" name="spinnerTarget" />
+    <item type="id" name="currentLocation" />
+    <item type="id" name="latitude" />
+    <item type="id" name="longitude" />
+    <item type="id" name="getLctnBtn" />
+    <item type="id" name="saveBtn" />
+    <item type="id" name="dpi" />
+    <item type="id" name="drop1prefix" />
+    <item type="id" name="drop2prefix" />
+    <item type="id" name="drop3prefix" />
+    <item type="id" name="drop1" />
+    <item type="id" name="drop2" />
+    <item type="id" name="drop3" />
+    <item type="id" name="traitLeft" />
+    <item type="id" name="traitType" />
+    <item type="id" name="traitRight" />
+    <item type="id" name="traitDetails" />
+    <item type="id" name="rangeLeft" />
+    <item type="id" name="rangeName" />
+    <item type="id" name="range" />
+    <item type="id" name="plotName" />
+    <item type="id" name="plot" />
+    <item type="id" name="rangeRight" />
+    <item type="id" name="tNum" />
+    <item type="id" name="eNum" />
+    <item type="id" name="pNum" />
+    <item type="id" name="seekbar" />
+    <item type="id" name="clearBtn4" />
+    <item type="id" name="qPick" />
+    <item type="id" name="q1" />
+    <item type="id" name="q2" />
+    <item type="id" name="q3" />
+    <item type="id" name="q4" />
+    <item type="id" name="q5" />
+    <item type="id" name="q6" />
+    <item type="id" name="q7" />
+    <item type="id" name="q8" />
+    <item type="id" name="q9" />
+    <item type="id" name="q10" />
+    <item type="id" name="q11" />
+    <item type="id" name="q12" />
+    <item type="id" name="clearBtn2" />
+    <item type="id" name="datePick" />
+    <item type="id" name="mth" />
+    <item type="id" name="day" />
+    <item type="id" name="minusDateBtn" />
+    <item type="id" name="enterBtn" />
+    <item type="id" name="addDateBtn" />
+    <item type="id" name="clearDateBtn" />
+    <item type="id" name="clearBtn" />
+    <item type="id" name="eImg" />
+    <item type="id" name="clearBtn5" />
+    <item type="id" name="kb" />
+    <item type="id" name="k1" />
+    <item type="id" name="k2" />
+    <item type="id" name="k3" />
+    <item type="id" name="k4" />
+    <item type="id" name="k5" />
+    <item type="id" name="k6" />
+    <item type="id" name="k7" />
+    <item type="id" name="k8" />
+    <item type="id" name="k9" />
+    <item type="id" name="k10" />
+    <item type="id" name="k11" />
+    <item type="id" name="k12" />
+    <item type="id" name="k13" />
+    <item type="id" name="k14" />
+    <item type="id" name="k15" />
+    <item type="id" name="k16" />
+    <item type="id" name="audio" />
+    <item type="id" name="record" />
+    <item type="id" name="clearRecord" />
+    <item type="id" name="segmenth" />
+    <item type="id" name="segment" />
+    <item type="id" name="mapClose" />
+    <item type="id" name="mapParameter" />
+    <item type="id" name="mapAnalyze" />
+    <item type="id" name="mapExport" />
+    <item type="id" name="mapTrait" />
+    <item type="id" name="upBtn" />
+    <item type="id" name="leftBtn" />
+    <item type="id" name="center" />
+    <item type="id" name="rightBtn" />
+    <item type="id" name="r1" />
+    <item type="id" name="r2" />
+    <item type="id" name="r3" />
+    <item type="id" name="value" />
+    <item type="id" name="mapSummary" />
+    <item type="id" name="downBtn" />
+    <item type="id" name="direction" />
+    <item type="id" name="orientation" />
+    <item type="id" name="currentPerson" />
+    <item type="id" name="firstName" />
+    <item type="id" name="lastName" />
+    <item type="id" name="fileName" />
+    <item type="id" name="formatDB" />
+    <item type="id" name="formatExcel" />
+    <item type="id" name="rowParent" />
+    <item type="id" name="startBtn" />
+    <item type="id" name="addBtn" />
+    <item type="id" name="columns" />
+    <item type="id" name="like" />
+    <item type="id" name="searchText" />
+    <item type="id" name="text1" />
+    <item type="id" name="formatbox" />
+    <item type="id" name="format" />
+    <item type="id" name="traitbox" />
+    <item type="id" name="trait" />
+    <item type="id" name="defbox" />
+    <item type="id" name="def" />
+    <item type="id" name="boolBtn" />
+    <item type="id" name="minbox" />
+    <item type="id" name="minimum" />
+    <item type="id" name="maxbox" />
+    <item type="id" name="maximum" />
+    <item type="id" name="detailsbox" />
+    <item type="id" name="details" />
+    <item type="id" name="categorybox" />
+    <item type="id" name="categories" />
+    <item type="id" name="visible" />
+    <item type="id" name="copyBtn" />
+    <item type="id" name="delBtn" />
+    <item type="id" name="text2" />
+    <item type="id" name="header" />
+    <item type="id" name="prev" />
+    <item type="id" name="close" />
+    <item type="id" name="next" />
+    <item type="id" name="help" />
+    <item type="id" name="database" />
+    <item type="id" name="about" />
+    <item type="id" name="search" />
+    <item type="id" name="resources" />
+    <item type="id" name="settings" />
+    <item type="id" name="addTrait" />
+    <item type="id" name="deleteTrait" />
+    <item type="id" name="importdb" />
+    <item type="id" name="exportdb" />
 </resources>

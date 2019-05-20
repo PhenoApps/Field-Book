@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/okay"
+            android:text="@string/dialog_ok"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />

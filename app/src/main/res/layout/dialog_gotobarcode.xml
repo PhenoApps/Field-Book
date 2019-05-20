@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/scan"
+            android:text="@string/main_toolbar_moveto_scan"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/close"
+            android:text="@string/dialog_close"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/okay"
+            android:text="@string/dialog_ok"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />

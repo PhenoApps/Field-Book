@@ -1,7 +1,7 @@
 package com.fieldbook.tracker.fields;
 
 
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -17,6 +17,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 
@@ -96,12 +97,14 @@ class FieldAdapter extends BaseAdapter {
                 ed.putString("ImportFirstName", getItem(position).primary_id);
                 ed.putString("ImportSecondName", getItem(position).secondary_id);
                 ed.putBoolean("ImportFieldFinished", true);
+                ed.putBoolean("FieldSelected",true);
+                ed.putString("lastplot", null);
                 ed.putString("DROP1", null);
                 ed.putString("DROP2", null);
                 ed.putString("DROP3", null);
                 ed.apply();
 
-                MainActivity.dt.switchField(getItem(position).exp_id);
+                ConfigActivity.dt.switchField(getItem(position).exp_id);
                 MainActivity.reloadData = true;
                 notifyDataSetChanged();
             }
@@ -139,15 +142,16 @@ class FieldAdapter extends BaseAdapter {
                 ed.putString("ImportFirstName", getItem(position).primary_id);
                 ed.putString("ImportSecondName", getItem(position).secondary_id);
                 ed.putBoolean("ImportFieldFinished", true);
+                ed.putBoolean("FieldSelected",true);
+                ed.putString("lastplot", null);
                 ed.putString("DROP1", null);
                 ed.putString("DROP2", null);
                 ed.putString("DROP3", null);
                 ed.apply();
 
-                MainActivity.dt.switchField(getItem(position).exp_id);
+                ConfigActivity.dt.switchField(getItem(position).exp_id);
                 MainActivity.reloadData = true;
                 notifyDataSetChanged();
-
             }
         });
 
@@ -167,23 +171,25 @@ class FieldAdapter extends BaseAdapter {
                 //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
-                        if (item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.delete))) {
+                        if (item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.fields_delete))) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
 
-                            builder.setTitle(context.getString(R.string.delete_field));
-                            builder.setMessage(context.getString(R.string.delete_field_confirmation));
+                            builder.setTitle(context.getString(R.string.fields_delete_study));
+                            builder.setMessage(context.getString(R.string.fields_delete_study_confirmation));
 
-                            builder.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() {
+                            builder.setPositiveButton(context.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
 
-                                    MainActivity.dt.deleteField(getItem(position).exp_id);
+                                    ConfigActivity.dt.deleteField(getItem(position).exp_id);
 
                                     if (getItem(position).exp_name.equals(ep.getString("FieldFile", ""))) {
                                         SharedPreferences.Editor ed = ep.edit();
                                         ed.putString("FieldFile", null);
                                         ed.putBoolean("ImportFieldFinished", false);
+                                        ed.putBoolean("FieldSelected",false);
+                                        ed.putString("lastplot", null);
                                         ed.putString("ImportID", null);
                                         ed.putString("ImportUniqueName", null);
                                         ed.putString("ImportFirstName", null);
@@ -199,7 +205,7 @@ class FieldAdapter extends BaseAdapter {
                                 }
                             });
 
-                            builder.setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener() {
+                            builder.setNegativeButton(context.getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
 
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
@@ -211,7 +217,7 @@ class FieldAdapter extends BaseAdapter {
                             alert.show();
                         }
 
-                        if (item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.statistics))) {
+                        if (item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.fields_study_statistics))) {
                             Toast.makeText(FieldEditorActivity.thisActivity, "Coming soon!", Toast.LENGTH_SHORT).show();
                         }
 
@@ -225,5 +231,4 @@ class FieldAdapter extends BaseAdapter {
 
         return convertView;
     }
-
 }

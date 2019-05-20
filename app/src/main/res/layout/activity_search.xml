@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/clear"
+            android:text="@string/search_dialog_clear"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/add"
+            android:text="@string/search_dialog_add"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/close"
+            android:text="@string/dialog_close"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -69,7 +69,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/okay"
+            android:text="@string/dialog_ok"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />

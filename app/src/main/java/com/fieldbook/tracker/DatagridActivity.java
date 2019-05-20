@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -60,9 +60,9 @@ public class DatagridActivity extends AppCompatActivity {
 
     private void gridViewTable() {
         String[] columns = {ep.getString("ImportUniqueName", "")};
-        String[] traits = MainActivity.dt.getVisibleTrait();
+        String[] traits = ConfigActivity.dt.getVisibleTrait();
 
-        databaseData = MainActivity.dt.convertDatabaseToTable(columns, traits);
+        databaseData = ConfigActivity.dt.convertDatabaseToTable(columns, traits);
         databaseData.moveToPosition(-1);
 
         int rows = databaseData.getCount();

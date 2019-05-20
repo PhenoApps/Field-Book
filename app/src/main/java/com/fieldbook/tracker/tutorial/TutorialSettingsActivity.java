@@ -58,14 +58,14 @@ public class TutorialSettingsActivity extends Activity {
 
         // Load help strings        
         final String array[] = new String[max];
-        array[0] = getString(R.string.shelp1);
-        array[1] = getString(R.string.shelp2);
-        array[2] = getString(R.string.shelp3);
-        array[3] = getString(R.string.shelp4);
-        array[4] = getString(R.string.shelp5);
-        array[5] = getString(R.string.shelp6);
+        array[0] = getString(R.string.tutorial_settings_1);
+        array[1] = getString(R.string.tutorial_settings_2);
+        array[2] = getString(R.string.tutorial_settings_3);
+        array[3] = getString(R.string.tutorial_settings_4);
+        array[4] = getString(R.string.tutorial_settings_5);
+        array[5] = getString(R.string.tutorial_settings_6);
 
-        header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
+        header.setText(getString(R.string.tutorial_dialog_title) + " " + screen + "/" + max);
         content.setText(array[screen - 1]);
 
         // move one step back in the tutorial        
@@ -78,7 +78,7 @@ public class TutorialSettingsActivity extends Activity {
                 if (screen < 1)
                     screen = 1;
 
-                header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
+                header.setText(getString(R.string.tutorial_dialog_title) + " " + screen + "/" + max);
                 content.setText(array[screen - 1]);
             }
         });
@@ -93,7 +93,7 @@ public class TutorialSettingsActivity extends Activity {
                 if (screen > max)
                     screen = max;
 
-                header.setText(getString(R.string.tutorial) + " " + screen + "/" + max);
+                header.setText(getString(R.string.tutorial_dialog_title) + " " + screen + "/" + max);
                 content.setText(array[screen - 1]);
             }
         });

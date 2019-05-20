@@ -3,7 +3,7 @@ package com.fieldbook.tracker;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +40,7 @@ public class ChangelogActivity extends AppCompatActivity {
 
 
         setContentView(R.layout.activity_changelog);
-        setTitle(R.string.updatemsg);
+        setTitle(R.string.changelog_title);
 
         params = getWindow().getAttributes();
         params.width = LinearLayout.LayoutParams.MATCH_PARENT;

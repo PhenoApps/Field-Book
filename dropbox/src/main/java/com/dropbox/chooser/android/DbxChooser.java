@@ -167,9 +167,9 @@ public class DbxChooser {
             }
 
             @Override
-            public android.support.v4.app.FragmentManager getSupportFragmentManager() {
-                if (mAct instanceof android.support.v4.app.FragmentActivity) {
-                    return ((android.support.v4.app.FragmentActivity) mAct).getSupportFragmentManager();
+            public androidx.fragment.app.FragmentManager getSupportFragmentManager() {
+                if (mAct instanceof androidx.fragment.app.FragmentActivity) {
+                    return ((androidx.fragment.app.FragmentActivity) mAct).getSupportFragmentManager();
                 } else {
                     return null;
                 }
@@ -231,7 +231,7 @@ public class DbxChooser {
             }
 
             @Override
-            public android.support.v4.app.FragmentManager getSupportFragmentManager() {
+            public androidx.fragment.app.FragmentManager getSupportFragmentManager() {
                 return null;
             }
         };
@@ -244,8 +244,8 @@ public class DbxChooser {
      * supplied Fragment. If the supplied Fragment is not attached to an Activity,
      * this will throw an IllegalStateException.
      */
-    public void launch(android.support.v4.app.Fragment frag, int requestCode) throws ActivityNotFoundException {
-        final android.support.v4.app.Fragment mFrag = frag;
+    public void launch(androidx.fragment.app.Fragment frag, int requestCode) throws ActivityNotFoundException {
+        final androidx.fragment.app.Fragment mFrag = frag;
         ActivityLike thing = new ActivityLike() {
 
             @Override
@@ -284,8 +284,8 @@ public class DbxChooser {
             }
 
             @Override
-            public android.support.v4.app.FragmentManager getSupportFragmentManager() {
-                android.support.v4.app.FragmentActivity act = mFrag.getActivity();
+            public androidx.fragment.app.FragmentManager getSupportFragmentManager() {
+                androidx.fragment.app.FragmentActivity act = mFrag.getActivity();
                 if (act == null) {
                     return null;
                 }

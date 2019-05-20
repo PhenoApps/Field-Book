@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="@string/versiontitle"
+        android:text="@string/about_version"
         android:textColor="@color/main_colorAccent"
         android:textSize="@dimen/text_size_medium"
         android:clickable="true"
@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="@string/otherapps"
+        android:text="@string/about_other_apps_title"
         android:textColor="@color/main_colorAccent"
         android:textSize="@dimen/text_size_medium"
         android:clickable="true"
@@ -40,7 +40,7 @@
         android:layout_height="wrap_content"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="@string/developers"
+        android:text="@string/about_developer_title"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_medium"
         android:textStyle="bold" />
@@ -52,7 +52,7 @@
         android:layout_marginLeft="15dip"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
-        android:text="@string/devr"
+        android:text="@string/about_developer_trife"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small"
         android:textStyle="bold" />
@@ -65,7 +65,7 @@
         android:autoLink="email"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
-        android:text="@string/devremail"
+        android:text="@string/about_developer_trife_email"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_xsmall"
         android:textStyle="bold" />
@@ -78,7 +78,7 @@
         android:autoLink="web"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="@string/devrsite"
+        android:text="@string/about_developer_trife_website"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_xsmall"
         android:textStyle="bold" />
@@ -90,7 +90,7 @@
         android:layout_marginLeft="15dip"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
-        android:text="@string/devp"
+        android:text="@string/about_developer_jpoland"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small"
         android:textStyle="bold" />
@@ -103,7 +103,7 @@
         android:autoLink="email"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
-        android:text="@string/devpemail"
+        android:text="@string/about_developer_jpoland_email"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_xsmall"
         android:textStyle="bold" />
@@ -116,7 +116,7 @@
         android:autoLink="web"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="@string/devpsite"
+        android:text="@string/about_developer_jpoland_website"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_xsmall"
         android:textStyle="bold" />
@@ -127,7 +127,7 @@
         android:layout_height="wrap_content"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
-        android:text="@string/translators"
+        android:text="@string/about_translators_title"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_medium"
         android:textStyle="bold" />
@@ -139,7 +139,7 @@
         android:layout_marginLeft="15dip"
         android:paddingBottom="15dp"
         android:paddingLeft="10dp"
-        android:text="@string/translist"
+        android:text="@string/about_translators_list"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small"
         android:textStyle="bold" />
@@ -156,7 +156,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:minWidth="@dimen/button_default_width"
-            android:text="@string/okay"
+            android:text="@string/dialog_ok"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
