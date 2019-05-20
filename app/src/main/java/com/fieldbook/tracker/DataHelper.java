@@ -839,8 +839,9 @@ public class DataHelper {
      * Returns the column names for the range table
      */
     public String[] getRangeColumnNames() {
+        if(db==null || !db.isOpen()) db =  openHelper.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT * from " + RANGE + " limit 1", null);
-
+        //Cursor cursor = db.rawQuery("SELECT * from range limit 1", null);
         String[] data = null;
 
         if (cursor.moveToFirst()) {
@@ -1009,19 +1010,26 @@ public class DataHelper {
      * Inserting traits data. The last field isVisible determines if the trait
      * is visible when using the app
      */
-    public long insertTraits(String trait, String format, String defaultValue,
+    public long insertTraits(TraitObject t) {
+            /*String trait, String format, String defaultValue,
                              String minimum, String maximum, String details, String categories,
-                             String isVisible, String realPosition) {
+                             String isVisible, String realPosition) {*/
+
+        if (hasTrait(t.trait)) {
+            return -1;
+        }
+
         try {
-            this.insertTraits.bindString(1, trait);
-            this.insertTraits.bindString(2, format);
-            this.insertTraits.bindString(3, defaultValue);
-            this.insertTraits.bindString(4, minimum);
-            this.insertTraits.bindString(5, maximum);
-            this.insertTraits.bindString(6, details);
-            this.insertTraits.bindString(7, categories);
-            this.insertTraits.bindString(8, isVisible);
-            this.insertTraits.bindString(9, realPosition);
+            this.insertTraits.bindString(1, t.trait);
+            this.insertTraits.bindString(2, t.format);
+            this.insertTraits.bindString(3, t.defaultValue);
+            this.insertTraits.bindString(4, t.minimum);
+            this.insertTraits.bindString(5, t.maximum);
+            this.insertTraits.bindString(6, t.details);
+            this.insertTraits.bindString(7, t.categories);
+            this.insertTraits.bindString(8, String.valueOf(t.visible));
+            //Probably wrong with this one, because the type of realPosition is int
+            this.insertTraits.bindString(9, t.realPosition);
 
             return this.insertTraits.executeInsert();
         } catch (Exception e) {
@@ -1131,6 +1139,10 @@ public class DataHelper {
             db.execSQL("CREATE TABLE "
                     + EXP_INDEX
                     + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER)");
+
+            //Do not know why the unique constraint does not work
+            //db.execSQL("CREATE UNIQUE INDEX expname ON " + EXP_INDEX +"(exp_name);");
+
             try {
                 db.execSQL("CREATE TABLE android_metadata (locale TEXT)");
                 db.execSQL("INSERT INTO android_metadata(locale) VALUES('en_US')");
@@ -1167,7 +1179,6 @@ public class DataHelper {
                 db.execSQL("CREATE TABLE "
                         + PLOT_ATTRIBUTES
                         + "(attribute_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_name VARCHAR, exp_id INTEGER)");
-
                 db.execSQL("CREATE TABLE "
                         + PLOT_VALUES
                         + "(attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_id INTEGER, attribute_value VARCHAR, plot_id INTEGER, exp_id INTEGER)");
@@ -1350,28 +1361,40 @@ public class DataHelper {
         db.execSQL(query);
     }
 
-    public boolean checkFieldName(String name) {
-        Cursor c = db.rawQuery("SELECT 1 FROM " + EXP_INDEX + " WHERE exp_name=?", new String[] {name});
-        return c.moveToFirst();
+    public int checkFieldName(String name) {
+        Cursor c = db.rawQuery("SELECT exp_id FROM " + EXP_INDEX + " WHERE exp_name=?", new String[] {name});
+
+        if (c.moveToFirst()) {
+            return c.getInt(0);
+        }
+
+        return -1;
     }
 
-    public int createField(String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns) {
+    public int createField(FieldObject e,  List<String> columns) {
+        // String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns){
+
+        long exp_id = checkFieldName(e.exp_name);
+        if (exp_id != -1) {
+            return (int)exp_id;
+        }
+
         // add to exp_index
         ContentValues insertExp = new ContentValues();
-        insertExp.put("exp_name", exp_name);
-        insertExp.put("exp_alias", exp_alias);
-        insertExp.put("unique_id", unique_id);
-        insertExp.put("primary_id", primary_id);
-        insertExp.put("secondary_id", secondary_id);
-        long exp_id = db.insert(EXP_INDEX, null, insertExp);
+        insertExp.put("exp_name", e.exp_name);
+        insertExp.put("exp_alias", e.exp_alias);
+        insertExp.put("unique_id", e.unique_id);
+        insertExp.put("primary_id", e.primary_id);
+        insertExp.put("secondary_id", e.secondary_id);
+        exp_id = db.insert(EXP_INDEX, null, insertExp);
 
-        // columns to plot_attributes
+        /* columns to plot_attributes
         String[] columnNames = columns;
         List<String> list = new ArrayList<>(Arrays.asList(columnNames));
         list.remove("id");
-        columnNames = list.toArray(new String[0]);
+        columnNames = list.toArray(new String[0]);*/
 
-        for (String columnName : columnNames) {
+        for (String columnName : columns) {
             ContentValues insertAttr = new ContentValues();
             insertAttr.put("attribute_name", columnName);
             insertAttr.put("exp_id", (int) exp_id);
@@ -1381,28 +1404,32 @@ public class DataHelper {
         return (int) exp_id;
     }
 
-    public void createFieldData(int exp_id, String[] columns, String[] data) {
+    public void createFieldData(int exp_id, List<String> columns, List<String> data) {
         // get unique_id, primary_id, secondary_id names from exp_id
         Cursor cursor = db.rawQuery("SELECT exp_id.unique_id, exp_id.primary_id, exp_id.secondary_id from exp_id where exp_id.exp_id = " + exp_id, null);
         cursor.moveToFirst();
 
         // extract unique_id, primary_id, secondary_id indices
         int[] plotIndices = new int[3];
-        plotIndices[0] = Arrays.asList(columns).indexOf(cursor.getString(0));
-        plotIndices[1] = Arrays.asList(columns).indexOf(cursor.getString(1));
-        plotIndices[2] = Arrays.asList(columns).indexOf(cursor.getString(2));
+        //plotIndices[0] = Arrays.asList(columns).indexOf(cursor.getString(0));
+        //plotIndices[1] = Arrays.asList(columns).indexOf(cursor.getString(1));
+        //plotIndices[2] = Arrays.asList(columns).indexOf(cursor.getString(2));
+
+        plotIndices[0] = columns.indexOf(cursor.getString(0));
+        plotIndices[1] = columns.indexOf(cursor.getString(1));
+        plotIndices[2] = columns.indexOf(cursor.getString(2));
 
         // add plot to plots table
         ContentValues insertValues = new ContentValues();
         insertValues.put("exp_id", exp_id);
-        insertValues.put("unique_id", data[plotIndices[0]]);
-        insertValues.put("primary_id", data[plotIndices[1]]);
-        insertValues.put("secondary_id", data[plotIndices[2]]);
+        insertValues.put("unique_id", data.get(plotIndices[0]));    //data[plotIndices[0]]);
+        insertValues.put("primary_id", data.get(plotIndices[1]));   //data[plotIndices[1]]);
+        insertValues.put("secondary_id", data.get(plotIndices[2])); //data[plotIndices[2]]);
         long plot_id = db.insert(PLOTS, null, insertValues);
 
         // add plot data plot_values table
-        for (int i = 0; i < columns.length; i++) {
-            Cursor attribute_id = db.rawQuery("select plot_attributes.attribute_id from plot_attributes where plot_attributes.attribute_name = " + "'" + columns[i] + "'" + " and plot_attributes.exp_id = " + exp_id, null);
+        for (int i = 0; i < columns.size(); i++) {
+            Cursor attribute_id = db.rawQuery("select plot_attributes.attribute_id from plot_attributes where plot_attributes.attribute_name = " + "'" + columns.get(i) + "'" + " and plot_attributes.exp_id = " + exp_id, null);
             Integer attId = 0;
 
             if(attribute_id.moveToFirst()) {
@@ -1411,7 +1438,7 @@ public class DataHelper {
 
             ContentValues plotValuesInsert = new ContentValues();
             plotValuesInsert.put("attribute_id",attId);
-            plotValuesInsert.put("attribute_value", data[i]);
+            plotValuesInsert.put("attribute_value", data.get(i));
             plotValuesInsert.put("plot_id", (int) plot_id);
             plotValuesInsert.put("exp_id", exp_id);
             db.insert(PLOT_VALUES, null, plotValuesInsert);

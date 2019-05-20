@@ -148,7 +148,6 @@ public class FieldEditorActivity extends AppCompatActivity {
         ConfigActivity.dt.updateExpTable(false, true, false, 0);
 
         thisActivity = this;
-
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
@@ -339,7 +338,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         e.putString("FieldFile", mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.lastIndexOf(".")));
         e.apply();
 
-        if (ConfigActivity.dt.checkFieldName(ep.getString("FieldFile", ""))) {
+        if (ConfigActivity.dt.checkFieldName(ep.getString("FieldFile", ""))>= 0) {
             makeToast(getString(R.string.fields_study_exists_message));
             SharedPreferences.Editor ed = ep.edit();
             ed.putString("FieldFile", null);
@@ -528,8 +527,14 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                     columns = cr.readNext();
 
-                    exp_id = ConfigActivity.dt.createField(ep.getString("FieldFile", ""), ep.getString("FieldFile", ""),
-                            uniqueS, primaryS, secondaryS, columns);
+                    FieldObject f = new FieldObject();
+                    f.exp_name = ep.getString("FieldFile", "");
+                    f.exp_alias = ep.getString("FieldFile", "");
+                    f.unique_id = uniqueS;
+                    f.primary_id = primaryS;
+                    f.secondary_id = secondaryS;
+
+                    exp_id = ConfigActivity.dt.createField(f, Arrays.asList(columns));
 
                     data = columns;
 
@@ -540,7 +545,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                             data = cr.readNext();
 
                             if (data != null) {
-                                ConfigActivity.dt.createFieldData(exp_id, columns, data);
+                                ConfigActivity.dt.createFieldData(exp_id, Arrays.asList(columns), Arrays.asList(data));
                             }
                         }
 
@@ -578,8 +583,13 @@ public class FieldEditorActivity extends AppCompatActivity {
                         columns[s] = wb.getSheet(0).getCell(s, 0).getContents();
                     }
 
-                    exp_id = ConfigActivity.dt.createField(ep.getString("FieldFile", ""), ep.getString("FieldFile", ""),
-                            uniqueS, primaryS, secondaryS, columns);
+                    FieldObject ftmp = new FieldObject();
+                    ftmp.exp_name = ep.getString("FieldFile", "");
+                    ftmp.exp_alias = ep.getString("FieldFile", "");
+                    ftmp.unique_id = uniqueS;
+                    ftmp.primary_id = primaryS;
+                    ftmp.secondary_id = secondaryS;
+                    exp_id = ConfigActivity.dt.createField(ftmp, Arrays.asList(columns));
 
                     int row = 1;
 
@@ -595,7 +605,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                             row += 1;
 
-                            ConfigActivity.dt.createFieldData(exp_id, columns, data);
+                            ConfigActivity.dt.createFieldData(exp_id, Arrays.asList(columns), Arrays.asList(data));
                         }
 
                         DataHelper.db.setTransactionSuccessful();

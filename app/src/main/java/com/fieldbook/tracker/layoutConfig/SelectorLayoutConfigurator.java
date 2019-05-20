@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -83,6 +83,7 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
         final String[] prefixTraits = dataHelper.getRangeColumnNames();
 
         ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(this.context, R.layout.custom_spinnerlayout, prefixTraits);
+
         spinner.setAdapter(prefixArrayAdapter);
 
         int spinnerPosition = prefixArrayAdapter.getPosition(getSharedPref().getString("DROP" + position, prefixTraits[0]));

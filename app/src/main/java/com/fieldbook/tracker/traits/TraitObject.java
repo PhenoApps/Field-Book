@@ -11,7 +11,7 @@ public class TraitObject {
     public String maximum;
     public String details;
     public String categories;
-    public String realPosition;
+    public String realPosition = "";
     public String id;
     public Boolean visible;
 }

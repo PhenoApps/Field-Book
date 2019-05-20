@@ -270,7 +270,11 @@ public class ConfigActivity extends AppCompatActivity {
         ListView settingsList = findViewById(R.id.myList);
 
         String[] items2 = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits),getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced)}; //, "API Test"};
+                getString(R.string.settings_traits),
+                getString(R.string.settings_collect),
+                getString(R.string.settings_profile),
+                getString(R.string.settings_export),
+                getString(R.string.settings_advanced), "Brapi"}; //, "API Test"};
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
@@ -332,7 +336,11 @@ public class ConfigActivity extends AppCompatActivity {
                                 PreferencesActivity.class.getName());
                         startActivity(intent);
                         break;
-
+                    case 6:
+                        intent.setClassName(ConfigActivity.this,
+                                BrapiActivity.class.getName());
+                        startActivity(intent);
+                        break;
                 }
             }
         });
