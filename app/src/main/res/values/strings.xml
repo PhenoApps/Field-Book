@@ -15,22 +15,21 @@
 
     <!-- Startup  -->
     <string name="startup_sample_data_title">Sample data</string>
-    <string name="startup_sample_data_message">Would you like to load the sample data provided?</string>
+    <string name="startup_sample_data_message">Load sample data?</string>
 
     <!-- Miscellaneous  -->
     <string name="fields_name">Field Name</string>
     <string name="fields_load">Load</string>
-    <string name="settings_customize_theme">Theme</string>
 
     <!-- Main Activity  -->
     <string name="main_toolbar_search">Search</string>
     <string name="main_toolbar_resources">Resources</string>
     <string name="main_trait_details">Trait details</string>
-    <string name="main_infobar_no_data">No data</string>
-    <string name="main_toolbar_lock_data">Lock data</string>
-    <string name="main_toolbar_unlock_data">Unlock data</string>
+    <string name="main_infobar_data_missing">No data</string>
+    <string name="main_toolbar_data_lock">Lock data</string>
+    <string name="main_toolbar_data_unlock">Unlock data</string>
     <string name="main_toolbar_moveto_no_match">No matching value</string>
-    <string name="main_toolbar_next_entry_no_data">Next empty entry</string>
+    <string name="main_toolbar_next_entry_no_data">Next entry with no data</string>
     <string name="main_toolbar_moveto">Go to ID</string>
     <string name="main_toolbar_barcode_scan">Scan barcode</string>
     <string name="main_toolbar_moveto_scan">Scan</string>
@@ -38,21 +37,22 @@
 
     <!-- Fields Activity  -->
     <string name="fields_delete_study">Delete field</string>
-    <string name="fields_delete_study_confirmation">Are you sure you want to delete this field? This will also delete all data associated with this field.</string>
-    <string name="fields_study_exists_title">Field exists</string>
-    <string name="fields_study_exists_message">A field with this name already exists.</string>
+    <string name="fields_delete_study_confirmation">Are you sure you want to delete this field? This will delete all data from this field.</string>
+    <string name="fields_study_exists_message">This field already exists.</string>
     <string name="fields_select_study">Select or import a field.</string>
     <string name="fields_date_imported">Import date</string>
     <string name="fields_date_edited">Edit date</string>
     <string name="fields_date_exported">Export date</string>
     <string name="fields_summary">Field summary</string>
     <string name="fields_options">Options</string>
-    <string name="fields_study_statistics">Stats</string>
+    <string name="fields_study_statistics">Statistics</string>
     <string name="fields_sort">Sort</string>
     <string name="fields_delete">Delete</string>
+    <string name="fields_filter">Filter</string>
+    <string name="fields_reimport">Reimport</string>
+    <string name="fields_archive">Archive</string>
 
     <!-- Settings Activity  -->
-    <string name="settings_title">Settings</string>
     <string name="settings_fields">Fields</string>
     <string name="settings_traits">Traits</string>
     <string name="settings_collect">Collect data</string>
@@ -61,15 +61,23 @@
     <string name="settings_profile">Profile</string>
 
     <!-- Traits Activity  -->
-    <string name="traits_sort_trait_name">Name</string>
     <string name="traits_sort_title">Sort</string>
+    <string name="traits_sort_name">Name</string>
     <string name="traits_sort_visibility">Visibility</string>
     <string name="traits_sort_format">Format</string>
+
     <string name="traits_toolbar_add_trait">Add trait</string>
+    <string name="traits_toolbar_delete_all">Delete all traits</string>
+    <string name="traits_toolbar_sort">Sort</string>
+    <string name="traits_toolbar_import_export">Import/Export</string>
+
+    <string name="traits_dialog_import">Import</string>
+    <string name="traits_dialog_export">Export</string>
+
     <string name="traits_options_copy">Copy</string>
     <string name="traits_options_edit">Edit</string>
     <string name="traits_options_delete">Delete</string>
-    <string name="traits_options_delete_dialog_title">Delete trait</string>
+    <string name="traits_options_delete_title">Delete trait</string>
 
     <string name="traits_format_numeric">Numeric</string>
     <string name="traits_format_categorical">Categorical</string>
@@ -85,6 +93,8 @@
     <string name="traits_format_angle">Angle</string>
     <string name="traits_format_video">Video</string>
     <string name="traits_format_location">Location</string>
+    <string name="traits_format_printer">Printer</string>
+    <string name="traits_format_barcode">Barcode</string>
 
     <string name="traits_create_trait">Trait</string>
     <string name="traits_create_format">Format</string>
@@ -94,22 +104,18 @@
     <string name="traits_create_details">Details</string>
     <string name="traits_create_optional">Optional</string>
     <string name="traits_create_categories_title">Categories</string>
-    <string name="traits_toolbar_import_export">Import/Export</string>
-    <string name="traits_dialog_import">Import</string>
-    <string name="traits_dialog_export">Export</string>
     <string name="traits_create_photo_maximum">Maximum number of photos</string>
     <string name="traits_create_true">True</string>
     <string name="traits_create_false">False</string>
     <string name="traits_create_categories_text">Use / to separate categories</string>
 
-    <string name="traits_create_warning_name_empty">Trait name cannot be empty</string>
+    <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
     <string name="traits_create_warning_duplicate">Trait already exists</string>
-    <string name="traits_toolbar_delete_all">Delete all traits</string>
-    <string name="traits_toolbar_sort">Sort</string>
-    <string name="traits_create_warning_numeric_required">Default, minimum, and maximum must be numeric</string>
+    <string name="traits_create_warning_numeric_required">Default, minimum, and maximum are required and must be numeric</string>
     <string name="traits_create_warning_categories_required">Category cannot be empty</string>
 
-    <string name="traits_export_check">Would you like to export the current trait list before importing a new list?</string>
+    <string name="traits_export_check">Export current trait list?</string>
+    <string name="traits_warning_delete">Deleting a trait also deletes data that has been collected for that trait. Are you sure you want to delete this trait?</string>
 
     <!-- Export  -->
     <string name="export_format_title">Format</string>
@@ -129,86 +135,85 @@
     <string name="export_error_missing_format">Export type must be selected</string>
     <string name="export_error_missing_column">Field column type must be selected</string>
     <string name="export_error_missing_trait">Trait type must be selected</string>
-    <string name="export_overwrite">Overwrite previously exported file</string>
+    <string name="export_overwrite">Overwrite previous export</string>
 
     <!-- Preferences Activity  -->
-    <string name="preferences_interface">Interface</string>
-    <string name="preferences_interface_tutorial">Tutorial</string>
-    <string name="infobar_number">Number of InfoBars</string>
-    <string name="quickgoto">Quick GoTo</string>
-    <string name="infobar_number_desc">Adjust the number of Infobars displayed on the main screen</string>
-    <string name="preferences_interface_language">Language</string>
-    <string name="language_desc">Language set by system</string>
+    <string name="preferences_appearance_title">Appearance</string>
+    <string name="preferences_appearance_tutorial">Tutorial</string>
+    <string name="preferences_appearance_tutorial_description">Adds a tutorial icon to the collect, settings, fields, and traits screens</string>
+    <string name="preferences_appearance_infobar_number">Number of InfoBars</string>
+    <string name="preferences_appearance_infobar_number_description">Adjust the number of Infobars displayed on the main screen</string>
+    <string name="preferences_appearance_quickgoto">Quick GoTo</string>
+    <string name="preferences_appearance_quickgoto_description">Changes middle section of main screen to the legacy Quick GoTo</string>
+    <string name="preferences_appearance_language">Language</string>
+    <string name="preferences_appearance_language_description">Language set by system</string>
+    <string name="preferences_appearance_theme_title">Theme</string>
 
-    <string name="customize_toolbar">Customize toolbar icons</string>
-    <string name="toolbar_search">Search</string>
-    <string name="toolbar_resources">Resources</string>
-    <string name="toolbar_summary">Summary</string>
-    <string name="toolbar_lock">Lock</string>
+    <string name="preferences_appearance_toolbar_customize">Main toolbar customize</string>
+    <string name="preferences_appearance_toolbar_customize_description">Modify which icons displayed on the collect screen</string>
+    <string name="preferences_appearance_toolbar_customize_search">Search</string>
+    <string name="preferences_appearance_toolbar_customize_resources">Resources</string>
+    <string name="preferences_appearance_toolbar_customize_summary">Summary</string>
+    <string name="preferences_appearance_toolbar_customize_lock">Lock</string>
 
-    <string name="preferences_behavior">Behavior</string>
-    <string name="navigate_volume_buttons">Remap volume keys for navigation</string>
-    <string name="navigate_volume_buttons_desc">Volume keys go to next or last entry</string>
-    <string name="return_character">Change how the return key signal is used</string>
+    <string name="preferences_behavior_title">Behavior</string>
+    <string name="preferences_behavior_volume_buttons_navigate">Map volume keys to entry navigation</string>
+    <string name="preferences_behavior_volume_buttons_navigate_description">Volume keys go to next or last entry</string>
+    <string name="preferences_behavior_return_character">Return key</string>
+    <string name="preferences_behavior_return_character_description">Change how the return key signal is interpreted</string>
+    <string name="preferences_behavior_return_character_next_plot">Next plot</string>
+    <string name="preferences_behavior_return_character_next_trait">Next trait</string>
+    <string name="preferences_behavior_return_character_do_nothing">Do nothing</string>
+    <string name="preferences_behavior_cycle_traits">Cycling traits advances entry</string>
+    <string name="preferences_behavior_cycle_traits_description">After going through all traits, the app goes to the next entry</string>
     <string name="preferences_behavior_import_source">Choose your default import source</string>
+    <string name="preferences_behavior_disable_entry_arrow">Disable entry arrow</string>
+    <string name="preferences_behavior_disable_entry_arrow_left">Left</string>
+    <string name="preferences_behavior_disable_entry_arrow_right">Right</string>
+    <string name="preferences_behavior_disable_entry_arrow_both">Both</string>
 
     <string name="preferences_naming">Naming</string>
     <string name="preferences_naming_photo">Photo name format</string>
-    <string name="preferences_naming_export_filename">Export filename format</string>
+    <string name="preferences_naming_export">Export name format</string>
 
     <string name="preferences_sounds">Sounds</string>
-    <string name="rangechime">Primary order sound</string>
-    <string name="rangechime_desc">Notification sound when the primary order changes</string>
+    <string name="preferences_sound_primary_order_sound">Primary order sound</string>
+    <string name="preferences_sound_primary_order_sound_description">Notification sound when the primary order changes</string>
 
-    <string name="preferences_general">General</string>
-    <string name="cycle">Cycling traits advances entry</string>
-    <string name="useday">Use day of year</string>
-    <string name="ignoreentries">Hide entries with data</string>
-    <string name="disableshare">Disable file sharing</string>
-    <string name="disableentrynavleft">Disable left entry arrow</string>
-    <string name="disableentrynavright">Disable right entry arrow</string>
-    <string name="barcodescan">Camera barcode scanner</string>
-    <string name="nextmissingenable">Next entry with no data</string>
-    <string name="jumptoplotid">Move to unique identifier</string>
-    <string name="datagrid">Datagrid</string>
-    <string name="tips_desc">Adds a tutorial icon to the main, settings, fields, and traits screens</string>
-    <string name="quickgoto_desc">Changes middle section of main screen to the legacy Quick GoTo</string>
-    <string name="cycle_desc">After going through all traits, the app goes to the next entry</string>
-    <string name="useday_desc">Use day of year when collecting data instead of the date</string>
-    <string name="ignoreentries_desc">Skips entries that have data for the current trait</string>
-    <string name="disableshare_desc">When files are exported, the share dialog will not be displayed</string>
-    <string name="disableentrynavleft_desc">If no data has been collected, disables left entry arrow</string>
-    <string name="disableentrynavright_desc">If no data has been collected, disables right entry arrow</string>
-    <string name="barcodescan_desc">Opens camera to scan barcode and move to the specific entry</string>
-    <string name="nextmissingenable_desc">Adds a button to the toolbar that jumps to the next entry with no data for the current trait</string>
-    <string name="jumptoplotid_desc">Opens dialog to input unique id and move to specific entry</string>
-    <string name="datagrid_desc">Displays a spreadsheet of plots and traits showing collected data</string>
+    <string name="preferences_general_title">General</string>
+    <string name="preferences_general_use_day_number">Use day of year</string>
+    <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
+    <string name="preferences_general_skip_entries_with_data">Skip entries with data</string>
+    <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the current trait</string>
+    <string name="preferences_general_share_disable">Disable file sharing</string>
+    <string name="preferences_general_share_disable_description">When files are exported, the share dialog will not be displayed</string>
+    <string name="preferences_general_entry_left_disable">Disable left entry arrow</string>
+    <string name="preferences_general_entry_left_disable_description">If no data has been collected, left entry arrow disabled</string>
+    <string name="preferences_general_entry_right_disable">Disable right entry arrow</string>
+    <string name="preferences_general_entry_right_disable_description">If no data has been collected, right entry arrow disabled</string>
+    <string name="preferences_general_barcode_camera">Camera barcode scanner</string>
+    <string name="preferences_general_barcode_camera_description">Opens camera to scan barcode and move to the specific entry</string>
+    <string name="preferences_general_feature_next_missing">Next entry with no data</string>
+    <string name="preferences_general_feature_next_missing_description">Adds a button to the toolbar that jumps to the next entry with no data for the current trait</string>
+    <string name="preferences_general_feature_barcode_text">Move to unique identifier</string>
+    <string name="preferences_general_feature_barcode_text_description">Opens dialog to input unique id and move to specific entry</string>
+    <string name="preferences_general_feature_datagrid">Datagrid</string>
+    <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
 
-    <string name="entry_arrow_left">Left</string>
-    <string name="entry_arrow_right">Right</string>
-    <string name="entry_arrow_both">Both</string>
+    <!-- Trait text and errors -->
+    <string name="trait_layout_data_stored">Saved</string>
 
-    <string name="return_next_plot">Next plot</string>
-    <string name="return_next_trait">Next trait</string>
-    <string name="return_do_nothing">Do nothing</string>
-
-    <!-- Trait layouts and messages -->
-    <string name="trait_layout_date_minusday">-1</string>
-    <string name="trait_layout_date_plusday">+1</string>
-    <string name="trait_layout_data_stored">Data has been saved</string>
-
-    <string name="hardwaremissing">Your device does not contain the necessary hardware for this feature</string>
-    <string name="photomissing">Photo does not exist</string>
-    <string name="photodecodefail">Photo cannot be read</string>
-    <string name="valueless">Value is less than allowed minimum</string>
-    <string name="valuemore">Value is larger than allowed maximum</string>
-    <string name="rustwarning">Severity already stored</string>
-    <string name="deletePhoto">Are you sure you want to delete this photo?</string>
-    <string name="delete_trait_warning">Deleting a trait also deletes data that has been collected for that trait. Are you sure you want to delete this trait?</string>
+    <string name="trait_error_hardware_missing">Your device does not contain the necessary hardware for this feature</string>
+    <string name="trait_error_photo_missing">Photo does not exist</string>
+    <string name="trait_error_photo_error">Photo cannot be read</string>
+    <string name="trait_error_minimum_value">Value is less than allowed minimum</string>
+    <string name="trait_error_maximum_value">Value is larger than allowed maximum</string>
+    <string name="trait_error_disease_severity">Severity already stored</string>
+    <string name="trait_delete_warning_photo">Are you sure you want to delete this photo?</string>
 
     <!-- Tutorial -->
     <string name="tutorial_dialog_title">Tutorial</string>
-    <string name="tutorial_dialog_description">Would you like to enable the tutorial? This setting can be changed in the Advanced Settings.</string>
+    <string name="tutorial_dialog_description">Would you like to enable the tutorial? This setting can be changed in the Settings.</string>
 
     <string name="tutorial_title">Tutorial</string>
     <string name="tutorial_previous">Previous</string>
@@ -219,41 +224,40 @@
     <string name="tutorial_main_3">A list of active traits is displayed when the current trait is pressed.</string>
     <string name="tutorial_main_4">The folder icon displays a list of files in the Resources folder.</string>
     <string name="tutorial_main_5">The search icon allows database queries.</string>
-    <string name="tutorial_main_6">The document icon displays a summary of all data for a given entry.</string>
-    <string name="tutorial_main_7">All other options are in the navigation drawer, on the left.</string>
+    <string name="tutorial_main_6">The summary icon displays a summary of all data for a given entry.</string>
 
     <string name="tutorial_settings_1">To import and manage fields, select Fields.</string>
     <string name="tutorial_settings_2">To add, import, or manage traits, select Traits.</string>
     <string name="tutorial_settings_3">To set the person and location, select Profile.</string>
     <string name="tutorial_settings_4">To export data, select Export. Data can be exported in two formats: database or table. Columns from the original file can be included or excluded from the exported file.</string>
-    <string name="tutorial_settings_5">Advanced Settings contains several optional settings to augment how data is collected.</string>
-    <string name="tutorial_settings_6">Once data is imported, the back button in the top left corner will take you to the main screen.</string>
+    <string name="tutorial_settings_5">Settings allows additional configuration for data collection.</string>
+    <string name="tutorial_settings_6">After fields and traits have been created, select Collect Data to collect data.</string>
 
     <string name="tutorial_traits_1">Add Trait on the menu creates a new trait. It is not possible to use the keyboard and tutorial at the same time. Different trait formats have different layouts.</string>
     <string name="tutorial_traits_2">To import trait files, choose Import on the toolbar.</string>
-    <string name="tutorial_traits_3">Consult the app manual for additional information about trait creation.</string>
+    <string name="tutorial_traits_3">Each trait format utilizes a different layout for data collection.</string>
     <string name="tutorial_traits_4">Use the checkbox on each trait to toggle its visibility on the main collection screen. Uncheck any traits you do not want to collect.</string>
     <string name="tutorial_traits_5">Press the back button in the top left corner to return to the Settings screen.</string>
 
-    <string name="tutorial_fields_1">Add Field on the toolbar allows a field file to be imported.</string>
+    <string name="tutorial_fields_1">Add Field on the toolbar imports a field file.</string>
     <string name="tutorial_fields_2">Files must contain three columns: a unique identifier, a primary order, and a secondary order. The primary/secondary order are used for navigation in the field.</string>
-    <string name="tutorial_fields_3">The field with the brown radio button is the currently active field.</string>
+    <string name="tutorial_fields_3">A field is selected for data collection after being imported.</string>
     <string name="tutorial_fields_4">To delete a field, open the menu on the left side of a field name and select Delete.</string>
 
     <!-- About dialog -->
     <string name="about_title">About</string>
-    <string name="about_version">Version</string>
-    <string name="about_developer_title">Developers</string>
-    <string name="about_translators_title">Translators</string>
-    <string name="about_other_apps_title">Other Apps</string>
+    <string name="about_version_title">Version</string>
+    <string name="about_title_other_apps">Other Apps</string>
 
-    <string name="about_developer_trife">Trevor Rife, Kansas State University</string>
-    <string name="about_developer_trife_email">trife@ksu.edu</string>
-    <string name="about_developer_trife_website">https://github.com/PhenoApps/Field-Book</string>
-    <string name="about_developer_jpoland">Jesse Poland, Kansas State University</string>
-    <string name="about_developer_jpoland_email">jpoland@ksu.edu</string>
-    <string name="about_developer_jpoland_website">http://wheatgenetics.org</string>
-    <string name="about_translators_list">Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa, Mokhlesur Rahman, Alice Brunazzi</string>
+    <string name="about_developer_title">Developers</string>
+    <string name="about_developer_trife" translatable="false">Trevor Rife, Kansas State University</string>
+    <string name="about_developer_trife_email" translatable="false">trife@ksu.edu</string>
+    <string name="about_developer_trife_website" translatable="false">https://github.com/PhenoApps/Field-Book</string>
+    <string name="about_developer_jpoland" translatable="false">Jesse Poland, Kansas State University</string>
+    <string name="about_developer_jpoland_email" translatable="false">jpoland@ksu.edu</string>
+    <string name="about_developer_jpoland_website" translatable="false">http://wheatgenetics.org</string>
+    <string name="about_translators_title">Translators</string>
+    <string name="about_translators_list" translatable="false">Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa, Mokhlesur Rahman, Alice Brunazzi</string>
 
     <string name="changelog_title">Changelog</string>
 
@@ -277,7 +281,7 @@
     <string name="database_import">Import database</string>
     <string name="database_export">Export database</string>
     <string name="database_reset">Delete database</string>
-    <string name="database_reset_warning1">All data will be deleted on reset. Are you sure you want to reset the database?</string>
+    <string name="database_reset_warning1">All data will be deleted. Are you sure you want to reset the database?</string>
     <string name="database_reset_warning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
     <string name="database_reset_message">Database has been deleted</string>
 
@@ -294,10 +298,10 @@
     <string name="import_dialog_importing">Please wait…</string>
 
     <string name="import_error_general">Error importing</string>
-    <string name="import_error_unique">Unique identifier contains duplicates or has already been used from different file</string>
+    <string name="import_error_unique">Unique identifier column contains duplicates or has already been used in a different file</string>
     <string name="import_error_unsupported">This file type is not currently supported</string>
-    <string name="import_error_columns">Column names contain illegal characters or words</string>
-    <string name="import_error_column_name">Column name in imported file cannot be</string>
+    <string name="import_error_columns">Column names contain illegal characters or words: </string>
+    <string name="import_error_column_name">Column name in imported file cannot be: </string>
     <string name="import_error_unique_characters_illegal">Selected column contains characters which cannot be used in the unique identifier</string>
     <string name="import_error_column_choice">Columns cannot be used for the same assignment</string>
 
@@ -325,20 +329,6 @@
     <!-- Citation strings -->
     <string name="citation_title">Citation</string>
     <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
-    <string name="citation_text">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
-    <string name="preferences_brapi">BrAPI</string>
-    <string name="brapi_base_url">BrAPI Base URL</string>
-    <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
-    <string name="brapi_base_url_default">https://example.org/brapi/v1</string>
-    <string name="brapi_load_data_button">Load Fields</string>
-    <string name="brapi_save_data_button">Save Field</string>
-    <string name="brapi_study_name">Name</string>
-    <string name="brapi_study_description">Description</string>
-    <string name="brapi_study_location">Location</string>
-    <string name="brapi_study_num_plots"> Plots</string>
-    <string name="brapi_study_num_traits"> Traits</string>
-    <string name="import_source_brapi">Remote (BrAPI)</string>
-
-    <!-- BrAPI strings -->
+    <string name="citation_text" translatable="false">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
 
 </resources>

@@ -24,7 +24,7 @@
         android:id="@+id/datagrid"
         android:icon="@drawable/ic_tb_datagrid"
         android:showAsAction="always"
-        android:title="@string/datagrid" />
+        android:title="@string/preferences_general_feature_datagrid" />
     <item
         android:id="@+id/search"
         android:icon="@drawable/ic_tb_search"
@@ -39,7 +39,7 @@
         android:id="@+id/summary"
         android:icon="@drawable/ic_tb_details"
         android:showAsAction="always"
-        android:title="@string/toolbar_summary" />"
+        android:title="@string/preferences_appearance_toolbar_customize_summary" />"
     <item
         android:id="@+id/lockData"
         android:icon="@drawable/ic_tb_lock"

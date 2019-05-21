@@ -1359,6 +1359,9 @@ public class DataHelper {
         // drop range table and import new query into range table
         dropRange();
         db.execSQL(query);
+
+        //String index = "CREATE INDEX range_unique_index ON " + RANGE + "(" + ep.getString("ImportUniqueName",null) + ")";
+        //db.execSQL(index);
     }
 
     public int checkFieldName(String name) {

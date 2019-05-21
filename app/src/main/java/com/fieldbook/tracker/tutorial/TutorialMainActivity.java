@@ -64,7 +64,6 @@ public class TutorialMainActivity extends Activity {
         array[3] = getString(R.string.tutorial_main_4);
         array[4] = getString(R.string.tutorial_main_5);
         array[5] = getString(R.string.tutorial_main_6);
-        array[6] = getString(R.string.tutorial_main_7);
 
         header.setText(getString(R.string.tutorial_dialog_title) + " " + screen + "/" + max);
         content.setText(array[screen - 1]);

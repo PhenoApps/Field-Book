@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/counterLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -46,10 +47,11 @@
                 android:background="@drawable/custom_round_button"
                 android:gravity="center|center_vertical"
                 android:minWidth="@dimen/button_default_width"
-                android:text="@string/trait_layout_date_minusday"
+                android:text="-1"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="HardcodedText"/>
 
             <Button
                 android:id="@+id/addBtn"
@@ -58,10 +60,11 @@
                 android:layout_margin="5dp"
                 android:background="@drawable/custom_round_button"
                 android:gravity="center"
-                android:text="@string/trait_layout_date_plusday"
+                android:text="+1"
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_xxlarge"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
 
         </LinearLayout>
     </LinearLayout>

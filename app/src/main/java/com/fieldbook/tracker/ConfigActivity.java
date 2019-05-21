@@ -4,6 +4,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AlertDialog;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,6 +23,7 @@ import android.provider.Settings;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import android.text.Html;
 import android.util.Log;
@@ -31,6 +33,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -40,13 +43,13 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
@@ -54,6 +57,7 @@ import com.fieldbook.tracker.traits.TraitEditorActivity;
 import com.fieldbook.tracker.tutorial.TutorialSettingsActivity;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.CustomListAdapter;
+import com.fieldbook.tracker.utilities.CustomListAdapter2;
 import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -270,16 +274,17 @@ public class ConfigActivity extends AppCompatActivity {
 
         ListView settingsList = findViewById(R.id.myList);
 
-        String[] items2 = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits),
-                getString(R.string.settings_collect),
-                getString(R.string.settings_profile),
-                getString(R.string.settings_export),
-                getString(R.string.settings_advanced)}; //, "API Test"};
+        String[] configList = new String[]{getString(R.string.settings_fields),
+                getString(R.string.settings_traits),getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced)}; //, "API Test"};
+
+
+        Integer image_id[] = {R.drawable.ic_nav_drawer_fields,R.drawable.ic_nav_drawer_traits,R.drawable.barley,R.drawable.ic_nav_drawer_person,R.drawable.trait_date_save,R.drawable.ic_nav_drawer_settings};
+
+        //get list of items
+        //make adapter
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
-                arg1.getId();
                 Intent intent = new Intent();
                 switch (position) {
                     case 0:
@@ -338,12 +343,16 @@ public class ConfigActivity extends AppCompatActivity {
                                 PreferencesActivity.class.getName());
                         startActivity(intent);
                         break;
+
                 }
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, items2);
-        settingsList.setAdapter(adapter);
+        CustomListAdapter2 adapterImg = new CustomListAdapter2(this, image_id, configList);
+        settingsList.setAdapter(adapterImg);
+
+        //ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, configList);
+        //settingsList.setAdapter(adapter);
 
         SharedPreferences.Editor ed = ep.edit();
 
@@ -400,6 +409,9 @@ public class ConfigActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //TODO change all request codes
+        super.onActivityResult(requestCode, resultCode, data);
+
+
         if (requestCode == 4) {
             if (resultCode == RESULT_OK) {
 
@@ -566,7 +578,7 @@ public class ConfigActivity extends AppCompatActivity {
         aboutDialog.getWindow().setAttributes(langParams);
 
         TextView versionText = (TextView) layout.findViewById(R.id.tvVersion);
-        versionText.setText(getString(R.string.about_version) + " " + versionName);
+        versionText.setText(getString(R.string.about_version_title) + " " + versionName);
 
         TextView otherApps = layout.findViewById(R.id.tvOtherApps);
 
@@ -604,7 +616,7 @@ public class ConfigActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.about_other_apps_title)
+        builder.setTitle(R.string.about_title_other_apps)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -627,6 +639,7 @@ public class ConfigActivity extends AppCompatActivity {
         final String[] links = {"https://play.google.com/store/apps/details?id=org.wheatgenetics.inventory",
                 "https://play.google.com/store/apps/details?id=org.wheatgenetics.coordinate",
                 "https://play.google.com/store/apps/details?id=org.wheatgenetics.onekk"};
+        final String[] desc = {"","",""};
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -650,7 +663,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        CustomListAdapter adapterImg = new CustomListAdapter(this, app_images, appsArray);
+        CustomListAdapter adapterImg = new CustomListAdapter(this, app_images, appsArray,desc);
         myList.setAdapter(adapterImg);
 
         Button langCloseBtn = layout.findViewById(R.id.closeBtn);
@@ -912,7 +925,7 @@ public class ConfigActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
+            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", filePath));
             try {
                 startActivity(Intent.createChooser(intent, "Sending File..."));
             } catch (Exception e) {

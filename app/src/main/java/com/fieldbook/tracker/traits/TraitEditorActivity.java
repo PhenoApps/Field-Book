@@ -39,6 +39,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -462,7 +463,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             public void onClick(View arg0) {
                 // Trait name is mandatory
                 if (trait.getText().toString().length() == 0) {
-                    makeToast(getString(R.string.traits_create_warning_name_empty));
+                    makeToast(getString(R.string.traits_create_warning_name_blank));
                     return;
                 }
 
@@ -1046,7 +1047,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         String[] sortOptions = new String[3];
 
-        sortOptions[0] = getString(R.string.traits_sort_trait_name);
+        sortOptions[0] = getString(R.string.traits_sort_name);
         sortOptions[1] = getString(R.string.traits_sort_format);
         sortOptions[2] = getString(R.string.traits_sort_visibility);
 
@@ -1387,7 +1388,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(filePath));
+            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", filePath));
             startActivity(Intent.createChooser(intent, "Sending File..."));
         }
     }

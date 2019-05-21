@@ -4,40 +4,29 @@
     <string name="field_book">মাঠ বহি</string>
     <string name="dialog_cancel">বাতিল</string>
     <string name="dialog_ok">ঠিক আছে</string>
-    <string name="genericerror">সমস্যা</string>
     <string name="dialog_yes">হ্যাঁ</string>
     <string name="dialog_no">না</string>
     <string name="dialog_close">বন্ধ</string>
     <string name="dialog_confirm">আপনি কি নিশ্চিত?</string>
     <string name="dialog_import">প্রবেশ করানো</string>
     <string name="dialog_warning">সতর্কতা</string>
-    <string name="later">পরবর্তীতে</string>
     <!-- Main  -->
     <string name="main_toolbar_search">অনুসান্ধান</string>
     <string name="main_toolbar_resources">উপাকরন সমূহ</string>
-    <string name="currentvalue">বর্তমান মান</string>
     <string name="main_trait_details">বৈশিষ্ট্যের বিস্তারিত</string>
-    <string name="main_infobar_no_data">উপাত্তহীন</string>
-    <string name="settings_customize_theme">ধারণা</string>
-    <string name="main_toolbar_lock_data">বন্ধ উপাত্ত</string>
-    <string name="main_toolbar_unlock_data">খোলা উপাত্ত</string>
+    <string name="main_infobar_data_missing">উপাত্তহীন</string>
+    <string name="preferences_appearance_theme_title">ধারণা</string>
+    <string name="main_toolbar_data_lock">বন্ধ উপাত্ত</string>
+    <string name="main_toolbar_data_unlock">খোলা উপাত্ত</string>
     <!-- Trait layouts and messages -->
-    <string name="trait_layout_date_minusday">- ১</string>
-    <string name="enter">প্রবেশ করানো</string>
-    <string name="trait_layout_date_plusday">+ ১</string>
-    <string name="nodate">উপাত্ত নাই</string>
-    <string name="record">নথি</string>
-    <string name="play">চালু করানো</string>
-    <string name="capture">ধারণ করানো</string>
-    <string name="stop">বন্ধ কর</string>
     <string name="trait_layout_data_stored">উপাত্ত সংরক্ষিত হয়েছে</string>
-    <string name="hardwaremissing">এই চরিত্রের জন্য আপনার যন্ত্র প্রয়োজনীয় হার্ডওয়্যার ধারণ করে না</string>
-    <string name="photomissing">ছবি অনুপস্থিত</string>
-    <string name="photodecodefail">ছবি দেখা যাই না</string>
-    <string name="valueless">অনুমোদিত নিম্নমানের চেয়ে ছোট মান</string>
-    <string name="valuemore">অনুমোদিত বডমানের চেয়েও বড মান</string>
-    <string name="rustwarning">প্রকোপতা সংরক্ষিত রয়েছে</string>
-    <string name="deletePhoto">আপনি কি নিশ্চিত ছবিটি মুছে ফেলতে চান ?</string>
+    <string name="trait_error_hardware_missing">এই চরিত্রের জন্য আপনার যন্ত্র প্রয়োজনীয় হার্ডওয়্যার ধারণ করে না</string>
+    <string name="trait_error_photo_missing">ছবি অনুপস্থিত</string>
+    <string name="trait_error_photo_error">ছবি দেখা যাই না</string>
+    <string name="trait_error_minimum_value">অনুমোদিত নিম্নমানের চেয়ে ছোট মান</string>
+    <string name="trait_error_maximum_value">অনুমোদিত বডমানের চেয়েও বড মান</string>
+    <string name="trait_error_disease_severity">প্রকোপতা সংরক্ষিত রয়েছে</string>
+    <string name="trait_delete_warning_photo">আপনি কি নিশ্চিত ছবিটি মুছে ফেলতে চান ?</string>
     <!-- Settings -->
     <string name="settings_title">বিন্যস্ত করা</string>
     <string name="settings_fields">ক্ষেত্রসমূহ</string>
@@ -45,12 +34,12 @@
     <string name="settings_profile">বৃত্তান্ত</string>
     <string name="settings_export">দিয়ে দেয়া</string>
     <string name="settings_advanced">অগ্রসরমান</string>
-    <string name="preferences_interface_language">ভাষা</string>
+    <string name="preferences_appearance_language">ভাষা</string>
     <string name="changelog_title">লগ পরিবর্তন</string>
     <string name="startup_sample_data_title">নমুনা উপাত্ত</string>
     <string name="startup_sample_data_message">সরবরাহকৃত নমুনা উপাত্ত কি লোড করতে চান ?</string>
     <!-- Traits -->
-    <string name="traits_sort_trait_name">বৈশিষ্ট্যের নাম</string>
+    <string name="traits_sort_name">বৈশিষ্ট্যের নাম</string>
     <string name="traits_sort_title">বাছাই করা</string>
     <string name="traits_options_delete">মুছে ফেলা</string>
     <string name="traits_sort_visibility">দৃশ্যমান</string>
@@ -82,44 +71,43 @@
     <string name="traits_create_true">সঠিক</string>
     <string name="traits_create_false">মিথ্যা</string>
     <string name="traits_create_categories_text">শ্রেনিসমুহকে আলাদা কারুন</string>
-    <string name="traits_create_warning_name_empty">বৈশিষ্ট্যের নাম ফাকা থাকতে পারে না</string>
+    <string name="traits_create_warning_name_blank">বৈশিষ্ট্যের নাম ফাকা থাকতে পারে না</string>
     <string name="traits_create_warning_duplicate">বৈশিষ্ট্যটি আগে থেকেই উপাস্থিত</string>
-    <string name="traits_options_delete_dialog_title">বিশিষ্টটি মুছে ফেলুন</string>
+    <string name="traits_options_delete_title">বিশিষ্টটি মুছে ফেলুন</string>
     <string name="traits_toolbar_delete_all">সকল বৈশিষ্ট্যই মুছে ফেলুন</string>
     <string name="traits_create_warning_numeric_required">নির্দিষ্টতা, সর্বনিম্ন, এবং সরবুচ্চ এগুলো অবশ্যই নম্বর হতে হবে</string>
     <string name="traits_create_warning_categories_required">শ্রেণি/বিভাগ ফাকা থাকতে পারে না</string>
     <!-- Advanced settings -->
-    <string name="preferences_interface_tutorial">শিক্ষাদান সম্পর্কিত</string>
-    <string name="quickgoto">দ্রুত গমন করুন</string>
-    <string name="cycle">পরবর্তী বৈশিষ্ট্যে চক্রাকারে গমন করে</string>
-    <string name="useday">বছর এর দিনটি ব্যাবহার করুন</string>
-    <string name="ignoreentries">উপাত্ত বিশিষ্ট এন্ট্রি লুকিয়ে রাখুন</string>
-    <string name="disableshare">নথিতে অংশগ্রহণ অক্ষম করুন</string>
-    <string name="disableentrynavleft">বাম তীর চিহ্নের দিকে যাওয়া অক্ষম করুন</string>
-    <string name="disableentrynavright">ডান তীর চিহ্নের দিকে যাওয়া অক্ষম করুন</string>
-    <string name="barcodescan">ক্যামেরা বারকোড স্ক্যানার</string>
-    <string name="rangechime">প্রাথমিক সারির শব্দ</string>
-    <string name="nextmissingenable">উপাত্তহীন পরবর্তী এন্ট্রি</string>
-    <string name="jumptoplotid">একই ধরনের সনাক্তকারীর দিকে যান</string>
-    <string name="datagrid">উপাত্তবাছাই</string>
-    <string name="tips_desc">প্রধান, সন্নিবেশ, ক্ষেত্র, এবং বৈশিষ্ট্যের স্ক্রীনে টিউটোরিয়াল যোগ করুন</string>
-    <string name="quickgoto_desc">স্ক্রিনের মধ্য অংশ পরিবর্তন করুন</string>
-    <string name="cycle_desc">সমস্ত বৈশিষ্ট্য পড়ার পর অ্যাপ পরবর্তী এন্ট্রিতে যাবে</string>
-    <string name="useday_desc">ডাটা সংগ্রহের সময় তারিখের পরিবর্তে বছরের দিন উল্লেখ করুন</string>
-    <string name="ignoreentries_desc">যে সকল এন্ট্রির বর্তমান বৈশিষ্ট্যের উপাত্ত ইতিমধ্যেই উপাস্থিত  তাদেরকে পরিত্যাগ করুন</string>
-    <string name="disableshare_desc">নথি পাঠানোর সময় তাতে অংশগ্রহণকৃত ডায়ালগ দেখানো হবেনা</string>
-    <string name="disableentrynavleft_desc">কোন উপাত্ত সংগৃহীত না হলে তীর চিহ্নের বাম এন্ট্রি দেখাবেনা</string>
-    <string name="disableentrynavright_desc">কোন উপাত্ত সংগৃহীত না হলে তীর চিহ্নের ডান এন্ট্রি দেখাবেনা</string>
-    <string name="barcodescan_desc">বারকোড স্ক্যান করার জন্য ক্যামেরা খুলুন এবং নির্ধারিত এন্ট্রিতে যান</string>
-    <string name="rangechime_desc">প্রাথমিক সারির পরিবর্তন হলে সতর্কতার শব্দ শোনান</string>
-    <string name="nextmissingenable_desc">বর্তমান বৈশিষ্ট্যে উপাত্ত ছাড়াই পরবর্তী এন্ট্রিতে গেলে মনোযোগ আকর্ষণ করুন</string>
-    <string name="jumptoplotid_desc">স্বতন্ত্র পরিচয়ের খোলার জন্য ডায়ালগ খুলুন এবং নির্ধারিত এন্ট্রিতে যান</string>
-    <string name="datagrid_desc">সংগৃহীত উপাত্তবিশিষ্ট ক্ষেত্র এবং বৈশিষ্ট্যসমূহের বিস্তৃত পাতা দেখান</string>
+    <string name="preferences_appearance_tutorial">শিক্ষাদান সম্পর্কিত</string>
+    <string name="preferences_appearance_quickgoto">দ্রুত গমন করুন</string>
+    <string name="preferences_behavior_cycle_traits">পরবর্তী বৈশিষ্ট্যে চক্রাকারে গমন করে</string>
+    <string name="preferences_general_use_day_number">বছর এর দিনটি ব্যাবহার করুন</string>
+    <string name="preferences_general_skip_entries_with_data">উপাত্ত বিশিষ্ট এন্ট্রি লুকিয়ে রাখুন</string>
+    <string name="preferences_general_share_disable">নথিতে অংশগ্রহণ অক্ষম করুন</string>
+    <string name="preferences_general_entry_left_disable">বাম তীর চিহ্নের দিকে যাওয়া অক্ষম করুন</string>
+    <string name="preferences_general_entry_right_disable">ডান তীর চিহ্নের দিকে যাওয়া অক্ষম করুন</string>
+    <string name="preferences_general_barcode_camera">ক্যামেরা বারকোড স্ক্যানার</string>
+    <string name="preferences_sound_primary_order_sound">প্রাথমিক সারির শব্দ</string>
+    <string name="preferences_general_feature_next_missing">উপাত্তহীন পরবর্তী এন্ট্রি</string>
+    <string name="preferences_general_feature_barcode_text">একই ধরনের সনাক্তকারীর দিকে যান</string>
+    <string name="preferences_general_feature_datagrid">উপাত্তবাছাই</string>
+    <string name="preferences_appearance_tutorial_description">প্রধান, সন্নিবেশ, ক্ষেত্র, এবং বৈশিষ্ট্যের স্ক্রীনে টিউটোরিয়াল যোগ করুন</string>
+    <string name="preferences_appearance_quickgoto_description">স্ক্রিনের মধ্য অংশ পরিবর্তন করুন</string>
+    <string name="preferences_behavior_cycle_traits_description">সমস্ত বৈশিষ্ট্য পড়ার পর অ্যাপ পরবর্তী এন্ট্রিতে যাবে</string>
+    <string name="preferences_general_use_day_number_description">ডাটা সংগ্রহের সময় তারিখের পরিবর্তে বছরের দিন উল্লেখ করুন</string>
+    <string name="preferences_general_skip_entries_with_data_description">যে সকল এন্ট্রির বর্তমান বৈশিষ্ট্যের উপাত্ত ইতিমধ্যেই উপাস্থিত  তাদেরকে পরিত্যাগ করুন</string>
+    <string name="preferences_general_share_disable_description">নথি পাঠানোর সময় তাতে অংশগ্রহণকৃত ডায়ালগ দেখানো হবেনা</string>
+    <string name="preferences_general_entry_left_disable_description">কোন উপাত্ত সংগৃহীত না হলে তীর চিহ্নের বাম এন্ট্রি দেখাবেনা</string>
+    <string name="preferences_general_entry_right_disable_description">কোন উপাত্ত সংগৃহীত না হলে তীর চিহ্নের ডান এন্ট্রি দেখাবেনা</string>
+    <string name="preferences_general_barcode_camera_description">বারকোড স্ক্যান করার জন্য ক্যামেরা খুলুন এবং নির্ধারিত এন্ট্রিতে যান</string>
+    <string name="preferences_sound_primary_order_sound_description">প্রাথমিক সারির পরিবর্তন হলে সতর্কতার শব্দ শোনান</string>
+    <string name="preferences_general_feature_next_missing_description">বর্তমান বৈশিষ্ট্যে উপাত্ত ছাড়াই পরবর্তী এন্ট্রিতে গেলে মনোযোগ আকর্ষণ করুন</string>
+    <string name="preferences_general_feature_barcode_text_description">স্বতন্ত্র পরিচয়ের খোলার জন্য ডায়ালগ খুলুন এবং নির্ধারিত এন্ট্রিতে যান</string>
+    <string name="preferences_general_feature_datagrid_description">সংগৃহীত উপাত্তবিশিষ্ট ক্ষেত্র এবং বৈশিষ্ট্যসমূহের বিস্তৃত পাতা দেখান</string>
     <!-- Advanced settings titles and messages -->
     <string name="main_toolbar_moveto_no_match">কোন সাদৃশ্য মান নাই</string>
     <string name="main_toolbar_next_entry_no_data">পরবর্তী ফাঁকা এন্ট্রি</string>
     <string name="main_toolbar_moveto">আইডিতে যান</string>
-    <string name="main_toolbar_barcode_scan_title">বারকোড স্ক্যান করুন</string>
     <string name="main_toolbar_moveto_scan">স্ক্যান করুন</string>
     <!-- Tutorial -->
     <string name="tutorial_dialog_title">টিউটোরিয়াল</string>
@@ -151,13 +139,12 @@
     <!-- About dialog -->
 
     <string name="about_title">সম্বন্ধে</string>
-    <string name="about_version">ভার্সন</string>
-    <string name="about_developers_title">উদ্ভাবনকারী</string>
+    <string name="about_version_title">ভার্সন</string>
+    <string name="about_developer_title">উদ্ভাবনকারী</string>
     <string name="about_translators_title">অনুবাদক</string>
-    <string name="versiontitle">ভার্সনঃ</string>
 
     <!-- Other Apps -->
-    <string name="about_other_apps_title">অন্যান্য অ্যাপ্স।</string>
+    <string name="about_title_other_apps">অন্যান্য অ্যাপ্স।</string>
 
     <!-- Export dialog -->
     <string name="export_format_database">ডাটাবেজ</string>
@@ -177,41 +164,18 @@
     <string name="export_error_missing_trait">বৈশিষ্ট্যের ধরন অবশ্যই নির্বাচিত থাকতে হবে</string>
     <string name="export_overwrite">পূর্বের পাঠানো নথির উপরে লিখুন</string>
     <!-- Language dialog -->
-    <string name="english">English (US)</string>
-    <string name="spanish">Español (México)</string>
-    <string name="german">Deutsch</string>
-    <string name="chinese">汉语</string>
-    <string name="japanese">日本語</string>
-    <string name="french">Français</string>
-    <string name="korean">Korean</string>
-    <string name="italian">Italian</string>
-    <string name="russian">Русский</string>
-    <string name="arabic">العربية</string>
-    <string name="hindi">हिन्दी</string>
-    <string name="filipino">Filipino</string>
-    <string name="portuguesebr">Português (Brasil)</string>
-    <string name="amharic">አማርኛ፤</string>
-    <string name="oromo">Afaan Oromoo</string>
-    <string name="swahili">Swahili</string>
-    <string name="chiga">Chiga</string>
-    <string name="bengali">বাংলা</string>
-    <string name="swedish">Swedish</string>
     <!-- Update dialog -->
     <!-- Setup dialog -->
     <string name="profile_person">বেক্তি</string>
     <string name="profile_location">স্থান</string>
-    <string name="drop1">ইনফবার ১</string>
-    <string name="drop2">ইনফবার ২</string>
-    <string name="drop3">ইনফবার ৩</string>
     <string name="profile_reset">সেটিং পরিষ্কার করুন</string>
     <string name="profile_person_title">বেক্তি সেট করুন</string>
     <string name="profile_name_first">নামের প্রথম অংশ</string>
     <string name="profile_name_last">নামের শেষ অংশ</string>
-    <string name="none">কিছুই না</string>
     <string name="profile_location_title">স্থান সেট করুন</string>
     <string name="profile_location_latitude">অক্ষাংশ</string>
     <string name="profile_location_longitude">দ্রাঘিমাংশ</string>
-    <string name="profile_get_location">স্থান দেখুন</string>
+    <string name="profile_location_get">স্থান দেখুন</string>
     <!-- Database dialog -->
     <string name="database_dialog_title">ডাটাবেজ</string>
     <string name="database_reset_message">ডাটাবেজ মুছে ফেলা হয়েছে</string>
@@ -255,19 +219,15 @@
     <string name="fields_delete_study_confirmation">আপনি কি নিশ্চিত যে আপনি ক্ষেত্রটি মুছে ফেলতে চান? এটি ক্ষেত্রের সাথে সম্পৃক্ত সমস্ত উপাত্তও মুছে দিবে।</string>
     <string name="fields_study_exists_title">ক্ষেত্র বিদ্যমান</string>
     <string name="fields_study_exists_message">এ নামের ক্ষেত্র ইতিমধ্যেই বিদ্যমান। আপনি কি বিদ্যমান ক্ষেত্রের উপরে লিখতে চান?</string>
-    <string name="choose_new_default">উপাত্ত সংগ্রহের পূর্বে নতুন ক্ষেত্র লোড করুন।</string>
     <string name="fields_date_imported">উত্তোলনের তারিখ</string>
     <string name="fields_date_edited">পরিমার্জনের তারিখ</string>
     <string name="fields_date_exported">পাঠানোর তারিখ</string>
     <string name="fields_summary">মাঠ সারাংশ</string>
     <string name="fields_options">পছন্দ</string>
-    <string name="walkingorder">এন্ট্রিসমূহের বাছাইকরণঃ</string>
     <!-- Drawer strings -->
-    <string name="main_drawer_open">নেভিগেশন ড্রয়ার খুলুন</string>
-    <string name="main_drawer_close">নেভিগেশন ড্রয়ার বন্ধ করুন</string>
     <!-- Strings below here have not been integrated into the app -->
     <!-- Customization strings TODO -->
-    <string name="infobar_number">তথ্যবারের সংখ্যা</string>
+    <string name="preferences_appearance_infobar_number">তথ্যবারের সংখ্যা</string>
     <!-- Map -->
     <!-- Network -->
     <!-- Miscellaneous -->

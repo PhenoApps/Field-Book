@@ -8,7 +8,7 @@ import com.fieldbook.tracker.R;
 
 public class PreferencesActivity extends AppCompatActivity {
 
-    // UI
+    // Appearance
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
     public static String LANGUAGE = "language";
     public static String INFOBAR_NUMBER = "INFOBAR_NUMBER";
@@ -17,7 +17,12 @@ public class PreferencesActivity extends AppCompatActivity {
     public static String TOOLBAR_SUMMARY = "TOOLBAR_SUMMARY";
     public static String TOOLBAR_LOCK = "TOOLBAR_LOCK";
 
-    // UX
+    // Profile
+    public static String PROFILE_FIRSTNAME = "FirstName";
+    public static String PROFILE_LASTNAME = "LastName";
+    public static String PROFILE_LOCATION = "Location";
+
+    // Behavior
     public static String RETURN_CHARACTER = "RETURN_CHARACTER";
     public static String VOLUME_NAVIGATION = "VOLUME_NAVIGATION";
 

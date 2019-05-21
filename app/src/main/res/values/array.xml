@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="disable_entry_arrows">
-        <item>@string/entry_arrow_left</item>
-        <item>@string/entry_arrow_right</item>
-        <item>@string/entry_arrow_both</item>
+        <item>@string/preferences_behavior_disable_entry_arrow_left</item>
+        <item>@string/preferences_behavior_disable_entry_arrow_right</item>
+        <item>@string/preferences_behavior_disable_entry_arrow_both</item>
     </string-array>
 
     <string-array name="disable_entry_arrows_values">
@@ -16,23 +16,23 @@
     </string-array>
 
     <string-array name="pref_toolbar_customize_title">
-        <item>@string/toolbar_search</item>
-        <item>@string/toolbar_resources</item>
-        <item>@string/toolbar_summary</item>
-        <item>@string/toolbar_lock</item>
+        <item>@string/preferences_appearance_toolbar_customize_search</item>
+        <item>@string/preferences_appearance_toolbar_customize_resources</item>
+        <item>@string/preferences_appearance_toolbar_customize_summary</item>
+        <item>@string/preferences_appearance_toolbar_customize_lock</item>
     </string-array>
 
     <string-array name="pref_toolbar_customize_key">
-        <item>@string/toolbar_search</item>
-        <item>@string/toolbar_resources</item>
-        <item>@string/toolbar_summary</item>
-        <item>@string/toolbar_lock</item>
+        <item>@string/preferences_appearance_toolbar_customize_search</item>
+        <item>@string/preferences_appearance_toolbar_customize_resources</item>
+        <item>@string/preferences_appearance_toolbar_customize_summary</item>
+        <item>@string/preferences_appearance_toolbar_customize_lock</item>
     </string-array>
 
     <string-array name="pref_return_character">
-        <item>@string/return_next_plot</item>
-        <item>@string/return_next_trait</item>
-        <item>@string/return_do_nothing</item>
+        <item>@string/preferences_behavior_return_character_next_plot</item>
+        <item>@string/preferences_behavior_return_character_next_trait</item>
+        <item>@string/preferences_behavior_return_character_do_nothing</item>
     </string-array>
 
     <string-array name="pref_return_character_values">

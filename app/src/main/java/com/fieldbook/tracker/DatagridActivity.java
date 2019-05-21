@@ -42,7 +42,7 @@ public class DatagridActivity extends AppCompatActivity {
         ep = getSharedPreferences("Settings", 0);
 
         setContentView(R.layout.activity_datagrid);
-        setTitle(R.string.datagrid);
+        setTitle(R.string.preferences_general_feature_datagrid);
 
         gridView = findViewById(R.id.tableLayout1);
         Button close = findViewById(R.id.closeBtn);

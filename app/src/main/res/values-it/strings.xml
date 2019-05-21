@@ -4,40 +4,29 @@
     <string name="field_book">Field Book</string>
     <string name="dialog_cancel">Cancella</string>
     <string name="dialog_ok">OK</string>
-    <string name="genericerror">Errore</string>
     <string name="dialog_yes">Sì</string>
     <string name="dialog_no">No</string>
     <string name="dialog_close">Chiudi</string>
     <string name="dialog_confirm">Sei sicuro?</string>
     <string name="dialog_import">Importa file</string>
     <string name="dialog_warning">Attenzione</string>
-    <string name="later">Dopo</string>
     <!-- Main  -->
     <string name="main_toolbar_search">Cerca</string>
     <string name="main_toolbar_resources">Risorse</string>
-    <string name="currentvalue">Valore attuale</string>
     <string name="main_trait_details">Dettagli carattere</string>
-    <string name="main_infobar_no_data">Nessun dato</string>
-    <string name="settings_customize_theme">Tema</string>
-    <string name="main_toolbar_lock_data">Blocca dati</string>
-    <string name="main_toolbar_unlock_data">Sblocca dati</string>
+    <string name="main_infobar_data_missing">Nessun dato</string>
+    <string name="preferences_appearance_theme_title">Tema</string>
+    <string name="main_toolbar_data_lock">Blocca dati</string>
+    <string name="main_toolbar_data_unlock">Sblocca dati</string>
     <!-- Trait layouts and messages -->
-    <string name="trait_layout_date_minusday">-1 giorno</string>
-    <string name="enter">Invio</string>
-    <string name="trait_layout_date_plusday">+1 giorno</string>
-    <string name="nodate">Nessuna data</string>
-    <string name="record">Registra</string>
-    <string name="play">Ascolta</string>
-    <string name="capture">Cattura</string>
-    <string name="stop">Stop</string>
     <string name="trait_layout_data_stored">I dati sono stati salvati</string>
-    <string name="hardwaremissing">Il tuo dispositivo non contiene l\'hardware necessario per questa funzione</string>
-    <string name="photomissing">La foto non esiste</string>
-    <string name="photodecodefail">Impossibile leggere la foto</string>
-    <string name="valueless">Il valore è minore rispetto al minimo impostato</string>
-    <string name="valuemore">Il valore è maggiore del massimo impostato</string>
-    <string name="rustwarning">Severità già registrata</string>
-    <string name="deletePhoto">Sei sicuro di voler eliminare questa foto?</string>
+    <string name="trait_error_hardware_missing">Il tuo dispositivo non contiene l\'hardware necessario per questa funzione</string>
+    <string name="trait_error_photo_missing">La foto non esiste</string>
+    <string name="trait_error_photo_error">Impossibile leggere la foto</string>
+    <string name="trait_error_minimum_value">Il valore è minore rispetto al minimo impostato</string>
+    <string name="trait_error_maximum_value">Il valore è maggiore del massimo impostato</string>
+    <string name="trait_error_disease_severity">Severità già registrata</string>
+    <string name="trait_delete_warning_photo">Sei sicuro di voler eliminare questa foto?</string>
     <!-- Settings -->
     <string name="settings_title">Impostazioni</string>
     <string name="settings_fields">Campi</string>
@@ -45,12 +34,12 @@
     <string name="settings_profile">Profilo</string>
     <string name="settings_export">Esporta</string>
     <string name="settings_advanced">Avanzate</string>
-    <string name="preferences_interface_language">Lingua</string>
+    <string name="preferences_appearance_language">Lingua</string>
     <string name="changelog_title">Diario di modifiche</string>
     <string name="startup_sample_data_title">Dati di prova</string>
     <string name="startup_sample_data_message">Vuoi caricare i dati di prova forniti?</string>
     <!-- Traits -->
-    <string name="traits_sort_trait_name">Nome del carattere</string>
+    <string name="traits_sort_name">Nome del carattere</string>
     <string name="traits_sort_title">Ordina</string>
     <string name="traits_options_delete">Cancella</string>
     <string name="traits_sort_visibility">Visibilità</string>
@@ -82,42 +71,41 @@
     <string name="traits_create_true">Vero</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_categories_text">Separa categorie con /</string>
-    <string name="traits_create_warning_name_empty">Il nome del carattere non può essere vuoto</string>
+    <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
-    <string name="traits_options_delete_dialog_title">Cancella carattere</string>
+    <string name="traits_options_delete_title">Cancella carattere</string>
     <string name="traits_toolbar_delete_all">Cancella tutti i caratteri</string>
     <string name="traits_create_warning_numeric_required">Default, minimo e massimo devono essere numerici</string>
     <string name="traits_create_warning_categories_required">La categoria non può essere vuota</string>
     <!-- Advanced settings -->
-    <string name="preferences_interface_tutorial">Tutorial</string>
-    <string name="quickgoto">Tasto rapido</string>
-    <string name="useday">Usa giorno dell\'anno</string>
-    <string name="ignoreentries">Nascondi voci con dati</string>
-    <string name="disableshare">Disabilita condivisione file</string>
-    <string name="disableentrynavleft">Disabilita voce di sinistra</string>
-    <string name="disableentrynavright">Disabilita voce di destra</string>
-    <string name="barcodescan">Scansione codice a barre</string>
-    <string name="rangechime">Suono dell\'ordine primario</string>
-    <string name="nextmissingenable">Prossima voce senza dati</string>
-    <string name="jumptoplotid">Sposta a identificatore unico</string>
-    <string name="datagrid">Griglia di dati</string>
-    <string name="tips_desc">Aggiungere una icona di aiuto nella schermata iniziale, nelle impostazioni, nei campi e nei caratteri</string>
-    <string name="cycle_desc">Dopo essere passata su tutti i caratteri, l\'applicazione si sposta sulla voce seguente</string>
-    <string name="useday_desc">Usa il giorno dell\'anno invece della data quando raccogli nuovi dati</string>
-    <string name="ignoreentries_desc">Salta le voci che hanno gia\' un dato per questo carattere</string>
-    <string name="disableshare_desc">Quando i file vengono esportati, la finestra di dialogo non viene mostrata</string>
-    <string name="disableentrynavleft_desc">Se non sono stati raccolti dati, disabilita la voce di sinistra</string>
-    <string name="disableentrynavright_desc">Se non sono stati raccolti dati, disabilita la voce di destra</string>
-    <string name="barcodescan_desc">Accendi la fotocamera per acquisire il codice a barre e andare alla voce</string>
-    <string name="rangechime_desc">Notifica sonora quando l\'ordine primario cambia</string>
-    <string name="nextmissingenable_desc">Aggiunge un bottone alla barra degli strumenti</string>
-    <string name="jumptoplotid_desc">Aprire una finestra di dialogo per inserire il valore identificativo unico e collegarsi ad una specifica voce</string>
-    <string name="datagrid_desc">Visualizzare un foglio di lavoro con parcelle e caratteri rilevati</string>
+    <string name="preferences_appearance_tutorial">Tutorial</string>
+    <string name="preferences_appearance_quickgoto">Tasto rapido</string>
+    <string name="preferences_general_use_day_number">Usa giorno dell\'anno</string>
+    <string name="preferences_general_skip_entries_with_data">Nascondi voci con dati</string>
+    <string name="preferences_general_share_disable">Disabilita condivisione file</string>
+    <string name="preferences_general_entry_left_disable">Disabilita voce di sinistra</string>
+    <string name="preferences_general_entry_right_disable">Disabilita voce di destra</string>
+    <string name="preferences_general_barcode_camera">Scansione codice a barre</string>
+    <string name="preferences_sound_primary_order_sound">Suono dell\'ordine primario</string>
+    <string name="preferences_general_feature_next_missing">Prossima voce senza dati</string>
+    <string name="preferences_general_feature_barcode_text">Sposta a identificatore unico</string>
+    <string name="preferences_general_feature_datagrid">Griglia di dati</string>
+    <string name="preferences_appearance_tutorial_description">Aggiungere una icona di aiuto nella schermata iniziale, nelle impostazioni, nei campi e nei caratteri</string>
+    <string name="preferences_behavior_cycle_traits_description">Dopo essere passata su tutti i caratteri, l\'applicazione si sposta sulla voce seguente</string>
+    <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno invece della data quando raccogli nuovi dati</string>
+    <string name="preferences_general_skip_entries_with_data_description">Salta le voci che hanno gia\' un dato per questo carattere</string>
+    <string name="preferences_general_share_disable_description">Quando i file vengono esportati, la finestra di dialogo non viene mostrata</string>
+    <string name="preferences_general_entry_left_disable_description">Se non sono stati raccolti dati, disabilita la voce di sinistra</string>
+    <string name="preferences_general_entry_right_disable_description">Se non sono stati raccolti dati, disabilita la voce di destra</string>
+    <string name="preferences_general_barcode_camera_description">Accendi la fotocamera per acquisire il codice a barre e andare alla voce</string>
+    <string name="preferences_sound_primary_order_sound_description">Notifica sonora quando l\'ordine primario cambia</string>
+    <string name="preferences_general_feature_next_missing_description">Aggiunge un bottone alla barra degli strumenti</string>
+    <string name="preferences_general_feature_barcode_text_description">Aprire una finestra di dialogo per inserire il valore identificativo unico e collegarsi ad una specifica voce</string>
+    <string name="preferences_general_feature_datagrid_description">Visualizzare un foglio di lavoro con parcelle e caratteri rilevati</string>
     <!-- Advanced settings titles and messages -->
     <string name="main_toolbar_moveto_no_match">Nessun valore corrispondente</string>
     <string name="main_toolbar_next_entry_no_data">Prossima voce senza dati</string>
     <string name="main_toolbar_moveto">Vai a ID</string>
-    <string name="main_toolbar_barcode_scan_title">Scansiona il codice a barre</string>
     <string name="main_toolbar_moveto_scan">Scansiona</string>
     <!-- Tutorial -->
     <string name="tutorial_dialog_title">Tutorial</string>
@@ -149,19 +137,11 @@ I dati possono essere esportati in due formati: database o tabella. Le colonne d
     <string name="tutorial_fields_4">Per cancellare un campo, aprire il menu a sinistra del nome del campo e selezionare Cancella</string>
     <!-- About dialog -->
     <string name="about_title">A proposito</string>
-    <string name="about_version">Versione</string>
-    <string name="about_developers_title">Sviluppatori</string>
+    <string name="about_version_title">Versione</string>
+    <string name="about_developer_title">Sviluppatori</string>
     <string name="about_translators_title">Traduttori</string>
-    <string name="versiontitle">Versione:</string>
-    <string name="about_developer_trevor_rife">Trevor Rife, Kansas State University</string>
-    <string name="about_developer_trife_email">trife@ksu.edu</string>
-    <string name="about_developer_trife_website">https://github.com/trife/Field-Book</string>
-    <string name="about_developer_jpoland">Jesse Poland, Kansas State University</string>
-    <string name="about_developer_jpoland_email">jpoland@ksu.edu</string>
-    <string name="about_developer_jpoland_website">http://wheatgenetics.org</string>
-    <string name="about_translators_list">Irazema Fuentes-Bueno, Sandra Dunckel, Shuangye Wu, Narinder Singh, Daljit Singh, Erena Edae, Tatiana Danilova, Rodrigo Pedrozo, Cristiano Lemes da Silva, Sophie Bouchet, Hiroyoshi Iwata, Goro Ishikawa, Khaled El-Shamaa</string>
     <!-- Other Apps -->
-    <string name="about_other_apps_title">Altre App</string>
+    <string name="about_title_other_apps">Altre App</string>
     <!-- Export dialog -->
     <string name="export_format_database">Database</string>
     <string name="export_format_table">Tabella</string>
@@ -180,41 +160,18 @@ I dati possono essere esportati in due formati: database o tabella. Le colonne d
     <string name="export_error_missing_trait">Il tipo di carattere deve essere selezionato</string>
     <string name="export_overwrite">Sovrascrivi i file esportati precedentemente</string>
     <!-- Language dialog -->
-    <string name="english">English (US)</string>
-    <string name="spanish">Español (México)</string>
-    <string name="german">Deutsch</string>
-    <string name="chinese">汉语</string>
-    <string name="japanese">日本語</string>
-    <string name="french">Français</string>
-    <string name="korean">Korean</string>
-    <string name="italian">Italiano</string>
-    <string name="russian">Русский</string>
-    <string name="arabic">العربية</string>
-    <string name="hindi">हिन्दी</string>
-    <string name="filipino">Filipino</string>
-    <string name="portuguesebr">Português (Brasil)</string>
-    <string name="amharic">አማርኛ፤</string>
-    <string name="oromo">Afaan Oromoo</string>
-    <string name="swahili">Swahili</string>
-    <string name="chiga">Chiga</string>
-    <string name="bengali">Bengali</string>
-    <string name="swedish">Swedish</string>
     <!-- Update dialog -->
     <!-- Setup dialog -->
     <string name="profile_person">Operatore</string>
     <string name="profile_location">Località</string>
-    <string name="drop1">InfoBar 1</string>
-    <string name="drop2">InfoBar 2</string>
-    <string name="drop3">InfoBar 3</string>
     <string name="profile_reset">Cancella impostazioni</string>
     <string name="profile_person_title">Scegli operatore</string>
     <string name="profile_name_first">Nome</string>
     <string name="profile_name_last">Cognome</string>
-    <string name="none">Nessuno</string>
     <string name="profile_location_title">Scegli località</string>
     <string name="profile_location_latitude">Latitudine</string>
     <string name="profile_location_longitude">Longitudine</string>
-    <string name="profile_get_location">Ottieni località</string>
+    <string name="profile_location_get">Ottieni località</string>
     <!-- Database dialog -->
     <string name="database_dialog_title">Database</string>
     <string name="database_reset_message">Il database è stato cancellato</string>
@@ -258,19 +215,15 @@ I dati possono essere esportati in due formati: database o tabella. Le colonne d
     <string name="fields_delete_study_confirmation">Sei sicuro di voler eliminare questo campo? Verranno cancellati anche tutti i dati associati a questo campo</string>
     <string name="fields_study_exists_title">Campo esistente</string>
     <string name="fields_study_exists_message">Un campo con questo nome esiste già. Vuoi sovrascrivere?</string>
-    <string name="choose_new_default">Carica un nuovo campo prima di rilevare il dato</string>
     <string name="fields_date_imported">Importa data</string>
     <string name="fields_date_edited">Modifica data</string>
     <string name="fields_date_exported">Esporta data</string>
     <string name="fields_summary">Riassunto campo</string>
     <string name="fields_options">Opzioni</string>
-    <string name="walkingorder">Ordina voci per:</string>
     <!-- Drawer strings -->
-    <string name="main_drawer_open">Apri il pannello di navigazione</string>
-    <string name="main_drawer_close">Chiudi il pannello di navigazione</string>
     <!-- Strings below here have not been integrated into the app -->
     <!-- Customization strings TODO -->
-    <string name="infobar_number">Numero di InfoBars</string>
+    <string name="preferences_appearance_infobar_number">Numero di InfoBars</string>
     <!-- Map -->
     <!-- Network -->
     <!-- Miscellaneous -->

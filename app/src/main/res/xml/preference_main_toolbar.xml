@@ -7,20 +7,20 @@ android:key="pref_toolbar">
     android:defaultValue="true"
     android:icon="@drawable/ic_tb_search"
     android:key="TOOLBAR_SEARCH"
-    android:title="@string/toolbar_search" />
+    android:title="@string/preferences_appearance_toolbar_customize_search" />
 <CheckBoxPreference
     android:defaultValue="true"
     android:icon="@drawable/ic_tb_folder"
     android:key="TOOLBAR_RESOURCES"
-    android:title="@string/toolbar_resources" />
+    android:title="@string/preferences_appearance_toolbar_customize_resources" />
 <CheckBoxPreference
     android:defaultValue="true"
     android:icon="@drawable/ic_tb_details"
     android:key="TOOLBAR_SUMMARY"
-    android:title="@string/toolbar_summary" />
+    android:title="@string/preferences_appearance_toolbar_customize_summary" />
 <CheckBoxPreference
     android:defaultValue="true"
     android:icon="@drawable/ic_tb_lock"
     android:key="TOOLBAR_LOCK"
-    android:title="@string/toolbar_lock" />
+    android:title="@string/preferences_appearance_toolbar_customize_lock" />
 </PreferenceScreen>

@@ -206,8 +206,8 @@ class TraitAdapter extends BaseAdapter {
                         } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_delete))) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
 
-                            builder.setTitle(context.getString(R.string.traits_options_delete_dialog_title));
-                            builder.setMessage(context.getString(R.string.delete_trait_warning));
+                            builder.setTitle(context.getString(R.string.traits_options_delete_title));
+                            builder.setMessage(context.getString(R.string.traits_warning_delete));
 
                             builder.setPositiveButton(context.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 

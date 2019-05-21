@@ -30,6 +30,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
@@ -399,7 +400,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                     if (currentTrait.maximum.length() > 0) {
                         if (val > Double.parseDouble(currentTrait.maximum)) {
-                            makeToast(getString(R.string.valuemore) + " " + currentTrait.maximum);
+                            makeToast(getString(R.string.trait_error_maximum_value) + " " + currentTrait.maximum);
                             en.clear();
                             removeTrait(currentTrait.trait);
                             return;
@@ -2232,6 +2233,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     // Moves to specific plot/range/plot_id
     private void moveToSearch(String type, int[] rangeID, String range, String plot, String plotID) {
+        /*
+
         if (rangeID == null) {
             return;
         }
@@ -2288,6 +2291,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         if (!haveData)
             makeToast(getString(R.string.main_toolbar_moveto_no_match));
+
+            */
     }
 
     private void moveToResult(int j) {
@@ -2769,7 +2774,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         makeToast(getString(R.string.traits_create_photo_maximum));
                 } catch (Exception e) {
                     e.printStackTrace();
-                    makeToast(getString(R.string.hardwaremissing));
+                    makeToast(getString(R.string.trait_error_hardware_missing));
                 }
                 break;
 
@@ -2982,7 +2987,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         } else {
             if (etCurVal.getText().toString().matches(".*\\d.*") && v.matches(".*\\d.*") && traitDiseaseRating.getVisibility() == View.VISIBLE && !etCurVal.getText().toString().contains("/")) {
-                makeToast(getString(R.string.rustwarning));
+                makeToast(getString(R.string.trait_error_disease_severity));
             } else {
                 etCurVal.setText(etCurVal.getText().toString() + v);
             }
@@ -2993,7 +2998,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
         builder.setTitle(getString(R.string.dialog_warning));
-        builder.setMessage(getString(R.string.deletePhoto));
+        builder.setMessage(getString(R.string.trait_delete_warning_photo));
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
@@ -3063,7 +3068,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                    Uri.fromFile(file));
+                    FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", file));
             startActivityForResult(takePictureIntent, 252);
         }
     }
@@ -3085,7 +3090,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // Force Gallery to update
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri contentUri = Uri.fromFile(file);
+        Uri contentUri = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", file);
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
 
@@ -3103,7 +3108,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_summary, null);
 
-        builder.setTitle(R.string.toolbar_summary)
+        builder.setTitle(R.string.preferences_appearance_toolbar_customize_summary)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -3211,10 +3216,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             Log.w("Display path", path);
 
             File f = new File(path);
-
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.fromFile(f), "image/*");
+            intent.setDataAndType(FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", f), "image/*");
             startActivity(intent);
         } catch (Exception ignore) {
         }
@@ -3222,7 +3226,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private Bitmap displayScaledSavedPhoto(String path) {
         if (path == null) {
-            makeToast(getString(R.string.photomissing));
+            makeToast(getString(R.string.trait_error_photo_missing));
             return null;
         }
 
@@ -3297,6 +3301,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
         switch (requestCode) {
             case 1:
                 if (resultCode == RESULT_OK) {
@@ -3307,7 +3313,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                     String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
                     Intent open = new Intent(Intent.ACTION_VIEW);
-                    open.setDataAndType((Uri.fromFile(mChosenFile)), mime);
+                    open.setDataAndType(FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", mChosenFile), mime);
 
                     startActivity(open);
                 }
@@ -3339,5 +3345,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     @Override
     public void onBackPressed() {
         finish();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }
