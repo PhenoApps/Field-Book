@@ -41,7 +41,7 @@ public class TextTraitLayout extends TraitLayout {
 
             if (currentTrait.defaultValue != null && currentTrait.defaultValue.length() > 0) {
                 etCurVal.setText(currentTrait.defaultValue);
-                updateTrait(currentTrait.trait, currentTrait.format, etCurVal.getText().toString());
+                //updateTrait(currentTrait.trait, currentTrait.format, etCurVal.getText().toString());
             }
 
             etCurVal.addTextChangedListener(cvText);

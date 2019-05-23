@@ -46,6 +46,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
@@ -274,10 +275,11 @@ public class ConfigActivity extends AppCompatActivity {
                 getString(R.string.settings_collect),
                 getString(R.string.settings_profile),
                 getString(R.string.settings_export),
-                getString(R.string.settings_advanced), "Brapi"}; //, "API Test"};
+                getString(R.string.settings_advanced)}; //, "API Test"};
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
+                arg1.getId();
                 Intent intent = new Intent();
                 switch (position) {
                     case 0:
@@ -334,11 +336,6 @@ public class ConfigActivity extends AppCompatActivity {
                     case 5:
                         intent.setClassName(ConfigActivity.this,
                                 PreferencesActivity.class.getName());
-                        startActivity(intent);
-                        break;
-                    case 6:
-                        intent.setClassName(ConfigActivity.this,
-                                BrapiActivity.class.getName());
                         startActivity(intent);
                         break;
                 }

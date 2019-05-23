@@ -68,7 +68,7 @@
 
 
         <activity
-            android:name=".BrapiActivity"
+            android:name=".brapi.BrapiActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"

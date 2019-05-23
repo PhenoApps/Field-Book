@@ -445,15 +445,15 @@ public class DataHelper {
         if (cursor.moveToFirst()) {
             do {
                 FieldObject o = new FieldObject();
-                o.exp_id = cursor.getInt(0);
-                o.exp_name = cursor.getString(1);
-                o.unique_id = cursor.getString(2);
-                o.primary_id = cursor.getString(3);
-                o.secondary_id = cursor.getString(4);
-                o.date_import = cursor.getString(5);
-                o.date_edit = cursor.getString(6);
-                o.date_export = cursor.getString(7);
-                o.count = cursor.getString(8);
+                o.setExp_id(cursor.getInt(0));
+                o.setExp_name(cursor.getString(1));
+                o.setUnique_id(cursor.getString(2));
+                o.setPrimary_id(cursor.getString(3));
+                o.setSecondary_id(cursor.getString(4));
+                o.setDate_import(cursor.getString(5));
+                o.setDate_edit(cursor.getString(6));
+                o.setDate_export(cursor.getString(7));
+                o.setCount(cursor.getString(8));
                 list.add(o);
             } while (cursor.moveToNext());
         }
@@ -1374,18 +1374,24 @@ public class DataHelper {
     public int createField(FieldObject e,  List<String> columns) {
         // String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns){
 
-        long exp_id = checkFieldName(e.exp_name);
+        long exp_id = checkFieldName(e.getExp_name());
         if (exp_id != -1) {
             return (int)exp_id;
         }
 
         // add to exp_index
         ContentValues insertExp = new ContentValues();
-        insertExp.put("exp_name", e.exp_name);
-        insertExp.put("exp_alias", e.exp_alias);
-        insertExp.put("unique_id", e.unique_id);
-        insertExp.put("primary_id", e.primary_id);
-        insertExp.put("secondary_id", e.secondary_id);
+        insertExp.put("exp_name", e.getExp_name());
+        insertExp.put("exp_alias", e.getExp_alias());
+        insertExp.put("unique_id", e.getUnique_id());
+        insertExp.put("primary_id", e.getPrimary_id());
+        insertExp.put("secondary_id", e.getSecondary_id());
+        insertExp.put("exp_layout", e.getExp_layout());
+        insertExp.put("exp_species", e.getExp_species());
+        insertExp.put("exp_sort", e.getExp_sort());
+        insertExp.put("count", e.getCount());
+        insertExp.put("date_import", timeStamp.format(Calendar.getInstance().getTime()));
+
         exp_id = db.insert(EXP_INDEX, null, insertExp);
 
         /* columns to plot_attributes

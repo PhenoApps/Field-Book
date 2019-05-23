@@ -45,6 +45,9 @@ public class PreferencesActivity extends AppCompatActivity {
     public static String PRIMARY_SOUND = "RangeSound";
     public static String TRAIT_SOUND = "TRAIT_SOUND";
 
+    //BrAPI
+    public static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,47 +16,72 @@
         app:popupTheme="@style/AppToolbar"
         app:theme="@style/AppToolbar" />
 
-    <ListView
-        android:id="@+id/myList"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:choiceMode="singleChoice" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray" />
-
-    <ListView
-        android:id="@+id/myList2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:choiceMode="singleChoice" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Load Studies"
-        android:textSize="20dp"
-        android:textColor="@color/s_text"
-        android:id="@+id/loadStudies"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="5dp"
-        android:onClick="buttonClicked"/>
-    <ListView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/loadStudies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:onClick="buttonClicked"
+            android:text="@string/brapi_load_data_button"
+            android:textColor="@color/s_text"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/brapiBaseURL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+
+    <ListView
         android:id="@+id/brapiStudies"
-        android:layout_marginTop="5dp"/>
-    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_weight="1"
+        android:choiceMode="singleChoice">
+
+    </ListView>
+
+    <RelativeLayout
+        android:id="@+id/loadingPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:gravity="center">
+
+        <ProgressBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Save to Database"
-        android:textSize="20dp"
-        android:textColor="@color/s_text"
-        android:id="@+id/save"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="5dp"
-        android:onClick="buttonClicked"/>
+        android:indeterminate="true" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:onClick="buttonClicked"
+            android:text="@string/brapi_save_data_button"
+            android:textColor="@color/s_text"
+            android:textSize="20sp" />
+    </LinearLayout>
 
 </LinearLayout>

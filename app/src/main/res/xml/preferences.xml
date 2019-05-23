@@ -152,6 +152,23 @@
             android:title="@string/jumptoplotid" />
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:key="pref_key_brapi_settings"
+        android:title="@string/preferences_brapi">
+
+        <EditTextPreference
+            android:icon="@drawable/ic_adv_infobar_count"
+            android:key="BRAPI_BASE_URL"
+            android:summary="@string/brapi_base_url_desc"
+            android:title="@string/brapi_base_url"
+            android:dialogTitle="@string/brapi_base_url"
+            android:dialogMessage="@string/brapi_base_url_desc"
+            android:defaultValue="@string/brapi_base_url_default"
+            />
+
+    </PreferenceCategory>
+
+
     <!--
 
 <PreferenceCategory

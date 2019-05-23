@@ -34,6 +34,7 @@ import android.view.MenuItem;
 import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
 //import com.fieldbook.tracker.utilities.ApiKeys;
+import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.io.CSVReader;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
@@ -173,9 +174,10 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         ListView myList = layout.findViewById(R.id.myList);
 
-        String[] importArray = new String[2];
+        String[] importArray = new String[3];
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_dropbox);
+        importArray[2] = getString(R.string.import_source_brapi);
 
         //TODO add google drive (requires Google Play Services)
         //importArray[2] = getString(R.string.importgoogle);
@@ -196,6 +198,12 @@ public class FieldEditorActivity extends AppCompatActivity {
                         //DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
                         //mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
                         break;
+                    case 2:
+                        intent.setClassName(FieldEditorActivity.this,
+                                BrapiActivity.class.getName());
+                        startActivityForResult(intent, 1);
+                        break;
+
                 }
                 importDialog.dismiss();
             }
@@ -528,11 +536,11 @@ public class FieldEditorActivity extends AppCompatActivity {
                     columns = cr.readNext();
 
                     FieldObject f = new FieldObject();
-                    f.exp_name = ep.getString("FieldFile", "");
-                    f.exp_alias = ep.getString("FieldFile", "");
-                    f.unique_id = uniqueS;
-                    f.primary_id = primaryS;
-                    f.secondary_id = secondaryS;
+                    f.setExp_name(ep.getString("FieldFile", ""));
+                    f.setExp_alias(ep.getString("FieldFile", ""));
+                    f.setUnique_id(uniqueS);
+                    f.setPrimary_id(primaryS);
+                    f.setSecondary_id(secondaryS);
 
                     exp_id = ConfigActivity.dt.createField(f, Arrays.asList(columns));
 
@@ -584,11 +592,11 @@ public class FieldEditorActivity extends AppCompatActivity {
                     }
 
                     FieldObject ftmp = new FieldObject();
-                    ftmp.exp_name = ep.getString("FieldFile", "");
-                    ftmp.exp_alias = ep.getString("FieldFile", "");
-                    ftmp.unique_id = uniqueS;
-                    ftmp.primary_id = primaryS;
-                    ftmp.secondary_id = secondaryS;
+                    ftmp.setExp_name(ep.getString("FieldFile", ""));
+                    ftmp.setExp_alias(ep.getString("FieldFile", ""));
+                    ftmp.setUnique_id(uniqueS);
+                    ftmp.setPrimary_id(primaryS);
+                    ftmp.setSecondary_id(secondaryS);
                     exp_id = ConfigActivity.dt.createField(ftmp, Arrays.asList(columns));
 
                     int row = 1;
