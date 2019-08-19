@@ -2607,6 +2607,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 dataLocked = !dataLocked;
                 lockData(dataLocked);
                 break;
+            case android.R.id.home:
+                finish();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
