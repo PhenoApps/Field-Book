@@ -326,6 +326,18 @@
     <string name="citation_title">Citation</string>
     <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
     <string name="citation_text">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
+    <string name="preferences_brapi">BrAPI</string>
+    <string name="brapi_base_url">BrAPI Base URL</string>
+    <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
+    <string name="brapi_base_url_default">https://example.org/brapi/v1</string>
+    <string name="brapi_load_data_button">Load Fields</string>
+    <string name="brapi_save_data_button">Save Field</string>
+    <string name="brapi_study_name">Name</string>
+    <string name="brapi_study_description">Description</string>
+    <string name="brapi_study_location">Location</string>
+    <string name="brapi_study_num_plots"> Plots</string>
+    <string name="brapi_study_num_traits"> Traits</string>
+    <string name="import_source_brapi">Remote (BrAPI)</string>
 
     <!-- BrAPI strings -->
 

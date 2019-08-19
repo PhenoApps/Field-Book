@@ -33,7 +33,8 @@ import android.view.MenuItem;
 
 import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
-import com.fieldbook.tracker.utilities.ApiKeys;
+//import com.fieldbook.tracker.utilities.ApiKeys;
+import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.io.CSVReader;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
@@ -148,7 +149,6 @@ public class FieldEditorActivity extends AppCompatActivity {
         ConfigActivity.dt.updateExpTable(false, true, false, 0);
 
         thisActivity = this;
-
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
@@ -174,9 +174,10 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         ListView myList = layout.findViewById(R.id.myList);
 
-        String[] importArray = new String[2];
+        String[] importArray = new String[3];
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_dropbox);
+        importArray[2] = getString(R.string.import_source_brapi);
 
         //TODO add google drive (requires Google Play Services)
         //importArray[2] = getString(R.string.importgoogle);
@@ -194,9 +195,15 @@ public class FieldEditorActivity extends AppCompatActivity {
                         startActivityForResult(intent, 1);
                         break;
                     case 1:
-                        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
-                        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
+                        //DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
+                        //mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
                         break;
+                    case 2:
+                        intent.setClassName(FieldEditorActivity.this,
+                                BrapiActivity.class.getName());
+                        startActivityForResult(intent, 1);
+                        break;
+
                 }
                 importDialog.dismiss();
             }
@@ -339,7 +346,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         e.putString("FieldFile", mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.lastIndexOf(".")));
         e.apply();
 
-        if (ConfigActivity.dt.checkFieldName(ep.getString("FieldFile", ""))) {
+        if (ConfigActivity.dt.checkFieldName(ep.getString("FieldFile", ""))>= 0) {
             makeToast(getString(R.string.fields_study_exists_message));
             SharedPreferences.Editor ed = ep.edit();
             ed.putString("FieldFile", null);
@@ -528,8 +535,14 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                     columns = cr.readNext();
 
-                    exp_id = ConfigActivity.dt.createField(ep.getString("FieldFile", ""), ep.getString("FieldFile", ""),
-                            uniqueS, primaryS, secondaryS, columns);
+                    FieldObject f = new FieldObject();
+                    f.setExp_name(ep.getString("FieldFile", ""));
+                    f.setExp_alias(ep.getString("FieldFile", ""));
+                    f.setUnique_id(uniqueS);
+                    f.setPrimary_id(primaryS);
+                    f.setSecondary_id(secondaryS);
+
+                    exp_id = ConfigActivity.dt.createField(f, Arrays.asList(columns));
 
                     data = columns;
 
@@ -540,7 +553,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                             data = cr.readNext();
 
                             if (data != null) {
-                                ConfigActivity.dt.createFieldData(exp_id, columns, data);
+                                ConfigActivity.dt.createFieldData(exp_id, Arrays.asList(columns), Arrays.asList(data));
                             }
                         }
 
@@ -578,8 +591,13 @@ public class FieldEditorActivity extends AppCompatActivity {
                         columns[s] = wb.getSheet(0).getCell(s, 0).getContents();
                     }
 
-                    exp_id = ConfigActivity.dt.createField(ep.getString("FieldFile", ""), ep.getString("FieldFile", ""),
-                            uniqueS, primaryS, secondaryS, columns);
+                    FieldObject ftmp = new FieldObject();
+                    ftmp.setExp_name(ep.getString("FieldFile", ""));
+                    ftmp.setExp_alias(ep.getString("FieldFile", ""));
+                    ftmp.setUnique_id(uniqueS);
+                    ftmp.setPrimary_id(primaryS);
+                    ftmp.setSecondary_id(secondaryS);
+                    exp_id = ConfigActivity.dt.createField(ftmp, Arrays.asList(columns));
 
                     int row = 1;
 
@@ -595,7 +613,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                             row += 1;
 
-                            ConfigActivity.dt.createFieldData(exp_id, columns, data);
+                            ConfigActivity.dt.createFieldData(exp_id, Arrays.asList(columns), Arrays.asList(data));
                         }
 
                         DataHelper.db.setTransactionSuccessful();

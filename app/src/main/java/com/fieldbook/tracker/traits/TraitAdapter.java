@@ -193,7 +193,13 @@ class TraitAdapter extends BaseAdapter {
                                 }
                             }
 
-                            ConfigActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
+                            TraitObject trait = getItem(position);
+                            trait.trait = newTraitName;
+                            trait.visible = true;
+                            trait.realPosition = String.valueOf(pos);
+
+                            //MainActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
+                            ConfigActivity.dt.insertTraits(trait);
                             TraitEditorActivity.loadData();
                             MainActivity.reloadData = true;
 

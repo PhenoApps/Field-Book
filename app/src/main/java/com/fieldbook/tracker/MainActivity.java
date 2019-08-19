@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     int delay = 100;
     int count = 1;
-    
+
     public static boolean searchReload;
 
     private static String displayColor = "#d50000";
@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         setContentView(R.layout.activity_main);
 
         initToolbars();
-        
+
         getSupportActionBar().setTitle(null);
         getSupportActionBar().getThemedContext();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         reloadData = true;
 
         lock = new Object();
-        
+
         thisActivity = this;
 
         // Keyboard service manager
@@ -1936,9 +1936,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             //TODO causes crash
                             photoLocation = ConfigActivity.dt.getPlotPhotos(cRange.plot_id, currentTrait.trait);
 
-                           for (int i = 0; i < photoLocation.size(); i++) {
-                               drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
-                           }
+                            for (int i = 0; i < photoLocation.size(); i++) {
+                                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
+                            }
 
                             photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
                             photo.setAdapter(photoAdapter);
@@ -2959,7 +2959,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case R.id.rustDelim:
                 v = "/";
                 break;
-            }
+        }
 
         if (traitDiseaseRating.getVisibility() == View.VISIBLE && etCurVal.getText().length() > 0 && !v.equals("/") && !etCurVal.getText().toString().substring(etCurVal.getText().length() - 1).equals("/")) {
             String lastChar = etCurVal.getText().toString().substring(etCurVal.getText().toString().length()-1);

@@ -46,6 +46,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
@@ -270,10 +271,15 @@ public class ConfigActivity extends AppCompatActivity {
         ListView settingsList = findViewById(R.id.myList);
 
         String[] items2 = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits),getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced)}; //, "API Test"};
+                getString(R.string.settings_traits),
+                getString(R.string.settings_collect),
+                getString(R.string.settings_profile),
+                getString(R.string.settings_export),
+                getString(R.string.settings_advanced)}; //, "API Test"};
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
+                arg1.getId();
                 Intent intent = new Intent();
                 switch (position) {
                     case 0:
@@ -332,7 +338,6 @@ public class ConfigActivity extends AppCompatActivity {
                                 PreferencesActivity.class.getName());
                         startActivity(intent);
                         break;
-
                 }
             }
         });

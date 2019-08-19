@@ -92,10 +92,10 @@ class FieldAdapter extends BaseAdapter {
         convertView.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 SharedPreferences.Editor ed = ep.edit();
-                ed.putString("FieldFile", getItem(position).exp_name);
-                ed.putString("ImportUniqueName", getItem(position).unique_id);
-                ed.putString("ImportFirstName", getItem(position).primary_id);
-                ed.putString("ImportSecondName", getItem(position).secondary_id);
+                ed.putString("FieldFile", getItem(position).getExp_name());
+                ed.putString("ImportUniqueName", getItem(position).getUnique_id());
+                ed.putString("ImportFirstName", getItem(position).getPrimary_id());
+                ed.putString("ImportSecondName", getItem(position).getSecondary_id());
                 ed.putBoolean("ImportFieldFinished", true);
                 ed.putBoolean("FieldSelected",true);
                 ed.putString("lastplot", null);
@@ -104,15 +104,15 @@ class FieldAdapter extends BaseAdapter {
                 ed.putString("DROP3", null);
                 ed.apply();
 
-                ConfigActivity.dt.switchField(getItem(position).exp_id);
+                ConfigActivity.dt.switchField(getItem(position).getExp_id());
                 MainActivity.reloadData = true;
                 notifyDataSetChanged();
             }
         });
 
-        String importDate = getItem(position).date_import;
-        String editDate = getItem(position).date_edit;
-        String exportDate = getItem(position).date_export;
+        String importDate = getItem(position).getDate_import();
+        String editDate = getItem(position).getDate_edit();
+        String exportDate = getItem(position).getDate_export();
 
         if (importDate != null) {
             importDate = importDate.split(" ")[0];
@@ -126,8 +126,8 @@ class FieldAdapter extends BaseAdapter {
             exportDate = exportDate.split(" ")[0];
         }
 
-        holder.fieldName.setText(getItem(position).exp_name);
-        holder.count.setText(getItem(position).count);
+        holder.fieldName.setText(getItem(position).getExp_name());
+        holder.count.setText(getItem(position).getCount());
         holder.importDate.setText(importDate);
         holder.editDate.setText(editDate);
         holder.exportDate.setText(exportDate);
@@ -136,11 +136,11 @@ class FieldAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 SharedPreferences.Editor ed = ep.edit();
-                ed.putString("FieldFile", getItem(position).exp_name);
-                ed.putInt("ExpID", getItem(position).exp_id);
-                ed.putString("ImportUniqueName", getItem(position).unique_id);
-                ed.putString("ImportFirstName", getItem(position).primary_id);
-                ed.putString("ImportSecondName", getItem(position).secondary_id);
+                ed.putString("FieldFile", getItem(position).getExp_name());
+                ed.putInt("ExpID", getItem(position).getExp_id());
+                ed.putString("ImportUniqueName", getItem(position).getUnique_id());
+                ed.putString("ImportFirstName", getItem(position).getPrimary_id());
+                ed.putString("ImportSecondName", getItem(position).getSecondary_id());
                 ed.putBoolean("ImportFieldFinished", true);
                 ed.putBoolean("FieldSelected",true);
                 ed.putString("lastplot", null);
@@ -149,7 +149,7 @@ class FieldAdapter extends BaseAdapter {
                 ed.putString("DROP3", null);
                 ed.apply();
 
-                ConfigActivity.dt.switchField(getItem(position).exp_id);
+                ConfigActivity.dt.switchField(getItem(position).getExp_id());
                 MainActivity.reloadData = true;
                 notifyDataSetChanged();
             }
@@ -182,9 +182,9 @@ class FieldAdapter extends BaseAdapter {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
 
-                                    ConfigActivity.dt.deleteField(getItem(position).exp_id);
+                                    ConfigActivity.dt.deleteField(getItem(position).getExp_id());
 
-                                    if (getItem(position).exp_name.equals(ep.getString("FieldFile", ""))) {
+                                    if (getItem(position).getExp_name().equals(ep.getString("FieldFile", ""))) {
                                         SharedPreferences.Editor ed = ep.edit();
                                         ed.putString("FieldFile", null);
                                         ed.putBoolean("ImportFieldFinished", false);
