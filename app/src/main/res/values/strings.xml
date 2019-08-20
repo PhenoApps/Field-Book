@@ -95,6 +95,7 @@
     <string name="traits_format_location">Location</string>
     <string name="traits_format_printer">Printer</string>
     <string name="traits_format_barcode">Barcode</string>
+    <string name="traits_format_labelprint">Zebra Label Print</string>
 
     <string name="traits_create_trait">Trait</string>
     <string name="traits_create_format">Format</string>
@@ -202,6 +203,17 @@
 
     <!-- Trait text and errors -->
     <string name="trait_layout_data_stored">Saved</string>
+    <string name="printlabeltitle">Print Label</string>
+    <string name="printstatustitle">Printer status</string>
+    <string name="printstatus">Retrieving connection status...</string>
+    <string name="labelsizetitle">Size:</string>
+    <string name="textfieldtitle">Text:</string>
+    <string name="textfieldtitle2">Text2:</string>
+    <string name="textfieldtitle3">Text3:</string>
+    <string name="textfieldtitle4">Text4:</string>
+    <string name="barcodefieldtitle">Barcode:</string>
+    <string name="labelcopiestitle">Copies:</string>
+    <string name="clearsettings">Clear settings</string>
 
     <string name="trait_error_hardware_missing">Your device does not contain the necessary hardware for this feature</string>
     <string name="trait_error_photo_missing">Photo does not exist</string>

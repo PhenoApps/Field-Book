@@ -132,6 +132,12 @@ class TraitAdapter extends BaseAdapter {
             case "location":
                 holder.format.setBackgroundResource(R.drawable.ic_trait_location);
                 break;
+            case "barcode":
+                holder.format.setBackgroundResource(R.drawable.ic_trait_barcode);
+                break;
+            case "zebra label print":
+                holder.format.setBackgroundResource(R.drawable.ic_trait_labelprint);
+                break;
             default:
                 holder.format.setBackgroundResource(R.drawable.ic_reorder);
                 break;
