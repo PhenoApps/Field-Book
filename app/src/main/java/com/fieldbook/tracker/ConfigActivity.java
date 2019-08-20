@@ -1308,11 +1308,8 @@ public class ConfigActivity extends AppCompatActivity {
                 }
             }
         }
-    }
+    }  
 
-
-
-    
     private void showDatabaseDialog() {
         String[] items = new String[3];
         items[0] = getString(R.string.database_export);
