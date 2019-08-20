@@ -1308,7 +1308,7 @@ public class ConfigActivity extends AppCompatActivity {
                 }
             }
         }
-    }
+    }  
 
     private void showDatabaseDialog() {
         String[] items = new String[3];
