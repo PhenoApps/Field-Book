@@ -348,7 +348,7 @@
     <string name="preferences_brapi">BrAPI</string>
     <string name="brapi_base_url">BrAPI Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
-    <string name="brapi_base_url_default">https://example.org/brapi/v1</string>
+    <string name="brapi_base_url_default">https://example.org</string>
     <string name="brapi_load_data_button">Load Fields</string>
     <string name="brapi_save_data_button">Save Field</string>
     <string name="brapi_study_name">Name</string>

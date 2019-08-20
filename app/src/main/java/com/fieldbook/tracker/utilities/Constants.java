@@ -42,4 +42,6 @@ public class Constants {
             Manifest.permission.ACCESS_NETWORK_STATE};
 
     public final static int PERM_REQ = 100;
+
+    public static final String BRAPI_PATH = "/brapi/v1";
 }

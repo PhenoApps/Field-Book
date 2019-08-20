@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.MenuItem;
@@ -52,6 +54,7 @@ public class PreferencesActivity extends AppCompatActivity {
 
     //BrAPI
     public static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
+    public static String BRAPI_TOKEN = "BRAPI_TOKEN";
 
 
     @Override
@@ -68,7 +71,9 @@ public class PreferencesActivity extends AppCompatActivity {
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new PreferencesFragment())
                 .commit();
-        }
+
+        checkBrapiAuth();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -80,6 +85,25 @@ public class PreferencesActivity extends AppCompatActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        checkBrapiAuth();
+    }
+
+    private void checkBrapiAuth() {
+        Uri data = this.getIntent().getData();
+        if (data != null && data.isHierarchical()) {
+            String uri = this.getIntent().getDataString();
+            uri = uri.substring(uri.indexOf("://")+3);
+            SharedPreferences preferences = getSharedPreferences("Settings", 0);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(PreferencesActivity.BRAPI_TOKEN, uri);
+            editor.apply();
         }
     }
 }

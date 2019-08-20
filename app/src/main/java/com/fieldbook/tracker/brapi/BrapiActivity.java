@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
+import com.fieldbook.tracker.utilities.Constants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +52,7 @@ public class BrapiActivity extends AppCompatActivity {
         setContentView(R.layout.activity_brapi);
 
         preferences = getSharedPreferences("Settings", 0);
-        String brapiBaseURL = preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "");
+        String brapiBaseURL = preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
         brAPIService = new BrAPIService(this, brapiBaseURL);
 
         TextView baseURLText = findViewById(R.id.brapiBaseURL);
