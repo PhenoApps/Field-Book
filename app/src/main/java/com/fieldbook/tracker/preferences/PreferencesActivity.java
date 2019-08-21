@@ -1,14 +1,18 @@
 package com.fieldbook.tracker.preferences;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.R;
 
-public class PreferencesActivity extends AppCompatActivity {
+public class PreferencesActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
 
     // Appearance
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
@@ -73,6 +77,12 @@ public class PreferencesActivity extends AppCompatActivity {
                 .commit();
 
         checkBrapiAuth();
+        registerSharedPreferencesListener();
+    }
+
+    private void registerSharedPreferencesListener() {
+        getSharedPreferences("Settings", 0).unregisterOnSharedPreferenceChangeListener(this);
+        getSharedPreferences("Settings", 0).registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -93,6 +103,7 @@ public class PreferencesActivity extends AppCompatActivity {
         super.onResume();
 
         checkBrapiAuth();
+        registerSharedPreferencesListener();
     }
 
     private void checkBrapiAuth() {
@@ -104,6 +115,30 @@ public class PreferencesActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(PreferencesActivity.BRAPI_TOKEN, uri);
             editor.apply();
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (BRAPI_BASE_URL.equals(key)) {
+            try {
+                String url = sharedPreferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&success_url=fieldbook://";
+                try {
+                    Uri uri = Uri.parse("googlechrome://navigate?url="+ url);
+                    Intent i = new Intent(Intent.ACTION_VIEW, uri);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                } catch (ActivityNotFoundException e) {
+                    Uri uri = Uri.parse(url);
+                    // Chrome is probably not installed
+                    // OR not selected as default browser OR if no Browser is selected as default browser
+                    Intent i = new Intent(Intent.ACTION_VIEW, uri);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                }
+            } catch (Exception ex) {
+                Log.e("BrAPI", "Error starting BrAPI auth", ex);
+            }
         }
     }
 }
