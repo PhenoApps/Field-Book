@@ -64,12 +64,17 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Locale;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * Settings Screen
@@ -79,6 +84,8 @@ public class ConfigActivity extends AppCompatActivity {
     Handler mHandler = new Handler();
 
     public static boolean helpActive;
+    boolean doubleBackToExitPressedOnce = false;
+
 
     private SharedPreferences ep;
 
@@ -112,9 +119,10 @@ public class ConfigActivity extends AppCompatActivity {
     private RadioButton activeTraits;
 
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 999;
-    private final int PERMISSIONS_REQUEST_IMPORT_FIELD = 998;
-    private final int PERMISSIONS_REQUEST_MANAGE_TRAITS = 997;
+    private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 998;
+    private final int PERMISSIONS_REQUEST_DATABASE_EXPORT = 997;
     private final int PERMISSIONS_REQUEST_LOCATION = 996;
+    private final int PERMISSIONS_REQUEST_TRAIT_DATA = 995;
 
     private ArrayList<String> newRange;
     private ArrayList<String> exportTrait;
@@ -164,8 +172,6 @@ public class ConfigActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
         helpActive = false;
-
-        checkIntent();
 
         // display intro tutorial
         if(ep.getBoolean("FirstRun",true)) {
@@ -288,14 +294,12 @@ public class ConfigActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 switch (position) {
                     case 0:
-                        if (checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_IMPORT_FIELD)) {
                             intent.setClassName(ConfigActivity.this,
                                     FieldEditorActivity.class.getName());
                             startActivity(intent);
-                        }
+
                         break;
                     case 1:
-                        if (checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_MANAGE_TRAITS)) {
                             if (!ep.getBoolean("ImportFieldFinished", false)) {
                                 makeToast(getString(R.string.warning_field_before_traits));
                                 return;
@@ -304,7 +308,7 @@ public class ConfigActivity extends AppCompatActivity {
                             intent.setClassName(ConfigActivity.this,
                                     TraitEditorActivity.class.getName());
                             startActivity(intent);
-                        }
+
                         break;
                     case 2:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
@@ -312,9 +316,7 @@ public class ConfigActivity extends AppCompatActivity {
                             return;
                         }
 
-                        intent.setClassName(ConfigActivity.this,
-                                MainActivity.class.getName());
-                        startActivity(intent);
+                        collectDataFilePermission();
                         break;
                     case 3:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
@@ -325,18 +327,15 @@ public class ConfigActivity extends AppCompatActivity {
                         showSetupDialog();
                         break;
                     case 4:
-                        if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,PERMISSIONS_REQUEST_EXPORT_DATA)) {
-                            if (!ep.getBoolean("ImportFieldFinished", false)) {
-                                makeToast(getString(R.string.warning_field_missing));
-                                return;
-                            } else if (dt.getTraitColumnsAsString() == null) {
-                                makeToast(getString(R.string.warning_traits_missing));
-                                return;
-                            }
-
-                            showSaveDialog();
+                        if (!ep.getBoolean("ImportFieldFinished", false)) {
+                            makeToast(getString(R.string.warning_field_missing));
+                            return;
+                        } else if (dt.getTraitColumnsAsString() == null) {
+                            makeToast(getString(R.string.warning_traits_missing));
+                            return;
                         }
 
+                        exportPermission();
                         break;
                     case 5:
                         intent.setClassName(ConfigActivity.this,
@@ -1060,6 +1059,11 @@ public class ConfigActivity extends AppCompatActivity {
                     return;
                 }
 
+                File file = new File(Constants.FIELDEXPORTPATH);
+                if (!file.exists()) {
+                    createDir(Constants.FIELDEXPORTPATH);
+                }
+
                 newRange = new ArrayList<>();
 
                 if (onlyUnique.isChecked()) {
@@ -1125,9 +1129,7 @@ public class ConfigActivity extends AppCompatActivity {
                         break;
 
                     case 1:
-                        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION,PERMISSIONS_REQUEST_LOCATION)) {
-                            showLocationDialog();
-                        }
+                        locationDialogPermission();
                         break;
 
                     case 2:
@@ -1289,26 +1291,68 @@ public class ConfigActivity extends AppCompatActivity {
         alert.show();
     }
 
-    private void checkIntent() {
-        Bundle extras = getIntent().getExtras();
-        String dialog = "";
-
-        if (extras != null) {
-            dialog = extras.getString("dialog");
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_LOCATION)
+    private void locationDialogPermission() {
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            showLocationDialog();
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_location),
+                    PERMISSIONS_REQUEST_LOCATION, perms);
         }
+    }
 
-        if (dialog != null) {
-            if (dialog.equals("person")) {
-                showPersonDialog();
-            }
-
-            if (dialog.equals("location")) {
-                if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION,PERMISSIONS_REQUEST_LOCATION)) {
-                    showLocationDialog();
-                }
-            }
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_EXPORT_DATA)
+    private void exportPermission() {
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            showSaveDialog();
+        } else {
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
+                    PERMISSIONS_REQUEST_EXPORT_DATA, perms);
         }
-    }  
+    }
+
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_DATABASE_IMPORT)
+    public void importDatabaseFilePermission() {
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            showDatabaseImportDialog();
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
+                    PERMISSIONS_REQUEST_DATABASE_IMPORT, perms);
+        }
+    }
+
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_DATABASE_EXPORT)
+    public void exportDatabaseFilePermission() {
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            showDatabaseExportDialog();
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
+                    PERMISSIONS_REQUEST_DATABASE_EXPORT, perms);
+        }
+    }
+
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)
+    public void collectDataFilePermission() {
+        String[] perms = {Manifest.permission.RECORD_AUDIO,Manifest.permission.CAMERA,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            Intent intent = new Intent();
+
+            intent.setClassName(ConfigActivity.this,
+                    MainActivity.class.getName());
+            startActivity(intent);
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_trait_features),
+                    PERMISSIONS_REQUEST_TRAIT_DATA, perms);
+        }
+    }
 
     private void showDatabaseDialog() {
         String[] items = new String[3];
@@ -1346,10 +1390,10 @@ public class ConfigActivity extends AppCompatActivity {
                 chooseBackupDialog.dismiss();
                 switch (which) {
                     case 0:
-                        showDatabaseExportDialog();
+                        exportDatabaseFilePermission();
                         break;
                     case 1:
-                        showDatabaseImportDialog();
+                        importDatabaseFilePermission();
                         break;
                     case 2:
                         showDatabaseResetDialog1();
@@ -1552,101 +1596,30 @@ public class ConfigActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private Boolean checkPermission(String permission, int resultCode) {
-        if (ContextCompat.checkSelfPermission(ConfigActivity.this,
-                permission)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(ConfigActivity.this,
-                    new String[]{permission},
-                    resultCode);
-        } else {
-            return true;
-        }
-        return false;
-    }
-
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_EXPORT_DATA: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-                    if (!ep.getBoolean("ImportFieldFinished", false)) {
-                        makeToast(getString(R.string.warning_field_missing));
-                        return;
-                    }
-
-                    showSaveDialog();
-                } else {
-                    // permission denied
-                    makeToast("Unable to export data without write permissions.");
-                }
-                return;
-            }
-
-            case PERMISSIONS_REQUEST_IMPORT_FIELD: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    if (!ep.getBoolean("ImportFieldFinished", false)) {
-                        makeToast(getString(R.string.warning_field_missing));
-                        return;
-                    }
-
-                    Intent intent = new Intent();
-
-                    intent.setClassName(ConfigActivity.this,
-                            FieldEditorActivity.class.getName());
-                    startActivity(intent);
-                } else {
-                    // permission denied
-                    makeToast("Unable to import data without read permissions.");
-                }
-                return;
-            }
-
-            case PERMISSIONS_REQUEST_MANAGE_TRAITS: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    if (!ep.getBoolean("ImportFieldFinished", false)) {
-                        makeToast(getString(R.string.warning_field_missing));
-                        return;
-                    }
-
-                    Intent intent = new Intent();
-
-                    intent.setClassName(ConfigActivity.this,
-                            TraitEditorActivity.class.getName());
-                    startActivity(intent);
-                } else {
-                    // permission denied
-                    makeToast("Unable to manage traits without read permissions.");
-                }
-                return;
-            }
-
-            case PERMISSIONS_REQUEST_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    showLocationDialog();
-
-                } else {
-                    makeToast("Unable to acquire location without permission.");
-                }
-                return;
-            }
-        }
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
     @Override
     public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
     }
 }

@@ -17,6 +17,15 @@
     <string name="startup_sample_data_title">Sample data</string>
     <string name="startup_sample_data_message">Load sample data?</string>
 
+    <!-- Permissions  -->
+    <string name="permission_rationale_location">Location features require access to the device\'s location.</string>
+    <string name="permission_rationale_camera">Camera features require access to the device\'s camera.</string>
+    <string name="permission_rationale_microphone">Recording sound requires access to the device\'s microphone.</string>
+    <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
+    <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
+    <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
+
+
     <!-- Miscellaneous  -->
     <string name="fields_name">Field Name</string>
     <string name="fields_load">Load</string>
@@ -303,7 +312,8 @@
     <string name="import_source_googledrive">Google Drive</string>
     <string name="import_source_box">Box</string>
 
-    <string name="import_dialog_title">Import field</string>
+    <string name="import_dialog_title_fields">Import field</string>
+    <string name="import_dialog_title_traits">Import traits</string>
     <string name="import_dialog_unique">Unique identifier</string>
     <string name="import_dialog_primary">Primary order</string>
     <string name="import_dialog_secondary">Secondary order</string>
