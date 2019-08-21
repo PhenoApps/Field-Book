@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.fields;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -36,6 +37,7 @@ import com.fieldbook.tracker.ConfigActivity;
 //import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.io.CSVReader;
+import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
@@ -56,6 +58,8 @@ import java.util.List;
 
 import jxl.Workbook;
 import jxl.WorkbookSettings;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class FieldEditorActivity extends AppCompatActivity {
 
@@ -80,6 +84,8 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     private static final int DIALOG_LOAD_FIELDFILECSV = 1000;
     private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
+    private final int PERMISSIONS_REQUEST_STORAGE = 998;
+
 
     private int action;
 
@@ -161,7 +167,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.import_dialog_title)
+        builder.setTitle(R.string.import_dialog_title_fields)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -184,24 +190,15 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                Intent intent = new Intent();
                 switch (which) {
                     case 0:
-                        intent.setClassName(FieldEditorActivity.this,
-                                FileExploreActivity.class.getName());
-                        intent.putExtra("path", Constants.FIELDIMPORTPATH);
-                        intent.putExtra("include", new String[]{"csv", "xls"});
-                        intent.putExtra("title", getString(R.string.import_dialog_title));
-                        startActivityForResult(intent, 1);
+                        loadLocalPermission();
                         break;
                     case 1:
-                        //DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
-                        //mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
+                        loadDropbox();
                         break;
                     case 2:
-                        intent.setClassName(FieldEditorActivity.this,
-                                BrapiActivity.class.getName());
-                        startActivityForResult(intent, 1);
+                        loadBrAPI();
                         break;
 
                 }
@@ -219,6 +216,55 @@ public class FieldEditorActivity extends AppCompatActivity {
         });
         importDialog.show();
     }
+
+    public void loadLocal() {
+        Intent intent = new Intent();
+
+        intent.setClassName(FieldEditorActivity.this,
+                FileExploreActivity.class.getName());
+        intent.putExtra("path", Constants.FIELDIMPORTPATH);
+        intent.putExtra("include", new String[]{"csv", "xls"});
+        intent.putExtra("title", getString(R.string.import_dialog_title_fields));
+        startActivityForResult(intent, 1);
+    }
+
+    public void loadDropbox() {
+        //DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
+        //mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
+        makeToast("If I forget to re-enable this, send me an angry email.");
+    }
+
+    public void loadBrAPI() {
+        Intent intent = new Intent();
+
+        intent.setClassName(FieldEditorActivity.this,
+                BrapiActivity.class.getName());
+        startActivityForResult(intent, 1);
+    }
+
+    //todo
+    public void loadBox() {
+
+    }
+
+    //todo
+    public void loadGoogleDrive() {
+
+    }
+
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE)
+    public void loadLocalPermission() {
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            loadLocal();
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
+                    PERMISSIONS_REQUEST_STORAGE, perms);
+        }
+
+    }
+
 
     // Helper function to load data
     public static void loadData() {
@@ -284,6 +330,8 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == 2) {
             if (resultCode == RESULT_OK) {
                 mChosenFile = data.getStringExtra("result");
@@ -457,7 +505,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_import, null);
 
-        builder.setTitle(R.string.import_dialog_title)
+        builder.setTitle(R.string.import_dialog_title_fields)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -767,4 +815,13 @@ public class FieldEditorActivity extends AppCompatActivity {
     private static void scanFile(File filePath) {
         MediaScannerConnection.scanFile(thisActivity, new String[]{filePath.getAbsolutePath()}, null, null);
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
 }
