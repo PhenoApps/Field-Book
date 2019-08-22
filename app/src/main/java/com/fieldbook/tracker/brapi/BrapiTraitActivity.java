@@ -95,8 +95,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
         traitList.setVisibility(View.GONE);
 
         // Show our progress bar
-        final RelativeLayout loadingPanel = findViewById(R.id.loadingPanel);
-        loadingPanel.setVisibility(View.VISIBLE);
+        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
         // Call our API to get the data
         brAPIService.getOntology(new Function< List<TraitObject>, Void>() {
@@ -128,7 +127,9 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 });
 
                 traitList.setVisibility(View.VISIBLE);
+
                 findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+
                 return null;
             }
 
@@ -155,7 +156,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
     // Button event for load and save traits
     public void buttonClicked(View view) {
         switch(view.getId()) {
-            case R.id.loadStudies:
+            case R.id.loadTraits:
                 loadTraitsList();
                 break;
             case R.id.save:
