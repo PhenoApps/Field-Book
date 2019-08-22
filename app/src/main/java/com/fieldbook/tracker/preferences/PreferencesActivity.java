@@ -18,7 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
 
-public class PreferencesActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
+public class PreferencesActivity extends AppCompatActivity {
 
     // Appearance
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
