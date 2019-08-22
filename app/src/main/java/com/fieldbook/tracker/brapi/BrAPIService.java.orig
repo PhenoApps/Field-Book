@@ -134,6 +134,7 @@ public class BrAPIService {
         queue.add(stringRequest);
     }
 
+<<<<<<< HEAD
     // Get the ontology from breedbase so the users can select the ontology
     public void getOntology(final Function< List<TraitObject>, Void > function) {
 
@@ -159,7 +160,8 @@ public class BrAPIService {
                 });
         queue.add(stringRequest);
     }
-    
+
+=======
     // dummy data test for now
     public void putStudyObservations(final String studyDbId) {
         String url = this.brapiBaseURL + "/studies/" + studyDbId + "/observations";
@@ -222,6 +224,7 @@ public class BrAPIService {
             };
         queue.add(putObservationsRequest);
     }
+>>>>>>> brapi_export
 
     private List<StudySummary> parseStudiesJson(String json) {
 
