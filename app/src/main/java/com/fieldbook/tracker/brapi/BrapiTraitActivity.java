@@ -54,6 +54,8 @@ public class BrapiTraitActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_traits_brapi);
 
+        loadToolbar();
+
         // Get the setting information for our brapi integration
         preferences = getSharedPreferences("Settings", 0);
         String brapiBaseURL = preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "");
@@ -202,6 +204,16 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         MainActivity.reloadData = true;
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }
