@@ -6,11 +6,14 @@ import android.widget.Toast;
 
 import androidx.arch.core.util.Function;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.fields.FieldObject;
@@ -18,11 +21,14 @@ import com.fieldbook.tracker.traits.TraitObject;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class BrAPIService {
     private String brapiBaseURL;
@@ -126,6 +132,69 @@ public class BrAPIService {
         });
 
         queue.add(stringRequest);
+    }
+
+    // dummy data test for now
+    public void putStudyObservations(final String studyDbId) {
+        String url = this.brapiBaseURL + "/studies/" + studyDbId + "/observations";
+
+        // Send dummy data to test server creating new observations
+        // TODO: Populate with actual collected data from database
+        JSONObject request = new JSONObject();
+        JSONArray observations = new JSONArray();
+        JSONObject observation0 = new JSONObject();
+        JSONObject observation1 = new JSONObject();
+
+        try{
+            observation0.put("collector", "NickFieldBook");
+            observation0.put("observationDbId", "");
+            observation0.put("observationTimeStamp", "2019-08-21T21:37:08.888Z");
+            observation0.put("observationUnitDbId", "1");
+            observation0.put("observationVariableDbId", "MO_123:100002");
+            observation0.put("value", "5");
+
+            observation1.put("collector", "NickFieldBook");
+            observation1.put("observationDbId", "");
+            observation1.put("observationTimeStamp", "2019-08-21T21:37:08.888Z");
+            observation1.put("observationUnitDbId", "1");
+            observation1.put("observationVariableDbId", "MO_123:100002");
+            observation1.put("value", "666");
+
+            observations.put(observation0);
+            observations.put(observation1);
+            request.put("observations", observations);
+
+            Log.d("json", observations.toString());
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest putObservationsRequest = new JsonObjectRequest(Request.Method.PUT, url, request,
+            new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    //TODO: verify that response indicates everything was written
+                    //TODO: update observationDId for observations in database
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(context.getApplicationContext(), "Error writing data", Toast.LENGTH_SHORT).show();
+                    Log.e("error", error.toString());
+                }
+            })
+            {
+                @Override
+                public Map<String, String> getHeaders () throws AuthFailureError {
+                    HashMap<String, String> headers = new HashMap<String, String>();
+                    headers.put("Content-Type", "application/json");
+                    headers.put("Accept", "application/json");
+                    headers.put("Authorization", "Bearer YYYY");
+                    return headers;
+                }
+            };
+        queue.add(putObservationsRequest);
     }
 
     private List<StudySummary> parseStudiesJson(String json) {
@@ -299,7 +368,7 @@ public class BrAPIService {
     public void saveStudyDetails(StudyDetails studyDetails) {
         FieldObject field = new FieldObject();
         field.setExp_name(studyDetails.getStudyName());
-        field.setExp_alias(studyDetails.getStudyName());
+        field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
         field.setExp_species(studyDetails.getCommonCropName());
         field.setCount(studyDetails.getNumberOfPlots().toString());
         field.setUnique_id("observationUnitDbId");
@@ -316,4 +385,5 @@ public class BrAPIService {
             dataHelper.insertTraits(t);
         }
     }
+
 }
