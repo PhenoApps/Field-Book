@@ -27,13 +27,13 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.dialog_brapi_import);
+        setContentView(R.layout.dialog_brapi_export);
 
         ;
         String brapiBaseURL = this.context.getSharedPreferences("Settings", 0)
                 .getString(PreferencesActivity.BRAPI_BASE_URL, "");
         brAPIService = new BrAPIService(this.context, brapiBaseURL);
-        saveBtn = findViewById(R.id.brapi_save_btn);
+        saveBtn = findViewById(R.id.brapi_export_btn);
         saveBtn.setOnClickListener(this);
         cancelBtn = findViewById(R.id.brapi_cancel_btn);
         cancelBtn.setOnClickListener(this);
@@ -43,7 +43,7 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.brapi_save_btn:
+            case R.id.brapi_export_btn:
                 // TODO: hardcoded, replace with actual studyid
                 brAPIService.putStudyObservations("1001");
                 break;
