@@ -201,12 +201,13 @@ public class BrAPIService {
                 public void onResponse(JSONObject response) {
                     //TODO: verify that response indicates everything was written
                     //TODO: update observationDId for observations in database
+                    Toast.makeText(context.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
                 }
             },
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(context.getApplicationContext(), "Error writing data", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context.getApplicationContext(), "BrAPI Export Failed", Toast.LENGTH_SHORT).show();
                     Log.e("error", error.toString());
                 }
             })
