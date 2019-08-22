@@ -9,12 +9,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,9 +22,13 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.swagger.client.ApiCallback;
+import io.swagger.client.ApiException;
+import io.swagger.client.model.StudiesResponse;
+import io.swagger.client.model.StudySummary;
 
 /**
  * API test Screen
@@ -33,7 +37,7 @@ public class BrapiActivity extends AppCompatActivity {
 
     private SharedPreferences preferences;
     private BrAPIService brAPIService;
-    private StudySummary selectedStudy;
+    private BrapiStudySummary selectedStudy;
 
     @Override
     public void onDestroy() {
@@ -78,10 +82,10 @@ public class BrapiActivity extends AppCompatActivity {
         final ListView listStudies = findViewById(R.id.brapiStudies);
         listStudies.setVisibility(View.GONE);
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-        brAPIService.getStudies(new Function<List<StudySummary>, Void>() {
-            @Override
-            public Void apply(final List<StudySummary> studies) {
 
+        brAPIService.getStudies(new Function<List<BrapiStudySummary>, Void>() {
+            @Override
+            public Void apply(final List<BrapiStudySummary> studies) {
                 BrapiActivity.this.selectedStudy = null;
 
                 listStudies.setAdapter(BrapiActivity.this.buildStudiesArrayAdapter(studies));
@@ -99,10 +103,10 @@ public class BrapiActivity extends AppCompatActivity {
         });
     }
 
-    private ArrayAdapter buildStudiesArrayAdapter(List<StudySummary> studies) {
+    private ArrayAdapter buildStudiesArrayAdapter(List<BrapiStudySummary> studies) {
         ArrayList<String> itemDataList = new ArrayList<>();;
 
-        for(StudySummary study: studies) {
+        for(BrapiStudySummary study: studies) {
             itemDataList.add(study.getStudyName());
         }
 

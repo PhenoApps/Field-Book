@@ -1,193 +1,283 @@
 package com.fieldbook.tracker.brapi;
 
+import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.arch.core.util.Function;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.fields.FieldObject;
 import com.fieldbook.tracker.traits.TraitObject;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import io.swagger.client.ApiClient;
+import io.swagger.client.ApiException;
+import io.swagger.client.api.StudiesApi;
+import io.swagger.client.model.ObservationUnit;
+import io.swagger.client.model.ObservationUnitsResponse1;
+import io.swagger.client.model.ObservationVariable;
+import io.swagger.client.model.StudiesResponse;
+import io.swagger.client.model.Study;
+import io.swagger.client.model.StudyObservationVariablesResponse;
+import io.swagger.client.model.StudyResponse;
+import io.swagger.client.model.StudySummary;
 
 public class BrAPIService {
-    private String brapiBaseURL;
     private Context context;
-    private RequestQueue queue;
     private DataHelper dataHelper;
+    private StudiesApi studiesApi;
+
 
     public BrAPIService(Context context, String brapiBaseURL) {
         this.context = context;
-        this.brapiBaseURL = brapiBaseURL;
-        this.queue = Volley.newRequestQueue(context);
         this.dataHelper = new DataHelper(context);
+
+        ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
+        this.studiesApi = new StudiesApi(apiClient);
+
     }
 
-    public void getStudies(final Function<List<StudySummary>, Void> function){
-        String url = this.brapiBaseURL + "/studies-search?pageSize=20&page=0"; // BrAPI v1.2, try "/studies" for v1.3
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        List<StudySummary> studies = parseStudiesJson(response);
-                        function.apply(studies);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(context.getApplicationContext(), "Error loading data", Toast.LENGTH_SHORT).show();
-
-                Log.e("error", error.toString());
-            }
-        });
-
-        queue.add(stringRequest);
-    }
-
-    public void getStudyDetails(String studyDbId, final Function<StudyDetails, Void> function) {
-
-        String url = this.brapiBaseURL + "/studies/" + studyDbId;
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        StudyDetails study = parseStudyDetailsJson(response);
-                        function.apply(study);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(context.getApplicationContext(), "Error loading data", Toast.LENGTH_SHORT).show();
-
-                Log.e("error", error.toString());
-            }
-        });
-
-        queue.add(stringRequest);
-    }
-
-    public void getPlotDetails(final String studyDbId, final Function<StudyDetails, Void> function) {
-        String url = this.brapiBaseURL + "/studies/" + studyDbId + "/observationunits?observationLevel=plot&pageSize=1000&page=0";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        StudyDetails studyDetails = new StudyDetails();
-                        studyDetails.setAttributes(new ArrayList<String>());
-                        studyDetails.setValues(new ArrayList<List<String>>());
-                        parsePlotJson(response, studyDetails);
-
-                        function.apply(studyDetails);
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(context.getApplicationContext(), "Error loading data", Toast.LENGTH_SHORT).show();
-                Log.e("error", error.toString());
-            }
-        });
-
-        queue.add(stringRequest);
-    }
-
-    public void getTraits(final String studyDbId, final Function<StudyDetails, Void> function) {
-        String url = this.brapiBaseURL + "/studies/" + studyDbId + "/observationvariables?pageSize=200&page=0";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        StudyDetails studyDetails = new StudyDetails();
-                        List<TraitObject> traits = parseTraitsJson(response);
-                        studyDetails.setTraits(traits);
-                        function.apply(studyDetails);
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(context.getApplicationContext(), "Error loading data", Toast.LENGTH_SHORT).show();
-                Log.e("error", error.toString());
-            }
-        });
-
-        queue.add(stringRequest);
-    }
-
-    private List<StudySummary> parseStudiesJson(String json) {
-
-        List<StudySummary> studies = new ArrayList<>();
+    public void getStudies(final Function<List<BrapiStudySummary>, Void> function){
         try {
-            JSONObject js = new JSONObject(json);
-            JSONObject result = (JSONObject) js.get("result");
-            JSONArray data = (JSONArray) result.get("data");
-            for (int i = 0; i < data.length(); ++i) {
-                JSONObject studyJSON = data.getJSONObject(i);
-                StudySummary studySummary = new StudySummary();
-                //s.setStudyName(studyJSON.getString("studyName"));//Brapi v1.3
-                studySummary.setStudyName(studyJSON.getString("name"));//Brapi v1.2
-                studySummary.setStudyDbId(studyJSON.getString("studyDbId"));
-                studies.add(studySummary);
-            }
-        } catch (Exception e) {
+
+            BrapiApiCallBack<StudiesResponse> callback = new BrapiApiCallBack<StudiesResponse>() {
+                @Override
+                public void onSuccess(StudiesResponse studiesResponse, int i, Map<String, List<String>> map) {
+                    final List<BrapiStudySummary> studies = new ArrayList<>();
+                    final List<StudySummary> studySummaryList = studiesResponse.getResult().getData();
+                    for(StudySummary studySummary: studySummaryList){
+                        studies.add(mapStudy(studySummary));
+                    }
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            function.apply(studies);
+                        }
+                    });
+                }
+            };
+
+            studiesApi.studiesGetAsync(
+                    null,null, null,null,
+                    null, null, null, null, null,
+                    null, null, null, null,
+                    0, 20, null, callback);
+
+        } catch (ApiException e) {
             e.printStackTrace();
         }
-        return studies;
+
     }
 
-    private List<TraitObject> parseTraitsJson(String json) {
-        List<TraitObject> traits = new ArrayList<>();
+    public BrapiStudySummary mapStudy(StudySummary studySummary) {
+        BrapiStudySummary study = new BrapiStudySummary();
+        study.setStudyDbId(studySummary.getStudyDbId());
+        study.setStudyName(studySummary.getStudyName());
+        return study;
+    }
 
+    public void getStudyDetails(String studyDbId, final Function<BrapiStudyDetails, Void> function) {
         try {
-            JSONObject js = new JSONObject(json);
-            JSONObject result = (JSONObject) js.get("result");
-            JSONArray data = (JSONArray) result.get("data");
-            for (int i = 0; i < data.length(); ++i) {
-                JSONObject tmp = data.getJSONObject(i);
-                TraitObject t = new TraitObject();
-                t.defaultValue = tmp.getString("defaultValue");
-                JSONObject traitJson = tmp.getJSONObject("trait");
-                t.trait = traitJson.getString("name");
-                t.details = traitJson.getString("description");
-                JSONObject scale = tmp.getJSONObject("scale");
 
-                JSONObject validValue = scale.getJSONObject("validValues");
-                t.minimum = Integer.toString(validValue.getInt("min"));
-                t.maximum = Integer.toString(validValue.getInt("max"));
-                JSONArray cat = validValue.getJSONArray("categories");
-                StringBuilder sb = new StringBuilder();
-                for (int j = 0; j < cat.length(); ++j) {
-                    sb.append(cat.get(j));
-                    if (j != cat.length() - 1) {
-                        sb.append("/");
-                    }
+            BrapiApiCallBack<StudyResponse> callback = new BrapiApiCallBack<StudyResponse>() {
+                @Override
+                public void onSuccess(StudyResponse studyResponse, int i, Map<String, List<String>> map) {
+                    final BrapiStudyDetails study = mapStudy(studyResponse.getResult());
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            function.apply(study);
+                        }
+                    });
                 }
-                t.categories = sb.toString();
-                t.format = convertBrAPIDataType(scale.getString("dataType"));
-                if (t.format.equals("integer")) {
-                    t.format = "numeric";
-                }
-                t.visible = true;
-                traits.add(t);
-            }
-        } catch (Exception e) {
+            };
+
+            studiesApi.studiesStudyDbIdGetAsync(
+                    studyDbId, null, callback);
+
+        } catch (ApiException e) {
             e.printStackTrace();
+        }
+    }
+
+    public BrapiStudyDetails mapStudy(Study study) {
+        BrapiStudyDetails studyDetails = new BrapiStudyDetails();
+        studyDetails.setStudyDbId(study.getStudyDbId());
+        studyDetails.setStudyName(study.getStudyName());
+        studyDetails.setCommonCropName(study.getCommonCropName());
+        studyDetails.setStudyDescription(study.getStudyDescription());
+        studyDetails.setStudyDescription(study.getLocation().getLocationName());
+        return studyDetails;
+    }
+
+    public void getPlotDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function) {
+        try {
+
+            BrapiApiCallBack<ObservationUnitsResponse1> callback = new BrapiApiCallBack<ObservationUnitsResponse1>() {
+                @Override
+                public void onSuccess(ObservationUnitsResponse1 response, int i, Map<String, List<String>> map) {
+                    final BrapiStudyDetails study = new BrapiStudyDetails();
+                    study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
+                    study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
+                    study.setValues(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
+
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            function.apply(study);
+                        }
+                    });
+                }
+            };
+            studiesApi.studiesStudyDbIdObservationunitsGetAsync(
+                    studyDbId, "plot", 0, 1000,
+                    null, callback);
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<String> mapAttributes(ObservationUnit unit) {
+        List<String> attributes = new ArrayList<>();
+        if(checkField(unit.getX(), unit.getPositionCoordinateX()))
+            attributes.add("Row");
+        if(checkField(unit.getY(), unit.getPositionCoordinateY()))
+            attributes.add("Column");
+        if(checkField(unit.getBlockNumber()))
+            attributes.add("Block");
+        if(checkField(unit.getReplicate()))
+            attributes.add("Replicate");
+        if(checkField(unit.getEntryNumber(), unit.getEntryType()))
+            attributes.add("Entry");
+        if(checkField(unit.getPlotNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId()))
+            attributes.add("Plot");
+        if(checkField(unit.getPlantNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId()))
+            attributes.add("Plant");
+        if(checkField(unit.getGermplasmName(), unit.getGermplasmDbId()))
+            attributes.add("Germplasm");
+        if(checkField(unit.getPedigree()))
+            attributes.add("Pedigree");
+
+        return attributes;
+
+    }
+
+    private List<List<String>> mapAttributeValues(List<String> attributes, List<ObservationUnit> data) {
+        List<List<String>> attributesTable = new ArrayList<>();
+        for(ObservationUnit unit: data){
+            List<String> dataRow = new ArrayList<>();
+            for(String attribute: attributes){
+                if (attribute.equalsIgnoreCase("Row"))
+                    addAttributeDataItem(dataRow, unit.getX(), unit.getPositionCoordinateX());
+                else if (attribute.equalsIgnoreCase("Column"))
+                    addAttributeDataItem(dataRow, unit.getY(), unit.getPositionCoordinateY());
+                else if (attribute.equalsIgnoreCase("Block"))
+                    addAttributeDataItem(dataRow, unit.getBlockNumber());
+                else if (attribute.equalsIgnoreCase("Replicate"))
+                    addAttributeDataItem(dataRow, unit.getReplicate());
+                else if (attribute.equalsIgnoreCase("Entry"))
+                    addAttributeDataItem(dataRow, unit.getEntryNumber(), unit.getEntryType());
+                else if (attribute.equalsIgnoreCase("Plot"))
+                    addAttributeDataItem(dataRow, unit.getPlotNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId());
+                else if (attribute.equalsIgnoreCase("Plant"))
+                    addAttributeDataItem(dataRow, unit.getPlantNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId());
+                else if (attribute.equalsIgnoreCase("Germplasm"))
+                    addAttributeDataItem(dataRow, unit.getGermplasmName(), unit.getGermplasmDbId());
+                else if (checkField(unit.getPedigree()) && attribute.equalsIgnoreCase("Pedigree"))
+                    addAttributeDataItem(dataRow, unit.getPedigree());
+            }
+            attributesTable.add(dataRow);
+        }
+
+        return attributesTable;
+    }
+
+    private void addAttributeDataItem(List<String> dataRow, String ... values) {
+        String goodValue = getPrioritizedValue(values);
+        if (goodValue != null){
+            dataRow.add(goodValue);
+        }
+    }
+
+    private boolean checkField(String ... values) {
+        return getPrioritizedValue(values) != null;
+    }
+
+    private String getPrioritizedValue(String... values) {
+        String returnValue = null;
+        for(String val: values){
+            if(val != null && !val.isEmpty()){
+                returnValue = val;
+                break;
+            }
+        }
+        return returnValue;
+    }
+
+    public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function) {
+        try {
+
+            BrapiApiCallBack<StudyObservationVariablesResponse> callback = new BrapiApiCallBack<StudyObservationVariablesResponse>() {
+                @Override
+                public void onSuccess(StudyObservationVariablesResponse response, int i, Map<String, List<String>> map) {
+                    final BrapiStudyDetails study = new BrapiStudyDetails();
+                    study.setTraits(mapTraits(response.getResult().getData()));
+
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            function.apply(study);
+                        }
+                    });
+                }
+            };
+            studiesApi.studiesStudyDbIdObservationvariablesGetAsync(
+                    studyDbId, 0, 200,
+                    null, callback);
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<TraitObject> mapTraits(List<ObservationVariable> variables) {
+        List<TraitObject> traits = new ArrayList<>();
+        for(ObservationVariable var: variables){
+            TraitObject trait = new TraitObject();
+            trait.setDefaultValue(var.getDefaultValue());
+            String synonym = var.getSynonyms().size() > 0 ? var.getSynonyms().get(0) : null;
+            trait.setTrait(getPrioritizedValue(synonym, var.getName()));
+            if(var.getTrait() != null) {
+                trait.setDetails(var.getTrait().getDescription());
+            }
+            if(var.getScale() != null) {
+                if(var.getScale().getValidValues() != null) {
+                    trait.setMinimum(var.getScale().getValidValues().getMin().toString());
+                    trait.setMaximum(var.getScale().getValidValues().getMax().toString());
+                    trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                }
+                if(var.getScale().getDataType() != null) {
+                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getValue()));
+                }
+            }
+            trait.setVisible(true);
+            trait.setRealPosition("");
+            traits.add(trait);
         }
         return traits;
+    }
+
+    private String buildCategoryList(List<String> categories) {
+        StringBuilder sb = new StringBuilder();
+        for (int j = 0; j < categories.size(); ++j) {
+            sb.append(categories.get(j));
+            if (j != categories.size() - 1) {
+                sb.append("/");
+            }
+        }
+        return sb.toString();
     }
 
     private String convertBrAPIDataType(String dataType) {
@@ -207,105 +297,16 @@ public class BrAPIService {
         }
     }
 
-    private void parsePlotJson(String json, StudyDetails studyDetails) {
-
-        try {
-            JSONObject js = new JSONObject(json);
-            JSONObject result = (JSONObject) js.get("result");
-            JSONArray data = (JSONArray) result.get("data");
-
-            studyDetails.setNumberOfPlots(data.length());
-
-
-            JSONObject first = (JSONObject) data.get(0);
-            Iterator<String> firstIter = first.keys();
-            while (firstIter.hasNext()) {
-                String key = firstIter.next();
-                if (!ignoreBrAPIAttribute(key)) {
-                    studyDetails.getAttributes().add(key);
-                }
-            }
-            Collections.sort(studyDetails.getAttributes());
-
-            for (int i = 0; i < data.length(); ++i) {
-                JSONObject unit = (JSONObject) data.get(i);
-                List<String> dataRow = new ArrayList<>();
-                for(String key: studyDetails.getAttributes()){
-                    if(unit.has(key)){
-                        dataRow.add(unit.getString(key));
-                    }else{
-                        dataRow.add("");
-                    }
-                }
-                studyDetails.getValues().add(dataRow);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private boolean ignoreBrAPIAttribute(String key) {
-        List<String> ignoredBrAPIAttributes = new ArrayList<>();
-        ignoredBrAPIAttributes.add("trialDbId");
-        ignoredBrAPIAttributes.add("trialName");
-        ignoredBrAPIAttributes.add("treatments");
-        ignoredBrAPIAttributes.add("studyName");
-        ignoredBrAPIAttributes.add("studyDbId");
-        ignoredBrAPIAttributes.add("studyLocation");
-        ignoredBrAPIAttributes.add("studyLocationDbId");
-        ignoredBrAPIAttributes.add("programName");
-        ignoredBrAPIAttributes.add("programDbId");
-        ignoredBrAPIAttributes.add("observations");
-        ignoredBrAPIAttributes.add("observationUnitXref");
-        ignoredBrAPIAttributes.add("locationName");
-        ignoredBrAPIAttributes.add("locationDbId");
-        return ignoredBrAPIAttributes.contains(key);
-    }
-
-
-    private StudyDetails parseStudyDetailsJson(String response) {
-
-        StudyDetails studyDetails = new StudyDetails();
-        try {
-            JSONObject js = new JSONObject(response);
-            JSONObject result = (JSONObject) js.get("result");
-            if(result.has("studyDbId"))
-                studyDetails.setStudyDbId(result.getString("studyDbId"));
-            if(result.has("name"))
-                studyDetails.setStudyName(result.getString("name")); // BrAPI v1.2
-            if(result.has("studyName"))
-                studyDetails.setStudyName(result.getString("studyName")); // BrAPI v1.3
-            if(result.has("studyDescription"))
-                studyDetails.setStudyDescription(result.getString("studyDescription"));
-            if(result.has("locationName"))
-                studyDetails.setStudyLocation(result.getString("locationName")); // BrAPI v1.2
-            if(result.has("location")){
-                JSONObject location = result.getJSONObject("location");
-                if(location.has("name"))
-                    studyDetails.setStudyLocation(location.getString("name")); // BrAPI v1.2
-                if(location.has("locationName"))
-                    studyDetails.setStudyLocation(location.getString("locationName")); // BrAPI v1.3
-            }
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return studyDetails;
-    }
-
-    public void saveStudyDetails(StudyDetails studyDetails) {
+    public void saveStudyDetails(BrapiStudyDetails studyDetails) {
         FieldObject field = new FieldObject();
         field.setExp_name(studyDetails.getStudyName());
         field.setExp_alias(studyDetails.getStudyName());
         field.setExp_species(studyDetails.getCommonCropName());
         field.setCount(studyDetails.getNumberOfPlots().toString());
-        field.setUnique_id("observationUnitDbId");
-        field.setPrimary_id("X");
-        field.setSecondary_id("Y");
-        field.setExp_sort("plotNumber");
+        field.setUnique_id("Plot");
+        field.setPrimary_id("Row");
+        field.setSecondary_id("Column");
+        field.setExp_sort("Plot");
         int expId = dataHelper.createField(field, studyDetails.getAttributes());
 
         for(List<String> dataRow: studyDetails.getValues()) {

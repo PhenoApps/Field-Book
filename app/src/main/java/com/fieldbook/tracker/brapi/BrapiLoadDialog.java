@@ -3,7 +3,6 @@ package com.fieldbook.tracker.brapi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -14,15 +13,13 @@ import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.fields.FieldEditorActivity;
-import com.fieldbook.tracker.fields.FieldObject;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 
 public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener{
 
     private Button saveBtn, cancelBtn;
-    private StudySummary study;
-    private StudyDetails studyDetails;
+    private BrapiStudySummary study;
+    private BrapiStudyDetails studyDetails;
     private BrAPIService brAPIService;
     private Context context;
 
@@ -31,7 +28,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         this.context = context;
     }
 
-    public void setSelectedStudy(StudySummary selectedStudy){
+    public void setSelectedStudy(BrapiStudySummary selectedStudy){
         this.study = selectedStudy;
     }
 
@@ -49,7 +46,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         saveBtn.setOnClickListener(this);
         cancelBtn = findViewById(R.id.brapi_cancel_btn);
         cancelBtn.setOnClickListener(this);
-        studyDetails = new StudyDetails();
+        studyDetails = new BrapiStudyDetails();
 
         buildStudyDetails();
         loadStudy();
@@ -57,26 +54,26 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
     private void buildStudyDetails() {
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-        brAPIService.getStudyDetails(study.getStudyDbId(), new Function<StudyDetails, Void>() {
+        brAPIService.getStudyDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
-            public Void apply(final StudyDetails study) {
-                StudyDetails.merge(studyDetails, study);
+            public Void apply(final BrapiStudyDetails study) {
+                BrapiStudyDetails.merge(studyDetails, study);
                 loadStudy();
                 return null;
             }
         });
-        brAPIService.getPlotDetails(study.getStudyDbId(), new Function<StudyDetails, Void>() {
+        brAPIService.getPlotDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
-            public Void apply(final StudyDetails study) {
-                StudyDetails.merge(studyDetails, study);
+            public Void apply(final BrapiStudyDetails study) {
+                BrapiStudyDetails.merge(studyDetails, study);
                 loadStudy();
                 return null;
             }
         });
-        brAPIService.getTraits(study.getStudyDbId(), new Function<StudyDetails, Void>() {
+        brAPIService.getTraits(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
-            public Void apply(final StudyDetails study) {
-                StudyDetails.merge(studyDetails, study);
+            public Void apply(final BrapiStudyDetails study) {
+                BrapiStudyDetails.merge(studyDetails, study);
                 loadStudy();
                 findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                 return null;

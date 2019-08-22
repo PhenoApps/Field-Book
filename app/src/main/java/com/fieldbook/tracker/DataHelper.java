@@ -481,15 +481,15 @@ public class DataHelper {
             do {
                 TraitObject o = new TraitObject();
 
-                o.id = cursor.getString(0);
-                o.trait = cursor.getString(1);
-                o.format = cursor.getString(2);
-                o.defaultValue = cursor.getString(3);
-                o.minimum = cursor.getString(4);
-                o.maximum = cursor.getString(5);
-                o.details = cursor.getString(6);
-                o.categories = cursor.getString(7);
-                o.realPosition = cursor.getString(9);
+                o.setId(cursor.getString(0));
+                o.setTrait(cursor.getString(1));
+                o.setFormat(cursor.getString(2));
+                o.setDefaultValue(cursor.getString(3));
+                o.setMinimum(cursor.getString(4));
+                o.setMaximum(cursor.getString(5));
+                o.setDetails(cursor.getString(6));
+                o.setCategories(cursor.getString(7));
+                o.setRealPosition(cursor.getString(9));
 
                 list.add(o);
 
@@ -532,13 +532,13 @@ public class DataHelper {
     public TraitObject getDetail(String trait) {
         TraitObject data = new TraitObject();
 
-        data.trait = "";
-        data.format = "";
-        data.defaultValue = "";
-        data.minimum = "";
-        data.maximum = "";
-        data.details = "";
-        data.categories = "";
+        data.setTrait("");
+        data.setFormat("");
+        data.setDefaultValue("");
+        data.setMinimum("");
+        data.setMaximum("");
+        data.setDetails("");
+        data.setCategories("");
 
         Cursor cursor = db.query(TRAITS, new String[]{"trait", "format", "defaultValue", "minimum",
                         "maximum", "details", "categories", "id"}, "trait like ? and isVisible like ?",
@@ -546,14 +546,14 @@ public class DataHelper {
         );
 
         if (cursor.moveToFirst()) {
-            data.trait = cursor.getString(0);
-            data.format = cursor.getString(1);
-            data.defaultValue = cursor.getString(2);
-            data.minimum = cursor.getString(3);
-            data.maximum = cursor.getString(4);
-            data.details = cursor.getString(5);
-            data.categories = cursor.getString(6);
-            data.id = cursor.getString(7);
+            data.setTrait(cursor.getString(0));
+            data.setFormat(cursor.getString(1));
+            data.setDefaultValue(cursor.getString(2));
+            data.setMinimum(cursor.getString(3));
+            data.setMaximum(cursor.getString(4));
+            data.setDetails(cursor.getString(5));
+            data.setCategories(cursor.getString(6));
+            data.setId(cursor.getString(7));
         }
 
         if (!cursor.isClosed()) {
@@ -1015,21 +1015,21 @@ public class DataHelper {
                              String minimum, String maximum, String details, String categories,
                              String isVisible, String realPosition) {*/
 
-        if (hasTrait(t.trait)) {
+        if (hasTrait(t.getTrait())) {
             return -1;
         }
 
         try {
-            this.insertTraits.bindString(1, t.trait);
-            this.insertTraits.bindString(2, t.format);
-            this.insertTraits.bindString(3, t.defaultValue);
-            this.insertTraits.bindString(4, t.minimum);
-            this.insertTraits.bindString(5, t.maximum);
-            this.insertTraits.bindString(6, t.details);
-            this.insertTraits.bindString(7, t.categories);
-            this.insertTraits.bindString(8, String.valueOf(t.visible));
+            this.insertTraits.bindString(1, t.getTrait());
+            this.insertTraits.bindString(2, t.getFormat());
+            this.insertTraits.bindString(3, t.getDefaultValue());
+            this.insertTraits.bindString(4, t.getMinimum());
+            this.insertTraits.bindString(5, t.getMaximum());
+            this.insertTraits.bindString(6, t.getDetails());
+            this.insertTraits.bindString(7, t.getCategories());
+            this.insertTraits.bindString(8, String.valueOf(t.getVisible()));
             //Probably wrong with this one, because the type of realPosition is int
-            this.insertTraits.bindString(9, t.realPosition);
+            this.insertTraits.bindString(9, t.getRealPosition());
 
             return this.insertTraits.executeInsert();
         } catch (Exception e) {

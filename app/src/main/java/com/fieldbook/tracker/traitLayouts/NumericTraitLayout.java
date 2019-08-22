@@ -25,9 +25,9 @@ public class NumericTraitLayout extends TraitLayout {
 
         etCurVal.setVisibility(EditText.VISIBLE);
 
-        if (newTraits.containsKey(currentTrait.trait)) {
+        if (newTraits.containsKey(currentTrait.getTrait())) {
             etCurVal.removeTextChangedListener(cvNum);
-            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
+            etCurVal.setText(newTraits.get(currentTrait.getTrait()).toString());
             etCurVal.setTextColor(Color.parseColor(displayColor));
             etCurVal.addTextChangedListener(cvNum);
         } else {
@@ -35,8 +35,8 @@ public class NumericTraitLayout extends TraitLayout {
             etCurVal.setText("");
             etCurVal.setTextColor(Color.BLACK);
 
-            if (currentTrait.defaultValue != null && currentTrait.defaultValue.length() > 0) {
-                etCurVal.setText(currentTrait.defaultValue);
+            if (currentTrait.getDefaultValue() != null && currentTrait.getDefaultValue().length() > 0) {
+                etCurVal.setText(currentTrait.getDefaultValue());
                 //updateTrait(currentTrait.trait, currentTrait.format, etCurVal.getText().toString());
             }
 

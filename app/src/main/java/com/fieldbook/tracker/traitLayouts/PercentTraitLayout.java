@@ -27,39 +27,39 @@ public class PercentTraitLayout extends TraitLayout {
         etCurVal.removeTextChangedListener(cvNum);
         etCurVal.removeTextChangedListener(cvText);
 
-        if (newTraits.containsKey(currentTrait.trait) && !newTraits.get(currentTrait.trait).toString().equals("NA")) {
+        if (newTraits.containsKey(currentTrait.getTrait()) && !newTraits.get(currentTrait.getTrait()).toString().equals("NA")) {
 
             etCurVal.setTextColor(Color.BLACK);
-            seekBar.setMax(Integer.parseInt(currentTrait.maximum));
+            seekBar.setMax(Integer.parseInt(currentTrait.getMaximum()));
             seekBar.setOnSeekBarChangeListener(null);
 
-            if (currentTrait.defaultValue != null) {
+            if (currentTrait.getDefaultValue() != null) {
 
-                if (currentTrait.defaultValue.length() > 0) {
-                    if (newTraits.get(currentTrait.trait).toString()
-                            .equals(currentTrait.defaultValue))
+                if (currentTrait.getDefaultValue().length() > 0) {
+                    if (newTraits.get(currentTrait.getTrait()).toString()
+                            .equals(currentTrait.getDefaultValue()))
                         etCurVal.setTextColor(Color.BLACK);
                     else
                         etCurVal.setTextColor(Color.parseColor(displayColor));
                 } else {
-                    if (newTraits.get(currentTrait.trait).toString().equals("0"))
+                    if (newTraits.get(currentTrait.getTrait()).toString().equals("0"))
                         etCurVal.setTextColor(Color.BLACK);
                     else
                         etCurVal.setTextColor(Color.parseColor(displayColor));
                 }
             } else {
-                if (newTraits.get(currentTrait.trait).toString().equals("0"))
+                if (newTraits.get(currentTrait.getTrait()).toString().equals("0"))
                     etCurVal.setTextColor(Color.BLACK);
                 else
                     etCurVal.setTextColor(Color.parseColor(displayColor));
             }
 
-            String curVal = newTraits.get(currentTrait.trait).toString() + "%";
+            String curVal = newTraits.get(currentTrait.getTrait()).toString() + "%";
             etCurVal.setText(curVal);
-            seekBar.setProgress(Integer.parseInt(newTraits.get(currentTrait.trait).toString()));
+            seekBar.setProgress(Integer.parseInt(newTraits.get(currentTrait.getTrait()).toString()));
             seekBar.setOnSeekBarChangeListener(seekListener);
 
-        } else if (newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+        } else if (newTraits.containsKey(currentTrait.getTrait()) && newTraits.get(currentTrait.getTrait()).toString().equals("NA")) {
             etCurVal.setText("NA");
             etCurVal.setTextColor(Color.parseColor(displayColor));
             seekBar.setProgress(0);
@@ -71,13 +71,13 @@ public class PercentTraitLayout extends TraitLayout {
             etCurVal.setTextColor(Color.BLACK);
 
             seekBar.setMax(Integer
-                    .parseInt(currentTrait.maximum));
+                    .parseInt(currentTrait.getMaximum()));
 
-            if (currentTrait.defaultValue != null
-                    && currentTrait.defaultValue.length() > 0) {
-                etCurVal.setText(currentTrait.defaultValue);
+            if (currentTrait.getDefaultValue() != null
+                    && currentTrait.getDefaultValue().length() > 0) {
+                etCurVal.setText(currentTrait.getDefaultValue());
                 seekBar.setProgress(Integer
-                        .valueOf(currentTrait.defaultValue));
+                        .valueOf(currentTrait.getDefaultValue()));
             }
 
             seekBar.setOnSeekBarChangeListener(seekListener);

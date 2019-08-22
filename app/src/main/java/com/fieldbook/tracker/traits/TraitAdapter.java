@@ -88,11 +88,11 @@ class TraitAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        holder.id = getItem(position).id;
-        holder.realPosition = getItem(position).realPosition;
-        holder.name.setText(getItem(position).trait);
+        holder.id = getItem(position).getId();
+        holder.realPosition = getItem(position).getRealPosition();
+        holder.name.setText(getItem(position).getTrait());
 
-        switch (getItem(position).format) {
+        switch (getItem(position).getFormat()) {
             case "numeric":
                 holder.format.setBackgroundResource(R.drawable.ic_trait_numeric);
                 break;
@@ -175,7 +175,7 @@ class TraitAdapter extends BaseAdapter {
                         if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_copy))) {
                             int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
 
-                            String traitName = getItem(position).trait;
+                            String traitName = getItem(position).getTrait();
 
                             if (traitName.contains("-Copy")) {
                                 traitName = traitName.substring(0, traitName.indexOf("-Copy"));
@@ -194,9 +194,9 @@ class TraitAdapter extends BaseAdapter {
                             }
 
                             TraitObject trait = getItem(position);
-                            trait.trait = newTraitName;
-                            trait.visible = true;
-                            trait.realPosition = String.valueOf(pos);
+                            trait.setTrait(newTraitName);
+                            trait.setVisible(true);
+                            trait.setRealPosition(String.valueOf(pos));
 
                             //MainActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
                             ConfigActivity.dt.insertTraits(trait);

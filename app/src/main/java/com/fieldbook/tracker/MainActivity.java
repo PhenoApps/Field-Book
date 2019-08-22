@@ -387,10 +387,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         public void run() {
                             runOnUiThread(new Runnable() {
                                 public void run() {
-                                    if (currentTrait.minimum.length() > 0) {
-                                        if (val < Double.parseDouble(currentTrait.minimum)) {
+                                    if (currentTrait.getMinimum().length() > 0) {
+                                        if (val < Double.parseDouble(currentTrait.getMinimum())) {
                                             en.clear();
-                                            removeTrait(currentTrait.trait);
+                                            removeTrait(currentTrait.getTrait());
                                         }
                                     }
                                 }
@@ -398,11 +398,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         }
                     }, DELAY);
 
-                    if (currentTrait.maximum.length() > 0) {
-                        if (val > Double.parseDouble(currentTrait.maximum)) {
-                            makeToast(getString(R.string.trait_error_maximum_value) + " " + currentTrait.maximum);
+                    if (currentTrait.getMaximum().length() > 0) {
+                        if (val > Double.parseDouble(currentTrait.getMaximum())) {
+                            makeToast(getString(R.string.trait_error_maximum_value) + " " + currentTrait.getMaximum());
                             en.clear();
-                            removeTrait(currentTrait.trait);
+                            removeTrait(currentTrait.getTrait());
                             return;
                         }
                     }
@@ -412,10 +412,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 if (en.toString().length() > 0) {
                     if (newTraits != null & currentTrait != null)
-                        updateTrait(currentTrait.trait, currentTrait.format, en.toString());
+                        updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), en.toString());
                 } else {
                     if (newTraits != null & currentTrait != null)
-                        newTraits.remove(currentTrait.trait);
+                        newTraits.remove(currentTrait.getTrait());
                 }
             }
 
@@ -435,10 +435,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 if (en.toString().length() >= 0) {
                     if (newTraits != null & currentTrait != null)
-                        updateTrait(currentTrait.trait, currentTrait.format, en.toString());
+                        updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), en.toString());
                 } else {
                     if (newTraits != null & currentTrait != null)
-                        newTraits.remove(currentTrait.trait);
+                        newTraits.remove(currentTrait.getTrait());
                 }
                 //tNum.setSelection(tNum.getText().length());
 
@@ -461,8 +461,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         seekListener = new OnSeekBarChangeListener() {
 
             public void onProgressChanged(SeekBar sb, int progress, boolean arg2) {
-                if (sb.getProgress() < Integer.parseInt(currentTrait.minimum))
-                    sb.setProgress(Integer.parseInt(currentTrait.minimum));
+                if (sb.getProgress() < Integer.parseInt(currentTrait.getMinimum()))
+                    sb.setProgress(Integer.parseInt(currentTrait.getMinimum()));
 
                 etCurVal.setText(String.valueOf(sb.getProgress()));
             }
@@ -471,7 +471,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
             public void onStopTrackingTouch(SeekBar arg0) {
-                updateTrait(currentTrait.trait, "percent", String.valueOf(seekBar.getProgress()));
+                updateTrait(currentTrait.getTrait(), "percent", String.valueOf(seekBar.getProgress()));
             }
         };
 
@@ -581,7 +581,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             public boolean onLongClick(View v) {
                 etCurVal.removeTextChangedListener(cvNum);
                 etCurVal.setText("");
-                removeTrait(currentTrait.trait);
+                removeTrait(currentTrait.getTrait());
                 etCurVal.addTextChangedListener(cvNum);
                 return false;
             }
@@ -707,7 +707,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
 
                 // Change text color
-                if (newTraits.containsKey(currentTrait.trait)) {
+                if (newTraits.containsKey(currentTrait.getTrait())) {
                     month.setTextColor(Color.BLUE);
                     day.setTextColor(Color.BLUE);
                 } else {
@@ -738,7 +738,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
 
                 // Change text color
-                if (newTraits.containsKey(currentTrait.trait)) {
+                if (newTraits.containsKey(currentTrait.getTrait())) {
                     month.setTextColor(Color.BLUE);
                     day.setTextColor(Color.BLUE);
                 } else {
@@ -761,9 +761,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 }
 
                 if (ep.getBoolean(PreferencesActivity.USE_DAY_OF_YEAR, false)) {
-                    updateTrait(currentTrait.trait, "date",String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+                    updateTrait(currentTrait.getTrait(), "date",String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
                 } else {
-                    updateTrait(currentTrait.trait, "date",dateFormat.format(calendar.getTime()));
+                    updateTrait(currentTrait.getTrait(), "date",dateFormat.format(calendar.getTime()));
                 }
 
                 // Change the text color accordingly
@@ -790,7 +790,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     startActivity(intent);
                 }
                 etCurVal.setText(fullLocation);
-                updateTrait(currentTrait.trait, "location", fullLocation);
+                updateTrait(currentTrait.getTrait(), "location", fullLocation);
             }
         });
 
@@ -798,12 +798,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         addCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 //TODO NullPointerException
-                if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                if(newTraits.containsKey(currentTrait.getTrait()) && newTraits.get(currentTrait.getTrait()).toString().equals("NA")) {
                     counterTv.setText("1");
                 } else {
                     counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) + 1));
                 }
-                updateTrait(currentTrait.trait, "counter", counterTv.getText().toString());
+                updateTrait(currentTrait.getTrait(), "counter", counterTv.getText().toString());
             }
         });
 
@@ -811,12 +811,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         minusCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 //TODO NullPointerException
-                if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                if(newTraits.containsKey(currentTrait.getTrait()) && newTraits.get(currentTrait.getTrait()).toString().equals("NA")) {
                     counterTv.setText("-1");
                 } else {
                     counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) - 1));
                 }
-                updateTrait(currentTrait.trait, "counter", counterTv.getText().toString());
+                updateTrait(currentTrait.getTrait(), "counter", counterTv.getText().toString());
             }
         });
 
@@ -841,7 +841,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     if (checkButton(btn)) {
                         return;
                     }
-                    updateTrait(currentTrait.trait, currentTrait.format, btn.getText().toString());
+                    updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), btn.getText().toString());
                     setCategoricalButtons(buttonArray, btn);
                 }
 
@@ -853,7 +853,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         // Boolean
         eImg.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                String val = newTraits.get(currentTrait.trait).toString();
+                String val = newTraits.get(currentTrait.getTrait()).toString();
 
                 if (val.equalsIgnoreCase("false")) {
                     val = "true";
@@ -863,7 +863,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     eImg.setImageResource(R.drawable.trait_boolean_false);
                 }
 
-                updateTrait(currentTrait.trait, "boolean", val);
+                updateTrait(currentTrait.getTrait(), "boolean", val);
             }
         });
 
@@ -1031,7 +1031,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private void moveEntryLeft() {
-        if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false) && !newTraits.containsKey(currentTrait.trait)) {
+        if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false) && !newTraits.containsKey(currentTrait.getTrait())) {
             playSound("error");
         } else {
             if (rangeID != null && rangeID.length > 0) {
@@ -1047,8 +1047,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         if (pos < 1)
                             return;
 
-                        if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                                currentTrait.format)) {
+                        if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                                currentTrait.getFormat())) {
                             paging = pos;
                             break;
                         }
@@ -1083,7 +1083,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private void moveEntryRight() {
-        if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false) && !newTraits.containsKey(currentTrait.trait)) {
+        if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false) && !newTraits.containsKey(currentTrait.getTrait())) {
             playSound("error");
         } else {
             if (rangeID != null && rangeID.length > 0) {
@@ -1106,8 +1106,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             return;
                         }
 
-                        if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                                currentTrait.format)) {
+                        if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                                currentTrait.getFormat())) {
                             paging = pos;
                             break;
                         }
@@ -1211,19 +1211,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         missingValue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateTrait(currentTrait.trait, currentTrait.format, "NA");
+                updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
                 etCurVal.setText("NA");
 
-                if (currentTrait.format.equals("date")) {
+                if (currentTrait.getFormat().equals("date")) {
                     month.setText("");
                     day.setText("NA");
                 }
 
-                if (currentTrait.format.equals("counter")) {
+                if (currentTrait.getFormat().equals("counter")) {
                     counterTv.setText("NA");
                 }
 
-                if (currentTrait.format.equals("photo")) {
+                if (currentTrait.getFormat().equals("photo")) {
 
                 }
             }
@@ -1233,10 +1233,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         deleteValue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (currentTrait.format) {
+                switch (currentTrait.getFormat()) {
                     case "categorical":
-                        newTraits.remove(currentTrait.trait);
-                        ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.trait);
+                        newTraits.remove(currentTrait.getTrait());
+                        ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
                         setCategoricalButtons(buttonArray, null);
                         break;
                     case "percent":
@@ -1245,18 +1245,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         seekBar.setProgress(0);
                         etCurVal.setTextColor(Color.BLACK);
 
-                        if (currentTrait.defaultValue != null
-                                && currentTrait.defaultValue.length() > 0) {
-                            etCurVal.setText(currentTrait.defaultValue);
+                        if (currentTrait.getDefaultValue() != null
+                                && currentTrait.getDefaultValue().length() > 0) {
+                            etCurVal.setText(currentTrait.getDefaultValue());
                             seekBar.setProgress(Integer
-                                    .valueOf(currentTrait.defaultValue));
+                                    .valueOf(currentTrait.getDefaultValue()));
                         }
 
-                        updateTrait(currentTrait.trait, "percent", String.valueOf(seekBar.getProgress()));
+                        updateTrait(currentTrait.getTrait(), "percent", String.valueOf(seekBar.getProgress()));
                         seekBar.setOnSeekBarChangeListener(seekListener);
                         break;
                     case "date":
-                        removeTrait(currentTrait.trait);
+                        removeTrait(currentTrait.getTrait());
 
                         final Calendar c = Calendar.getInstance();
                         date = dateFormat.format(c.getTime());
@@ -1269,11 +1269,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
                         break;
                     case "boolean":
-                        if (currentTrait.defaultValue.trim().toLowerCase().equals("true")) {
-                            updateTrait(currentTrait.trait, "boolean", "true");
+                        if (currentTrait.getDefaultValue().trim().toLowerCase().equals("true")) {
+                            updateTrait(currentTrait.getTrait(), "boolean", "true");
                             eImg.setImageResource(R.drawable.trait_boolean_true);
                         } else {
-                            updateTrait(currentTrait.trait, "boolean", "false");
+                            updateTrait(currentTrait.getTrait(), "boolean", "false");
                             eImg.setImageResource(R.drawable.trait_boolean_false);
                         }
                         break;
@@ -1281,24 +1281,24 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         deletePhotoWarning();
                         break;
                     case "counter":
-                        removeTrait(currentTrait.trait);
+                        removeTrait(currentTrait.getTrait());
                         counterTv.setText("0");
                         break;
                     case "disease rating":
                         etCurVal.removeTextChangedListener(cvNum);
                         etCurVal.setText("");
-                        removeTrait(currentTrait.trait);
+                        removeTrait(currentTrait.getTrait());
                         etCurVal.addTextChangedListener(cvNum);
                         break;
                     case "rust rating":
                         etCurVal.removeTextChangedListener(cvNum);
                         etCurVal.setText("");
-                        removeTrait(currentTrait.trait);
+                        removeTrait(currentTrait.getTrait());
                         etCurVal.addTextChangedListener(cvNum);
                         break;
                     case "audio":
                         deleteRecording();
-                        removeTrait(currentTrait.trait);
+                        removeTrait(currentTrait.getTrait());
                         etCurVal.setText("");
                         mRecording = false;
                         doRecord.setImageResource(R.drawable.trait_audio);
@@ -1306,8 +1306,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         mRecording = false;
                         break;
                     default:
-                        newTraits.remove(currentTrait.trait);
-                        ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.trait);
+                        newTraits.remove(currentTrait.getTrait());
+                        ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
                         etCurVal.setText("");
                         break;
                 }
@@ -1365,13 +1365,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private Boolean checkButton(Button button) {
         String curCat = "";
-        if (newTraits.containsKey(currentTrait.trait)) {
-            curCat = newTraits.get(currentTrait.trait)
+        if (newTraits.containsKey(currentTrait.getTrait())) {
+            curCat = newTraits.get(currentTrait.getTrait())
                     .toString();
         }
         if (button.getText().toString().equals(curCat)) {
-            newTraits.remove(currentTrait.trait);
-            ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.trait);
+            newTraits.remove(currentTrait.getTrait());
+            ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
             setCategoricalButtons(buttonArray, null);
             return true;
         }
@@ -1392,8 +1392,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     if (pos < 1)
                         pos = rangeID.length;
 
-                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                            currentTrait.format)) {
+                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                            currentTrait.getFormat())) {
                         paging = pos;
                         break;
                     }
@@ -1465,8 +1465,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         return;
                     }
 
-                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                            currentTrait.format)) {
+                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                            currentTrait.getFormat())) {
                         paging = pos;
                         break;
                     }
@@ -1613,16 +1613,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             .toString());
 
                     imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    if (!currentTrait.format.equals("text")) {
+                    if (!currentTrait.getFormat().equals("text")) {
                         try {
                             imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
                         } catch (Exception ignore) {
                         }
                     }
 
-                    traitDetails.setText(currentTrait.details);
+                    traitDetails.setText(currentTrait.getDetails());
 
-                    if (!rangeSuppress | !currentTrait.format.equals("numeric")) {
+                    if (!rangeSuppress | !currentTrait.getFormat().equals("numeric")) {
                         if (etCurVal.getVisibility() == TextView.VISIBLE) {
                             etCurVal.setVisibility(EditText.GONE);
                             etCurVal.setEnabled(false);
@@ -1632,7 +1632,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     // All the logic is here to hide controls except for the current trait
                     // Checks in-memory hashmap
                     // Populate screen with in saved data
-                    if (currentTrait.format.equals("text")) {
+                    if (currentTrait.getFormat().equals("text")) {
                         hideLayouts();
                         traitText.setVisibility(View.VISIBLE);
 
@@ -1640,9 +1640,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         etCurVal.setSelection(etCurVal.getText().length());
                         etCurVal.setEnabled(true);
 
-                        if (newTraits.containsKey(currentTrait.trait)) {
+                        if (newTraits.containsKey(currentTrait.getTrait())) {
                             etCurVal.removeTextChangedListener(cvText);
-                            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
+                            etCurVal.setText(newTraits.get(currentTrait.getTrait()).toString());
                             etCurVal.setTextColor(Color.parseColor(displayColor));
                             etCurVal.addTextChangedListener(cvText);
                             etCurVal.setSelection(etCurVal.getText().length());
@@ -1651,9 +1651,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             etCurVal.setText("");
                             etCurVal.setTextColor(Color.BLACK);
 
-                            if (currentTrait.defaultValue != null && currentTrait.defaultValue.length() > 0) {
-                                etCurVal.setText(currentTrait.defaultValue);
-                                updateTrait(currentTrait.trait, currentTrait.format, etCurVal.getText().toString());
+                            if (currentTrait.getDefaultValue() != null && currentTrait.getDefaultValue().length() > 0) {
+                                etCurVal.setText(currentTrait.getDefaultValue());
+                                updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), etCurVal.getText().toString());
                             }
 
                             etCurVal.addTextChangedListener(cvText);
@@ -1674,15 +1674,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 etCurVal.setSelection(etCurVal.getText().length());
                             }
                         }, 300);
-                    } else if (currentTrait.format.equals("numeric")) {
+                    } else if (currentTrait.getFormat().equals("numeric")) {
                         hideLayouts();
                         traitNumeric.setVisibility(View.VISIBLE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
 
-                        if (newTraits.containsKey(currentTrait.trait)) {
+                        if (newTraits.containsKey(currentTrait.getTrait())) {
                             etCurVal.removeTextChangedListener(cvNum);
-                            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
+                            etCurVal.setText(newTraits.get(currentTrait.getTrait()).toString());
                             etCurVal.setTextColor(Color.parseColor(displayColor));
                             etCurVal.addTextChangedListener(cvNum);
                         } else {
@@ -1690,15 +1690,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             etCurVal.setText("");
                             etCurVal.setTextColor(Color.BLACK);
 
-                            if (currentTrait.defaultValue != null && currentTrait.defaultValue.length() > 0) {
-                                etCurVal.setText(currentTrait.defaultValue);
-                                updateTrait(currentTrait.trait, currentTrait.format, etCurVal.getText().toString());
+                            if (currentTrait.getDefaultValue() != null && currentTrait.getDefaultValue().length() > 0) {
+                                etCurVal.setText(currentTrait.getDefaultValue());
+                                updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), etCurVal.getText().toString());
                             }
 
                             etCurVal.addTextChangedListener(cvNum);
                         }
 
-                    } else if (currentTrait.format.equals("percent")) {
+                    } else if (currentTrait.getFormat().equals("percent")) {
                         hideLayouts();
                         traitPercent.setVisibility(View.VISIBLE);
 
@@ -1706,42 +1706,42 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         etCurVal.removeTextChangedListener(cvNum);
                         etCurVal.removeTextChangedListener(cvText);
 
-                        if (newTraits.containsKey(currentTrait.trait) && !newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                        if (newTraits.containsKey(currentTrait.getTrait()) && !newTraits.get(currentTrait.getTrait()).toString().equals("NA")) {
 
                             etCurVal.setTextColor(Color.BLACK);
-                            seekBar.setMax(Integer.parseInt(currentTrait.maximum));
+                            seekBar.setMax(Integer.parseInt(currentTrait.getMaximum()));
                             seekBar.setOnSeekBarChangeListener(null);
 
-                            if (currentTrait.defaultValue != null) {
+                            if (currentTrait.getDefaultValue() != null) {
 
-                                if (currentTrait.defaultValue.length() > 0) {
-                                    if (newTraits.get(currentTrait.trait).toString()
-                                            .equals(currentTrait.defaultValue))
+                                if (currentTrait.getDefaultValue().length() > 0) {
+                                    if (newTraits.get(currentTrait.getTrait()).toString()
+                                            .equals(currentTrait.getDefaultValue()))
                                         etCurVal.setTextColor(Color.BLACK);
                                     else
                                         etCurVal.setTextColor(Color.parseColor(displayColor));
                                 } else {
-                                    if (newTraits.get(currentTrait.trait).toString().equals("0"))
+                                    if (newTraits.get(currentTrait.getTrait()).toString().equals("0"))
                                         etCurVal.setTextColor(Color.BLACK);
                                     else
                                         etCurVal.setTextColor(Color.parseColor(displayColor));
                                 }
                             } else {
-                                if (newTraits.get(currentTrait.trait).toString().equals("0"))
+                                if (newTraits.get(currentTrait.getTrait()).toString().equals("0"))
                                     etCurVal.setTextColor(Color.BLACK);
                                 else
                                     etCurVal.setTextColor(Color.parseColor(displayColor));
                             }
 
-                            if(newTraits.get(currentTrait.trait).toString().contains("%")) {
-                                updateTrait(currentTrait.trait, "percent", newTraits.get(currentTrait.trait).toString().replace("%",""));
+                            if(newTraits.get(currentTrait.getTrait()).toString().contains("%")) {
+                                updateTrait(currentTrait.getTrait(), "percent", newTraits.get(currentTrait.getTrait()).toString().replace("%",""));
                             }
 
-                            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
-                            seekBar.setProgress(Integer.parseInt(newTraits.get(currentTrait.trait).toString()));
+                            etCurVal.setText(newTraits.get(currentTrait.getTrait()).toString());
+                            seekBar.setProgress(Integer.parseInt(newTraits.get(currentTrait.getTrait()).toString()));
                             seekBar.setOnSeekBarChangeListener(seekListener);
 
-                        } else if (newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                        } else if (newTraits.containsKey(currentTrait.getTrait()) && newTraits.get(currentTrait.getTrait()).toString().equals("NA")) {
                             etCurVal.setText("NA");
                             etCurVal.setTextColor(Color.parseColor(displayColor));
                             seekBar.setProgress(0);
@@ -1753,20 +1753,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             etCurVal.setTextColor(Color.BLACK);
 
                             seekBar.setMax(Integer
-                                    .parseInt(currentTrait.maximum));
+                                    .parseInt(currentTrait.getMaximum()));
 
-                            if (currentTrait.defaultValue != null
-                                    && currentTrait.defaultValue.length() > 0) {
-                                etCurVal.setText(currentTrait.defaultValue);
+                            if (currentTrait.getDefaultValue() != null
+                                    && currentTrait.getDefaultValue().length() > 0) {
+                                etCurVal.setText(currentTrait.getDefaultValue());
                                 seekBar.setProgress(Integer
-                                        .valueOf(currentTrait.defaultValue));
+                                        .valueOf(currentTrait.getDefaultValue()));
                             }
 
-                            updateTrait(currentTrait.trait, "percent", String.valueOf(seekBar.getProgress()));
+                            updateTrait(currentTrait.getTrait(), "percent", String.valueOf(seekBar.getProgress()));
                             seekBar.setOnSeekBarChangeListener(seekListener);
                         }
 
-                    } else if (currentTrait.format.equals("date")) {
+                    } else if (currentTrait.getFormat().equals("date")) {
                         hideLayouts();
                         traitDate.setVisibility(View.VISIBLE);
 
@@ -1776,12 +1776,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         final Calendar c = Calendar.getInstance();
                         date = dateFormat.format(c.getTime());
 
-                        if (newTraits.containsKey(currentTrait.trait) && !newTraits.get(currentTrait.trait).toString().equals("NA")) {
-                            if(newTraits.get(currentTrait.trait).toString().length() < 4 && newTraits.get(currentTrait.trait).toString().length() > 0) {
+                        if (newTraits.containsKey(currentTrait.getTrait()) && !newTraits.get(currentTrait.getTrait()).toString().equals("NA")) {
+                            if(newTraits.get(currentTrait.getTrait()).toString().length() < 4 && newTraits.get(currentTrait.getTrait()).toString().length() > 0) {
                                 Calendar calendar = Calendar.getInstance();
 
                                 //convert day of year to yyyy-mm-dd string
-                                date = newTraits.get(currentTrait.trait).toString();
+                                date = newTraits.get(currentTrait.getTrait()).toString();
                                 calendar.set(Calendar.DAY_OF_YEAR, Integer.parseInt(date));
                                 date = dateFormat.format(calendar.getTime());
 
@@ -1792,9 +1792,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
                                 day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
 
-                            } else if (newTraits.get(currentTrait.trait).toString().contains(".")) {
+                            } else if (newTraits.get(currentTrait.getTrait()).toString().contains(".")) {
                                 //convert from yyyy.mm.dd to yyyy-mm-dd
-                                String[] oldDate = newTraits.get(currentTrait.trait).toString().split("\\.");
+                                String[] oldDate = newTraits.get(currentTrait.getTrait()).toString().split("\\.");
                                 date = oldDate[0] + "-" + String.format("%02d", Integer.parseInt(oldDate[1])) + "-" + String.format("%02d", Integer.parseInt(oldDate[2]));
 
                                 //set month/day text and color
@@ -1807,7 +1807,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 Calendar calendar = Calendar.getInstance();
 
                                 //new format
-                                date = newTraits.get(currentTrait.trait).toString();
+                                date = newTraits.get(currentTrait.getTrait()).toString();
 
                                 //Parse date
                                 try {
@@ -1823,7 +1823,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 month.setTextColor(Color.parseColor(displayColor));
                                 day.setTextColor(Color.parseColor(displayColor));
                             }
-                        } else if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                        } else if(newTraits.containsKey(currentTrait.getTrait()) && newTraits.get(currentTrait.getTrait()).toString().equals("NA")) {
                             month.setText("");
                             day.setText("NA");
                         } else {
@@ -1832,7 +1832,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             month.setText(getMonthForInt(c.get(Calendar.MONTH)));
                             day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
                         }
-                    } else if (currentTrait.format.equals("qualitative") | currentTrait.format.equals("categorical")) {
+                    } else if (currentTrait.getFormat().equals("qualitative") | currentTrait.getFormat().equals("categorical")) {
                         hideLayouts();
                         traitCategorical.setVisibility(View.VISIBLE);
 
@@ -1841,12 +1841,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         String lastQualitative = "";
 
-                        if (newTraits.containsKey(currentTrait.trait)) {
-                            lastQualitative = newTraits.get(currentTrait.trait)
+                        if (newTraits.containsKey(currentTrait.getTrait())) {
+                            lastQualitative = newTraits.get(currentTrait.getTrait())
                                     .toString();
                         }
 
-                        String[] cat = currentTrait.categories.split("/");
+                        String[] cat = currentTrait.getCategories().split("/");
 
                         // Hide unused buttons
                         for (int i = cat.length; i < 12; i++) {
@@ -1875,23 +1875,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                 buttonArray[i].setBackgroundColor(getResources().getColor(R.color.button_normal));
                             }
                         }
-                    } else if (currentTrait.format.equals("boolean")) {
+                    } else if (currentTrait.getFormat().equals("boolean")) {
                         hideLayouts();
                         traitBoolean.setVisibility(View.VISIBLE);
 
                         etCurVal.setVisibility(EditText.GONE);
                         etCurVal.setEnabled(false);
 
-                        if (!newTraits.containsKey(currentTrait.trait)) {
-                            if (currentTrait.defaultValue.trim().equalsIgnoreCase("true")) {
-                                updateTrait(currentTrait.trait, "boolean", "true");
+                        if (!newTraits.containsKey(currentTrait.getTrait())) {
+                            if (currentTrait.getDefaultValue().trim().equalsIgnoreCase("true")) {
+                                updateTrait(currentTrait.getTrait(), "boolean", "true");
                                 eImg.setImageResource(R.drawable.trait_boolean_true);
                             } else {
-                                updateTrait(currentTrait.trait, "boolean", "false");
+                                updateTrait(currentTrait.getTrait(), "boolean", "false");
                                 eImg.setImageResource(R.drawable.trait_boolean_false);
                             }
                         } else {
-                            String bval = newTraits.get(currentTrait.trait).toString();
+                            String bval = newTraits.get(currentTrait.getTrait()).toString();
 
                             if (bval.equalsIgnoreCase("false")) {
                                 eImg.setImageResource(R.drawable.trait_boolean_false);
@@ -1900,25 +1900,25 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             }
 
                         }
-                    } else if (currentTrait.format.equals("audio")) {
+                    } else if (currentTrait.getFormat().equals("audio")) {
                         hideLayouts();
                         traitAudio.setVisibility(View.VISIBLE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
 
-                        if (!newTraits.containsKey(currentTrait.trait)) {
+                        if (!newTraits.containsKey(currentTrait.getTrait())) {
                             doRecord.setImageResource(R.drawable.trait_audio);
                             etCurVal.setText("");
-                        } else if(newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
+                        } else if(newTraits.containsKey(currentTrait.getTrait()) && newTraits.get(currentTrait.getTrait()).toString().equals("NA")) {
                             doRecord.setImageResource(R.drawable.trait_audio);
                             etCurVal.setText("NA");
                         } else {
-                            mRecordingLocation = new File(newTraits.get(currentTrait.trait).toString());
+                            mRecordingLocation = new File(newTraits.get(currentTrait.getTrait()).toString());
                             doRecord.setImageResource(R.drawable.trait_audio_play);
                             etCurVal.setText(getString(R.string.trait_layout_data_stored));
                         }
 
-                    } else if (currentTrait.format.equals("photo")) {
+                    } else if (currentTrait.getFormat().equals("photo")) {
                         hideLayouts();
                         traitPhoto.setVisibility(View.VISIBLE);
 
@@ -1935,7 +1935,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         if (img.listFiles() != null) {
 
                             //TODO causes crash
-                            photoLocation = ConfigActivity.dt.getPlotPhotos(cRange.plot_id, currentTrait.trait);
+                            photoLocation = ConfigActivity.dt.getPlotPhotos(cRange.plot_id, currentTrait.getTrait());
 
                             for (int i = 0; i < photoLocation.size(); i++) {
                                 drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
@@ -1958,67 +1958,67 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             photo.setAdapter(photoAdapter);
                         }
 
-                        if (!newTraits.containsKey(currentTrait.trait)) {
+                        if (!newTraits.containsKey(currentTrait.getTrait())) {
                             if (!img.exists()) {
                                 img.mkdirs();
                             }
                         }
-                    } else if(currentTrait.format.equals("counter")) {
+                    } else if(currentTrait.getFormat().equals("counter")) {
                         hideLayouts();
                         traitCounter.setVisibility(View.VISIBLE);
 
                         etCurVal.setVisibility(EditText.GONE);
                         etCurVal.setEnabled(false);
 
-                        if (!newTraits.containsKey(currentTrait.trait)) {
+                        if (!newTraits.containsKey(currentTrait.getTrait())) {
                             counterTv.setText("0");
                         } else {
-                            counterTv.setText(newTraits.get(currentTrait.trait).toString());
+                            counterTv.setText(newTraits.get(currentTrait.getTrait()).toString());
                         }
 
-                    } else if(currentTrait.format.equals("rust rating") | currentTrait.format.equals("disease rating")) {
+                    } else if(currentTrait.getFormat().equals("rust rating") | currentTrait.getFormat().equals("disease rating")) {
                         hideLayouts();
                         traitDiseaseRating.setVisibility(View.VISIBLE);
 
                         etCurVal.removeTextChangedListener(cvText);
                         etCurVal.setVisibility(EditText.VISIBLE);
 
-                        if (!newTraits.containsKey(currentTrait.trait)) {
+                        if (!newTraits.containsKey(currentTrait.getTrait())) {
                             etCurVal.removeTextChangedListener(cvNum);
                             etCurVal.setText("");
                             etCurVal.setTextColor(Color.BLACK);
 
-                            if (currentTrait.defaultValue != null
-                                    && currentTrait.defaultValue.length() > 0)
-                                etCurVal.setText(currentTrait.defaultValue);
+                            if (currentTrait.getDefaultValue() != null
+                                    && currentTrait.getDefaultValue().length() > 0)
+                                etCurVal.setText(currentTrait.getDefaultValue());
 
                             etCurVal.addTextChangedListener(cvNum);
                         } else {
                             etCurVal.removeTextChangedListener(cvNum);
-                            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
+                            etCurVal.setText(newTraits.get(currentTrait.getTrait()).toString());
                             etCurVal.setTextColor(Color.parseColor(displayColor));
                             etCurVal.addTextChangedListener(cvNum);
                         }
 
-                    } else if(currentTrait.format.equals("multicat")) {
+                    } else if(currentTrait.getFormat().equals("multicat")) {
                         hideLayouts();
                         traitMulticat.setVisibility(View.VISIBLE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
 
-                        if (!newTraits.containsKey(currentTrait.trait)) {
+                        if (!newTraits.containsKey(currentTrait.getTrait())) {
                             etCurVal.removeTextChangedListener(cvNum);
                             etCurVal.setText("");
                             etCurVal.setTextColor(Color.BLACK);
                             etCurVal.addTextChangedListener(cvNum);
                         } else {
                             etCurVal.removeTextChangedListener(cvNum);
-                            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
+                            etCurVal.setText(newTraits.get(currentTrait.getTrait()).toString());
                             etCurVal.setTextColor(Color.parseColor(displayColor));
                             etCurVal.addTextChangedListener(cvNum);
                         }
 
-                        final String[] cat = currentTrait.categories.split("/");
+                        final String[] cat = currentTrait.getCategories().split("/");
 
                         if(!dataLocked) {
                             gridMultiCat.setAdapter(new BaseAdapter() {
@@ -2066,15 +2066,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             }
                         });
 
-                    } else if(currentTrait.format.equals("location")) {
+                    } else if(currentTrait.getFormat().equals("location")) {
                         hideLayouts();
                         traitLocation.setVisibility(View.VISIBLE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
 
-                        if (newTraits.containsKey(currentTrait.trait)) {
+                        if (newTraits.containsKey(currentTrait.getTrait())) {
                             etCurVal.removeTextChangedListener(cvNum);
-                            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
+                            etCurVal.setText(newTraits.get(currentTrait.getTrait()).toString());
                             etCurVal.setTextColor(Color.parseColor(displayColor));
                             etCurVal.addTextChangedListener(cvNum);
                         } else {
@@ -2083,22 +2083,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             etCurVal.setText("");
                             etCurVal.setTextColor(Color.BLACK);
 
-                            if (currentTrait.defaultValue != null
-                                    && currentTrait.defaultValue.length() > 0)
-                                etCurVal.setText(currentTrait.defaultValue);
+                            if (currentTrait.getDefaultValue() != null
+                                    && currentTrait.getDefaultValue().length() > 0)
+                                etCurVal.setText(currentTrait.getDefaultValue());
 
                             etCurVal.addTextChangedListener(cvNum);
                         }
 
-                    } else if(currentTrait.format.equals("angle")) {
+                    } else if(currentTrait.getFormat().equals("angle")) {
                         hideLayouts();
                         traitAngle.setVisibility(View.VISIBLE);
 
                         etCurVal.setVisibility(EditText.VISIBLE);
 
-                        if (newTraits.containsKey(currentTrait.trait)) {
+                        if (newTraits.containsKey(currentTrait.getTrait())) {
                             etCurVal.removeTextChangedListener(cvNum);
-                            etCurVal.setText(newTraits.get(currentTrait.trait).toString());
+                            etCurVal.setText(newTraits.get(currentTrait.getTrait()).toString());
                             etCurVal.setTextColor(Color.parseColor(displayColor));
                             etCurVal.addTextChangedListener(cvNum);
                         } else {
@@ -2297,8 +2297,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private void moveToResult(int j) {
         if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-            if (!ConfigActivity.dt.getTraitExists(rangeID[j - 1], currentTrait.trait,
-                    currentTrait.format)) {
+            if (!ConfigActivity.dt.getTraitExists(rangeID[j - 1], currentTrait.getTrait(),
+                    currentTrait.getFormat())) {
                 paging = j;
 
                 // Reload traits based on the selected
@@ -2731,8 +2731,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 return;
             }
 
-            if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.trait,
-                    currentTrait.format)) {
+            if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                    currentTrait.getFormat())) {
                 paging = pos;
                 break;
             }
@@ -2762,7 +2762,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     int m;
 
                     try {
-                        m = Integer.parseInt(currentTrait.details);
+                        m = Integer.parseInt(currentTrait.getDetails());
                     } catch (Exception n) {
                         m = 0;
                     }
@@ -2803,7 +2803,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                     releaseRecorder();
 
-                    updateTrait(currentTrait.trait, "audio", mRecordingLocation.getAbsolutePath());
+                    updateTrait(currentTrait.getTrait(), "audio", mRecordingLocation.getAbsolutePath());
 
                     etCurVal.setText(getString(R.string.trait_layout_data_stored));
 
@@ -2816,16 +2816,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     traitLeft.setEnabled(true);
                     traitRight.setEnabled(true);
                     deleteValue.setEnabled(true);
-                } else if (newTraits.containsKey(currentTrait.trait)) {
+                } else if (newTraits.containsKey(currentTrait.getTrait())) {
                     beginPlayback();
                     deleteValue.setEnabled(false);
 
-                } else if (!newTraits.containsKey(currentTrait.trait)) {
+                } else if (!newTraits.containsKey(currentTrait.getTrait())) {
 
                     // start recording
                     deleteRecording();
                     deleteValue.setEnabled(false);
-                    removeTrait(currentTrait.trait);
+                    removeTrait(currentTrait.getTrait());
                     etCurVal.setText("");
 
                     prepareRecorder();
@@ -2982,7 +2982,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if(etCurVal.getText().toString().length()==0) {
                 etCurVal.removeTextChangedListener(cvNum);
                 etCurVal.setText("");
-                removeTrait(currentTrait.trait);
+                removeTrait(currentTrait.getTrait());
                 etCurVal.addTextChangedListener(cvNum);
             }
         } else {
@@ -3015,11 +3015,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     Utils.scanFile(MainActivity.this,f);
 
                     // Remove individual images
-                    ConfigActivity.dt.deleteTraitByValue(cRange.plot_id, currentTrait.trait, item);
+                    ConfigActivity.dt.deleteTraitByValue(cRange.plot_id, currentTrait.getTrait(), item);
 
                     // Only do a purge by trait when there are no more images left
                     if (photoLocation.size() == 0)
-                        removeTrait(currentTrait.trait);
+                        removeTrait(currentTrait.getTrait());
 
                     photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
 
@@ -3055,7 +3055,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         dir.mkdirs();
 
-        String generatedName = MainActivity.cRange.plot_id + "_" + currentTrait.trait + "_" + getRep() + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
+        String generatedName = MainActivity.cRange.plot_id + "_" + currentTrait.getTrait() + "_" + getRep() + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
         mCurrentPhotoPath = generatedName;
 
         Log.w("File", Constants.PLOTDATAPATH + "/" + ep.getString("FieldFile", "") + "/photos/" + generatedName);
@@ -3074,7 +3074,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private String getRep() {
-        int repInt = ConfigActivity.dt.getRep(MainActivity.cRange.plot_id,currentTrait.trait);
+        int repInt = ConfigActivity.dt.getRep(MainActivity.cRange.plot_id,currentTrait.getTrait());
         return String.valueOf(repInt);
     }
 
@@ -3094,7 +3094,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
 
-        updateTraitAllowDuplicates(currentTrait.trait, "photo", file.getAbsolutePath());
+        updateTraitAllowDuplicates(currentTrait.getTrait(), "photo", file.getAbsolutePath());
 
         photoAdapter = new GalleryImageAdapter(MainActivity.this, drawables);
 

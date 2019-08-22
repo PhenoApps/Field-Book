@@ -161,11 +161,11 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                     try {
                         // e.g. 4
-                        String prevID = mAdapter.getItem(from).id;
+                        String prevID = mAdapter.getItem(from).getId();
 
                         // e.g. 6
-                        String currentID = mAdapter.getItem(to).id;
-                        String currentPosition = mAdapter.getItem(to).realPosition;
+                        String currentID = mAdapter.getItem(to).getId();
+                        String currentPosition = mAdapter.getItem(to).getRealPosition();
 
                         ConfigActivity.dt.updateTraitPosition(currentID, currentPosition);
                         ConfigActivity.dt.updateTraitPosition(prevID, String.valueOf(Integer.parseInt(currentPosition) + 1));
@@ -174,7 +174,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                         int newCount = 2;
 
                         for (int i = to + 1; i < mAdapter.getCount(); i++) {
-                            ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
+                            ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), String.valueOf(Integer.parseInt(currentPosition) + newCount));
                             newCount++;
                         }
 
@@ -188,10 +188,10 @@ public class TraitEditorActivity extends AppCompatActivity {
                     try {
                         // upward drag
                         // e.g. 4
-                        String prevID = mAdapter.getItem(from).id;
+                        String prevID = mAdapter.getItem(from).getId();
 
                         // e.g. 6
-                        String currentPosition = mAdapter.getItem(to).realPosition;
+                        String currentPosition = mAdapter.getItem(to).getRealPosition();
 
                         if (Integer.parseInt(currentPosition) - to >= 0) {
                             Log.w("Reorder", "top1");
@@ -200,7 +200,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                             int newCount = Integer.parseInt(currentPosition) - to;
 
                             for (int i = 0; i < to; i++) {
-                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(newCount));
+                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), String.valueOf(newCount));
                                 newCount++;
                             }
 
@@ -215,7 +215,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                             Log.w("Reorder", "top2");
 
                             for (int i = 0; i < to; i++) {
-                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(i));
+                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), String.valueOf(i));
                             }
 
                             Log.w("Reorder", "current");
@@ -235,7 +235,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                         for (int i = to; i < mAdapter.getCount(); i++) {
                             if (i != from) {
-                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).id, String.valueOf(Integer.parseInt(currentPosition) + newCount));
+                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), String.valueOf(Integer.parseInt(currentPosition) + newCount));
                                 newCount++;
                             }
                         }
@@ -365,12 +365,12 @@ public class TraitEditorActivity extends AppCompatActivity {
                 // When a trait is selected, alter the layout of the edit dialog accordingly
 
                 o = mAdapter.getItem(position);
-                currentId = o.id;
-                trait.setText(o.trait);
-                oldTrait = o.trait;
+                currentId = o.getId();
+                trait.setText(o.getTrait());
+                oldTrait = o.getTrait();
 
                 for (int i = 0; i < data.length; i++) {
-                    if (data[i].toLowerCase().equals(o.format.toLowerCase())) {
+                    if (data[i].toLowerCase().equals(o.getFormat().toLowerCase())) {
                         currentPosition = i;
                         format.setSelection(i, true);
                         prepareFields(i);
@@ -378,17 +378,17 @@ public class TraitEditorActivity extends AppCompatActivity {
                     }
                 }
 
-                def.setText(o.defaultValue);
+                def.setText(o.getDefaultValue());
 
-                if (o.defaultValue.equals("true"))
+                if (o.getDefaultValue().equals("true"))
                     bool.setChecked(true);
                 else
                     bool.setChecked(false);
 
-                minimum.setText(o.minimum);
-                maximum.setText(o.maximum);
-                details.setText(o.details);
-                categories.setText(o.categories);
+                minimum.setText(o.getMinimum());
+                maximum.setText(o.getMaximum());
+                details.setText(o.getDetails());
+                categories.setText(o.getCategories());
 
                 edit = true;
                 createVisible = true;
@@ -543,15 +543,15 @@ public class TraitEditorActivity extends AppCompatActivity {
                             details.getText().toString(), categories.getText().toString(),
                             "true", String.valueOf(pos));*/
                     TraitObject t = new TraitObject();
-                    t.trait = trait.getText().toString().trim();
-                    t.format = enData[format.getSelectedItemPosition()].toLowerCase();
-                    t.defaultValue = def.getText().toString();
-                    t.minimum = minimum.getText().toString();
-                    t.maximum = maximum.getText().toString();
-                    t.details = details.getText().toString();
-                    t.categories = categories.getText().toString();
-                    t.visible = true;
-                    t.realPosition = String.valueOf(pos);
+                    t.setTrait(trait.getText().toString().trim());
+                    t.setFormat(enData[format.getSelectedItemPosition()].toLowerCase());
+                    t.setDefaultValue(def.getText().toString());
+                    t.setMinimum(minimum.getText().toString());
+                    t.setMaximum(maximum.getText().toString());
+                    t.setDetails(details.getText().toString());
+                    t.setCategories(categories.getText().toString());
+                    t.setVisible(true);
+                    t.setRealPosition(String.valueOf(pos));
                     ConfigActivity.dt.insertTraits(t);
                 } else {
                     ConfigActivity.dt.editTraits(currentId, trait.getText().toString().trim(),
@@ -592,27 +592,27 @@ public class TraitEditorActivity extends AppCompatActivity {
                 defString = "false";
             }
 
-            if (!trait.getText().toString().equals(o.trait))
+            if (!trait.getText().toString().equals(o.getTrait()))
                 return true;
 
             if (format.getSelectedItemPosition() == 4) {
                 if (!def.getText().toString().equals(defString))
                     return true;
             } else {
-                if (!def.getText().toString().equals(o.defaultValue))
+                if (!def.getText().toString().equals(o.getDefaultValue()))
                     return true;
             }
 
-            if (!minimum.getText().toString().equals(o.minimum))
+            if (!minimum.getText().toString().equals(o.getMinimum()))
                 return true;
 
-            if (!maximum.getText().toString().equals(o.maximum))
+            if (!maximum.getText().toString().equals(o.getMaximum()))
                 return true;
 
-            if (!details.getText().toString().equals(o.details))
+            if (!details.getText().toString().equals(o.getDetails()))
                 return true;
 
-            if (!categories.getText().toString().equals(o.categories))
+            if (!categories.getText().toString().equals(o.getCategories()))
                 return true;
 
         } else {
@@ -1309,19 +1309,19 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                     if (data != null) {
                         TraitObject t = new TraitObject();
-                        t.trait = data[0];
-                        t.format = data[1];
-                        t.defaultValue = data[2];
-                        t.minimum = data[3];
-                        t.maximum = data[4];
-                        t.details = data[5];
-                        t.categories = data[6];
+                        t.setTrait(data[0]);
+                        t.setFormat(data[1]);
+                        t.setDefaultValue(data[2]);
+                        t.setMinimum(data[3]);
+                        t.setMaximum(data[4]);
+                        t.setDetails(data[5]);
+                        t.setCategories(data[6]);
                         //t.visible = data[7].toLowerCase();
-                        t.realPosition = data[8];
+                        t.setRealPosition(data[8]);
                         if (data[7].toLowerCase().equals("true")) {
-                            t.visible = true;
+                            t.setVisible(true);
                         } else {
-                            t.visible = false;
+                            t.setVisible(false);
                         }
                         ConfigActivity.dt.insertTraits(t);
                     }

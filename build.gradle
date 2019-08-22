@@ -13,5 +13,6 @@ allprojects {
     repositories {
         jcenter()
         google()
+        maven { url "https://dl.bintray.com/pheno-apps/pheno-apps-java-client-library" }
     }
 }
