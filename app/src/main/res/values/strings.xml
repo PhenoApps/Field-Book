@@ -332,6 +332,11 @@
     <string name="export_source_brapi">BrAPI</string>
     <string name="export_dialog_title">Export Data</string>
 
+    <!-- BrAPI export dialog -->
+    <string name="brapi_export_button">Export</string>
+    <string name="brapi_export_title">BrAPI Export Statistics</string>
+    <string name="brapi_export_num_new_obs"> New Observations</string>
+    <string name="brapi_export_num_ed_obs"> Edited Observations</string>
 
     <!-- Warnings/Catches -->
     <string name="warning_field_before_traits">A field must be imported before traits can be created.</string>

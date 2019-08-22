@@ -339,7 +339,6 @@ public class ConfigActivity extends AppCompatActivity {
                             return;
                         }
 
-                        exportPermission();
                         showExportDialog();
                         break;
                     case 5:
@@ -1019,7 +1018,7 @@ public class ConfigActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 switch (which) {
                     case 0:
-                        showSaveDialog();
+                        exportPermission();
                         break;
                     case 1:
                         // one BrAPIService?
