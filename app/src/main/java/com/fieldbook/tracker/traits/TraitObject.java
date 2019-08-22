@@ -14,5 +14,6 @@ public class TraitObject {
     public String realPosition = "";
     public String id;
     public String external_db_id;
+    public String trait_data_source;
     public Boolean visible;
 }

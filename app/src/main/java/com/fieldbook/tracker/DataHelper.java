@@ -28,9 +28,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,8 +63,8 @@ public class DataHelper {
 
     private static final String INSERTTRAITS = "insert into "
             + TRAITS
-            + "(external_db_id, trait, format, defaultValue, minimum, maximum, details, categories, "
-            + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?,?)";
+            + "(external_db_id, trait_data_source, trait, format, defaultValue, minimum, maximum, details, categories, "
+            + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String INSERTUSERTRAITS = "insert into " + USER_TRAITS
             + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id) values (?,?,?,?,?,?,?,?,?,?)";
@@ -156,6 +158,53 @@ public class DataHelper {
 
         return largest;
     }
+
+    /**
+     * Get the data for brapi export to external system
+     */
+    public List<Map<String, String>> getDataBrapiExport() {
+
+        // Get only the data that belongs to the system we are importing to.
+        String query = "SELECT " +
+                "range.observationUnitDbId, " +
+                "exp_id.exp_alias, " +
+                "traits.external_db_id, " +
+                "user_traits.timeTaken, " +
+                "user_traits.userValue " +
+                "FROM " +
+                "user_traits " +
+                "JOIN " +
+                "traits ON user_traits.parent = traits.trait " +
+                "JOIN " +
+                "range ON user_traits.rid = range.observationUnitDbId " +
+                "JOIN " +
+                "exp_id ON user_traits.id = exp_id.exp_id " +
+                "WHERE traits.trait_data_source <> 'local'";
+
+        Cursor db_cursor = db.rawQuery(query,null);
+
+        // Transform our data into a more accessible format
+        List<String> columns = new ArrayList<>(Arrays.asList("observationUnitDbId", "exp_alias",
+                "external_db_id", "timeTaken", "userValue"));
+        List<Map<String, String>> results = new ArrayList<>();
+
+        if (db_cursor.moveToFirst()){
+            do{
+
+                Map<String, String> row = new HashMap<>();
+                for (String column : columns) {
+                    row.put(column, db_cursor.getString(db_cursor.getColumnIndex(column)));
+                }
+
+                results.add(row);
+
+            }while(db_cursor.moveToNext());
+        }
+        db_cursor.close();
+
+        return results;
+    }
+
 
     /**
      * Helper function to close the database
@@ -1021,16 +1070,17 @@ public class DataHelper {
 
         try {
             this.insertTraits.bindString(1, t.external_db_id);
-            this.insertTraits.bindString(2, t.trait);
-            this.insertTraits.bindString(3, t.format);
-            this.insertTraits.bindString(4, t.defaultValue);
-            this.insertTraits.bindString(5, t.minimum);
-            this.insertTraits.bindString(6, t.maximum);
-            this.insertTraits.bindString(7, t.details);
-            this.insertTraits.bindString(8, t.categories);
-            this.insertTraits.bindString(9, String.valueOf(t.visible));
+            this.insertTraits.bindString(2, t.trait_data_source);
+            this.insertTraits.bindString(3, t.trait);
+            this.insertTraits.bindString(4, t.format);
+            this.insertTraits.bindString(5, t.defaultValue);
+            this.insertTraits.bindString(6, t.minimum);
+            this.insertTraits.bindString(7, t.maximum);
+            this.insertTraits.bindString(8, t.details);
+            this.insertTraits.bindString(9, t.categories);
+            this.insertTraits.bindString(10, String.valueOf(t.visible));
             //Probably wrong with this one, because the type of realPosition is int
-            this.insertTraits.bindString(10, t.realPosition);
+            this.insertTraits.bindString(11, t.realPosition);
 
             return this.insertTraits.executeInsert();
         } catch (Exception e) {
@@ -1124,7 +1174,7 @@ public class DataHelper {
                     + "(id INTEGER PRIMARY KEY, range TEXT, plot TEXT, entry TEXT, plot_id TEXT, pedigree TEXT)");
             db.execSQL("CREATE TABLE "
                     + TRAITS
-                    + "(id INTEGER PRIMARY KEY, external_db_id INTEGER, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
+                    + "(id INTEGER PRIMARY KEY, external_db_id TEXT, trait_data_source TEXT, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
             db.execSQL("CREATE TABLE "
                     + USER_TRAITS
                     + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT)");
@@ -1253,6 +1303,7 @@ public class DataHelper {
 
                 // add columns to tables for brapi integration
                 db.execSQL("ALTER TABLE traits ADD COLUMN external_db_id TEXT");
+                db.execSQL("ALTER TABLE traits ADD COLUMN trait_data_source TEXT");
 
             }
         }

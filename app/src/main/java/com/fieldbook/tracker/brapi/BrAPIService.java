@@ -283,6 +283,11 @@ public class BrAPIService {
                 // Get database id of external system to sync to enabled pushing through brAPI
                 t.external_db_id = tmp.getString("observationVariableDbId");
 
+                // Need to set where we are getting the data from so we don't push to a different
+                // external link than where the trait was retrieved from.
+                Integer url_path_start = this.brapiBaseURL.indexOf("/brapi", 0);
+                t.trait_data_source = this.brapiBaseURL.substring(0, url_path_start);
+
                 t.visible = true;
                 traits.add(t);
             }

@@ -195,12 +195,11 @@ public class BrapiTraitActivity extends AppCompatActivity {
             ConfigActivity.dt.insertTraits(trait);
         }
 
-        /*SharedPreferences.Editor ed = ep.edit();
+        SharedPreferences ep = getSharedPreferences("Settings", 0);
+        SharedPreferences.Editor ed = ep.edit();
         ed.putBoolean("CreateTraitFinished", true);
         ed.putBoolean("TraitsExported", false);
         ed.apply();
-
-        loadData();*/
 
         MainActivity.reloadData = true;
 

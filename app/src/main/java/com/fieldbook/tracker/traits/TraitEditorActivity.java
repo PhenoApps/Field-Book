@@ -562,8 +562,12 @@ public class TraitEditorActivity extends AppCompatActivity {
                     t.categories = categories.getText().toString();
                     t.visible = true;
                     t.realPosition = String.valueOf(pos);
+                    // TODO: Add the local trait data_source name into other trait editing/inserting db functions.
+                    t.trait_data_source = "local";
                     ConfigActivity.dt.insertTraits(t);
                 } else {
+                    // TODO: Add the trait_data_source variable into the edit.
+
                     ConfigActivity.dt.editTraits(currentId, trait.getText().toString().trim(),
                             enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
                             minimum.getText().toString(), maximum.getText().toString(),
