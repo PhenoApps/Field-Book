@@ -128,6 +128,33 @@ public class BrAPIService {
         queue.add(stringRequest);
     }
 
+    // Get the ontology from breedbase so the users can select the ontology
+    public void getOntology(final Function< List<TraitObject>, Void > function) {
+
+        String url = this.brapiBaseURL + "/variables";
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Parse the response
+
+                        //TODO: Replace this class and parse function when Pete releases
+                        // his brapi java library
+                        List<TraitObject> traits = parseTraitsJson(response);
+                        function.apply(traits);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(context.getApplicationContext(), "Error loading data", Toast.LENGTH_SHORT).show();
+                        Log.e("error", error.toString());
+                    }
+                });
+        queue.add(stringRequest);
+    }
+
+
     private List<StudySummary> parseStudiesJson(String json) {
 
         List<StudySummary> studies = new ArrayList<>();
@@ -166,8 +193,10 @@ public class BrAPIService {
                 JSONObject scale = tmp.getJSONObject("scale");
 
                 JSONObject validValue = scale.getJSONObject("validValues");
-                t.minimum = Integer.toString(validValue.getInt("min"));
-                t.maximum = Integer.toString(validValue.getInt("max"));
+                //TODO: Add integer parsing to get min and max as integers
+                // Requires changes to breedbase as well
+                t.minimum = validValue.getString("min");
+                t.maximum = validValue.getString("max");
                 JSONArray cat = validValue.getJSONArray("categories");
                 StringBuilder sb = new StringBuilder();
                 for (int j = 0; j < cat.length(); ++j) {
@@ -177,10 +206,15 @@ public class BrAPIService {
                     }
                 }
                 t.categories = sb.toString();
-                t.format = convertBrAPIDataType(scale.getString("dataType"));
+                //TODO: datatype field should be dataType. Breedbase needs to be fixed.
+                t.format = convertBrAPIDataType(scale.getString("datatype"));
                 if (t.format.equals("integer")) {
                     t.format = "numeric";
                 }
+
+                // Get database id of external system to sync to enabled pushing through brAPI
+                t.external_db_id = tmp.getString("observationVariableDbId");
+
                 t.visible = true;
                 traits.add(t);
             }
@@ -312,8 +346,9 @@ public class BrAPIService {
             dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
         }
 
-        for(TraitObject t : studyDetails.getTraits()){
+        // The traits are now retrieved from a different avenue.
+        /*for(TraitObject t : studyDetails.getTraits()){
             dataHelper.insertTraits(t);
-        }
+        }*/
     }
 }

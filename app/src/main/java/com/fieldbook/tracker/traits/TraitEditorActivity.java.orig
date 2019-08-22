@@ -20,8 +20,11 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import com.fieldbook.tracker.ConfigActivity;
+<<<<<<< Updated upstream
 import com.fieldbook.tracker.utilities.Utils;
+=======
 import com.fieldbook.tracker.brapi.BrapiTraitActivity;
+>>>>>>> Stashed changes
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.widget.Toolbar;

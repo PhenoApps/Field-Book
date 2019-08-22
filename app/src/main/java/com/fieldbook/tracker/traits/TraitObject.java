@@ -13,5 +13,6 @@ public class TraitObject {
     public String categories;
     public String realPosition = "";
     public String id;
+    public String external_db_id;
     public Boolean visible;
 }

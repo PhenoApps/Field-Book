@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
+import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +59,8 @@ public class BrapiActivity extends AppCompatActivity {
         baseURLText.setText(brapiBaseURL);
 
         loadToolbar();
-        if(isConnected()) {
+
+        if(Utils.isConnected(this)) {
             loadStudiesList();
         }else{
             Toast.makeText(getApplicationContext(), "Device Offline: Please connect to a network and try again", Toast.LENGTH_SHORT).show();
@@ -78,6 +80,7 @@ public class BrapiActivity extends AppCompatActivity {
         final ListView listStudies = findViewById(R.id.brapiStudies);
         listStudies.setVisibility(View.GONE);
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+
         brAPIService.getStudies(new Function<List<StudySummary>, Void>() {
             @Override
             public Void apply(final List<StudySummary> studies) {
@@ -138,12 +141,4 @@ public class BrapiActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public boolean isConnected(){
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected())
-            return true;
-        else
-            return false;
-    }
 }

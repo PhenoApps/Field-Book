@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
  */
 public class DataHelper {
     private static final String DATABASE_NAME = "fieldbook.db";
-    static final int DATABASE_VERSION = 7;
+    static final int DATABASE_VERSION = 8;
 
     private static String TAG = "Field Book";
 
@@ -61,8 +61,8 @@ public class DataHelper {
 
     private static final String INSERTTRAITS = "insert into "
             + TRAITS
-            + "(trait, format, defaultValue, minimum, maximum, details, categories, "
-            + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?)";
+            + "(external_db_id, trait, format, defaultValue, minimum, maximum, details, categories, "
+            + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?,?)";
 
     private static final String INSERTUSERTRAITS = "insert into " + USER_TRAITS
             + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id) values (?,?,?,?,?,?,?,?,?,?)";
@@ -1020,16 +1020,17 @@ public class DataHelper {
         }
 
         try {
-            this.insertTraits.bindString(1, t.trait);
-            this.insertTraits.bindString(2, t.format);
-            this.insertTraits.bindString(3, t.defaultValue);
-            this.insertTraits.bindString(4, t.minimum);
-            this.insertTraits.bindString(5, t.maximum);
-            this.insertTraits.bindString(6, t.details);
-            this.insertTraits.bindString(7, t.categories);
-            this.insertTraits.bindString(8, String.valueOf(t.visible));
+            this.insertTraits.bindString(1, t.external_db_id);
+            this.insertTraits.bindString(2, t.trait);
+            this.insertTraits.bindString(3, t.format);
+            this.insertTraits.bindString(4, t.defaultValue);
+            this.insertTraits.bindString(5, t.minimum);
+            this.insertTraits.bindString(6, t.maximum);
+            this.insertTraits.bindString(7, t.details);
+            this.insertTraits.bindString(8, t.categories);
+            this.insertTraits.bindString(9, String.valueOf(t.visible));
             //Probably wrong with this one, because the type of realPosition is int
-            this.insertTraits.bindString(9, t.realPosition);
+            this.insertTraits.bindString(10, t.realPosition);
 
             return this.insertTraits.executeInsert();
         } catch (Exception e) {
@@ -1123,7 +1124,7 @@ public class DataHelper {
                     + "(id INTEGER PRIMARY KEY, range TEXT, plot TEXT, entry TEXT, plot_id TEXT, pedigree TEXT)");
             db.execSQL("CREATE TABLE "
                     + TRAITS
-                    + "(id INTEGER PRIMARY KEY, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
+                    + "(id INTEGER PRIMARY KEY, external_db_id INTEGER, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
             db.execSQL("CREATE TABLE "
                     + USER_TRAITS
                     + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT)");
@@ -1246,6 +1247,13 @@ public class DataHelper {
                         } while (attribute_val.moveToNext());
                     }
                 }
+            }
+
+            if (oldVersion <= 8 & newVersion >= 8) {
+
+                // add columns to tables for brapi integration
+                db.execSQL("ALTER TABLE traits ADD COLUMN external_db_id TEXT");
+
             }
         }
     }

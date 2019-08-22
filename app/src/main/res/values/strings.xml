@@ -367,4 +367,5 @@
     <string name="brapi_study_num_plots"> Plots</string>
     <string name="brapi_study_num_traits"> Traits</string>
     <string name="import_source_brapi">Remote (BrAPI)</string>
+    <string name="brapi_save_trait">Save Traits</string>
 </resources>
