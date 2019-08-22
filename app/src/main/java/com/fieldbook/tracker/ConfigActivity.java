@@ -50,6 +50,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.brapi.BrapiExportDialog;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
@@ -334,7 +335,7 @@ public class ConfigActivity extends AppCompatActivity {
                                 return;
                             }
 
-                            showSaveDialog();
+                            showExportDialog();
                         }
 
                         break;
@@ -984,6 +985,61 @@ public class ConfigActivity extends AppCompatActivity {
 
         ga.notifyDataSetChanged();
     }
+
+    private void showExportDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.dialog_list, null);
+
+        builder.setTitle(R.string.export_dialog_title)
+                .setCancelable(true)
+                .setView(layout);
+
+        final AlertDialog exportDialog = builder.create();
+
+        android.view.WindowManager.LayoutParams params = exportDialog.getWindow().getAttributes();
+        params.width = LayoutParams.MATCH_PARENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        exportDialog.getWindow().setAttributes(params);
+
+        ListView myList = layout.findViewById(R.id.myList);
+
+        String[] exportArray = new String[2];
+        exportArray[0] = getString(R.string.export_source_local);
+        exportArray[1] = getString(R.string.export_source_brapi);
+
+        final Context context = this;
+
+        myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
+                Intent intent = new Intent();
+                switch (which) {
+                    case 0:
+                        showSaveDialog();
+                        break;
+                    case 1:
+                        // one BrAPIService?
+                        BrapiExportDialog bed = new BrapiExportDialog(context);
+                        bed.show();
+                        break;
+
+                }
+                exportDialog.dismiss();
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, exportArray);
+        myList.setAdapter(adapter);
+        Button importCloseBtn = layout.findViewById(R.id.closeBtn);
+        importCloseBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                exportDialog.dismiss();
+            }
+        });
+        exportDialog.show();
+    }
+
 
     private void showSaveDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);

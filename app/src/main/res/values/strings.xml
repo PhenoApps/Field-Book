@@ -305,6 +305,12 @@
     <string name="import_error_unique_characters_illegal">Selected column contains characters which cannot be used in the unique identifier</string>
     <string name="import_error_column_choice">Columns cannot be used for the same assignment</string>
 
+    <!-- Export dialog -->
+    <string name="export_source_local">Local</string>
+    <string name="export_source_brapi">BrAPI</string>
+    <string name="export_dialog_title">Export Data</string>
+
+
     <!-- Warnings/Catches -->
     <string name="warning_field_before_traits">A field must be imported before traits can be created.</string>
     <string name="warning_field_missing">No field is currently loaded. Please load a field before collecting data.</string>
