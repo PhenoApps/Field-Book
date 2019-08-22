@@ -1,16 +1,22 @@
 package com.fieldbook.tracker.preferences;
 
-import android.content.ActivityNotFoundException;
+import android.annotation.SuppressLint;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceGroup;
+import android.preference.PreferenceManager;
+import android.view.MenuItem;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.util.Log;
-import android.view.MenuItem;
-
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.BrAPIService;
 
 public class PreferencesActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
 
@@ -60,29 +66,34 @@ public class PreferencesActivity extends AppCompatActivity implements SharedPref
     public static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
     public static String BRAPI_TOKEN = "BRAPI_TOKEN";
 
+    private PreferenceManager prefMgr;
+    private Preference brapiAuthButton;
+    private Preference brapiLogoutButton;
+    private PreferenceGroup brapiConfig;
 
+
+    @SuppressLint("NewApi")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.settings_advanced));
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
+        final PreferencesFragment preferencesFragment = new PreferencesFragment();
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new PreferencesFragment())
+                .replace(android.R.id.content, preferencesFragment)
                 .commit();
 
-        checkBrapiAuth();
-        registerSharedPreferencesListener();
-    }
+        registerBrapiButtonListeners(this, preferencesFragment);
 
-    private void registerSharedPreferencesListener() {
-        getSharedPreferences("Settings", 0).unregisterOnSharedPreferenceChangeListener(this);
-        getSharedPreferences("Settings", 0).registerOnSharedPreferenceChangeListener(this);
+        checkBrapiAuth();
+
+        registerBrapiHostChangeListener(this);
     }
 
     @Override
@@ -103,41 +114,128 @@ public class PreferencesActivity extends AppCompatActivity implements SharedPref
         super.onResume();
 
         checkBrapiAuth();
-        registerSharedPreferencesListener();
     }
 
-    private void checkBrapiAuth() {
-        Uri data = this.getIntent().getData();
-        if (data != null && data.isHierarchical()) {
-            String uri = this.getIntent().getDataString();
-            uri = uri.substring(uri.indexOf("://")+3);
-            SharedPreferences preferences = getSharedPreferences("Settings", 0);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(PreferencesActivity.BRAPI_TOKEN, uri);
-            editor.apply();
-        }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (BRAPI_BASE_URL.equals(key)) {
-            try {
-                String url = sharedPreferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&success_url=fieldbook://";
-                try {
-                    Uri uri = Uri.parse("googlechrome://navigate?url="+ url);
-                    Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                } catch (ActivityNotFoundException e) {
-                    Uri uri = Uri.parse(url);
-                    // Chrome is probably not installed
-                    // OR not selected as default browser OR if no Browser is selected as default browser
-                    Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
+            if(brapiConfig != null) {
+                brapiConfig.addPreference(brapiAuthButton);
+                brapiConfig.addPreference(brapiLogoutButton);
+                BrAPIService.authorizeBrAPI(sharedPreferences, this);
+            }
+        }
+    }
+
+    private void registerBrapiHostChangeListener(final PreferencesActivity prefActivity) {
+        getSharedPreferences("Settings", 0).registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (BRAPI_BASE_URL.equals(key)) {
+                    if(brapiConfig != null) {
+                        brapiConfig.addPreference(brapiAuthButton);
+                        brapiConfig.addPreference(brapiLogoutButton);
+                        BrAPIService.authorizeBrAPI(sharedPreferences, prefActivity);
+                    }
                 }
-            } catch (Exception ex) {
-                Log.e("BrAPI", "Error starting BrAPI auth", ex);
+            }
+        });
+    }
+
+    private void registerBrapiButtonListeners(PreferencesActivity prefActivity, PreferencesFragment preferencesFragment) {
+        getFragmentManager().registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
+            @Override
+            public void onFragmentCreated(FragmentManager fm, Fragment f, Bundle savedInstanceState) {
+                super.onFragmentCreated(fm, f, savedInstanceState);
+
+                prefMgr = preferencesFragment.getPreferenceManager();
+                brapiAuthButton = prefMgr.findPreference("authorizeBrapi");
+                brapiLogoutButton = prefMgr.findPreference("revokeBrapiAuth");
+                brapiConfig = brapiAuthButton.getParent();
+                if (brapiAuthButton != null) {
+                    String brapiToken = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_TOKEN, null);
+                    String brapiHost = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_BASE_URL, null);
+
+                    brapiAuthButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            String brapiHost = preference.getSharedPreferences().getString(PreferencesActivity.BRAPI_BASE_URL, null);
+                            if (brapiHost != null) {
+                                BrAPIService.authorizeBrAPI(preference.getSharedPreferences(), prefActivity);
+                            }
+                            return true;
+                        }
+                    });
+
+                    if(brapiHost != null && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
+                        brapiAuthButton.setTitle(R.string.brapi_authorize);
+                        brapiAuthButton.setSummary(null);
+                        if (brapiToken != null) {
+                            brapiAuthButton.setTitle(R.string.brapi_reauthorize);
+                            brapiAuthButton.setSummary(getString(R.string.brapi_btn_auth_summary, brapiHost));
+                        }
+                    } else {
+                        brapiConfig.removePreference(brapiAuthButton);
+                        brapiConfig.removePreference(brapiLogoutButton);
+                    }
+                }
+
+                if (brapiLogoutButton != null) {
+                    brapiLogoutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            SharedPreferences preferences = getSharedPreferences("Settings", 0);
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
+                            editor.apply();
+
+                            brapiAuthButton.setTitle(R.string.brapi_authorize);
+                            brapiAuthButton.setSummary(null);
+
+                            brapiConfig.removePreference(brapiLogoutButton);
+                            return true;
+                        }
+                    });
+                }
+
+            }
+        }, false);
+    }
+
+    private void checkBrapiAuth() {
+        Uri data = this.getIntent().getData();
+        if (data != null && data.isHierarchical()) {
+            int status = Integer.parseInt(data.getQueryParameter("status"));
+
+            if(status == 200) {
+                SharedPreferences preferences = getSharedPreferences("Settings", 0);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(PreferencesActivity.BRAPI_TOKEN, data.getQueryParameter("token"));
+                editor.apply();
+
+                String brapiHost = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_BASE_URL, "");
+                brapiAuthButton.setTitle(R.string.brapi_reauthorize);
+                brapiAuthButton.setSummary(getString(R.string.brapi_btn_auth_summary, brapiHost));
+
+                brapiConfig.addPreference(brapiLogoutButton);
+
+                Toast.makeText(getApplicationContext(), R.string.brapi_auth_success, Toast.LENGTH_SHORT).show();
+            } else {
+                SharedPreferences preferences = getSharedPreferences("Settings", 0);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
+                editor.apply();
+
+                brapiAuthButton.setTitle(R.string.brapi_authorize);
+                brapiAuthButton.setSummary(null);
+
+                Toast.makeText(getApplicationContext(), R.string.brapi_auth_deny, Toast.LENGTH_SHORT).show();
             }
         }
     }
