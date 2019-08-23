@@ -6,21 +6,28 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 
-public class BrapiExportDialog extends Dialog implements android.view.View.OnClickListener{
+import java.util.List;
+import java.util.Map;
+
+public class BrapiExportDialog extends Dialog implements android.view.View.OnClickListener {
 
     private Button saveBtn, cancelBtn;
     private BrAPIService brAPIService;
     private Context context;
+    private DataHelper dataHelper;
 
     public BrapiExportDialog(@NonNull Context context) {
         super(context);
         this.context = context;
+        this.dataHelper = new DataHelper(context);
     }
 
     @Override
@@ -38,6 +45,7 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
         cancelBtn = findViewById(R.id.brapi_cancel_btn);
         cancelBtn.setOnClickListener(this);
 
+        loadStatistics();
     }
 
     @Override
@@ -45,7 +53,9 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
         switch (v.getId()) {
             case R.id.brapi_export_btn:
                 // TODO: hardcoded, replace with actual studyid
-                brAPIService.putStudyObservations("1001");
+
+                //brAPIService.putStudyObservations();
+                brAPIService.postPhenotypes();
                 break;
             case R.id.brapi_cancel_btn:
                 dismiss();
@@ -56,4 +66,14 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
         dismiss();
     }
 
+    private void loadStatistics() {
+        // TODO: don't run this twice, organize better
+        List<Map<String, String>> data = dataHelper.getDataBrapiExport();
+        String numUpdated = String.valueOf(data.size());
+
+        // For now everything is treated as new
+        ((TextView) findViewById(R.id.brapiNumNewValue)).setText(numUpdated);
+        // TODO: update with real numbers
+        ((TextView) findViewById(R.id.brapiNumEditedValue)).setText("0");
+    }
 }

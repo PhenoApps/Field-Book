@@ -12,7 +12,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.fieldbook.tracker.DataHelper;
@@ -23,10 +22,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -159,9 +162,87 @@ public class BrAPIService {
                 });
         queue.add(stringRequest);
     }
-    
+
+    public void postPhenotypes() {
+        String url = this.brapiBaseURL + "/phenotypes";
+
+        List<Map<String, String>> data = dataHelper.getDataBrapiExport();
+        // TODO: group by studyid and group observations in json
+
+        JSONObject request = new JSONObject();
+        JSONArray jsonData = new JSONArray();
+
+        try {
+            for (Map<String, String> observation : data) {
+
+                JSONObject observationJson = new JSONObject();
+                observationJson.put("collector", "NickFieldBook"); //TODO: get user profile name
+                observationJson.put("observationDbId", ""); // TODO: handle updates, not just new
+
+
+                SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
+                        Locale.getDefault());
+                Date time = timeStamp.parse(observation.get("timeTaken"));
+                String iso8601Time = TimestampUtils.getISO8601StringForDate(time);
+
+
+                observationJson.put("observationTimeStamp", iso8601Time);
+                observationJson.put("observationUnitDbId", observation.get("observationUnitDbId"));
+                observationJson.put("observationVariableDbId", "MO_123:100002"); // TODO: get this from somewhere
+                observationJson.put("observationVariableName", "Plant Height"); // TODO: get this from somewhere
+                observationJson.put("season", "Spring 2018"); // Needs to be two words to work around BrAPI test server bug
+                observationJson.put("value", observation.get("userValue"));
+                JSONArray observations = new JSONArray();
+                observations.put(observationJson);
+                JSONObject observationStudy = new JSONObject();
+                observationStudy.put("studyDbId", observation.get("exp_alias"));
+                observationStudy.put("observatioUnitDbId", "1"); // TODO: get this from somewhere
+                observationStudy.put("observations", observations);
+                jsonData.put(observationStudy);
+            }
+
+            request.put("data", jsonData);
+            Log.d("json", request.toString());
+
+
+        }catch (JSONException e){
+            e.printStackTrace();
+        }catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest putObservationsRequest = new JsonObjectRequest(Request.Method.POST, url, request,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        //TODO: verify that response indicates everything was written
+                        //TODO: update observationDId for observations in database
+                        Toast.makeText(context.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(context.getApplicationContext(), "BrAPI Export Failed", Toast.LENGTH_SHORT).show();
+                        Log.e("error", error.toString());
+                    }
+                })
+        {
+            @Override
+            public Map<String, String> getHeaders () throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Content-Type", "application/json");
+                headers.put("Accept", "application/json");
+                headers.put("Authorization", "Bearer YYYY");
+                return headers;
+            }
+        };
+        queue.add(putObservationsRequest);
+    }
+
     // dummy data test for now
-    public void putStudyObservations(final String studyDbId) {
+    public void putStudyObservations() {
+        final String studyDbId = "1001";
         String url = this.brapiBaseURL + "/studies/" + studyDbId + "/observations";
 
         // Send dummy data to test server creating new observations
