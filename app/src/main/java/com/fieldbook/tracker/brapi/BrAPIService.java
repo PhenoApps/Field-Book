@@ -140,7 +140,7 @@ public class BrAPIService {
     // Get the ontology from breedbase so the users can select the ontology
     public void getOntology(final Function< List<TraitObject>, Void > function) {
 
-        String url = this.brapiBaseURL + "/variables";
+        String url = this.brapiBaseURL + "/variables?pageSize=1000&page=0";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -501,10 +501,12 @@ public class BrAPIService {
             dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
         }
 
-        // The traits are now retrieved from a different avenue.
-        /*for(TraitObject t : studyDetails.getTraits()){
+        // Get the traits already associated with this study
+        //TODO: Traits likely need to be made more field specific if we are to use this.
+        // Or give them the ability to delete the existing traits when we import these ones.
+        for(TraitObject t : studyDetails.getTraits()) {
             dataHelper.insertTraits(t);
-        }*/
+        }
     }
 
 }
