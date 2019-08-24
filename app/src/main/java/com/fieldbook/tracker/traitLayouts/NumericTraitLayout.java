@@ -4,43 +4,133 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.text.TextWatcher;
+import android.util.AttributeSet;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
+import com.fieldbook.tracker.MainActivity;
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.traits.TraitObject;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class NumericTraitLayout extends TraitLayout {
 
+    private Map<Integer, Button> numberButtons;
+
     public NumericTraitLayout(Context context) {
         super(context);
-        throw new RuntimeException("Stub!");
     }
 
+    public NumericTraitLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
-    public void loadLayout(EditText etCurVal, DataWrapper dataWrapper, HashMap newTraits,
-                           TraitObject currentTrait, String displayColor, TextWatcher cvNum,
-                           TextWatcher cvText, SeekBar seekBar, SeekBar.OnSeekBarChangeListener seekListener, Handler mHandler){
+    public NumericTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
 
-        etCurVal.setVisibility(EditText.VISIBLE);
+    @Override
+    public void init(){
+        numberButtons = new LinkedHashMap<>();
+        numberButtons.put(R.id.k1, (Button) findViewById(R.id.k1));
+        numberButtons.put(R.id.k2, (Button) findViewById(R.id.k2));
+        numberButtons.put(R.id.k3, (Button) findViewById(R.id.k3));
+        numberButtons.put(R.id.k4, (Button) findViewById(R.id.k4));
+        numberButtons.put(R.id.k5, (Button) findViewById(R.id.k5));
+        numberButtons.put(R.id.k6, (Button) findViewById(R.id.k6));
+        numberButtons.put(R.id.k7, (Button) findViewById(R.id.k7));
+        numberButtons.put(R.id.k8, (Button) findViewById(R.id.k8));
+        numberButtons.put(R.id.k9, (Button) findViewById(R.id.k9));
+        numberButtons.put(R.id.k10, (Button) findViewById(R.id.k10));
+        numberButtons.put(R.id.k11, (Button) findViewById(R.id.k11));
+        numberButtons.put(R.id.k12, (Button) findViewById(R.id.k12));
+        numberButtons.put(R.id.k13, (Button) findViewById(R.id.k13));
+        numberButtons.put(R.id.k14, (Button) findViewById(R.id.k14));
+        numberButtons.put(R.id.k15, (Button) findViewById(R.id.k15));
+        numberButtons.put(R.id.k16, (Button) findViewById(R.id.k16));
 
-        if (newTraits.containsKey(currentTrait.getTrait())) {
-            etCurVal.removeTextChangedListener(cvNum);
-            etCurVal.setText(newTraits.get(currentTrait.getTrait()).toString());
-            etCurVal.setTextColor(Color.parseColor(displayColor));
-            etCurVal.addTextChangedListener(cvNum);
+        for(Button numButton: numberButtons.values()){
+            numButton.setOnClickListener(new NumberButtonOnClickListener());
+        }
+
+        numberButtons.get(R.id.k16).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                getEtCurVal().removeTextChangedListener(getCvNum());
+                getEtCurVal().setText("");
+                removeTrait(getCurrentTrait().getTrait());
+                getEtCurVal().addTextChangedListener(getCvNum());
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public void loadLayout(){
+
+        getEtCurVal().setVisibility(EditText.VISIBLE);
+
+        if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
+            getEtCurVal().removeTextChangedListener(getCvNum());
+            getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
+            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
+            getEtCurVal().addTextChangedListener(getCvNum());
         } else {
-            etCurVal.removeTextChangedListener(cvNum);
-            etCurVal.setText("");
-            etCurVal.setTextColor(Color.BLACK);
+            getEtCurVal().removeTextChangedListener(getCvNum());
+            getEtCurVal().setText("");
+            getEtCurVal().setTextColor(Color.BLACK);
 
-            if (currentTrait.getDefaultValue() != null && currentTrait.getDefaultValue().length() > 0) {
-                etCurVal.setText(currentTrait.getDefaultValue());
-                //updateTrait(currentTrait.trait, currentTrait.format, etCurVal.getText().toString());
+            if (getCurrentTrait().getDefaultValue() != null && getCurrentTrait().getDefaultValue().length() > 0) {
+                getEtCurVal().setText(getCurrentTrait().getDefaultValue());
+                updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
             }
 
-            etCurVal.addTextChangedListener(cvNum);
+            getEtCurVal().addTextChangedListener(getCvNum());
+        }
+    }
+
+    @Override
+    public void deleteTraitListener() {
+
+    }
+
+    private class NumberButtonOnClickListener implements OnClickListener{
+
+        @Override
+        public void onClick(View view) {
+
+            String v = "";
+
+            if(numberButtons.containsKey(view.getId())){
+                v = numberButtons.get(view.getId()).getText().toString();
+            }
+
+            if (view.getId() == R.id.k16) {
+                if(getEtCurVal().getText().toString().length()>0) {
+                    getEtCurVal().setText(getEtCurVal().getText().toString().substring(0, getEtCurVal().getText().toString().length()-1));
+                }
+
+                if(getEtCurVal().getText().toString().length()==0) {
+                    getEtCurVal().removeTextChangedListener(getCvNum());
+                    getEtCurVal().setText("");
+                    removeTrait(getCurrentTrait().getTrait());
+                    getEtCurVal().addTextChangedListener(getCvNum());
+                }
+            } else {
+                if (getEtCurVal().getText().toString().matches(".*\\d.*")
+                        && v.matches(".*\\d.*")
+                        && getVisibility() == View.VISIBLE
+                        && !getEtCurVal().getText().toString().contains("/")) {
+                    makeToast(getContext().getString(R.string.trait_error_disease_severity));
+                } else {
+                    getEtCurVal().setText(getEtCurVal().getText().toString() + v);
+                }
+            }
         }
     }
 }
