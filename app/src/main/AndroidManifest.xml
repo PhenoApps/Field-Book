@@ -138,7 +138,17 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppThemeAction" />
+            android:theme="@style/AppThemeAction" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="fieldbook" />
+            </intent-filter>
+        </activity>
 
         <provider
             android:name=".GenericFileProvider"

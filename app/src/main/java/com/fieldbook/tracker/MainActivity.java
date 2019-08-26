@@ -2,11 +2,16 @@ package com.fieldbook.tracker;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.ExifInterface;
+import android.os.Parcel;
+import android.os.ResultReceiver;
 import android.provider.Settings;
 import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
@@ -84,6 +89,7 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -96,6 +102,8 @@ import java.util.Locale;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static com.fieldbook.tracker.ConfigActivity.dt;
 
 /**
  * All main screen logic resides here
@@ -224,6 +232,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     TextView azimutTv;
     SensorEventListener mEventListener;
 
+    String[] options;
+    String[] labelCopiesArray;
+    String[] labelSizeArray;
+    ArrayList<String> optionsList;
+    ArrayAdapter<String> sizeArrayAdapter;
+    ArrayAdapter<String> fieldArrayAdapter;
+    ArrayAdapter<String> copiesArrayAdapter;
+    ImageView exampleLabel;
+
+    Spinner labelsize;
+    Spinner textfield1;
+    Spinner textfield2;
+    Spinner textfield3;
+    Spinner textfield4;
+    Spinner barcodefield;
+    Spinner labelcopies;
+
     /**
      * Trait layouts
      */
@@ -240,6 +265,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     LinearLayout traitMulticat;
     LinearLayout traitLocation;
     LinearLayout traitAngle;
+    LinearLayout traitBarcode;
+    LinearLayout traitLabelprint;
 
     private Boolean dataLocked = false;
 
@@ -299,6 +326,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         traitMulticat = findViewById(R.id.multicatLayout);
         traitLocation = findViewById(R.id.locationLayout);
         traitAngle = findViewById(R.id.angleLayout);
+        traitBarcode = findViewById(R.id.barcodeLayout);
+        traitLabelprint = findViewById(R.id.labelprintLayout);
 
         traitType = findViewById(R.id.traitType);
         newTraits = new HashMap();
@@ -618,6 +647,42 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         List<String> tempsNoFile = Arrays.asList("0","5","10","15","20","25","30","35","40","45","50","55","60","65","70","75","80","85","90","95","100");
         String token1;
         Scanner inFile1 = null;
+
+        prefixTraits = dt.getRangeColumnNames();
+
+        optionsList = new ArrayList<>(Arrays.asList(prefixTraits));
+        optionsList.add("date");
+        optionsList.add("trial_name");
+        optionsList.add("blank");
+        options = new String[ optionsList.size() ];
+        optionsList.toArray( options );
+
+        fieldArrayAdapter = new ArrayAdapter<>(
+                MainActivity.this, R.layout.custom_spinnerlayout, options);
+
+        labelSizeArray = new String[]{"3\" x 2\" simple", "3\" x 2\" detailed", "2\" x 1\" simple", "2\" x 1\" detailed"};
+        sizeArrayAdapter = new ArrayAdapter<>(
+                MainActivity.this, R.layout.custom_spinnerlayout, labelSizeArray);
+
+        labelCopiesArray = new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+        copiesArrayAdapter = new ArrayAdapter<>(
+                MainActivity.this, R.layout.custom_spinnerlayout, labelCopiesArray);
+
+        labelsize = traitLabelprint.findViewById(R.id.labelsize);
+        textfield1 = traitLabelprint.findViewById(R.id.textfield);
+        textfield2 = traitLabelprint.findViewById(R.id.textfield2);
+        textfield3 = traitLabelprint.findViewById(R.id.textfield3);
+        textfield4 = traitLabelprint.findViewById(R.id.textfield4);
+        barcodefield = traitLabelprint.findViewById(R.id.barcodefield);
+        labelcopies = traitLabelprint.findViewById(R.id.labelcopies);
+
+        labelsize.setAdapter(sizeArrayAdapter);
+        textfield1.setAdapter(fieldArrayAdapter);
+        textfield2.setAdapter(fieldArrayAdapter);
+        textfield3.setAdapter(fieldArrayAdapter);
+        textfield4.setAdapter(fieldArrayAdapter);
+        barcodefield.setAdapter(fieldArrayAdapter);
+        labelcopies.setAdapter(copiesArrayAdapter);
 
         try {
             inFile1 = new Scanner(new File(Constants.TRAITPATH + "/severity.txt"));
@@ -1047,7 +1112,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         if (pos < 1)
                             return;
 
-                        if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
                                 currentTrait.getFormat())) {
                             paging = pos;
                             break;
@@ -1061,7 +1126,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 }
 
                 // Refresh onscreen controls
-                cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
+                cRange = dt.getRange(rangeID[paging - 1]);
 
                 saveLastPlot();
 
@@ -1074,7 +1139,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     }
                 }
 
-                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                         .clone();
 
                 initWidgets(true);
@@ -1106,7 +1171,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             return;
                         }
 
-                        if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
                                 currentTrait.getFormat())) {
                             paging = pos;
                             break;
@@ -1120,7 +1185,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 }
 
                 // Refresh onscreen controls
-                cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
+                cRange = dt.getRange(rangeID[paging - 1]);
 
                 saveLastPlot();
 
@@ -1131,7 +1196,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         playSound("plonk");
                     }
                 }
-                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                         .clone();
 
                 initWidgets(true);
@@ -1236,7 +1301,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 switch (currentTrait.getFormat()) {
                     case "categorical":
                         newTraits.remove(currentTrait.getTrait());
-                        ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
+                        dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
                         setCategoricalButtons(buttonArray, null);
                         break;
                     case "percent":
@@ -1307,7 +1372,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         break;
                     default:
                         newTraits.remove(currentTrait.getTrait());
-                        ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
+                        dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
                         etCurVal.setText("");
                         break;
                 }
@@ -1371,7 +1436,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
         if (button.getText().toString().equals(curCat)) {
             newTraits.remove(currentTrait.getTrait());
-            ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
+            dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
             setCategoricalButtons(buttonArray, null);
             return true;
         }
@@ -1391,8 +1456,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                     if (pos < 1)
                         pos = rangeID.length;
-
-                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                    if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
                             currentTrait.getFormat())) {
                         paging = pos;
                         break;
@@ -1406,7 +1470,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
             // Refresh onscreen controls
-            cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
+            cRange = dt.getRange(rangeID[paging - 1]);
 
             saveLastPlot();
 
@@ -1436,7 +1500,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             displayRange(cRange);
 
-            newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+            newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                     .clone();
 
             initWidgets(true);
@@ -1465,7 +1529,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         return;
                     }
 
-                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                    if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
                             currentTrait.getFormat())) {
                         paging = pos;
                         break;
@@ -1479,7 +1543,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
             // Refresh onscreen controls
-            cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
+            cRange = dt.getRange(rangeID[paging - 1]);
             saveLastPlot();
 
             if (cRange.plot_id.length() == 0)
@@ -1505,7 +1569,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
             displayRange(cRange);
-            newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+            newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                     .clone();
 
             initWidgets(true);
@@ -1517,7 +1581,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         if (rangeID == null)
             return;
 
-        newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                 .clone();
 
         initWidgets(true);
@@ -1553,6 +1617,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         traitMulticat.setVisibility(View.GONE);
         traitLocation.setVisibility(View.GONE);
         traitAngle.setVisibility(View.GONE);
+        traitBarcode.setVisibility(View.GONE);
+        traitLabelprint.setVisibility(View.GONE);
     }
 
     // This is central to the application
@@ -1561,7 +1627,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
-        if (!ConfigActivity.dt.isTableEmpty(DataHelper.RANGE)) {
+        if (!dt.isTableEmpty(DataHelper.RANGE)) {
             selectorLayoutConfigurator.configureDropdownArray(cRange.plot_id);
         }
 
@@ -1586,7 +1652,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // trait is unique, format is not
 
-        String[] traits = ConfigActivity.dt.getVisibleTrait();
+        String[] traits = dt.getVisibleTrait();
 
         int traitPosition;
 
@@ -1609,7 +1675,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                            int arg2, long arg3) {
 
                     // This updates the in memory hashmap from database
-                    currentTrait = ConfigActivity.dt.getDetail(traitType.getSelectedItem()
+                    currentTrait = dt.getDetail(traitType.getSelectedItem()
                             .toString());
 
                     imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -1935,7 +2001,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         if (img.listFiles() != null) {
 
                             //TODO causes crash
-                            photoLocation = ConfigActivity.dt.getPlotPhotos(cRange.plot_id, currentTrait.getTrait());
+                            photoLocation = dt.getPlotPhotos(cRange.plot_id, currentTrait.getTrait());
 
                             for (int i = 0; i < photoLocation.size(); i++) {
                                 drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
@@ -2112,6 +2178,263 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                             sensorManager.registerListener(mEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
                                     SensorManager.SENSOR_DELAY_NORMAL);
                         }
+                    } else if(currentTrait.getFormat().equals("barcode")) {
+                        hideLayouts();
+                        traitBarcode.setVisibility(View.VISIBLE);
+
+                        etCurVal.setVisibility(EditText.VISIBLE);
+
+
+                    } else if(currentTrait.getFormat().equals("zebra label print")) {
+                        hideLayouts();
+                        traitLabelprint.setVisibility(View.VISIBLE);
+                        etCurVal.setVisibility(EditText.GONE);
+
+                        PackageManager pm = getPackageManager();
+                        try {
+                            pm.getPackageInfo("com.zebra.printconnect", PackageManager.GET_ACTIVITIES);
+
+                            final ImageView exampleLabel = (ImageView) traitLabelprint.findViewById(R.id.labelPreview);
+
+
+                            if (!labelsize.equals(null)) {
+                                int spinnerPosition = sizeArrayAdapter.getPosition(ep.getString("SIZE", labelSizeArray[0]));
+                                labelsize.setSelection(spinnerPosition);
+
+                                if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed") || labelsize.getSelectedItem().toString().equals("2\" x 1\" detailed")) { //if extra text, make extra text spinners visible
+                                    ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
+                                    ((View) textfield3.getParent()).setVisibility(View.VISIBLE);
+                                    ((View) textfield4.getParent()).setVisibility(View.VISIBLE);
+                                    exampleLabel.setBackgroundResource(R.drawable.label_detailed);
+                                } else { //else setVisibility(View.GONE) for text spinners=
+                                    ((View) textfield2.getParent()).setVisibility(View.GONE);
+                                    ((View) textfield3.getParent()).setVisibility(View.GONE);
+                                    ((View) textfield4.getParent()).setVisibility(View.GONE);
+                                    exampleLabel.setBackgroundResource(R.drawable.label_simple);
+                                }
+                            }
+                            if (!textfield1.equals(null)) {
+                                int spinnerPosition = fieldArrayAdapter.getPosition(ep.getString("TEXT", options[0]));
+                                textfield1.setSelection(spinnerPosition);
+                            }
+                            if (!textfield2.equals(null)) {
+                                int spinnerPosition = fieldArrayAdapter.getPosition(ep.getString("TEXT2", options[0]));
+                                textfield2.setSelection(spinnerPosition);
+                            }
+                            if (!textfield3.equals(null)) {
+                                int spinnerPosition = fieldArrayAdapter.getPosition(ep.getString("TEXT3", options[0]));
+                                textfield3.setSelection(spinnerPosition);
+                            }
+                            if (!textfield4.equals(null)) {
+                                int spinnerPosition = fieldArrayAdapter.getPosition(ep.getString("TEXT4", options[0]));
+                                textfield4.setSelection(spinnerPosition);
+                            }
+                            if (!barcodefield.equals(null)) {
+                                int spinnerPosition = fieldArrayAdapter.getPosition(ep.getString("BARCODE", options[0]));
+                                barcodefield.setSelection(spinnerPosition);
+                            }
+                            if (!labelcopies.equals(null)) {
+                                int spinnerPosition = copiesArrayAdapter.getPosition(ep.getString("COPIES", labelCopiesArray[0]));
+                                labelcopies.setSelection(spinnerPosition);
+                            }
+
+                            // Change spinner visibility, label example image for detailed label option
+                            labelsize.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+                                @Override
+                                public void onItemSelected(AdapterView<?> arg0, View arg1,
+                                                           int pos, long arg3) {
+                                    Log.d(TAG, labelsize.getSelectedItem().toString());
+
+                                    if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed") || labelsize.getSelectedItem().toString().equals("2\" x 1\" detailed")) {
+                                        ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
+                                        ((View) textfield3.getParent()).setVisibility(View.VISIBLE);
+                                        ((View) textfield4.getParent()).setVisibility(View.VISIBLE);
+                                        exampleLabel.setBackgroundResource(R.drawable.label_detailed);
+                                    } else { //else setVisibility(View.GONE) for text spinners=
+                                        ((View) textfield2.getParent()).setVisibility(View.GONE);
+                                        ((View) textfield3.getParent()).setVisibility(View.GONE);
+                                        ((View) textfield4.getParent()).setVisibility(View.GONE);
+                                        exampleLabel.setBackgroundResource(R.drawable.label_simple);
+                                    }
+
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> arg0) {
+
+                                }
+                            });
+
+                            //Get and display printer status
+                            final TextView printStatus = (TextView) traitLabelprint.findViewById(R.id.printStatus);
+                            Intent statusIntent = new Intent();
+                            statusIntent.setComponent(new ComponentName("com.zebra.printconnect",
+                                    "com.zebra.printconnect.print.GetPrinterStatusService"));
+
+                            ResultReceiver buildIPCSafeReceiver2 = new
+                                    ResultReceiver(null) {
+                                        @Override
+                                        protected void onReceiveResult(int resultCode, Bundle resultData) {
+                                            if (resultCode == 0) { // Result code 0 indicates success
+                                                // Handle successful printer status retrieval
+                                                HashMap<String, String> printerStatusMap = (HashMap<String, String>)
+                                                        resultData.getSerializable("PrinterStatusMap");
+                                                final String successMessage = printerStatusMap.get("friendlyName") + " is connected.";
+                                                Log.d(TAG, successMessage);
+                                                runOnUiThread(new Runnable() {
+                                                    public void run() {
+                                                        printStatus.setText(successMessage);
+                                                    }
+                                                });
+                                            } else {
+                                                // Handle unsuccessful printer status retrieval
+                                                final String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
+                                                Log.e(TAG, errorMessage);
+                                                runOnUiThread(new Runnable() {
+                                                    public void run() {
+                                                        printStatus.setText(errorMessage);
+                                                    }
+                                                });
+                                            }
+
+                                        }
+                                    };
+
+                            statusIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver2));
+                            startService(statusIntent);
+
+                            ImageButton printLabel = traitLabelprint.findViewById(R.id.printLabelButton);
+                            printLabel.setOnClickListener(new OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    HashMap<String, String> labelSizes = new HashMap<String, String>();
+                                    labelSizes.put(labelSizeArray[0], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO180,120^BQ,,sizeb^FDMA,barcode^FS^XZ");
+                                    labelSizes.put(labelSizeArray[1], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO30,120^BQ,,sizeb^FDMA,barcode^FS^FO260,140^FB349,2,0,C,0^A0,size2,^FDtext2^FS^FO260,270^FB349,2,0,C,0^A0,size3,^FDtext3^FS^FO260,320^FB349,2,0,C,0^A0,size4,^FDtext4^FS^XZ");
+                                    labelSizes.put(labelSizeArray[2], "^XA^POI^PW406^LL0203^FO0,10^FB399,2,0,C,0^A0,size1,^FDtext1^FS^FO125,50^BQ,,sizeb^FDMA,barcode^FS^XZ");
+                                    labelSizes.put(labelSizeArray[3], "^XA^POI^PW406^LL0203^FO15,50^BQ,,sizeb^FDMA,barcode^FS^FO0,10^FB406,1,0,C,0^A0,size1,^FDtext1^FS^FO155,60^FB250,1,0,C,0^A0,size2,^FDtext2^FS^FO155,130^FB250,1,0,C,0^A0,size3,^FDtext3^FS^FO155,155^FB250,1,0,C,0^A0,size4,^FDtext4^FS^XZ");
+
+                                    //get and handle selected items from dropdowns
+                                    String size = labelsize.getSelectedItem().toString();
+                                    String text1 = getValueFromSpinner(textfield1, options);
+                                    String text2 = getValueFromSpinner(textfield2, options);
+                                    String text3 = getValueFromSpinner(textfield3, options);
+                                    String text4 = getValueFromSpinner(textfield4, options);
+                                    String barcode = getValueFromSpinner(barcodefield, options);
+
+                                    Integer copiespos = labelcopies.getSelectedItemPosition();
+                                    String copies = labelcopies.getSelectedItem().toString();
+
+                                    // Save selected options for next time
+                                    Editor ed = ep.edit();
+                                    ed.putString("SIZE", size);
+                                    ed.putString("TEXT", textfield1.getSelectedItem().toString());
+                                    ed.putString("TEXT2", textfield2.getSelectedItem().toString());
+                                    ed.putString("TEXT3", textfield3.getSelectedItem().toString());
+                                    ed.putString("TEXT4", textfield4.getSelectedItem().toString());
+                                    ed.putString("BARCODE", barcodefield.getSelectedItem().toString());
+                                    ed.putString("COPIES", copies);
+                                    ed.apply();
+
+                                    Integer length = barcode.length();
+                                    Integer barcode_size = 6;
+
+                                    // Scale barcode based on label size and variable field length
+                                    if (size.equals("3\" x 2\" simple")) {
+                                        barcode_size = 10 - (length/15);
+                                    } else if (size.equals("3\" x 2\" detailed")) {
+                                        barcode_size = 9 - (length/15);
+                                    } else if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
+                                        barcode_size = 5 - (length / 15);
+                                    } else {
+                                        Log.d(TAG, "Matched no sizes");
+                                    }
+
+                                    Integer dotsAvailable1;
+                                    Integer dotsAvailable2;
+
+                                    // Scale text based on label size and variable field length
+                                    if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
+                                        dotsAvailable1 = 399;
+                                        dotsAvailable2 = 250;
+
+                                    } else {
+                                        dotsAvailable1 = 599;
+                                        dotsAvailable2 = 349;
+                                    }
+
+                                    String size1 = Integer.toString(dotsAvailable1 * 3 / (text1.length() + 13));
+                                    String size2 = Integer.toString(dotsAvailable2 * 2 / (text2.length() + 5));
+                                    String size3 = Integer.toString(dotsAvailable2 * 2 / (text3.length() + 5));
+                                    String size4 = Integer.toString(dotsAvailable2 * 2 / (text4.length() + 5));
+
+                                    // Replace placeholders in zpl code
+                                    String labelData = labelSizes.get(size);
+                                    labelData = labelData.replace("text1", text1);
+                                    labelData = labelData.replace("text2", text2);
+                                    labelData = labelData.replace("text3", text3);
+                                    labelData = labelData.replace("text4", text4);
+                                    labelData = labelData.replace("size1", size1);
+                                    labelData = labelData.replace("size2", size2);
+                                    labelData = labelData.replace("size3", size3);
+                                    labelData = labelData.replace("size4", size4);
+                                    labelData = labelData.replace("barcode", barcode);
+                                    labelData = labelData.replace("sizeb", Integer.toString(barcode_size));
+
+                                    Log.d(TAG, labelData);
+
+                                    String passthroughData = "";
+                                    for (int j = 0; j <= copiespos; j++) {
+                                        passthroughData += labelData;
+                                    }
+
+                                    byte[] passthroughBytes = null;
+
+                                    try {
+                                        passthroughBytes = passthroughData.getBytes("UTF-8");
+                                    } catch (UnsupportedEncodingException e) {
+                                        // Handle exception
+                                    }
+
+                                    Intent printIntent = new Intent();
+                                    printIntent.setComponent(new ComponentName("com.zebra.printconnect", "com.zebra.printconnect.print.PassthroughService"));
+                                    printIntent.putExtra("com.zebra.printconnect.PrintService.PASSTHROUGH_DATA", passthroughBytes);
+
+                                    ResultReceiver buildIPCSafeReceiver = new ResultReceiver(null) {
+                                        @Override
+                                        protected void onReceiveResult(int resultCode, Bundle resultData) {
+                                            if (resultCode == 0) {
+                                                // Handle successful print
+                                                runOnUiThread(new Runnable() {
+                                                    public void run() {
+                                                        printStatus.setText("Label printed!");
+                                                    }
+                                                });
+                                            } else {
+                                                // Error message (null on successful print)
+                                                // Handle unsuccessful print
+                                                String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
+                                                Log.e(TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
+                                                runOnUiThread(new Runnable() {
+                                                    public void run() {
+                                                        printStatus.setText("Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
+
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    };
+
+                                    printIntent.setExtrasClassLoader(getClassLoader());
+                                    printIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver));
+                                    startService(printIntent);
+                                }
+                            });
+
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Log.d(TAG, "Print Connect package not found");
+                            showDownloadDialog();
+                        }
                     } else {
                         traitText.setVisibility(View.GONE);
                         traitNumeric.setVisibility(View.GONE);
@@ -2138,6 +2461,62 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             traitType.setSelection(traitPosition);
         }
+    }
+
+    private AlertDialog showDownloadDialog() {
+        Log.d(TAG, "Building Download dialog");
+        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+        String title = "Install PrintConnect?";
+        String message = "This application requires PrintConnect. Would you like to install it?";
+        String buttonYes = "Yes";
+        String buttonNo = "No";
+        final String PC_PACKAGE = "com.zebra.printconnect";
+
+        downloadDialog.setTitle(title);
+        downloadDialog.setMessage(message);
+        downloadDialog.setPositiveButton(buttonYes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                Uri uri = Uri.parse("market://details?id=" + PC_PACKAGE);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException anfe) {
+                    // Hmm, market is not installed
+                    Log.w(TAG, "Google Play is not installed; cannot install " + PC_PACKAGE);
+                }
+            }
+        });
+        downloadDialog.setNegativeButton(buttonNo, null);
+        downloadDialog.setCancelable(true);
+        return downloadDialog.show();
+    }
+
+
+    public static ResultReceiver receiverForSending(ResultReceiver actualReceiver) {
+        Parcel parcel = Parcel.obtain();
+        actualReceiver.writeToParcel(parcel,0);
+        parcel.setDataPosition(0);
+        ResultReceiver receiverForSending = ResultReceiver.CREATOR.createFromParcel(parcel);
+        parcel.recycle();
+        return receiverForSending;
+    }
+
+    public String getValueFromSpinner(Spinner spinner, String[] options) {
+        Calendar calendar = Calendar.getInstance();
+        String value = "";
+        if (spinner.getSelectedItem().toString().equals("date")) {
+            value = dateFormat.format(calendar.getTime());
+        } else if (spinner.getSelectedItem().toString().equals("trial_name")) {
+            value = ep.getString("FieldFile", "");
+        } else if (spinner.getSelectedItem().toString().equals("blank")) {
+            value = "";
+        } else {
+            Integer pos = spinner.getSelectedItemPosition();
+            value = dt.getDropDownRange(options[pos], cRange.plot_id)[0];
+        }
+        return value;
     }
 
     // For audio trait type
@@ -2297,7 +2676,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private void moveToResult(int j) {
         if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-            if (!ConfigActivity.dt.getTraitExists(rangeID[j - 1], currentTrait.getTrait(),
+            if (!dt.getTraitExists(rangeID[j - 1], currentTrait.getTrait(),
                     currentTrait.getFormat())) {
                 paging = j;
 
@@ -2305,7 +2684,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 // plot
                 displayRange(cRange);
 
-                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(
+                newTraits = (HashMap) dt.getUserDetail(
                         cRange.plot_id).clone();
 
                 initWidgets(false);
@@ -2316,7 +2695,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             // Reload traits based on the selected plot
             displayRange(cRange);
 
-            newTraits = (HashMap) ConfigActivity.dt.getUserDetail(
+            newTraits = (HashMap) dt.getUserDetail(
                     cRange.plot_id).clone();
 
             initWidgets(false);
@@ -2327,7 +2706,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public void onPause() {
         // Backup database
         try {
-            ConfigActivity.dt.exportDatabase("backup");
+            dt.exportDatabase("backup");
             File exportedDb = new File(Constants.BACKUPPATH + "/" + "backup.db");
             File exportedSp = new File(Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
             Utils.scanFile(MainActivity.this,exportedDb);
@@ -2404,33 +2783,33 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             paging = 1;
 
-            rangeID = ConfigActivity.dt.getAllRangeID();
+            rangeID = dt.getAllRangeID();
 
             if (rangeID != null) {
-                cRange = ConfigActivity.dt.getRange(rangeID[0]);
+                cRange = dt.getRange(rangeID[0]);
 
                 //TODO NullPointerException
                 lastRange = cRange.range;
                 displayRange(cRange);
 
-                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id).clone();
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id).clone();
             }
 
-            prefixTraits = ConfigActivity.dt.getRangeColumnNames();
+            prefixTraits = dt.getRangeColumnNames();
 
             initWidgets(false);
             traitType.setSelection(0);
 
             // try to go to last saved plot
             if(ep.getString("lastplot",null)!=null) {
-                rangeID = ConfigActivity.dt.getAllRangeID();
+                rangeID = dt.getAllRangeID();
                 moveToSearch("id",rangeID,null,null,ep.getString("lastplot",null));
             }
 
         } else if (partialReload) {
             partialReload = false;
             displayRange(cRange);
-            prefixTraits = ConfigActivity.dt.getRangeColumnNames();
+            prefixTraits = dt.getRangeColumnNames();
             initWidgets(false);
 
         } else if (searchReload) {
@@ -2463,10 +2842,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        ConfigActivity.dt.deleteTrait(cRange.plot_id, parent);
+        dt.deleteTrait(cRange.plot_id, parent);
 
         String exp_id = Integer.toString(ep.getInt("ExpID", 0));
-        ConfigActivity.dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id); //TODO add notes and exp_id
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id); //TODO add notes and exp_id
     }
 
     // Delete trait, including from database
@@ -2481,7 +2860,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        ConfigActivity.dt.deleteTrait(cRange.plot_id, parent);
+        dt.deleteTrait(cRange.plot_id, parent);
     }
 
     /**
@@ -2612,6 +2991,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 dataLocked = !dataLocked;
                 lockData(dataLocked);
                 break;
+            case android.R.id.home:
+                finish();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -2704,7 +3086,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         exportButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 inputPlotId = barcodeId.getText().toString();
-                rangeID = ConfigActivity.dt.getAllRangeID();
+                rangeID = dt.getAllRangeID();
                 moveToSearch("id",rangeID,null,null,inputPlotId);
                 goToId.dismiss();
             }
@@ -2731,16 +3113,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 return;
             }
 
-            if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+            if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
                     currentTrait.getFormat())) {
                 paging = pos;
                 break;
             }
         }
-        cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
+        cRange = dt.getRange(rangeID[paging - 1]);
         displayRange(cRange);
         lastRange = cRange.range;
-        newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                 .clone();
         initWidgets(true);
     }
@@ -2779,7 +3161,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 break;
 
             case R.id.record:
-                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                         .clone();
 
                 if (mListening) {
@@ -3015,7 +3397,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     Utils.scanFile(MainActivity.this,f);
 
                     // Remove individual images
-                    ConfigActivity.dt.deleteTraitByValue(cRange.plot_id, currentTrait.getTrait(), item);
+                    dt.deleteTraitByValue(cRange.plot_id, currentTrait.getTrait(), item);
 
                     // Only do a purge by trait when there are no more images left
                     if (photoLocation.size() == 0)
@@ -3074,7 +3456,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private String getRep() {
-        int repInt = ConfigActivity.dt.getRep(MainActivity.cRange.plot_id,currentTrait.getTrait());
+        int repInt = dt.getRep(MainActivity.cRange.plot_id,currentTrait.getTrait());
         return String.valueOf(repInt);
     }
 
@@ -3127,13 +3509,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
         });
 
-        String[] traitList = ConfigActivity.dt.getAllTraits();
+        String[] traitList = dt.getAllTraits();
         StringBuilder data = new StringBuilder();
 
         //TODO this test crashes app
         if (cRange != null) {
             for (String s : prefixTraits) {
-                data.append(s).append(": ").append(ConfigActivity.dt.getDropDownRange(s, cRange.plot_id)[0]).append("\n");
+                data.append(s).append(": ").append(dt.getDropDownRange(s, cRange.plot_id)[0]).append("\n");
             }
         }
 
@@ -3205,10 +3587,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         newTraits.put(parent, value);
 
-        ConfigActivity.dt.deleteTraitByValue(cRange.plot_id, parent, value);
+        dt.deleteTraitByValue(cRange.plot_id, parent, value);
 
         String exp_id = Integer.toString(ep.getInt("ExpID", 0));
-        ConfigActivity.dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName","") + " " + ep.getString("LastName",""), ep.getString("Location",""),"",exp_id); //TODO add notes and exp_id
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName","") + " " + ep.getString("LastName",""), ep.getString("Location",""),"",exp_id); //TODO add notes and exp_id
     }
 
     private void displayPlotImage(String path) {
@@ -3321,7 +3703,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case 2:
                 if (resultCode == RESULT_OK) {
                     inputPlotId = data.getStringExtra("result");
-                    rangeID = ConfigActivity.dt.getAllRangeID();
+                    rangeID = dt.getAllRangeID();
                     moveToSearch("id",rangeID,null,null,inputPlotId);
                 }
                 break;
@@ -3335,7 +3717,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (scanResult != null) {
             inputPlotId = scanResult.getContents();
-            rangeID = ConfigActivity.dt.getAllRangeID();
+            rangeID = dt.getAllRangeID();
             moveToSearch("id",rangeID,null,null,inputPlotId);
             if(goToId!=null) {
                 goToId.dismiss();

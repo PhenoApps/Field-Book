@@ -285,9 +285,9 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         final String[] data = new String[]{getString(R.string.traits_format_numeric), getString(R.string.traits_format_categorical), getString(R.string.traits_format_date), getString(R.string.traits_format_percent), getString(R.string.traits_format_boolean),
                 getString(R.string.traits_format_text), getString(R.string.traits_format_photo), getString(R.string.traits_format_audio), getString(R.string.traits_format_counter), getString(R.string.traits_format_disease_rating), getString(R.string.traits_format_multicategorical),
-                getString(R.string.traits_format_location)};
+                getString(R.string.traits_format_location), getString(R.string.traits_format_barcode), getString(R.string.traits_format_labelprint)};
 
-        final String[] enData = new String[]{"Numeric", "Categorical", "Date", "Percent", "Boolean", "Text", "Photo", "Audio", "Counter", "Disease Rating", "Multicat", "Location"};
+        final String[] enData = new String[]{"Numeric", "Categorical", "Date", "Percent", "Boolean", "Text", "Photo", "Audio", "Counter", "Disease Rating", "Multicat", "Location", "Barcode", "Zebra Label Print"};
 
         HashMap visibility = ConfigActivity.dt.getTraitVisibility();
         traitList = findViewById(R.id.myList);

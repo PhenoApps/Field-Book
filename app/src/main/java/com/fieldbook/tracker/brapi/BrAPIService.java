@@ -1,12 +1,18 @@
 package com.fieldbook.tracker.brapi;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.util.Log;
 
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.fields.FieldObject;
+import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.TraitObject;
 
 import java.util.ArrayList;
@@ -315,6 +321,31 @@ public class BrAPIService {
 
         for(TraitObject t : studyDetails.getTraits()){
             dataHelper.insertTraits(t);
+        }
+    }
+
+    public static void authorizeBrAPI(SharedPreferences sharedPreferences, Activity activity) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
+        editor.apply();
+
+        try {
+            String url = sharedPreferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://";
+            try {
+                Uri uri = Uri.parse("googlechrome://navigate?url="+ url);
+                Intent i = new Intent(Intent.ACTION_VIEW, uri);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                activity.startActivity(i);
+            } catch (ActivityNotFoundException e) {
+                Uri uri = Uri.parse(url);
+                // Chrome is probably not installed
+                // OR not selected as default browser OR if no Browser is selected as default browser
+                Intent i = new Intent(Intent.ACTION_VIEW, uri);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                activity.startActivity(i);
+            }
+        } catch (Exception ex) {
+            Log.e("BrAPI", "Error starting BrAPI auth", ex);
         }
     }
 }
