@@ -122,7 +122,6 @@ public class PreferencesActivity extends AppCompatActivity {
         setIntent(intent);
     }
 
-    @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (BRAPI_BASE_URL.equals(key)) {
             if(brapiConfig != null) {
@@ -148,7 +147,8 @@ public class PreferencesActivity extends AppCompatActivity {
         });
     }
 
-    private void registerBrapiButtonListeners(PreferencesActivity prefActivity, PreferencesFragment preferencesFragment) {
+    @SuppressLint("NewApi")
+    private void registerBrapiButtonListeners(final PreferencesActivity prefActivity, final PreferencesFragment preferencesFragment) {
         getFragmentManager().registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
             @Override
             public void onFragmentCreated(FragmentManager fm, Fragment f, Bundle savedInstanceState) {
