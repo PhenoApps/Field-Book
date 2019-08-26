@@ -370,6 +370,16 @@
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content" />
 
+                        <include
+                            layout="@layout/trait_barcode"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content" />
+
+                        <include
+                            layout="@layout/trait_labelprint"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content" />
+
                     </LinearLayout>
                 </ScrollView>
             </LinearLayout>
