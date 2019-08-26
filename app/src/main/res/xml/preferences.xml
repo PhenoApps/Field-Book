@@ -155,16 +155,30 @@
         android:key="pref_key_brapi_settings"
         android:title="@string/preferences_brapi">
 
-        <EditTextPreference
-            android:icon="@drawable/ic_adv_infobar_count"
-            android:key="BRAPI_BASE_URL"
-            android:summary="@string/brapi_base_url_desc"
-            android:title="@string/brapi_base_url"
-            android:dialogTitle="@string/brapi_base_url"
-            android:dialogMessage="@string/brapi_base_url_desc"
-            android:defaultValue="@string/brapi_base_url_default"
-            />
-
+        <PreferenceScreen android:title="@string/brapi_title">
+            <PreferenceCategory android:title="@string/brapi_title">
+                <EditTextPreference
+                    android:icon="@drawable/ic_adv_infobar_count"
+                    android:key="BRAPI_BASE_URL"
+                    android:summary="@string/brapi_base_url_desc"
+                    android:title="@string/brapi_base_url"
+                    android:dialogTitle="@string/brapi_base_url"
+                    android:dialogMessage="@string/brapi_base_url_desc"
+                    android:defaultValue="@string/brapi_base_url_default"
+                    android:positiveButtonText="@string/brapi_save_authorize"
+                    />
+                <Preference
+                    android:icon="@drawable/ic_launch"
+                    android:key="authorizeBrapi"
+                    android:title="@string/brapi_authorize"
+                    />
+                <Preference
+                    android:icon="@drawable/ic_exit_to_app"
+                    android:key="revokeBrapiAuth"
+                    android:title="@string/brapi_revoke_auth"
+                    />
+            </PreferenceCategory>
+        </PreferenceScreen>
     </PreferenceCategory>
 
 

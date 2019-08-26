@@ -21,6 +21,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -44,7 +45,6 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 
 import com.fieldbook.tracker.barcodes.*;
 import com.fieldbook.tracker.layoutConfig.SelectorLayoutConfigurator;
@@ -52,6 +52,7 @@ import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.search.*;
 import com.fieldbook.tracker.traitLayouts.AngleTraitLayout;
 import com.fieldbook.tracker.traitLayouts.AudioTraitLayout;
+import com.fieldbook.tracker.traitLayouts.BarcodeTraitLayout;
 import com.fieldbook.tracker.traitLayouts.BooleanTraitLayout;
 import com.fieldbook.tracker.traitLayouts.CategoricalTraitLayout;
 import com.fieldbook.tracker.traitLayouts.CounterTraitLayout;
@@ -63,6 +64,7 @@ import com.fieldbook.tracker.traitLayouts.NumericTraitLayout;
 import com.fieldbook.tracker.traitLayouts.PercentTraitLayout;
 import com.fieldbook.tracker.traitLayouts.PhotoTraitLayout;
 import com.fieldbook.tracker.traitLayouts.TextTraitLayout;
+import com.fieldbook.tracker.traitLayouts.LabelPrintTraitLayout;
 import com.fieldbook.tracker.traitLayouts.TraitLayout;
 import com.fieldbook.tracker.traits.*;
 import com.fieldbook.tracker.tutorial.*;
@@ -71,11 +73,12 @@ import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.File;
-import java.text.DateFormatSymbols;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static com.fieldbook.tracker.ConfigActivity.dt;
 
 /**
  * All main screen logic resides here
@@ -171,6 +174,8 @@ public class MainActivity extends AppCompatActivity {
     PercentTraitLayout traitPercent;
     PhotoTraitLayout traitPhoto;
     TextTraitLayout traitText;
+    BarcodeTraitLayout traitBarcode;
+    LabelPrintTraitLayout traitLabelprint;
 
     private Boolean dataLocked = false;
 
@@ -401,6 +406,8 @@ public class MainActivity extends AppCompatActivity {
         traitAngle.init();
         traitAudio = findViewById(R.id.audioLayout);
         traitAudio.init();
+        traitBarcode = findViewById(R.id.barcodeLayout);
+        traitBarcode.init();
         traitBoolean = findViewById(R.id.booleanLayout);
         traitBoolean.init();
         traitCategorical = findViewById(R.id.categoricalLayout);
@@ -423,6 +430,8 @@ public class MainActivity extends AppCompatActivity {
         traitPhoto.init();
         traitText = findViewById(R.id.textLayout);
         traitText.init();
+        traitLabelprint = findViewById(R.id.labelprintLayout);
+        traitLabelprint.init();
 
         traitType = findViewById(R.id.traitType);
         newTraits = new HashMap();
@@ -608,7 +617,7 @@ public class MainActivity extends AppCompatActivity {
                         if (pos < 1)
                             return;
 
-                        if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
                                 currentTrait.getFormat())) {
                             paging = pos;
                             break;
@@ -622,7 +631,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // Refresh onscreen controls
-                cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
+                cRange = dt.getRange(rangeID[paging - 1]);
 
                 saveLastPlot();
 
@@ -635,7 +644,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                         .clone();
 
                 initWidgets(true);
@@ -667,7 +676,7 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
                                 currentTrait.getFormat())) {
                             paging = pos;
                             break;
@@ -681,7 +690,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // Refresh onscreen controls
-                cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
+                cRange = dt.getRange(rangeID[paging - 1]);
 
                 saveLastPlot();
 
@@ -692,7 +701,7 @@ public class MainActivity extends AppCompatActivity {
                         playSound("plonk");
                     }
                 }
-                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                         .clone();
 
                 initWidgets(true);
@@ -822,7 +831,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     default:
                         newTraits.remove(currentTrait.getTrait());
-                        ConfigActivity.dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
+                        dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
                         etCurVal.setText("");
                         break;
                 }
@@ -898,7 +907,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // Refresh onscreen controls
-            cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
+            cRange = dt.getRange(rangeID[paging - 1]);
             saveLastPlot();
 
             if (cRange.plot_id.length() == 0)
@@ -924,7 +933,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             displayRange(cRange);
-            newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+            newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                     .clone();
 
             initWidgets(true);
@@ -936,7 +945,7 @@ public class MainActivity extends AppCompatActivity {
         if (rangeID == null)
             return;
 
-        newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                 .clone();
 
         initWidgets(true);
@@ -972,6 +981,8 @@ public class MainActivity extends AppCompatActivity {
         traitMulticat.setVisibility(View.GONE);
         traitLocation.setVisibility(View.GONE);
         traitAngle.setVisibility(View.GONE);
+        traitBarcode.setVisibility(View.GONE);
+        traitLabelprint.setVisibility(View.GONE);
     }
 
     // This is central to the application
@@ -980,7 +991,7 @@ public class MainActivity extends AppCompatActivity {
     private void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
-        if (!ConfigActivity.dt.isTableEmpty(DataHelper.RANGE)) {
+        if (!dt.isTableEmpty(DataHelper.RANGE)) {
             selectorLayoutConfigurator.configureDropdownArray(cRange.plot_id);
         }
 
@@ -1005,7 +1016,7 @@ public class MainActivity extends AppCompatActivity {
 
         // trait is unique, format is not
 
-        String[] traits = ConfigActivity.dt.getVisibleTrait();
+        String[] traits = dt.getVisibleTrait();
 
         int traitPosition;
 
@@ -1028,7 +1039,7 @@ public class MainActivity extends AppCompatActivity {
                                            int arg2, long arg3) {
 
                     // This updates the in memory hashmap from database
-                    currentTrait = ConfigActivity.dt.getDetail(traitType.getSelectedItem()
+                    currentTrait = dt.getDetail(traitType.getSelectedItem()
                             .toString());
 
                     imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -1081,6 +1092,7 @@ public class MainActivity extends AppCompatActivity {
                 return traitPercent;
             case "date":
                 return traitDate;
+            case "qualitative":
             case "categorical":
                 return traitCategorical;
             case "boolean":
@@ -1100,6 +1112,10 @@ public class MainActivity extends AppCompatActivity {
                 return traitLocation;
             case "angle":
                 return traitAngle;
+            case "barcode":
+                return traitBarcode;
+            case "zebra label print":
+                return traitLabelprint;
             case "text":
             default:
                 return traitText;
@@ -1110,7 +1126,7 @@ public class MainActivity extends AppCompatActivity {
     public void onPause() {
         // Backup database
         try {
-            ConfigActivity.dt.exportDatabase("backup");
+            dt.exportDatabase("backup");
             File exportedDb = new File(Constants.BACKUPPATH + "/" + "backup.db");
             File exportedSp = new File(Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
             Utils.scanFile(MainActivity.this,exportedDb);
@@ -1187,33 +1203,33 @@ public class MainActivity extends AppCompatActivity {
 
             paging = 1;
 
-            rangeID = ConfigActivity.dt.getAllRangeID();
+            rangeID = dt.getAllRangeID();
 
             if (rangeID != null) {
-                cRange = ConfigActivity.dt.getRange(rangeID[0]);
+                cRange = dt.getRange(rangeID[0]);
 
                 //TODO NullPointerException
                 lastRange = cRange.range;
                 displayRange(cRange);
 
-                newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id).clone();
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id).clone();
             }
 
-            prefixTraits = ConfigActivity.dt.getRangeColumnNames();
+            prefixTraits = dt.getRangeColumnNames();
 
             initWidgets(false);
             traitType.setSelection(0);
 
             // try to go to last saved plot
             if(ep.getString("lastplot",null)!=null) {
-                rangeID = ConfigActivity.dt.getAllRangeID();
+                rangeID = dt.getAllRangeID();
                 //moveToSearch("id",rangeID,null,null,ep.getString("lastplot",null));
             }
 
         } else if (partialReload) {
             partialReload = false;
             displayRange(cRange);
-            prefixTraits = ConfigActivity.dt.getRangeColumnNames();
+            prefixTraits = dt.getRangeColumnNames();
             initWidgets(false);
 
         } else if (searchReload) {
@@ -1246,10 +1262,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        ConfigActivity.dt.deleteTrait(cRange.plot_id, parent);
+        dt.deleteTrait(cRange.plot_id, parent);
 
         String exp_id = Integer.toString(ep.getInt("ExpID", 0));
-        ConfigActivity.dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id); //TODO add notes and exp_id
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id); //TODO add notes and exp_id
     }
 
     // Delete trait, including from database
@@ -1264,7 +1280,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        ConfigActivity.dt.deleteTrait(cRange.plot_id, parent);
+        dt.deleteTrait(cRange.plot_id, parent);
     }
 
     public final Handler myGuiHandler = new Handler() {
@@ -1380,6 +1396,9 @@ public class MainActivity extends AppCompatActivity {
                 dataLocked = !dataLocked;
                 lockData(dataLocked);
                 break;
+            case android.R.id.home:
+                finish();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1472,7 +1491,7 @@ public class MainActivity extends AppCompatActivity {
         exportButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 inputPlotId = barcodeId.getText().toString();
-                rangeID = ConfigActivity.dt.getAllRangeID();
+                rangeID = dt.getAllRangeID();
                 //moveToSearch("id",rangeID,null,null,inputPlotId);
                 goToId.dismiss();
             }
@@ -1499,16 +1518,16 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
+            if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
                     currentTrait.getFormat())) {
                 paging = pos;
                 break;
             }
         }
-        cRange = ConfigActivity.dt.getRange(rangeID[paging - 1]);
+        cRange = dt.getRange(rangeID[paging - 1]);
         displayRange(cRange);
         lastRange = cRange.range;
-        newTraits = (HashMap) ConfigActivity.dt.getUserDetail(cRange.plot_id)
+        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
                 .clone();
         initWidgets(true);
     }
@@ -1544,13 +1563,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        String[] traitList = ConfigActivity.dt.getAllTraits();
+        String[] traitList = dt.getAllTraits();
         StringBuilder data = new StringBuilder();
 
         //TODO this test crashes app
         if (cRange != null) {
             for (String s : prefixTraits) {
-                data.append(s).append(": ").append(ConfigActivity.dt.getDropDownRange(s, cRange.plot_id)[0]).append("\n");
+                data.append(s).append(": ").append(dt.getDropDownRange(s, cRange.plot_id)[0]).append("\n");
             }
         }
 
@@ -1630,7 +1649,7 @@ public class MainActivity extends AppCompatActivity {
             case 2:
                 if (resultCode == RESULT_OK) {
                     inputPlotId = data.getStringExtra("result");
-                    rangeID = ConfigActivity.dt.getAllRangeID();
+                    rangeID = dt.getAllRangeID();
                     //moveToSearch("id",rangeID,null,null,inputPlotId);
                 }
                 break;

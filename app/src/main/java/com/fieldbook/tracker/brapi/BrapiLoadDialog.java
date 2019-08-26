@@ -14,6 +14,7 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
+import com.fieldbook.tracker.utilities.Constants;
 
 public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener{
 
@@ -40,7 +41,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
         ;
         String brapiBaseURL = this.context.getSharedPreferences("Settings", 0)
-                .getString(PreferencesActivity.BRAPI_BASE_URL, "");
+                .getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
         brAPIService = new BrAPIService(this.context, brapiBaseURL);
         saveBtn = findViewById(R.id.brapi_save_btn);
         saveBtn.setOnClickListener(this);
