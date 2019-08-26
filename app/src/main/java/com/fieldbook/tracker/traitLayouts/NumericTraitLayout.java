@@ -111,10 +111,11 @@ public class NumericTraitLayout extends TraitLayout {
             }
 
             if (view.getId() == R.id.k16) {
+                //Backspace Key Pressed
                 if(getEtCurVal().getText().toString().length()>0) {
                     getEtCurVal().setText(getEtCurVal().getText().toString().substring(0, getEtCurVal().getText().toString().length()-1));
                 }
-
+                //If backspace makes value empty, then remove trait
                 if(getEtCurVal().getText().toString().length()==0) {
                     getEtCurVal().removeTextChangedListener(getCvNum());
                     getEtCurVal().setText("");
@@ -122,14 +123,7 @@ public class NumericTraitLayout extends TraitLayout {
                     getEtCurVal().addTextChangedListener(getCvNum());
                 }
             } else {
-                if (getEtCurVal().getText().toString().matches(".*\\d.*")
-                        && v.matches(".*\\d.*")
-                        && getVisibility() == View.VISIBLE
-                        && !getEtCurVal().getText().toString().contains("/")) {
-                    makeToast(getContext().getString(R.string.trait_error_disease_severity));
-                } else {
-                    getEtCurVal().setText(getEtCurVal().getText().toString() + v);
-                }
+                getEtCurVal().setText(getEtCurVal().getText().toString() + v);
             }
         }
     }
