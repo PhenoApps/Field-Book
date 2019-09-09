@@ -43,3 +43,6 @@ proguard/
 
 # Other
 **/ApiKeys.java
+
+# Git orig files
+*.orig

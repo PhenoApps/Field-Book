@@ -7,9 +7,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.arch.core.util.Function;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.fields.FieldObject;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
@@ -30,16 +39,34 @@ import io.swagger.client.model.Study;
 import io.swagger.client.model.StudyObservationVariablesResponse;
 import io.swagger.client.model.StudyResponse;
 import io.swagger.client.model.StudySummary;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.HashMap;
 
 public class BrAPIService {
     private Context context;
     private DataHelper dataHelper;
     private StudiesApi studiesApi;
+    private String brapiBaseURL;
+    private RequestQueue queue;
 
 
     public BrAPIService(Context context, String brapiBaseURL) {
         this.context = context;
         this.dataHelper = new DataHelper(context);
+        this.brapiBaseURL = brapiBaseURL;
+        this.queue = Volley.newRequestQueue(context);
 
         ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
         this.studiesApi = new StudiesApi(apiClient);
@@ -211,6 +238,226 @@ public class BrAPIService {
     private boolean checkField(String ... values) {
         return getPrioritizedValue(values) != null;
     }
+    // Get the ontology from breedbase so the users can select the ontology
+    public void getOntology(final Function< List<TraitObject>, Void > function) {
+
+        String url = this.brapiBaseURL + "/variables?pageSize=1000&page=0";
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Parse the response
+
+                        //TODO: Replace this class and parse function when Pete releases
+                        // his brapi java library
+                        List<TraitObject> traits = parseTraitsJson(response);
+                        function.apply(traits);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(context.getApplicationContext(), "Error loading data", Toast.LENGTH_SHORT).show();
+                        Log.e("error", error.toString());
+                    }
+                });
+        queue.add(stringRequest);
+    }
+
+    private List<TraitObject> parseTraitsJson(String json) {
+        List<TraitObject> traits = new ArrayList<>();
+
+        try {
+            JSONObject js = new JSONObject(json);
+            JSONObject result = (JSONObject) js.get("result");
+            JSONArray data = (JSONArray) result.get("data");
+            for (int i = 0; i < data.length(); ++i) {
+                JSONObject tmp = data.getJSONObject(i);
+                TraitObject t = new TraitObject();
+                t.setDefaultValue(tmp.getString("defaultValue"));
+                JSONObject traitJson = tmp.getJSONObject("trait");
+                t.setTrait(traitJson.getString("name"));
+                t.setDetails(traitJson.getString("description"));
+                JSONObject scale = tmp.getJSONObject("scale");
+
+                JSONObject validValue = scale.getJSONObject("validValues");
+                //TODO: Add integer parsing to get min and max as integers
+                // Requires changes to breedbase as well
+                t.setMinimum(validValue.getString("min"));
+                t.setMaximum(validValue.getString("max"));
+                JSONArray cat = validValue.getJSONArray("categories");
+                StringBuilder sb = new StringBuilder();
+                for (int j = 0; j < cat.length(); ++j) {
+                    sb.append(cat.get(j));
+                    if (j != cat.length() - 1) {
+                        sb.append("/");
+                    }
+                }
+                t.setCategories(sb.toString());
+                //TODO: datatype field should be dataType. Breedbase needs to be fixed.
+                t.setFormat(convertBrAPIDataType(scale.getString("datatype")));
+                if (t.getFormat().equals("integer")) {
+                    t.setFormat("numeric");
+                }
+
+                // Get database id of external system to sync to enabled pushing through brAPI
+                t.setExternalDbId(tmp.getString("observationVariableDbId"));
+
+                // Need to set where we are getting the data from so we don't push to a different
+                // external link than where the trait was retrieved from.
+                Integer url_path_start = this.brapiBaseURL.indexOf("/brapi", 0);
+                t.setTraitDataSource(this.brapiBaseURL.substring(0, url_path_start));
+
+                t.setVisible(true);
+                traits.add(t);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return traits;
+    }
+
+    public void postPhenotypes() {
+        String url = this.brapiBaseURL + "/phenotypes";
+
+        List<Map<String, String>> data = dataHelper.getDataBrapiExport();
+        // TODO: group by studyid and group observations in json
+
+        JSONObject request = new JSONObject();
+        JSONArray jsonData = new JSONArray();
+
+        try {
+            for (Map<String, String> observation : data) {
+
+                JSONObject observationJson = new JSONObject();
+                observationJson.put("collector", "NickFieldBook"); //TODO: get user profile name
+                observationJson.put("observationDbId", ""); // TODO: handle updates, not just new
+
+
+                SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
+                        Locale.getDefault());
+                Date time = timeStamp.parse(observation.get("timeTaken"));
+                String iso8601Time = TimestampUtils.getISO8601StringForDate(time);
+
+
+                observationJson.put("observationTimeStamp", iso8601Time);
+                observationJson.put("observationUnitDbId", observation.get("observationUnitDbId"));
+                observationJson.put("observationVariableDbId", "MO_123:100002"); // TODO: get this from somewhere
+                observationJson.put("observationVariableName", "Plant Height"); // TODO: get this from somewhere
+                observationJson.put("season", "Spring 2018"); // Needs to be two words to work around BrAPI test server bug
+                observationJson.put("value", observation.get("userValue"));
+                JSONArray observations = new JSONArray();
+                observations.put(observationJson);
+                JSONObject observationStudy = new JSONObject();
+                observationStudy.put("studyDbId", observation.get("exp_alias"));
+                observationStudy.put("observatioUnitDbId", "1"); // TODO: get this from somewhere
+                observationStudy.put("observations", observations);
+                jsonData.put(observationStudy);
+            }
+
+            request.put("data", jsonData);
+            Log.d("json", request.toString());
+
+
+        }catch (JSONException e){
+            e.printStackTrace();
+        }catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest putObservationsRequest = new JsonObjectRequest(Request.Method.POST, url, request,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        //TODO: verify that response indicates everything was written
+                        //TODO: update observationDId for observations in database
+                        Toast.makeText(context.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(context.getApplicationContext(), "BrAPI Export Failed", Toast.LENGTH_SHORT).show();
+                        Log.e("error", error.toString());
+                    }
+                })
+        {
+            @Override
+            public Map<String, String> getHeaders () throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Content-Type", "application/json");
+                headers.put("Accept", "application/json");
+                headers.put("Authorization", "Bearer YYYY");
+                return headers;
+            }
+        };
+        queue.add(putObservationsRequest);
+    }
+
+    // dummy data test for now
+    public void putStudyObservations() {
+        final String studyDbId = "1001";
+        String url = this.brapiBaseURL + "/studies/" + studyDbId + "/observations";
+
+        // Send dummy data to test server creating new observations
+        // TODO: Populate with actual collected data from database
+        JSONObject request = new JSONObject();
+        JSONArray observations = new JSONArray();
+        JSONObject observation0 = new JSONObject();
+        JSONObject observation1 = new JSONObject();
+
+        try{
+            observation0.put("collector", "NickFieldBook");
+            observation0.put("observationDbId", "");
+            observation0.put("observationTimeStamp", "2019-08-21T21:37:08.888Z");
+            observation0.put("observationUnitDbId", "1");
+            observation0.put("observationVariableDbId", "MO_123:100002");
+            observation0.put("value", "5");
+
+            observation1.put("collector", "NickFieldBook");
+            observation1.put("observationDbId", "");
+            observation1.put("observationTimeStamp", "2019-08-21T21:37:08.888Z");
+            observation1.put("observationUnitDbId", "1");
+            observation1.put("observationVariableDbId", "MO_123:100002");
+            observation1.put("value", "666");
+
+            observations.put(observation0);
+            observations.put(observation1);
+            request.put("observations", observations);
+
+            Log.d("json", observations.toString());
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest putObservationsRequest = new JsonObjectRequest(Request.Method.PUT, url, request,
+            new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    //TODO: verify that response indicates everything was written
+                    //TODO: update observationDId for observations in database
+                    Toast.makeText(context.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(context.getApplicationContext(), "BrAPI Export Failed", Toast.LENGTH_SHORT).show();
+                    Log.e("error", error.toString());
+                }
+            })
+            {
+                @Override
+                public Map<String, String> getHeaders () throws AuthFailureError {
+                    HashMap<String, String> headers = new HashMap<String, String>();
+                    headers.put("Content-Type", "application/json");
+                    headers.put("Accept", "application/json");
+                    headers.put("Authorization", "Bearer YYYY");
+                    return headers;
+                }
+            };
+        queue.add(putObservationsRequest);
+    }
 
     private String getPrioritizedValue(String... values) {
         String returnValue = null;
@@ -257,6 +504,13 @@ public class BrAPIService {
             trait.setTrait(getPrioritizedValue(synonym, var.getName()));
             if(var.getTrait() != null) {
                 trait.setDetails(var.getTrait().getDescription());
+                // Get database id of external system to sync to enabled pushing through brAPI
+                trait.setExternalDbId(var.getObservationVariableDbId());
+
+                // Need to set where we are getting the data from so we don't push to a different
+                // external link than where the trait was retrieved from.
+                Integer url_path_start = this.brapiBaseURL.indexOf("/brapi", 0);
+                trait.setTraitDataSource(this.brapiBaseURL.substring(0, url_path_start));
             }
             if(var.getScale() != null) {
                 if(var.getScale().getValidValues() != null) {
@@ -306,7 +560,7 @@ public class BrAPIService {
     public void saveStudyDetails(BrapiStudyDetails studyDetails) {
         FieldObject field = new FieldObject();
         field.setExp_name(studyDetails.getStudyName());
-        field.setExp_alias(studyDetails.getStudyName());
+        field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
         field.setExp_species(studyDetails.getCommonCropName());
         field.setCount(studyDetails.getNumberOfPlots().toString());
         field.setUnique_id("Plot");
@@ -319,7 +573,10 @@ public class BrAPIService {
             dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
         }
 
-        for(TraitObject t : studyDetails.getTraits()){
+        // Get the traits already associated with this study
+        //TODO: Traits likely need to be made more field specific if we are to use this.
+        // Or give them the ability to delete the existing traits when we import these ones.
+        for(TraitObject t : studyDetails.getTraits()) {
             dataHelper.insertTraits(t);
         }
     }

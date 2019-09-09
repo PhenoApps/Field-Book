@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -24,32 +23,32 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/loadStudies"
+            android:id="@+id/loadTraits"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginStart="5dp"
             android:layout_marginTop="5dp"
             android:onClick="buttonClicked"
-            android:text="@string/brapi_load_data_button"
+            android:text="@string/brapi_load_traits_button"
             android:textColor="@color/s_text"
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/brapiBaseURL"
+            android:id="@+id/brapiBaseUrl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="15sp" />
+            android:textSize="15sp"/>
 
     </LinearLayout>
 
     <ListView
-        android:id="@+id/brapiStudies"
+        android:id="@+id/brapiTraits"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_weight="1"
-        android:choiceMode="singleChoice">
+        android:choiceMode="multipleChoice">
 
     </ListView>
 
@@ -59,13 +58,12 @@
         android:layout_height="wrap_content"
         android:layout_weight="0"
         android:gravity="center"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:indeterminate="true"
-            tools:visibility="visible" />
+            android:indeterminate="true" />
     </RelativeLayout>
 
     <LinearLayout
@@ -78,13 +76,13 @@
             android:id="@+id/save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
             android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp"
             android:layout_marginTop="5dp"
-            android:onClick="buttonClicked"
-            android:text="@string/brapi_save_data_button"
+            android:text="@string/brapi_save_trait"
             android:textColor="@color/s_text"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:onClick="buttonClicked"/>
     </LinearLayout>
 
 </LinearLayout>

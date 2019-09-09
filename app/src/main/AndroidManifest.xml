@@ -5,82 +5,84 @@
     android:versionCode="409"
     android:versionName="4.1.0">
 
-    <uses-feature android:name="android.hardware.location" android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <supports-screens
         android:anyDensity="true"
-        android:smallScreens="true"
-        android:normalScreens="true"
         android:largeScreens="true"
-        android:xlargeScreens="true"/>
+        android:normalScreens="true"
+        android:smallScreens="true"
+        android:xlargeScreens="true" />
 
     <application
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/field_book"
         android:largeHeap="true"
-        tools:ignore="GoogleAppIndexingWarning">
-
+        tools:ignore="GoogleAppIndexingWarning"
+        android:usesCleartextTraffic="true">
         <activity
-            android:name="ConfigActivity"
+            android:name=".ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="MainActivity"
+            android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale|keyboard"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustPan|stateHidden"/>
-
+            android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
             android:name=".search.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/ActivityDialog" />
-
+            android:theme="@style/ActivityDialog"
+            android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name="DatagridActivity"
+            android:name=".DatagridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/ActivityDialog" />
-
-
         <activity
             android:name=".brapi.BrapiActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-
         <activity
-            android:name="FileExploreActivity"
+            android:name=".brapi.BrapiTraitActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".FileExploreActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/ActivityDialog" />
-
         <activity
             android:name=".traits.TraitEditorActivity"
             android:alwaysRetainTaskState="false"
@@ -88,8 +90,7 @@
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".fields.FieldEditorActivity"
             android:alwaysRetainTaskState="false"
@@ -98,41 +99,35 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-
         <activity
-            android:name="ChangelogActivity"
+            android:name=".ChangelogActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:screenOrientation="portrait"
             android:theme="@style/ActivityDialog" />
-
         <activity
             android:name=".tutorial.TutorialMainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppDialog" />
-
         <activity
             android:name=".tutorial.TutorialSettingsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppDialog" />
-
         <activity
             android:name=".tutorial.TutorialTraitsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppDialog" />
-
         <activity
             android:name=".tutorial.TutorialFieldActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppDialog" />
-
         <activity
             android:name=".preferences.PreferencesActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -157,8 +152,8 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
-
     </application>
+
 </manifest>

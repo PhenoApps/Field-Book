@@ -14,6 +14,8 @@ public class TraitObject {
     private String realPosition;
     private String id;
     private Boolean visible;
+    private String external_db_id;
+    private String trait_data_source;
 
     public String getTrait() {
         return trait;
@@ -94,4 +96,13 @@ public class TraitObject {
     public void setVisible(Boolean visible) {
         this.visible = visible;
     }
+
+    public String getExternalDbId() { return external_db_id; }
+
+    public void setExternalDbId(String externalDbId) { this.external_db_id = externalDbId; }
+
+    public String getTraitDataSource() { return trait_data_source; }
+
+    public void setTraitDataSource(String traitDataSource) { this.trait_data_source = traitDataSource; }
+
 }

@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 
@@ -19,6 +20,8 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import com.fieldbook.tracker.ConfigActivity;
+import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.brapi.BrapiTraitActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.widget.Toolbar;
@@ -66,6 +69,7 @@ import com.fieldbook.tracker.dragsort.DragSortController;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -73,6 +77,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class TraitEditorActivity extends AppCompatActivity {
 
@@ -118,6 +125,9 @@ public class TraitEditorActivity extends AppCompatActivity {
     private TraitObject o;
 
     private Menu systemMenu;
+
+    private final int PERMISSIONS_REQUEST_STORAGE_IMPORT = 999;
+    private final int PERMISSIONS_REQUEST_STORAGE_EXPORT = 998;
 
     @Override
     public void onDestroy() {
@@ -552,8 +562,13 @@ public class TraitEditorActivity extends AppCompatActivity {
                     t.setCategories(categories.getText().toString());
                     t.setVisible(true);
                     t.setRealPosition(String.valueOf(pos));
+
+                    // TODO: Add the local trait data_source name into other trait editing/inserting db functions.
+                    t.setTraitDataSource("local");
                     ConfigActivity.dt.insertTraits(t);
                 } else {
+                    // TODO: Add the trait_data_source variable into the edit.
+
                     ConfigActivity.dt.editTraits(currentId, trait.getText().toString().trim(),
                             enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
                             minimum.getText().toString(), maximum.getText().toString(),
@@ -903,14 +918,10 @@ public class TraitEditorActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 switch (which) {
                     case 0:
-                        if (ep.getBoolean("TraitsExported", false)) {
-                            showFileDialog();
-                        } else {
-                            checkTraitExportDialog();
-                        }
+                        loadTraitFilePermission();
                         break;
                     case 1:
-                        showExportDialog();
+                        exportTraitFilePermission();
                         break;
                 }
                 importExport.dismiss();
@@ -929,13 +940,43 @@ public class TraitEditorActivity extends AppCompatActivity {
         importExport.show();
     }
 
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE_IMPORT)
+    public void loadTraitFilePermission() {
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            if (ep.getBoolean("TraitsExported", false)) {
+                showFileDialog();
+            } else {
+                checkTraitExportDialog();
+            }
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
+                    PERMISSIONS_REQUEST_STORAGE_IMPORT, perms);
+        }
+
+    }
+
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE_EXPORT)
+    public void exportTraitFilePermission() {
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            showExportDialog();
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
+                    PERMISSIONS_REQUEST_STORAGE_EXPORT, perms);
+        }
+
+    }
+
     private void showFileDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list, null);
 
-        builder.setTitle(R.string.import_dialog_title)
+        builder.setTitle(R.string.import_dialog_title_traits)
                 .setCancelable(true)
                 .setView(layout);
 
@@ -948,9 +989,10 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         ListView myList = layout.findViewById(R.id.myList);
 
-        String[] importArray = new String[2];
+        String[] importArray = new String[3];
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_dropbox);
+        importArray[2] = getString(R.string.import_source_brapi);
 
         //TODO add google drive (requires Google Play Services)
         //importArray[2] = getString(R.string.importgoogle);
@@ -970,6 +1012,11 @@ public class TraitEditorActivity extends AppCompatActivity {
                     case 1:
                         //DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
                         //mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
+                        makeToast("if i forget to reenable this email me");
+                        break;
+                    case 2:
+                        intent.setClassName(thisActivity, BrapiTraitActivity.class.getName());
+                        startActivityForResult(intent, 1);
                         break;
                 }
                 importDialog.dismiss();
@@ -1000,6 +1047,12 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
+
+                File file = new File(Constants.TRAITPATH);
+                if (!file.exists()) {
+                    createDir(Constants.FIELDEXPORTPATH);
+                }
+
                 showExportDialog();
                 dialog.dismiss();
             }
@@ -1017,6 +1070,22 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private void createDir(String path) {
+        File dir = new File(path);
+        File blankFile = new File(path + "/.fieldbook");
+
+        if (!dir.exists()) {
+            dir.mkdirs();
+
+            try {
+                blankFile.getParentFile().mkdirs();
+                blankFile.createNewFile();
+                Utils.scanFile(TraitEditorActivity.this,blankFile);
+            } catch (IOException ignore) {
+            }
+        }
     }
 
     private void sortDialog() {
@@ -1234,7 +1303,10 @@ public class TraitEditorActivity extends AppCompatActivity {
         finish();
     }
 
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 mChosenFile = data.getStringExtra("result");
@@ -1392,4 +1464,13 @@ public class TraitEditorActivity extends AppCompatActivity {
             startActivity(Intent.createChooser(intent, "Sending File..."));
         }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
 }
