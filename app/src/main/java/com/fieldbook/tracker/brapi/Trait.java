@@ -24,7 +24,6 @@ public class Trait {
         return description;
     }
 
-
     public void setTraitDbId(String traitDbId) {
         this.traitDbId = traitDbId;
     }

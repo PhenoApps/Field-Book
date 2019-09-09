@@ -31,9 +31,13 @@ import java.util.Map;
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.StudiesApi;
+import io.swagger.client.api.ObservationVariablesApi;
+import io.swagger.client.model.Observation;
 import io.swagger.client.model.ObservationUnit;
 import io.swagger.client.model.ObservationUnitsResponse1;
 import io.swagger.client.model.ObservationVariable;
+import io.swagger.client.model.ObservationVariableResponse;
+import io.swagger.client.model.ObservationVariablesResponse;
 import io.swagger.client.model.StudiesResponse;
 import io.swagger.client.model.Study;
 import io.swagger.client.model.StudyObservationVariablesResponse;
@@ -58,6 +62,7 @@ public class BrAPIService {
     private Context context;
     private DataHelper dataHelper;
     private StudiesApi studiesApi;
+    private ObservationVariablesApi traitsApi;
     private String brapiBaseURL;
     private RequestQueue queue;
 
@@ -70,6 +75,7 @@ public class BrAPIService {
 
         ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
         this.studiesApi = new StudiesApi(apiClient);
+        this.traitsApi = new ObservationVariablesApi(apiClient);
 
     }
 
@@ -238,10 +244,12 @@ public class BrAPIService {
     private boolean checkField(String ... values) {
         return getPrioritizedValue(values) != null;
     }
-    // Get the ontology from breedbase so the users can select the ontology
-    public void getOntology(final Function< List<TraitObject>, Void > function) {
 
-        String url = this.brapiBaseURL + "/variables?pageSize=1000&page=0";
+    // Get the ontology from breedbase so the users can select the ontology
+    /*public void getOntology(final Function< List<TraitObject>, Void > function) {
+
+        //TODO: Need to add the ability to change the page
+        String url = this.brapiBaseURL + "/variables?pageSize=50&page=0";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -262,6 +270,35 @@ public class BrAPIService {
                     }
                 });
         queue.add(stringRequest);
+    }*/
+
+    public void getOntology(final Function<List<TraitObject>, Void> function) {
+        try {
+
+            BrapiApiCallBack<ObservationVariablesResponse> callback = new BrapiApiCallBack<ObservationVariablesResponse>() {
+                @Override
+                public void onSuccess(ObservationVariablesResponse response, int i, Map<String, List<String>> map) {
+
+                    // Result contains a list of observation variables
+                    List<ObservationVariable> brapiTraitList = response.getResult().getData();
+                    final List<TraitObject> traitsList = mapTraits(brapiTraitList);
+
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            function.apply(traitsList);
+                        }
+                    });
+                }
+            };
+
+            traitsApi.variablesGetAsync(0, 50, null, null,
+                    null, callback);
+
+        } catch (ApiException e) {
+            Toast.makeText(context.getApplicationContext(), "Error loading data", Toast.LENGTH_SHORT).show();
+            Log.e("error", e.toString());
+        }
     }
 
     private List<TraitObject> parseTraitsJson(String json) {
@@ -500,18 +537,21 @@ public class BrAPIService {
         for(ObservationVariable var: variables){
             TraitObject trait = new TraitObject();
             trait.setDefaultValue(var.getDefaultValue());
+
+            // Get the synonyms for easier reading. Set it as the trait name.
             String synonym = var.getSynonyms().size() > 0 ? var.getSynonyms().get(0) : null;
             trait.setTrait(getPrioritizedValue(synonym, var.getName()));
-            if(var.getTrait() != null) {
-                trait.setDetails(var.getTrait().getDescription());
-                // Get database id of external system to sync to enabled pushing through brAPI
-                trait.setExternalDbId(var.getObservationVariableDbId());
 
-                // Need to set where we are getting the data from so we don't push to a different
-                // external link than where the trait was retrieved from.
-                Integer url_path_start = this.brapiBaseURL.indexOf("/brapi", 0);
-                trait.setTraitDataSource(this.brapiBaseURL.substring(0, url_path_start));
-            }
+            trait.setDetails(var.getTrait().getDescription());
+            // Get database id of external system to sync to enabled pushing through brAPI
+            trait.setExternalDbId(var.getObservationVariableDbId());
+
+            // Need to set where we are getting the data from so we don't push to a different
+            // external link than where the trait was retrieved from.
+            Integer url_path_start = this.brapiBaseURL.indexOf("/brapi", 0);
+            trait.setTraitDataSource(this.brapiBaseURL.substring(0, url_path_start));
+
+            // Parse out the scale of the variable
             if(var.getScale() != null) {
                 if(var.getScale().getValidValues() != null) {
                     trait.setMinimum(var.getScale().getValidValues().getMin().toString());
@@ -522,8 +562,11 @@ public class BrAPIService {
                     trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getValue()));
                 }
             }
+
+            // Set some config variables in fieldbook
             trait.setVisible(true);
             trait.setRealPosition("");
+
             traits.add(trait);
         }
         return traits;

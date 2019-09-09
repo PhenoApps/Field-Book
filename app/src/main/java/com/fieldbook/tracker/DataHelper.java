@@ -178,7 +178,7 @@ public class DataHelper {
                 "JOIN " +
                 "range ON user_traits.rid = range.observationUnitDbId " +
                 "JOIN " +
-                "exp_id ON user_traits.id = exp_id.exp_id " +
+                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
                 "WHERE traits.trait_data_source <> 'local'";
 
         Cursor db_cursor = db.rawQuery(query,null);
