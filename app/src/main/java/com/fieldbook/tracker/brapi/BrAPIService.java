@@ -31,6 +31,7 @@ import java.util.Map;
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.StudiesApi;
+import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ObservationVariablesApi;
 import io.swagger.client.model.Observation;
 import io.swagger.client.model.ObservationUnit;
@@ -38,14 +39,21 @@ import io.swagger.client.model.ObservationUnitsResponse1;
 import io.swagger.client.model.ObservationVariable;
 import io.swagger.client.model.ObservationVariableResponse;
 import io.swagger.client.model.ObservationVariablesResponse;
+import io.swagger.client.model.PhenotypesRequest;
+import io.swagger.client.model.PhenotypesRequestData;
+import io.swagger.client.model.PhenotypesRequestObservation;
 import io.swagger.client.model.StudiesResponse;
+import io.swagger.client.model.NewObservationDbIdsResponse;
 import io.swagger.client.model.Study;
 import io.swagger.client.model.StudyObservationVariablesResponse;
 import io.swagger.client.model.StudyResponse;
 import io.swagger.client.model.StudySummary;
+import io.swagger.client.model.WSMIMEDataTypes;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
+import org.threeten.bp.OffsetDateTime;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -62,6 +70,7 @@ public class BrAPIService {
     private Context context;
     private DataHelper dataHelper;
     private StudiesApi studiesApi;
+    private PhenotypesApi phenotypesApi;
     private ObservationVariablesApi traitsApi;
     private String brapiBaseURL;
     private RequestQueue queue;
@@ -76,6 +85,7 @@ public class BrAPIService {
         ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
         this.studiesApi = new StudiesApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
+        this.phenotypesApi = new PhenotypesApi(apiClient);
 
     }
 
@@ -355,6 +365,44 @@ public class BrAPIService {
     }
 
     public void postPhenotypes() {
+        try {
+
+            BrapiApiCallBack<NewObservationDbIdsResponse> callback = new BrapiApiCallBack<NewObservationDbIdsResponse>() {
+                @Override
+                public void onSuccess(NewObservationDbIdsResponse phenotypesResponse, int i, Map<String, List<String>> map) {
+                    // TODO: reponse processing
+                }
+            };
+
+            // TODO: get from db once working
+            PhenotypesRequestObservation observation = new PhenotypesRequestObservation();
+            observation.setCollector("Nick Field Book");
+            observation.setObservationDbId(""); // new entry only for now
+            OffsetDateTime time = OffsetDateTime.now();
+            observation.setObservationTimeStamp(time);
+            observation.setObservationVariableDbId("MO_123:100002");
+            observation.setObservationVariableName("Plant Height");
+            observation.season("Spring 2018");
+            observation.setValue("1");
+
+            PhenotypesRequestData phenotype = new PhenotypesRequestData();
+            phenotype.addObservationsItem(observation);
+            phenotype.setObservatioUnitDbId("1");
+            phenotype.setStudyDbId("1001");
+
+            PhenotypesRequest request = new PhenotypesRequest();
+            request.addDataItem(phenotype);
+
+            phenotypesApi.phenotypesPostAsync(request, null,"Bearer YYYY", callback);
+
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /*
+    public void postPhenotypes() {
         String url = this.brapiBaseURL + "/phenotypes";
 
         List<Map<String, String>> data = dataHelper.getDataBrapiExport();
@@ -430,6 +478,7 @@ public class BrAPIService {
         };
         queue.add(putObservationsRequest);
     }
+    */
 
     // dummy data test for now
     public void putStudyObservations() {

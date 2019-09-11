@@ -45,7 +45,7 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
         cancelBtn = findViewById(R.id.brapi_cancel_btn);
         cancelBtn.setOnClickListener(this);
 
-        loadStatistics();
+        //loadStatistics();
     }
 
     @Override
