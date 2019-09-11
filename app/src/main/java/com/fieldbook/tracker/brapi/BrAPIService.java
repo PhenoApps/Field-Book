@@ -200,6 +200,10 @@ public class BrAPIService {
         if(checkField(unit.getPedigree()))
             attributes.add("Pedigree");
 
+        // We always add the observationUnitDbId and observationName
+        attributes.add("observationUnitDbId");
+        attributes.add("observationUnitName");
+
         return attributes;
 
     }
@@ -227,7 +231,13 @@ public class BrAPIService {
                     addAttributeDataItem(dataRow, unit.getGermplasmName(), unit.getGermplasmDbId());
                 else if (checkField(unit.getPedigree()) && attribute.equalsIgnoreCase("Pedigree"))
                     addAttributeDataItem(dataRow, unit.getPedigree());
+
             }
+
+            // ObservationUnitDbId and observationUnitName will always go in the attributes
+            addAttributeDataItem(dataRow, unit.getObservationUnitDbId());
+            addAttributeDataItem(dataRow, unit.getObservationUnitName());
+
             attributesTable.add(dataRow);
         }
 

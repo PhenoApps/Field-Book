@@ -1180,7 +1180,7 @@ public class DataHelper {
                     + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT)");
             db.execSQL("CREATE TABLE "
                     + PLOTS
-                    + "(plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR)");
+                    + "(plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR, observationUnitDbId VARCHAR, observationUnitName VARCHAR)");
             db.execSQL("CREATE TABLE "
                     + PLOT_ATTRIBUTES
                     + "(attribute_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_name VARCHAR, exp_id INTEGER)");
@@ -1302,8 +1302,11 @@ public class DataHelper {
             if (oldVersion <= 8 & newVersion >= 8) {
 
                 // add columns to tables for brapi integration
-                db.execSQL("ALTER TABLE traits ADD COLUMN external_db_id TEXT");
-                db.execSQL("ALTER TABLE traits ADD COLUMN trait_data_source TEXT");
+                db.execSQL("ALTER TABLE traits ADD COLUMN external_db_id VARCHAR");
+                db.execSQL("ALTER TABLE traits ADD COLUMN trait_data_source VARCHAR");
+                db.execSQL("ALTER TABLE plots ADD COLUMN observationUnitDbId VARCHAR");
+                db.execSQL("ALTER TABLE plots ADD COLUMN observationUnitName VARCHAR");
+
 
             }
         }
@@ -1493,6 +1496,13 @@ public class DataHelper {
         insertValues.put("unique_id", data.get(plotIndices[0]));    //data[plotIndices[0]]);
         insertValues.put("primary_id", data.get(plotIndices[1]));   //data[plotIndices[1]]);
         insertValues.put("secondary_id", data.get(plotIndices[2])); //data[plotIndices[2]]);
+
+        // Insert the observationUnitId and observationName for syncing with external system
+        Integer unitDbIdIndex = columns.indexOf("observationUnitDbId");
+        Integer unitNameIndex = columns.indexOf("observationUnitName");
+        insertValues.put("observationUnitDbId", data.get(unitDbIdIndex));
+        insertValues.put("observationUnitName", data.get(unitNameIndex));
+
         long plot_id = db.insert(PLOTS, null, insertValues);
 
         // add plot data plot_values table
@@ -1504,6 +1514,7 @@ public class DataHelper {
                 attId = attribute_id.getInt(0);
             }
 
+            // We store these observationUnitDbId and observationUnitName in the plot table. Skip them here.
             ContentValues plotValuesInsert = new ContentValues();
             plotValuesInsert.put("attribute_id",attId);
             plotValuesInsert.put("attribute_value", data.get(i));
@@ -1512,6 +1523,7 @@ public class DataHelper {
             db.insert(PLOT_VALUES, null, plotValuesInsert);
 
             attribute_id.close();
+
         }
 
         cursor.close();
