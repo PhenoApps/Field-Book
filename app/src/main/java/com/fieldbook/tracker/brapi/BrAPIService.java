@@ -24,6 +24,8 @@ import com.fieldbook.tracker.fields.FieldObject;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.TraitObject;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -607,8 +609,13 @@ public class BrAPIService {
 
             // Need to set where we are getting the data from so we don't push to a different
             // external link than where the trait was retrieved from.
-            Integer url_path_start = this.brapiBaseURL.indexOf("/brapi", 0);
-            trait.setTraitDataSource(this.brapiBaseURL.substring(0, url_path_start));
+            if (getHostUrl() != null) {
+                trait.setTraitDataSource(getHostUrl());
+            }
+            else {
+                //TODO: Don't let this keep going
+                trait.setTraitDataSource(null);
+            }
 
             // Parse out the scale of the variable
             if(var.getScale() != null) {
@@ -665,10 +672,21 @@ public class BrAPIService {
         field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
         field.setExp_species(studyDetails.getCommonCropName());
         field.setCount(studyDetails.getNumberOfPlots().toString());
+        if (getHostUrl() != null) {
+            field.setExp_source(getHostUrl());
+        }
+        else {
+            //TODO: Don't let this go through
+            field.setExp_source(null);
+        }
+
         field.setUnique_id("Plot");
         field.setPrimary_id("Row");
         field.setSecondary_id("Column");
         field.setExp_sort("Plot");
+
+        // Get our host url
+
         int expId = dataHelper.createField(field, studyDetails.getAttributes());
 
         for(List<String> dataRow: studyDetails.getValues()) {
@@ -681,6 +699,20 @@ public class BrAPIService {
         for(TraitObject t : studyDetails.getTraits()) {
             dataHelper.insertTraits(t);
         }
+    }
+
+    public String getHostUrl() {
+
+        try {
+            URL externalUrl = new URL(this.brapiBaseURL);
+            return externalUrl.getHost();
+        }
+        catch (MalformedURLException e) {
+            Toast.makeText(context.getApplicationContext(), "Cannot get host of data endpoint.", Toast.LENGTH_SHORT).show();
+            Log.e("error", e.toString());
+            return null;
+        }
+
     }
 
     public static void authorizeBrAPI(SharedPreferences sharedPreferences, Activity activity) {

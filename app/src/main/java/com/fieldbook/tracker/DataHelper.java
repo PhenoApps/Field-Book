@@ -166,20 +166,27 @@ public class DataHelper {
 
         // Get only the data that belongs to the system we are importing to.
         String query = "SELECT " +
-                "range.observationUnitDbId, " +
-                "exp_id.exp_alias, " +
-                "traits.external_db_id, " +
-                "user_traits.timeTaken, " +
-                "user_traits.userValue " +
-                "FROM " +
-                "user_traits " +
-                "JOIN " +
-                "traits ON user_traits.parent = traits.trait " +
-                "JOIN " +
-                "range ON user_traits.rid = range.observationUnitDbId " +
-                "JOIN " +
-                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
-                "WHERE traits.trait_data_source <> 'local'";
+                    "range.observationUnitDbId, " +
+                    "range.observationUnitName, " +
+                    "traits.external_db_id, " +
+                    "user_traits.timeTaken, " +
+                    "user_traits.userValue, " +
+                    "traits.trait " +
+                    "FROM " +
+                    "user_traits " +
+                    "JOIN " +
+                    "range ON user_traits.rid = range.id " +
+                    "JOIN " +
+                    "traits ON user_traits.parent = traits.trait " +
+                    "JOIN " +
+                    "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+                    "WHERE " +
+                    "exp_id.exp_source IS NOT NULL " +
+                    "AND " +
+                    "traits.trait_data_source <> 'local' " +
+                    "AND " +
+                    "traits.trait_data_source IS NOT NULL;";
+
 
         Cursor db_cursor = db.rawQuery(query,null);
 
@@ -1180,7 +1187,7 @@ public class DataHelper {
                     + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT)");
             db.execSQL("CREATE TABLE "
                     + PLOTS
-                    + "(plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR, observationUnitDbId VARCHAR, observationUnitName VARCHAR)");
+                    + "(plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR)");
             db.execSQL("CREATE TABLE "
                     + PLOT_ATTRIBUTES
                     + "(attribute_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_name VARCHAR, exp_id INTEGER)");
@@ -1189,7 +1196,7 @@ public class DataHelper {
                     + "(attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_id INTEGER, attribute_value VARCHAR, plot_id INTEGER, exp_id INTEGER)");
             db.execSQL("CREATE TABLE "
                     + EXP_INDEX
-                    + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER)");
+                    + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER, exp_source VARCHAR)");
 
             //Do not know why the unique constraint does not work
             //db.execSQL("CREATE UNIQUE INDEX expname ON " + EXP_INDEX +"(exp_name);");
@@ -1304,8 +1311,7 @@ public class DataHelper {
                 // add columns to tables for brapi integration
                 db.execSQL("ALTER TABLE traits ADD COLUMN external_db_id VARCHAR");
                 db.execSQL("ALTER TABLE traits ADD COLUMN trait_data_source VARCHAR");
-                db.execSQL("ALTER TABLE plots ADD COLUMN observationUnitDbId VARCHAR");
-                db.execSQL("ALTER TABLE plots ADD COLUMN observationUnitName VARCHAR");
+                db.execSQL("ALTER TABLE exp_id ADD COLUMN exp_source VARCHAR");
 
 
             }
@@ -1456,6 +1462,7 @@ public class DataHelper {
         insertExp.put("exp_sort", e.getExp_sort());
         insertExp.put("count", e.getCount());
         insertExp.put("date_import", timeStamp.format(Calendar.getInstance().getTime()));
+        insertExp.put("exp_source", e.getExp_source());
 
         exp_id = db.insert(EXP_INDEX, null, insertExp);
 
@@ -1496,12 +1503,6 @@ public class DataHelper {
         insertValues.put("unique_id", data.get(plotIndices[0]));    //data[plotIndices[0]]);
         insertValues.put("primary_id", data.get(plotIndices[1]));   //data[plotIndices[1]]);
         insertValues.put("secondary_id", data.get(plotIndices[2])); //data[plotIndices[2]]);
-
-        // Insert the observationUnitId and observationName for syncing with external system
-        Integer unitDbIdIndex = columns.indexOf("observationUnitDbId");
-        Integer unitNameIndex = columns.indexOf("observationUnitName");
-        insertValues.put("observationUnitDbId", data.get(unitDbIdIndex));
-        insertValues.put("observationUnitName", data.get(unitNameIndex));
 
         long plot_id = db.insert(PLOTS, null, insertValues);
 
