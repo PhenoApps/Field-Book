@@ -35,7 +35,8 @@ import io.swagger.client.ApiException;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ObservationVariablesApi;
-import io.swagger.client.model.Observation;
+import io.swagger.client.model.NewObservationDbIds;
+import io.swagger.client.model.NewObservationDbIdsObservations;
 import io.swagger.client.model.ObservationUnit;
 import io.swagger.client.model.ObservationUnitsResponse1;
 import io.swagger.client.model.ObservationVariable;
@@ -376,41 +377,52 @@ public class BrAPIService {
         return traits;
     }
 
-    public void postPhenotypes() {
+    public void postPhenotypes(List<Observation> observations, final Function<List<NewObservationDbIdsObservations>, Void> function) {
+
         try {
 
             BrapiApiCallBack<NewObservationDbIdsResponse> callback = new BrapiApiCallBack<NewObservationDbIdsResponse>() {
                 @Override
                 public void onSuccess(NewObservationDbIdsResponse phenotypesResponse, int i, Map<String, List<String>> map) {
-                    // TODO: reponse processing
+
+                    // TODO: response processing
+                    final List<NewObservationDbIdsObservations> observationDbIds = phenotypesResponse.getResult().getObservations();
+
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            function.apply(observationDbIds);
+                        }
+                    });
                 }
             };
 
-            // TODO: get from db once working
-            PhenotypesRequestObservation observation = new PhenotypesRequestObservation();
-            observation.setCollector("Nick Field Book");
-            observation.setObservationDbId(""); // new entry only for now
-            OffsetDateTime time = OffsetDateTime.now();
-            observation.setObservationTimeStamp(time);
-            observation.setObservationVariableDbId("MO_123:100002");
-            observation.setObservationVariableName("Plant Height");
-            observation.season("Spring 2018");
-            observation.setValue("1");
-
-            PhenotypesRequestData phenotype = new PhenotypesRequestData();
-            phenotype.addObservationsItem(observation);
-            phenotype.setObservatioUnitDbId("1");
-            phenotype.setStudyDbId("1001");
-
             PhenotypesRequest request = new PhenotypesRequest();
-            request.addDataItem(phenotype);
+
+            // TODO: group by study and observationunit db ids
+            for (Observation observation : observations) {
+                PhenotypesRequestObservation request_observation = new PhenotypesRequestObservation();
+                request_observation.setCollector("Field Book");
+                request_observation.setObservationDbId(""); // new entry only for now
+                request_observation.setObservationTimeStamp(observation.getTimestamp());
+                request_observation.setObservationVariableDbId(observation.getVariableDbId());
+                request_observation.setObservationVariableName(observation.getVariableName());
+                request_observation.season("Spring 2018"); // workaround for test server
+                request_observation.setValue(observation.getValue());
+
+                PhenotypesRequestData request_data = new PhenotypesRequestData();
+                request_data.addObservationsItem(request_observation);
+                request_data.setObservatioUnitDbId(observation.getUnitDbId());
+                request_data.setStudyDbId(observation.getStudyId());
+
+                request.addDataItem(request_data);
+            }
 
             phenotypesApi.phenotypesPostAsync(request, null,"Bearer YYYY", callback);
 
         } catch (ApiException e) {
             e.printStackTrace();
         }
-
     }
 
     /*
