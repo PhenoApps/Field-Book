@@ -56,6 +56,34 @@ android:paddingBottom="5dp">
     android:orientation="horizontal">
 
     <TextView
+        android:id="@+id/brapiNumSyncedValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingBottom="5dp"
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_medium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/brapiNumSynceddLbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingBottom="10dp"
+        android:text="@string/brapi_export_num_synced_obs"
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_medium"
+        android:textStyle="bold" />
+</LinearLayout>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_weight="0"
+    android:orientation="horizontal">
+
+    <TextView
         android:id="@+id/brapiNumEditedValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

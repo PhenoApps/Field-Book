@@ -26,26 +26,49 @@ public class Observation {
     private String dbId;
     private String value;
 
+    public enum Status {
+        NEW, SYNCED, EDITED
+    }
+
+    public Observation() {
+    }
+
+    public Observation(NewObservationDbIdsObservations response) {
+        this.dbId = response.getObservationDbId();
+        this.unitDbId = response.getObservationUnitDbId();
+        this.variableDbId = response.getObservationVariableDbId();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Observation that = (Observation) o;
-        return Objects.equals(collector, that.collector) &&
-                Objects.equals(brapiDbId, that.brapiDbId) &&
-                Objects.equals(fieldbookDbId, that.fieldbookDbId) &&
-                Objects.equals(unitDbId, that.unitDbId) &&
-                Objects.equals(variableDbId, that.variableDbId) &&
-                Objects.equals(timestamp, that.timestamp) &&
-                Objects.equals(variableName, that.variableName) &&
-                Objects.equals(season, that.season) &&
-                Objects.equals(studyId, that.studyId) &&
-                Objects.equals(value, that.value);
+        return  Objects.equals(unitDbId, that.unitDbId) &&
+                Objects.equals(variableDbId, that.variableDbId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(collector, brapiDbId, fieldbookDbId, unitDbId, variableDbId, timestamp, variableName, season, studyId, value);
+        return Objects.hash(unitDbId, variableDbId);
+    }
+
+    public Status getStatus() {
+
+        Status status;
+
+        if (dbId == null) {
+            status = Status.NEW;
+        }
+        else {
+            status = Status.SYNCED;
+        }
+
+        // TODO: handle edited case
+        // need to look at timestamps / different values which would require
+        // a request to the server
+
+        return status;
     }
 
     public String getFieldbookDbId() {
