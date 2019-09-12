@@ -32,12 +32,17 @@ import java.util.List;
 import java.util.Map;
 import com.fieldbook.tracker.traits.TraitObject;
 
+import io.swagger.client.model.Metadata;
+
 
 public class BrapiTraitActivity extends AppCompatActivity {
 
     private SharedPreferences preferences;
     private BrAPIService brAPIService;
     private List<TraitObject> selectedTraits;
+    private Integer currentPage = 0;
+    private Integer totalPages = 1;
+    private Integer resultsPerPage = 3;
 
     @Override
     public void onDestroy() {
@@ -70,7 +75,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         // Load the traits from breedbase if user is connected to the internet
         if(Utils.isConnected(this)) {
-            loadTraitsList();
+            loadTraitsList(BrapiTraitActivity.this.currentPage, BrapiTraitActivity.this.resultsPerPage);
         }else{
             // Check if the user is connected. If not, pull from cache
             Toast.makeText(getApplicationContext(), "Device Offline: Please connect to a network and try again", Toast.LENGTH_SHORT).show();
@@ -88,7 +93,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
     }
 
     // Load the traits from breedbase
-    public void loadTraitsList() {
+    public void loadTraitsList(final Integer page, Integer pageSize) {
 
         // Get our UI elements for the list of traits
         final ListView traitList = findViewById(R.id.brapiTraits);
@@ -97,17 +102,37 @@ public class BrapiTraitActivity extends AppCompatActivity {
         // Show our progress bar
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
-        // Call our API to get the data
-        brAPIService.getOntology(new Function< List<TraitObject>, Void>() {
+        TextView pageIndicator = findViewById(R.id.page_indicator);
+        pageIndicator.setText(String.format("Page %d of %d", page + 1, BrapiTraitActivity.this.totalPages));
 
+
+        // Call our API to get the data
+        brAPIService.getOntology(page, pageSize, new Function<BrapiListResponse<TraitObject>, Void>() {
             @Override
-            public Void apply(final List<TraitObject> traits) {
+            public Void apply(BrapiListResponse<TraitObject> input) {
+
+                // Cancel processing if the page that was processed is not the page
+                // that we are currently on.
+                if (page != BrapiTraitActivity.this.currentPage) {
+                    return null;
+                }
+
+                final List<TraitObject> traits = input.getData();
+
+                // Update the total pages
+                final Metadata metadata = input.getMetadata();
+                BrapiTraitActivity.this.totalPages = metadata.getPagination().getTotalPages();
+                TextView pageIndicator = findViewById(R.id.page_indicator);
+                pageIndicator.setText(String.format("Page %d of %d", BrapiTraitActivity.this.currentPage + 1,
+                        BrapiTraitActivity.this.totalPages));
 
                 // Clear our selected traits
                 selectedTraits = new ArrayList<>();
 
                 // Build our array adapter
                 traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
+
+                // Set our page numbers
 
                 // Set our on click listener for each item
 
@@ -118,8 +143,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                         if (traitList.isItemChecked(position)) {
                             // It is checked now, it wasn't before
                             selectedTraits.add(traits.get(position));
-                        }
-                        else {
+                        } else {
                             // It was checked before, remove from selection
                             selectedTraits.remove(traits.get(position));
                         }
@@ -134,7 +158,6 @@ public class BrapiTraitActivity extends AppCompatActivity {
             }
 
         });
-
     }
 
 
@@ -157,8 +180,11 @@ public class BrapiTraitActivity extends AppCompatActivity {
     public void buttonClicked(View view) {
         switch(view.getId()) {
             case R.id.loadTraits:
-                loadTraitsList();
+                // Start from beginning
+                BrapiTraitActivity.this.currentPage = 0;
+                loadTraitsList(BrapiTraitActivity.this.currentPage, BrapiTraitActivity.this.resultsPerPage);
                 break;
+
             case R.id.save:
 
                 // Save the selected traits
@@ -167,6 +193,23 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 // navigate back to our traits list page
                 ((Activity) view.getContext()).finish();
                 break;
+            case R.id.prev:
+
+                // Query the previous page of traits
+                Integer prevPage = BrapiTraitActivity.this.currentPage - 1;
+                BrapiTraitActivity.this.currentPage = prevPage;
+                if (prevPage >= 0) { loadTraitsList(prevPage, BrapiTraitActivity.this.resultsPerPage); }
+                break;
+
+            case R.id.next:
+
+                // Query the next page of traits
+                Integer nextPage = BrapiTraitActivity.this.currentPage + 1;
+                Integer totalPages = BrapiTraitActivity.this.totalPages;
+                BrapiTraitActivity.this.currentPage = nextPage;
+                if (nextPage < totalPages) { loadTraitsList(nextPage, BrapiTraitActivity.this.resultsPerPage); }
+                break;
+
         }
 
     }

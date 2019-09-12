@@ -35,6 +35,7 @@ import io.swagger.client.ApiException;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ObservationVariablesApi;
+import io.swagger.client.model.Metadata;
 import io.swagger.client.model.Observation;
 import io.swagger.client.model.ObservationUnit;
 import io.swagger.client.model.ObservationUnitsResponse1;
@@ -294,7 +295,7 @@ public class BrAPIService {
         queue.add(stringRequest);
     }*/
 
-    public void getOntology(final Function<List<TraitObject>, Void> function) {
+    public void getOntology(Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function) {
         try {
 
             BrapiApiCallBack<ObservationVariablesResponse> callback = new BrapiApiCallBack<ObservationVariablesResponse>() {
@@ -303,18 +304,26 @@ public class BrAPIService {
 
                     // Result contains a list of observation variables
                     List<ObservationVariable> brapiTraitList = response.getResult().getData();
+                    final Metadata metadata = response.getMetadata();
                     final List<TraitObject> traitsList = mapTraits(brapiTraitList);
+                    final BrapiListResponse<TraitObject> traitResponse = new BrapiListResponse<TraitObject>();
+                    traitResponse.setData(traitsList);
+                    traitResponse.setMetadata(metadata);
 
                     ((Activity)context).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            function.apply(traitsList);
+                            function.apply(traitResponse);
                         }
                     });
                 }
             };
 
-            traitsApi.variablesGetAsync(0, 50, null, null,
+            // Set defaults for page and pageSize if not specified.
+            if (page == null) { page = 0; }
+            if (pageSize == null) { pageSize = 50; }
+
+            traitsApi.variablesGetAsync(page, pageSize, null, null,
                     null, callback);
 
         } catch (ApiException e) {
@@ -672,6 +681,7 @@ public class BrAPIService {
         field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
         field.setExp_species(studyDetails.getCommonCropName());
         field.setCount(studyDetails.getNumberOfPlots().toString());
+
         if (getHostUrl() != null) {
             field.setExp_source(getHostUrl());
         }

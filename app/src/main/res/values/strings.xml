@@ -388,4 +388,7 @@
     <string name="brapi_study_num_traits"> Traits</string>
     <string name="import_source_brapi">Remote (BrAPI)</string>
     <string name="brapi_save_trait">Save Traits</string>
+    <string name="next">Next</string>
+    <string name="prev">Prev</string>
+    <string name="page_one_of_one">Page 1 of 1</string>
 </resources>
