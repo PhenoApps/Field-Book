@@ -36,7 +36,7 @@ import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ObservationVariablesApi;
 import io.swagger.client.model.Metadata;
-import io.swagger.client.model.Observation;
+import com.fieldbook.tracker.brapi.Observation;
 import io.swagger.client.model.NewObservationDbIds;
 import io.swagger.client.model.NewObservationDbIdsObservations;
 import io.swagger.client.model.ObservationUnit;
