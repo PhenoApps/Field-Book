@@ -82,11 +82,9 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
             Toast.makeText(getContext().getApplicationContext(), "Wrong number of observations returned", Toast.LENGTH_SHORT).show();
         }
         else {
-            // can't use streams/filter with API < 24
-            for (NewObservationDbIdsObservations observationDbId : observationDbIds) {
-                // get observation associated with this
+            // TODO
 
-            }
+            Toast.makeText(context.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
         }
 
     }

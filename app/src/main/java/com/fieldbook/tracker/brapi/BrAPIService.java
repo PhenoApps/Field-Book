@@ -405,6 +405,22 @@ public class BrAPIService {
                         }
                     });
                 }
+
+                @Override
+                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
+
+                    final ApiException error = e;
+
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context.getApplicationContext(), "BrAPI Export Failed", Toast.LENGTH_SHORT).show();
+                            Log.e("error", error.toString());
+                        }
+                    });
+
+
+                }
             };
 
             PhenotypesRequest request = new PhenotypesRequest();
