@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
+import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.fields.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
@@ -35,6 +36,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import io.swagger.client.model.PhenotypesRequest;
 
 /**
  * All database related functions are here
@@ -162,7 +165,9 @@ public class DataHelper {
     /**
      * Get the data for brapi export to external system
      */
-    public List<Map<String, String>> getDataBrapiExport() {
+    public List<Observation> getObservations() {
+
+        List<Observation> observations = new ArrayList<Observation>();
 
         // Get only the data that belongs to the system we are importing to.
         String query = "SELECT " +
@@ -171,7 +176,8 @@ public class DataHelper {
                     "traits.external_db_id, " +
                     "user_traits.timeTaken, " +
                     "user_traits.userValue, " +
-                    "traits.trait " +
+                    "traits.trait, " +
+                    "exp_id.exp_alias " +
                     "FROM " +
                     "user_traits " +
                     "JOIN " +
@@ -188,30 +194,38 @@ public class DataHelper {
                     "traits.trait_data_source IS NOT NULL;";
 
 
-        Cursor db_cursor = db.rawQuery(query,null);
+        Cursor cursor = db.rawQuery(query,null);
 
-        // Transform our data into a more accessible format
-        List<String> columns = new ArrayList<>(Arrays.asList("observationUnitDbId", "exp_alias",
-                "external_db_id", "timeTaken", "userValue"));
-        List<Map<String, String>> results = new ArrayList<>();
 
-        if (db_cursor.moveToFirst()){
-            do{
+        if (cursor.moveToFirst()) {
+            do {
+                Observation o = new Observation();
 
-                Map<String, String> row = new HashMap<>();
-                for (String column : columns) {
-                    row.put(column, db_cursor.getString(db_cursor.getColumnIndex(column)));
-                }
+                o.setUnitDbId(cursor.getString(0));
+                o.setVariableDbId(cursor.getString(2));
+                o.setTimestamp(cursor.getString(3));
+                o.setValue(cursor.getString(4));
+                o.setVariableName(cursor.getString(5));
+                o.setStudyId(cursor.getString(6));
 
-                results.add(row);
+                observations.add(o);
 
-            }while(db_cursor.moveToNext());
+            } while (cursor.moveToNext());
         }
-        db_cursor.close();
 
-        return results;
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return observations;
     }
 
+    /**
+     * Sync with observationdbids BrAPI
+     */
+    public void updateObservations(List<Observation> observations) {
+
+    }
 
     /**
      * Helper function to close the database
@@ -1309,10 +1323,12 @@ public class DataHelper {
             if (oldVersion <= 8 & newVersion >= 8) {
 
                 // add columns to tables for brapi integration
+
                 db.execSQL("ALTER TABLE traits ADD COLUMN external_db_id VARCHAR");
                 db.execSQL("ALTER TABLE traits ADD COLUMN trait_data_source VARCHAR");
                 db.execSQL("ALTER TABLE exp_id ADD COLUMN exp_source VARCHAR");
 
+                //db.execSQL("ALTER TABLE user_traits ADD COLUMN observationDbId");
 
             }
         }
