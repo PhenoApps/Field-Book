@@ -1,5 +1,6 @@
 package com.fieldbook.tracker;
 
+import androidx.arch.core.util.Function;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AlertDialog;
 
@@ -50,6 +51,8 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.brapi.BrapiExportDialog;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
@@ -161,6 +164,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         invalidateOptionsMenu();
         loadScreen();
+
     }
 
     @Override
@@ -193,6 +197,7 @@ public class ConfigActivity extends AppCompatActivity {
         createDirs();
 
         dt = new DataHelper(this);
+
     }
 
     private void createDirs() {
@@ -414,6 +419,10 @@ public class ConfigActivity extends AppCompatActivity {
         //TODO change all request codes
         super.onActivityResult(requestCode, resultCode, data);
 
+        // Brapi authentication for exporting fields
+        if (requestCode == 5) {
+
+        }
 
         if (requestCode == 4) {
             if (resultCode == RESULT_OK) {
@@ -1022,11 +1031,15 @@ public class ConfigActivity extends AppCompatActivity {
                         break;
                     case 1:
                         // one BrAPIService?
-                        BrapiExportDialog bed = new BrapiExportDialog(context);
-                        bed.show();
+                        // Check if we are authorized and force authorization if not.
+                        Intent loginIntent = new Intent(ConfigActivity.this, BrapiAuthActivity.class);
+                        //loginIntent.putExtra("target", "export");
+                        startActivityForResult(loginIntent, 5);
+
                         break;
 
                 }
+
                 exportDialog.dismiss();
             }
         });
@@ -1681,4 +1694,5 @@ public class ConfigActivity extends AppCompatActivity {
             }
         }, 2000);
     }
+
 }

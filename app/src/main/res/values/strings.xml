@@ -391,4 +391,12 @@
     <string name="next">Next</string>
     <string name="prev">Prev</string>
     <string name="page_one_of_one">Page 1 of 1</string>
+    <string name="brapi_auth_needed_title">Login Needed</string>
+    <string name="brapi_auth_needed">
+    You need to be logged into the system you are attempting to sync data with in order
+        to sync your data.
+
+    Would you like to authenticate now?
+    </string>
+    <string name="brapi_auth_btn">Log In to Site</string>
 </resources>

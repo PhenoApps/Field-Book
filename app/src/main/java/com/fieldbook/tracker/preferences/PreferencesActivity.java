@@ -90,10 +90,8 @@ public class PreferencesActivity extends AppCompatActivity {
                 .commit();
 
         registerBrapiButtonListeners(this, preferencesFragment);
-
-        checkBrapiAuth();
-
         registerBrapiHostChangeListener(this);
+
     }
 
     @Override
@@ -110,13 +108,6 @@ public class PreferencesActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        checkBrapiAuth();
-    }
-
-    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
@@ -127,7 +118,7 @@ public class PreferencesActivity extends AppCompatActivity {
             if(brapiConfig != null) {
                 brapiConfig.addPreference(brapiAuthButton);
                 brapiConfig.addPreference(brapiLogoutButton);
-                BrAPIService.authorizeBrAPI(sharedPreferences, this);
+                //TODO: BrAPIService.authorizeBrAPI(sharedPreferences, this);
             }
         }
     }
@@ -140,7 +131,7 @@ public class PreferencesActivity extends AppCompatActivity {
                     if(brapiConfig != null) {
                         brapiConfig.addPreference(brapiAuthButton);
                         brapiConfig.addPreference(brapiLogoutButton);
-                        BrAPIService.authorizeBrAPI(sharedPreferences, prefActivity);
+                        BrAPIService.authorizeBrAPI(sharedPreferences, prefActivity, null);
                     }
                 }
             }
@@ -167,7 +158,7 @@ public class PreferencesActivity extends AppCompatActivity {
                         public boolean onPreferenceClick(Preference preference) {
                             String brapiHost = preference.getSharedPreferences().getString(PreferencesActivity.BRAPI_BASE_URL, null);
                             if (brapiHost != null) {
-                                BrAPIService.authorizeBrAPI(preference.getSharedPreferences(), prefActivity);
+                                BrAPIService.authorizeBrAPI(preference.getSharedPreferences(), prefActivity, null);
                             }
                             return true;
                         }
@@ -208,35 +199,4 @@ public class PreferencesActivity extends AppCompatActivity {
         }, false);
     }
 
-    private void checkBrapiAuth() {
-        Uri data = this.getIntent().getData();
-        if (data != null && data.isHierarchical()) {
-            int status = Integer.parseInt(data.getQueryParameter("status"));
-
-            if(status == 200) {
-                SharedPreferences preferences = getSharedPreferences("Settings", 0);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(PreferencesActivity.BRAPI_TOKEN, data.getQueryParameter("token"));
-                editor.apply();
-
-                String brapiHost = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_BASE_URL, "");
-                brapiAuthButton.setTitle(R.string.brapi_reauthorize);
-                brapiAuthButton.setSummary(getString(R.string.brapi_btn_auth_summary, brapiHost));
-
-                brapiConfig.addPreference(brapiLogoutButton);
-
-                Toast.makeText(getApplicationContext(), R.string.brapi_auth_success, Toast.LENGTH_SHORT).show();
-            } else {
-                SharedPreferences preferences = getSharedPreferences("Settings", 0);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
-                editor.apply();
-
-                brapiAuthButton.setTitle(R.string.brapi_authorize);
-                brapiAuthButton.setSummary(null);
-
-                Toast.makeText(getApplicationContext(), R.string.brapi_auth_deny, Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 }

@@ -41,7 +41,6 @@
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -51,7 +50,9 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
+            android:windowSoftInputMode="adjustPan|stateHidden" >
+
+        </activity>
         <activity
             android:name=".search.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -98,7 +99,9 @@
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme" >
+
+        </activity>
         <activity
             android:name=".ChangelogActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -134,16 +137,25 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeAction" >
-
+        </activity>
+        <activity
+            android:name=".brapi.BrapiAuthActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDialog" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data
-                    android:scheme="fieldbook" />
+                    android:scheme="fieldbook"
+                    android:host="export"/>
+                <data
+                    android:scheme="fieldbook"/>
             </intent-filter>
         </activity>
+
 
         <provider
             android:name=".GenericFileProvider"

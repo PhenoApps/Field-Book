@@ -20,6 +20,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 import com.fieldbook.tracker.DataHelper;
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.fields.FieldObject;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.TraitObject;
@@ -738,28 +739,60 @@ public class BrAPIService {
 
     }
 
-    public static void authorizeBrAPI(SharedPreferences sharedPreferences, Activity activity) {
+    public static void authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
         editor.apply();
 
+        if (target == null) {
+            target = "";
+        }
+
         try {
-            String url = sharedPreferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://";
+            String url = sharedPreferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://%s";
+            url = String.format(url, target);
             try {
                 Uri uri = Uri.parse("googlechrome://navigate?url="+ url);
                 Intent i = new Intent(Intent.ACTION_VIEW, uri);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                activity.startActivity(i);
+                context.startActivity(i);
+
             } catch (ActivityNotFoundException e) {
                 Uri uri = Uri.parse(url);
                 // Chrome is probably not installed
                 // OR not selected as default browser OR if no Browser is selected as default browser
                 Intent i = new Intent(Intent.ACTION_VIEW, uri);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                activity.startActivity(i);
             }
         } catch (Exception ex) {
             Log.e("BrAPI", "Error starting BrAPI auth", ex);
         }
+    }
+
+    // Returns true on successful parsing. False otherwise.
+    public static Boolean parseBrapiAuth(Activity activity) {
+
+        Uri data = activity.getIntent().getData();
+
+        int status = Integer.parseInt(data.getQueryParameter("status"));
+
+        if(status == 200) {
+            SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(PreferencesActivity.BRAPI_TOKEN, data.getQueryParameter("token"));
+            editor.apply();
+            Toast.makeText(activity.getApplicationContext(), R.string.brapi_auth_success, Toast.LENGTH_SHORT).show();
+
+            return true;
+        } else {
+            SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
+            editor.apply();
+            Toast.makeText(activity.getApplicationContext(), R.string.brapi_auth_deny, Toast.LENGTH_SHORT).show();
+
+            return false;
+        }
+
     }
 }
