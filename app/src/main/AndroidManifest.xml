@@ -155,6 +155,12 @@
                     android:scheme="fieldbook"/>
             </intent-filter>
         </activity>
+        <activity
+            android:name=".brapi.BrapiExportDialog"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDialog" ></activity>
 
 
         <provider

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.DataHelper;
@@ -22,19 +23,15 @@ import java.util.List;
 
 import io.swagger.client.model.NewObservationDbIdsObservations;
 
-public class BrapiExportDialog extends Dialog implements android.view.View.OnClickListener {
+public class BrapiExportDialog extends AppCompatActivity {
 
-    private Button saveBtn, cancelBtn;
     private BrAPIService brAPIService;
-    private Context context;
     private DataHelper dataHelper;
     private List<Observation> observations;
     private List<Observation> observationsNeedingSync;
 
-    public BrapiExportDialog(@NonNull Context context) {
-        super(context);
-        this.context = context;
-        this.dataHelper = new DataHelper(context);
+    public BrapiExportDialog() {
+        this.dataHelper = new DataHelper(this);
     }
 
     @Override
@@ -43,20 +40,17 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_brapi_export);
 
-        String brapiBaseURL = this.context.getSharedPreferences("Settings", 0)
+        String brapiBaseURL = this.getSharedPreferences("Settings", 0)
                 .getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
-        brAPIService = new BrAPIService(this.context, brapiBaseURL);
-        saveBtn = findViewById(R.id.brapi_export_btn);
-        saveBtn.setOnClickListener(this);
-        cancelBtn = findViewById(R.id.brapi_cancel_btn);
-        cancelBtn.setOnClickListener(this);
+
+        brAPIService = new BrAPIService(this, brapiBaseURL);
         observations = dataHelper.getObservations();
         observationsNeedingSync = new ArrayList<>();
 
         loadStatistics();
     }
 
-    @Override
+
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.brapi_export_btn:
@@ -70,16 +64,16 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
                     });
                 }
                 else {
-                    Toast.makeText(context.getApplicationContext(), "Error: Nothing to sync", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error: Nothing to sync", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.brapi_cancel_btn:
-                dismiss();
+                finish();
                 break;
             default:
                 break;
         }
-        dismiss();
+        finish();
     }
 
     private void updateObservations(List<NewObservationDbIdsObservations> observationDbIds) {
@@ -87,7 +81,7 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
         boolean error = false;
 
         if (observationDbIds.size() != observationsNeedingSync.size()) {
-            Toast.makeText(getContext().getApplicationContext(), "Wrong number of observations returned", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Wrong number of observations returned", Toast.LENGTH_SHORT).show();
         }
         else {
             // TODO: update to work with multiple observations per variable
@@ -101,11 +95,11 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
                 int first_index = observationsNeedingSync.indexOf(converted);
                 int last_index = observationsNeedingSync.lastIndexOf(converted);
                 if (first_index == -1) {
-                    Toast.makeText(context.getApplicationContext(), "Error: Missing observation", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this.getApplicationContext(), "Error: Missing observation", Toast.LENGTH_SHORT).show();
                     error = true;
                 }
                 else if (first_index != last_index) {
-                    Toast.makeText(context.getApplicationContext(), "Error: Multiple observations per variable", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this.getApplicationContext(), "Error: Multiple observations per variable", Toast.LENGTH_SHORT).show();
                     error = true;
                 }
                 else {
@@ -117,7 +111,7 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
 
             if (error == false) {
                 dataHelper.updateObservations(observationsNeedingSync);
-                Toast.makeText(context.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
             }
         }
     }

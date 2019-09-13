@@ -102,7 +102,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
                 // Config Page
                 Intent nextPage = null;
                 if (target.equals("export")) {
-                    nextPage = new Intent(this, ConfigActivity.class);
+                    nextPage = new Intent(this, BrapiExportDialog.class);
                 }
                 else if (target.equals("")) {
                     nextPage = new Intent(this, ConfigActivity.class);
@@ -119,7 +119,10 @@ public class BrapiAuthActivity extends AppCompatActivity {
                 Intent nextPage = new Intent(this, ConfigActivity.class);
                 startActivity(nextPage);
             }
+
+            finish();
         }
+
 
     }
 }

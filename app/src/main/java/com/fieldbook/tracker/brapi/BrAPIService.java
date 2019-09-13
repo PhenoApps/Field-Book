@@ -739,6 +739,7 @@ public class BrAPIService {
         for(TraitObject t : studyDetails.getTraits()) {
             dataHelper.insertTraits(t);
         }
+
     }
 
     public String getHostUrl() {

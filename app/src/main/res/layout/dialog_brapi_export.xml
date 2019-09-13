@@ -121,7 +121,7 @@ android:paddingBottom="5dp">
         android:textColor="#000000"
         android:textSize="@dimen/text_size_large"
         android:textStyle="bold"
-        android:onClick="dialogButtonClicked"/>
+        android:onClick="onClick"/>
 
     <Button
         android:id="@+id/brapi_cancel_btn"
@@ -133,7 +133,7 @@ android:paddingBottom="5dp">
         android:textColor="#000000"
         android:textSize="@dimen/text_size_large"
         android:textStyle="bold"
-        android:onClick="dialogButtonClicked"/>
+        android:onClick="onClick"/>
 </LinearLayout>
 
 </LinearLayout>
