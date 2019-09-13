@@ -17,8 +17,8 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import io.swagger.client.model.NewObservationDbIdsObservations;
 
@@ -29,6 +29,7 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
     private Context context;
     private DataHelper dataHelper;
     private List<Observation> observations;
+    private List<Observation> observationsNeedingSync;
 
     public BrapiExportDialog(@NonNull Context context) {
         super(context);
@@ -49,6 +50,8 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
         saveBtn.setOnClickListener(this);
         cancelBtn = findViewById(R.id.brapi_cancel_btn);
         cancelBtn.setOnClickListener(this);
+        observations = dataHelper.getObservations();
+        observationsNeedingSync = new ArrayList<>();
 
         loadStatistics();
     }
@@ -57,15 +60,18 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.brapi_export_btn:
-                // TODO: hardcoded, replace with actual studyid
-                observations = dataHelper.getObservations();
-                brAPIService.postPhenotypes(observations, new Function<List<NewObservationDbIdsObservations>, Void>() {
-                    @Override
-                    public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
-                        updateObservations(observationDbIds);
-                        return null;
-                    }
-                });
+                if (observationsNeedingSync.size() > 0) {
+                    brAPIService.postPhenotypes(observationsNeedingSync, new Function<List<NewObservationDbIdsObservations>, Void>() {
+                        @Override
+                        public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
+                            updateObservations(observationDbIds);
+                            return null;
+                        }
+                    });
+                }
+                else {
+                    Toast.makeText(context.getApplicationContext(), "Error: Nothing to sync", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.brapi_cancel_btn:
                 dismiss();
@@ -78,27 +84,68 @@ public class BrapiExportDialog extends Dialog implements android.view.View.OnCli
 
     private void updateObservations(List<NewObservationDbIdsObservations> observationDbIds) {
 
-        if (observationDbIds.size() != observations.size()) {
+        boolean error = false;
+
+        if (observationDbIds.size() != observationsNeedingSync.size()) {
             Toast.makeText(getContext().getApplicationContext(), "Wrong number of observations returned", Toast.LENGTH_SHORT).show();
         }
         else {
-            // can't use streams/filter with API < 24
-            for (NewObservationDbIdsObservations observationDbId : observationDbIds) {
-                // get observation associated with this
+            // TODO: update to work with multiple observations per variable
+            // Also would be nice to have a cleaner 'find' mechanism
+            // For now, just use observationUnitDbId and observationVariableId to key off
+            // Won't work for multiple observations of the same variable which we want to support in the future
 
+            for (NewObservationDbIdsObservations observationDbId : observationDbIds) {
+                // find observation with matching keys and update observationDbId
+                Observation converted = new Observation(observationDbId);
+                int first_index = observationsNeedingSync.indexOf(converted);
+                int last_index = observationsNeedingSync.lastIndexOf(converted);
+                if (first_index == -1) {
+                    Toast.makeText(context.getApplicationContext(), "Error: Missing observation", Toast.LENGTH_SHORT).show();
+                    error = true;
+                }
+                else if (first_index != last_index) {
+                    Toast.makeText(context.getApplicationContext(), "Error: Multiple observations per variable", Toast.LENGTH_SHORT).show();
+                    error = true;
+                }
+                else {
+                    Observation update = observationsNeedingSync.get(first_index);
+                    update.setDbId(converted.getDbId());
+                    observationsNeedingSync.set(first_index, update);
+                }
+            }
+
+            if (error == false) {
+                dataHelper.updateObservations(observationsNeedingSync);
+                Toast.makeText(context.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
             }
         }
-
     }
 
     private void loadStatistics() {
-        // TODO: don't run this twice, organize better
-        List<Observation> data = dataHelper.getObservations();
-        String numUpdated = String.valueOf(data.size());
 
-        // For now everything is treated as new
-        ((TextView) findViewById(R.id.brapiNumNewValue)).setText(numUpdated);
-        // TODO: update with real numbers
-        ((TextView) findViewById(R.id.brapiNumEditedValue)).setText("0");
+        int newObservations = 0;
+        int syncedObservations = 0;
+        int editedObservations = 0;
+
+        for (Observation observation : observations) {
+            switch(observation.getStatus()) {
+                case NEW:
+                    newObservations++;
+                    observationsNeedingSync.add(observation);
+                    break;
+                case SYNCED:
+                    syncedObservations++;
+                    break;
+                case EDITED:
+                    editedObservations++;
+                    observationsNeedingSync.add(observation);
+                    break;
+            }
+        }
+
+        ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(newObservations));
+        ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(syncedObservations));
+        ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(editedObservations));
     }
 }

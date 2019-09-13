@@ -130,6 +130,7 @@ public class DataHelper {
             this.insertUserTraits.bindString(9, notes);
             this.insertUserTraits.bindString(10, exp_id);
 
+
             return this.insertUserTraits.executeInsert();
         } catch (Exception e) {
             e.printStackTrace();
@@ -177,7 +178,9 @@ public class DataHelper {
                     "user_traits.timeTaken, " +
                     "user_traits.userValue, " +
                     "traits.trait, " +
-                    "exp_id.exp_alias " +
+                    "exp_id.exp_alias, " +
+                    "user_traits.id, " +
+                    "user_traits.observation_db_id " +
                     "FROM " +
                     "user_traits " +
                     "JOIN " +
@@ -207,6 +210,8 @@ public class DataHelper {
                 o.setValue(cursor.getString(4));
                 o.setVariableName(cursor.getString(5));
                 o.setStudyId(cursor.getString(6));
+                o.setFieldbookDbId(cursor.getString(7));
+                o.setDbId(cursor.getString(8));
 
                 observations.add(o);
 
@@ -224,7 +229,21 @@ public class DataHelper {
      * Sync with observationdbids BrAPI
      */
     public void updateObservations(List<Observation> observations) {
+        ArrayList<String> ids = new ArrayList<String>();
 
+        db.beginTransaction();
+        String sql = "UPDATE user_traits SET observation_db_id = ? WHERE id = ?";
+        SQLiteStatement update = db.compileStatement(sql);
+
+
+        for (Observation observation : observations) {
+            update.bindString(1, observation.getDbId());
+            update.bindString(2, observation.getFieldbookDbId());
+            update.execute();
+        }
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
     }
 
     /**
@@ -1198,7 +1217,7 @@ public class DataHelper {
                     + "(id INTEGER PRIMARY KEY, external_db_id TEXT, trait_data_source TEXT, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
             db.execSQL("CREATE TABLE "
                     + USER_TRAITS
-                    + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT)");
+                    + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT, observation_db_id TEXT)");
             db.execSQL("CREATE TABLE "
                     + PLOTS
                     + "(plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR)");
@@ -1327,8 +1346,7 @@ public class DataHelper {
                 db.execSQL("ALTER TABLE traits ADD COLUMN external_db_id VARCHAR");
                 db.execSQL("ALTER TABLE traits ADD COLUMN trait_data_source VARCHAR");
                 db.execSQL("ALTER TABLE exp_id ADD COLUMN exp_source VARCHAR");
-
-                //db.execSQL("ALTER TABLE user_traits ADD COLUMN observationDbId");
+                db.execSQL("ALTER TABLE user_traits ADD COLUMN observation_db_id TEXT");
 
             }
         }
