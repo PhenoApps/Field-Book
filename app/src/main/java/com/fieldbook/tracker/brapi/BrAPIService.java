@@ -791,12 +791,28 @@ public class BrAPIService {
 
         Uri data = activity.getIntent().getData();
 
-        int status = Integer.parseInt(data.getQueryParameter("status"));
+        Integer status = Integer.parseInt(data.getQueryParameter("status"));
+
+        // Check that we actually have the data. If not return failure.
+        if (status == null) {
+            // TODO: Return specific error message?
+            return false;
+        }
 
         if(status == 200) {
             SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(PreferencesActivity.BRAPI_TOKEN, data.getQueryParameter("token"));
+            String token = data.getQueryParameter("token");
+
+            // Check that we received a token.
+            if (token == null) {
+                // TODO: Return specific error message?
+                return false;
+            }
+
+            //TODO: Remove this and use the actual token
+            token = "Bearer YYYY";
+            editor.putString(PreferencesActivity.BRAPI_TOKEN, token);
             editor.apply();
             Toast.makeText(activity.getApplicationContext(), R.string.brapi_auth_success, Toast.LENGTH_SHORT).show();
 

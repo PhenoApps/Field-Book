@@ -45,16 +45,9 @@ public class BrapiAuthActivity extends AppCompatActivity {
         // Check if this is a return from Brapi authentication
         checkBrapiAuth();
 
-        // Check if the user is logged in already and skip this dialog if so.
-        String auth_token = preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
-        if (auth_token != null && auth_token != "") {
-            finish();
-        }
-
         // User is not authenticated. Show our authentication window.
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_brapi_auth);
-
 
     }
 
@@ -65,6 +58,18 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
         // Check if this is a return from Brapi authentication
         checkBrapiAuth();
+    }
+
+    public static Boolean isLoggedIn(Context context) {
+
+        String auth_token = context.getSharedPreferences("Settings", 0)
+                .getString(PreferencesActivity.BRAPI_TOKEN, "");
+
+        if (auth_token == null || auth_token == "") {
+            return false;
+        }
+
+        return true;
     }
 
     public void onClick(View view) {

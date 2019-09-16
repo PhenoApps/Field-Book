@@ -1032,9 +1032,16 @@ public class ConfigActivity extends AppCompatActivity {
                     case 1:
                         // one BrAPIService?
                         // Check if we are authorized and force authorization if not.
-                        Intent loginIntent = new Intent(ConfigActivity.this, BrapiAuthActivity.class);
-                        //loginIntent.putExtra("target", "export");
-                        startActivityForResult(loginIntent, 5);
+                        if (BrapiAuthActivity.isLoggedIn(getApplicationContext())){
+                            Intent exportIntent = new Intent(ConfigActivity.this, BrapiExportDialog.class);
+                            startActivity(exportIntent);
+                        }
+                        else {
+                            Intent loginIntent = new Intent(ConfigActivity.this, BrapiAuthActivity.class);
+                            // TODO: Constants for targets
+                            loginIntent.putExtra("target", "export");
+                            startActivity(loginIntent);
+                        }
 
                         break;
 
