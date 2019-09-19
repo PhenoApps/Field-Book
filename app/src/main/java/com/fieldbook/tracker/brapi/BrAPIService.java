@@ -89,13 +89,17 @@ public class BrAPIService {
         this.queue = Volley.newRequestQueue(context);
 
         ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
+
+        // Make timeout longer. Set it to 60 seconds for now
+        apiClient.setReadTimeout(60000);
+
         this.studiesApi = new StudiesApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);
 
     }
 
-    public void getStudies(final Function<List<BrapiStudySummary>, Void> function){
+    public void getStudies(final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction){
         try {
 
             BrapiApiCallBack<StudiesResponse> callback = new BrapiApiCallBack<StudiesResponse>() {
@@ -113,13 +117,24 @@ public class BrAPIService {
                         }
                     });
                 }
+
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    // Close our current study and report failure
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            failFunction.apply("Error when loading studies.");
+                        }
+                    });
+                }
             };
 
             studiesApi.studiesGetAsync(
                     null,null, null,null,
                     null, null, null, null, null,
                     null, null, null, null,
-                    0, 20, null, callback);
+                    0, 1000, null, callback);
 
         } catch (ApiException e) {
             e.printStackTrace();
@@ -134,7 +149,7 @@ public class BrAPIService {
         return study;
     }
 
-    public void getStudyDetails(String studyDbId, final Function<BrapiStudyDetails, Void> function) {
+    public void getStudyDetails(String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<String, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudyResponse> callback = new BrapiApiCallBack<StudyResponse>() {
@@ -145,6 +160,17 @@ public class BrAPIService {
                         @Override
                         public void run() {
                             function.apply(study);
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    // Close our current study and report failure
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            failFunction.apply("Error when loading study details for study. Study not saved.");
                         }
                     });
                 }
@@ -164,11 +190,11 @@ public class BrAPIService {
         studyDetails.setStudyName(study.getStudyName());
         studyDetails.setCommonCropName(study.getCommonCropName());
         studyDetails.setStudyDescription(study.getStudyDescription());
-        studyDetails.setStudyDescription(study.getLocation().getLocationName());
+        studyDetails.setStudyLocation(study.getLocation().getLocationName());
         return studyDetails;
     }
 
-    public void getPlotDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function) {
+    public void getPlotDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<String, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ObservationUnitsResponse1> callback = new BrapiApiCallBack<ObservationUnitsResponse1>() {
@@ -186,10 +212,24 @@ public class BrAPIService {
                         }
                     });
                 }
+
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    // Close our current study and report failure
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            failFunction.apply("Error when loading plots for study. Study not saved.");
+                        }
+                    });
+                }
+
             };
+
             studiesApi.studiesStudyDbIdObservationunitsGetAsync(
                     studyDbId, "plot", 0, 1000,
                     null, callback);
+
         } catch (ApiException e) {
             e.printStackTrace();
         }
@@ -298,7 +338,7 @@ public class BrAPIService {
         queue.add(stringRequest);
     }*/
 
-    public void getOntology(Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function) {
+    public void getOntology(Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<String, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ObservationVariablesResponse> callback = new BrapiApiCallBack<ObservationVariablesResponse>() {
@@ -320,6 +360,18 @@ public class BrAPIService {
                         }
                     });
                 }
+
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    // Close our current study and report failure
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            failFunction.apply("Error when loading traits.");
+                        }
+                    });
+                }
+
             };
 
             // Set defaults for page and pageSize if not specified.
@@ -607,7 +659,7 @@ public class BrAPIService {
         return returnValue;
     }
 
-    public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function) {
+    public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<String, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudyObservationVariablesResponse> callback = new BrapiApiCallBack<StudyObservationVariablesResponse>() {
@@ -622,6 +674,21 @@ public class BrAPIService {
                             function.apply(study);
                         }
                     });
+                }
+
+                @Override
+                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
+
+                    final ApiException error = e;
+
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            failFunction.apply("Error loadings traits for the study. Study not saved.");
+                        }
+                    });
+
+
                 }
             };
             studiesApi.studiesStudyDbIdObservationvariablesGetAsync(
@@ -659,8 +726,12 @@ public class BrAPIService {
             // Parse out the scale of the variable
             if(var.getScale() != null) {
                 if(var.getScale().getValidValues() != null) {
-                    trait.setMinimum(var.getScale().getValidValues().getMin().toString());
-                    trait.setMaximum(var.getScale().getValidValues().getMax().toString());
+                    if (var.getScale().getValidValues().getMin() != null){
+                        trait.setMinimum(var.getScale().getValidValues().getMin().toString());
+                    }
+                    if (var.getScale().getValidValues().getMax() != null) {
+                        trait.setMaximum(var.getScale().getValidValues().getMax().toString());
+                    }
                     trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
                 }
                 if(var.getScale().getDataType() != null) {

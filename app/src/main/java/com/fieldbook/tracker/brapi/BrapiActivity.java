@@ -104,6 +104,14 @@ public class BrapiActivity extends AppCompatActivity {
                 findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                 return null;
             }
+        }, new Function<String, Void>() {
+            @Override
+            public Void apply(String input) {
+                // Show error message. We don't finish the activity intentionally.
+                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                Toast.makeText(getApplicationContext(), input, Toast.LENGTH_LONG).show();
+                return null;
+            }
         });
     }
 

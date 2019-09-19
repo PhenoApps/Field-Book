@@ -157,6 +157,15 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 return null;
             }
 
+        }, new Function<String, Void>() {
+            @Override
+            public Void apply(String input) {
+                // Display error message but don't finish the activity.
+                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                Toast.makeText(getApplicationContext(), input, Toast.LENGTH_LONG).show();
+
+                return null;
+            }
         });
     }
 
