@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
@@ -52,11 +53,25 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         cancelBtn.setOnClickListener(this);
         studyDetails = new BrapiStudyDetails();
 
+        // Set our OK button to be disabled until we are finished loading
+        saveBtn.setVisibility(View.GONE);
         buildStudyDetails();
         loadStudy();
     }
 
     private void buildStudyDetails() {
+
+        Function<String, Void> errorFunction = new Function<String, Void>() {
+
+            @Override
+            public Void apply(String errorMessage) {
+                dismiss();
+                //TODO: Make into xml string message for translations.
+                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
+                return null;
+            }
+        };
+
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
         brAPIService.getStudyDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
@@ -67,11 +82,13 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 studyLoadStatus = true;
                 if (checkAllLoadsFinished()) {
                     findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                    saveBtn.setVisibility(View.VISIBLE);
                     resetLoadStatus();
                 }
                 return null;
             }
-        });
+        }, errorFunction);
+
         brAPIService.getPlotDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
@@ -81,11 +98,14 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 plotLoadStatus = true;
                 if (checkAllLoadsFinished()) {
                     findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                    saveBtn.setVisibility(View.VISIBLE);
                     resetLoadStatus();
                 }
                 return null;
             }
-        });
+
+        }, errorFunction);
+
         brAPIService.getTraits(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
@@ -95,11 +115,12 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 traitLoadStatus = true;
                 if (checkAllLoadsFinished()) {
                     findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                    saveBtn.setVisibility(View.VISIBLE);
                     resetLoadStatus();
                 }
                 return null;
             }
-        });
+        }, errorFunction);
     }
 
     private void loadStudy() {
