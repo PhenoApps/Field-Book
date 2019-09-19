@@ -152,7 +152,9 @@
                     android:scheme="fieldbook"
                     android:host="export"/>
                 <data
-                    android:scheme="fieldbook"/>
+                    android:scheme="fieldbook"
+                    android:host=""
+                    tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
             </intent-filter>
         </activity>
         <activity
