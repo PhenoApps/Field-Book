@@ -197,10 +197,11 @@ public class BrapiTraitActivity extends AppCompatActivity {
             case R.id.save:
 
                 // Save the selected traits
-                saveTraits();
+                String saveMessage = saveTraits();
 
                 // navigate back to our traits list page
                 ((Activity) view.getContext()).finish();
+                Toast.makeText(this, saveMessage, Toast.LENGTH_LONG).show();
                 break;
             case R.id.prev:
 
@@ -224,14 +225,16 @@ public class BrapiTraitActivity extends AppCompatActivity {
     }
 
     // Save our select traits
-    public void saveTraits() {
+    public String saveTraits() {
 
         // Check if there are any traits selected
         if (selectedTraits.size() == 0) {
-            Toast.makeText(getApplicationContext(), "No traits are selected", Toast.LENGTH_SHORT).show();
-            return;
+            return "No traits are selected";
         }
 
+        Integer totalTraits = selectedTraits.size();
+        Integer successfulSaves = 0;
+        String secondaryMessage = "";
         // For now, only give the ability to create new variables
         // Determine later if the need to edit existing variables is needed.
         for (int i = 0; i < selectedTraits.size(); ++i) {
@@ -240,12 +243,16 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
             // Check if the trait already exists
             if (ConfigActivity.dt.hasTrait(trait.getTrait())) {
-                Toast.makeText(getApplicationContext(), "Trait already exists: " + trait.getTrait(), Toast.LENGTH_SHORT).show();
-                return;
+                secondaryMessage = "Trait already exists: " + trait.getTrait();
+                // Skip this one, continue on.
+                continue;
             }
             
             // Insert our new trait
-            ConfigActivity.dt.insertTraits(trait);
+            long saveStatus = ConfigActivity.dt.insertTraits(trait);
+
+            successfulSaves += saveStatus == -1 ? 0 : 1;
+
         }
 
         SharedPreferences ep = getSharedPreferences("Settings", 0);
@@ -255,6 +262,17 @@ public class BrapiTraitActivity extends AppCompatActivity {
         ed.apply();
 
         MainActivity.reloadData = true;
+
+        // Check how successful we were at saving our traits.
+        if (successfulSaves == 0) {
+            return "Error saving traits. No traits were saved";
+        }
+        else if (successfulSaves < totalTraits) {
+            return "Error saving some traits. Some traits were not saved";
+        }
+
+        // Check if we had a secondary message to show
+        return secondaryMessage != "" ? secondaryMessage : "Selected traits saved successfully.";
 
     }
 

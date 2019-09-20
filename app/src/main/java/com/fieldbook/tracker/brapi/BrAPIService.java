@@ -311,32 +311,6 @@ public class BrAPIService {
         return getPrioritizedValue(values) != null;
     }
 
-    // Get the ontology from breedbase so the users can select the ontology
-    /*public void getOntology(final Function< List<TraitObject>, Void > function) {
-
-        //TODO: Need to add the ability to change the page
-        String url = this.brapiBaseURL + "/variables?pageSize=50&page=0";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Parse the response
-
-                        //TODO: Replace this class and parse function when Pete releases
-                        // his brapi java library
-                        List<TraitObject> traits = parseTraitsJson(response);
-                        function.apply(traits);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(context.getApplicationContext(), "Error loading data", Toast.LENGTH_SHORT).show();
-                        Log.e("error", error.toString());
-                    }
-                });
-        queue.add(stringRequest);
-    }*/
 
     public void getOntology(Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<String, Void> failFunction) {
         try {
@@ -349,7 +323,7 @@ public class BrAPIService {
                     List<ObservationVariable> brapiTraitList = response.getResult().getData();
                     final Metadata metadata = response.getMetadata();
                     final List<TraitObject> traitsList = mapTraits(brapiTraitList);
-                    final BrapiListResponse<TraitObject> traitResponse = new BrapiListResponse<TraitObject>();
+                    final BrapiListResponse<TraitObject> traitResponse = new BrapiListResponse<>();
                     traitResponse.setData(traitsList);
                     traitResponse.setMetadata(metadata);
 
@@ -387,58 +361,6 @@ public class BrAPIService {
         }
     }
 
-    private List<TraitObject> parseTraitsJson(String json) {
-        List<TraitObject> traits = new ArrayList<>();
-
-        try {
-            JSONObject js = new JSONObject(json);
-            JSONObject result = (JSONObject) js.get("result");
-            JSONArray data = (JSONArray) result.get("data");
-            for (int i = 0; i < data.length(); ++i) {
-                JSONObject tmp = data.getJSONObject(i);
-                TraitObject t = new TraitObject();
-                t.setDefaultValue(tmp.getString("defaultValue"));
-                JSONObject traitJson = tmp.getJSONObject("trait");
-                t.setTrait(traitJson.getString("name"));
-                t.setDetails(traitJson.getString("description"));
-                JSONObject scale = tmp.getJSONObject("scale");
-
-                JSONObject validValue = scale.getJSONObject("validValues");
-                //TODO: Add integer parsing to get min and max as integers
-                // Requires changes to breedbase as well
-                t.setMinimum(validValue.getString("min"));
-                t.setMaximum(validValue.getString("max"));
-                JSONArray cat = validValue.getJSONArray("categories");
-                StringBuilder sb = new StringBuilder();
-                for (int j = 0; j < cat.length(); ++j) {
-                    sb.append(cat.get(j));
-                    if (j != cat.length() - 1) {
-                        sb.append("/");
-                    }
-                }
-                t.setCategories(sb.toString());
-                //TODO: datatype field should be dataType. Breedbase needs to be fixed.
-                t.setFormat(convertBrAPIDataType(scale.getString("datatype")));
-                if (t.getFormat().equals("integer")) {
-                    t.setFormat("numeric");
-                }
-
-                // Get database id of external system to sync to enabled pushing through brAPI
-                t.setExternalDbId(tmp.getString("observationVariableDbId"));
-
-                // Need to set where we are getting the data from so we don't push to a different
-                // external link than where the trait was retrieved from.
-                Integer url_path_start = this.brapiBaseURL.indexOf("/brapi", 0);
-                t.setTraitDataSource(this.brapiBaseURL.substring(0, url_path_start));
-
-                t.setVisible(true);
-                traits.add(t);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return traits;
-    }
 
     public void postPhenotypes(List<Observation> observations, final Function<List<NewObservationDbIdsObservations>, Void> function) {
 
@@ -726,17 +648,24 @@ public class BrAPIService {
             // Parse out the scale of the variable
             if(var.getScale() != null) {
                 if(var.getScale().getValidValues() != null) {
+
                     if (var.getScale().getValidValues().getMin() != null){
                         trait.setMinimum(var.getScale().getValidValues().getMin().toString());
                     }
+
                     if (var.getScale().getValidValues().getMax() != null) {
                         trait.setMaximum(var.getScale().getValidValues().getMax().toString());
                     }
+                    
                     trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
                 }
-                if(var.getScale().getDataType() != null) {
+                if (var.getScale().getDataType() != null){
                     trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getValue()));
                 }
+                else {
+                    trait.setFormat("text");
+                }
+
             }
 
             // Set some config variables in fieldbook
@@ -760,6 +689,7 @@ public class BrAPIService {
     }
 
     private String convertBrAPIDataType(String dataType) {
+        //TODO: Check these out and make sure they match with fieldbook data types.
         switch (dataType){
             case "Code":
             case "Nominal":

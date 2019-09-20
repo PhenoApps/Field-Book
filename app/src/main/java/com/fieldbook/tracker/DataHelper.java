@@ -1109,24 +1109,34 @@ public class DataHelper {
         }
 
         try {
-            this.insertTraits.bindString(1, t.getExternalDbId());
-            this.insertTraits.bindString(2, t.getTraitDataSource());
-            this.insertTraits.bindString(3, t.getTrait());
-            this.insertTraits.bindString(4, t.getFormat());
-            this.insertTraits.bindString(5, t.getDefaultValue());
-            this.insertTraits.bindString(6, t.getMinimum());
-            this.insertTraits.bindString(7, t.getMaximum());
-            this.insertTraits.bindString(8, t.getDetails());
-            this.insertTraits.bindString(9, t.getCategories());
-            this.insertTraits.bindString(10, String.valueOf(t.getVisible()));
-            //Probably wrong with this one, because the type of realPosition is int
-            this.insertTraits.bindString(11, t.getRealPosition());
+            this.insertTraits = this.bindValue(insertTraits, 1, t.getExternalDbId());
+            this.insertTraits = this.bindValue(insertTraits, 2, t.getTraitDataSource());
+            this.insertTraits = this.bindValue(insertTraits, 3, t.getTrait());
+            this.insertTraits = this.bindValue(insertTraits, 4, t.getFormat());
+            this.insertTraits = this.bindValue(insertTraits, 5, t.getDefaultValue());
+            this.insertTraits = this.bindValue(insertTraits, 6, t.getMinimum());
+            this.insertTraits = this.bindValue(insertTraits, 7, t.getMaximum());
+            this.insertTraits = this.bindValue(insertTraits, 8, t.getDetails());
+            this.insertTraits = this.bindValue(insertTraits, 9, t.getCategories());
+            this.insertTraits = this.bindValue(insertTraits, 10, String.valueOf(t.getVisible()));
+            this.insertTraits = this.bindValue(insertTraits, 11, t.getRealPosition());
 
             return this.insertTraits.executeInsert();
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
+    }
+
+    public <T> SQLiteStatement bindValue(SQLiteStatement statement, Integer index, T value) {
+
+        if (value != null) {
+            statement.bindString(index, value.toString());
+        }
+        else {
+            statement.bindNull(index);
+        }
+        return statement;
     }
 
     /**
