@@ -419,7 +419,10 @@ public class BrAPIService {
                 request.addDataItem(request_data);
             }
 
-            phenotypesApi.phenotypesPostAsync(request, null,"Bearer YYYY", callback);
+            String auth_token = context.getSharedPreferences("Settings", 0)
+                    .getString(PreferencesActivity.BRAPI_TOKEN, "");
+
+            phenotypesApi.phenotypesPostAsync(request, null,auth_token, callback);
 
         } catch (ApiException e) {
             e.printStackTrace();
@@ -811,8 +814,6 @@ public class BrAPIService {
                 return false;
             }
 
-            //TODO: Remove this and use the actual token
-            token = "Bearer YYYY";
             editor.putString(PreferencesActivity.BRAPI_TOKEN, token);
             editor.apply();
             Toast.makeText(activity.getApplicationContext(), R.string.brapi_auth_success, Toast.LENGTH_SHORT).show();
