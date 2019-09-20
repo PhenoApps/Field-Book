@@ -184,7 +184,7 @@ public class DataHelper {
                     "FROM " +
                     "user_traits " +
                     "JOIN " +
-                    "range ON user_traits.rid = range.id " +
+                    "range ON user_traits.rid = range.plot " +
                     "JOIN " +
                     "traits ON user_traits.parent = traits.trait " +
                     "JOIN " +
