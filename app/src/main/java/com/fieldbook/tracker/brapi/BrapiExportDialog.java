@@ -31,7 +31,7 @@ public class BrapiExportDialog extends AppCompatActivity {
     private List<Observation> observationsNeedingSync;
 
     public BrapiExportDialog() {
-        this.dataHelper = new DataHelper(this);
+
     }
 
     @Override
@@ -43,6 +43,7 @@ public class BrapiExportDialog extends AppCompatActivity {
         String brapiBaseURL = this.getSharedPreferences("Settings", 0)
                 .getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
 
+        this.dataHelper = new DataHelper(this);
         brAPIService = new BrAPIService(this, brapiBaseURL);
         observations = dataHelper.getObservations();
         observationsNeedingSync = new ArrayList<>();
