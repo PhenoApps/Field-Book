@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
@@ -46,7 +47,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         ;
         String brapiBaseURL = this.context.getSharedPreferences("Settings", 0)
                 .getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
-        brAPIService = new BrAPIService(this.context, brapiBaseURL);
+        brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this.context));
         saveBtn = findViewById(R.id.brapi_save_btn);
         saveBtn.setOnClickListener(this);
         cancelBtn = findViewById(R.id.brapi_cancel_btn);
@@ -64,10 +65,15 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         Function<String, Void> errorFunction = new Function<String, Void>() {
 
             @Override
-            public Void apply(String errorMessage) {
-                dismiss();
-                //TODO: Make into xml string message for translations.
-                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
+            public Void apply(final String errorMessage) {
+                ((Activity)context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dismiss();
+                        //TODO: Make into xml string message for translations.
+                        Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
+                    }
+                });
                 return null;
             }
         };
@@ -76,15 +82,21 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         brAPIService.getStudyDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
-                BrapiStudyDetails.merge(studyDetails, study);
-                loadStudy();
-                // Check if user should save yet
-                studyLoadStatus = true;
-                if (checkAllLoadsFinished()) {
-                    findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                    saveBtn.setVisibility(View.VISIBLE);
-                    resetLoadStatus();
-                }
+
+                ((Activity)context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        BrapiStudyDetails.merge(studyDetails, study);
+                        loadStudy();
+                        // Check if user should save yet
+                        studyLoadStatus = true;
+                        if (checkAllLoadsFinished()) {
+                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                            saveBtn.setVisibility(View.VISIBLE);
+                            resetLoadStatus();
+                        }
+                    }
+                });
                 return null;
             }
         }, errorFunction);
@@ -92,15 +104,21 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         brAPIService.getPlotDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
-                BrapiStudyDetails.merge(studyDetails, study);
-                loadStudy();
-                // Check if user should save yet
-                plotLoadStatus = true;
-                if (checkAllLoadsFinished()) {
-                    findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                    saveBtn.setVisibility(View.VISIBLE);
-                    resetLoadStatus();
-                }
+
+                ((Activity)context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        BrapiStudyDetails.merge(studyDetails, study);
+                        loadStudy();
+                        // Check if user should save yet
+                        plotLoadStatus = true;
+                        if (checkAllLoadsFinished()) {
+                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                            saveBtn.setVisibility(View.VISIBLE);
+                            resetLoadStatus();
+                        }
+                    }
+                });
                 return null;
             }
 
@@ -109,15 +127,21 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         brAPIService.getTraits(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
-                BrapiStudyDetails.merge(studyDetails, study);
-                loadStudy();
-                // Check if user should save yet
-                traitLoadStatus = true;
-                if (checkAllLoadsFinished()) {
-                    findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                    saveBtn.setVisibility(View.VISIBLE);
-                    resetLoadStatus();
-                }
+
+                ((Activity)context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        BrapiStudyDetails.merge(studyDetails, study);
+                        loadStudy();
+                        // Check if user should save yet
+                        traitLoadStatus = true;
+                        if (checkAllLoadsFinished()) {
+                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                            saveBtn.setVisibility(View.VISIBLE);
+                            resetLoadStatus();
+                        }
+                    }
+                });
                 return null;
             }
         }, errorFunction);

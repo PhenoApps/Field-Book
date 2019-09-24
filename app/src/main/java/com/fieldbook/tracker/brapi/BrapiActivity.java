@@ -18,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
@@ -59,7 +60,7 @@ public class BrapiActivity extends AppCompatActivity {
 
         preferences = getSharedPreferences("Settings", 0);
         String brapiBaseURL = preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
-        brAPIService = new BrAPIService(this, brapiBaseURL);
+        brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiActivity.this));
 
         TextView baseURLText = findViewById(R.id.brapiBaseURL);
         baseURLText.setText(brapiBaseURL);
@@ -90,27 +91,44 @@ public class BrapiActivity extends AppCompatActivity {
         brAPIService.getStudies(new Function<List<BrapiStudySummary>, Void>() {
             @Override
             public Void apply(final List<BrapiStudySummary> studies) {
-                BrapiActivity.this.selectedStudy = null;
 
-                listStudies.setAdapter(BrapiActivity.this.buildStudiesArrayAdapter(studies));
-                listStudies.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                (BrapiActivity.this).runOnUiThread(new Runnable() {
                     @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        selectedStudy = studies.get(position);
+                    public void run() {
+                        BrapiActivity.this.selectedStudy = null;
+
+                        listStudies.setAdapter(BrapiActivity.this.buildStudiesArrayAdapter(studies));
+                        listStudies.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                selectedStudy = studies.get(position);
+                            }
+                        });
+
+                        listStudies.setVisibility(View.VISIBLE);
+                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                     }
                 });
 
-                listStudies.setVisibility(View.VISIBLE);
-                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                 return null;
             }
         }, new Function<String, Void>() {
+
+
             @Override
-            public Void apply(String input) {
-                // Show error message. We don't finish the activity intentionally.
-                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                Toast.makeText(getApplicationContext(), input, Toast.LENGTH_LONG).show();
+            public Void apply(final String input) {
+
+                (BrapiActivity.this).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Show error message. We don't finish the activity intentionally.
+                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                        Toast.makeText(getApplicationContext(), input, Toast.LENGTH_LONG).show();
+                    }
+                });
+
                 return null;
+
             }
         });
     }

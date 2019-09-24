@@ -14,7 +14,6 @@ import androidx.arch.core.util.Function;
 import com.android.volley.AuthFailureError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -37,13 +36,10 @@ import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ObservationVariablesApi;
 import io.swagger.client.model.Metadata;
-import com.fieldbook.tracker.brapi.Observation;
-import io.swagger.client.model.NewObservationDbIds;
 import io.swagger.client.model.NewObservationDbIdsObservations;
 import io.swagger.client.model.ObservationUnit;
 import io.swagger.client.model.ObservationUnitsResponse1;
 import io.swagger.client.model.ObservationVariable;
-import io.swagger.client.model.ObservationVariableResponse;
 import io.swagger.client.model.ObservationVariablesResponse;
 import io.swagger.client.model.PhenotypesRequest;
 import io.swagger.client.model.PhenotypesRequestData;
@@ -54,39 +50,24 @@ import io.swagger.client.model.Study;
 import io.swagger.client.model.StudyObservationVariablesResponse;
 import io.swagger.client.model.StudyResponse;
 import io.swagger.client.model.StudySummary;
-import io.swagger.client.model.WSMIMEDataTypes;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
-import org.threeten.bp.OffsetDateTime;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.HashMap;
 
 public class BrAPIService {
-    private Context context;
+
     private DataHelper dataHelper;
     private StudiesApi studiesApi;
     private PhenotypesApi phenotypesApi;
     private ObservationVariablesApi traitsApi;
     private String brapiBaseURL;
-    private RequestQueue queue;
 
 
-    public BrAPIService(Context context, String brapiBaseURL) {
-        this.context = context;
-        this.dataHelper = new DataHelper(context);
+    public BrAPIService(String brapiBaseURL, DataHelper dataHelper) {
+        this.dataHelper = dataHelper;
         this.brapiBaseURL = brapiBaseURL;
-        this.queue = Volley.newRequestQueue(context);
 
         ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
 
@@ -110,23 +91,17 @@ public class BrAPIService {
                     for(StudySummary studySummary: studySummaryList){
                         studies.add(mapStudy(studySummary));
                     }
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            function.apply(studies);
-                        }
-                    });
+
+                    function.apply(studies);
+
                 }
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                    // Close our current study and report failure
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            failFunction.apply("Error when loading studies.");
-                        }
-                    });
+
+                // Close our current study and report failure
+                    failFunction.apply("Error when loading studies.");
+
                 }
             };
 
@@ -155,24 +130,17 @@ public class BrAPIService {
             BrapiApiCallBack<StudyResponse> callback = new BrapiApiCallBack<StudyResponse>() {
                 @Override
                 public void onSuccess(StudyResponse studyResponse, int i, Map<String, List<String>> map) {
+
                     final BrapiStudyDetails study = mapStudy(studyResponse.getResult());
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            function.apply(study);
-                        }
-                    });
+                    function.apply(study);
+
                 }
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     // Close our current study and report failure
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            failFunction.apply("Error when loading study details for study. Study not saved.");
-                        }
-                    });
+                    failFunction.apply("Error when loading study details for study. Study not saved.");
+
                 }
             };
 
@@ -205,23 +173,15 @@ public class BrAPIService {
                     study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
                     study.setValues(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
 
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            function.apply(study);
-                        }
-                    });
+                    function.apply(study);
+
                 }
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     // Close our current study and report failure
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            failFunction.apply("Error when loading plots for study. Study not saved.");
-                        }
-                    });
+                    failFunction.apply("Error when loading plots for study. Study not saved.");
+
                 }
 
             };
@@ -327,23 +287,14 @@ public class BrAPIService {
                     traitResponse.setData(traitsList);
                     traitResponse.setMetadata(metadata);
 
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            function.apply(traitResponse);
-                        }
-                    });
+                    function.apply(traitResponse);
+
                 }
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     // Close our current study and report failure
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            failFunction.apply("Error when loading traits.");
-                        }
-                    });
+                    failFunction.apply("Error when loading traits.");
                 }
 
             };
@@ -356,13 +307,13 @@ public class BrAPIService {
                     null, callback);
 
         } catch (ApiException e) {
-            Toast.makeText(context.getApplicationContext(), "Error loading data", Toast.LENGTH_SHORT).show();
             Log.e("error", e.toString());
         }
     }
 
 
-    public void postPhenotypes(List<Observation> observations, final Function<List<NewObservationDbIdsObservations>, Void> function) {
+    public void postPhenotypes(List<Observation> observations, final Function<List<NewObservationDbIdsObservations>, Void> function,
+                               final Function<String, Void> failFunction) {
 
         try {
 
@@ -372,28 +323,16 @@ public class BrAPIService {
 
                     // TODO: response processing
                     final List<NewObservationDbIdsObservations> observationDbIds = phenotypesResponse.getResult().getObservations();
+                    function.apply(observationDbIds);
 
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            function.apply(observationDbIds);
-                        }
-                    });
                 }
 
                 @Override
                 public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
 
                     final ApiException error = e;
-
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context.getApplicationContext(), "BrAPI Export Failed", Toast.LENGTH_SHORT).show();
-                            Log.e("error", error.toString());
-                        }
-                    });
-
+                    failFunction.apply("BrAPI Export Failed");
+                    Log.e("error", error.toString());
 
                 }
             };
@@ -506,7 +445,7 @@ public class BrAPIService {
     */
 
     // dummy data test for now
-    public void putStudyObservations() {
+/*    public void putStudyObservations() {
         final String studyDbId = "1001";
         String url = this.brapiBaseURL + "/studies/" + studyDbId + "/observations";
 
@@ -568,7 +507,7 @@ public class BrAPIService {
                 }
             };
         queue.add(putObservationsRequest);
-    }
+    }*/
 
     private String getPrioritizedValue(String... values) {
         String returnValue = null;
@@ -590,26 +529,15 @@ public class BrAPIService {
                     final BrapiStudyDetails study = new BrapiStudyDetails();
                     study.setTraits(mapTraits(response.getResult().getData()));
 
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
                             function.apply(study);
-                        }
-                    });
+
                 }
 
                 @Override
                 public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
 
                     final ApiException error = e;
-
-                    ((Activity)context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            failFunction.apply("Error loadings traits for the study. Study not saved.");
-                        }
-                    });
-
+                    failFunction.apply("Error loadings traits for the study. Study not saved.");
 
                 }
             };
@@ -750,7 +678,6 @@ public class BrAPIService {
             return externalUrl.getHost();
         }
         catch (MalformedURLException e) {
-            Toast.makeText(context.getApplicationContext(), "Cannot get host of data endpoint.", Toast.LENGTH_SHORT).show();
             Log.e("error", e.toString());
             return null;
         }

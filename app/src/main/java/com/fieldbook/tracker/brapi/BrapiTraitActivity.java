@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.ConfigActivity;
+import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
@@ -64,7 +65,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
         // Get the setting information for our brapi integration
         preferences = getSharedPreferences("Settings", 0);
         String brapiBaseURL = preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "");
-        brAPIService = new BrAPIService(this, brapiBaseURL + "/brapi/v1");
+        brAPIService = new BrAPIService(brapiBaseURL + "/brapi/v1", new DataHelper(this));
 
         // Make a clean list to track our selected traits
         selectedTraits = new ArrayList<>();
@@ -109,60 +110,68 @@ public class BrapiTraitActivity extends AppCompatActivity {
         // Call our API to get the data
         brAPIService.getOntology(page, pageSize, new Function<BrapiListResponse<TraitObject>, Void>() {
             @Override
-            public Void apply(BrapiListResponse<TraitObject> input) {
+            public Void apply(final BrapiListResponse<TraitObject> input) {
 
-                // Cancel processing if the page that was processed is not the page
-                // that we are currently on.
-                if (page != BrapiTraitActivity.this.currentPage) {
-                    return null;
-                }
-
-                final List<TraitObject> traits = input.getData();
-
-                // Update the total pages
-                final Metadata metadata = input.getMetadata();
-                BrapiTraitActivity.this.totalPages = metadata.getPagination().getTotalPages();
-                TextView pageIndicator = findViewById(R.id.page_indicator);
-                pageIndicator.setText(String.format("Page %d of %d", BrapiTraitActivity.this.currentPage + 1,
-                        BrapiTraitActivity.this.totalPages));
-
-                // Clear our selected traits
-                selectedTraits = new ArrayList<>();
-
-                // Build our array adapter
-                traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
-
-                // Set our page numbers
-
-                // Set our on click listener for each item
-
-                traitList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    public void run() {
+                        // Cancel processing if the page that was processed is not the page
+                        // that we are currently on.
+                        if (page == BrapiTraitActivity.this.currentPage) {
 
-                        if (traitList.isItemChecked(position)) {
-                            // It is checked now, it wasn't before
-                            selectedTraits.add(traits.get(position));
-                        } else {
-                            // It was checked before, remove from selection
-                            selectedTraits.remove(traits.get(position));
+                            final List<TraitObject> traits = input.getData();
+
+                            // Update the total pages
+                            final Metadata metadata = input.getMetadata();
+                            BrapiTraitActivity.this.totalPages = metadata.getPagination().getTotalPages();
+                            TextView pageIndicator = findViewById(R.id.page_indicator);
+                            pageIndicator.setText(String.format("Page %d of %d", BrapiTraitActivity.this.currentPage + 1,
+                                    BrapiTraitActivity.this.totalPages));
+
+                            // Clear our selected traits
+                            selectedTraits = new ArrayList<>();
+
+                            // Build our array adapter
+                            traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
+
+                            // Set our page numbers
+
+                            // Set our on click listener for each item
+
+                            traitList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                                    if (traitList.isItemChecked(position)) {
+                                        // It is checked now, it wasn't before
+                                        selectedTraits.add(traits.get(position));
+                                    } else {
+                                        // It was checked before, remove from selection
+                                        selectedTraits.remove(traits.get(position));
+                                    }
+                                }
+                            });
+
+                            traitList.setVisibility(View.VISIBLE);
+
+                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                         }
                     }
                 });
-
-                traitList.setVisibility(View.VISIBLE);
-
-                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-
                 return null;
             }
 
         }, new Function<String, Void>() {
             @Override
-            public Void apply(String input) {
-                // Display error message but don't finish the activity.
-                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                Toast.makeText(getApplicationContext(), input, Toast.LENGTH_LONG).show();
+            public Void apply(final String input) {
+                (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Display error message but don't finish the activity.
+                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                        Toast.makeText(getApplicationContext(), input, Toast.LENGTH_LONG).show();
+                    }
+                });
 
                 return null;
             }

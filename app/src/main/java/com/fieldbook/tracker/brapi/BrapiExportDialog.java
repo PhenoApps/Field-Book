@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.brapi;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -44,7 +45,7 @@ public class BrapiExportDialog extends AppCompatActivity {
                 .getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
 
         this.dataHelper = new DataHelper(this);
-        brAPIService = new BrAPIService(this, brapiBaseURL);
+        brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper);
         observations = dataHelper.getObservations();
         observationsNeedingSync = new ArrayList<>();
 
@@ -59,7 +60,27 @@ public class BrapiExportDialog extends AppCompatActivity {
                     brAPIService.postPhenotypes(observationsNeedingSync, new Function<List<NewObservationDbIdsObservations>, Void>() {
                         @Override
                         public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
-                            updateObservations(observationDbIds);
+
+                            (BrapiExportDialog.this).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    updateObservations(observationDbIds);
+                                }
+                            });
+                            return null;
+                        }
+                    }, new Function<String, Void>() {
+
+                        @Override
+                        public Void apply(final String input) {
+
+                            (BrapiExportDialog.this).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(BrapiExportDialog.this, input, Toast.LENGTH_LONG).show();
+                                }
+                            });
+
                             return null;
                         }
                     });
