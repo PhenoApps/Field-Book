@@ -58,28 +58,33 @@ public class BrapiTraitActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_traits_brapi);
-
-        loadToolbar();
-
-        // Get the setting information for our brapi integration
-        preferences = getSharedPreferences("Settings", 0);
-        String brapiBaseURL = preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "");
-        brAPIService = new BrAPIService(brapiBaseURL + "/brapi/v1", new DataHelper(this));
-
-        // Make a clean list to track our selected traits
-        selectedTraits = new ArrayList<>();
-
-        // Set the url on our interface
-        TextView baseURLText = findViewById(R.id.brapiBaseUrl);
-        baseURLText.setText(brapiBaseURL);
 
         // Load the traits from breedbase if user is connected to the internet
         if(Utils.isConnected(this)) {
-            loadTraitsList(BrapiTraitActivity.this.currentPage, BrapiTraitActivity.this.resultsPerPage);
+            if (BrapiAuthActivity.hasValidBaseUrl(this)) {
+                setContentView(R.layout.activity_traits_brapi);
+
+                loadToolbar();
+                // Get the setting information for our brapi integration
+                String brapiBaseURL = BrapiAuthActivity.getBrapiUrl(this);
+                brAPIService = new BrAPIService(this, brapiBaseURL);
+
+                // Make a clean list to track our selected traits
+                selectedTraits = new ArrayList<>();
+
+                // Set the url on our interface
+                TextView baseURLText = findViewById(R.id.brapiBaseUrl);
+                baseURLText.setText(brapiBaseURL);
+
+                loadTraitsList(BrapiTraitActivity.this.currentPage, BrapiTraitActivity.this.resultsPerPage);
+            }else{
+                Toast.makeText(getApplicationContext(), "Must configure a valid BrAPI URL in settings before proceeding", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }else{
             // Check if the user is connected. If not, pull from cache
             Toast.makeText(getApplicationContext(), "Device Offline: Please connect to a network and try again", Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 
