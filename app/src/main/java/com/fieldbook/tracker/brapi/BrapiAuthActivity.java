@@ -84,6 +84,11 @@ public class BrapiAuthActivity extends AppCompatActivity {
         return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
     }
 
+    public static String getBrapiToken(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
+        return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
+    }
+
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.brapi_auth_cancel_btn:

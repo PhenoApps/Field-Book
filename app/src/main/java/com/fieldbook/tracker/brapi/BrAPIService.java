@@ -312,7 +312,7 @@ public class BrAPIService {
     }
 
 
-    public void postPhenotypes(List<Observation> observations, final Function<List<NewObservationDbIdsObservations>, Void> function,
+    public void postPhenotypes(List<Observation> observations, String brapiToken, final Function<List<NewObservationDbIdsObservations>, Void> function,
                                final Function<String, Void> failFunction) {
 
         try {
@@ -358,10 +358,7 @@ public class BrAPIService {
                 request.addDataItem(request_data);
             }
 
-            String auth_token = context.getSharedPreferences("Settings", 0)
-                    .getString(PreferencesActivity.BRAPI_TOKEN, "");
-
-            phenotypesApi.phenotypesPostAsync(request, null,auth_token, callback);
+            phenotypesApi.phenotypesPostAsync(request, null,brapiToken, callback);
 
         } catch (ApiException e) {
             e.printStackTrace();

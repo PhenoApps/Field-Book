@@ -67,7 +67,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 loadToolbar();
                 // Get the setting information for our brapi integration
                 String brapiBaseURL = BrapiAuthActivity.getBrapiUrl(this);
-                brAPIService = new BrAPIService(this, brapiBaseURL);
+                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this));
 
                 // Make a clean list to track our selected traits
                 selectedTraits = new ArrayList<>();

@@ -71,18 +71,20 @@ public class BrapiExportDialog extends AppCompatActivity {
         switch (v.getId()) {
             case R.id.brapi_export_btn:
                 if (observationsNeedingSync.size() > 0) {
-                    brAPIService.postPhenotypes(observationsNeedingSync, new Function<List<NewObservationDbIdsObservations>, Void>() {
-                        @Override
-                        public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
-
-                            (BrapiExportDialog.this).runOnUiThread(new Runnable() {
+                    brAPIService.postPhenotypes(observationsNeedingSync,
+                            BrapiAuthActivity.getBrapiToken(this),
+                            new Function<List<NewObservationDbIdsObservations>, Void>() {
                                 @Override
-                                public void run() {
-                                    updateObservations(observationDbIds);
+                                public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
+
+                                    (BrapiExportDialog.this).runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            updateObservations(observationDbIds);
+                                        }
+                                    });
+                                    return null;
                                 }
-                            });
-                            return null;
-                        }
                     }, new Function<String, Void>() {
 
                         @Override
