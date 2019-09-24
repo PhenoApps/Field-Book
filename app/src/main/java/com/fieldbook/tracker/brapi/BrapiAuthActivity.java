@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.util.Patterns;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -70,6 +71,17 @@ public class BrapiAuthActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    public static Boolean hasValidBaseUrl(Context context) {
+        String url = getBrapiUrl(context);
+
+        return Patterns.WEB_URL.matcher(url).matches();
+    }
+
+    public static String getBrapiUrl(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
+        return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
     }
 
     public void onClick(View view) {

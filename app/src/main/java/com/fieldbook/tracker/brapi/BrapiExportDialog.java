@@ -17,6 +17,7 @@ import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,18 +38,31 @@ public class BrapiExportDialog extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.dialog_brapi_export);
 
-        String brapiBaseURL = this.getSharedPreferences("Settings", 0)
-                .getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
+        if(Utils.isConnected(this)) {
+            if (BrapiAuthActivity.hasValidBaseUrl(this)) {
 
-        this.dataHelper = new DataHelper(this);
-        brAPIService = new BrAPIService(this, brapiBaseURL);
-        observations = dataHelper.getObservations();
-        observationsNeedingSync = new ArrayList<>();
+                requestWindowFeature(Window.FEATURE_NO_TITLE);
+                setContentView(R.layout.dialog_brapi_export);
 
-        loadStatistics();
+                String brapiBaseURL = BrapiAuthActivity.getBrapiUrl(this);
+
+                this.dataHelper = new DataHelper(this);
+                brAPIService = new BrAPIService(this, brapiBaseURL);
+                observations = dataHelper.getObservations();
+                observationsNeedingSync = new ArrayList<>();
+
+                loadStatistics();
+
+            }else{
+                Toast.makeText(getApplicationContext(), "Must configure a valid BrAPI URL in settings before proceeding", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }else{
+            // Check if the user is connected. If not, pull from cache
+            Toast.makeText(getApplicationContext(), "Device Offline: Please connect to a network and try again", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
 

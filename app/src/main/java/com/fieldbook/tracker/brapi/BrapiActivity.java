@@ -55,21 +55,25 @@ public class BrapiActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_brapi);
-
-        preferences = getSharedPreferences("Settings", 0);
-        String brapiBaseURL = preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
-        brAPIService = new BrAPIService(this, brapiBaseURL);
-
-        TextView baseURLText = findViewById(R.id.brapiBaseURL);
-        baseURLText.setText(brapiBaseURL);
-
-        loadToolbar();
 
         if(Utils.isConnected(this)) {
-            loadStudiesList();
+            if (BrapiAuthActivity.hasValidBaseUrl(this)) {
+                setContentView(R.layout.activity_brapi);
+                String brapiBaseURL = BrapiAuthActivity.getBrapiUrl(this);
+                brAPIService = new BrAPIService(this, brapiBaseURL);
+
+                TextView baseURLText = findViewById(R.id.brapiBaseURL);
+                baseURLText.setText(brapiBaseURL);
+
+                loadToolbar();
+                loadStudiesList();
+            }else{
+                Toast.makeText(getApplicationContext(), "Must configure a valid BrAPI URL in settings before proceeding", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }else{
             Toast.makeText(getApplicationContext(), "Device Offline: Please connect to a network and try again", Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 
