@@ -86,7 +86,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
     public static String getBrapiToken(Context context) {
         SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
-        return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
+        return preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
     }
 
     public void onClick(View view) {
