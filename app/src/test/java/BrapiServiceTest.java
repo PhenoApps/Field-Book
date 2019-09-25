@@ -22,7 +22,6 @@ import java.util.concurrent.CountDownLatch;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@RunWith(RobolectricTestRunner.class)
 public class BrapiServiceTest {
 
     String brapiBaseUrl = "https://test-server.brapi.org/brapi/v1";
