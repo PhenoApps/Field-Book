@@ -352,7 +352,7 @@ public class BrAPIService {
 
                 PhenotypesRequestData request_data = new PhenotypesRequestData();
                 request_data.addObservationsItem(request_observation);
-                request_data.setObservatioUnitDbId(observation.getUnitDbId());
+                request_data.setObservationUnitDbId(observation.getUnitDbId());
                 request_data.setStudyDbId(observation.getStudyId());
 
                 request.addDataItem(request_data);
