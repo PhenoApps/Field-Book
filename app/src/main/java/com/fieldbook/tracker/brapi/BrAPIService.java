@@ -580,9 +580,16 @@ public class BrAPIService {
                     if (var.getScale().getValidValues().getMin() != null){
                         trait.setMinimum(var.getScale().getValidValues().getMin().toString());
                     }
+                    else {
+                        // Fieldbook requires empty string for min and maxes.
+                        trait.setMinimum("");
+                    }
 
                     if (var.getScale().getValidValues().getMax() != null) {
                         trait.setMaximum(var.getScale().getValidValues().getMax().toString());
+                    }
+                    else {
+                        trait.setMaximum("");
                     }
                     
                     trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
