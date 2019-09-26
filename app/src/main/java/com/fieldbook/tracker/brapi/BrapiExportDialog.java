@@ -3,6 +3,7 @@ package com.fieldbook.tracker.brapi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -16,6 +17,7 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.fields.FieldObject;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.Utils;
@@ -176,6 +178,10 @@ public class BrapiExportDialog extends AppCompatActivity {
             }
         }
 
+        SharedPreferences ep = this.getSharedPreferences("Settings", 0);
+        String field = ep.getString("FieldFile", "");
+
+        ((TextView) findViewById(R.id.brapistudyValue)).setText(field);
         ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(newObservations));
         ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(syncedObservations));
         ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(editedObservations));
