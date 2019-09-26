@@ -47,6 +47,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 
 import com.fieldbook.tracker.barcodes.*;
+import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.layoutConfig.SelectorLayoutConfigurator;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.search.*;
@@ -1260,12 +1261,15 @@ public class MainActivity extends AppCompatActivity {
 
         newTraits.put(parent, value);
 
+        Observation observation = dt.getObservation(cRange.plot_id, parent);
+        String observationDbId = observation.getDbId();
+
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
         dt.deleteTrait(cRange.plot_id, parent);
 
         String exp_id = Integer.toString(ep.getInt("ExpID", 0));
-        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id); //TODO add notes and exp_id
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id, observationDbId); //TODO add notes and exp_id
     }
 
     // Delete trait, including from database

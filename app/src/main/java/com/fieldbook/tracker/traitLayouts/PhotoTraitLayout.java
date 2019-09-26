@@ -32,6 +32,7 @@ import androidx.core.content.FileProvider;
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.traits.TraitObject;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.GalleryImageAdapter;
@@ -251,10 +252,12 @@ public class PhotoTraitLayout extends TraitLayout {
 
         newTraits.put(parent, value);
 
+        Observation observation = ConfigActivity.dt.getObservation(getCRange().plot_id, parent);
+
         ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, parent, value);
 
         String exp_id = Integer.toString(getPrefs().getInt("ExpID", 0));
-        ConfigActivity.dt.insertUserTraits(getCRange().plot_id, parent, trait, value, getPrefs().getString("FirstName","") + " " + getPrefs().getString("LastName",""), getPrefs().getString("Location",""),"",exp_id); //TODO add notes and exp_id
+        ConfigActivity.dt.insertUserTraits(getCRange().plot_id, parent, trait, value, getPrefs().getString("FirstName","") + " " + getPrefs().getString("LastName",""), getPrefs().getString("Location",""),"",exp_id, observation.getDbId()); //TODO add notes and exp_id
     }
 
     private void deletePhotoWarning() {
