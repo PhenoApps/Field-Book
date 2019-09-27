@@ -70,7 +70,7 @@ public class DataHelper {
             + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String INSERTUSERTRAITS = "insert into " + USER_TRAITS
-            + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id) values (?,?,?,?,?,?,?,?,?,?)";
+            + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id, observation_db_id) values (?,?,?,?,?,?,?,?,?,?,?)";
 
     private SimpleDateFormat timeStamp;
 
@@ -113,7 +113,7 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertUserTraits(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id) {
+    public long insertUserTraits(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id, String observationDbId) {
 
         Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
         int rep = cursor.getCount() + 1;
@@ -129,7 +129,12 @@ public class DataHelper {
             this.insertUserTraits.bindString(8, Integer.toString(rep));
             this.insertUserTraits.bindString(9, notes);
             this.insertUserTraits.bindString(10, exp_id);
-
+            if (observationDbId != null) {
+                this.insertUserTraits.bindString(11, observationDbId);
+            }
+            else {
+                this.insertUserTraits.bindNull(11);
+            }
 
             return this.insertUserTraits.executeInsert();
         } catch (Exception e) {
@@ -676,6 +681,31 @@ public class DataHelper {
 
         return data;
     }
+
+    /**
+     * Get observation data that needs to be saved on edits
+     */
+    public Observation getObservation(String plotId, String parent) {
+
+        Observation o = new Observation();
+
+        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id"}, "rid like ? and parent like ?", new String[]{plotId, parent},
+                null, null, null
+        );
+
+        if (cursor.moveToFirst()) {
+            do {
+                o.setDbId(cursor.getString(0));
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return o;
+    }
+
 
     /**
      * Check if a trait exists within the database
