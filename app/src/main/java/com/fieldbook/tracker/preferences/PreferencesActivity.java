@@ -66,13 +66,6 @@ public class PreferencesActivity extends AppCompatActivity {
     public static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
     public static String BRAPI_TOKEN = "BRAPI_TOKEN";
 
-    private PreferenceManager prefMgr;
-    private Preference brapiAuthButton;
-    private Preference brapiLogoutButton;
-    private PreferenceGroup brapiConfig;
-
-
-    @SuppressLint("NewApi")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,10 +82,11 @@ public class PreferencesActivity extends AppCompatActivity {
                 .replace(android.R.id.content, preferencesFragment)
                 .commit();
 
-        registerBrapiButtonListeners(this, preferencesFragment);
-        registerBrapiHostChangeListener(this);
+        //TODO: The top tool bar disappears when you go into 'Brapi Configuration'. Fix it. 
 
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -111,92 +105,6 @@ public class PreferencesActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-    }
-
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (BRAPI_BASE_URL.equals(key)) {
-            if(brapiConfig != null) {
-                brapiConfig.addPreference(brapiAuthButton);
-                brapiConfig.addPreference(brapiLogoutButton);
-                //TODO: BrAPIService.authorizeBrAPI(sharedPreferences, this);
-            }
-        }
-    }
-
-    private void registerBrapiHostChangeListener(final PreferencesActivity prefActivity) {
-        getSharedPreferences("Settings", 0).registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (BRAPI_BASE_URL.equals(key)) {
-                    if(brapiConfig != null) {
-                        brapiConfig.addPreference(brapiAuthButton);
-                        brapiConfig.addPreference(brapiLogoutButton);
-                        BrAPIService.authorizeBrAPI(sharedPreferences, prefActivity, null);
-                    }
-                }
-            }
-        });
-    }
-
-    @SuppressLint("NewApi")
-    private void registerBrapiButtonListeners(final PreferencesActivity prefActivity, final PreferencesFragment preferencesFragment) {
-        getFragmentManager().registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
-            @Override
-            public void onFragmentCreated(FragmentManager fm, Fragment f, Bundle savedInstanceState) {
-                super.onFragmentCreated(fm, f, savedInstanceState);
-
-                prefMgr = preferencesFragment.getPreferenceManager();
-                brapiAuthButton = prefMgr.findPreference("authorizeBrapi");
-                brapiLogoutButton = prefMgr.findPreference("revokeBrapiAuth");
-                brapiConfig = brapiAuthButton.getParent();
-                if (brapiAuthButton != null) {
-                    String brapiToken = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_TOKEN, null);
-                    String brapiHost = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_BASE_URL, null);
-
-                    brapiAuthButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                        @Override
-                        public boolean onPreferenceClick(Preference preference) {
-                            String brapiHost = preference.getSharedPreferences().getString(PreferencesActivity.BRAPI_BASE_URL, null);
-                            if (brapiHost != null) {
-                                BrAPIService.authorizeBrAPI(preference.getSharedPreferences(), prefActivity, null);
-                            }
-                            return true;
-                        }
-                    });
-
-                    if(brapiHost != null && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
-                        brapiAuthButton.setTitle(R.string.brapi_authorize);
-                        brapiAuthButton.setSummary(null);
-                        if (brapiToken != null) {
-                            brapiAuthButton.setTitle(R.string.brapi_reauthorize);
-                            brapiAuthButton.setSummary(getString(R.string.brapi_btn_auth_summary, brapiHost));
-                        }
-                    } else {
-                        brapiConfig.removePreference(brapiAuthButton);
-                        brapiConfig.removePreference(brapiLogoutButton);
-                    }
-                }
-
-                if (brapiLogoutButton != null) {
-                    brapiLogoutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                        @Override
-                        public boolean onPreferenceClick(Preference preference) {
-                            SharedPreferences preferences = getSharedPreferences("Settings", 0);
-                            SharedPreferences.Editor editor = preferences.edit();
-                            editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
-                            editor.apply();
-
-                            brapiAuthButton.setTitle(R.string.brapi_authorize);
-                            brapiAuthButton.setSummary(null);
-
-                            brapiConfig.removePreference(brapiLogoutButton);
-                            return true;
-                        }
-                    });
-                }
-
-            }
-        }, false);
     }
 
 }

@@ -214,7 +214,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 String saveMessage = saveTraits();
 
                 // navigate back to our traits list page
-                ((Activity) view.getContext()).finish();
+                finish();
                 Toast.makeText(this, saveMessage, Toast.LENGTH_LONG).show();
                 break;
             case R.id.prev:
