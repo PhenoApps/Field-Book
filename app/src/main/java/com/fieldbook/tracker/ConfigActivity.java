@@ -52,7 +52,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiAuthActivity;
+import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiExportActivity;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
@@ -1034,7 +1034,7 @@ public class ConfigActivity extends AppCompatActivity {
                         }
                         else {
                             // Show our login dialog
-                            BrapiAuthActivity brapiAuth = new BrapiAuthActivity(ConfigActivity.this, BrAPIService.exportTarget);
+                            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this, BrAPIService.exportTarget);
                             brapiAuth.show();
                         }
 

@@ -25,7 +25,7 @@ import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
 
 
-public class BrapiAuthActivity extends Dialog implements android.view.View.OnClickListener {
+public class BrapiAuthDialog extends Dialog implements android.view.View.OnClickListener {
 
     private BrAPIService brAPIService;
     private SharedPreferences preferences;
@@ -34,7 +34,7 @@ public class BrapiAuthActivity extends Dialog implements android.view.View.OnCli
     private Button authBtn;
     private Button cancelBtn;
 
-    public BrapiAuthActivity(@NonNull Context context, String target) {
+    public BrapiAuthDialog(@NonNull Context context, String target) {
         super(context);
         this.context = context;
         this.target = target;
