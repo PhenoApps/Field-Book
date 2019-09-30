@@ -257,7 +257,7 @@ public class PhotoTraitLayout extends TraitLayout {
         ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, parent, value);
 
         String exp_id = Integer.toString(getPrefs().getInt("ExpID", 0));
-        ConfigActivity.dt.insertUserTraits(getCRange().plot_id, parent, trait, value, getPrefs().getString("FirstName","") + " " + getPrefs().getString("LastName",""), getPrefs().getString("Location",""),"",exp_id, observation.getDbId()); //TODO add notes and exp_id
+        ConfigActivity.dt.insertUserTraits(getCRange().plot_id, parent, trait, value, getPrefs().getString("FirstName","") + " " + getPrefs().getString("LastName",""), getPrefs().getString("Location",""),"",exp_id, observation.getDbId(), observation.getLastSyncedTime()); //TODO add notes and exp_id
     }
 
     private void deletePhotoWarning() {

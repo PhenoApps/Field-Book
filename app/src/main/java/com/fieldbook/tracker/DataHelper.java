@@ -18,6 +18,9 @@ import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.search.SearchData;
 import com.fieldbook.tracker.traits.TraitObject;
 
+import org.threeten.bp.OffsetDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -70,7 +73,7 @@ public class DataHelper {
             + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String INSERTUSERTRAITS = "insert into " + USER_TRAITS
-            + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id, observation_db_id) values (?,?,?,?,?,?,?,?,?,?,?)";
+            + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id, observation_db_id, last_synced_time) values (?,?,?,?,?,?,?,?,?,?,?,?)";
 
     private SimpleDateFormat timeStamp;
 
@@ -113,7 +116,7 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertUserTraits(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id, String observationDbId) {
+    public long insertUserTraits(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id, String observationDbId, OffsetDateTime lastSyncedTime) {
 
         Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
         int rep = cursor.getCount() + 1;
@@ -134,6 +137,12 @@ public class DataHelper {
             }
             else {
                 this.insertUserTraits.bindNull(11);
+            }
+            if (lastSyncedTime != null) {
+                this.insertUserTraits.bindString(12, lastSyncedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            }
+            else {
+                this.insertUserTraits.bindNull(12);
             }
 
             return this.insertUserTraits.executeInsert();
@@ -185,7 +194,8 @@ public class DataHelper {
                     "traits.trait, " +
                     "exp_id.exp_alias, " +
                     "user_traits.id, " +
-                    "user_traits.observation_db_id " +
+                    "user_traits.observation_db_id, " +
+                    "user_traits.last_synced_time " +
                     "FROM " +
                     "user_traits " +
                     "JOIN " +
@@ -217,6 +227,7 @@ public class DataHelper {
                 o.setStudyId(cursor.getString(6));
                 o.setFieldbookDbId(cursor.getString(7));
                 o.setDbId(cursor.getString(8));
+                o.setLastSyncedTime(cursor.getString(9));
 
                 observations.add(o);
 
@@ -237,13 +248,13 @@ public class DataHelper {
         ArrayList<String> ids = new ArrayList<String>();
 
         db.beginTransaction();
-        String sql = "UPDATE user_traits SET observation_db_id = ? WHERE id = ?";
+        String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
         SQLiteStatement update = db.compileStatement(sql);
-
 
         for (Observation observation : observations) {
             update.bindString(1, observation.getDbId());
-            update.bindString(2, observation.getFieldbookDbId());
+            update.bindString(2, observation.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            update.bindString(3, observation.getFieldbookDbId());
             update.execute();
         }
 
@@ -689,13 +700,14 @@ public class DataHelper {
 
         Observation o = new Observation();
 
-        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id"}, "rid like ? and parent like ?", new String[]{plotId, parent},
+        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ?", new String[]{plotId, parent},
                 null, null, null
         );
 
         if (cursor.moveToFirst()) {
             do {
                 o.setDbId(cursor.getString(0));
+                o.setLastSyncedTime(cursor.getString(1));
             } while (cursor.moveToNext());
         }
 
@@ -1257,7 +1269,7 @@ public class DataHelper {
                     + "(id INTEGER PRIMARY KEY, external_db_id TEXT, trait_data_source TEXT, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
             db.execSQL("CREATE TABLE "
                     + USER_TRAITS
-                    + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT, observation_db_id TEXT)");
+                    + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT, observation_db_id TEXT, last_synced_time TEXT)");
             db.execSQL("CREATE TABLE "
                     + PLOTS
                     + "(plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR)");
@@ -1387,6 +1399,7 @@ public class DataHelper {
                 db.execSQL("ALTER TABLE traits ADD COLUMN trait_data_source VARCHAR");
                 db.execSQL("ALTER TABLE exp_id ADD COLUMN exp_source VARCHAR");
                 db.execSQL("ALTER TABLE user_traits ADD COLUMN observation_db_id TEXT");
+                db.execSQL("ALTER TABLE user_traits ADD COLUMN last_synced_time TEXT");
 
             }
         }

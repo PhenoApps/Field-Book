@@ -73,6 +73,8 @@ import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.Utils;
 
+import org.threeten.bp.OffsetDateTime;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -1263,13 +1265,14 @@ public class MainActivity extends AppCompatActivity {
 
         Observation observation = dt.getObservation(cRange.plot_id, parent);
         String observationDbId = observation.getDbId();
+        OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
         dt.deleteTrait(cRange.plot_id, parent);
 
         String exp_id = Integer.toString(ep.getInt("ExpID", 0));
-        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id, observationDbId); //TODO add notes and exp_id
+        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id, observationDbId, lastSyncedTime); //TODO add notes and exp_id
     }
 
     // Delete trait, including from database
@@ -1283,7 +1286,7 @@ public class MainActivity extends AppCompatActivity {
             newTraits.remove(parent);
 
         // Always remove existing trait before inserting again
-        // Based on plot_id, prevent duplicates
+        // Based on plot_id, prevent duplicate
         dt.deleteTrait(cRange.plot_id, parent);
     }
 
