@@ -67,12 +67,12 @@ public class BrapiExportActivity extends AppCompatActivity {
                 loadStatistics();
 
             }else{
-                Toast.makeText(getApplicationContext(), "Must configure a valid BrAPI URL in settings before proceeding", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), R.string.brapi_must_configure_url, Toast.LENGTH_SHORT).show();
                 finish();
             }
         }else{
             // Check if the user is connected. If not, pull from cache
-            Toast.makeText(getApplicationContext(), "Device Offline: Please connect to a network and try again", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -96,16 +96,17 @@ public class BrapiExportActivity extends AppCompatActivity {
         }
 
         // Check whether our brapi auth response was successful
-        if (brapiControllerResponse.status != null) {
-            processMessage(brapiControllerResponse.status, brapiControllerResponse.message);
+        processBrapiControllerMessage(brapiControllerResponse);
 
-        }
     }
 
-    public void processMessage(Boolean status, String message) {
+    public void processBrapiControllerMessage(BrapiControllerResponse brapiControllerResponse) {
 
-        // If we fail or succeed, show our message
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        if (brapiControllerResponse != null) {
+            if (brapiControllerResponse.status) {
+                Toast.makeText(this, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     public void onClick(View v) {

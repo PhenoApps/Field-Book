@@ -97,10 +97,16 @@ public class PreferencesActivity extends AppCompatActivity {
 
     }
 
-    public void processMessage(Boolean status, String message) {
+    public void processMessage(BrapiControllerResponse brapiControllerResponse) {
 
         // If we fail or succeed, show our message
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        if (brapiControllerResponse.status) {
+            Toast.makeText(this, R.string.brapi_auth_success, Toast.LENGTH_LONG).show();
+        }
+        else {
+            Toast.makeText(this, R.string.brapi_auth_deny, Toast.LENGTH_LONG).show();
+        }
+
     }
 
     @Override
@@ -114,7 +120,7 @@ public class PreferencesActivity extends AppCompatActivity {
 
         // Check whether our brapi auth response was successful
         if (brapiControllerResponse.status != null) {
-            processMessage(brapiControllerResponse.status, brapiControllerResponse.message);
+            processMessage(brapiControllerResponse);
 
             // Show our brapi preferences if they just came back from a brapi auth and it is not displayed already.
             PreferenceScreen brapi_prefs = (PreferenceScreen) preferencesFragment.findPreference("brapi_preference_screen");

@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import com.fieldbook.tracker.traits.TraitObject;
 
+import io.swagger.client.ApiException;
 import io.swagger.client.model.Metadata;
 
 
@@ -78,12 +79,12 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
                 loadTraitsList(BrapiTraitActivity.this.currentPage, BrapiTraitActivity.this.resultsPerPage);
             }else{
-                Toast.makeText(getApplicationContext(), "Must configure a valid BrAPI URL in settings before proceeding", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), R.string.brapi_must_configure_url, Toast.LENGTH_SHORT).show();
                 finish();
             }
         }else{
             // Check if the user is connected. If not, pull from cache
-            Toast.makeText(getApplicationContext(), "Device Offline: Please connect to a network and try again", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -166,15 +167,15 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 return null;
             }
 
-        }, new Function<String, Void>() {
+        }, new Function<ApiException, Void>() {
             @Override
-            public Void apply(final String input) {
+            public Void apply(final ApiException input) {
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Display error message but don't finish the activity.
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        Toast.makeText(getApplicationContext(), input, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), R.string.brapi_ontology_error, Toast.LENGTH_LONG).show();
                     }
                 });
 

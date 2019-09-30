@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -17,6 +18,9 @@ import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.utilities.Utils;
+
+import io.swagger.client.ApiException;
 
 public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener{
 
@@ -62,22 +66,6 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
     private void buildStudyDetails() {
 
-        Function<String, Void> errorFunction = new Function<String, Void>() {
-
-            @Override
-            public Void apply(final String errorMessage) {
-                ((Activity)context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        dismiss();
-                        //TODO: Make into xml string message for translations.
-                        Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
-                    }
-                });
-                return null;
-            }
-        };
-
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
         brAPIService.getStudyDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
@@ -99,7 +87,21 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 });
                 return null;
             }
-        }, errorFunction);
+        }, new Function<ApiException, Void>() {
+
+            @Override
+            public Void apply(final ApiException error) {
+                ((Activity)context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                        Toast.makeText(context, context.getString(R.string.brapi_study_detail_error), Toast.LENGTH_LONG).show();
+                    }
+                });
+                return null;
+            }
+        });
+
 
         brAPIService.getPlotDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
@@ -122,7 +124,21 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 return null;
             }
 
-        }, errorFunction);
+        }, new Function<ApiException, Void>() {
+
+            @Override
+            public Void apply(final ApiException error) {
+                ((Activity)context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                        Toast.makeText(context, context.getString(R.string.brapi_plot_detail_error), Toast.LENGTH_LONG).show();
+                    }
+                });
+                return null;
+            }
+        });
+
 
         brAPIService.getTraits(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
@@ -144,7 +160,20 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 });
                 return null;
             }
-        }, errorFunction);
+        }, new Function<ApiException, Void>() {
+
+            @Override
+            public Void apply(final ApiException error) {
+                ((Activity)context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                        Toast.makeText(context, context.getString(R.string.brapi_study_traits_error), Toast.LENGTH_LONG).show();
+                    }
+                });
+                return null;
+            }
+        });
     }
 
     private void loadStudy() {
@@ -194,7 +223,13 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     }
 
     private void saveStudy() {
-        brAPIService.saveStudyDetails(studyDetails);
+
+        BrapiControllerResponse brapiControllerResponse = brAPIService.saveStudyDetails(studyDetails);
+        // Display our message.
+        if (brapiControllerResponse.status == false) {
+            Log.e("error", brapiControllerResponse.message);
+            Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
+        }
     }
 
 }

@@ -130,7 +130,7 @@ public class BrAPIService {
         return study;
     }
 
-    public void getStudyDetails(String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<String, Void> failFunction) {
+    public void getStudyDetails(String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudyResponse> callback = new BrapiApiCallBack<StudyResponse>() {
@@ -145,7 +145,7 @@ public class BrAPIService {
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     // Close our current study and report failure
-                    failFunction.apply("Error when loading study details for study. Study not saved.");
+                    failFunction.apply(error);
 
                 }
             };
@@ -154,6 +154,7 @@ public class BrAPIService {
                     studyDbId, null, callback);
 
         } catch (ApiException e) {
+            failFunction.apply(e);
             e.printStackTrace();
         }
     }
@@ -168,7 +169,7 @@ public class BrAPIService {
         return studyDetails;
     }
 
-    public void getPlotDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<String, Void> failFunction) {
+    public void getPlotDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ObservationUnitsResponse1> callback = new BrapiApiCallBack<ObservationUnitsResponse1>() {
@@ -186,7 +187,7 @@ public class BrAPIService {
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     // Close our current study and report failure
-                    failFunction.apply("Error when loading plots for study. Study not saved.");
+                    failFunction.apply(error);
 
                 }
 
@@ -197,6 +198,7 @@ public class BrAPIService {
                     null, callback);
 
         } catch (ApiException e) {
+            failFunction.apply(e);
             e.printStackTrace();
         }
     }
@@ -278,7 +280,7 @@ public class BrAPIService {
     }
 
 
-    public void getOntology(Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<String, Void> failFunction) {
+    public void getOntology(Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ObservationVariablesResponse> callback = new BrapiApiCallBack<ObservationVariablesResponse>() {
@@ -289,6 +291,12 @@ public class BrAPIService {
                     List<ObservationVariable> brapiTraitList = response.getResult().getData();
                     final Metadata metadata = response.getMetadata();
                     final List<TraitObject> traitsList = mapTraits(brapiTraitList);
+
+                    // Check if our traits list was processed correctly. Right now, will be null if host not found.
+                    if (traitsList == null) {
+                        failFunction.apply(new ApiException("Could not assign host url to new data."));
+                    }
+
                     final BrapiListResponse<TraitObject> traitResponse = new BrapiListResponse<>();
                     traitResponse.setData(traitsList);
                     traitResponse.setMetadata(metadata);
@@ -300,7 +308,7 @@ public class BrAPIService {
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     // Close our current study and report failure
-                    failFunction.apply("Error when loading traits.");
+                    failFunction.apply(error);
                 }
 
             };
@@ -314,6 +322,7 @@ public class BrAPIService {
 
         } catch (ApiException e) {
             Log.e("error", e.toString());
+            failFunction.apply(e);
         }
     }
 
@@ -526,7 +535,7 @@ public class BrAPIService {
         return returnValue;
     }
 
-    public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<String, Void> failFunction) {
+    public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudyObservationVariablesResponse> callback = new BrapiApiCallBack<StudyObservationVariablesResponse>() {
@@ -542,8 +551,7 @@ public class BrAPIService {
                 @Override
                 public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
 
-                    final ApiException error = e;
-                    failFunction.apply("Error loadings traits for the study. Study not saved.");
+                    failFunction.apply(e);
 
                 }
             };
@@ -551,6 +559,7 @@ public class BrAPIService {
                     studyDbId, 0, 200,
                     null, callback);
         } catch (ApiException e) {
+            failFunction.apply(e);
             e.printStackTrace();
         }
     }
@@ -575,8 +584,8 @@ public class BrAPIService {
                 trait.setTraitDataSource(getHostUrl());
             }
             else {
-                //TODO: Don't let this keep going
-                trait.setTraitDataSource(null);
+                // return null to indicate we couldn't process the traits
+                return null;
             }
 
             // Parse out the scale of the variable
@@ -647,7 +656,7 @@ public class BrAPIService {
         }
     }
 
-    public void saveStudyDetails(BrapiStudyDetails studyDetails) {
+    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails) {
         FieldObject field = new FieldObject();
         field.setExp_name(studyDetails.getStudyName());
         field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
@@ -658,8 +667,8 @@ public class BrAPIService {
             field.setExp_source(getHostUrl());
         }
         else {
-            //TODO: Don't let this go through
-            field.setExp_source(null);
+            // Return an error notifying user we can't save this field
+            return new BrapiControllerResponse(false, "Host is null");
         }
 
         field.setUnique_id("Plot");
@@ -682,6 +691,7 @@ public class BrAPIService {
             dataHelper.insertTraits(t);
         }
 
+        return new BrapiControllerResponse(true, "");
     }
 
     public String getHostUrl() {
@@ -697,7 +707,7 @@ public class BrAPIService {
 
     }
 
-    public static void authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
+    public static BrapiControllerResponse authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
         editor.apply();
@@ -716,14 +726,18 @@ public class BrAPIService {
                 //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(i);
 
+                // We require no response since this starts a new activity.
+                return new BrapiControllerResponse(null, "");
 
             } catch (ActivityNotFoundException ex) {
-                // TODO: Need to handle this error in the UI. Return a brapi response controller object.
                 Log.e("BrAPI", "Error starting BrAPI auth", ex);
+                return new BrapiControllerResponse(false, context.getString(R.string.brapi_auth_error_starting));
+
             }
         } catch (Exception ex) {
-            // TODO: Need to handle this error in the UI. Return a brapi response controller object.
             Log.e("BrAPI", "Error starting BrAPI auth", ex);
+            return new BrapiControllerResponse(false, context.getString(R.string.brapi_auth_error_starting));
+
         }
     }
 
@@ -755,16 +769,15 @@ public class BrAPIService {
                 editor.putString(PreferencesActivity.BRAPI_TOKEN, token);
                 editor.apply();
 
-                //TODO: Make the string, R.string.brapi_auth_success
-                return new BrapiControllerResponse(false, "BrAPI Authorization Successful");
-            } else {
+                return new BrapiControllerResponse(true, activity.getString(R.string.brapi_auth_success));
+            }
+            else {
                 SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
                 editor.apply();
-                Toast.makeText(activity.getApplicationContext(), R.string.brapi_auth_deny, Toast.LENGTH_SHORT).show();
 
-                return new BrapiControllerResponse(false, "BrAPI Authorization Failed");
+                return new BrapiControllerResponse(false, activity.getString(R.string.brapi_auth_deny));
             }
         }
         else {

@@ -23,6 +23,7 @@ import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.utilities.Utils;
 
 
 public class BrapiAuthDialog extends Dialog implements android.view.View.OnClickListener {
@@ -69,9 +70,18 @@ public class BrapiAuthDialog extends Dialog implements android.view.View.OnClick
 
                 // Start our brapi authentication process.
                 dismiss();
-                BrAPIService.authorizeBrAPI(preferences, context, target);
+                // Show our error message if it exists
+                BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(preferences, context, target);
+                processBrapiControllerMessage(brapiControllerResponse);
                 break;
 
+        }
+    }
+
+    private void processBrapiControllerMessage(BrapiControllerResponse brapiControllerResponse) {
+
+        if (!brapiControllerResponse.status) {
+            Toast.makeText(context, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
         }
     }
 

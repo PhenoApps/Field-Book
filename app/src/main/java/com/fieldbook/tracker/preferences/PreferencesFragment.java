@@ -8,9 +8,12 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.utilities.Utils;
 
 
 public class PreferencesFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
@@ -74,11 +77,22 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
             if (brapiPrefCategory != null) {
                 brapiPrefCategory.addPreference(brapiAuthButton);
                 brapiPrefCategory.addPreference(brapiLogoutButton);
-                BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), context, null);
+                BrapiControllerResponse brapiControllerResponse  = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), context, null);
+                // Show our error message if it exists
+                processResponseMessage(brapiControllerResponse);
             }
         }
 
         return true;
+    }
+
+    public void processResponseMessage(BrapiControllerResponse brapiControllerResponse) {
+        // Only show the error message
+        if (brapiControllerResponse.status != null) {
+            if (!brapiControllerResponse.status) {
+                Toast.makeText(context, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void registerBrapiButtonListeners() {
@@ -92,7 +106,9 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
                 public boolean onPreferenceClick(Preference preference) {
                     String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
                     if (brapiHost != null) {
-                        BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), PreferencesFragment.this.context, null);
+                        BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), PreferencesFragment.this.context, null);
+                        // Show our error message if it exists
+                        processResponseMessage(brapiControllerResponse);
                     }
                     return true;
                 }

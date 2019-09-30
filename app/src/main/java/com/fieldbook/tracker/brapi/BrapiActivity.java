@@ -69,11 +69,11 @@ public class BrapiActivity extends AppCompatActivity {
                 loadToolbar();
                 loadStudiesList();
             }else{
-                Toast.makeText(getApplicationContext(), "Must configure a valid BrAPI URL in settings before proceeding", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), R.string.brapi_must_configure_url, Toast.LENGTH_SHORT).show();
                 finish();
             }
         }else{
-            Toast.makeText(getApplicationContext(), "Device Offline: Please connect to a network and try again", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
         }
     }
