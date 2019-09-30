@@ -155,9 +155,11 @@
         android:key="pref_key_brapi_settings"
         android:title="@string/preferences_brapi">
 
-        <PreferenceScreen android:title="@string/brapi_title">
+        <PreferenceScreen
+            android:key="brapi_preference_screen"
+            android:title="@string/brapi_title">
             <PreferenceCategory
-                android:key="test_category"
+                android:key="brapi_category"
                 android:title="@string/brapi_title">
                 <EditTextPreference
                     android:icon="@drawable/ic_adv_infobar_count"

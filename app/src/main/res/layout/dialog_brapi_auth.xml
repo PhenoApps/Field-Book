@@ -46,8 +46,7 @@
             android:text="@string/dialog_cancel"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
-            android:textStyle="bold"
-            android:onClick="onClick"/>
+            android:textStyle="bold"/>
 
         <Button
             android:id="@+id/brapi_auth_btn"
@@ -58,8 +57,7 @@
             android:text="@string/brapi_auth_btn"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
-            android:textStyle="bold"
-            android:onClick="onClick"/>
+            android:textStyle="bold"/>
     </LinearLayout>
 
 </LinearLayout>

@@ -7,9 +7,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
@@ -34,13 +32,13 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
         prefMgr.setSharedPreferencesName("Settings");
         SharedPreferences sharedPreferences;
         addPreferencesFromResource(R.xml.preferences);
-        brapiPrefCategory = (PreferenceCategory) prefMgr.findPreference("test_category");
+        brapiPrefCategory = (PreferenceCategory) prefMgr.findPreference("brapi_category");
         brapiAuthButton = findPreference("authorizeBrapi");
         brapiLogoutButton = findPreference("revokeBrapiAuth");
         brapiURLPreference = findPreference("BRAPI_BASE_URL");
 
         brapiURLPreference.setOnPreferenceChangeListener(this);
-        testRegisterBrapiButtonListeners();
+        registerBrapiButtonListeners();
     }
 
     // Support for > API 23
@@ -83,25 +81,7 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
         return true;
     }
 
-
-    public SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChanged() {
-
-        return new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (BRAPI_BASE_URL.equals(key)) {
-                    if (brapiPrefCategory != null) {
-                        brapiPrefCategory.addPreference(brapiAuthButton);
-                        brapiPrefCategory.addPreference(brapiLogoutButton);
-                        BrAPIService.authorizeBrAPI(sharedPreferences, context, null);
-                    }
-                }
-            }
-        };
-
-    }
-
-    private void testRegisterBrapiButtonListeners() {
+    private void registerBrapiButtonListeners() {
 
         if (brapiAuthButton != null) {
             String brapiToken = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_TOKEN, null);

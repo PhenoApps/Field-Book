@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.brapi;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,127 +25,55 @@ import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
 
 
-public class BrapiAuthActivity extends AppCompatActivity {
+public class BrapiAuthActivity extends Dialog implements android.view.View.OnClickListener {
 
     private BrAPIService brAPIService;
     private SharedPreferences preferences;
     private String target;
+    private Context context;
+    private Button authBtn;
+    private Button cancelBtn;
 
-    public BrapiAuthActivity() {
-
+    public BrapiAuthActivity(@NonNull Context context, String target) {
+        super(context);
+        this.context = context;
+        this.target = target;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        preferences = this.getSharedPreferences("Settings", 0);
-
-        Intent originIntent = getIntent();
-        target = originIntent.getStringExtra("target");
-
-        // Check if this is a return from Brapi authentication
-        checkBrapiAuth();
+        preferences = context.getSharedPreferences("Settings", 0);
 
         // User is not authenticated. Show our authentication window.
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_brapi_auth);
 
+        // Set our button click event
+        authBtn = findViewById(R.id.brapi_auth_btn);
+        authBtn.setOnClickListener(this);
+        cancelBtn = findViewById(R.id.brapi_auth_cancel_btn);
+        cancelBtn.setOnClickListener(this);
     }
 
-    // This will be call when we resume our Brapi login.
     @Override
-    public void onResume() {
-        super.onResume();
-
-        // Check if this is a return from Brapi authentication
-        checkBrapiAuth();
-    }
-
-    public static Boolean isLoggedIn(Context context) {
-
-        String auth_token = context.getSharedPreferences("Settings", 0)
-                .getString(PreferencesActivity.BRAPI_TOKEN, "");
-
-        if (auth_token == null || auth_token == "") {
-            return false;
-        }
-
-        return true;
-    }
-
-    public static Boolean hasValidBaseUrl(Context context) {
-        String url = getBrapiUrl(context);
-
-        return Patterns.WEB_URL.matcher(url).matches();
-    }
-
-    public static String getBrapiUrl(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
-        return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
-    }
-
-    public static String getBrapiToken(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
-        return preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
-    }
-
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.brapi_auth_cancel_btn:
                 // Cancel
-                finish();
+                dismiss();
                 break;
 
             case R.id.brapi_auth_btn:
 
                 // Start our brapi authentication process.
-                finish();
-                BrAPIService.authorizeBrAPI(preferences, this, target);
+                dismiss();
+                BrAPIService.authorizeBrAPI(preferences, context, target);
                 break;
 
         }
     }
 
-    private void checkBrapiAuth() {
 
-        Uri data = this.getIntent().getData();
-
-        if (data != null && data.isHierarchical()) {
-
-            Boolean parseSuccess = BrAPIService.parseBrapiAuth(this);
-            String brapiHost = this.getSharedPreferences("Settings", 0)
-                    .getString(PreferencesActivity.BRAPI_BASE_URL, "");
-
-            if (parseSuccess) {
-
-                // Get the target destination
-                String target = data.getHost();
-
-                // Config Page
-                Intent nextPage = null;
-                if (target.equals("export")) {
-                    nextPage = new Intent(this, BrapiExportDialog.class);
-                }
-                else if (target.equals("")) {
-                    nextPage = new Intent(this, ConfigActivity.class);
-                }
-                else {
-                    nextPage = new Intent(this, ConfigActivity.class);
-                }
-
-                startActivity(nextPage);
-                Toast.makeText(this, String.format("Successfully authenticated with %s", brapiHost), Toast.LENGTH_LONG);
-            }
-            else {
-                Toast.makeText(this, String.format("Unable to authenticate with %s", brapiHost), Toast.LENGTH_LONG);
-                Intent nextPage = new Intent(this, ConfigActivity.class);
-                startActivity(nextPage);
-            }
-
-            finish();
-        }
-
-
-    }
 }

@@ -61,12 +61,12 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         // Load the traits from breedbase if user is connected to the internet
         if(Utils.isConnected(this)) {
-            if (BrapiAuthActivity.hasValidBaseUrl(this)) {
+            if (brAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_traits_brapi);
 
                 loadToolbar();
                 // Get the setting information for our brapi integration
-                String brapiBaseURL = BrapiAuthActivity.getBrapiUrl(this);
+                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this));
 
                 // Make a clean list to track our selected traits

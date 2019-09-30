@@ -58,9 +58,9 @@ public class BrapiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         if(Utils.isConnected(this)) {
-            if (BrapiAuthActivity.hasValidBaseUrl(this)) {
+            if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi);
-                String brapiBaseURL = BrapiAuthActivity.getBrapiUrl(this);
+                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiActivity.this));
 
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);

@@ -8,8 +8,11 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -17,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
 public class PreferencesActivity extends AppCompatActivity {
 
@@ -66,6 +70,10 @@ public class PreferencesActivity extends AppCompatActivity {
     public static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
     public static String BRAPI_TOKEN = "BRAPI_TOKEN";
 
+    private static PreferencesFragment preferencesFragment;
+    private static Preference brapiPrefCategory;
+    private BrapiControllerResponse brapiControllerResponse;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,16 +85,45 @@ public class PreferencesActivity extends AppCompatActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        final PreferencesFragment preferencesFragment = new PreferencesFragment();
+        // Check if our activity was started up with brapi auth deep link.
+        brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
+
+        // This is not related to the deep link, load normally.
+        preferencesFragment = new PreferencesFragment();
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, preferencesFragment)
                 .commit();
-
-        //TODO: The top tool bar disappears when you go into 'Brapi Configuration'. Fix it. 
+        //TODO: The top tool bar disappears when you go into 'Brapi Configuration'. Fix it.
 
     }
 
+    public void processMessage(Boolean status, String message) {
 
+        // If we fail or succeed, show our message
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // If our preference page was resumed, we will want to see if it was resumed from a deep link.
+        if (brapiControllerResponse.status == null) {
+            brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
+        }
+
+        // Check whether our brapi auth response was successful
+        if (brapiControllerResponse.status != null) {
+            processMessage(brapiControllerResponse.status, brapiControllerResponse.message);
+
+            // Show our brapi preferences if they just came back from a brapi auth and it is not displayed already.
+            PreferenceScreen brapi_prefs = (PreferenceScreen) preferencesFragment.findPreference("brapi_preference_screen");
+            if (!preferencesFragment.getPreferenceScreen().equals(brapi_prefs)) {
+                preferencesFragment.setPreferenceScreen(brapi_prefs);
+            }
+
+        }
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

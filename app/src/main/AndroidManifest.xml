@@ -137,6 +137,15 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeAction" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="fieldbook"
+                    android:host=""
+                    tools:ignore="AppLinkUrlError"/> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
+            </intent-filter>
         </activity>
         <activity
             android:name=".brapi.BrapiAuthActivity"
@@ -144,6 +153,13 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppDialog" >
+        </activity>
+        <activity
+            android:name=".brapi.BrapiExportActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -151,18 +167,8 @@
                 <data
                     android:scheme="fieldbook"
                     android:host="export"/>
-                <data
-                    android:scheme="fieldbook"
-                    android:host=""
-                    tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
             </intent-filter>
         </activity>
-        <activity
-            android:name=".brapi.BrapiExportDialog"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" ></activity>
 
 
         <provider

@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.DataHelper;
@@ -27,14 +29,15 @@ import java.util.List;
 
 import io.swagger.client.model.NewObservationDbIdsObservations;
 
-public class BrapiExportDialog extends AppCompatActivity {
+public class BrapiExportActivity extends AppCompatActivity {
 
     private BrAPIService brAPIService;
     private DataHelper dataHelper;
     private List<Observation> observations;
     private List<Observation> observationsNeedingSync;
+    private BrapiControllerResponse brapiControllerResponse;
 
-    public BrapiExportDialog() {
+    public BrapiExportActivity() {
 
     }
 
@@ -42,19 +45,24 @@ public class BrapiExportDialog extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Check if our activity was started up with brapi auth deep link.
+        brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
+
         if(Utils.isConnected(this)) {
-            if (BrapiAuthActivity.hasValidBaseUrl(this)) {
+            if (BrAPIService.hasValidBaseUrl(this)) {
 
                 requestWindowFeature(Window.FEATURE_NO_TITLE);
                 setContentView(R.layout.dialog_brapi_export);
 
-                String brapiBaseURL = BrapiAuthActivity.getBrapiUrl(this);
+
+                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
 
                 this.dataHelper = new DataHelper(this);
                 brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper);
                 observations = dataHelper.getObservations();
                 observationsNeedingSync = new ArrayList<>();
 
+                loadToolbar();
                 loadStatistics();
 
             }else{
@@ -68,18 +76,48 @@ public class BrapiExportDialog extends AppCompatActivity {
         }
     }
 
+    private void loadToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("BrAPI Export");
+        getSupportActionBar().getThemedContext();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // If our activity was resumed, we will want to see if it was resumed from a deep link.
+        if (brapiControllerResponse.status == null) {
+            brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
+        }
+
+        // Check whether our brapi auth response was successful
+        if (brapiControllerResponse.status != null) {
+            processMessage(brapiControllerResponse.status, brapiControllerResponse.message);
+
+        }
+    }
+
+    public void processMessage(Boolean status, String message) {
+
+        // If we fail or succeed, show our message
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.brapi_export_btn:
                 if (observationsNeedingSync.size() > 0) {
                     brAPIService.postPhenotypes(observationsNeedingSync,
-                            BrapiAuthActivity.getBrapiToken(this),
+                            BrAPIService.getBrapiToken(this),
                             new Function<List<NewObservationDbIdsObservations>, Void>() {
                                 @Override
                                 public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
 
-                                    (BrapiExportDialog.this).runOnUiThread(new Runnable() {
+                                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             updateObservations(observationDbIds);
@@ -92,10 +130,10 @@ public class BrapiExportDialog extends AppCompatActivity {
                         @Override
                         public Void apply(final String input) {
 
-                            (BrapiExportDialog.this).runOnUiThread(new Runnable() {
+                            (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(BrapiExportDialog.this, input, Toast.LENGTH_LONG).show();
+                                    Toast.makeText(BrapiExportActivity.this, input, Toast.LENGTH_LONG).show();
                                 }
                             });
 
@@ -185,5 +223,15 @@ public class BrapiExportDialog extends AppCompatActivity {
         ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(newObservations));
         ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(syncedObservations));
         ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(editedObservations));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

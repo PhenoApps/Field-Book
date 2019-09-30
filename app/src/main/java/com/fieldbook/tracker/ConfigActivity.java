@@ -53,7 +53,7 @@ import android.widget.Toast;
 
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiAuthActivity;
-import com.fieldbook.tracker.brapi.BrapiExportDialog;
+import com.fieldbook.tracker.brapi.BrapiExportActivity;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
@@ -68,17 +68,12 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Dictionary;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -197,6 +192,8 @@ public class ConfigActivity extends AppCompatActivity {
         createDirs();
 
         dt = new DataHelper(this);
+
+
 
     }
 
@@ -1030,17 +1027,15 @@ public class ConfigActivity extends AppCompatActivity {
                         exportPermission();
                         break;
                     case 1:
-                        // one BrAPIService?
                         // Check if we are authorized and force authorization if not.
-                        if (BrapiAuthActivity.isLoggedIn(getApplicationContext())){
-                            Intent exportIntent = new Intent(ConfigActivity.this, BrapiExportDialog.class);
+                        if (BrAPIService.isLoggedIn(getApplicationContext())){
+                            Intent exportIntent = new Intent(ConfigActivity.this, BrapiExportActivity.class);
                             startActivity(exportIntent);
                         }
                         else {
-                            Intent loginIntent = new Intent(ConfigActivity.this, BrapiAuthActivity.class);
-                            // TODO: Constants for targets
-                            loginIntent.putExtra("target", "export");
-                            startActivity(loginIntent);
+                            // Show our login dialog
+                            BrapiAuthActivity brapiAuth = new BrapiAuthActivity(ConfigActivity.this, BrAPIService.exportTarget);
+                            brapiAuth.show();
                         }
 
                         break;

@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.util.Log;
+import android.util.Patterns;
 import android.widget.Toast;
 
 import androidx.arch.core.util.Function;
@@ -20,11 +21,13 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
+import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.fields.FieldObject;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.TraitObject;
+import com.fieldbook.tracker.utilities.Constants;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -65,6 +68,7 @@ public class BrAPIService {
     private PhenotypesApi phenotypesApi;
     private ObservationVariablesApi traitsApi;
     private String brapiBaseURL;
+    public static String exportTarget = "export";
 
 
     public BrAPIService(String brapiBaseURL, DataHelper dataHelper) {
@@ -709,7 +713,7 @@ public class BrAPIService {
                 // Go to url with the default browser
                 Uri uri = Uri.parse(url);
                 Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(i);
 
 
@@ -723,44 +727,79 @@ public class BrAPIService {
         }
     }
 
+
     // Returns true on successful parsing. False otherwise.
-    public static Boolean parseBrapiAuth(Activity activity) {
+    public static BrapiControllerResponse checkBrapiAuth(Activity activity) {
 
         Uri data = activity.getIntent().getData();
 
-        Integer status = Integer.parseInt(data.getQueryParameter("status"));
+        if (data != null && data.isHierarchical()) {
 
-        // Check that we actually have the data. If not return failure.
-        if (status == null) {
-            // TODO: Return specific error message?
-            return false;
-        }
+            Integer status = Integer.parseInt(data.getQueryParameter("status"));
 
-        if(status == 200) {
-            SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
-            SharedPreferences.Editor editor = preferences.edit();
-            String token = data.getQueryParameter("token");
-
-            // Check that we received a token.
-            if (token == null) {
-                // TODO: Return specific error message?
-                return false;
+            // Check that we actually have the data. If not return failure.
+            if (status == null) {
+                return new BrapiControllerResponse(false, "No data received from host.");
             }
 
-            editor.putString(PreferencesActivity.BRAPI_TOKEN, token);
-            editor.apply();
-            Toast.makeText(activity.getApplicationContext(), R.string.brapi_auth_success, Toast.LENGTH_SHORT).show();
+            if (status == 200) {
+                SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
+                SharedPreferences.Editor editor = preferences.edit();
+                String token = data.getQueryParameter("token");
 
-            return true;
-        } else {
-            SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
-            editor.apply();
-            Toast.makeText(activity.getApplicationContext(), R.string.brapi_auth_deny, Toast.LENGTH_SHORT).show();
+                // Check that we received a token.
+                if (token == null) {
+                    return new BrapiControllerResponse(false, "No access token received in response from host.");
+                }
 
+                editor.putString(PreferencesActivity.BRAPI_TOKEN, token);
+                editor.apply();
+
+                //TODO: Make the string, R.string.brapi_auth_success
+                return new BrapiControllerResponse(false, "BrAPI Authorization Successful");
+            } else {
+                SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
+                editor.apply();
+                Toast.makeText(activity.getApplicationContext(), R.string.brapi_auth_deny, Toast.LENGTH_SHORT).show();
+
+                return new BrapiControllerResponse(false, "BrAPI Authorization Failed");
+            }
+        }
+        else {
+            // Return null status when it is not a brapi response
+            return new BrapiControllerResponse(null, "");
+        }
+
+    }
+
+    // Helper functions for brapi configurations
+    public static Boolean isLoggedIn(Context context) {
+
+        String auth_token = context.getSharedPreferences("Settings", 0)
+                .getString(PreferencesActivity.BRAPI_TOKEN, "");
+
+        if (auth_token == null || auth_token == "") {
             return false;
         }
 
+        return true;
+    }
+
+    public static Boolean hasValidBaseUrl(Context context) {
+        String url = getBrapiUrl(context);
+
+        return Patterns.WEB_URL.matcher(url).matches();
+    }
+
+    public static String getBrapiUrl(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
+        return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
+    }
+
+    public static String getBrapiToken(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
+        return preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
     }
 }
