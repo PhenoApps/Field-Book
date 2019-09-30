@@ -5,6 +5,8 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
@@ -704,19 +706,19 @@ public class BrAPIService {
             String url = sharedPreferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://%s";
             url = String.format(url, target);
             try {
-                Uri uri = Uri.parse("googlechrome://navigate?url="+ url);
+                // Go to url with the default browser
+                Uri uri = Uri.parse(url);
                 Intent i = new Intent(Intent.ACTION_VIEW, uri);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(i);
 
-            } catch (ActivityNotFoundException e) {
-                Uri uri = Uri.parse(url);
-                // Chrome is probably not installed
-                // OR not selected as default browser OR if no Browser is selected as default browser
-                Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            } catch (ActivityNotFoundException ex) {
+                // TODO: Need to handle this error in the UI. Return a brapi response controller object.
+                Log.e("BrAPI", "Error starting BrAPI auth", ex);
             }
         } catch (Exception ex) {
+            // TODO: Need to handle this error in the UI. Return a brapi response controller object.
             Log.e("BrAPI", "Error starting BrAPI auth", ex);
         }
     }
