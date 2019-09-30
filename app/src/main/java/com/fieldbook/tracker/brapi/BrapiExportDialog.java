@@ -1,29 +1,24 @@
 package com.fieldbook.tracker.brapi;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.fields.FieldObject;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import io.swagger.client.model.NewObservationDbIdsObservations;
 
@@ -33,6 +28,9 @@ public class BrapiExportDialog extends AppCompatActivity {
     private DataHelper dataHelper;
     private List<Observation> observations;
     private List<Observation> observationsNeedingSync;
+    private int newObservations;
+    private int syncedObservations;
+    private int editedObservations;
 
     public BrapiExportDialog() {
 
@@ -54,6 +52,9 @@ public class BrapiExportDialog extends AppCompatActivity {
                 brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper);
                 observations = dataHelper.getObservations();
                 observationsNeedingSync = new ArrayList<>();
+                newObservations = 0;
+                syncedObservations = 0;
+                editedObservations = 0;
 
                 loadStatistics();
 
@@ -119,6 +120,9 @@ public class BrapiExportDialog extends AppCompatActivity {
     private void updateObservations(List<NewObservationDbIdsObservations> observationDbIds) {
 
         boolean error = false;
+        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
+                Locale.getDefault());
+        String syncTime = timeStamp.format(Calendar.getInstance().getTime());
 
         if (observationDbIds.size() != observationsNeedingSync.size()) {
             Toast.makeText(this, "Wrong number of observations returned", Toast.LENGTH_SHORT).show();
@@ -145,6 +149,7 @@ public class BrapiExportDialog extends AppCompatActivity {
                 else {
                     Observation update = observationsNeedingSync.get(first_index);
                     update.setDbId(converted.getDbId());
+                    update.setLastSyncedTime(syncTime);
                     observationsNeedingSync.set(first_index, update);
                 }
             }
@@ -157,10 +162,6 @@ public class BrapiExportDialog extends AppCompatActivity {
     }
 
     private void loadStatistics() {
-
-        int newObservations = 0;
-        int syncedObservations = 0;
-        int editedObservations = 0;
 
         for (Observation observation : observations) {
             switch(observation.getStatus()) {

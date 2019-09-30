@@ -4,12 +4,7 @@ import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 import org.threeten.bp.format.DateTimeParseException;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.Date;
-
 import io.swagger.client.model.NewObservationDbIdsObservations;
 
 public class Observation {
@@ -20,6 +15,7 @@ public class Observation {
     private String unitDbId;
     private String variableDbId;
     private OffsetDateTime timestamp;
+    private OffsetDateTime lastSyncedTime;
     private String variableName;
     private String season;
     private String studyId;
@@ -27,7 +23,7 @@ public class Observation {
     private String value;
 
     public enum Status {
-        NEW, SYNCED, EDITED
+        NEW, SYNCED, EDITED, INVALID
     }
 
     public Observation() {
@@ -55,18 +51,17 @@ public class Observation {
 
     public Status getStatus() {
 
-        Status status;
+        Status status = Status.INVALID;
 
         if (dbId == null) {
             status = Status.NEW;
         }
-        else {
+        else if (dbId != null && lastSyncedTime != null && timestamp.compareTo(lastSyncedTime) < 0) {
             status = Status.SYNCED;
         }
-
-        // TODO: handle edited case
-        // need to look at timestamps / different values which would require
-        // a request to the server
+        else if (dbId != null && lastSyncedTime != null && timestamp.compareTo(lastSyncedTime) > 0) {
+            status = Status.EDITED;
+        }
 
         return status;
     }
@@ -104,13 +99,30 @@ public class Observation {
     }
 
     public void setTimestamp(String timestamp) {
+        this.timestamp = convertTime(timestamp);
+    }
+
+    public void setLastSyncedTime(String timestamp) {
+        this.lastSyncedTime = convertTime(timestamp);
+    }
+
+    private OffsetDateTime convertTime(String time) {
+        OffsetDateTime converted = null;
         try {
             //TODO: locale
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ");
-            this.timestamp = OffsetDateTime.parse(timestamp, formatter);
+            converted = OffsetDateTime.parse(time, formatter);
         } catch (DateTimeParseException e) {
             e.printStackTrace();
         }
+        finally {
+            return converted;
+        }
+
+    }
+
+    public OffsetDateTime getLastSyncedTime() {
+        return lastSyncedTime;
     }
 
     public String getVariableName() {
