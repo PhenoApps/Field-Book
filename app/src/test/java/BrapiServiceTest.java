@@ -18,6 +18,8 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import io.swagger.client.ApiException;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -97,9 +99,9 @@ public class BrapiServiceTest {
 
                 return null;
             }
-        }, new Function<String, Void>() {
+        }, new Function<ApiException, Void>() {
             @Override
-            public Void apply(String input) {
+            public Void apply(ApiException input) {
                 BrapiServiceTest.this.checkGetStudyDetailsResult = false;
                 // Notify the countdown that we are finish
                 signal.countDown();
@@ -138,9 +140,9 @@ public class BrapiServiceTest {
 
                 return null;
             }
-        }, new Function<String, Void>() {
+        }, new Function<ApiException, Void>() {
             @Override
-            public Void apply(String input) {
+            public Void apply(ApiException input) {
                 BrapiServiceTest.this.checkGetPlotDetailsResult = false;
                 // Notify the countdown that we are finish
                 signal.countDown();
@@ -178,9 +180,9 @@ public class BrapiServiceTest {
 
                 return null;
             }
-        }, new Function<String, Void>() {
+        }, new Function<ApiException, Void>() {
             @Override
-            public Void apply(String input) {
+            public Void apply(ApiException input) {
                 BrapiServiceTest.this.checkGetOntologyResult = false;
                 // Notify the countdown that we are finish
                 signal.countDown();
@@ -219,9 +221,9 @@ public class BrapiServiceTest {
 
                 return null;
             }
-        }, new Function<String, Void>() {
+        }, new Function<ApiException, Void>() {
             @Override
-            public Void apply(String input) {
+            public Void apply(ApiException input) {
                 BrapiServiceTest.this.checkGetTraitsResult = false;
                 // Notify the countdown that we are finish
                 signal.countDown();
