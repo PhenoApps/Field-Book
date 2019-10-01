@@ -323,7 +323,8 @@ public class BrAPIService {
     }
 
 
-    public void postPhenotypes(List<Observation> observations, String brapiToken, final Function<List<NewObservationDbIdsObservations>, Void> function,
+    public void postPhenotypes(List<Observation> observations, String brapiToken, String fieldbookUser,
+                               final Function<List<NewObservationDbIdsObservations>, Void> function,
                                final Function<Integer, Void> failFunction) {
 
         try {
@@ -353,7 +354,7 @@ public class BrAPIService {
             // TODO: group by study and observationunit db ids
             for (Observation observation : observations) {
                 PhenotypesRequestObservation request_observation = new PhenotypesRequestObservation();
-                request_observation.setCollector("Field Book");
+                request_observation.setCollector(fieldbookUser);
                 request_observation.setObservationDbId(""); // new entry only for post
                 request_observation.setObservationTimeStamp(observation.getTimestamp());
                 request_observation.setObservationVariableDbId(observation.getVariableDbId());
