@@ -393,6 +393,7 @@
     <string name="brapi_study_traits_error">Error when loading traits for study. Study not saved.</string>
     <string name="brapi_ontology_error">Error loadings traits from BrAPI.</string>
     <string name="brapi_save_field_error">Error Saving Field</string>
+    <string name="brapi_field_not_selected">Selected Field Must Be Imported From BrAPI.</string>
     <string name="import_source_brapi">Remote (BrAPI)</string>
     <string name="brapi_save_trait">Save Traits</string>
     <string name="brapi_must_configure_url">Must configure a valid BrAPI URL in settings before proceeding</string>

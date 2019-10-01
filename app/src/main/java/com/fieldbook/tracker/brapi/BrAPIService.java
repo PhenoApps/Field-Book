@@ -19,6 +19,7 @@ import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.TraitObject;
 import com.fieldbook.tracker.utilities.Constants;
 
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -64,6 +65,7 @@ public class BrAPIService {
     private ObservationVariablesApi traitsApi;
     private String brapiBaseURL;
     public static String exportTarget = "export";
+    public static String notUniqueFieldMessage = "not_unique";
 
 
     public BrAPIService(String brapiBaseURL, DataHelper dataHelper) {
@@ -588,6 +590,7 @@ public class BrAPIService {
             field.setExp_species(studyDetails.getCommonCropName());
             field.setCount(studyDetails.getNumberOfPlots().toString());
 
+            // Get our host url
             if (getHostUrl() != null) {
                 field.setExp_source(getHostUrl());
             } else {
@@ -600,7 +603,11 @@ public class BrAPIService {
             field.setSecondary_id("Column");
             field.setExp_sort("Plot");
 
-            // Get our host url
+            // Do a pre-check to see if the field exists so we can show an error
+            Integer FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
+            if (FieldUniqueStatus != -1) {
+                return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
+            }
 
             int expId = dataHelper.createField(field, studyDetails.getAttributes());
 

@@ -227,8 +227,13 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         BrapiControllerResponse brapiControllerResponse = brAPIService.saveStudyDetails(studyDetails);
         // Display our message.
         if (brapiControllerResponse.status == false) {
-            Log.e("error", brapiControllerResponse.message);
-            Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
+            if (brapiControllerResponse.message == BrAPIService.notUniqueFieldMessage) {
+                Toast.makeText(context, R.string.fields_study_exists_message, Toast.LENGTH_LONG).show();
+            }
+            else {
+                Log.e("error", brapiControllerResponse.message);
+                Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
