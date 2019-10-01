@@ -572,6 +572,36 @@ public class DataHelper {
         return list;
     }
 
+    public FieldObject getFieldObject(Integer exp_id) {
+
+        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
+                        "secondary_id", "date_import", "date_edit", "date_export", "count", "exp_source"},
+                String.format("exp_id = %s", exp_id), null, null, null, "exp_id"
+        );
+
+        if (cursor.moveToFirst()) {
+            do {
+                FieldObject o = new FieldObject();
+                o.setExp_id(cursor.getInt(0));
+                o.setExp_name(cursor.getString(1));
+                o.setUnique_id(cursor.getString(2));
+                o.setPrimary_id(cursor.getString(3));
+                o.setSecondary_id(cursor.getString(4));
+                o.setDate_import(cursor.getString(5));
+                o.setDate_edit(cursor.getString(6));
+                o.setDate_export(cursor.getString(7));
+                o.setCount(cursor.getString(8));
+                o.setExp_source(cursor.getString(9));
+                return o;
+            } while (cursor.moveToNext());
+        }
+        else {
+            // If we have no results, return null.
+            return null;
+        }
+
+    }
+
     /**
      * V2 - Get all traits in the system, in order, as TraitObjects
      */
