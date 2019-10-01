@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
 import android.util.Patterns;
-import android.widget.Toast;
 
 import androidx.arch.core.util.Function;
 
@@ -50,9 +49,6 @@ import io.swagger.client.model.StudyObservationVariablesResponse;
 import io.swagger.client.model.StudyResponse;
 import io.swagger.client.model.StudySummary;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONException;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -324,8 +320,7 @@ public class BrAPIService {
         }
     }
 
-
-    public void postPhenotypes(List<Observation> observations, String brapiToken, String fieldbookUser,
+    public void postPhenotypes(List<Observation> observations, String brapiToken,
                                final Function<List<NewObservationDbIdsObservations>, Void> function,
                                final Function<Integer, Void> failFunction) {
 
@@ -356,7 +351,7 @@ public class BrAPIService {
             // TODO: group by study and observationunit db ids
             for (Observation observation : observations) {
                 PhenotypesRequestObservation request_observation = new PhenotypesRequestObservation();
-                request_observation.setCollector(fieldbookUser);
+                request_observation.setCollector(observation.getCollector().trim());
                 request_observation.setObservationDbId(""); // new entry only for post
                 request_observation.setObservationTimeStamp(observation.getTimestamp());
                 request_observation.setObservationVariableDbId(observation.getVariableDbId());
@@ -380,7 +375,7 @@ public class BrAPIService {
     }
 
     // will only ever have one study in current architecture
-    public void putObservations(List<Observation> observations, String fieldbookUser, String brapiToken,
+    public void putObservations(List<Observation> observations, String brapiToken,
                                 final Function<List<NewObservationDbIdsObservations>, Void> function,
                                 final Function<Integer, Void> failFunction) {
 
@@ -428,7 +423,7 @@ public class BrAPIService {
 
                 for (Observation obs: studyObs) {
                     NewObservationsRequestObservations o = new NewObservationsRequestObservations();
-                    o.setCollector(fieldbookUser);
+                    o.setCollector(obs.getCollector().trim());
                     o.setObservationDbId(obs.getDbId());
                     o.setObservationTimeStamp(obs.getTimestamp());
                     o.setObservationUnitDbId(obs.getUnitDbId());

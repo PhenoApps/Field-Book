@@ -195,7 +195,8 @@ public class DataHelper {
                     "exp_id.exp_alias, " +
                     "user_traits.id, " +
                     "user_traits.observation_db_id, " +
-                    "user_traits.last_synced_time " +
+                    "user_traits.last_synced_time, " +
+                    "user_traits.person " +
                     "FROM " +
                     "user_traits " +
                     "JOIN " +
@@ -228,6 +229,7 @@ public class DataHelper {
                 o.setFieldbookDbId(cursor.getString(7));
                 o.setDbId(cursor.getString(8));
                 o.setLastSyncedTime(cursor.getString(9));
+                o.setCollector(cursor.getString(10));
 
                 observations.add(o);
 
@@ -1670,6 +1672,8 @@ public class DataHelper {
             copyFile(oldSp, newSp);
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
+        } finally {
+            open();
         }
     }
 
@@ -1680,8 +1684,6 @@ public class DataHelper {
         if (oldFile.exists()) {
             try {
                 copyFileCall(new FileInputStream(oldFile), new FileOutputStream(newFile));
-                openHelper = new OpenHelper(this.context);
-                open();
             } catch (IOException e) {
                 e.printStackTrace();
             }
