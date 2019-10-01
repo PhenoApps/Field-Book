@@ -657,41 +657,46 @@ public class BrAPIService {
     }
 
     public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails) {
-        FieldObject field = new FieldObject();
-        field.setExp_name(studyDetails.getStudyName());
-        field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
-        field.setExp_species(studyDetails.getCommonCropName());
-        field.setCount(studyDetails.getNumberOfPlots().toString());
 
-        if (getHostUrl() != null) {
-            field.setExp_source(getHostUrl());
+        try {
+            FieldObject field = new FieldObject();
+            field.setExp_name(studyDetails.getStudyName());
+            field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
+            field.setExp_species(studyDetails.getCommonCropName());
+            field.setCount(studyDetails.getNumberOfPlots().toString());
+
+            if (getHostUrl() != null) {
+                field.setExp_source(getHostUrl());
+            } else {
+                // Return an error notifying user we can't save this field
+                return new BrapiControllerResponse(false, "Host is null");
+            }
+
+            field.setUnique_id("Plot");
+            field.setPrimary_id("Row");
+            field.setSecondary_id("Column");
+            field.setExp_sort("Plot");
+
+            // Get our host url
+
+            int expId = dataHelper.createField(field, studyDetails.getAttributes());
+
+            for (List<String> dataRow : studyDetails.getValues()) {
+                dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
+            }
+
+            // Get the traits already associated with this study
+            //TODO: Traits likely need to be made more field specific if we are to use this.
+            // Or give them the ability to delete the existing traits when we import these ones.
+            for (TraitObject t : studyDetails.getTraits()) {
+                dataHelper.insertTraits(t);
+            }
+
+            return new BrapiControllerResponse(true, "");
         }
-        else {
-            // Return an error notifying user we can't save this field
-            return new BrapiControllerResponse(false, "Host is null");
+        catch (Exception e) {
+            return new BrapiControllerResponse(false, e.toString());
         }
-
-        field.setUnique_id("Plot");
-        field.setPrimary_id("Row");
-        field.setSecondary_id("Column");
-        field.setExp_sort("Plot");
-
-        // Get our host url
-
-        int expId = dataHelper.createField(field, studyDetails.getAttributes());
-
-        for(List<String> dataRow: studyDetails.getValues()) {
-            dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
-        }
-
-        // Get the traits already associated with this study
-        //TODO: Traits likely need to be made more field specific if we are to use this.
-        // Or give them the ability to delete the existing traits when we import these ones.
-        for(TraitObject t : studyDetails.getTraits()) {
-            dataHelper.insertTraits(t);
-        }
-
-        return new BrapiControllerResponse(true, "");
     }
 
     public String getHostUrl() {
@@ -704,7 +709,6 @@ public class BrAPIService {
             Log.e("error", e.toString());
             return null;
         }
-
     }
 
     public static BrapiControllerResponse authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
