@@ -377,7 +377,8 @@ public class BrAPIService {
     }
 
     // will only ever have one study in current architecture
-    public void putObservations(List<Observation> observations, String brapiToken, final Function<List<NewObservationDbIdsObservations>, Void> function,
+    public void putObservations(List<Observation> observations, String fieldbookUser, String brapiToken,
+                                final Function<List<NewObservationDbIdsObservations>, Void> function,
                                 final Function<Integer, Void> failFunction) {
 
         // group observations by studyid
@@ -424,7 +425,7 @@ public class BrAPIService {
 
                 for (Observation obs: studyObs) {
                     NewObservationsRequestObservations o = new NewObservationsRequestObservations();
-                    o.setCollector("Field Book");
+                    o.setCollector(fieldbookUser);
                     o.setObservationDbId(obs.getDbId());
                     o.setObservationTimeStamp(obs.getTimestamp());
                     o.setObservationUnitDbId(obs.getUnitDbId());

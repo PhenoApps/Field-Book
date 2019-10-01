@@ -138,7 +138,12 @@ public class BrapiExportActivity extends AppCompatActivity {
     }
 
     private void putObservations() {
-        brAPIService.putObservations(observationsNeedingSync,
+
+        SharedPreferences ep = this.getSharedPreferences("Settings", 0);
+        String userName = ep.getString("FirstName", "") + " " + ep.getString("LastName", "");
+        userName = userName.trim();
+
+        brAPIService.putObservations(observationsNeedingSync, userName,
             BrAPIService.getBrapiToken(this),
             new Function<List<NewObservationDbIdsObservations>, Void>() {
                 @Override
