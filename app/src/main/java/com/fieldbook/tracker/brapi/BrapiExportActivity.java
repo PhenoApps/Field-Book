@@ -30,10 +30,20 @@ public class BrapiExportActivity extends AppCompatActivity {
     private DataHelper dataHelper;
     private List<Observation> observations;
     private List<Observation> observationsNeedingSync;
+
     private BrapiControllerResponse brapiControllerResponse;
-    private int newObservations;
-    private int syncedObservations;
-    private int editedObservations;
+    private int numNewObservations;
+    private int numSyncedObservations;
+    private int numEditedObservations;
+    private UploadError putObservationsError;
+
+    public enum UploadError {
+        NONE,
+        MISSING_OBSERVATION_IN_RESPONSE,
+        MULTIPLE_OBSERVATIONS_PER_VARIABLE,
+        WRONG_NUM_OBSERVATIONS_RETURNED,
+        API_CALLBACK_ERROR
+    }
 
     public BrapiExportActivity() {
 
@@ -52,16 +62,16 @@ public class BrapiExportActivity extends AppCompatActivity {
                 requestWindowFeature(Window.FEATURE_NO_TITLE);
                 setContentView(R.layout.dialog_brapi_export);
 
-
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
 
                 this.dataHelper = new DataHelper(this);
                 brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper);
-                observations = dataHelper.getObservations();
+
+                putObservationsError = UploadError.NONE;
                 observationsNeedingSync = new ArrayList<>();
-                newObservations = 0;
-                syncedObservations = 0;
-                editedObservations = 0;
+                numNewObservations = 0;
+                numSyncedObservations = 0;
+                numEditedObservations = 0;
 
                 loadToolbar();
                 loadStatistics();
@@ -102,8 +112,8 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     public void processBrapiControllerMessage(BrapiControllerResponse brapiControllerResponse) {
 
-        if (brapiControllerResponse != null) {
-            if (brapiControllerResponse.status) {
+        if (brapiControllerResponse.status != null) {
+            if (!brapiControllerResponse.status) {
                 Toast.makeText(this, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
             }
         }
@@ -112,36 +122,8 @@ public class BrapiExportActivity extends AppCompatActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.brapi_export_btn:
-                if (observationsNeedingSync.size() > 0) {
-                    brAPIService.postPhenotypes(observationsNeedingSync,
-                            BrAPIService.getBrapiToken(this),
-                            new Function<List<NewObservationDbIdsObservations>, Void>() {
-                                @Override
-                                public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
-
-                                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            updateObservations(observationDbIds);
-                                        }
-                                    });
-                                    return null;
-                                }
-                    }, new Function<String, Void>() {
-
-                        @Override
-                        public Void apply(final String input) {
-
-                            (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(BrapiExportActivity.this, input, Toast.LENGTH_LONG).show();
-                                }
-                            });
-
-                            return null;
-                        }
-                    });
+                if (numNewObservations > 0 || numEditedObservations > 0) {
+                    putObservations();
                 }
                 else {
                     Toast.makeText(this, "Error: Nothing to sync", Toast.LENGTH_SHORT).show();
@@ -153,18 +135,76 @@ public class BrapiExportActivity extends AppCompatActivity {
             default:
                 break;
         }
-        finish();
     }
 
-    private void updateObservations(List<NewObservationDbIdsObservations> observationDbIds) {
+    private void putObservations() {
 
-        boolean error = false;
+        SharedPreferences ep = this.getSharedPreferences("Settings", 0);
+        String userName = ep.getString("FirstName", "") + " " + ep.getString("LastName", "");
+        userName = userName.trim();
+
+        brAPIService.putObservations(observationsNeedingSync, userName,
+            BrAPIService.getBrapiToken(this),
+            new Function<List<NewObservationDbIdsObservations>, Void>() {
+                @Override
+                public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
+
+                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            processPutObservationsResponse(observationDbIds);
+                            uploadComplete();
+                        }
+                    });
+                    return null;
+                }
+            }, new Function<Integer, Void>() {
+
+                @Override
+                public Void apply(final Integer code) {
+
+                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            putObservationsError = UploadError.API_CALLBACK_ERROR;
+                            uploadComplete();
+                        }
+                    });
+
+                    return null;
+                }
+            }
+        );
+    }
+
+    private void uploadComplete() {
+        // show upload status
+        if (putObservationsError != UploadError.NONE) {
+            Toast.makeText(this.getApplicationContext(), "BrAPI Export Failed", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            Toast.makeText(this.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
+        }
+
+        // refresh statistics
+        loadStatistics();
+        // reset
+        reset();
+    }
+
+    private void reset() {
+        putObservationsError = UploadError.NONE;
+    }
+
+    private UploadError processResponse(List<NewObservationDbIdsObservations> observationDbIds, List<Observation> observationsNeedingSync)
+    {
+        UploadError retVal = UploadError.NONE;
         SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
                 Locale.getDefault());
         String syncTime = timeStamp.format(Calendar.getInstance().getTime());
 
         if (observationDbIds.size() != observationsNeedingSync.size()) {
-            Toast.makeText(this, "Wrong number of observations returned", Toast.LENGTH_SHORT).show();
+            retVal = UploadError.WRONG_NUM_OBSERVATIONS_RETURNED;
         }
         else {
             // TODO: update to work with multiple observations per variable
@@ -178,14 +218,10 @@ public class BrapiExportActivity extends AppCompatActivity {
                 int first_index = observationsNeedingSync.indexOf(converted);
                 int last_index = observationsNeedingSync.lastIndexOf(converted);
                 if (first_index == -1) {
-                    Toast.makeText(this.getApplicationContext(), "Error: Missing observation", Toast.LENGTH_SHORT).show();
-                    error = true;
-                }
-                else if (first_index != last_index) {
-                    Toast.makeText(this.getApplicationContext(), "Error: Multiple observations per variable", Toast.LENGTH_SHORT).show();
-                    error = true;
-                }
-                else {
+                    retVal = UploadError.MISSING_OBSERVATION_IN_RESPONSE;
+                } else if (first_index != last_index) {
+                    retVal = UploadError.MULTIPLE_OBSERVATIONS_PER_VARIABLE;
+                } else {
                     Observation update = observationsNeedingSync.get(first_index);
                     update.setDbId(converted.getDbId());
                     update.setLastSyncedTime(syncTime);
@@ -193,26 +229,38 @@ public class BrapiExportActivity extends AppCompatActivity {
                 }
             }
 
-            if (error == false) {
+            if (retVal == UploadError.NONE) {
                 dataHelper.updateObservations(observationsNeedingSync);
-                Toast.makeText(this.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
             }
         }
+
+        return retVal;
+    }
+
+    private void processPutObservationsResponse(List<NewObservationDbIdsObservations> observationDbIds) {
+        UploadError error = processResponse(observationDbIds, observationsNeedingSync);
+        putObservationsError = error;
     }
 
     private void loadStatistics() {
 
+        numNewObservations = 0;
+        numSyncedObservations = 0;
+        numEditedObservations = 0;
+        observations = dataHelper.getObservations();
+        observationsNeedingSync.clear();
+
         for (Observation observation : observations) {
             switch(observation.getStatus()) {
                 case NEW:
-                    newObservations++;
+                    numNewObservations++;
                     observationsNeedingSync.add(observation);
                     break;
                 case SYNCED:
-                    syncedObservations++;
+                    numSyncedObservations++;
                     break;
                 case EDITED:
-                    editedObservations++;
+                    numEditedObservations++;
                     observationsNeedingSync.add(observation);
                     break;
             }
@@ -222,9 +270,9 @@ public class BrapiExportActivity extends AppCompatActivity {
         String field = ep.getString("FieldFile", "");
 
         ((TextView) findViewById(R.id.brapistudyValue)).setText(field);
-        ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(newObservations));
-        ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(syncedObservations));
-        ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(editedObservations));
+        ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));
+        ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
+        ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));
     }
 
     @Override
