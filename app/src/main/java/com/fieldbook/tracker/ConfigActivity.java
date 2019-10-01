@@ -53,6 +53,7 @@ import android.widget.Toast;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiExportActivity;
+import com.fieldbook.tracker.fields.FieldObject;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
@@ -191,8 +192,6 @@ public class ConfigActivity extends AppCompatActivity {
         createDirs();
 
         dt = new DataHelper(this);
-
-
 
     }
 
@@ -1026,6 +1025,30 @@ public class ConfigActivity extends AppCompatActivity {
                         exportPermission();
                         break;
                     case 1:
+
+                        // Get our active field
+                        Integer activeFieldId = dt.checkFieldName(ep.getString("FieldFile", ""));
+                        FieldObject activeField;
+                        if (activeFieldId != -1){
+                            activeField = dt.getFieldObject(activeFieldId);
+                        }
+                        else {
+                            activeField = null;
+                        }
+
+                        // Check if the selected field is a brapi field.
+                        if (activeField == null){
+                            Toast.makeText(ConfigActivity.this, R.string.warning_field_missing, Toast.LENGTH_LONG).show();
+                            break;
+                        }
+                        else if (activeField.getExp_source() == null ||
+                                activeField.getExp_source() == "" ||
+                                activeField.getExp_source() == "local"){
+
+                            Toast.makeText(ConfigActivity.this, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show();
+                            break;
+                        }
+
                         // Check if we are authorized and force authorization if not.
                         if (BrAPIService.isLoggedIn(getApplicationContext())){
                             Intent exportIntent = new Intent(ConfigActivity.this, BrapiExportActivity.class);
