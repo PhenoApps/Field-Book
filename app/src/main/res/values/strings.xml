@@ -397,6 +397,10 @@
     <string name="import_source_brapi">Remote (BrAPI)</string>
     <string name="brapi_save_trait">Save Traits</string>
     <string name="brapi_must_configure_url">Must configure a valid BrAPI URL in settings before proceeding</string>
+    <string name="brapi_export_failed">BrAPI Export Failed</string>
+    <string name="brapi_export_permission_deny">ERROR: You do not have the permissions to send data to the specified system.</string>
+    <string name="brapi_export_not_supported">ERROR: Target system does not support sending observations via BrAPI.</string>
+    <string name="brapi_export_successful">BrAPI Export Successful</string>
     <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>

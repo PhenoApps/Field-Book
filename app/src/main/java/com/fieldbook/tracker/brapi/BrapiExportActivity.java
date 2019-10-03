@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Utils;
@@ -42,7 +43,10 @@ public class BrapiExportActivity extends AppCompatActivity {
         MISSING_OBSERVATION_IN_RESPONSE,
         MULTIPLE_OBSERVATIONS_PER_VARIABLE,
         WRONG_NUM_OBSERVATIONS_RETURNED,
-        API_CALLBACK_ERROR
+        API_CALLBACK_ERROR,
+        API_UNAUTHORIZED_ERROR,
+        API_NOTSUPPORTED_ERROR,
+        API_PERMISSION_ERROR
     }
 
     public BrapiExportActivity() {
@@ -116,6 +120,9 @@ public class BrapiExportActivity extends AppCompatActivity {
             if (!brapiControllerResponse.status) {
                 Toast.makeText(this, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
             }
+            else {
+                Toast.makeText(this, R.string.brapi_auth_success, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -161,7 +168,31 @@ public class BrapiExportActivity extends AppCompatActivity {
                     (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            putObservationsError = UploadError.API_CALLBACK_ERROR;
+
+                            switch (code) {
+                                case 403:
+                                    // Warn that they do not have permissions to push traits
+                                    putObservationsError = UploadError.API_PERMISSION_ERROR;
+                                    break;
+                                case 401:
+                                    // Start the login process
+                                    putObservationsError = UploadError.API_UNAUTHORIZED_ERROR;
+                                    break;
+                                case 400:
+                                    // Bad request
+                                    putObservationsError = UploadError.API_CALLBACK_ERROR;
+                                    break;
+                                case 404:
+                                    // End point not supported
+                                    putObservationsError = UploadError.API_NOTSUPPORTED_ERROR;
+                                    break;
+                                default:
+                                    // Do our generic error handler.
+                                    putObservationsError = UploadError.API_CALLBACK_ERROR;
+
+                            }
+
+
                             uploadComplete();
                         }
                     });
@@ -174,12 +205,21 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private void uploadComplete() {
         // show upload status
-        if (putObservationsError != UploadError.NONE) {
-            Toast.makeText(this.getApplicationContext(), "BrAPI Export Failed", Toast.LENGTH_SHORT).show();
+        Integer message = R.string.brapi_export_failed;
+        if (putObservationsError == UploadError.API_CALLBACK_ERROR) { message = R.string.brapi_export_failed; }
+        else if (putObservationsError == UploadError.API_PERMISSION_ERROR) { message = R.string.brapi_export_permission_deny; }
+        else if (putObservationsError == UploadError.API_NOTSUPPORTED_ERROR) { message = R.string.brapi_export_not_supported; }
+        else if (putObservationsError == UploadError.API_UNAUTHORIZED_ERROR) {
+            // Start the login process
+            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(BrapiExportActivity.this, BrAPIService.exportTarget);
+            brapiAuth.show();
+            return;
         }
         else {
-            Toast.makeText(this.getApplicationContext(), "BrAPI Export Successful", Toast.LENGTH_SHORT).show();
+            message = R.string.brapi_export_successful;
         }
+
+        Toast.makeText(this.getApplicationContext(), message, Toast.LENGTH_LONG).show();
 
         // refresh statistics
         loadStatistics();

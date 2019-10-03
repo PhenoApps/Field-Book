@@ -80,8 +80,10 @@ public class BrapiAuthDialog extends Dialog implements android.view.View.OnClick
 
     private void processBrapiControllerMessage(BrapiControllerResponse brapiControllerResponse) {
 
-        if (!brapiControllerResponse.status) {
-            Toast.makeText(context, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
+        if (brapiControllerResponse.status != null) {
+            if (!brapiControllerResponse.status) {
+                Toast.makeText(context, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
