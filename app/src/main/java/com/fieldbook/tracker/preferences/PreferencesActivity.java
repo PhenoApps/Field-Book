@@ -97,6 +97,7 @@ public class PreferencesActivity extends AppCompatActivity {
 
     }
 
+
     public void processMessage(BrapiControllerResponse brapiControllerResponse) {
 
         // If we fail or succeed, show our message

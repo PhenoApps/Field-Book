@@ -652,7 +652,8 @@ public class BrAPIService {
                 // Go to url with the default browser
                 Uri uri = Uri.parse(url);
                 Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 context.startActivity(i);
 
                 // We require no response since this starts a new activity.

@@ -148,13 +148,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".brapi.BrapiAuthActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" >
-        </activity>
-        <activity
             android:name=".brapi.BrapiExportActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"

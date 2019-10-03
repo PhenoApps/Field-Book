@@ -80,6 +80,7 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
                 BrapiControllerResponse brapiControllerResponse  = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), context, null);
                 // Show our error message if it exists
                 processResponseMessage(brapiControllerResponse);
+                ((Activity)context).finish();
             }
         }
 
@@ -109,6 +110,7 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
                         BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), PreferencesFragment.this.context, null);
                         // Show our error message if it exists
                         processResponseMessage(brapiControllerResponse);
+                        ((Activity)context).finish();
                     }
                     return true;
                 }
