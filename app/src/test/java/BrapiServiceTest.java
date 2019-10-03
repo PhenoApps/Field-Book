@@ -5,20 +5,25 @@ import android.view.View;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiExportActivity;
 import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.brapi.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
+import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.traits.TraitObject;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.threeten.bp.OffsetDateTime;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import io.swagger.client.ApiException;
+import io.swagger.client.model.NewObservationDbIdsObservations;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -32,6 +37,7 @@ public class BrapiServiceTest {
     Boolean checkGetPlotDetailsResult = false;
     Boolean checkGetTraitsResult = false;
     Boolean checkGetOntologyResult = false;
+    List<NewObservationDbIdsObservations> putObservationsResponse;
 
 
     @Before
@@ -239,6 +245,60 @@ public class BrapiServiceTest {
         catch (InterruptedException e) {
             fail(e.toString());
         }
+    }
 
+    @Test
+    public void checkPutObservations(){
+
+        putObservationsResponse = null;
+        final CountDownLatch signal = new CountDownLatch(1);
+        final String brapiToken = "YYYY";
+
+        List<Observation> testObservations = new ArrayList<>();
+        Observation testObservation = new Observation();
+        testObservation.setCollector("Brapi Test");
+        testObservation.setDbId("");
+        testObservation.setTimestamp(OffsetDateTime.now());
+        testObservation.setUnitDbId("1");
+        testObservation.setVariableDbId("MO_123:100002");
+        testObservation.setValue("5");
+        testObservation.setStudyId("1001");
+        testObservations.add(testObservation);
+
+        // Call our get study details endpoint with the same parsing that our classes use.
+        this.brAPIService.putObservations(testObservations, brapiToken, new Function<List<NewObservationDbIdsObservations>, Void>() {
+                    @Override
+                    public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
+
+                        putObservationsResponse = observationDbIds;
+                        signal.countDown();
+
+                        return null;
+                    }
+                }, new Function<Integer, Void>() {
+
+                    @Override
+                    public Void apply(final Integer code) {
+
+                        signal.countDown();
+
+                        return null;
+                    }
+                }
+        );
+
+        // Wait for our callback and evaluate how we did
+        try {
+            signal.await();
+
+            assertTrue(putObservationsResponse != null);
+            assertTrue(putObservationsResponse.size() == 1);
+            assertTrue(putObservationsResponse.get(0).getObservationUnitDbId() == "1");
+            assertTrue(putObservationsResponse.get(0).getObservationVariableDbId() == "MO_123:100002");
+
+        }
+        catch (InterruptedException e) {
+            fail(e.toString());
+        }
     }
 }

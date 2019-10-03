@@ -341,7 +341,6 @@ public class BrAPIService {
                     final ApiException error = e;
                     Integer code = new Integer(error.getCode());
                     failFunction.apply(code);
-                    Log.e("error", error.toString());
 
                 }
             };
@@ -408,7 +407,6 @@ public class BrAPIService {
                     final ApiException error = e;
                     Integer code = new Integer(error.getCode());
                     failFunction.apply(code);
-                    Log.e("error", error.toString());
 
                 }
             };
