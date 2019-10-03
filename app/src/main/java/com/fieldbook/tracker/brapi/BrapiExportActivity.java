@@ -211,6 +211,39 @@ public class BrapiExportActivity extends AppCompatActivity {
         );
     }
 
+    private String getMessageForErrorCode(UploadError error) {
+        String message;
+
+        switch(error) {
+            case API_CALLBACK_ERROR:
+                message = getString(R.string.brapi_export_failed);
+                break;
+            case API_PERMISSION_ERROR:
+                message = getString(R.string.brapi_export_permission_deny);
+                break;
+            case API_NOTSUPPORTED_ERROR:
+                message = getString(R.string.brapi_export_not_supported);
+                break;
+            case WRONG_NUM_OBSERVATIONS_RETURNED:
+                message = getString(R.string.brapi_export_wrong_num_obs);
+                break;
+            case MISSING_OBSERVATION_IN_RESPONSE:
+                message = getString(R.string.brapi_export_missing_obs);
+                break;
+            case MULTIPLE_OBSERVATIONS_PER_VARIABLE:
+                message = getString(R.string.brapi_export_multiple_obs);
+                break;
+            case NONE:
+                message = getString(R.string.brapi_export_successful);
+                break;
+            default:
+                message = getString(R.string.brapi_export_unknown_error);
+                break;
+        }
+
+        return message;
+    }
+
     private void uploadComplete() {
 
         // Re-enable our login button
@@ -220,21 +253,16 @@ public class BrapiExportActivity extends AppCompatActivity {
         this.findViewById(R.id.saving_panel).setVisibility(View.GONE);
 
         // show upload status
-        Integer message = R.string.brapi_export_failed;
-        if (putObservationsError == UploadError.API_CALLBACK_ERROR) { message = R.string.brapi_export_failed; }
-        else if (putObservationsError == UploadError.API_PERMISSION_ERROR) { message = R.string.brapi_export_permission_deny; }
-        else if (putObservationsError == UploadError.API_NOTSUPPORTED_ERROR) { message = R.string.brapi_export_not_supported; }
-        else if (putObservationsError == UploadError.API_UNAUTHORIZED_ERROR) {
+        if (putObservationsError == UploadError.API_UNAUTHORIZED_ERROR) {
             // Start the login process
             BrapiAuthDialog brapiAuth = new BrapiAuthDialog(BrapiExportActivity.this, BrAPIService.exportTarget);
             brapiAuth.show();
             return;
         }
         else {
-            message = R.string.brapi_export_successful;
+            String message = getMessageForErrorCode(putObservationsError);
+            Toast.makeText(this.getApplicationContext(), message, Toast.LENGTH_LONG).show();
         }
-
-        Toast.makeText(this.getApplicationContext(), message, Toast.LENGTH_LONG).show();
 
         // refresh statistics
         loadStatistics();

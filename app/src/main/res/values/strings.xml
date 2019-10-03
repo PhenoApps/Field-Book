@@ -400,6 +400,10 @@
     <string name="brapi_export_failed">BrAPI Export Failed</string>
     <string name="brapi_export_permission_deny">ERROR: You do not have the permissions to send data to the specified system.</string>
     <string name="brapi_export_not_supported">ERROR: Target system does not support sending observations via BrAPI.</string>
+    <string name="brapi_export_wrong_num_obs">ERROR: Response number of observations different from request</string>
+    <string name="brapi_export_missing_obs">ERROR: Missing observation in response</string>
+    <string name="brapi_export_multiple_obs">ERROR: Multiple observations per variable</string>
+    <string name="brapi_export_unknown_error">ERROR: Unknown Error</string>
     <string name="brapi_export_successful">BrAPI Export Successful</string>
     <string name="brapi_saving_indicator">Saving Observations...</string>
     <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
