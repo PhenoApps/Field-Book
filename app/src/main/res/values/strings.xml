@@ -401,6 +401,7 @@
     <string name="brapi_export_permission_deny">ERROR: You do not have the permissions to send data to the specified system.</string>
     <string name="brapi_export_not_supported">ERROR: Target system does not support sending observations via BrAPI.</string>
     <string name="brapi_export_successful">BrAPI Export Successful</string>
+    <string name="brapi_saving_indicator">Saving Observations...</string>
     <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>

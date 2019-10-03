@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -145,6 +146,13 @@ public class BrapiExportActivity extends AppCompatActivity {
     }
 
     private void putObservations() {
+
+        // Disable the export button so that can't click it again
+        Button exportBtn = (Button) this.findViewById(R.id.brapi_export_btn);
+        exportBtn.setEnabled(false);
+        // Show our saving wheel
+        this.findViewById(R.id.saving_panel).setVisibility(View.VISIBLE);
+
         brAPIService.putObservations(observationsNeedingSync,
             BrAPIService.getBrapiToken(this),
             new Function<List<NewObservationDbIdsObservations>, Void>() {
@@ -204,6 +212,13 @@ public class BrapiExportActivity extends AppCompatActivity {
     }
 
     private void uploadComplete() {
+
+        // Re-enable our login button
+        // Disable the export button so that can't click it again
+        Button exportBtn = (Button) this.findViewById(R.id.brapi_export_btn);
+        exportBtn.setEnabled(true);
+        this.findViewById(R.id.saving_panel).setVisibility(View.GONE);
+
         // show upload status
         Integer message = R.string.brapi_export_failed;
         if (putObservationsError == UploadError.API_CALLBACK_ERROR) { message = R.string.brapi_export_failed; }
