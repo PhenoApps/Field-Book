@@ -338,6 +338,10 @@
     <string name="brapi_export_num_new_obs"> New Observations</string>
     <string name="brapi_export_num_synced_obs"> Synced Observations</string>
     <string name="brapi_export_num_ed_obs"> Edited Observations</string>
+    <string name="brapi_export_skipped_observations"> Skipped Observations</string>
+    <string name="brapi_export_skipped_user_created"> User Created Trait Observations</string>
+    <string name="brapi_export_skipped_empty"> Empty Value Observations</string>
+
 
     <!-- Warnings/Catches -->
     <string name="warning_field_before_traits">A field must be imported before traits can be created.</string>

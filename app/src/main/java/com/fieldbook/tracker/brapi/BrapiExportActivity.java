@@ -32,6 +32,8 @@ public class BrapiExportActivity extends AppCompatActivity {
     private DataHelper dataHelper;
     private List<Observation> observations;
     private List<Observation> observationsNeedingSync;
+    private List<Observation> userCreatedTraitObservations;
+    private List<Observation> emptyValueObservations;
 
     private BrapiControllerResponse brapiControllerResponse;
     private int numNewObservations;
@@ -327,6 +329,8 @@ public class BrapiExportActivity extends AppCompatActivity {
         numEditedObservations = 0;
         observations = dataHelper.getObservations();
         observationsNeedingSync.clear();
+        userCreatedTraitObservations = dataHelper.getUserTraitObservations();
+        emptyValueObservations = dataHelper.getEmptyValueObservations();
 
         for (Observation observation : observations) {
             switch(observation.getStatus()) {
@@ -351,6 +355,9 @@ public class BrapiExportActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));
         ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
         ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));
+        ((TextView) findViewById(R.id.brapiUserCreatedValue)).setText(String.valueOf(userCreatedTraitObservations.size()));
+        ((TextView) findViewById(R.id.brapiEmptyValue)).setText(String.valueOf(emptyValueObservations.size()));
+
     }
 
     @Override
