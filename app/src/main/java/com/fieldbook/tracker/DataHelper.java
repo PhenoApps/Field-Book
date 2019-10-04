@@ -177,6 +177,30 @@ public class DataHelper {
         return largest;
     }
 
+    public Boolean isBrapiSynced(String rid, String parent) {
+
+        Boolean synced = false;
+        Observation o = new Observation();
+
+        Cursor cursor = db.rawQuery("SELECT observation_db_id, last_synced_time, timeTaken from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
+
+        if (cursor.moveToFirst()) {
+            o.setDbId(cursor.getString(0));
+            o.setLastSyncedTime(cursor.getString(1));
+            o.setTimestamp(cursor.getString(2));
+
+            if (o.getStatus() == Observation.Status.SYNCED || o.getStatus() == Observation.Status.EDITED) {
+                synced = true;
+            }
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return synced;
+    }
+
     /**
      * Get user created trait observations for currently selected study
      */

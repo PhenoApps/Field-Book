@@ -806,37 +806,44 @@ public class MainActivity extends AppCompatActivity {
         deleteValue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (currentTrait.getFormat()) {
-                    case "categorical":
-                        traitCategorical.deleteTraitListener();
-                        break;
-                    case "percent":
-                        traitPercent.deleteTraitListener();
-                        break;
-                    case "date":
-                        traitDate.deleteTraitListener();
-                        break;
-                    case "boolean":
-                        traitBoolean.deleteTraitListener();
-                        break;
-                    case "photo":
-                        traitPhoto.deleteTraitListener();
-                        break;
-                    case "counter":
-                        traitCounter.deleteTraitListener();
-                        break;
-                    case "disease rating":
-                    case "rust rating":
-                        traitDiseaseRating.deleteTraitListener();
-                        break;
-                    case "audio":
-                        traitAudio.deleteTraitListener();
-                        break;
-                    default:
-                        newTraits.remove(currentTrait.getTrait());
-                        dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
-                        etCurVal.setText("");
-                        break;
+
+                // if a brapi observation that has been synced, don't allow deleting
+                if (dt.isBrapiSynced(cRange.plot_id, currentTrait.getTrait())) {
+                    Toast.makeText(getApplicationContext(), "Cannot delete synced BrAPI observation, use NA instead", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    switch (currentTrait.getFormat()) {
+                        case "categorical":
+                            traitCategorical.deleteTraitListener();
+                            break;
+                        case "percent":
+                            traitPercent.deleteTraitListener();
+                            break;
+                        case "date":
+                            traitDate.deleteTraitListener();
+                            break;
+                        case "boolean":
+                            traitBoolean.deleteTraitListener();
+                            break;
+                        case "photo":
+                            traitPhoto.deleteTraitListener();
+                            break;
+                        case "counter":
+                            traitCounter.deleteTraitListener();
+                            break;
+                        case "disease rating":
+                        case "rust rating":
+                            traitDiseaseRating.deleteTraitListener();
+                            break;
+                        case "audio":
+                            traitAudio.deleteTraitListener();
+                            break;
+                        default:
+                            newTraits.remove(currentTrait.getTrait());
+                            dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
+                            etCurVal.setText("");
+                            break;
+                    }
                 }
             }
         });
