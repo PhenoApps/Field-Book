@@ -218,7 +218,7 @@ public class DataHelper {
                 "JOIN " +
                 "traits ON user_traits.parent = traits.trait " +
                 "WHERE " +
-                "traits.trait_data_source = 'local' " +
+                "(traits.trait_data_source = 'local' OR traits.trait_data_source IS NULL)" +
                 "AND " +
                 "user_traits.exp_id = " + exp_id + ";";
 
