@@ -756,6 +756,6 @@ public class BrAPIService {
 
     public static String getBrapiToken(Context context) {
         SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
-        return preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
+        return "Bearer " + preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
     }
 }
