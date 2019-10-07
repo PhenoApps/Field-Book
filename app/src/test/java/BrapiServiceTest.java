@@ -252,7 +252,7 @@ public class BrapiServiceTest {
 
         putObservationsResponse = null;
         final CountDownLatch signal = new CountDownLatch(1);
-        final String brapiToken = "YYYY";
+        final String brapiToken = "Bearer YYYY";
 
         List<Observation> testObservations = new ArrayList<>();
         Observation testObservation = new Observation();
@@ -293,8 +293,8 @@ public class BrapiServiceTest {
 
             assertTrue(putObservationsResponse != null);
             assertTrue(putObservationsResponse.size() == 1);
-            assertTrue(putObservationsResponse.get(0).getObservationUnitDbId() == "1");
-            assertTrue(putObservationsResponse.get(0).getObservationVariableDbId() == "MO_123:100002");
+            assertTrue(putObservationsResponse.get(0).getObservationUnitDbId().equals("1"));
+            assertTrue(putObservationsResponse.get(0).getObservationVariableDbId().equals("MO_123:100002"));
 
         }
         catch (InterruptedException e) {
