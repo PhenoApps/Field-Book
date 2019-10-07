@@ -498,8 +498,8 @@ public class BrAPIService {
 
             // Need to set where we are getting the data from so we don't push to a different
             // external link than where the trait was retrieved from.
-            if (getHostUrl() != null) {
-                trait.setTraitDataSource(getHostUrl());
+            if (getHostUrl(this.brapiBaseURL) != null) {
+                trait.setTraitDataSource(getHostUrl(this.brapiBaseURL));
             }
             else {
                 // return null to indicate we couldn't process the traits
@@ -584,8 +584,8 @@ public class BrAPIService {
             field.setCount(studyDetails.getNumberOfPlots().toString());
 
             // Get our host url
-            if (getHostUrl() != null) {
-                field.setExp_source(getHostUrl());
+            if (getHostUrl(this.brapiBaseURL) != null) {
+                field.setExp_source(getHostUrl(this.brapiBaseURL));
             } else {
                 // Return an error notifying user we can't save this field
                 return new BrapiControllerResponse(false, "Host is null");
@@ -619,18 +619,6 @@ public class BrAPIService {
         }
         catch (Exception e) {
             return new BrapiControllerResponse(false, e.toString());
-        }
-    }
-
-    public String getHostUrl() {
-
-        try {
-            URL externalUrl = new URL(this.brapiBaseURL);
-            return externalUrl.getHost();
-        }
-        catch (MalformedURLException e) {
-            Log.e("error", e.toString());
-            return null;
         }
     }
 
@@ -732,6 +720,33 @@ public class BrAPIService {
         String url = getBrapiUrl(context);
 
         return Patterns.WEB_URL.matcher(url).matches();
+    }
+
+    public static Boolean checkMatchBrapiUrl(Context context, String dataSource) {
+
+        try {
+            URL externalUrl = new URL(getBrapiUrl(context));
+            String hostURL = externalUrl.getHost();
+
+            return (hostURL.equals(dataSource));
+        }
+        catch (MalformedURLException e) {
+            Log.e("error", e.toString());
+            return false;
+        }
+
+    }
+
+    public static String getHostUrl(String brapiURL) {
+
+        try {
+            URL externalUrl = new URL(brapiURL);
+            return externalUrl.getHost();
+        }
+        catch (MalformedURLException e) {
+            Log.e("error", e.toString());
+            return null;
+        }
     }
 
     public static String getBrapiUrl(Context context) {

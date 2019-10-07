@@ -341,6 +341,7 @@
     <string name="brapi_export_skipped_observations"> Skipped Observations</string>
     <string name="brapi_export_skipped_user_created"> User Created Trait Observations</string>
     <string name="brapi_export_skipped_empty"> Empty Value Observations</string>
+    <string name="brapi_export_skipped_wrong_source"> Different Data Source</string>
 
 
     <!-- Warnings/Catches -->
@@ -410,6 +411,7 @@
     <string name="brapi_export_unknown_error">ERROR: Unknown Error</string>
     <string name="brapi_export_successful">BrAPI Export Successful</string>
     <string name="brapi_saving_indicator">Saving Observations...</string>
+    <string name="brapi_field_non_matching_sources">Unable to sync data. Field data originates from, %1$s, BrAPI url currently set to %2$s. Sources must match.</string>
     <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>

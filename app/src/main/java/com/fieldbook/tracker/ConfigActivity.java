@@ -68,6 +68,7 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1034,18 +1035,25 @@ public class ConfigActivity extends AppCompatActivity {
                         }
                         else {
                             activeField = null;
-                        }
-
-                        // Check if the selected field is a brapi field.
-                        if (activeField == null){
                             Toast.makeText(ConfigActivity.this, R.string.warning_field_missing, Toast.LENGTH_LONG).show();
                             break;
                         }
-                        else if (activeField.getExp_source() == null ||
+
+                        // Check that our field is a brapi field
+                        if (activeField.getExp_source() == null ||
                                 activeField.getExp_source() == "" ||
                                 activeField.getExp_source() == "local"){
 
                             Toast.makeText(ConfigActivity.this, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show();
+                            break;
+                        }
+
+                        // Check that the field data source is the same as the current target
+                        if (!BrAPIService.checkMatchBrapiUrl(ConfigActivity.this, activeField.getExp_source())) {
+
+                            String hostURL = BrAPIService.getHostUrl(BrAPIService.getBrapiUrl(ConfigActivity.this));
+                            String badSourceMsg = getResources().getString(R.string.brapi_field_non_matching_sources, activeField.getExp_source(), hostURL);
+                            Toast.makeText(ConfigActivity.this, badSourceMsg, Toast.LENGTH_LONG).show();
                             break;
                         }
 
