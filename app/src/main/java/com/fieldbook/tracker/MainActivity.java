@@ -296,6 +296,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        etCurVal.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    clearHint();
+                }
+            }
+        });
+
         // Validates the text entered for numeric format
         //todo get rid of this- validate/delete in next/last plot
         cvNum = new TextWatcher() {
@@ -340,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
                         updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), en.toString());
                 } else {
                     if (newTraits != null & currentTrait != null)
-                        newTraits.remove(currentTrait.getTrait());
+                        removeTrait(currentTrait.getTrait());
                 }
             }
 
@@ -358,12 +366,12 @@ public class MainActivity extends AppCompatActivity {
         cvText = new TextWatcher() {
             public void afterTextChanged(Editable en) {
 
-                if (en.toString().length() >= 0) {
+                if (en.toString().length() > 0) {
                     if (newTraits != null & currentTrait != null)
                         updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), en.toString());
                 } else {
                     if (newTraits != null & currentTrait != null)
-                        newTraits.remove(currentTrait.getTrait());
+                        removeTrait(currentTrait.getTrait());
                 }
                 //tNum.setSelection(tNum.getText().length());
 
@@ -603,6 +611,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void clearHint() {
+        etCurVal.setHint("");
+    }
+
     private void moveEntryLeft() {
         if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false) && !newTraits.containsKey(currentTrait.getTrait())) {
             playSound("error");
@@ -809,7 +821,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // if a brapi observation that has been synced, don't allow deleting
                 if (dt.isBrapiSynced(cRange.plot_id, currentTrait.getTrait())) {
-                    Toast.makeText(getApplicationContext(), "Cannot delete synced BrAPI observation, use NA instead", Toast.LENGTH_LONG).show();
+                    brapiDelete(currentTrait.getTrait());
                 }
                 else {
                     switch (currentTrait.getFormat()) {
@@ -1282,19 +1294,29 @@ public class MainActivity extends AppCompatActivity {
         dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id, observationDbId, lastSyncedTime); //TODO add notes and exp_id
     }
 
+    private void brapiDelete(String parent) {
+        Toast.makeText(getApplicationContext(), getString(R.string.brapi_delete_message), Toast.LENGTH_LONG).show();
+        updateTrait(parent, currentTrait.getFormat(), getString(R.string.brapi_na));
+        etCurVal.setHint(getString(R.string.brapi_na));
+    }
+
     // Delete trait, including from database
     public void removeTrait(String parent) {
-
         if (cRange == null || cRange.plot_id.length() == 0) {
             return;
         }
 
-        if (newTraits.containsKey(parent))
-            newTraits.remove(parent);
+        if (dt.isBrapiSynced(cRange.plot_id, currentTrait.getTrait())) {
+            brapiDelete(parent);
+        }
+        else {
+            if (newTraits.containsKey(parent))
+                newTraits.remove(parent);
 
-        // Always remove existing trait before inserting again
-        // Based on plot_id, prevent duplicate
-        dt.deleteTrait(cRange.plot_id, parent);
+            // Always remove existing trait before inserting again
+            // Based on plot_id, prevent duplicate
+            dt.deleteTrait(cRange.plot_id, parent);
+        }
     }
 
     public final Handler myGuiHandler = new Handler() {
