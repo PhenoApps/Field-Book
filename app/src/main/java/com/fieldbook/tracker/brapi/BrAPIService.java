@@ -62,7 +62,7 @@ public class BrAPIService {
     private String brapiBaseURL;
     public static String exportTarget = "export";
     public static String notUniqueFieldMessage = "not_unique";
-
+    public static String notUniqueIdMessage = "not_unique_id";
 
     public BrAPIService(String brapiBaseURL, DataHelper dataHelper) {
         this.dataHelper = dataHelper;
@@ -602,15 +602,27 @@ public class BrAPIService {
                 return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
             }
 
+            // Check that there are not duplicate unique ids in the database
+            HashMap<String, String> checkMap = new HashMap<>();
+
+            // Construct our map to check for uniques
+            for (List<String> dataRow : studyDetails.getValues()) {
+                Integer idColumn = studyDetails.getAttributes().indexOf("Plot");
+                checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
+            }
+
+            if (!dataHelper.checkUnique(checkMap)) {
+                return new BrapiControllerResponse(false, this.notUniqueIdMessage);
+            }
+
+            // All checks finished, insert our data.
             int expId = dataHelper.createField(field, studyDetails.getAttributes());
 
             for (List<String> dataRow : studyDetails.getValues()) {
                 dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
             }
 
-            // Get the traits already associated with this study
-            //TODO: Traits likely need to be made more field specific if we are to use this.
-            // Or give them the ability to delete the existing traits when we import these ones.
+            // Insert the traits already associated with this study
             for (TraitObject t : studyDetails.getTraits()) {
                 dataHelper.insertTraits(t);
             }
