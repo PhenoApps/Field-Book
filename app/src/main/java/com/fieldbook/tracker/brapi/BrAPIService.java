@@ -677,6 +677,10 @@ public class BrAPIService {
 
         if (data != null && data.isHierarchical()) {
 
+            // Clear our data from our deep link so the app doesn't think it is
+            // coming from a deep link if it is coming from deep link on pause and resume.
+            activity.getIntent().setData(null);
+
             Integer status = Integer.parseInt(data.getQueryParameter("status"));
 
             // Check that we actually have the data. If not return failure.
