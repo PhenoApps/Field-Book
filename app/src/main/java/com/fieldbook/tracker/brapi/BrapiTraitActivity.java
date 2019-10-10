@@ -258,7 +258,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
             // Check if the trait already exists
             if (ConfigActivity.dt.hasTrait(trait.getTrait())) {
-                secondaryMessage = "Trait already exists: " + trait.getTrait();
+                secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getTrait());
                 // Skip this one, continue on.
                 continue;
             }
@@ -280,14 +280,14 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         // Check how successful we were at saving our traits.
         if (successfulSaves == 0) {
-            return "Error saving traits. No traits were saved";
+            return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_all_traits);
         }
         else if (successfulSaves < totalTraits) {
-            return "Error saving some traits. Some traits were not saved";
+            return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_some_traits);
         }
 
         // Check if we had a secondary message to show
-        return secondaryMessage != "" ? secondaryMessage : "Selected traits saved successfully.";
+        return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_traits_saved_success);
 
     }
 
