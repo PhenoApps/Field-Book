@@ -286,7 +286,10 @@ public class BrapiTraitActivity extends AppCompatActivity {
             return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_some_traits);
         }
 
-        // Check if we had a secondary message to show
+        // Check if we had a secondary message to show.
+        // Current this secondaryMessage will always be empty for the success message.
+        // Putting selection for secondaryMessage in here now for potential future use with
+        // more detailed success and failure messages. 
         return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_traits_saved_success);
 
     }
