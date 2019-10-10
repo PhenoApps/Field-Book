@@ -85,9 +85,6 @@ public class PreferencesActivity extends AppCompatActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        // Check if our activity was started up with brapi auth deep link.
-        brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
-
         // This is not related to the deep link, load normally.
         preferencesFragment = new PreferencesFragment();
         getFragmentManager().beginTransaction()
@@ -100,12 +97,13 @@ public class PreferencesActivity extends AppCompatActivity {
 
     public void processMessage(BrapiControllerResponse brapiControllerResponse) {
 
-        // If we fail or succeed, show our message
-        if (brapiControllerResponse.status) {
-            Toast.makeText(this, R.string.brapi_auth_success, Toast.LENGTH_LONG).show();
-        }
-        else {
-            Toast.makeText(this, R.string.brapi_auth_deny, Toast.LENGTH_LONG).show();
+        if (brapiControllerResponse.status != null) {
+            if (!brapiControllerResponse.status) {
+                Toast.makeText(this, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
+            }
+            else {
+                Toast.makeText(this, R.string.brapi_auth_success, Toast.LENGTH_LONG).show();
+            }
         }
 
     }
@@ -115,21 +113,13 @@ public class PreferencesActivity extends AppCompatActivity {
         super.onResume();
 
         // If our preference page was resumed, we will want to see if it was resumed from a deep link.
-        if (brapiControllerResponse.status == null) {
-            brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
-        }
+        brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
 
-        // Check whether our brapi auth response was successful
-        if (brapiControllerResponse.status != null) {
-            processMessage(brapiControllerResponse);
+        // Set our button visibility and text
+        preferencesFragment.setButtonView();
 
-            // Show our brapi preferences if they just came back from a brapi auth and it is not displayed already.
-            PreferenceScreen brapi_prefs = (PreferenceScreen) preferencesFragment.findPreference("brapi_preference_screen");
-            if (!preferencesFragment.getPreferenceScreen().equals(brapi_prefs)) {
-                preferencesFragment.setPreferenceScreen(brapi_prefs);
-            }
+        processMessage(brapiControllerResponse);
 
-        }
     }
 
     @Override
