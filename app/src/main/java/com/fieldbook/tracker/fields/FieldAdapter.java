@@ -20,6 +20,9 @@ import android.widget.Toast;
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiAuthDialog;
+import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 
 import java.util.ArrayList;
 
@@ -91,22 +94,7 @@ class FieldAdapter extends BaseAdapter {
 
         convertView.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                SharedPreferences.Editor ed = ep.edit();
-                ed.putString("FieldFile", getItem(position).getExp_name());
-                ed.putString("ImportUniqueName", getItem(position).getUnique_id());
-                ed.putString("ImportFirstName", getItem(position).getPrimary_id());
-                ed.putString("ImportSecondName", getItem(position).getSecondary_id());
-                ed.putBoolean("ImportFieldFinished", true);
-                ed.putBoolean("FieldSelected",true);
-                ed.putString("lastplot", null);
-                ed.putString("DROP1", null);
-                ed.putString("DROP2", null);
-                ed.putString("DROP3", null);
-                ed.apply();
-
-                ConfigActivity.dt.switchField(getItem(position).getExp_id());
-                MainActivity.reloadData = true;
-                notifyDataSetChanged();
+                fieldClick(getItem(position));
             }
         });
 
@@ -135,23 +123,7 @@ class FieldAdapter extends BaseAdapter {
         holder.active.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences.Editor ed = ep.edit();
-                ed.putString("FieldFile", getItem(position).getExp_name());
-                ed.putInt("ExpID", getItem(position).getExp_id());
-                ed.putString("ImportUniqueName", getItem(position).getUnique_id());
-                ed.putString("ImportFirstName", getItem(position).getPrimary_id());
-                ed.putString("ImportSecondName", getItem(position).getSecondary_id());
-                ed.putBoolean("ImportFieldFinished", true);
-                ed.putBoolean("FieldSelected",true);
-                ed.putString("lastplot", null);
-                ed.putString("DROP1", null);
-                ed.putString("DROP2", null);
-                ed.putString("DROP3", null);
-                ed.apply();
-
-                ConfigActivity.dt.switchField(getItem(position).getExp_id());
-                MainActivity.reloadData = true;
-                notifyDataSetChanged();
+                fieldClick(getItem(position));
             }
         });
 
@@ -230,5 +202,36 @@ class FieldAdapter extends BaseAdapter {
         });
 
         return convertView;
+    }
+
+    public void fieldClick(FieldObject selectedField) {
+
+        SharedPreferences.Editor ed = ep.edit();
+        ed.putString("FieldFile", selectedField.getExp_name());
+        ed.putInt("ExpID", selectedField.getExp_id());
+        ed.putString("ImportUniqueName", selectedField.getUnique_id());
+        ed.putString("ImportFirstName", selectedField.getPrimary_id());
+        ed.putString("ImportSecondName", selectedField.getSecondary_id());
+        ed.putBoolean("ImportFieldFinished", true);
+        ed.putBoolean("FieldSelected",true);
+        ed.putString("lastplot", null);
+        ed.putString("DROP1", null);
+        ed.putString("DROP2", null);
+        ed.putString("DROP3", null);
+        ed.apply();
+
+        ConfigActivity.dt.switchField(selectedField.getExp_id());
+        MainActivity.reloadData = true;
+        notifyDataSetChanged();
+
+        // Check if this is a BrAPI field and show BrAPI info dialog if so
+        if (selectedField.getExp_source() != null &&
+                selectedField.getExp_source() != "" &&
+                selectedField.getExp_source() != "local"){
+
+            BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context,
+                    context.getResources().getString(R.string.brapi_info_message));
+            brapiInfo.show();
+        }
     }
 }
