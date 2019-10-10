@@ -75,12 +75,14 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
 
             // Call our brapi authorize function
             if (brapiPrefCategory != null) {
-                brapiPrefCategory.addPreference(brapiAuthButton);
-                brapiPrefCategory.addPreference(brapiLogoutButton);
+                // Set our button visibility and text
+                setButtonView();
+
+                // Start our login process
                 BrapiControllerResponse brapiControllerResponse  = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), context, null);
+
                 // Show our error message if it exists
                 processResponseMessage(brapiControllerResponse);
-                ((Activity)context).finish();
             }
         }
 
@@ -107,26 +109,18 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
                 public boolean onPreferenceClick(Preference preference) {
                     String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
                     if (brapiHost != null) {
-                        BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), PreferencesFragment.this.context, null);
+                        // Start our login process
+                        BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), context, null);
+
                         // Show our error message if it exists
                         processResponseMessage(brapiControllerResponse);
-                        ((Activity)context).finish();
                     }
                     return true;
                 }
             });
 
-            if(brapiHost != null && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
-                brapiAuthButton.setTitle(R.string.brapi_authorize);
-                brapiAuthButton.setSummary(null);
-                if (brapiToken != null) {
-                    brapiAuthButton.setTitle(R.string.brapi_reauthorize);
-                    brapiAuthButton.setSummary(getString(R.string.brapi_btn_auth_summary, brapiHost));
-                }
-            } else {
-                brapiPrefCategory.removePreference(brapiAuthButton);
-                brapiPrefCategory.removePreference(brapiLogoutButton);
-            }
+            // Set our button visibility and text
+            setButtonView();
         }
 
         if (brapiLogoutButton != null) {
@@ -135,18 +129,45 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
                 public boolean onPreferenceClick(Preference preference) {
                     SharedPreferences preferences = prefMgr.getSharedPreferences();
 
+                    // Clear our brapi token
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
                     editor.apply();
 
-                    brapiAuthButton.setTitle(R.string.brapi_authorize);
-                    brapiAuthButton.setSummary(null);
+                    // Set our button visibility and text
+                    setButtonView();
 
-
-                    brapiPrefCategory.removePreference(brapiLogoutButton);
                     return true;
                 }
             });
         }
+    }
+
+    public void setButtonView() {
+
+        String brapiToken = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_TOKEN, null);
+        String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
+
+        if(brapiHost != null && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
+
+            if (brapiToken != null) {
+                // Show our reauthorize button and remove logout button
+                brapiAuthButton.setTitle(R.string.brapi_reauthorize);
+                brapiAuthButton.setSummary(getString(R.string.brapi_btn_auth_summary, brapiHost));
+                // Show if our logout button if it is not shown already
+                brapiPrefCategory.addPreference(brapiLogoutButton);
+            }
+            else {
+                // Show authorize button and remove our logout button
+                brapiAuthButton.setTitle(R.string.brapi_authorize);
+                brapiAuthButton.setSummary(null);
+                brapiPrefCategory.removePreference(brapiLogoutButton);
+            }
+
+        } else {
+            brapiPrefCategory.removePreference(brapiAuthButton);
+            brapiPrefCategory.removePreference(brapiLogoutButton);
+        }
+
     }
 }

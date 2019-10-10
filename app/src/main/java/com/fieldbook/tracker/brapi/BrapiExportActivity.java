@@ -1,6 +1,9 @@
 package com.fieldbook.tracker.brapi;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -61,9 +64,6 @@ public class BrapiExportActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Check if our activity was started up with brapi auth deep link.
-        brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
-
         if(Utils.isConnected(this)) {
             if (BrAPIService.hasValidBaseUrl(this)) {
 
@@ -108,13 +108,23 @@ public class BrapiExportActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        // If our activity was resumed, we will want to see if it was resumed from a deep link.
-        if (brapiControllerResponse.status == null) {
-            brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
-        }
+        // Check out brapi auth
+        brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
 
-        // Check whether our brapi auth response was successful
+        // Check whether our brapi auth response was exists or was successful
         processBrapiControllerMessage(brapiControllerResponse);
+
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        // We will arrive at this function after our deep link when starting the auth
+        // process from this page.
+
+        // Set our intent on resume so we get the deep link info.
+        setIntent(intent);
 
     }
 
