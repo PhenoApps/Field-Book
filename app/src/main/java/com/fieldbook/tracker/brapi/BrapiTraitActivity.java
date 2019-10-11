@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +36,8 @@ public class BrapiTraitActivity extends AppCompatActivity {
     private Integer currentPage = 0;
     private Integer totalPages = 1;
     private Integer resultsPerPage = 15;
+    private Button nextBtn;
+    private Button prevBtn;
 
     @Override
     public void onDestroy() {
@@ -54,6 +57,14 @@ public class BrapiTraitActivity extends AppCompatActivity {
         if(Utils.isConnected(this)) {
             if (brAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_traits_brapi);
+
+                // Make our prev and next buttons invisible
+                nextBtn = findViewById(R.id.next);
+                prevBtn = findViewById(R.id.prev);
+
+                // Initially make next and prev gone until we know there are more than 1 page.
+                nextBtn.setVisibility(View.INVISIBLE);
+                prevBtn.setVisibility(View.INVISIBLE);
 
                 loadToolbar();
                 // Get the setting information for our brapi integration
@@ -102,6 +113,8 @@ public class BrapiTraitActivity extends AppCompatActivity {
         TextView pageIndicator = findViewById(R.id.page_indicator);
         pageIndicator.setText(String.format("Page %d of %d", page + 1, BrapiTraitActivity.this.totalPages));
 
+        // Determine our button visibility. Not necessary if we only have 1 page.
+        determineBtnVisibility();
 
         // Call our API to get the data
         brAPIService.getOntology(page, pageSize, new Function<BrapiListResponse<TraitObject>, Void>() {
@@ -123,6 +136,8 @@ public class BrapiTraitActivity extends AppCompatActivity {
                             TextView pageIndicator = findViewById(R.id.page_indicator);
                             pageIndicator.setText(String.format("Page %d of %d", BrapiTraitActivity.this.currentPage + 1,
                                     BrapiTraitActivity.this.totalPages));
+
+                            determineBtnVisibility();
 
                             // Build our array adapter
                             traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
@@ -213,6 +228,9 @@ public class BrapiTraitActivity extends AppCompatActivity {
         switch(view.getId()) {
             case R.id.loadTraits:
                 // Start from beginning
+                nextBtn.setVisibility(View.INVISIBLE);
+                prevBtn.setVisibility(View.INVISIBLE);
+
                 BrapiTraitActivity.this.currentPage = 0;
                 loadTraitsList(BrapiTraitActivity.this.currentPage, BrapiTraitActivity.this.resultsPerPage);
                 break;
@@ -235,6 +253,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                     // We are allowed to change pages. Update current page and start brapi call.
                     BrapiTraitActivity.this.currentPage = prevPage;
                     loadTraitsList(prevPage, BrapiTraitActivity.this.resultsPerPage);
+
                 }
 
                 break;
@@ -249,12 +268,14 @@ public class BrapiTraitActivity extends AppCompatActivity {
                     // We are allowed to change pages. Update current page and start brapi call.
                     BrapiTraitActivity.this.currentPage = nextPage;
                     loadTraitsList(nextPage, BrapiTraitActivity.this.resultsPerPage);
+
                 }
                 break;
 
         }
 
     }
+
 
     // Save our select traits
     public String saveTraits() {
@@ -319,6 +340,17 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void determineBtnVisibility() {
+
+        if (currentPage == 0) { prevBtn.setVisibility(View.INVISIBLE); }
+        else { prevBtn.setVisibility(View.VISIBLE); }
+
+        // Determine what buttons should be visible
+        if (currentPage == (totalPages - 1)) { nextBtn.setVisibility(View.INVISIBLE); }
+        else { nextBtn.setVisibility(View.VISIBLE); }
+
     }
 
 }
