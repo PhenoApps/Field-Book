@@ -116,6 +116,8 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
 
     @Override
     public void loadLayout(){
+        // clear NA hint
+        getEtCurVal().setHint("");
         getEtCurVal().removeTextChangedListener(getCvText());
         getEtCurVal().setVisibility(EditText.VISIBLE);
 

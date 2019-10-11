@@ -73,6 +73,9 @@ public class NumericTraitLayout extends TraitLayout {
     @Override
     public void loadLayout(){
 
+        // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
+        getEtCurVal().setHint("");
+
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
@@ -114,13 +117,6 @@ public class NumericTraitLayout extends TraitLayout {
                 //Backspace Key Pressed
                 if(getEtCurVal().getText().toString().length()>0) {
                     getEtCurVal().setText(getEtCurVal().getText().toString().substring(0, getEtCurVal().getText().toString().length()-1));
-                }
-                //If backspace makes value empty, then remove trait
-                if(getEtCurVal().getText().toString().length()==0) {
-                    getEtCurVal().removeTextChangedListener(getCvNum());
-                    getEtCurVal().setText("");
-                    removeTrait(getCurrentTrait().getTrait());
-                    getEtCurVal().addTextChangedListener(getCvNum());
                 }
             } else {
                 getEtCurVal().setText(getEtCurVal().getText().toString() + v);
