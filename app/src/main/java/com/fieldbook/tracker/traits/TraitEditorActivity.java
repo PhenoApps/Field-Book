@@ -1531,11 +1531,11 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                     // Just returns an empty trait object in the case the trait isn't found
                     TraitObject trait = dt.getDetail(traitName);
-                    if (trait.getExternalDbId() == null) {
+                    if (trait.getTrait() == null) {
                         return false;
                     }
 
-                    if (trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
+                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
 
                         // Show info dialog if a BrAPI field is selected.
                         BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
