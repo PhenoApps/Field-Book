@@ -159,6 +159,7 @@ class FieldAdapter extends BaseAdapter {
                                     if (getItem(position).getExp_name().equals(ep.getString("FieldFile", ""))) {
                                         SharedPreferences.Editor ed = ep.edit();
                                         ed.putString("FieldFile", null);
+                                        ed.putString("ImportExpSource", null);
                                         ed.putBoolean("ImportFieldFinished", false);
                                         ed.putBoolean("FieldSelected",false);
                                         ed.putString("lastplot", null);
@@ -209,6 +210,7 @@ class FieldAdapter extends BaseAdapter {
         SharedPreferences.Editor ed = ep.edit();
         ed.putString("FieldFile", selectedField.getExp_name());
         ed.putInt("ExpID", selectedField.getExp_id());
+        ed.putString("ImportExpSource", selectedField.getExp_source());
         ed.putString("ImportUniqueName", selectedField.getUnique_id());
         ed.putString("ImportFirstName", selectedField.getPrimary_id());
         ed.putString("ImportSecondName", selectedField.getSecondary_id());

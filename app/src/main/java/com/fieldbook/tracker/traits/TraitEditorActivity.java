@@ -7,6 +7,7 @@ import android.app.Activity;
 import androidx.appcompat.app.AlertDialog;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
@@ -20,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import com.fieldbook.tracker.ConfigActivity;
+import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.brapi.BrapiTraitActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -88,6 +90,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     public static DragSortListView traitList;
     public static TraitAdapter mAdapter;
     public static boolean createVisible;
+    public static boolean brapiDialogShown = false;
 
     public static Activity thisActivity;
     public static EditText trait;
@@ -305,7 +308,10 @@ public class TraitEditorActivity extends AppCompatActivity {
         if (!traitList.isShown())
             traitList.setVisibility(ListView.VISIBLE);
 
-        mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility);
+        // Determines whether brapi dialog should be shown on first click of a non-BrAPI
+        // trait when a BrAPI field is selected.
+        brapiDialogShown = false;
+        mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
 
         traitList.setAdapter(mAdapter);
         traitList.setDropListener(onDrop);
@@ -580,10 +586,18 @@ public class TraitEditorActivity extends AppCompatActivity {
                 ed.putBoolean("TraitsExported", false);
                 ed.apply();
 
+                // Display our BrAPI dialog if it has not been show already
+                // Get our dialog state from our adapter to see if a trait has been selected
+                brapiDialogShown = mAdapter.infoDialogShown;
+                if (!brapiDialogShown) {
+                    brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, ConfigActivity.dt, null, true);
+                }
+
                 loadData();
 
                 MainActivity.reloadData = true;
                 createDialog.dismiss();
+
             }
         });
 
@@ -798,7 +812,18 @@ public class TraitEditorActivity extends AppCompatActivity {
             if (!traitList.isShown())
                 traitList.setVisibility(ListView.VISIBLE);
 
-            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility);
+            // Determine if our BrAPI dialog was should with our current trait adapter
+            Boolean showBrapiDialog;
+            if (mAdapter != null ) {
+                // Check if current trait adapter has shown a dialog
+                brapiDialogShown = !brapiDialogShown ? mAdapter.infoDialogShown : brapiDialogShown;
+            }
+            else {
+                // We should show our brapi dialog if this is our creating of the mAdapter
+                brapiDialogShown = false;
+            }
+
+            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
 
             traitList.setAdapter(mAdapter);
             traitList.setDropListener(onDrop);
@@ -1311,6 +1336,11 @@ public class TraitEditorActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 mChosenFile = data.getStringExtra("result");
                 mHandler.post(importCSV);
+
+                brapiDialogShown = mAdapter.infoDialogShown;
+                if (!brapiDialogShown) {
+                    brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, ConfigActivity.dt, null, true);
+                }
             }
         }
     }
@@ -1471,6 +1501,62 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    public static Boolean displayBrapiInfo(Context context, DataHelper dt, String traitName, Boolean noCheckTrait) {
+
+        // Returns true if the dialog is shown, false if not.
+
+        // If we run into an error, do not warn the user since this is just a helper dialog
+        try {
+            // Check if this is a non-BrAPI field
+            String fieldName = context.getSharedPreferences("Settings", 0)
+                    .getString("FieldFile", "");
+            String fieldSource = context.getSharedPreferences("Settings", 0)
+                    .getString("ImportExpSource", "");
+
+            if (!fieldName.equals("") && !fieldSource.equals("local") && !fieldSource.equals("")) {
+
+                // noCheckTrait is used when the trait should not be checked, but the dialog
+                // should be shown.
+                if (noCheckTrait) {
+
+                    BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
+                    brapiInfo.show();
+                    return true;
+                }
+
+                // Check if this is a BrAPI trait
+                if (traitName != null) {
+
+                    // Just returns an empty trait object in the case the trait isn't found
+                    TraitObject trait = dt.getDetail(traitName);
+                    if (trait.getExternalDbId() == null) {
+                        return false;
+                    }
+
+                    if (trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
+
+                        // Show info dialog if a BrAPI field is selected.
+                        BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
+                        brapiInfo.show();
+
+                        // Only show the info dialog on the first non-BrAPI trait selected.
+                        return true;
+
+                    }
+                    else {
+                        // Dialog was not shown
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("error", e.toString());
+            return false;
+        }
+
+        return false;
     }
 
 }

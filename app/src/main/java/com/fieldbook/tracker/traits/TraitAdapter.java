@@ -3,6 +3,8 @@ package com.fieldbook.tracker.traits;
 import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,8 +20,12 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.ConfigActivity;
+import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiAuthDialog;
+import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,12 +40,15 @@ class TraitAdapter extends BaseAdapter {
     private Context context;
     private OnItemClickListener listener;
     private HashMap visibility;
+    public Boolean infoDialogShown = false;
 
-    TraitAdapter(Context context, int resource, ArrayList<TraitObject> list, OnItemClickListener listener, HashMap visibility) {
+    TraitAdapter(Context context, int resource, ArrayList<TraitObject> list, OnItemClickListener listener, HashMap visibility, Boolean dialogShown) {
         this.context = context;
         this.list = list;
         this.listener = listener;
         this.visibility = visibility;
+        // dialog shown indicates whether dialog has been shown on activity or not
+        this.infoDialogShown = dialogShown;
     }
 
     public int getCount() {
@@ -160,10 +169,37 @@ class TraitAdapter extends BaseAdapter {
             public void onCheckedChanged(CompoundButton arg0, boolean isChecked) {
                 if (holder.visible.isChecked()) {
                     ConfigActivity.dt.updateTraitVisibility(holder.name.getText().toString(), true);
-                    visibility.put(holder.name.getText().toString(),"true");
+                    visibility.put(holder.name.getText().toString(), "true");
+
+
                 } else {
                     ConfigActivity.dt.updateTraitVisibility(holder.name.getText().toString(), false);
-                    visibility.put(holder.name.getText().toString(),false);
+                    visibility.put(holder.name.getText().toString(), false);
+                }
+
+            }
+        });
+
+        holder.visible.setOnClickListener(new OnClickListener() {
+            // We make this separate form the on check changed listener so that we can
+            // separate the difference between user interaction and programmatic checking.
+
+            @Override
+            public void onClick(View v) {
+
+                // Only show dialog if it hasn't been show yet
+                if (!infoDialogShown) {
+
+                    // Check if the button is checked or not.
+                    CheckBox visibleCheckBox = (CheckBox) v;
+                    if (visibleCheckBox.isChecked()) {
+
+                        // Show our BrAPI info box if this is a non-BrAPI trait
+                        String traitName = holder.name.getText().toString();
+                        infoDialogShown = TraitEditorActivity.displayBrapiInfo(context, new DataHelper(context), traitName, false);
+
+                    }
+
                 }
             }
         });
@@ -253,4 +289,5 @@ class TraitAdapter extends BaseAdapter {
 
         return convertView;
     }
+
 }

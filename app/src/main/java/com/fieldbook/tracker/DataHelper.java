@@ -827,7 +827,7 @@ public class DataHelper {
         data.setCategories("");
 
         Cursor cursor = db.query(TRAITS, new String[]{"trait", "format", "defaultValue", "minimum",
-                        "maximum", "details", "categories", "id"}, "trait like ? and isVisible like ?",
+                        "maximum", "details", "categories", "id", "external_db_id"}, "trait like ? and isVisible like ?",
                 new String[]{trait, "true"}, null, null, null
         );
 
@@ -840,6 +840,7 @@ public class DataHelper {
             data.setDetails(cursor.getString(5));
             data.setCategories(cursor.getString(6));
             data.setId(cursor.getString(7));
+            data.setExternalDbId(cursor.getString(8));
         }
 
         if (!cursor.isClosed()) {
