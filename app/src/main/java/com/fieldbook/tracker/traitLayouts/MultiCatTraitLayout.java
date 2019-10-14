@@ -43,6 +43,7 @@ public class MultiCatTraitLayout extends TraitLayout {
     @Override
     public void loadLayout(){
 
+        getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
         if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {

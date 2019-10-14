@@ -296,14 +296,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        etCurVal.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    clearHint();
-                }
-            }
-        });
-
         // Validates the text entered for numeric format
         //todo get rid of this- validate/delete in next/last plot
         cvNum = new TextWatcher() {
@@ -611,10 +603,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void clearHint() {
-        etCurVal.setHint("");
-    }
-
     private void moveEntryLeft() {
         if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false) && !newTraits.containsKey(currentTrait.getTrait())) {
             playSound("error");
@@ -786,6 +774,29 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private void setNaTraitsText() {
+        if (currentTrait.getFormat().equals("date")) {
+            traitDate.getMonth().setText("");
+            traitDate.getDay().setText("NA");
+        }
+
+        if (currentTrait.getFormat().equals("counter")) {
+            traitCounter.getCounterTv().setText("NA");
+        }
+    }
+
+    private void setNaText() {
+        etCurVal.setText("NA");
+
+        setNaTraitsText();
+    }
+
+    private void setNaTextBrapiEmptyField() {
+        etCurVal.setHint("NA");
+
+        setNaTraitsText();
+    }
+
     private void initToolbars() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -797,20 +808,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
-                etCurVal.setText("NA");
-
-                if (currentTrait.getFormat().equals("date")) {
-                    traitDate.getMonth().setText("");
-                    traitDate.getDay().setText("NA");
-                }
-
-                if (currentTrait.getFormat().equals("counter")) {
-                    traitCounter.getCounterTv().setText("NA");
-                }
-
-                if (currentTrait.getFormat().equals("photo")) {
-
-                }
+                setNaText();
             }
         });
 
@@ -821,7 +819,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // if a brapi observation that has been synced, don't allow deleting
                 if (dt.isBrapiSynced(cRange.plot_id, currentTrait.getTrait())) {
-                    brapiDelete(currentTrait.getTrait());
+                    brapiDelete(currentTrait.getTrait(), false);
                 }
                 else {
                     switch (currentTrait.getFormat()) {
@@ -1294,10 +1292,15 @@ public class MainActivity extends AppCompatActivity {
         dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id, observationDbId, lastSyncedTime); //TODO add notes and exp_id
     }
 
-    private void brapiDelete(String parent) {
+    private void brapiDelete(String parent, Boolean hint) {
         Toast.makeText(getApplicationContext(), getString(R.string.brapi_delete_message), Toast.LENGTH_LONG).show();
         updateTrait(parent, currentTrait.getFormat(), getString(R.string.brapi_na));
-        etCurVal.setHint(getString(R.string.brapi_na));
+        if (hint) {
+            setNaTextBrapiEmptyField();
+        }
+        else {
+            setNaText();
+        }
     }
 
     // Delete trait, including from database
@@ -1307,7 +1310,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (dt.isBrapiSynced(cRange.plot_id, currentTrait.getTrait())) {
-            brapiDelete(parent);
+            brapiDelete(parent, true);
         }
         else {
             if (newTraits.containsKey(parent))
