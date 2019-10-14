@@ -45,6 +45,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.setCanceledOnTouchOutside(false);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_brapi_import);
 

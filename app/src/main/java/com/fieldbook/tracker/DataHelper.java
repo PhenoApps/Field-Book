@@ -693,7 +693,7 @@ public class DataHelper {
         ArrayList<FieldObject> list = new ArrayList<>();
 
         Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
-                        "secondary_id", "date_import", "date_edit", "date_export", "count"},
+                        "secondary_id", "date_import", "date_edit", "date_export", "count", "exp_source"},
                 null, null, null, null, "exp_id"
         );
 
@@ -709,6 +709,7 @@ public class DataHelper {
                 o.setDate_edit(cursor.getString(6));
                 o.setDate_export(cursor.getString(7));
                 o.setCount(cursor.getString(8));
+                o.setExp_source(cursor.getString(9));
                 list.add(o);
             } while (cursor.moveToNext());
         }
@@ -826,7 +827,7 @@ public class DataHelper {
         data.setCategories("");
 
         Cursor cursor = db.query(TRAITS, new String[]{"trait", "format", "defaultValue", "minimum",
-                        "maximum", "details", "categories", "id"}, "trait like ? and isVisible like ?",
+                        "maximum", "details", "categories", "id", "external_db_id"}, "trait like ? and isVisible like ?",
                 new String[]{trait, "true"}, null, null, null
         );
 
@@ -839,6 +840,7 @@ public class DataHelper {
             data.setDetails(cursor.getString(5));
             data.setCategories(cursor.getString(6));
             data.setId(cursor.getString(7));
+            data.setExternalDbId(cursor.getString(8));
         }
 
         if (!cursor.isClosed()) {
