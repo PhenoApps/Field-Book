@@ -649,19 +649,23 @@ public class DataHelper {
      * V2 - Returns all traits column titles as a string array
      */
     public String[] getTraitColumns() {
+
         Cursor cursor = db.rawQuery("SELECT * from traits limit 1", null);
 
         String[] data = null;
 
         if (cursor.moveToFirst()) {
-            int i = cursor.getColumnCount() - 1;
+            int i = cursor.getColumnCount() - 3; // Make sure to update this if excluding additional columns
 
             data = new String[i];
 
             int k = 0;
 
             for (int j = 0; j < cursor.getColumnCount(); j++) {
-                if (!cursor.getColumnName(j).equals("id")) {
+                if (!cursor.getColumnName(j).equals("id") &&
+                    !cursor.getColumnName(j).equals("external_db_id") &&
+                    !cursor.getColumnName(j).equals("trait_data_source")) {
+
                     data[k] = cursor.getColumnName(j);
                     k += 1;
                 }
