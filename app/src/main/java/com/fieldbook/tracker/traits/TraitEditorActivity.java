@@ -812,7 +812,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             if (!traitList.isShown())
                 traitList.setVisibility(ListView.VISIBLE);
 
-            // Determine if our BrAPI dialog was should with our current trait adapter
+            // Determine if our BrAPI dialog was shown with our current trait adapter
             Boolean showBrapiDialog;
             if (mAdapter != null ) {
                 // Check if current trait adapter has shown a dialog
