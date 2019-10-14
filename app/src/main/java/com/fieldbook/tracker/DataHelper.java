@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -649,19 +650,25 @@ public class DataHelper {
      * V2 - Returns all traits column titles as a string array
      */
     public String[] getTraitColumns() {
+
         Cursor cursor = db.rawQuery("SELECT * from traits limit 1", null);
 
         String[] data = null;
+        HashSet<String> excludedColumns = new HashSet<>();
+
+        excludedColumns.add("id");
+        excludedColumns.add("external_db_id");
+        excludedColumns.add("trait_data_source");
 
         if (cursor.moveToFirst()) {
-            int i = cursor.getColumnCount() - 1;
+            int i = cursor.getColumnCount() - excludedColumns.size();
 
             data = new String[i];
 
             int k = 0;
 
             for (int j = 0; j < cursor.getColumnCount(); j++) {
-                if (!cursor.getColumnName(j).equals("id")) {
+                if (!excludedColumns.contains(cursor.getColumnName(j))) {
                     data[k] = cursor.getColumnName(j);
                     k += 1;
                 }
