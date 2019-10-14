@@ -36,7 +36,6 @@ public class BrapiExportActivity extends AppCompatActivity {
     private List<Observation> observations;
     private List<Observation> observationsNeedingSync;
     private List<Observation> userCreatedTraitObservations;
-    private List<Observation> emptyValueObservations;
     private List<Observation> wrongSourceObservations;
 
     private BrapiControllerResponse brapiControllerResponse;
@@ -342,7 +341,6 @@ public class BrapiExportActivity extends AppCompatActivity {
         observations = dataHelper.getObservations(hostURL);
         observationsNeedingSync.clear();
         userCreatedTraitObservations = dataHelper.getUserTraitObservations();
-        emptyValueObservations = dataHelper.getEmptyValueObservations();
         wrongSourceObservations = dataHelper.getWrongSourceObservations(hostURL);
 
         for (Observation observation : observations) {
@@ -369,7 +367,6 @@ public class BrapiExportActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
         ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));
         ((TextView) findViewById(R.id.brapiUserCreatedValue)).setText(String.valueOf(userCreatedTraitObservations.size()));
-        ((TextView) findViewById(R.id.brapiEmptyValue)).setText(String.valueOf(emptyValueObservations.size()));
         ((TextView) findViewById(R.id.brapiWrongSource)).setText(String.valueOf(wrongSourceObservations.size()));
 
     }

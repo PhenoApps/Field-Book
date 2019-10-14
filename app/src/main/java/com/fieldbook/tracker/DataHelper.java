@@ -242,49 +242,6 @@ public class DataHelper {
         return observations;
     }
 
-    /**
-     * Get empty value observations
-     */
-    public List<Observation> getEmptyValueObservations() {
-        List<Observation> observations = new ArrayList<>();
-
-        String query = "SELECT " +
-                "user_traits.id, " +
-                "user_traits.userValue " +
-                "FROM " +
-                "user_traits " +
-                "JOIN " +
-                "traits ON user_traits.parent = traits.trait " +
-                "JOIN " +
-                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
-                "WHERE " +
-                "exp_id.exp_source IS NOT NULL " +
-                "AND " +
-                "traits.trait_data_source <> 'local' " +
-                "AND " +
-                "user_traits.userValue = '' " +
-                "AND " +
-                "traits.trait_data_source IS NOT NULL;";
-
-        Cursor cursor = db.rawQuery(query,null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Observation o = new Observation();
-                o.setFieldbookDbId(cursor.getString(0));
-                o.setValue(cursor.getString(1));
-                observations.add(o);
-
-            } while (cursor.moveToNext());
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return observations;
-    }
-
     public List<Observation> getWrongSourceObservations(String hostUrl) {
 
         List<Observation> observations = new ArrayList<>();

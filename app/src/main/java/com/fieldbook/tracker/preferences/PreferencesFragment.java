@@ -75,14 +75,15 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
 
             // Call our brapi authorize function
             if (brapiPrefCategory != null) {
-                // Set our button visibility and text
-                setButtonView();
 
                 // Start our login process
                 BrapiControllerResponse brapiControllerResponse  = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), context, null);
 
                 // Show our error message if it exists
                 processResponseMessage(brapiControllerResponse);
+
+                // Set our button visibility and text
+                setButtonView();
             }
         }
 
@@ -149,6 +150,8 @@ public class PreferencesFragment extends PreferenceFragment implements Preferenc
         String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
 
         if(brapiHost != null && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
+
+            brapiPrefCategory.addPreference(brapiAuthButton);
 
             if (brapiToken != null) {
                 // Show our reauthorize button and remove logout button

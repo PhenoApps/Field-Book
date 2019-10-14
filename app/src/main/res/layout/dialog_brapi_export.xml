@@ -188,33 +188,6 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/brapiEmptyValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="10dp"
-                android:paddingBottom="5dp"
-                android:textColor="#000000"
-                android:textSize="@dimen/text_size_medium"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/brapiEmptyLbl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="10dp"
-                android:paddingBottom="10dp"
-                android:text="@string/brapi_export_skipped_empty"
-                android:textColor="#000000"
-                android:textSize="@dimen/text_size_medium"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
                 android:id="@+id/brapiWrongSource"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
