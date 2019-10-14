@@ -40,13 +40,17 @@ public class Observation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Observation that = (Observation) o;
-        return  Objects.equals(unitDbId, that.unitDbId) &&
-                Objects.equals(variableDbId, that.variableDbId);
+        return  unitDbId.equals(that.unitDbId) &&
+                variableDbId.equals(that.variableDbId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(unitDbId, variableDbId);
+        int prime = 31;
+        int result = 1;
+        result = prime * result + ((unitDbId == null) ? 0 : unitDbId.hashCode());
+        result = prime * result + ((variableDbId == null) ? 0 : variableDbId.hashCode());
+        return result;
     }
 
     public Status getStatus() {
