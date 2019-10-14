@@ -431,7 +431,7 @@
     </string>
     <string name="brapi_info_message">
         Traits and fields imported via BrAPI will be able to export their observations via the BrAPI export.
-        Traits and fields created manually or imported via CSV, will need to be exported via CSV format.
+        Traits and fields created manually or imported via CSV will need to be exported via CSV format.
     </string>
     <string name="brapi_info_title">BrAPI Syncing Info</string>
     <string name="brapi_auth_btn">Log In to Site</string>
