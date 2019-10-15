@@ -73,7 +73,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.fieldbook.tracker.barcodes.*;
+//import com.fieldbook.tracker.barcodes.*;
+import com.google.zxing.client.android.Intents;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.fieldbook.tracker.layoutConfig.SelectorLayoutConfigurator;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.search.*;
@@ -295,15 +298,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         // If the app is just starting up, we must always allow refreshing of data onscreen
         reloadData = true;
-
         lock = new Object();
-
         thisActivity = this;
 
         // Keyboard service manager
         imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-
-
 
         range = findViewById(R.id.range);
         plot = findViewById(R.id.plot);
@@ -2613,7 +2612,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     // Moves to specific plot/range/plot_id
     private void moveToSearch(String type, int[] rangeID, String range, String plot, String plotID) {
-        /*
 
         if (rangeID == null) {
             return;
@@ -2664,15 +2662,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 if (cRange.plot_id.equals(plotID)) {
                     moveToResult(j);
-                    haveData=true;
+                    return;
                 }
             }
         }
 
         if (!haveData)
             makeToast(getString(R.string.main_toolbar_moveto_no_match));
-
-            */
     }
 
     private void moveToResult(int j) {
@@ -2681,12 +2677,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     currentTrait.format)) {
                 paging = j;
 
-                // Reload traits based on the selected
-                // plot
+                // Reload traits based on selected plot
                 displayRange(cRange);
 
-                newTraits = (HashMap) dt.getUserDetail(
-                        cRange.plot_id).clone();
+                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id).clone();
 
                 initWidgets(false);
             }
@@ -2695,9 +2689,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             // Reload traits based on the selected plot
             displayRange(cRange);
+            Log.d("Field Book",cRange.plot_id);
 
-            newTraits = (HashMap) dt.getUserDetail(
-                    cRange.plot_id).clone();
+            newTraits = (HashMap) dt.getUserDetail(cRange.plot_id).clone();
 
             initWidgets(false);
         }
@@ -2722,7 +2716,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     @Override
     public void onDestroy() {
 
-        //save last plot id
         if (ep.getBoolean("ImportFieldFinished", false)) {
             saveLastPlot();
         }
@@ -2738,8 +2731,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
-
-        loadScreen();
 
         // Update menu item visibility
         if (systemMenu != null) {
@@ -2791,7 +2782,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 //TODO NullPointerException
                 lastRange = cRange.range;
-                displayRange(cRange);
+                //displayRange(cRange);
 
                 newTraits = (HashMap) dt.getUserDetail(cRange.plot_id).clone();
             }
@@ -2971,8 +2962,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 moveToPlotID();
                 break;
             case R.id.barcodeScan:
-                IntentIntegrator integrator = new IntentIntegrator(thisActivity);
-                integrator.initiateScan();
+                new IntentIntegrator(this).initiateScan();
                 break;
             case R.id.summary:
                 showSummary();
@@ -3715,14 +3705,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 break;
         }
 
-        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (scanResult != null) {
-            inputPlotId = scanResult.getContents();
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if(result != null) {
+            inputPlotId = result.getContents();
             rangeID = dt.getAllRangeID();
             moveToSearch("id",rangeID,null,null,inputPlotId);
-            if(goToId!=null) {
-                goToId.dismiss();
-            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
     @Override
@@ -3735,5 +3724,4 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         onBackPressed();
         return true;
     }
-
 }

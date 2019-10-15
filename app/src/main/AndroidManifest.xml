@@ -140,6 +140,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeAction" />
 
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="portrait"
+            tools:replace="android:screenOrientation"
+            android:stateNotNeeded="true"/>
+
         <provider
             android:name=".GenericFileProvider"
             android:authorities="com.fieldbook.tracker.fileprovider"
