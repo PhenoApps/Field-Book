@@ -40,13 +40,39 @@ public class Observation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Observation that = (Observation) o;
-        return  Objects.equals(unitDbId, that.unitDbId) &&
-                Objects.equals(variableDbId, that.variableDbId);
+        return objectsEquals(unitDbId, that.unitDbId) &&
+               objectsEquals(variableDbId, that.variableDbId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(unitDbId, variableDbId);
+        return objectsHash(unitDbId, variableDbId);
+    }
+
+    // The objects methods used were added in API 19 so they'll just
+    // be duplicated here to work around that
+
+    // Objects.equals Jdk7
+    private boolean objectsEquals(Object a, Object b) {
+        return (a == b) || (a != null && a.equals(b));
+    }
+
+    // Objects.hash Jdk7
+    private int objectsHash(Object... values) {
+        return arraysHashCode(values);
+    }
+
+    // Objects.hashCode Jdk7
+    private int arraysHashCode(Object a[]) {
+        if (a == null)
+            return 0;
+
+        int result = 1;
+
+        for (Object element : a)
+            result = 31 * result + (element == null ? 0 : element.hashCode());
+
+        return result;
     }
 
     public Status getStatus() {
