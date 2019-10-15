@@ -51,7 +51,7 @@ public class Observation {
 
     // The objects methods used were added in API 19 so they'll just
     // be duplicated here to work around that
-    
+
     // Objects.equals Jdk7
     private boolean objectsEquals(Object a, Object b) {
         return (a == b) || (a != null && a.equals(b));
