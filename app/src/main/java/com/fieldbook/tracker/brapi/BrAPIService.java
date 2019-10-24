@@ -71,7 +71,7 @@ public class BrAPIService {
 
         ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
 
-        // Make timeout longer. Set it to 60 seconds for now
+        // Make timeout longer. Set it to 120 seconds for now
         apiClient.setReadTimeout(60000);
 
         this.studiesApi = new StudiesApi(apiClient);
@@ -561,12 +561,17 @@ public class BrAPIService {
         //TODO: Check these out and make sure they match with fieldbook data types.
         switch (dataType){
             case "Code":
+                // Not the ideal solution for this conversion
+                return "text";
             case "Nominal":
                 return "categorical";
             case "Date":
                 return "date";
             case "Numerical":
+                return "numeric";
             case "Ordinal":
+                // All Field Book categories are ordered, so this works
+                return "categorical";
             case "Duration":
                 return "numeric";
             case "Text":
