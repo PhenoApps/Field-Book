@@ -71,7 +71,7 @@ public class BrAPIService {
 
         ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
 
-        // Make timeout longer. Set it to 120 seconds for now
+        // Make timeout longer. Set it to 60 seconds for now
         apiClient.setReadTimeout(60000);
 
         this.studiesApi = new StudiesApi(apiClient);
