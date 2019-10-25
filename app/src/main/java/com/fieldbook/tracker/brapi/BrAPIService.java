@@ -561,12 +561,17 @@ public class BrAPIService {
         //TODO: Check these out and make sure they match with fieldbook data types.
         switch (dataType){
             case "Code":
+                // Not the ideal solution for this conversion
+                return "text";
             case "Nominal":
                 return "categorical";
             case "Date":
                 return "date";
             case "Numerical":
+                return "numeric";
             case "Ordinal":
+                // All Field Book categories are ordered, so this works
+                return "categorical";
             case "Duration":
                 return "numeric";
             case "Text":
