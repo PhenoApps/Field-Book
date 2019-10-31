@@ -32,7 +32,10 @@ import io.swagger.client.api.ObservationsApi;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ObservationVariablesApi;
+import io.swagger.client.model.Image;
+import io.swagger.client.model.ImageResponse;
 import io.swagger.client.model.Metadata;
+import io.swagger.client.model.NewImageRequest;
 import io.swagger.client.model.NewObservationDbIdsObservations;
 import io.swagger.client.model.NewObservationsRequest;
 import io.swagger.client.model.NewObservationsRequestObservations;
@@ -321,6 +324,42 @@ public class BrAPIService {
             Log.e("error", e.toString());
             failFunction.apply(e);
         }
+    }
+
+    public void postImageMetaData(String brapiToken,
+                                  final Function<Image, Void> function,
+                                  final Function<Integer, Void> failFunction) {
+
+        try {
+            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
+                @Override
+                public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
+                    final Image response = imageResponse.getResult();
+                    function.apply(response);
+                }
+
+                @Override
+                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
+                    final ApiException error = e;
+                    Integer code = new Integer(error.getCode());
+                    failFunction.apply(code);
+                }
+            };
+
+            NewImageRequest request = new NewImageRequest();
+            request.setCopyright("2019");
+            request.setDescription("test");
+            request.setImageWidth(10);
+            request.setImageHeight(5);
+            request.setImageFileSize(100);
+
+
+            imagesApi.imagesPostAsync(request, brapiToken, callback);
+
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void postPhenotypes(List<Observation> observations, String brapiToken,
