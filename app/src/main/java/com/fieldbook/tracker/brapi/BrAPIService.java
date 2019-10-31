@@ -27,6 +27,7 @@ import java.util.Map;
 
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
+import io.swagger.client.api.ImagesApi;
 import io.swagger.client.api.ObservationsApi;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
@@ -55,6 +56,7 @@ import java.util.Set;
 public class BrAPIService {
 
     private DataHelper dataHelper;
+    private ImagesApi imagesApi;
     private StudiesApi studiesApi;
     private PhenotypesApi phenotypesApi;
     private ObservationsApi observationsApi;
@@ -73,6 +75,7 @@ public class BrAPIService {
         // Make timeout longer. Set it to 60 seconds for now
         apiClient.setReadTimeout(60000);
 
+        this.imagesApi = new ImagesApi(apiClient);        
         this.studiesApi = new StudiesApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);

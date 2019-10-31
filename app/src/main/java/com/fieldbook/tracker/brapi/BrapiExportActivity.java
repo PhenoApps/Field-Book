@@ -316,6 +316,8 @@ public class BrapiExportActivity extends AppCompatActivity {
                     update.setDbId(converted.getDbId());
                     update.setLastSyncedTime(syncTime);
                     observationsNeedingSync.set(first_index, update);
+                    // TODO: if image data part of observation then store images on BrAPI host
+                    // a new BrAPI service using the images endpoints is needed
                 }
             }
 
