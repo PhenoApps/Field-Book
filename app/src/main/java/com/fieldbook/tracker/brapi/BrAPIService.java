@@ -28,6 +28,8 @@ import java.util.Map;
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.ImagesApi;
+import io.swagger.client.api.ImageResponse;
+import io.swagger.client.api.Image;
 import io.swagger.client.api.ObservationsApi;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
@@ -84,6 +86,32 @@ public class BrAPIService {
         this.phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
 
+    }
+
+    public void putImageContent(Image image, String brapiToken, final Function<, Void> function, final Function<String, Void> failFunction){
+        try {
+
+            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallback<StudiesResponse>() {
+                @Override
+                public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
+
+                    function.apply(imageResponse.getresult());
+                    
+                }
+                    
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    // report failure
+                    failFunction.apply("Error when exporting image content");
+                }
+            };
+                       
+            imagesApi.imagesImageDbIdImagecontentPutAsync(image.imageDbId, image.getData(), brapiToken, callback);
+            
+        } catch (ApiException e){
+            e.printStackTrace();
+        }
+        
     }
 
     public void getStudies(final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction){
