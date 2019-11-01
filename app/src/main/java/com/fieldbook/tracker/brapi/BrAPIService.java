@@ -86,12 +86,45 @@ public class BrAPIService {
 
     }
 
+    public void postImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<String, Void> failFunction){
+        try {
+
+            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
+                @Override
+                public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
+
+                    function.apply(imageResponse.getResult());
+                    
+                }
+                    
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    // report failure
+                    failFunction.apply("Error when exporting image meta data");
+                }
+                };
+
+            final NewImageRequest newImage = new NewImageRequest();
+            newImage.setImageFileName(image.getFileName());
+            newImage.setImageName(image.getFileName());
+            newImage.setImageHeight(image.getHeight());
+            newImage.setImageWidth(image.getWidth());
+            newImage.setMimeType(image.getMimeType());            
+            imagesApi.imagesPostAsync(newImage, brapiToken, callback);
+            
+        } catch (ApiException e){
+            e.printStackTrace();
+        }
+        
+    }
+
     public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<String, Void> failFunction){
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
                 @Override
                 public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
+
                     final Image response = imageResponse.getResult();
                     function.apply(response);
                     
@@ -112,6 +145,41 @@ public class BrAPIService {
         
     }
 
+    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<String, Void> failFunction){
+        try {
+
+            final NewImageRequest updatedImage = new NewImageRequest();
+            updatedImage.setImageFileName(image.getFileName());
+            updatedImage.setImageName(image.getFileName());
+            updatedImage.setImageHeight(image.getHeight());
+            updatedImage.setImageWidth(image.getWidth());
+            updatedImage.setMimeType(image.getMimeType());
+
+            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
+                @Override
+                public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
+
+                    //function.apply(imageResponse.getresult());
+                    function.apply(imageResponse.getResult());                    
+                    
+                }
+                    
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    // report failure
+                    failFunction.apply("Error when exporting image meta data");
+                }
+            };
+                       
+            imagesApi.imagesImageDbIdPutAsync(image.getDbId(), updatedImage, brapiToken, callback);
+            
+        } catch (ApiException e){
+            e.printStackTrace();
+        }
+        
+    }
+
+    
     public void getStudies(final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction){
         try {
 
