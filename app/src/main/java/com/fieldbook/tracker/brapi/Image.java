@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.brapi;
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 public class Image {
@@ -12,9 +13,12 @@ public class Image {
     private String mimeType;
     private Object data;
     private String dbId;
+    private Bitmap bitmap;
+    private String observationUnitDbId;
 
     public Image(String filePath) {
         this.filePath = filePath;
+        this.fileName = filePath.substring(filePath.lastIndexOf("/")+1);
         loadImage();
     }
 
@@ -50,11 +54,23 @@ public class Image {
         return dbId;
     }
 
+    public void setDbId(String id) {
+        this.dbId = id;
+    }
+
+    public String getObservationUnitDbId() {
+        return observationUnitDbId;
+    }
+
+    public void setObservationUnitDbId(String observationUnitDbId) {
+        this.observationUnitDbId = observationUnitDbId;
+    }
+
     private void loadImage() {
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
 
-        BitmapFactory.decodeFile(filePath, bmOptions);
+        bitmap = BitmapFactory.decodeFile(filePath, bmOptions);
         width = bmOptions.outWidth;
         height = bmOptions.outHeight;
         mimeType = bmOptions.outMimeType;

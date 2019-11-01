@@ -373,11 +373,18 @@ public class BrAPIService {
             };
 
             NewImageRequest request = new NewImageRequest();
+
+            // TODO: hardcoded stuff in here for now until we get the data we need
             request.setCopyright("2019");
             request.setDescription("test");
-            request.setImageWidth(10);
-            request.setImageHeight(5);
-            request.setImageFileSize(100);
+            request.setImageWidth(image.getWidth());
+            request.setImageHeight(image.getHeight());
+            request.setImageFileSize(image.getFileSize());
+            request.setMimeType("image/jpeg");
+            request.setObservationUnitDbId(image.getObservationUnitDbId());
+            request.setImageName("test");
+            request.setDescription("description");
+            request.setImageFileName(image.getFileName());
 
 
             imagesApi.imagesPostAsync(request, brapiToken, callback);
