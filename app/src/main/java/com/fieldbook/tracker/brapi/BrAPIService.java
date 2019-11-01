@@ -28,8 +28,6 @@ import java.util.Map;
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.ImagesApi;
-import io.swagger.client.api.ImageResponse;
-import io.swagger.client.api.Image;
 import io.swagger.client.api.ObservationsApi;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
@@ -88,14 +86,14 @@ public class BrAPIService {
 
     }
 
-    public void putImageContent(Image image, String brapiToken, final Function<, Void> function, final Function<String, Void> failFunction){
+    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<String, Void> failFunction){
         try {
 
-            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallback<StudiesResponse>() {
+            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
                 @Override
                 public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
-
-                    function.apply(imageResponse.getresult());
+                    final Image response = imageResponse.getResult();
+                    function.apply(response);
                     
                 }
                     
@@ -106,7 +104,7 @@ public class BrAPIService {
                 }
             };
                        
-            imagesApi.imagesImageDbIdImagecontentPutAsync(image.imageDbId, image.getData(), brapiToken, callback);
+            imagesApi.imagesImageDbIdImagecontentPutAsync(image.getDbId(), image.getData(), brapiToken, callback);
             
         } catch (ApiException e){
             e.printStackTrace();
@@ -354,7 +352,7 @@ public class BrAPIService {
         }
     }
 
-    public void postImageMetaData(String brapiToken,
+    public void postImageMetaData(com.fieldbook.tracker.brapi.Image image, String brapiToken,
                                   final Function<Image, Void> function,
                                   final Function<Integer, Void> failFunction) {
 
