@@ -5,8 +5,9 @@ import android.graphics.BitmapFactory;
 
 import java.util.List;
 
-public class Image {
+public class Image extends BrapiObservation {
 
+    private String fieldBookDbId;
     private String filePath;
     private int width;
     private int height;
@@ -15,10 +16,10 @@ public class Image {
     private String imageName;
     private String mimeType;
     private Object data;
-    private String dbId;
     private Bitmap bitmap;
     private String observationUnitDbId;
     private List<String> descriptiveOntologyTerms;
+    private String description;
 
     public Image(String filePath) {
         this.filePath = filePath;
@@ -55,14 +56,6 @@ public class Image {
         return data;
     }
 
-    public String getDbId() {
-        return dbId;
-    }
-
-    public void setDbId(String id) {
-        this.dbId = id;
-    }
-
     public String getObservationUnitDbId() {
         return observationUnitDbId;
     }
@@ -77,6 +70,12 @@ public class Image {
 
     public void setDescriptiveOntologyTerms(List<String> descriptiveOntologyTerms) {
         this.descriptiveOntologyTerms = descriptiveOntologyTerms;
+    }
+
+    public String getDescription(){ return this.description; }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     private void loadImage() {
