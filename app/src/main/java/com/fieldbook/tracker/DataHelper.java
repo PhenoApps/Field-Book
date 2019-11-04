@@ -274,7 +274,7 @@ public class DataHelper {
         if (cursor.moveToFirst()) {
             do {
                 Image image = new Image(cursor.getString(1));
-                image.setDbId(cursor.getString(0));
+                image.setFieldbookDbId(cursor.getString(0));
                 images.add(image);
 
             } while (cursor.moveToNext());
@@ -359,7 +359,7 @@ public class DataHelper {
         if (cursor.moveToFirst()) {
             do {
                 Image image = new Image(cursor.getString(1));
-                image.setDbId(cursor.getString(0));
+                image.setFieldbookDbId(cursor.getString(0));
                 images.add(image);
 
             } while (cursor.moveToNext());
@@ -459,7 +459,8 @@ public class DataHelper {
                 "user_traits.id, " +
                 "user_traits.observation_db_id, " +
                 "user_traits.last_synced_time, " +
-                "user_traits.person " +
+                "user_traits.person, " +
+                "traits.details " +
                 "FROM " +
                 "user_traits " +
                 "JOIN " +
@@ -493,6 +494,14 @@ public class DataHelper {
                 List<String> descriptiveOntologyTerms = new ArrayList<>();
                 descriptiveOntologyTerms.add(cursor.getString(2));
                 image.setDescriptiveOntologyTerms(descriptiveOntologyTerms);
+
+                // Set image decription the same as our trait description.
+                image.setDescription(cursor.getString(11));
+
+
+                image.setTimestamp(cursor.getString(3));
+                image.setFieldbookDbId(cursor.getString(7));
+
 
                 images.add(image);
 
