@@ -3,6 +3,8 @@ package com.fieldbook.tracker.brapi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import java.util.List;
+
 public class Image {
 
     private String filePath;
@@ -10,15 +12,18 @@ public class Image {
     private int height;
     private int fileSize;
     private String fileName;
+    private String imageName;
     private String mimeType;
     private Object data;
     private String dbId;
     private Bitmap bitmap;
     private String observationUnitDbId;
+    private List<String> descriptiveOntologyTerms;
 
     public Image(String filePath) {
         this.filePath = filePath;
         this.fileName = filePath.substring(filePath.lastIndexOf("/")+1);
+        this.imageName = this.fileName;
         loadImage();
     }
 
@@ -64,6 +69,14 @@ public class Image {
 
     public void setObservationUnitDbId(String observationUnitDbId) {
         this.observationUnitDbId = observationUnitDbId;
+    }
+
+    public List<String> getDescriptiveOntologyTerms() {
+        return this.descriptiveOntologyTerms;
+    }
+
+    public void setDescriptiveOntologyTerms(List<String> descriptiveOntologyTerms) {
+        this.descriptiveOntologyTerms = descriptiveOntologyTerms;
     }
 
     private void loadImage() {

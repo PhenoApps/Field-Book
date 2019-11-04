@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
+import com.fieldbook.tracker.brapi.Image;
 import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.fields.FieldObject;
@@ -27,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -221,6 +223,8 @@ public class DataHelper {
                 "WHERE " +
                 "(traits.trait_data_source = 'local' OR traits.trait_data_source IS NULL)" +
                 "AND " +
+                "traits.format <> 'photo' " +
+                "AND " +
                 "user_traits.exp_id = " + exp_id + ";";
 
         Cursor cursor = db.rawQuery(query,null);
@@ -240,6 +244,47 @@ public class DataHelper {
         }
 
         return observations;
+    }
+
+    /**
+     * Get user created trait observations for currently selected study
+     */
+    public List<Image> getUserTraitImageObservations() {
+        List<Image> images = new ArrayList<>();
+
+        // get currently selected study
+        String exp_id = Integer.toString(ep.getInt("ExpID", 0));
+
+        String query = "SELECT " +
+                "user_traits.id, " +
+                "user_traits.userValue " +
+                "FROM " +
+                "user_traits " +
+                "JOIN " +
+                "traits ON user_traits.parent = traits.trait " +
+                "WHERE " +
+                "(traits.trait_data_source = 'local' OR traits.trait_data_source IS NULL)" +
+                "AND " +
+                "traits.format = 'photo' " +
+                "AND " +
+                "user_traits.exp_id = " + exp_id + ";";
+
+        Cursor cursor = db.rawQuery(query,null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Image image = new Image(cursor.getString(1));
+                image.setDbId(cursor.getString(0));
+                images.add(image);
+
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return images;
     }
 
     public List<Observation> getWrongSourceObservations(String hostUrl) {
@@ -262,7 +307,9 @@ public class DataHelper {
                 "AND " +
                 "traits.trait_data_source <> 'local' " +
                 "AND " +
-                "traits.trait_data_source IS NOT NULL", hostUrl) ;
+                "traits.trait_data_source IS NOT NULL " +
+                "AND " +
+                "traits.format <> 'photo'", hostUrl) ;
 
         Cursor cursor = db.rawQuery(query,null);
 
@@ -281,6 +328,48 @@ public class DataHelper {
         }
 
         return observations;
+    }
+
+    public List<Image> getWrongSourceImageObservations(String hostUrl) {
+
+        List<Image> images = new ArrayList<>();
+
+        String query = String.format("SELECT " +
+                "user_traits.id, " +
+                "user_traits.userValue " +
+                "FROM " +
+                "user_traits " +
+                "JOIN " +
+                "traits ON user_traits.parent = traits.trait " +
+                "JOIN " +
+                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+                "WHERE " +
+                "exp_id.exp_source IS NOT NULL " +
+                "AND " +
+                "traits.trait_data_source <> '%s' " +
+                "AND " +
+                "traits.trait_data_source <> 'local' " +
+                "AND " +
+                "traits.trait_data_source IS NOT NULL " +
+                "AND " +
+                "traits.format = 'photo'", hostUrl) ;
+
+        Cursor cursor = db.rawQuery(query,null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Image image = new Image(cursor.getString(1));
+                image.setDbId(cursor.getString(0));
+                images.add(image);
+
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return images;
     }
 
     /**
@@ -318,7 +407,9 @@ public class DataHelper {
                     "AND " +
                     "user_traits.userValue <> '' " +
                     "AND " +
-                    "traits.trait_data_source IS NOT NULL;";
+                    "traits.trait_data_source IS NOT NULL " +
+                    "AND " +
+                    "traits.format <> 'photo'";
 
         Cursor cursor = db.rawQuery(query,null);
 
@@ -349,6 +440,71 @@ public class DataHelper {
         return observations;
     }
 
+    /**
+     * Get the image observations for brapi export to external system
+     */
+    public List<Image> getImageObservations(String hostUrl) {
+
+        List<Image> images = new ArrayList<Image>();
+
+        // Get only the data that belongs to the system we are importing to.
+        String query = "SELECT " +
+                "range.observationUnitDbId, " +
+                "range.observationUnitName, " +
+                "traits.external_db_id, " +
+                "user_traits.timeTaken, " +
+                "user_traits.userValue, " +
+                "traits.trait, " +
+                "exp_id.exp_alias, " +
+                "user_traits.id, " +
+                "user_traits.observation_db_id, " +
+                "user_traits.last_synced_time, " +
+                "user_traits.person " +
+                "FROM " +
+                "user_traits " +
+                "JOIN " +
+                "range ON user_traits.rid = range.plot " +
+                "JOIN " +
+                "traits ON user_traits.parent = traits.trait " +
+                "JOIN " +
+                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+                "WHERE " +
+                "exp_id.exp_source IS NOT NULL " +
+                "AND " +
+                String.format("traits.trait_data_source = '%s' ", hostUrl) +
+                "AND " +
+                "user_traits.userValue <> '' " +
+                "AND " +
+                "traits.trait_data_source IS NOT NULL " +
+                "AND " +
+                "traits.format = 'photo'";
+
+        Cursor cursor = db.rawQuery(query,null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                // Instantiate our image with our file path. Which is stored in the userValue.
+                Image image = new Image(cursor.getString(4));
+
+
+                // Assign the rest of our values
+                image.setObservationUnitDbId(cursor.getString(0));
+
+                List<String> descriptiveOntologyTerms = new ArrayList<>();
+                descriptiveOntologyTerms.add(cursor.getString(2));
+                image.setDescriptiveOntologyTerms(descriptiveOntologyTerms);
+
+                images.add(image);
+
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return images;
+    }
     /**
      * Sync with observationdbids BrAPI
      */
