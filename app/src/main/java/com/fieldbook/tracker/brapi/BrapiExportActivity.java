@@ -37,11 +37,19 @@ public class BrapiExportActivity extends AppCompatActivity {
     private List<Observation> observationsNeedingSync;
     private List<Observation> userCreatedTraitObservations;
     private List<Observation> wrongSourceObservations;
+    private List<Image> images;
+    private List<Image> imagesNeedingSync;
+    private List<Image> userCreatedTraitImages;
+    private List<Image> wrongSourceImages;
+
 
     private BrapiControllerResponse brapiControllerResponse;
     private int numNewObservations;
     private int numSyncedObservations;
     private int numEditedObservations;
+    private int numNewImages;
+    private int numSyncedImages;
+    private int numEditedImages;
     private UploadError putObservationsError;
 
     public enum UploadError {
@@ -79,6 +87,10 @@ public class BrapiExportActivity extends AppCompatActivity {
                 numNewObservations = 0;
                 numSyncedObservations = 0;
                 numEditedObservations = 0;
+                imagesNeedingSync = new ArrayList<>();
+                numNewImages = 0;
+                numSyncedImages = 0;
+                numEditedImages = 0;
 
                 loadToolbar();
                 loadStatistics();
@@ -345,6 +357,11 @@ public class BrapiExportActivity extends AppCompatActivity {
         userCreatedTraitObservations = dataHelper.getUserTraitObservations();
         wrongSourceObservations = dataHelper.getWrongSourceObservations(hostURL);
 
+        images = dataHelper.getImageObservations(hostURL);
+        imagesNeedingSync.clear();
+        userCreatedTraitImages = dataHelper.getUserTraitImageObservations();
+        wrongSourceImages = dataHelper.getWrongSourceImageObservations(hostURL);
+
         for (Observation observation : observations) {
             switch(observation.getStatus()) {
                 case NEW:
@@ -361,6 +378,22 @@ public class BrapiExportActivity extends AppCompatActivity {
             }
         }
 
+        for (Image image : images) {
+            switch(image.getStatus()) {
+                case NEW:
+                    numNewImages++;
+                    imagesNeedingSync.add(image);
+                    break;
+                case SYNCED:
+                    numSyncedImages++;
+                    break;
+                case EDITED:
+                    numEditedImages++;
+                    imagesNeedingSync.add(image);
+                    break;
+            }
+        }
+
         SharedPreferences ep = this.getSharedPreferences("Settings", 0);
         String field = ep.getString("FieldFile", "");
 
@@ -370,6 +403,12 @@ public class BrapiExportActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));
         ((TextView) findViewById(R.id.brapiUserCreatedValue)).setText(String.valueOf(userCreatedTraitObservations.size()));
         ((TextView) findViewById(R.id.brapiWrongSource)).setText(String.valueOf(wrongSourceObservations.size()));
+
+        ((TextView) findViewById(R.id.brapiNumNewImagesValue)).setText(String.valueOf(numNewImages));
+        ((TextView) findViewById(R.id.brapiNumSyncedImagesValue)).setText(String.valueOf(numSyncedImages));
+        ((TextView) findViewById(R.id.brapiNumEditedImagesValue)).setText(String.valueOf(numEditedImages));
+        ((TextView) findViewById(R.id.brapiUserCreatedImagesValue)).setText(String.valueOf(userCreatedTraitImages.size()));
+        ((TextView) findViewById(R.id.brapiWrongSourceImages)).setText(String.valueOf(wrongSourceImages.size()));
 
     }
 
