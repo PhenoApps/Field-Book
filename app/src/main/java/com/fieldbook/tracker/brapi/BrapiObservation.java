@@ -12,8 +12,8 @@ public class BrapiObservation {
     private OffsetDateTime lastSyncedTime;
     private OffsetDateTime timestamp;
     private String fieldbookDbId;
-    private String unitDbId;
-    private String variableDbId;
+    protected String unitDbId;
+    protected String variableDbId;
     private String variableName;
 
     public enum Status {
@@ -88,30 +88,18 @@ public class BrapiObservation {
         return status;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Observation that = (Observation) o;
-        return objectsEquals(unitDbId, that.getUnitDbId()) &&
-                objectsEquals(variableDbId, that.getVariableDbId());
-    }
 
-    @Override
-    public int hashCode() {
-        return objectsHash(unitDbId, variableDbId);
-    }
 
     // The objects methods used were added in API 19 so they'll just
     // be duplicated here to work around that
 
     // Objects.equals Jdk7
-    private boolean objectsEquals(Object a, Object b) {
+    protected boolean objectsEquals(Object a, Object b) {
         return (a == b) || (a != null && a.equals(b));
     }
 
     // Objects.hash Jdk7
-    private int objectsHash(Object... values) {
+    protected int objectsHash(Object... values) {
         return arraysHashCode(values);
     }
 

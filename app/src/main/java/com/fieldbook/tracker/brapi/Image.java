@@ -3,33 +3,53 @@ package com.fieldbook.tracker.brapi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import java.io.File;
 import java.util.List;
 
 public class Image extends BrapiObservation {
 
-    private String fieldBookDbId;
-    private String filePath;
+    private File file;
     private int width;
     private int height;
-    private int fileSize;
+    private long fileSize;
     private String fileName;
     private String imageName;
     private String mimeType;
     private Object data;
     private Bitmap bitmap;
-    private String observationUnitDbId;
     private List<String> descriptiveOntologyTerms;
     private String description;
 
     public Image(String filePath) {
-        this.filePath = filePath;
-        this.fileName = filePath.substring(filePath.lastIndexOf("/")+1);
+        //this.filePath = filePath;
+        //this.fileName = filePath.substring(filePath.lastIndexOf("/")+1);
+
+        this.file = new File(filePath);
+        this.fileSize = file.length();
+        this.fileName = file.getName();
         this.imageName = this.fileName;
+
         loadImage();
     }
 
-    public String getFilePath() {
-        return filePath;
+    public Image(io.swagger.client.model.Image response) {
+        this.setDbId(response.getImageDbId());
+        this.setUnitDbId(response.getObservationUnitDbId());
+        this.fileName = response.getImageFileName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Image that = (Image) o;
+        return super.objectsEquals(unitDbId, that.getUnitDbId()) &&
+                objectsEquals(fileName, that.getFileName());
+    }
+
+    @Override
+    public int hashCode() {
+        return super.objectsHash(unitDbId, fileName);
     }
 
     public int getWidth() {
@@ -40,12 +60,16 @@ public class Image extends BrapiObservation {
         return height;
     }
 
-    public int getFileSize() {
+    public long getFileSize() {
         return fileSize;
     }
 
     public String getFileName() {
         return fileName;
+    }
+
+    public String getImageName() {
+        return imageName;
     }
 
     public String getMimeType() {
@@ -54,14 +78,6 @@ public class Image extends BrapiObservation {
 
     public Object getData() {
         return data;
-    }
-
-    public String getObservationUnitDbId() {
-        return observationUnitDbId;
-    }
-
-    public void setObservationUnitDbId(String observationUnitDbId) {
-        this.observationUnitDbId = observationUnitDbId;
     }
 
     public List<String> getDescriptiveOntologyTerms() {
@@ -80,12 +96,12 @@ public class Image extends BrapiObservation {
 
     private void loadImage() {
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
+        //bmOptions.inJustDecodeBounds = true;
 
-        bitmap = BitmapFactory.decodeFile(filePath, bmOptions);
-        width = bmOptions.outWidth;
-        height = bmOptions.outHeight;
-        mimeType = bmOptions.outMimeType;
+        bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+        width = bitmap.getWidth();
+        height = bitmap.getHeight();
+        //mimeType = bmOptions.outMimeType;
     }
 
 }

@@ -23,6 +23,20 @@ public class Observation extends BrapiObservation {
         this.setUnitDbId(response.getObservationUnitDbId());
         this.setVariableDbId(response.getObservationVariableDbId());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Observation that = (Observation) o;
+        return super.objectsEquals(unitDbId, that.getUnitDbId()) &&
+                objectsEquals(variableDbId, that.getVariableDbId());
+    }
+
+    @Override
+    public int hashCode() {
+        return super.objectsHash(unitDbId, variableDbId);
+    }
     
     public String getSeason() {
         return season;

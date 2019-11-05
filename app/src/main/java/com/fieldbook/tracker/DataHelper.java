@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
+import com.fieldbook.tracker.brapi.BrapiObservation;
 import com.fieldbook.tracker.brapi.Image;
 import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.utilities.Constants;
@@ -489,7 +490,7 @@ public class DataHelper {
 
 
                 // Assign the rest of our values
-                image.setObservationUnitDbId(cursor.getString(0));
+                image.setUnitDbId(cursor.getString(0));
 
                 List<String> descriptiveOntologyTerms = new ArrayList<>();
                 descriptiveOntologyTerms.add(cursor.getString(2));
@@ -501,6 +502,8 @@ public class DataHelper {
 
                 image.setTimestamp(cursor.getString(3));
                 image.setFieldbookDbId(cursor.getString(7));
+                image.setDbId(cursor.getString(8));
+                image.setLastSyncedTime(cursor.getString(9));
 
 
                 images.add(image);
@@ -530,6 +533,38 @@ public class DataHelper {
             update.bindString(3, observation.getFieldbookDbId());
             update.execute();
         }
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
+
+    public void updateImages(List<Image> images) {
+        ArrayList<String> ids = new ArrayList<String>();
+
+        db.beginTransaction();
+        String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
+        SQLiteStatement update = db.compileStatement(sql);
+
+        for (Image image : images) {
+            update.bindString(1, image.getDbId());
+            update.bindString(2, image.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            update.bindString(3, image.getFieldbookDbId());
+            update.execute();
+        }
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
+
+    public void updateImage(Image image) {
+        db.beginTransaction();
+        String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
+        SQLiteStatement update = db.compileStatement(sql);
+
+        update.bindString(1, image.getDbId());
+        update.bindString(2, image.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+        update.bindString(3, image.getFieldbookDbId());
+        update.execute();
 
         db.setTransactionSuccessful();
         db.endTransaction();
