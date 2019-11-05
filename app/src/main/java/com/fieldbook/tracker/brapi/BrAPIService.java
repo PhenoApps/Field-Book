@@ -11,6 +11,7 @@ import android.util.Patterns;
 
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.fields.FieldObject;
@@ -671,12 +672,17 @@ public class BrAPIService {
         //TODO: Check these out and make sure they match with fieldbook data types.
         switch (dataType){
             case "Code":
+                // Not the ideal solution for this conversion
+                return "text";
             case "Nominal":
                 return "categorical";
             case "Date":
                 return "date";
             case "Numerical":
+                return "numeric";
             case "Ordinal":
+                // All Field Book categories are ordered, so this works
+                return "categorical";
             case "Duration":
                 return "numeric";
             case "Text":
@@ -726,19 +732,47 @@ public class BrAPIService {
                 return new BrapiControllerResponse(false, this.notUniqueIdMessage);
             }
 
+
+            DataHelper.db.beginTransaction();
             // All checks finished, insert our data.
             int expId = dataHelper.createField(field, studyDetails.getAttributes());
 
-            for (List<String> dataRow : studyDetails.getValues()) {
-                dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
+            Boolean fail = false;
+            String failMessage = "";
+
+            // We want the saving of plots and traits wrap together in a transaction
+            // so if they fail, the field can be deleted.
+            try {
+                for (List<String> dataRow : studyDetails.getValues()) {
+                    dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
+                }
+
+                // Insert the traits already associated with this study
+                for (TraitObject t : studyDetails.getTraits()) {
+                    dataHelper.insertTraits(t);
+                }
+
+                // If we haven't thrown an error by now, we are good.
+                DataHelper.db.setTransactionSuccessful();
+
+            } catch (Exception e) {
+                // Delete our field if our traits or fields failed to insert
+                fail = true;
+                failMessage = e.toString();
             }
 
-            // Insert the traits already associated with this study
-            for (TraitObject t : studyDetails.getTraits()) {
-                dataHelper.insertTraits(t);
+            DataHelper.db.endTransaction();
+            dataHelper.close();
+            dataHelper.open();
+
+            if (fail) {
+                return new BrapiControllerResponse(false, failMessage);
+            }
+            else {
+                return new BrapiControllerResponse(true, "");
             }
 
-            return new BrapiControllerResponse(true, "");
+
         }
         catch (Exception e) {
             return new BrapiControllerResponse(false, e.toString());

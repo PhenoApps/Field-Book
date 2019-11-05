@@ -2,8 +2,13 @@ package com.fieldbook.tracker.brapi;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -14,11 +19,20 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.DataHelper;
+import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.fields.FieldEditorActivity;
+import com.fieldbook.tracker.fields.FieldObject;
+import com.fieldbook.tracker.io.CSVReader;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.Utils;
+
+import java.io.File;
+import java.io.FileReader;
+import java.util.Arrays;
 
 import io.swagger.client.ApiException;
 
@@ -212,7 +226,6 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         switch (v.getId()) {
             case R.id.brapi_save_btn:
                 saveStudy();
-                ((Activity) this.context).finish();
                 break;
             case R.id.brapi_cancel_btn:
                 dismiss();
@@ -225,20 +238,84 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
     private void saveStudy() {
 
-        BrapiControllerResponse brapiControllerResponse = brAPIService.saveStudyDetails(studyDetails);
+        // Dismiss this dialog
+        dismiss();
 
-        // Display our message.
-        if (brapiControllerResponse.status == false) {
-            if (brapiControllerResponse.message == BrAPIService.notUniqueFieldMessage) {
-                Toast.makeText(context, R.string.fields_study_exists_message, Toast.LENGTH_LONG).show();
+        // Run saving task in the background so we can showing progress dialog
+        Handler mHandler = new Handler();
+        mHandler.post(importRunnable);
+
+    }
+
+    // Creates a new thread to do importing
+    private Runnable importRunnable = new Runnable() {
+        public void run() {
+            new BrapiLoadDialog.ImportRunnableTask().execute(0);
+        }
+    };
+
+    // Mimics the class used in the csv field importer to run the saving
+    // task in a different thread from the UI thread so the app doesn't freeze up.
+    private class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
+
+        ProgressDialog dialog;
+
+        BrapiControllerResponse brapiControllerResponse;
+        boolean fail;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(context);
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(false);
+            dialog.setMessage(Html.fromHtml(context.getResources().getString(R.string.import_dialog_importing)));
+            dialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... params) {
+            try {
+
+                brapiControllerResponse = brAPIService.saveStudyDetails(studyDetails);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail = true;
             }
-            else if (brapiControllerResponse.message == BrAPIService.notUniqueIdMessage) {
-                Toast.makeText(context, R.string.import_error_unique, Toast.LENGTH_LONG).show();
+
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if (dialog.isShowing())
+                dialog.dismiss();
+
+            // Finish our BrAPI import activity
+            ((Activity) context).finish();
+
+            // Display our message.
+            if (brapiControllerResponse.status == false) {
+                if (brapiControllerResponse.message == BrAPIService.notUniqueFieldMessage) {
+                    Toast.makeText(context, R.string.fields_study_exists_message, Toast.LENGTH_LONG).show();
+                }
+                else if (brapiControllerResponse.message == BrAPIService.notUniqueIdMessage) {
+                    Toast.makeText(context, R.string.import_error_unique, Toast.LENGTH_LONG).show();
+                }
+                else {
+                    Log.e("error", brapiControllerResponse.message);
+                    Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
+                }
             }
-            else {
+
+            // This is an unhandled failed that we should not run into unless there is
+            // an error in the saveStudyDetails code outside of that handling.
+            if (fail) {
                 Log.e("error", brapiControllerResponse.message);
                 Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
             }
+
         }
     }
 

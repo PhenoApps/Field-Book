@@ -23,9 +23,7 @@ public class Observation extends BrapiObservation {
         this.setUnitDbId(response.getObservationUnitDbId());
         this.setVariableDbId(response.getObservationVariableDbId());
     }
-
-
-
+    
     public String getSeason() {
         return season;
     }
