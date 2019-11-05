@@ -438,8 +438,7 @@
         android:orientation="vertical"
         android:visibility="gone"
         android:layout_centerHorizontal="true"
-        android:background="@color/whiteBackground"
-        android:bo>
+        android:background="@color/whiteBackground">
 
         <TextView
             android:layout_width="match_parent"
