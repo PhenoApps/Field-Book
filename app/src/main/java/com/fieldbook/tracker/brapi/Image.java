@@ -21,9 +21,6 @@ public class Image extends BrapiObservation {
     private String description;
 
     public Image(String filePath) {
-        //this.filePath = filePath;
-        //this.fileName = filePath.substring(filePath.lastIndexOf("/")+1);
-
         this.file = new File(filePath);
         this.fileSize = file.length();
         this.fileName = file.getName();
@@ -76,8 +73,8 @@ public class Image extends BrapiObservation {
         return mimeType;
     }
 
-    public Object getData() {
-        return data;
+    public File getFile() {
+        return file;
     }
 
     public List<String> getDescriptiveOntologyTerms() {

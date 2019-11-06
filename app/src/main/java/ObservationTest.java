@@ -1,3 +1,4 @@
+import com.fieldbook.tracker.brapi.BrapiObservation;
 import com.fieldbook.tracker.brapi.Observation;
 
 import org.junit.Test;
@@ -78,7 +79,15 @@ public class ObservationTest {
     public void invalidStatus() {
         Observation o = new Observation();
         o.setDbId("1");
-        assertTrue("Invalid status dbId but no lastSynced time", o.getStatus() == Observation.Status.INVALID);
+        o.setLastSyncedTime("2019-10-15 12:14:59-0400");
+        assertTrue("Invalid status dbId but no lastSynced time", o.getStatus() == BrapiObservation.Status.INVALID);
+    }
+
+    @Test
+    public void incompleteStatus() {
+        Observation o = new Observation();
+        o.setDbId("1");
+        assertTrue("Incomplete status", o.getStatus() == BrapiObservation.Status.INCOMPLETE);
     }
 
     @Test

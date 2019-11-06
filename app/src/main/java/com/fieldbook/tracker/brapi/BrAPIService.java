@@ -87,7 +87,7 @@ public class BrAPIService {
 
     }
 
-    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<String, Void> failFunction){
+    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction){
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
@@ -100,13 +100,14 @@ public class BrAPIService {
                 }
                     
                 @Override
-                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                    // report failure
-                    failFunction.apply("Error when exporting image content");
+                public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
+                    final ApiException error = e;
+                    Integer code = new Integer(error.getCode());
+                    failFunction.apply(code);
                 }
             };
                        
-            imagesApi.imagesImageDbIdImagecontentPutAsync(image.getDbId(), image.getData(), brapiToken, callback);
+            imagesApi.imagesImageDbIdImagecontentPutAsync(image.getDbId(), image.getFile(), brapiToken, callback);
             
         } catch (ApiException e){
             e.printStackTrace();
@@ -114,15 +115,8 @@ public class BrAPIService {
         
     }
 
-    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<String, Void> failFunction){
+    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction){
         try {
-
-            final NewImageRequest updatedImage = new NewImageRequest();
-            updatedImage.setImageFileName(image.getFileName());
-            updatedImage.setImageName(image.getFileName());
-            updatedImage.setImageHeight(image.getHeight());
-            updatedImage.setImageWidth(image.getWidth());
-            updatedImage.setMimeType(image.getMimeType());
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
                 @Override
@@ -134,13 +128,30 @@ public class BrAPIService {
                 }
                     
                 @Override
-                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
                     // report failure
-                    failFunction.apply("Error when exporting image meta data");
+                    final ApiException error = e;
+                    Integer code = new Integer(error.getCode());
+                    failFunction.apply(code);
                 }
             };
+
+            NewImageRequest request = new NewImageRequest();
+
+            // TODO: hardcoded stuff in here for now until we get the data we need
+            request.setCopyright("2019");
+            request.setDescription(image.getDescription());
+            request.setImageWidth(image.getWidth());
+            request.setImageHeight(image.getHeight());
+            request.setImageFileSize((int)image.getFileSize());
+            request.setMimeType("image/jpeg");
+            request.setObservationUnitDbId(image.getUnitDbId());
+            request.setImageName(image.getImageName());
+            request.setDescription(image.getDescription());
+            request.setImageFileName(image.getFileName());
                        
-            imagesApi.imagesImageDbIdPutAsync(image.getDbId(), updatedImage, brapiToken, callback);
+            imagesApi.imagesImageDbIdPutAsync(image.getDbId(), request, brapiToken, callback);
+
             
         } catch (ApiException e){
             e.printStackTrace();

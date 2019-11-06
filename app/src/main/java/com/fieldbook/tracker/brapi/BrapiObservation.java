@@ -17,7 +17,7 @@ public class BrapiObservation {
     private String variableName;
 
     public enum Status {
-        NEW, SYNCED, EDITED, INVALID
+        NEW, SYNCED, EDITED, INCOMPLETE, INVALID
     }
 
     public String getFieldbookDbId() {
@@ -78,10 +78,13 @@ public class BrapiObservation {
         if (dbId == null) {
             status = BrapiObservation.Status.NEW;
         }
-        else if (dbId != null && lastSyncedTime != null && timestamp.compareTo(lastSyncedTime) < 0) {
+        else if (dbId != null && lastSyncedTime == null) {
+            status = BrapiObservation.Status.INCOMPLETE;
+        }
+        else if (dbId != null && lastSyncedTime != null && timestamp != null && timestamp.compareTo(lastSyncedTime) < 0) {
             status = BrapiObservation.Status.SYNCED;
         }
-        else if (dbId != null && lastSyncedTime != null && timestamp.compareTo(lastSyncedTime) > 0) {
+        else if (dbId != null && lastSyncedTime != null && timestamp != null && timestamp.compareTo(lastSyncedTime) > 0) {
             status = BrapiObservation.Status.EDITED;
         }
 

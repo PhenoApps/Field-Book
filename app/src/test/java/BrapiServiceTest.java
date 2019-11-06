@@ -314,7 +314,7 @@ public class BrapiServiceTest {
         final String brapiToken = "Bearer xoktgruhclayzdlrifvsmtotjvduweojwqawvnurnlkdntwpenmwzpiklifbrdatfcixrzo";
 
         com.fieldbook.tracker.brapi.Image image = new com.fieldbook.tracker.brapi.Image("/path/test.jpg");
-        image.setObservationUnitDbId("1");
+        image.setUnitDbId("1");
 
         // Call our get study details endpoint with the same parsing that our classes use.
         this.brAPIService.postImageMetaData(image, brapiToken, new Function<Image, Void>() {

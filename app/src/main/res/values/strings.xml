@@ -345,6 +345,7 @@
     <string name="brapi_export_num_new_imgs">New Images</string>
     <string name="brapi_export_num_synced_imgs">Synced Images</string>
     <string name="brapi_export_num_ed_imgs">Edited Images</string>
+    <string name="brapi_export_num_incomplete_imgs">Incomplete Synced Images</string>
     <string name="brapi_export_skipped_images">Skipped Images</string>
     <string name="brapi_export_skipped_user_created_images">User Created Trait Images</string>
     <string name="brapi_export_images">Images</string>

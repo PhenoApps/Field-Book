@@ -556,19 +556,33 @@ public class DataHelper {
         db.endTransaction();
     }
 
-    public void updateImage(Image image) {
+    public void updateImage(Image image, Boolean writeLastSyncedTime) {
         db.beginTransaction();
-        String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
+        String sql;
+        if (writeLastSyncedTime) {
+            sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
+        }
+        else {
+            sql = "UPDATE user_traits SET observation_db_id = ? WHERE id = ?";
+        }
+
         SQLiteStatement update = db.compileStatement(sql);
 
         update.bindString(1, image.getDbId());
-        update.bindString(2, image.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
-        update.bindString(3, image.getFieldbookDbId());
+        if (writeLastSyncedTime) {
+            update.bindString(2, image.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            update.bindString(3, image.getFieldbookDbId());
+        }
+        else {
+            update.bindString(2, image.getFieldbookDbId());
+        }
+
         update.execute();
 
         db.setTransactionSuccessful();
         db.endTransaction();
     }
+
 
     /**
      * Helper function to close the database

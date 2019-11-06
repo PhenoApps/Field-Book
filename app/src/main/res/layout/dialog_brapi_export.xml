@@ -340,6 +340,33 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/brapiNumIncompleteImagesValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="10dp"
+                    android:paddingBottom="5dp"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/brapiNumIncompleteImagesLbl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="10dp"
+                    android:paddingBottom="10dp"
+                    android:text="@string/brapi_export_num_incomplete_imgs"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
                     android:id="@+id/brapiSkippedImages"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
