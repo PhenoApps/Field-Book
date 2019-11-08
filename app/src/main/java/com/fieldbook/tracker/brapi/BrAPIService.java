@@ -11,7 +11,6 @@ import android.util.Patterns;
 
 import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.fields.FieldObject;
@@ -19,7 +18,6 @@ import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.TraitObject;
 import com.fieldbook.tracker.utilities.Constants;
 
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,6 +31,7 @@ import io.swagger.client.api.ObservationsApi;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ObservationVariablesApi;
+import io.swagger.client.model.GeoJSON;
 import io.swagger.client.model.Image;
 import io.swagger.client.model.ImageResponse;
 import io.swagger.client.model.Metadata;
@@ -87,6 +86,54 @@ public class BrAPIService {
 
     }
 
+    public void postImageMetaData(com.fieldbook.tracker.brapi.Image image, String brapiToken,
+                                  final Function<Image, Void> function,
+                                  final Function<Integer, Void> failFunction) {
+
+        try {
+            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
+                @Override
+                public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
+                    final Image response = imageResponse.getResult();
+                    function.apply(response);
+                }
+
+                @Override
+                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
+                    final ApiException error = e;
+                    Integer code = new Integer(error.getCode());
+                    failFunction.apply(code);
+                }
+            };
+
+            NewImageRequest request = mapImage(image);
+            imagesApi.imagesPostAsync(request, brapiToken, callback);
+
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private NewImageRequest mapImage(com.fieldbook.tracker.brapi.Image image) {
+        NewImageRequest request = new NewImageRequest();
+        // TODO: hardcoded stuff in here for now until we get the data we need
+        request.setCopyright("2019");
+        request.setDescription(image.getDescription());
+        request.setImageWidth(image.getWidth());
+        request.setImageHeight(image.getHeight());
+        request.setImageFileSize((int)image.getFileSize());
+        request.setMimeType(image.getMimeType());
+        request.setObservationUnitDbId(image.getUnitDbId());
+        request.setImageName(image.getImageName());
+        request.setDescription(image.getDescription());
+        request.setImageFileName(image.getFileName());
+        // TODO: Add this back in when ontology is fixed in breedbase
+        //request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
+        request.setImageLocation(image.getLocation());
+        return request;
+    }
+
     public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction){
         try {
 
@@ -136,23 +183,9 @@ public class BrAPIService {
                 }
             };
 
-            NewImageRequest request = new NewImageRequest();
-
-            // TODO: hardcoded stuff in here for now until we get the data we need
-            request.setCopyright("2019");
-            request.setDescription(image.getDescription());
-            request.setImageWidth(image.getWidth());
-            request.setImageHeight(image.getHeight());
-            request.setImageFileSize((int)image.getFileSize());
-            request.setMimeType("image/jpeg");
-            request.setObservationUnitDbId(image.getUnitDbId());
-            request.setImageName(image.getImageName());
-            request.setDescription(image.getDescription());
-            request.setImageFileName(image.getFileName());
-                       
+            NewImageRequest request = mapImage(image);
             imagesApi.imagesImageDbIdPutAsync(image.getDbId(), request, brapiToken, callback);
 
-            
         } catch (ApiException e){
             e.printStackTrace();
         }
@@ -398,50 +431,6 @@ public class BrAPIService {
             Log.e("error", e.toString());
             failFunction.apply(e);
         }
-    }
-
-    public void postImageMetaData(com.fieldbook.tracker.brapi.Image image, String brapiToken,
-                                  final Function<Image, Void> function,
-                                  final Function<Integer, Void> failFunction) {
-
-        try {
-            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
-                @Override
-                public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
-                    final Image response = imageResponse.getResult();
-                    function.apply(response);
-                }
-
-                @Override
-                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
-                    final ApiException error = e;
-                    Integer code = new Integer(error.getCode());
-                    failFunction.apply(code);
-                }
-            };
-
-            NewImageRequest request = new NewImageRequest();
-
-            // TODO: hardcoded stuff in here for now until we get the data we need
-            request.setCopyright("2019");
-            request.setDescription(image.getDescription());
-            request.setImageWidth(image.getWidth());
-            request.setImageHeight(image.getHeight());
-            request.setImageFileSize((int)image.getFileSize());
-            request.setMimeType("image/jpeg");
-            request.setObservationUnitDbId(image.getUnitDbId());
-            request.setImageName(image.getImageName());
-            request.setDescription(image.getDescription());
-            request.setImageFileName(image.getFileName());
-            // TODO: Add this back in when ontology is fixed in breedbase
-            //request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
-
-            imagesApi.imagesPostAsync(request, brapiToken, callback);
-
-        } catch (ApiException e) {
-            e.printStackTrace();
-        }
-
     }
 
     public void postPhenotypes(List<Observation> observations, String brapiToken,

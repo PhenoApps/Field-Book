@@ -2,11 +2,20 @@ package com.fieldbook.tracker.brapi;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import androidx.exifinterface.media.ExifInterface;
 import android.os.Build;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+
+import io.swagger.client.model.GeoJSON;
 
 public class Image extends BrapiObservation {
 
@@ -20,6 +29,8 @@ public class Image extends BrapiObservation {
     private Object data;
     private Bitmap bitmap;
     private Bitmap missing;
+    private GeoJSON location;
+
     private List<String> descriptiveOntologyTerms;
     private String description;
 
@@ -30,6 +41,24 @@ public class Image extends BrapiObservation {
         this.fileName = file.getName();
         this.imageName = this.fileName;
         this.missing = missingPhoto;
+        this.location = new GeoJSON();
+        try {
+            ExifInterface exif = new ExifInterface(filePath);
+            double latlon[] = exif.getLatLong();
+            if (latlon != null) {
+                double lat = latlon[0];
+                double lon = latlon[1];
+                location.setType(GeoJSON.TypeEnum.FEATURE);
+                JsonObject o = new JsonObject();
+                o.addProperty("type", "Point");
+                JsonArray a = new JsonArray();
+                a.add(lon);
+                a.add(lat);
+                o.add("coordinates", a);
+                location.setGeometry(o);
+            }
+        } catch (IOException e) { }
+
     }
 
     public Image(io.swagger.client.model.Image response) {
@@ -51,6 +80,10 @@ public class Image extends BrapiObservation {
     @Override
     public int hashCode() {
         return objectsHash(unitDbId, fileName);//, timestamp);
+    }
+
+    public GeoJSON getLocation() {
+        return location;
     }
 
     public int getWidth() {
@@ -135,5 +168,4 @@ public class Image extends BrapiObservation {
             mimeType = "image/jpeg";
         }
     }
-
 }
