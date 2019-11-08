@@ -351,6 +351,7 @@
     <string name="brapi_export_images">Images</string>
     <string name="brapi_na">NA</string>
     <string name="brapi_delete_message">Cannot delete synced BrAPI observation, using NA instead</string>
+    <string name="images_loading">Loading Images...</string>
 
 
     <!-- Warnings/Catches -->
