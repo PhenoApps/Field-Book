@@ -107,7 +107,7 @@ public class BrAPIService {
                 }
             };
                        
-            imagesApi.imagesImageDbIdImagecontentPutAsync(image.getDbId(), image.getFile(), brapiToken, callback);
+            imagesApi.imagesImageDbIdImagecontentPutAsync(image.getDbId(), image.getImageData(), brapiToken, callback);
             
         } catch (ApiException e){
             e.printStackTrace();

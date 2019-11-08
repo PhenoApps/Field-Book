@@ -1,11 +1,9 @@
 package com.fieldbook.tracker.brapi;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.style.UpdateLayout;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -17,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Utils;
@@ -40,7 +37,6 @@ public class BrapiExportActivity extends AppCompatActivity {
     private List<Observation> userCreatedTraitObservations;
     private List<Observation> wrongSourceObservations;
     private List<com.fieldbook.tracker.brapi.Image> images;
-    private List<com.fieldbook.tracker.brapi.Image> imagesNeedingSync;
     private List<com.fieldbook.tracker.brapi.Image> imagesNew;
     private List<com.fieldbook.tracker.brapi.Image> imagesEditedIncomplete;
 
@@ -110,7 +106,6 @@ public class BrapiExportActivity extends AppCompatActivity {
                 numNewObservations = 0;
                 numSyncedObservations = 0;
                 numEditedObservations = 0;
-                imagesNeedingSync = new ArrayList<>();
                 imagesNew = new ArrayList<>();
                 imagesEditedIncomplete = new ArrayList<>();
                 numNewImages = 0;
@@ -187,18 +182,7 @@ public class BrapiExportActivity extends AppCompatActivity {
                 }
                 else {
                     showSaving();
-                    if (numNewObservations > 0 || numEditedObservations > 0) {
-                        putObservations();
-                    }
-                    else if (numNewObservations == 0 && numEditedObservations == 0) {
-                        observationsComplete = true;
-                    }
-                    if (numNewImages > 0) {
-                        postImages();
-                    }
-                    if (numEditedImages > 0 || numIncompleteImages > 0) {
-                        putImages();
-                    }
+                    sendData();
                 }
                 break;
             case R.id.brapi_cancel_btn:
@@ -206,6 +190,41 @@ public class BrapiExportActivity extends AppCompatActivity {
                 break;
             default:
                 break;
+        }
+    }
+
+    private void sendData() {
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (numNewObservations > 0 || numEditedObservations > 0) {
+                    putObservations();
+                }
+                else if (numNewObservations == 0 && numEditedObservations == 0) {
+                    observationsComplete = true;
+                }
+                if (numNewImages > 0) {
+                    loadNewImages();
+                    postImages();
+                }
+                if (numEditedImages > 0 || numIncompleteImages > 0) {
+                    loadEditedIncompleteImages();
+                    putImages();
+                }
+            }
+        });
+    }
+
+    private void loadNewImages() {
+        for (com.fieldbook.tracker.brapi.Image image : imagesNew) {
+            image.loadImage();
+        }
+    }
+
+    private void loadEditedIncompleteImages() {
+        for (com.fieldbook.tracker.brapi.Image image : imagesEditedIncomplete) {
+            image.loadImage();
         }
     }
 
@@ -282,6 +301,7 @@ public class BrapiExportActivity extends AppCompatActivity {
                         public void run() {
                             processPostImageResponse(image);
                             postImageMetaDataUpdatesCount++;
+                            imageData.setDbId(image.getImageDbId());
                             putImageContent(imageData, imagesNew);
                             uploadComplete();
                         }
@@ -298,6 +318,7 @@ public class BrapiExportActivity extends AppCompatActivity {
                         public void run() {
                             postImageMetaDataError = processErrorCode(code);
                             postImageMetaDataUpdatesCount++;
+                            putImageContentUpdatesCount++; //since we aren't calling this
                             uploadComplete();
                         }
                     });
@@ -365,6 +386,7 @@ public class BrapiExportActivity extends AppCompatActivity {
                         public void run() {
                             processPutImageResponse(image);
                             putImageMetaDataUpdatesCount++;
+                            imageData.setDbId(image.getImageDbId());
                             putImageContent(imageData, imagesEditedIncomplete);
                             uploadComplete();
                         }
@@ -381,6 +403,7 @@ public class BrapiExportActivity extends AppCompatActivity {
                         public void run() {
                             putImageMetaDataError = processErrorCode(code);
                             putImageMetaDataUpdatesCount++;
+                            putImageContentUpdatesCount++; // since we aren't calling this
                             uploadComplete();
                         }
                     });
@@ -630,7 +653,6 @@ public class BrapiExportActivity extends AppCompatActivity {
         wrongSourceObservations = dataHelper.getWrongSourceObservations(hostURL);
 
         images = dataHelper.getImageObservations(hostURL);
-        imagesNeedingSync.clear();
         imagesNew.clear();
         imagesEditedIncomplete.clear();
         userCreatedTraitImages = dataHelper.getUserTraitImageObservations();
@@ -656,7 +678,6 @@ public class BrapiExportActivity extends AppCompatActivity {
             switch(image.getStatus()) {
                 case NEW:
                     numNewImages++;
-                    imagesNeedingSync.add(image);
                     imagesNew.add(image);
                     break;
                 case SYNCED:
@@ -664,12 +685,10 @@ public class BrapiExportActivity extends AppCompatActivity {
                     break;
                 case EDITED:
                     numEditedImages++;
-                    imagesNeedingSync.add(image);
                     imagesEditedIncomplete.add(image);
                     break;
                 case INCOMPLETE:
                     numIncompleteImages++;
-                    imagesNeedingSync.add(image);
                     imagesEditedIncomplete.add(image);
                     break;
             }
@@ -704,4 +723,6 @@ public class BrapiExportActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
+

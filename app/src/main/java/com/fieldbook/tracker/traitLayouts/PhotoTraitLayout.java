@@ -121,7 +121,11 @@ public class PhotoTraitLayout extends TraitLayout {
     }
     @Override
     public void deleteTraitListener() {
-        deletePhotoWarning();
+        deletePhotoWarning(false, null);
+    }
+
+    public void brapiDelete(Map newTraits) {
+        deletePhotoWarning(true, newTraits);
     }
 
     private Bitmap displayScaledSavedPhoto(String path) {
@@ -231,7 +235,7 @@ public class PhotoTraitLayout extends TraitLayout {
         mediaScanIntent.setData(contentUri);
         getContext().sendBroadcast(mediaScanIntent);
 
-        updateTraitAllowDuplicates(currentTrait.getTrait(), "photo", file.getAbsolutePath(), newTraits);
+        updateTraitAllowDuplicates(currentTrait.getTrait(), "photo", file.getAbsolutePath(), null, newTraits);
 
         photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
 
@@ -239,28 +243,32 @@ public class PhotoTraitLayout extends TraitLayout {
         photo.setSelection(photoAdapter.getCount() - 1);
     }
 
-    private void updateTraitAllowDuplicates(String parent, String trait, String value, Map newTraits) {
+    private void updateTraitAllowDuplicates(String parent, String trait, String value, String newValue, Map newTraits) {
 
-        if (getCRange() == null || getCRange().plot_id.length() == 0) {
-            return;
+        if (!value.equals(newValue)) {
+
+            if (getCRange() == null || getCRange().plot_id.length() == 0) {
+                return;
+            }
+
+            Log.d("Field Book", trait + " " + value);
+
+            if (newTraits.containsKey(parent))
+                newTraits.remove(parent);
+
+            newTraits.put(parent, value);
+
+            //Observation observation = ConfigActivity.dt.getObservation(getCRange().plot_id, parent);
+            Observation observation = ConfigActivity.dt.getObservationByValue(getCRange().plot_id, parent, value);
+
+            ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, parent, value);
+
+            String exp_id = Integer.toString(getPrefs().getInt("ExpID", 0));
+            ConfigActivity.dt.insertUserTraits(getCRange().plot_id, parent, trait, newValue == null ? value : newValue, getPrefs().getString("FirstName", "") + " " + getPrefs().getString("LastName", ""), getPrefs().getString("Location", ""), "", exp_id, observation.getDbId(), observation.getLastSyncedTime()); //TODO add notes and exp_id
         }
-
-        Log.d("Field Book",trait + " " + value);
-
-        if (newTraits.containsKey(parent))
-            newTraits.remove(parent);
-
-        newTraits.put(parent, value);
-
-        Observation observation = ConfigActivity.dt.getObservation(getCRange().plot_id, parent);
-
-        ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, parent, value);
-
-        String exp_id = Integer.toString(getPrefs().getInt("ExpID", 0));
-        ConfigActivity.dt.insertUserTraits(getCRange().plot_id, parent, trait, value, getPrefs().getString("FirstName","") + " " + getPrefs().getString("LastName",""), getPrefs().getString("Location",""),"",exp_id, null, null); //TODO add notes and exp_id
     }
 
-    private void deletePhotoWarning() {
+    private void deletePhotoWarning(final Boolean brapiDelete, final Map newTraits) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
         builder.setTitle(getContext().getString(R.string.dialog_warning));
@@ -271,26 +279,45 @@ public class PhotoTraitLayout extends TraitLayout {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
 
+                if (brapiDelete) {
+                    Toast.makeText(getContext().getApplicationContext(), getContext().getString(R.string.brapi_delete_message), Toast.LENGTH_SHORT).show();
+                    //updateTrait(parent, currentTrait.getFormat(), getString(R.string.brapi_na));
+                }
+
                 if (photo.getCount() > 0) {
                     String item = photoLocation.get(photo.getSelectedItemPosition());
-                    photoLocation.remove(photo.getSelectedItemPosition());
-                    drawables.remove(photo.getSelectedItemPosition());
+                    if (!brapiDelete) {
+                        photoLocation.remove(photo.getSelectedItemPosition());
+                        drawables.remove(photo.getSelectedItemPosition());
+                    }
 
                     File f = new File(item);
                     f.delete();
                     Utils.scanFile((Activity) getContext(),f);
 
                     // Remove individual images
-                    ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), item);
+                    if (brapiDelete) {
+                        updateTraitAllowDuplicates(getCurrentTrait().getTrait(), "photo", item, "NA", newTraits);
+                        //ConfigActivity.dt.updateTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), item, "NA");
+                        loadLayout();
+                    }
+                    else {
+                        ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), item);
+                    }
 
                     // Only do a purge by trait when there are no more images left
-                    if (photoLocation.size() == 0)
-                        removeTrait(getCurrentTrait().getTrait());
+                    if (!brapiDelete) {
+                        if (photoLocation.size() == 0)
+                            removeTrait(getCurrentTrait().getTrait());
+                    }
 
                     photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
 
                     photo.setAdapter(photoAdapter);
-                } else {
+                }
+                else {
+                    // If an NA exists, delete it
+                    ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), "NA");
                     ArrayList<Drawable> emptyList = new ArrayList<>();
 
                     photoAdapter = new GalleryImageAdapter((Activity) getContext(), emptyList);

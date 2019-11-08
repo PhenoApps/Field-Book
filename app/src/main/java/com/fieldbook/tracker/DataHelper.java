@@ -9,9 +9,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.fieldbook.tracker.brapi.BrapiObservation;
 import com.fieldbook.tracker.brapi.Image;
 import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.utilities.Constants;
@@ -29,22 +30,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import io.swagger.client.model.PhenotypesRequest;
 
 /**
  * All database related functions are here
@@ -85,6 +81,8 @@ public class DataHelper {
 
     private SharedPreferences ep;
 
+    private Bitmap missingPhoto;
+
     public DataHelper(Context context) {
         try {
             this.context = context;
@@ -97,6 +95,9 @@ public class DataHelper {
 
             timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
                     Locale.getDefault());
+
+
+            missingPhoto = BitmapFactory.decodeResource(context.getResources(), R.drawable.trait_photo_missing);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -274,7 +275,7 @@ public class DataHelper {
 
         if (cursor.moveToFirst()) {
             do {
-                Image image = new Image(cursor.getString(1));
+                Image image = new Image(cursor.getString(1), missingPhoto);
                 image.setFieldbookDbId(cursor.getString(0));
                 images.add(image);
 
@@ -359,7 +360,7 @@ public class DataHelper {
 
         if (cursor.moveToFirst()) {
             do {
-                Image image = new Image(cursor.getString(1));
+                Image image = new Image(cursor.getString(1), missingPhoto);
                 image.setFieldbookDbId(cursor.getString(0));
                 images.add(image);
 
@@ -486,8 +487,7 @@ public class DataHelper {
         if (cursor.moveToFirst()) {
             do {
                 // Instantiate our image with our file path. Which is stored in the userValue.
-                Image image = new Image(cursor.getString(4));
-
+                Image image = new Image(cursor.getString(4), missingPhoto);
 
                 // Assign the rest of our values
                 image.setUnitDbId(cursor.getString(0));
@@ -1078,6 +1078,29 @@ public class DataHelper {
         return o;
     }
 
+    public Observation getObservationByValue(String plotId, String parent, String value) {
+
+        Observation o = new Observation();
+
+        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ? and userValue like ?", new String[]{plotId, parent, value},
+                null, null, null
+        );
+
+        if (cursor.moveToFirst()) {
+            do {
+                o.setDbId(cursor.getString(0));
+                o.setLastSyncedTime(cursor.getString(1));
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return o;
+    }
+
+
 
     /**
      * Check if a trait exists within the database
@@ -1248,6 +1271,19 @@ public class DataHelper {
 
         try {
             db.delete(USER_TRAITS, "rid like ? and parent like ? and userValue = ?",
+                    new String[]{rid, parent, value});
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    public void updateTraitByValue(String rid, String parent, String value, String newValue) {
+
+        ContentValues values = new ContentValues();
+        values.put("userValue", newValue);
+
+        try {
+            db.update(USER_TRAITS, values, "rid like ? and parent like ? and userValue = ?",
                     new String[]{rid, parent, value});
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());

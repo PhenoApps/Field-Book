@@ -10,7 +10,7 @@ public class BrapiObservation {
 
     private String dbId;
     private OffsetDateTime lastSyncedTime;
-    private OffsetDateTime timestamp;
+    protected OffsetDateTime timestamp;
     private String fieldbookDbId;
     protected String unitDbId;
     protected String variableDbId;

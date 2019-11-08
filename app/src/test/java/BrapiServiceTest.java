@@ -1,4 +1,5 @@
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 
@@ -42,12 +43,15 @@ public class BrapiServiceTest {
     Boolean checkGetOntologyResult = false;
     List<NewObservationDbIdsObservations> putObservationsResponse;
     Image postImageMetaDataResponse;
+    Bitmap missingImage;
 
 
     @Before
     public void setUp() throws Exception {
         // Instantiate our brapi service class
         this.brAPIService = new BrAPIService(brapiBaseUrl, null);
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
+        Bitmap missingImage = Bitmap.createBitmap(100, 100, conf);
     }
 
     @Test
@@ -313,7 +317,7 @@ public class BrapiServiceTest {
         final CountDownLatch signal = new CountDownLatch(1);
         final String brapiToken = "Bearer xoktgruhclayzdlrifvsmtotjvduweojwqawvnurnlkdntwpenmwzpiklifbrdatfcixrzo";
 
-        com.fieldbook.tracker.brapi.Image image = new com.fieldbook.tracker.brapi.Image("/path/test.jpg");
+        com.fieldbook.tracker.brapi.Image image = new com.fieldbook.tracker.brapi.Image("/path/test.jpg", missingImage);
         image.setUnitDbId("1");
 
         // Call our get study details endpoint with the same parsing that our classes use.

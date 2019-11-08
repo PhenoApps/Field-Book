@@ -819,7 +819,12 @@ public class MainActivity extends AppCompatActivity {
 
                 // if a brapi observation that has been synced, don't allow deleting
                 if (dt.isBrapiSynced(cRange.plot_id, currentTrait.getTrait())) {
-                    brapiDelete(currentTrait.getTrait(), false);
+                    if (currentTrait.getFormat().equals("photo")) {
+                        traitPhoto.brapiDelete(newTraits);
+                    }
+                    else {
+                        brapiDelete(currentTrait.getTrait(), false);
+                    }
                 }
                 else {
                     switch (currentTrait.getFormat()) {
