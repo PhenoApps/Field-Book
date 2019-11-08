@@ -488,6 +488,7 @@ public class BrapiExportActivity extends AppCompatActivity {
                 postImageMetaDataError == UploadError.API_UNAUTHORIZED_ERROR ||
                 putImageContentError == UploadError.API_UNAUTHORIZED_ERROR ||
                 putImageMetaDataError == UploadError.API_UNAUTHORIZED_ERROR) {
+                reset();
                 // Start the login process
                 BrapiAuthDialog brapiAuth = new BrapiAuthDialog(BrapiExportActivity.this, BrAPIService.exportTarget);
                 brapiAuth.show();
