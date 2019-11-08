@@ -143,4 +143,8 @@ public class BrapiObservation {
         this.variableName = variableName;
     }
 
+    public String getFieldBookDbId() { return fieldbookDbId; }
+
+    public void setFieldBookDbId(String fieldbookDbId) { this.fieldbookDbId = fieldbookDbId; }
+
 }

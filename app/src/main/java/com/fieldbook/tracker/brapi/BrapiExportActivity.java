@@ -299,7 +299,8 @@ public class BrapiExportActivity extends AppCompatActivity {
                     (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            processPostImageResponse(image);
+                            String fieldBookId = imageData.getFieldBookDbId();
+                            processPostImageResponse(image, fieldBookId);
                             postImageMetaDataUpdatesCount++;
                             imageData.setDbId(image.getImageDbId());
                             putImageContent(imageData, imagesNew);
@@ -335,12 +336,13 @@ public class BrapiExportActivity extends AppCompatActivity {
         brAPIService.putImageContent(image, BrAPIService.getBrapiToken(this),
             new Function<Image, Void>() {
                 @Override
-                public Void apply(final Image image) {
+                public Void apply(final Image responseImage) {
 
                     (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            processPutImageContentResponse(image, uploads);
+                            String fieldBookId = image.getFieldBookDbId();
+                            processPutImageContentResponse(responseImage, fieldBookId);
                             putImageContentUpdatesCount++;
                             uploadComplete();
                         }
@@ -384,7 +386,8 @@ public class BrapiExportActivity extends AppCompatActivity {
                     (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            processPutImageResponse(image);
+                            String fieldBookId = imageData.getFieldBookDbId();
+                            processPutImageResponse(image, fieldBookId);
                             putImageMetaDataUpdatesCount++;
                             imageData.setDbId(image.getImageDbId());
                             putImageContent(imageData, imagesEditedIncomplete);
@@ -579,9 +582,9 @@ public class BrapiExportActivity extends AppCompatActivity {
         return retVal;
     }
 
-    private UploadError processImageResponse(Image response,
-                                             List<com.fieldbook.tracker.brapi.Image> uploads,
+    private UploadError processImageResponse(Image response, String fieldBookId,
                                              Boolean writeSyncTime) {
+
         UploadError retVal = UploadError.NONE;
         // keep track of responses to be processed when finished?
 
@@ -589,18 +592,16 @@ public class BrapiExportActivity extends AppCompatActivity {
                 Locale.getDefault());
         String syncTime = timeStamp.format(Calendar.getInstance().getTime());
 
+        // Check that our image id was passed back
         com.fieldbook.tracker.brapi.Image converted = new com.fieldbook.tracker.brapi.Image(response);
-        int first_index = uploads.indexOf(converted);
-        int last_index = uploads.indexOf(converted);
-        if (first_index == -1) {
+        converted.setLastSyncedTime(syncTime);
+        converted.setFieldbookDbId(fieldBookId);
+
+        if (converted.getDbId() != null && converted.getFieldBookDbId() != null) {
+            dataHelper.updateImage(converted, writeSyncTime);
+        }
+        else {
             retVal = UploadError.MISSING_OBSERVATION_IN_RESPONSE;
-        } else if (first_index != last_index) {
-            retVal = UploadError.MULTIPLE_OBSERVATIONS_PER_VARIABLE;
-        } else {
-            com.fieldbook.tracker.brapi.Image update = uploads.get(first_index);
-            update.setDbId(converted.getDbId());
-            update.setLastSyncedTime(syncTime);
-            dataHelper.updateImage(update, writeSyncTime);
         }
 
         return retVal;
@@ -611,8 +612,8 @@ public class BrapiExportActivity extends AppCompatActivity {
         putObservationsError = error;
     }
 
-    private void processPostImageResponse(Image response) {
-        UploadError error = processImageResponse(response, imagesNew, false);
+    private void processPostImageResponse(Image response, String fieldBookId) {
+        UploadError error = processImageResponse(response, fieldBookId, false);
         // latch error so that if one happens it is not cleared until all posts are done
         if (postImageMetaDataError == UploadError.NONE) {
             postImageMetaDataError = error;
@@ -620,16 +621,16 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     }
 
-    private void processPutImageContentResponse(Image response, List<com.fieldbook.tracker.brapi.Image> uploads) {
-        UploadError error = processImageResponse(response, uploads, true);
+    private void processPutImageContentResponse(Image response, String fieldBookId) {
+        UploadError error = processImageResponse(response, fieldBookId, true);
         // latch error so that if one happens it is not cleared until all posts are done
         if (putImageContentError == UploadError.NONE) {
             putImageContentError = error;
         }
     }
 
-    private void processPutImageResponse(Image response) {
-        UploadError error = processImageResponse(response, imagesEditedIncomplete, false);
+    private void processPutImageResponse(Image response, String fieldBookId) {
+        UploadError error = processImageResponse(response, fieldBookId, false);
         // latch error so that if one happens it is not cleared until all posts are done
         if (putImageMetaDataError == UploadError.NONE) {
             putImageMetaDataError = error;

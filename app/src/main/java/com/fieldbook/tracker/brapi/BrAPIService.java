@@ -433,6 +433,8 @@ public class BrAPIService {
             request.setImageName(image.getImageName());
             request.setDescription(image.getDescription());
             request.setImageFileName(image.getFileName());
+            // TODO: Add this back in when ontology is fixed in breedbase
+            //request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
 
             imagesApi.imagesPostAsync(request, brapiToken, callback);
 
