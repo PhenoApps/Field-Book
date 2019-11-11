@@ -3,11 +3,12 @@ package com.fieldbook.tracker.brapi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import androidx.exifinterface.media.ExifInterface;
+
+import android.graphics.Matrix;
 import android.os.Build;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -30,6 +31,7 @@ public class Image extends BrapiObservation {
     private Bitmap bitmap;
     private Bitmap missing;
     private GeoJSON location;
+    private ExifInterface exif;
 
     private List<String> descriptiveOntologyTerms;
     private String description;
@@ -43,7 +45,7 @@ public class Image extends BrapiObservation {
         this.missing = missingPhoto;
         this.location = new GeoJSON();
         try {
-            ExifInterface exif = new ExifInterface(filePath);
+            exif = new ExifInterface(filePath);
             double latlon[] = exif.getLatLong();
             if (latlon != null) {
                 double lat = latlon[0];
@@ -133,7 +135,7 @@ public class Image extends BrapiObservation {
 
     public byte[] getImageData() {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 95, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 99, stream);
         return stream.toByteArray();
     }
 
@@ -166,6 +168,29 @@ public class Image extends BrapiObservation {
             width = bitmap.getWidth();
             height = bitmap.getHeight();
             mimeType = "image/jpeg";
+        }
+
+        rotateImageIfNeeded();
+    }
+
+    private void rotateImageIfNeeded() {
+
+        if (exif != null) {
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            int angle = 0;
+
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+                angle = 90;
+            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                angle = 180;
+            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                angle = 270;
+            }
+
+            Matrix mat = new Matrix();
+            mat.postRotate(angle);
+
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mat, true);
         }
     }
 }
