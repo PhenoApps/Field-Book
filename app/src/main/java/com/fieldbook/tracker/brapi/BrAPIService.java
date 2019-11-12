@@ -116,7 +116,6 @@ public class BrAPIService {
 
     private NewImageRequest mapImage(com.fieldbook.tracker.brapi.Image image) {
         NewImageRequest request = new NewImageRequest();
-        // TODO: hardcoded stuff in here for now until we get the data we need
         request.setCopyright(image.getCopyright());
         request.setDescription(image.getDescription());
         request.setImageWidth(image.getWidth());
@@ -127,8 +126,7 @@ public class BrAPIService {
         request.setImageName(image.getImageName());
         request.setDescription(image.getDescription());
         request.setImageFileName(image.getFileName());
-        // TODO: Add this back in when ontology is fixed in breedbase
-        //request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
+        request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
         request.setImageLocation(image.getLocation());
         request.setImageTimeStamp(image.getTimestamp());
         return request;
