@@ -130,7 +130,7 @@ public class BrAPIService {
         // TODO: Add this back in when ontology is fixed in breedbase
         //request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
         request.setImageLocation(image.getLocation());
-        //request.setImageTimeStamp(image.getTimestamp());
+        request.setImageTimeStamp(image.getTimestamp());
         return request;
     }
 
