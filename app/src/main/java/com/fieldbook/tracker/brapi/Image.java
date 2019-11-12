@@ -4,16 +4,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import androidx.exifinterface.media.ExifInterface;
 
-import android.graphics.Matrix;
-import android.os.Build;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import io.swagger.client.model.GeoJSON;
@@ -32,6 +29,7 @@ public class Image extends BrapiObservation {
     private Bitmap missing;
     private GeoJSON location;
     private ExifInterface exif;
+    private byte[] bytes;
 
     private List<String> descriptiveOntologyTerms;
     private String description;
@@ -44,23 +42,6 @@ public class Image extends BrapiObservation {
         this.imageName = this.fileName;
         this.missing = missingPhoto;
         this.location = new GeoJSON();
-        try {
-            exif = new ExifInterface(filePath);
-            double latlon[] = exif.getLatLong();
-            if (latlon != null) {
-                double lat = latlon[0];
-                double lon = latlon[1];
-                location.setType(GeoJSON.TypeEnum.FEATURE);
-                JsonObject o = new JsonObject();
-                o.addProperty("type", "Point");
-                JsonArray a = new JsonArray();
-                a.add(lon);
-                a.add(lat);
-                o.add("coordinates", a);
-                location.setGeometry(o);
-            }
-        } catch (IOException e) { }
-
     }
 
     public Image(io.swagger.client.model.Image response) {
@@ -75,8 +56,7 @@ public class Image extends BrapiObservation {
         if (o == null || getClass() != o.getClass()) return false;
         Image that = (Image) o;
         return  objectsEquals(unitDbId, that.getUnitDbId()) &&
-                objectsEquals(fileName, that.getFileName()); //&&
-                //objectsEquals(timestamp, that.getTimestamp());
+                objectsEquals(fileName, that.getFileName());
     }
 
     @Override
@@ -116,29 +96,9 @@ public class Image extends BrapiObservation {
         return file;
     }
 
-    public byte[] getBytes() {
-        int size = byteSizeOf(bitmap);
-        ByteBuffer buffer = ByteBuffer.allocate(size);
-        bitmap.copyPixelsToBuffer(buffer);
-        return buffer.array();
-    }
-
-    private int byteSizeOf(Bitmap data) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR1) {
-            return data.getRowBytes() * data.getHeight();
-        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            return data.getByteCount();
-        } else {
-            return data.getAllocationByteCount();
-        }
-    }
-
     public byte[] getImageData() {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 99, stream);
-        return stream.toByteArray();
+        return bytes;
     }
-
 
     public List<String> getDescriptiveOntologyTerms() {
         return this.descriptiveOntologyTerms;
@@ -155,42 +115,44 @@ public class Image extends BrapiObservation {
     }
 
     public void loadImage() {
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        //bmOptions.inJustDecodeBounds = true;
-
-        bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-
-        if (bitmap == null) {
+        if (!file.exists()) {
             bitmap = missing;
+            width = missing.getWidth();
+            height = missing.getHeight();
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 95, stream);
+            bytes = stream.toByteArray();
+            fileSize = bytes.length;
+        }
+        else {
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inJustDecodeBounds = true;
+            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), bmOptions);
+            width = bmOptions.outWidth;
+            height = bmOptions.outHeight;
+            bytes = new byte[(int)file.length()];
+
+            try {
+                exif = new ExifInterface(file.getAbsolutePath());
+                double latlon[] = exif.getLatLong();
+                if (latlon != null) {
+                    double lat = latlon[0];
+                    double lon = latlon[1];
+                    location.setType(GeoJSON.TypeEnum.FEATURE);
+                    JsonObject o = new JsonObject();
+                    o.addProperty("type", "Point");
+                    JsonArray a = new JsonArray();
+                    a.add(lon);
+                    a.add(lat);
+                    o.add("coordinates", a);
+                    location.setGeometry(o);
+                }
+
+                FileInputStream fin = new FileInputStream(file);
+                fin.read(bytes);
+            } catch (IOException e) { }
         }
 
-        if (bitmap != null) {
-            width = bitmap.getWidth();
-            height = bitmap.getHeight();
-            mimeType = "image/jpeg";
-        }
-
-        rotateImageIfNeeded();
-    }
-
-    private void rotateImageIfNeeded() {
-
-        if (exif != null) {
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            int angle = 0;
-
-            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
-                angle = 90;
-            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
-                angle = 180;
-            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
-                angle = 270;
-            }
-
-            Matrix mat = new Matrix();
-            mat.postRotate(angle);
-
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mat, true);
-        }
+        mimeType = "image/jpeg";
     }
 }

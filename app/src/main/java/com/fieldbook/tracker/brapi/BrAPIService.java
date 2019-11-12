@@ -31,7 +31,6 @@ import io.swagger.client.api.ObservationsApi;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ObservationVariablesApi;
-import io.swagger.client.model.GeoJSON;
 import io.swagger.client.model.Image;
 import io.swagger.client.model.ImageResponse;
 import io.swagger.client.model.Metadata;
