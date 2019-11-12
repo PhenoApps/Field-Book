@@ -315,7 +315,7 @@ public class BrapiServiceTest {
 
         postImageMetaDataResponse = null;
         final CountDownLatch signal = new CountDownLatch(1);
-        final String brapiToken = "Bearer xoktgruhclayzdlrifvsmtotjvduweojwqawvnurnlkdntwpenmwzpiklifbrdatfcixrzo";
+        final String brapiToken = "Bearer YYYY";
 
         com.fieldbook.tracker.brapi.Image image = new com.fieldbook.tracker.brapi.Image("/path/test.jpg", missingImage);
         image.setUnitDbId("1");

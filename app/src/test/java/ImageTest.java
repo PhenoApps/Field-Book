@@ -1,4 +1,3 @@
-
 import android.graphics.Bitmap;
 
 import com.fieldbook.tracker.brapi.Image;
@@ -8,8 +7,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import static org.checkerframework.checker.units.UnitsTools.h;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
@@ -22,7 +19,8 @@ public class ImageTest {
     public void setUp() throws Exception {
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap bmp = Bitmap.createBitmap(100, 100, conf);
-        this.image = new Image(filePath, bmp);
+        image = new Image(filePath, bmp);
+        image.loadImage();
     }
 
     @Test
@@ -37,11 +35,13 @@ public class ImageTest {
     }
 
     @Test
+    public void correctImagename() {
+        assertTrue("Imagename check", image.getImageName().equals("file.jpg"));
+    }
+
+    @Test
     public void correctMimeType() {
         assertTrue("MimeType check", image.getMimeType().equals("image/jpeg"));
     }
-
-
-
 
 }
