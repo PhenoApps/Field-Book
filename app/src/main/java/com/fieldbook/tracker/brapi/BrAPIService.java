@@ -117,7 +117,7 @@ public class BrAPIService {
     private NewImageRequest mapImage(com.fieldbook.tracker.brapi.Image image) {
         NewImageRequest request = new NewImageRequest();
         // TODO: hardcoded stuff in here for now until we get the data we need
-        request.setCopyright("2019");
+        request.setCopyright(image.getCopyright());
         request.setDescription(image.getDescription());
         request.setImageWidth(image.getWidth());
         request.setImageHeight(image.getHeight());

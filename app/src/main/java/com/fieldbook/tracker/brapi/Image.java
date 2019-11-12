@@ -96,6 +96,10 @@ public class Image extends BrapiObservation {
         return file;
     }
 
+    public String getCopyright() {
+        return String.valueOf(timestamp.getYear());
+    }
+
     public byte[] getImageData() {
         return bytes;
     }
