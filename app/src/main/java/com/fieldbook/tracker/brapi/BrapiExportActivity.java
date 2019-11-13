@@ -505,8 +505,11 @@ public class BrapiExportActivity extends AppCompatActivity {
                 else if (putImageContentError != UploadError.NONE) {
                     message = getMessageForErrorCode(putImageContentError);
                 }
+                else if (putImageMetaDataError != UploadError.NONE){
+                    message = getMessageForErrorCode(putImageMetaDataError);
+                }
                 else {
-                    message = getMessageForErrorCode(putObservationsError);
+                    message = getMessageForErrorCode(UploadError.NONE);
                 }
 
                 Toast.makeText(this.getApplicationContext(), message, Toast.LENGTH_LONG).show();
