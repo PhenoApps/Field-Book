@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import io.swagger.client.model.GeoJSON;
 
@@ -29,6 +31,7 @@ public class Image extends BrapiObservation {
     private Bitmap missing;
     private GeoJSON location;
     private ExifInterface exif;
+    private Map<String, String> additionalInfo;
     private byte[] bytes;
 
     private List<String> descriptiveOntologyTerms;
@@ -42,6 +45,7 @@ public class Image extends BrapiObservation {
         this.imageName = this.fileName;
         this.missing = missingPhoto;
         this.location = new GeoJSON();
+        this.additionalInfo = new HashMap<>();
     }
 
     public Image(io.swagger.client.model.Image response) {
@@ -98,6 +102,10 @@ public class Image extends BrapiObservation {
 
     public String getCopyright() {
         return String.valueOf(timestamp.getYear());
+    }
+
+    public Map<String, String> getAdditionalInfo() {
+        return additionalInfo;
     }
 
     public byte[] getImageData() {

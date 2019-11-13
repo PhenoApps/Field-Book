@@ -116,19 +116,19 @@ public class BrAPIService {
 
     private NewImageRequest mapImage(com.fieldbook.tracker.brapi.Image image) {
         NewImageRequest request = new NewImageRequest();
+        request.setAdditionalInfo(image.getAdditionalInfo());
         request.setCopyright(image.getCopyright());
         request.setDescription(image.getDescription());
-        request.setImageWidth(image.getWidth());
-        request.setImageHeight(image.getHeight());
+        request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
+        request.setImageFileName(image.getFileName());
         request.setImageFileSize((int)image.getFileSize());
+        request.setImageHeight(image.getHeight());
+        request.setImageLocation(image.getLocation());
+        request.setImageName(image.getImageName());
+        request.setImageTimeStamp(image.getTimestamp());
+        request.setImageWidth(image.getWidth());
         request.setMimeType(image.getMimeType());
         request.setObservationUnitDbId(image.getUnitDbId());
-        request.setImageName(image.getImageName());
-        request.setDescription(image.getDescription());
-        request.setImageFileName(image.getFileName());
-        request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
-        request.setImageLocation(image.getLocation());
-        request.setImageTimeStamp(image.getTimestamp());
         return request;
     }
 
