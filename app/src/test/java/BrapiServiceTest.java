@@ -1,4 +1,5 @@
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 
@@ -15,6 +16,7 @@ import com.fieldbook.tracker.traits.TraitObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.threeten.bp.OffsetDateTime;
 
 
@@ -23,11 +25,13 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import io.swagger.client.ApiException;
+import io.swagger.client.model.Image;
 import io.swagger.client.model.NewObservationDbIdsObservations;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@RunWith(RobolectricTestRunner.class)
 public class BrapiServiceTest {
 
     String brapiBaseUrl = "https://test-server.brapi.org/brapi/v1";
@@ -38,12 +42,16 @@ public class BrapiServiceTest {
     Boolean checkGetTraitsResult = false;
     Boolean checkGetOntologyResult = false;
     List<NewObservationDbIdsObservations> putObservationsResponse;
+    Image postImageMetaDataResponse;
+    Bitmap missingImage;
 
 
     @Before
     public void setUp() throws Exception {
         // Instantiate our brapi service class
         this.brAPIService = new BrAPIService(brapiBaseUrl, null);
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
+        Bitmap missingImage = Bitmap.createBitmap(100, 100, conf);
     }
 
     @Test
@@ -295,6 +303,50 @@ public class BrapiServiceTest {
             assertTrue(putObservationsResponse.size() == 1);
             assertTrue(putObservationsResponse.get(0).getObservationUnitDbId().equals("1"));
             assertTrue(putObservationsResponse.get(0).getObservationVariableDbId().equals("MO_123:100002"));
+
+        }
+        catch (InterruptedException e) {
+            fail(e.toString());
+        }
+    }
+
+    @Test
+    public void checkPostImageMetaData(){
+
+        postImageMetaDataResponse = null;
+        final CountDownLatch signal = new CountDownLatch(1);
+        final String brapiToken = "Bearer YYYY";
+
+        com.fieldbook.tracker.brapi.Image image = new com.fieldbook.tracker.brapi.Image("/path/test.jpg", missingImage);
+        image.setUnitDbId("1");
+
+        // Call our get study details endpoint with the same parsing that our classes use.
+        this.brAPIService.postImageMetaData(image, brapiToken, new Function<Image, Void>() {
+                    @Override
+                    public Void apply(final Image response) {
+
+                        postImageMetaDataResponse = response;
+                        signal.countDown();
+
+                        return null;
+                    }
+                }, new Function<Integer, Void>() {
+
+                    @Override
+                    public Void apply(final Integer code) {
+
+                        signal.countDown();
+
+                        return null;
+                    }
+                }
+        );
+
+        // Wait for our callback and evaluate how we did
+        try {
+            signal.await();
+
+            assertTrue(postImageMetaDataResponse != null);
 
         }
         catch (InterruptedException e) {

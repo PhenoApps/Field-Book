@@ -335,14 +335,23 @@
     <!-- BrAPI export dialog -->
     <string name="brapi_export_button">Export</string>
     <string name="brapi_export_title">BrAPI Export Statistics</string>
+    <string name="brapi_export_observations">Observations</string>
     <string name="brapi_export_num_new_obs"> New Observations</string>
     <string name="brapi_export_num_synced_obs"> Synced Observations</string>
     <string name="brapi_export_num_ed_obs"> Edited Observations</string>
     <string name="brapi_export_skipped_observations"> Skipped Observations</string>
     <string name="brapi_export_skipped_user_created"> User Created Trait Observations</string>
     <string name="brapi_export_skipped_wrong_source"> Different Data Source</string>
+    <string name="brapi_export_num_new_imgs">New Images</string>
+    <string name="brapi_export_num_synced_imgs">Synced Images</string>
+    <string name="brapi_export_num_ed_imgs">Edited Images</string>
+    <string name="brapi_export_num_incomplete_imgs">Incomplete Synced Images</string>
+    <string name="brapi_export_skipped_images">Skipped Images</string>
+    <string name="brapi_export_skipped_user_created_images">User Created Trait Images</string>
+    <string name="brapi_export_images">Images</string>
     <string name="brapi_na">NA</string>
     <string name="brapi_delete_message">Cannot delete synced BrAPI observation, using NA instead</string>
+    <string name="images_loading">Loading Images...</string>
 
 
     <!-- Warnings/Catches -->

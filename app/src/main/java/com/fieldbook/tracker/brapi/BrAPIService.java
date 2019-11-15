@@ -11,7 +11,6 @@ import android.util.Patterns;
 
 import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.fields.FieldObject;
@@ -19,7 +18,6 @@ import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.TraitObject;
 import com.fieldbook.tracker.utilities.Constants;
 
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,11 +26,15 @@ import java.util.Map;
 
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
+import io.swagger.client.api.ImagesApi;
 import io.swagger.client.api.ObservationsApi;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ObservationVariablesApi;
+import io.swagger.client.model.Image;
+import io.swagger.client.model.ImageResponse;
 import io.swagger.client.model.Metadata;
+import io.swagger.client.model.NewImageRequest;
 import io.swagger.client.model.NewObservationDbIdsObservations;
 import io.swagger.client.model.NewObservationsRequest;
 import io.swagger.client.model.NewObservationsRequestObservations;
@@ -56,6 +58,7 @@ import java.util.Set;
 public class BrAPIService {
 
     private DataHelper dataHelper;
+    private ImagesApi imagesApi;
     private StudiesApi studiesApi;
     private PhenotypesApi phenotypesApi;
     private ObservationsApi observationsApi;
@@ -74,6 +77,7 @@ public class BrAPIService {
         // Make timeout longer. Set it to 60 seconds for now
         apiClient.setReadTimeout(60000);
 
+        this.imagesApi = new ImagesApi(apiClient);        
         this.studiesApi = new StudiesApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);
@@ -81,6 +85,112 @@ public class BrAPIService {
 
     }
 
+    public void postImageMetaData(com.fieldbook.tracker.brapi.Image image, String brapiToken,
+                                  final Function<Image, Void> function,
+                                  final Function<Integer, Void> failFunction) {
+
+        try {
+            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
+                @Override
+                public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
+                    final Image response = imageResponse.getResult();
+                    function.apply(response);
+                }
+
+                @Override
+                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
+                    final ApiException error = e;
+                    Integer code = new Integer(error.getCode());
+                    failFunction.apply(code);
+                }
+            };
+
+            NewImageRequest request = mapImage(image);
+            imagesApi.imagesPostAsync(request, brapiToken, callback);
+
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private NewImageRequest mapImage(com.fieldbook.tracker.brapi.Image image) {
+        NewImageRequest request = new NewImageRequest();
+        request.setAdditionalInfo(image.getAdditionalInfo());
+        request.setCopyright(image.getCopyright());
+        request.setDescription(image.getDescription());
+        request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
+        request.setImageFileName(image.getFileName());
+        request.setImageFileSize((int)image.getFileSize());
+        request.setImageHeight(image.getHeight());
+        request.setImageLocation(image.getLocation());
+        request.setImageName(image.getImageName());
+        request.setImageTimeStamp(image.getTimestamp());
+        request.setImageWidth(image.getWidth());
+        request.setMimeType(image.getMimeType());
+        request.setObservationUnitDbId(image.getUnitDbId());
+        return request;
+    }
+
+    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction){
+        try {
+
+            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
+                @Override
+                public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
+
+                    final Image response = imageResponse.getResult();
+                    function.apply(response);
+                    
+                }
+                    
+                @Override
+                public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
+                    final ApiException error = e;
+                    Integer code = new Integer(error.getCode());
+                    failFunction.apply(code);
+                }
+            };
+                       
+            imagesApi.imagesImageDbIdImagecontentPutAsync(image.getDbId(), image.getImageData(), brapiToken, callback);
+            
+        } catch (ApiException e){
+            e.printStackTrace();
+        }
+        
+    }
+
+    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction){
+        try {
+
+            BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
+                @Override
+                public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
+
+                    //function.apply(imageResponse.getresult());
+                    function.apply(imageResponse.getResult());                    
+                    
+                }
+                    
+                @Override
+                public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
+                    // report failure
+                    final ApiException error = e;
+                    Integer code = new Integer(error.getCode());
+                    failFunction.apply(code);
+                }
+            };
+
+            NewImageRequest request = mapImage(image);
+            imagesApi.imagesImageDbIdPutAsync(image.getDbId(), request, brapiToken, callback);
+
+        } catch (ApiException e){
+            e.printStackTrace();
+        }
+        
+    }
+
+    
     public void getStudies(final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction){
         try {
 
