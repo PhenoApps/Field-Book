@@ -1,6 +1,6 @@
 package com.fieldbook.tracker.brapi;
 
-public class StudySummary {
+public class BrapiStudySummary {
 
     private String studyName;
     private String studyDbId;

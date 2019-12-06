@@ -4,83 +4,128 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.text.TextWatcher;
+import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
+import com.fieldbook.tracker.MainActivity;
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.traits.TraitObject;
 
 import java.util.HashMap;
 
 public class PercentTraitLayout extends TraitLayout {
+    private SeekBar seekBar;
+    private SeekBar.OnSeekBarChangeListener seekListener;
 
     public PercentTraitLayout(Context context) {
         super(context);
-        throw new RuntimeException("Stub!");
     }
 
+    public PercentTraitLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
-    public void loadLayout(EditText etCurVal, DataWrapper dataWrapper, HashMap newTraits,
-                           TraitObject currentTrait, String displayColor, TextWatcher cvNum,
-                           TextWatcher cvText, SeekBar seekBar, SeekBar.OnSeekBarChangeListener seekListener, Handler mHandler){
+    public PercentTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
 
-        etCurVal.setVisibility(EditText.VISIBLE);
-        etCurVal.removeTextChangedListener(cvNum);
-        etCurVal.removeTextChangedListener(cvText);
+    public SeekBar getSeekBar(){
+        return seekBar;
+    }
 
-        if (newTraits.containsKey(currentTrait.trait) && !newTraits.get(currentTrait.trait).toString().equals("NA")) {
+    @Override
+    public void init(){
+        // Progress bar
+        seekBar = findViewById(R.id.seekbar);
+        seekBar.setMax(100);
 
-            etCurVal.setTextColor(Color.BLACK);
-            seekBar.setMax(Integer.parseInt(currentTrait.maximum));
-            seekBar.setOnSeekBarChangeListener(null);
+        seekListener = new SeekBar.OnSeekBarChangeListener() {
 
-            if (currentTrait.defaultValue != null) {
+            public void onProgressChanged(SeekBar sb, int progress, boolean arg2) {
+                if (sb.getProgress() < Integer.parseInt(getCurrentTrait().getMinimum()))
+                    sb.setProgress(Integer.parseInt(getCurrentTrait().getMinimum()));
 
-                if (currentTrait.defaultValue.length() > 0) {
-                    if (newTraits.get(currentTrait.trait).toString()
-                            .equals(currentTrait.defaultValue))
-                        etCurVal.setTextColor(Color.BLACK);
-                    else
-                        etCurVal.setTextColor(Color.parseColor(displayColor));
-                } else {
-                    if (newTraits.get(currentTrait.trait).toString().equals("0"))
-                        etCurVal.setTextColor(Color.BLACK);
-                    else
-                        etCurVal.setTextColor(Color.parseColor(displayColor));
-                }
-            } else {
-                if (newTraits.get(currentTrait.trait).toString().equals("0"))
-                    etCurVal.setTextColor(Color.BLACK);
-                else
-                    etCurVal.setTextColor(Color.parseColor(displayColor));
+                setCurrentValueText(sb.getProgress(), Color.parseColor(getDisplayColor()));
             }
 
-            String curVal = newTraits.get(currentTrait.trait).toString() + "%";
-            etCurVal.setText(curVal);
-            seekBar.setProgress(Integer.parseInt(newTraits.get(currentTrait.trait).toString()));
+            public void onStartTrackingTouch(SeekBar arg0) {
+            }
+
+            public void onStopTrackingTouch(SeekBar arg0) {
+                updateTrait(getCurrentTrait().getTrait(), "percent", String.valueOf(seekBar.getProgress()));
+            }
+        };
+
+        seekBar.setOnSeekBarChangeListener(seekListener);
+    }
+
+    public void loadLayout(){
+
+        getEtCurVal().setHint("");
+        getEtCurVal().setVisibility(EditText.VISIBLE);
+        getEtCurVal().removeTextChangedListener(getCvNum());
+        getEtCurVal().removeTextChangedListener(getCvText());
+
+        if (getNewTraits().containsKey(getCurrentTrait().getTrait())
+                && !getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
+            String currentValue = getNewTraits().get(getCurrentTrait().getTrait()).toString();
+            seekBar.setMax(Integer.parseInt(getCurrentTrait().getMaximum()));
+
+            int textColor = currentValue.equals(getDefaultValue()) ? Color.BLACK : Color.parseColor(getDisplayColor());
+            setCurrentValueText(currentValue, textColor);
+
+            seekBar.setOnSeekBarChangeListener(null);
+            seekBar.setProgress(Integer.parseInt(currentValue));
             seekBar.setOnSeekBarChangeListener(seekListener);
 
-        } else if (newTraits.containsKey(currentTrait.trait) && newTraits.get(currentTrait.trait).toString().equals("NA")) {
-            etCurVal.setText("NA");
-            etCurVal.setTextColor(Color.parseColor(displayColor));
+        } else if (getNewTraits().containsKey(getCurrentTrait().getTrait())
+                && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
+            getEtCurVal().setText("NA");
+            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
             seekBar.setProgress(0);
         } else {
-            seekBar.setOnSeekBarChangeListener(null);
-
-            etCurVal.setText("");
-            seekBar.setProgress(0);
-            etCurVal.setTextColor(Color.BLACK);
-
-            seekBar.setMax(Integer
-                    .parseInt(currentTrait.maximum));
-
-            if (currentTrait.defaultValue != null
-                    && currentTrait.defaultValue.length() > 0) {
-                etCurVal.setText(currentTrait.defaultValue);
-                seekBar.setProgress(Integer
-                        .valueOf(currentTrait.defaultValue));
+            String loadValue = "";
+            if (getCurrentTrait().getDefaultValue() != null
+                    && !getCurrentTrait().getDefaultValue().isEmpty()) {
+                loadValue = getDefaultValue();
             }
 
+            setCurrentValueText(loadValue, Color.BLACK);
+            seekBar.setMax(Integer.parseInt(getCurrentTrait().getMaximum()));
+            seekBar.setOnSeekBarChangeListener(null);
+            seekBar.setProgress(Integer.parseInt(getDefaultValue()));
             seekBar.setOnSeekBarChangeListener(seekListener);
         }
+    }
+
+    private String getDefaultValue() {
+        String defaultValue = "0";
+        if (getCurrentTrait().getDefaultValue() != null
+                && !getCurrentTrait().getDefaultValue().isEmpty()) {
+            defaultValue = getCurrentTrait().getDefaultValue();
+        }
+        return defaultValue;
+    }
+
+    private void setCurrentValueText(int value, int color){
+        setCurrentValueText(String.valueOf(value), color);
+    }
+
+    private void setCurrentValueText(String value, int color){
+        getEtCurVal().setTextColor(color);
+        if(value.isEmpty())
+            getEtCurVal().setText(value);
+        else
+            getEtCurVal().setText(value + "%");
+    }
+
+    @Override
+    public void deleteTraitListener() {
+        removeTrait(getCurrentTrait().getTrait());
+        setCurrentValueText("", Color.BLACK);
+        seekBar.setOnSeekBarChangeListener(null);
+        seekBar.setProgress(Integer.parseInt(getDefaultValue()));
+        seekBar.setOnSeekBarChangeListener(seekListener);
     }
 }

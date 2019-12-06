@@ -9,13 +9,20 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.fieldbook.tracker.brapi.Image;
+import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.fields.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.search.SearchData;
 import com.fieldbook.tracker.traits.TraitObject;
+
+import org.threeten.bp.OffsetDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -39,7 +47,7 @@ import java.util.regex.Pattern;
  */
 public class DataHelper {
     private static final String DATABASE_NAME = "fieldbook.db";
-    static final int DATABASE_VERSION = 7;
+    static final int DATABASE_VERSION = 8;
 
     private static String TAG = "Field Book";
 
@@ -61,17 +69,19 @@ public class DataHelper {
 
     private static final String INSERTTRAITS = "insert into "
             + TRAITS
-            + "(trait, format, defaultValue, minimum, maximum, details, categories, "
-            + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?)";
+            + "(external_db_id, trait_data_source, trait, format, defaultValue, minimum, maximum, details, categories, "
+            + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String INSERTUSERTRAITS = "insert into " + USER_TRAITS
-            + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id) values (?,?,?,?,?,?,?,?,?,?)";
+            + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id, observation_db_id, last_synced_time) values (?,?,?,?,?,?,?,?,?,?,?,?)";
 
     private SimpleDateFormat timeStamp;
 
     private OpenHelper openHelper;
 
     private SharedPreferences ep;
+
+    private Bitmap missingPhoto;
 
     public DataHelper(Context context) {
         try {
@@ -85,6 +95,9 @@ public class DataHelper {
 
             timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
                     Locale.getDefault());
+
+
+            missingPhoto = BitmapFactory.decodeResource(context.getResources(), R.drawable.trait_photo_missing);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -108,7 +121,7 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertUserTraits(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id) {
+    public long insertUserTraits(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id, String observationDbId, OffsetDateTime lastSyncedTime) {
 
         Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
         int rep = cursor.getCount() + 1;
@@ -124,6 +137,18 @@ public class DataHelper {
             this.insertUserTraits.bindString(8, Integer.toString(rep));
             this.insertUserTraits.bindString(9, notes);
             this.insertUserTraits.bindString(10, exp_id);
+            if (observationDbId != null) {
+                this.insertUserTraits.bindString(11, observationDbId);
+            }
+            else {
+                this.insertUserTraits.bindNull(11);
+            }
+            if (lastSyncedTime != null) {
+                this.insertUserTraits.bindString(12, lastSyncedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            }
+            else {
+                this.insertUserTraits.bindNull(12);
+            }
 
             return this.insertUserTraits.executeInsert();
         } catch (Exception e) {
@@ -156,6 +181,408 @@ public class DataHelper {
 
         return largest;
     }
+
+    public Boolean isBrapiSynced(String rid, String parent) {
+
+        Boolean synced = false;
+        Observation o = new Observation();
+
+        Cursor cursor = db.rawQuery("SELECT observation_db_id, last_synced_time, timeTaken from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
+
+        if (cursor.moveToFirst()) {
+            o.setDbId(cursor.getString(0));
+            o.setLastSyncedTime(cursor.getString(1));
+            o.setTimestamp(cursor.getString(2));
+
+            if (o.getStatus() == Observation.Status.SYNCED || o.getStatus() == Observation.Status.EDITED) {
+                synced = true;
+            }
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return synced;
+    }
+
+    /**
+     * Get user created trait observations for currently selected study
+     */
+    public List<Observation> getUserTraitObservations() {
+        List<Observation> observations = new ArrayList<>();
+
+        // get currently selected study
+        String exp_id = Integer.toString(ep.getInt("ExpID", 0));
+
+        String query = "SELECT " +
+                "user_traits.id, " +
+                "user_traits.userValue " +
+                "FROM " +
+                "user_traits " +
+                "JOIN " +
+                "traits ON user_traits.parent = traits.trait " +
+                "WHERE " +
+                "(traits.trait_data_source = 'local' OR traits.trait_data_source IS NULL)" +
+                "AND " +
+                "traits.format <> 'photo' " +
+                "AND " +
+                "user_traits.exp_id = " + exp_id + ";";
+
+        Cursor cursor = db.rawQuery(query,null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Observation o = new Observation();
+                o.setFieldbookDbId(cursor.getString(0));
+                o.setValue(cursor.getString(1));
+                observations.add(o);
+
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return observations;
+    }
+
+    /**
+     * Get user created trait observations for currently selected study
+     */
+    public List<Image> getUserTraitImageObservations() {
+        List<Image> images = new ArrayList<>();
+
+        // get currently selected study
+        String exp_id = Integer.toString(ep.getInt("ExpID", 0));
+
+        String query = "SELECT " +
+                "user_traits.id, " +
+                "user_traits.userValue " +
+                "FROM " +
+                "user_traits " +
+                "JOIN " +
+                "traits ON user_traits.parent = traits.trait " +
+                "WHERE " +
+                "(traits.trait_data_source = 'local' OR traits.trait_data_source IS NULL)" +
+                "AND " +
+                "traits.format = 'photo' " +
+                "AND " +
+                "user_traits.exp_id = " + exp_id + ";";
+
+        Cursor cursor = db.rawQuery(query,null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Image image = new Image(cursor.getString(1), missingPhoto);
+                image.setFieldbookDbId(cursor.getString(0));
+                images.add(image);
+
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return images;
+    }
+
+    public List<Observation> getWrongSourceObservations(String hostUrl) {
+
+        List<Observation> observations = new ArrayList<>();
+
+        String query = String.format("SELECT " +
+                "user_traits.id, " +
+                "user_traits.userValue " +
+                "FROM " +
+                "user_traits " +
+                "JOIN " +
+                "traits ON user_traits.parent = traits.trait " +
+                "JOIN " +
+                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+                "WHERE " +
+                "exp_id.exp_source IS NOT NULL " +
+                "AND " +
+                "traits.trait_data_source <> '%s' " +
+                "AND " +
+                "traits.trait_data_source <> 'local' " +
+                "AND " +
+                "traits.trait_data_source IS NOT NULL " +
+                "AND " +
+                "traits.format <> 'photo'", hostUrl) ;
+
+        Cursor cursor = db.rawQuery(query,null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Observation o = new Observation();
+                o.setFieldbookDbId(cursor.getString(0));
+                o.setValue(cursor.getString(1));
+                observations.add(o);
+
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return observations;
+    }
+
+    public List<Image> getWrongSourceImageObservations(String hostUrl) {
+
+        List<Image> images = new ArrayList<>();
+
+        String query = String.format("SELECT " +
+                "user_traits.id, " +
+                "user_traits.userValue " +
+                "FROM " +
+                "user_traits " +
+                "JOIN " +
+                "traits ON user_traits.parent = traits.trait " +
+                "JOIN " +
+                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+                "WHERE " +
+                "exp_id.exp_source IS NOT NULL " +
+                "AND " +
+                "traits.trait_data_source <> '%s' " +
+                "AND " +
+                "traits.trait_data_source <> 'local' " +
+                "AND " +
+                "traits.trait_data_source IS NOT NULL " +
+                "AND " +
+                "traits.format = 'photo'", hostUrl) ;
+
+        Cursor cursor = db.rawQuery(query,null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Image image = new Image(cursor.getString(1), missingPhoto);
+                image.setFieldbookDbId(cursor.getString(0));
+                images.add(image);
+
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return images;
+    }
+
+    /**
+     * Get the data for brapi export to external system
+     */
+    public List<Observation> getObservations(String hostUrl) {
+
+        List<Observation> observations = new ArrayList<Observation>();
+
+        // Get only the data that belongs to the system we are importing to.
+        String query = "SELECT " +
+                    "range.observationUnitDbId, " +
+                    "range.observationUnitName, " +
+                    "traits.external_db_id, " +
+                    "user_traits.timeTaken, " +
+                    "user_traits.userValue, " +
+                    "traits.trait, " +
+                    "exp_id.exp_alias, " +
+                    "user_traits.id, " +
+                    "user_traits.observation_db_id, " +
+                    "user_traits.last_synced_time, " +
+                    "user_traits.person " +
+                    "FROM " +
+                    "user_traits " +
+                    "JOIN " +
+                    "range ON user_traits.rid = range.plot " +
+                    "JOIN " +
+                    "traits ON user_traits.parent = traits.trait " +
+                    "JOIN " +
+                    "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+                    "WHERE " +
+                    "exp_id.exp_source IS NOT NULL " +
+                    "AND " +
+                    String.format("traits.trait_data_source = '%s' ", hostUrl) +
+                    "AND " +
+                    "user_traits.userValue <> '' " +
+                    "AND " +
+                    "traits.trait_data_source IS NOT NULL " +
+                    "AND " +
+                    "traits.format <> 'photo'";
+
+        Cursor cursor = db.rawQuery(query,null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Observation o = new Observation();
+
+                o.setUnitDbId(cursor.getString(0));
+                o.setVariableDbId(cursor.getString(2));
+                o.setTimestamp(cursor.getString(3));
+                o.setValue(cursor.getString(4));
+                o.setVariableName(cursor.getString(5));
+                o.setStudyId(cursor.getString(6));
+                o.setFieldbookDbId(cursor.getString(7));
+                o.setDbId(cursor.getString(8));
+                o.setLastSyncedTime(cursor.getString(9));
+                o.setCollector(cursor.getString(10));
+
+                observations.add(o);
+
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return observations;
+    }
+
+    /**
+     * Get the image observations for brapi export to external system
+     */
+    public List<Image> getImageObservations(String hostUrl) {
+
+        List<Image> images = new ArrayList<Image>();
+
+        // Get only the data that belongs to the system we are importing to.
+        String query = "SELECT " +
+                "range.observationUnitDbId, " +
+                "range.observationUnitName, " +
+                "traits.external_db_id, " +
+                "user_traits.timeTaken, " +
+                "user_traits.userValue, " +
+                "traits.trait, " +
+                "exp_id.exp_alias, " +
+                "user_traits.id, " +
+                "user_traits.observation_db_id, " +
+                "user_traits.last_synced_time, " +
+                "user_traits.person, " +
+                "traits.details " +
+                "FROM " +
+                "user_traits " +
+                "JOIN " +
+                "range ON user_traits.rid = range.plot " +
+                "JOIN " +
+                "traits ON user_traits.parent = traits.trait " +
+                "JOIN " +
+                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+                "WHERE " +
+                "exp_id.exp_source IS NOT NULL " +
+                "AND " +
+                String.format("traits.trait_data_source = '%s' ", hostUrl) +
+                "AND " +
+                "user_traits.userValue <> '' " +
+                "AND " +
+                "traits.trait_data_source IS NOT NULL " +
+                "AND " +
+                "traits.format = 'photo'";
+
+        Cursor cursor = db.rawQuery(query,null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                // Instantiate our image with our file path. Which is stored in the userValue.
+                Image image = new Image(cursor.getString(4), missingPhoto);
+
+                // Assign the rest of our values
+                image.setUnitDbId(cursor.getString(0));
+
+                List<String> descriptiveOntologyTerms = new ArrayList<>();
+                descriptiveOntologyTerms.add(cursor.getString(2));
+                image.setDescriptiveOntologyTerms(descriptiveOntologyTerms);
+
+                // Set image decription the same as our trait description.
+                image.setDescription(cursor.getString(11));
+
+
+                image.setTimestamp(cursor.getString(3));
+                image.setFieldbookDbId(cursor.getString(7));
+                image.setDbId(cursor.getString(8));
+                image.setLastSyncedTime(cursor.getString(9));
+
+
+                images.add(image);
+
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return images;
+    }
+    /**
+     * Sync with observationdbids BrAPI
+     */
+    public void updateObservations(List<Observation> observations) {
+        ArrayList<String> ids = new ArrayList<String>();
+
+        db.beginTransaction();
+        String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
+        SQLiteStatement update = db.compileStatement(sql);
+
+        for (Observation observation : observations) {
+            update.bindString(1, observation.getDbId());
+            update.bindString(2, observation.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            update.bindString(3, observation.getFieldbookDbId());
+            update.execute();
+        }
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
+
+    public void updateImages(List<Image> images) {
+        ArrayList<String> ids = new ArrayList<String>();
+
+        db.beginTransaction();
+        String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
+        SQLiteStatement update = db.compileStatement(sql);
+
+        for (Image image : images) {
+            update.bindString(1, image.getDbId());
+            update.bindString(2, image.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            update.bindString(3, image.getFieldbookDbId());
+            update.execute();
+        }
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
+
+    public void updateImage(Image image, Boolean writeLastSyncedTime) {
+        db.beginTransaction();
+        String sql;
+        if (writeLastSyncedTime) {
+            sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
+        }
+        else {
+            sql = "UPDATE user_traits SET observation_db_id = ? WHERE id = ?";
+        }
+
+        SQLiteStatement update = db.compileStatement(sql);
+
+        update.bindString(1, image.getDbId());
+        if (writeLastSyncedTime) {
+            update.bindString(2, image.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            update.bindString(3, image.getFieldbookDbId());
+        }
+        else {
+            update.bindString(2, image.getFieldbookDbId());
+        }
+
+        update.execute();
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
+
 
     /**
      * Helper function to close the database
@@ -394,19 +821,25 @@ public class DataHelper {
      * V2 - Returns all traits column titles as a string array
      */
     public String[] getTraitColumns() {
+
         Cursor cursor = db.rawQuery("SELECT * from traits limit 1", null);
 
         String[] data = null;
+        HashSet<String> excludedColumns = new HashSet<>();
+
+        excludedColumns.add("id");
+        excludedColumns.add("external_db_id");
+        excludedColumns.add("trait_data_source");
 
         if (cursor.moveToFirst()) {
-            int i = cursor.getColumnCount() - 1;
+            int i = cursor.getColumnCount() - excludedColumns.size();
 
             data = new String[i];
 
             int k = 0;
 
             for (int j = 0; j < cursor.getColumnCount(); j++) {
-                if (!cursor.getColumnName(j).equals("id")) {
+                if (!excludedColumns.contains(cursor.getColumnName(j))) {
                     data[k] = cursor.getColumnName(j);
                     k += 1;
                 }
@@ -438,7 +871,7 @@ public class DataHelper {
         ArrayList<FieldObject> list = new ArrayList<>();
 
         Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
-                        "secondary_id", "date_import", "date_edit", "date_export", "count"},
+                        "secondary_id", "date_import", "date_edit", "date_export", "count", "exp_source"},
                 null, null, null, null, "exp_id"
         );
 
@@ -454,6 +887,7 @@ public class DataHelper {
                 o.setDate_edit(cursor.getString(6));
                 o.setDate_export(cursor.getString(7));
                 o.setCount(cursor.getString(8));
+                o.setExp_source(cursor.getString(9));
                 list.add(o);
             } while (cursor.moveToNext());
         }
@@ -463,6 +897,36 @@ public class DataHelper {
         }
 
         return list;
+    }
+
+    public FieldObject getFieldObject(Integer exp_id) {
+
+        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
+                        "secondary_id", "date_import", "date_edit", "date_export", "count", "exp_source"},
+                String.format("exp_id = %s", exp_id), null, null, null, "exp_id"
+        );
+
+        if (cursor.moveToFirst()) {
+            do {
+                FieldObject o = new FieldObject();
+                o.setExp_id(cursor.getInt(0));
+                o.setExp_name(cursor.getString(1));
+                o.setUnique_id(cursor.getString(2));
+                o.setPrimary_id(cursor.getString(3));
+                o.setSecondary_id(cursor.getString(4));
+                o.setDate_import(cursor.getString(5));
+                o.setDate_edit(cursor.getString(6));
+                o.setDate_export(cursor.getString(7));
+                o.setCount(cursor.getString(8));
+                o.setExp_source(cursor.getString(9));
+                return o;
+            } while (cursor.moveToNext());
+        }
+        else {
+            // If we have no results, return null.
+            return null;
+        }
+
     }
 
     /**
@@ -481,15 +945,15 @@ public class DataHelper {
             do {
                 TraitObject o = new TraitObject();
 
-                o.id = cursor.getString(0);
-                o.trait = cursor.getString(1);
-                o.format = cursor.getString(2);
-                o.defaultValue = cursor.getString(3);
-                o.minimum = cursor.getString(4);
-                o.maximum = cursor.getString(5);
-                o.details = cursor.getString(6);
-                o.categories = cursor.getString(7);
-                o.realPosition = cursor.getString(9);
+                o.setId(cursor.getString(0));
+                o.setTrait(cursor.getString(1));
+                o.setFormat(cursor.getString(2));
+                o.setDefaultValue(cursor.getString(3));
+                o.setMinimum(cursor.getString(4));
+                o.setMaximum(cursor.getString(5));
+                o.setDetails(cursor.getString(6));
+                o.setCategories(cursor.getString(7));
+                o.setRealPosition(cursor.getString(9));
 
                 list.add(o);
 
@@ -532,28 +996,29 @@ public class DataHelper {
     public TraitObject getDetail(String trait) {
         TraitObject data = new TraitObject();
 
-        data.trait = "";
-        data.format = "";
-        data.defaultValue = "";
-        data.minimum = "";
-        data.maximum = "";
-        data.details = "";
-        data.categories = "";
+        data.setTrait("");
+        data.setFormat("");
+        data.setDefaultValue("");
+        data.setMinimum("");
+        data.setMaximum("");
+        data.setDetails("");
+        data.setCategories("");
 
         Cursor cursor = db.query(TRAITS, new String[]{"trait", "format", "defaultValue", "minimum",
-                        "maximum", "details", "categories", "id"}, "trait like ? and isVisible like ?",
+                        "maximum", "details", "categories", "id", "external_db_id"}, "trait like ? and isVisible like ?",
                 new String[]{trait, "true"}, null, null, null
         );
 
         if (cursor.moveToFirst()) {
-            data.trait = cursor.getString(0);
-            data.format = cursor.getString(1);
-            data.defaultValue = cursor.getString(2);
-            data.minimum = cursor.getString(3);
-            data.maximum = cursor.getString(4);
-            data.details = cursor.getString(5);
-            data.categories = cursor.getString(6);
-            data.id = cursor.getString(7);
+            data.setTrait(cursor.getString(0));
+            data.setFormat(cursor.getString(1));
+            data.setDefaultValue(cursor.getString(2));
+            data.setMinimum(cursor.getString(3));
+            data.setMaximum(cursor.getString(4));
+            data.setDetails(cursor.getString(5));
+            data.setCategories(cursor.getString(6));
+            data.setId(cursor.getString(7));
+            data.setExternalDbId(cursor.getString(8));
         }
 
         if (!cursor.isClosed()) {
@@ -587,6 +1052,55 @@ public class DataHelper {
 
         return data;
     }
+
+    /**
+     * Get observation data that needs to be saved on edits
+     */
+    public Observation getObservation(String plotId, String parent) {
+
+        Observation o = new Observation();
+
+        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ?", new String[]{plotId, parent},
+                null, null, null
+        );
+
+        if (cursor.moveToFirst()) {
+            do {
+                o.setDbId(cursor.getString(0));
+                o.setLastSyncedTime(cursor.getString(1));
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return o;
+    }
+
+    public Observation getObservationByValue(String plotId, String parent, String value) {
+
+        Observation o = new Observation();
+
+        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ? and userValue like ?", new String[]{plotId, parent, value},
+                null, null, null
+        );
+
+        if (cursor.moveToFirst()) {
+            do {
+                o.setDbId(cursor.getString(0));
+                o.setLastSyncedTime(cursor.getString(1));
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
+        return o;
+    }
+
+
 
     /**
      * Check if a trait exists within the database
@@ -757,6 +1271,19 @@ public class DataHelper {
 
         try {
             db.delete(USER_TRAITS, "rid like ? and parent like ? and userValue = ?",
+                    new String[]{rid, parent, value});
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    public void updateTraitByValue(String rid, String parent, String value, String newValue) {
+
+        ContentValues values = new ContentValues();
+        values.put("userValue", newValue);
+
+        try {
+            db.update(USER_TRAITS, values, "rid like ? and parent like ? and userValue = ?",
                     new String[]{rid, parent, value});
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -1015,27 +1542,39 @@ public class DataHelper {
                              String minimum, String maximum, String details, String categories,
                              String isVisible, String realPosition) {*/
 
-        if (hasTrait(t.trait)) {
+        if (hasTrait(t.getTrait())) {
             return -1;
         }
 
         try {
-            this.insertTraits.bindString(1, t.trait);
-            this.insertTraits.bindString(2, t.format);
-            this.insertTraits.bindString(3, t.defaultValue);
-            this.insertTraits.bindString(4, t.minimum);
-            this.insertTraits.bindString(5, t.maximum);
-            this.insertTraits.bindString(6, t.details);
-            this.insertTraits.bindString(7, t.categories);
-            this.insertTraits.bindString(8, String.valueOf(t.visible));
-            //Probably wrong with this one, because the type of realPosition is int
-            this.insertTraits.bindString(9, t.realPosition);
+            this.insertTraits = this.bindValue(insertTraits, 1, t.getExternalDbId());
+            this.insertTraits = this.bindValue(insertTraits, 2, t.getTraitDataSource());
+            this.insertTraits = this.bindValue(insertTraits, 3, t.getTrait());
+            this.insertTraits = this.bindValue(insertTraits, 4, t.getFormat());
+            this.insertTraits = this.bindValue(insertTraits, 5, t.getDefaultValue());
+            this.insertTraits = this.bindValue(insertTraits, 6, t.getMinimum());
+            this.insertTraits = this.bindValue(insertTraits, 7, t.getMaximum());
+            this.insertTraits = this.bindValue(insertTraits, 8, t.getDetails());
+            this.insertTraits = this.bindValue(insertTraits, 9, t.getCategories());
+            this.insertTraits = this.bindValue(insertTraits, 10, String.valueOf(t.getVisible()));
+            this.insertTraits = this.bindValue(insertTraits, 11, t.getRealPosition());
 
             return this.insertTraits.executeInsert();
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
+    }
+
+    public <T> SQLiteStatement bindValue(SQLiteStatement statement, Integer index, T value) {
+
+        if (value != null) {
+            statement.bindString(index, value.toString());
+        }
+        else {
+            statement.bindNull(index);
+        }
+        return statement;
     }
 
     /**
@@ -1123,10 +1662,10 @@ public class DataHelper {
                     + "(id INTEGER PRIMARY KEY, range TEXT, plot TEXT, entry TEXT, plot_id TEXT, pedigree TEXT)");
             db.execSQL("CREATE TABLE "
                     + TRAITS
-                    + "(id INTEGER PRIMARY KEY, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
+                    + "(id INTEGER PRIMARY KEY, external_db_id TEXT, trait_data_source TEXT, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
             db.execSQL("CREATE TABLE "
                     + USER_TRAITS
-                    + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT)");
+                    + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT, observation_db_id TEXT, last_synced_time TEXT)");
             db.execSQL("CREATE TABLE "
                     + PLOTS
                     + "(plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR)");
@@ -1138,7 +1677,7 @@ public class DataHelper {
                     + "(attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_id INTEGER, attribute_value VARCHAR, plot_id INTEGER, exp_id INTEGER)");
             db.execSQL("CREATE TABLE "
                     + EXP_INDEX
-                    + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER)");
+                    + "(exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER, exp_source VARCHAR)");
 
             //Do not know why the unique constraint does not work
             //db.execSQL("CREATE UNIQUE INDEX expname ON " + EXP_INDEX +"(exp_name);");
@@ -1246,6 +1785,18 @@ public class DataHelper {
                         } while (attribute_val.moveToNext());
                     }
                 }
+            }
+
+            if (oldVersion <= 8 & newVersion >= 8) {
+
+                // add columns to tables for brapi integration
+
+                db.execSQL("ALTER TABLE traits ADD COLUMN external_db_id VARCHAR");
+                db.execSQL("ALTER TABLE traits ADD COLUMN trait_data_source VARCHAR");
+                db.execSQL("ALTER TABLE exp_id ADD COLUMN exp_source VARCHAR");
+                db.execSQL("ALTER TABLE user_traits ADD COLUMN observation_db_id TEXT");
+                db.execSQL("ALTER TABLE user_traits ADD COLUMN last_synced_time TEXT");
+
             }
         }
     }
@@ -1394,6 +1945,7 @@ public class DataHelper {
         insertExp.put("exp_sort", e.getExp_sort());
         insertExp.put("count", e.getCount());
         insertExp.put("date_import", timeStamp.format(Calendar.getInstance().getTime()));
+        insertExp.put("exp_source", e.getExp_source());
 
         exp_id = db.insert(EXP_INDEX, null, insertExp);
 
@@ -1434,6 +1986,7 @@ public class DataHelper {
         insertValues.put("unique_id", data.get(plotIndices[0]));    //data[plotIndices[0]]);
         insertValues.put("primary_id", data.get(plotIndices[1]));   //data[plotIndices[1]]);
         insertValues.put("secondary_id", data.get(plotIndices[2])); //data[plotIndices[2]]);
+
         long plot_id = db.insert(PLOTS, null, insertValues);
 
         // add plot data plot_values table
@@ -1445,6 +1998,7 @@ public class DataHelper {
                 attId = attribute_id.getInt(0);
             }
 
+            // We store these observationUnitDbId and observationUnitName in the plot table. Skip them here.
             ContentValues plotValuesInsert = new ContentValues();
             plotValuesInsert.put("attribute_id",attId);
             plotValuesInsert.put("attribute_value", data.get(i));
@@ -1453,6 +2007,7 @@ public class DataHelper {
             db.insert(PLOT_VALUES, null, plotValuesInsert);
 
             attribute_id.close();
+
         }
 
         cursor.close();
@@ -1511,6 +2066,8 @@ public class DataHelper {
             copyFile(oldSp, newSp);
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
+        } finally {
+            open();
         }
     }
 
@@ -1521,8 +2078,6 @@ public class DataHelper {
         if (oldFile.exists()) {
             try {
                 copyFileCall(new FileInputStream(oldFile), new FileOutputStream(newFile));
-                openHelper = new OpenHelper(this.context);
-                open();
             } catch (IOException e) {
                 e.printStackTrace();
             }

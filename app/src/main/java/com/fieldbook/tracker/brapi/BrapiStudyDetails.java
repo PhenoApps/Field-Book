@@ -4,7 +4,7 @@ import com.fieldbook.tracker.traits.TraitObject;
 
 import java.util.List;
 
-public class StudyDetails {
+public class BrapiStudyDetails {
     private String studyDbId;
     private String studyName;
     private String studyDescription;
@@ -15,7 +15,7 @@ public class StudyDetails {
     private List<List<String>> values;
     private List<TraitObject> traits;
 
-    public static void merge(StudyDetails sd1, StudyDetails sd2){
+    public static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2){
         if(sd2.getStudyDbId() != null)
             sd1.setStudyDbId(sd2.getStudyDbId());
         if(sd2.getStudyName() != null)
