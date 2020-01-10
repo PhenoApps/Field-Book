@@ -212,75 +212,7 @@ class TraitAdapter extends BaseAdapter {
                 popup.getMenuInflater().inflate(R.menu.menu_trait_listitem, popup.getMenu());
 
                 //registering popup with OnMenuItemClickListener
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(MenuItem item) {
-                        if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_copy))) {
-                            int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
-
-                            String traitName = getItem(position).getTrait();
-
-                            if (traitName.contains("-Copy")) {
-                                traitName = traitName.substring(0, traitName.indexOf("-Copy"));
-                            }
-
-                            String newTraitName = "";
-
-                            String[] allTraits = ConfigActivity.dt.getAllTraits();
-
-                            for (int i = 0; i < allTraits.length; i++) {
-                                newTraitName = traitName + "-Copy-" + "(" + Integer.toString(i) + ")";
-
-                                if (!Arrays.asList(allTraits).contains(newTraitName)) {
-                                    break;
-                                }
-                            }
-
-                            TraitObject trait = getItem(position);
-                            trait.setTrait(newTraitName);
-                            trait.setVisible(true);
-                            trait.setRealPosition(String.valueOf(pos));
-
-                            //MainActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
-                            ConfigActivity.dt.insertTraits(trait);
-                            TraitEditorActivity.loadData();
-                            MainActivity.reloadData = true;
-
-                        } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_delete))) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
-
-                            builder.setTitle(context.getString(R.string.traits_options_delete_title));
-                            builder.setMessage(context.getString(R.string.traits_warning_delete));
-
-                            builder.setPositiveButton(context.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-
-                                    ConfigActivity.dt.deleteTrait(holder.id);
-                                    TraitEditorActivity.loadData();
-                                    MainActivity.reloadData = true;
-                                }
-
-                            });
-
-                            builder.setNegativeButton(context.getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-
-                            });
-
-                            AlertDialog alert = builder.create();
-                            alert.show();
-
-                        } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_edit))) {
-                            listener.onItemClick((AdapterView) parent, v, position, v.getId());
-                        }
-
-                        return false;
-                    }
-                });
+                popup.setOnMenuItemClickListener(createTraitListListener(parent, holder, v, position));
 
                 popup.show();//showing popup menu
 
@@ -289,5 +221,87 @@ class TraitAdapter extends BaseAdapter {
 
         return convertView;
     }
+	
+	private PopupMenu.OnMenuItemClickListener createTraitListListener(
+								final ViewGroup parent, final ViewHolder holder,
+								final View v, final int position) {
+		return new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_copy))) {
+					copyTrait(position);
+                } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_delete))) {
+                    delteTrait(holder);
+                } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_edit))) {
+                    listener.onItemClick((AdapterView) parent, v, position, v.getId());
+                }
 
+                return false;
+            }
+        };
+    }
+    
+    private void copyTrait(final int position) {
+        int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
+
+        String traitName = getItem(position).getTrait();
+        final String newTraitName = copyTraitName(traitName);
+
+        TraitObject trait = getItem(position);
+        trait.setTrait(newTraitName);
+        trait.setVisible(true);
+        trait.setRealPosition(String.valueOf(pos));
+
+        //MainActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
+        ConfigActivity.dt.insertTraits(trait);
+        TraitEditorActivity.loadData();
+        MainActivity.reloadData = true;
+	}
+	
+	private String copyTraitName(String traitName) {
+        if (traitName.contains("-Copy")) {
+            traitName = traitName.substring(0, traitName.indexOf("-Copy"));
+        }
+
+        String newTraitName = "";
+
+        String[] allTraits = ConfigActivity.dt.getAllTraits();
+
+        for (int i = 0; i < allTraits.length; i++) {
+            newTraitName = traitName + "-Copy-(" + Integer.toString(i) + ")";
+            if (!Arrays.asList(allTraits).contains(newTraitName)) {
+                return newTraitName;
+            }
+        }
+        return "";	// not come here
+	}
+	
+	private void delteTrait(final ViewHolder holder) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
+
+        builder.setTitle(context.getString(R.string.traits_options_delete_title));
+        builder.setMessage(context.getString(R.string.traits_warning_delete));
+
+        builder.setPositiveButton(context.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+
+                ConfigActivity.dt.deleteTrait(holder.id);
+                TraitEditorActivity.loadData();
+                MainActivity.reloadData = true;
+            }
+
+        });
+
+        builder.setNegativeButton(context.getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
 }

@@ -932,6 +932,7 @@ public class DataHelper {
     /**
      * V2 - Get all traits in the system, in order, as TraitObjects
      */
+    // DBからすべての形質を得る
     public ArrayList<TraitObject> getAllTraitObjects() {
 
         ArrayList<TraitObject> list = new ArrayList<>();
