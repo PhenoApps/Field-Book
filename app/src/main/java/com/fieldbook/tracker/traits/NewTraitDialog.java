@@ -577,6 +577,8 @@ public class NewTraitDialog extends DialogFragment {
         public String getEnglishString() { return "Percent"; }
         public int getResourceId() { return R.string.traits_format_percent; }
         
+        public boolean isNumericInputType() { return true; }
+        
         public boolean allowsNegative() { return false; }
     }
 	
