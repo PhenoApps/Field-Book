@@ -41,7 +41,15 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
     public DiseaseRatingTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "audio"; }
+    public boolean isTraitType(String trait) {
+		return trait.equals("rust rating") || trait.equals("disease rating");
+	}
+    
     @Override
     public void init(){
         rustButtons = new LinkedHashMap<>();

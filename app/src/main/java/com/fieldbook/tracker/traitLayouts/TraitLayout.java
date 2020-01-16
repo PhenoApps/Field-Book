@@ -26,10 +26,14 @@ public abstract class TraitLayout extends LinearLayout {
     public TraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
+    
+    public abstract String type();	// return trait type
+    public boolean isTraitType(String trait) { return trait.equals(type()); }
 
     public abstract void init();
     public abstract void loadLayout();
     public abstract void deleteTraitListener();
+    public abstract void setNaTraitsText();
 
     public Map getNewTraits(){
         return ((MainActivity) getContext()).getNewTraits();

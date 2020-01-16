@@ -33,7 +33,12 @@ public class PercentTraitLayout extends TraitLayout {
     public SeekBar getSeekBar(){
         return seekBar;
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "percent"; }
+    
     @Override
     public void init(){
         // Progress bar

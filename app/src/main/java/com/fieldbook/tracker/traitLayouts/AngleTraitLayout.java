@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 
 public class AngleTraitLayout extends TraitLayout {
@@ -23,6 +24,7 @@ public class AngleTraitLayout extends TraitLayout {
     TextView rollTv;
     TextView azimutTv;
     SensorEventListener mEventListener;
+    EditText etCurVal;
 
     public AngleTraitLayout(Context context) {
         super(context);
@@ -35,6 +37,12 @@ public class AngleTraitLayout extends TraitLayout {
     public AngleTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "angle"; }
+    
     @Override
     public void init(){
         sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
@@ -44,6 +52,7 @@ public class AngleTraitLayout extends TraitLayout {
         pitchTv = findViewById(R.id.pitch);
         rollTv = findViewById(R.id.roll);
         azimutTv = findViewById(R.id.azimuth);
+        etCurVal = findViewById(R.id.etCurVal);
 
         mEventListener = new SensorEventListener() {
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -101,8 +110,9 @@ public class AngleTraitLayout extends TraitLayout {
                     SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
+    
     @Override
     public void deleteTraitListener() {
-
+		((MainActivity) getContext()).removeTrait();
     }
 }

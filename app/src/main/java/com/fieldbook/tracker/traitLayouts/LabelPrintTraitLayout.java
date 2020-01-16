@@ -66,7 +66,12 @@ public class LabelPrintTraitLayout extends TraitLayout {
     public LabelPrintTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "zebra label print"; }
+    
     @Override
     public void init(){
         String[] prefixTraits = ConfigActivity.dt.getRangeColumnNames();

@@ -104,5 +104,38 @@ public class TraitObject {
     public String getTraitDataSource() { return trait_data_source; }
 
     public void setTraitDataSource(String traitDataSource) { this.trait_data_source = traitDataSource; }
+    
+    public boolean isValidValue(final String s) {
+		// this code is not perfect.
+		// I think that it is necessary to check
+		// the minimum and the maximum values
+		return isNotUnder(s) && isNotOver(s);
+	}
+	
+	public boolean isNotUnder(final String s) {
+		if (!(format.equals("numeric") || format.equals("percent")))
+			return true;
+		
+		final double v = Double.parseDouble(s);
+		if (minimum.length() > 0) {
+			final double lowerValue = Double.parseDouble(minimum);
+			if (v < lowerValue)
+				return false;
+		}
+		return true;
+	}
+	
+	public boolean isNotOver(final String s) {
+		if (!(format.equals("numeric") || format.equals("percent")))
+			return true;
+		
+		final double v = Double.parseDouble(s);
+		if (maximum.length() > 0) {
+			final double upperValue = Double.parseDouble(maximum);
+			if (v > upperValue)
+				return false;
+		}
+		return true;
+	}
 
 }

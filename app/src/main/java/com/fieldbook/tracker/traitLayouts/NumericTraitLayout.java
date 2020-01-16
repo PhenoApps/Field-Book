@@ -33,7 +33,12 @@ public class NumericTraitLayout extends TraitLayout {
     public NumericTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "numeric"; }
+    
     @Override
     public void init(){
         numberButtons = new LinkedHashMap<>();
@@ -99,27 +104,23 @@ public class NumericTraitLayout extends TraitLayout {
 
     @Override
     public void deleteTraitListener() {
-
+		((MainActivity) getContext()).removeTrait();
     }
 
-    private class NumberButtonOnClickListener implements OnClickListener{
+    private class NumberButtonOnClickListener implements OnClickListener {
 
         @Override
         public void onClick(View view) {
-
-            String v = "";
-
-            if(numberButtons.containsKey(view.getId())){
-                v = numberButtons.get(view.getId()).getText().toString();
-            }
-
-            if (view.getId() == R.id.k16) {
-                //Backspace Key Pressed
-                if(getEtCurVal().getText().toString().length()>0) {
-                    getEtCurVal().setText(getEtCurVal().getText().toString().substring(0, getEtCurVal().getText().toString().length()-1));
+			final String curText = getEtCurVal().getText().toString();
+            if (view.getId() == R.id.k16) {		// Backspace Key Pressed
+                final int length = curText.length();
+                if (length > 0) {
+                    getEtCurVal().setText(curText.substring(0, length-1));
                 }
-            } else {
-                getEtCurVal().setText(getEtCurVal().getText().toString() + v);
+            }
+            else if(numberButtons.containsKey(view.getId())){
+                final String v = numberButtons.get(view.getId()).getText().toString();
+                getEtCurVal().setText(curText + v);
             }
         }
     }

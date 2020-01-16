@@ -30,7 +30,12 @@ public class TextTraitLayout extends TraitLayout {
     public TextTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "text"; }
+    
     @Override
     public void init(){
 
@@ -81,6 +86,6 @@ public class TextTraitLayout extends TraitLayout {
     }
     @Override
     public void deleteTraitListener() {
-
+		((MainActivity) getContext()).removeTrait();
     }
 }

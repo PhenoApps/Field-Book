@@ -76,6 +76,7 @@ import com.fieldbook.tracker.utilities.Utils;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -104,8 +105,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Object lock;
 
-    private Map newTraits;
-
     public static boolean searchReload;
     public static String searchRange;
     public static String searchPlot;
@@ -117,8 +116,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static Activity thisActivity;
 
-    private TraitObject currentTrait;
-
     public static String TAG = "Field Book";
     private Handler repeatHandler;
 
@@ -127,8 +124,6 @@ public class MainActivity extends AppCompatActivity {
      */
 
     private Menu systemMenu;
-
-    private String[] prefixTraits;
 
     private SelectorLayoutConfigurator selectorLayoutConfigurator;
 
@@ -140,14 +135,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvRange;
     private TextView tvPlot;
 
-    private Spinner traitType;
-    private TextView traitDetails;
-
     private ImageView rangeLeft;
     private ImageView rangeRight;
-
-    private ImageView traitLeft;
-    private ImageView traitRight;
+    
+    private TraitBox traitBox;
 
     /**
      * Trait-related elements
@@ -164,21 +155,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Trait layouts
      */
-    AngleTraitLayout traitAngle;
-    AudioTraitLayout traitAudio;
-    BooleanTraitLayout traitBoolean;
-    CategoricalTraitLayout traitCategorical;
-    CounterTraitLayout traitCounter;
-    DateTraitLayout traitDate;
-    DiseaseRatingTraitLayout traitDiseaseRating;
-    LocationTraitLayout traitLocation;
-    MultiCatTraitLayout traitMulticat;
-    NumericTraitLayout traitNumeric;
-    PercentTraitLayout traitPercent;
-    PhotoTraitLayout traitPhoto;
-    TextTraitLayout traitText;
-    BarcodeTraitLayout traitBarcode;
-    LabelPrintTraitLayout traitLabelprint;
+    LayoutCollections traitLayouts;
 
     private Boolean dataLocked = false;
 
@@ -300,56 +277,30 @@ public class MainActivity extends AppCompatActivity {
         //todo get rid of this- validate/delete in next/last plot
         cvNum = new TextWatcher() {
 
+            // if the trait has a range, updateTrait does not work
             public void afterTextChanged(final Editable en) {
+	            final String strValue = etCurVal.getText().toString();
+	            if(strValue.equals(""))
+	            	return;
+	            
                 Timer timer = new Timer();
                 final long DELAY = 750; // in ms
-
-                try {
-                    final double val = Double.parseDouble(etCurVal.getText().toString());
-                    timer.cancel();
-                    timer = new Timer();
-                    timer.schedule(new TimerTask() {
-                        public void run() {
-                            runOnUiThread(new Runnable() {
-                                public void run() {
-                                    if (currentTrait.getMinimum().length() > 0) {
-                                        if (val < Double.parseDouble(currentTrait.getMinimum())) {
-                                            en.clear();
-                                            removeTrait(currentTrait.getTrait());
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    }, DELAY);
-
-                    if (currentTrait.getMaximum().length() > 0) {
-                        if (val > Double.parseDouble(currentTrait.getMaximum())) {
-                            makeToast(getString(R.string.trait_error_maximum_value) + " " + currentTrait.getMaximum());
-                            en.clear();
-                            removeTrait(currentTrait.getTrait());
-                            return;
-                        }
+                
+                timer.cancel();
+                timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    public void run() {
+                        runOnUiThread(createDelayThread(en));
                     }
-                } catch (Exception e) {
-                    Log.e(TAG,"" + e.getMessage());
-                }
-
-                if (en.toString().length() > 0) {
-                    if (newTraits != null & currentTrait != null)
-                        updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), en.toString());
-                } else {
-                    if (newTraits != null & currentTrait != null)
-                        removeTrait(currentTrait.getTrait());
-                }
+                }, DELAY);
             }
 
-            public void beforeTextChanged(CharSequence arg0, int arg1,
-                                          int arg2, int arg3) {
+            public void beforeTextChanged(CharSequence arg0,
+            								int arg1, int arg2, int arg3) {
             }
 
-            public void onTextChanged(CharSequence arg0, int arg1, int arg2,
-                                      int arg3) {
+            public void onTextChanged(CharSequence arg0,
+            								int arg1, int arg2, int arg3) {
             }
 
         };
@@ -357,13 +308,13 @@ public class MainActivity extends AppCompatActivity {
         // Validates the text entered for text format
         cvText = new TextWatcher() {
             public void afterTextChanged(Editable en) {
-
+				final TraitObject trait = traitBox.getCurrentTrait();
                 if (en.toString().length() > 0) {
-                    if (newTraits != null & currentTrait != null)
-                        updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), en.toString());
+                    if (traitBox.existsNewTraits() & trait != null)
+                        updateTrait(trait.getTrait(), trait.getFormat(), en.toString());
                 } else {
-                    if (newTraits != null & currentTrait != null)
-                        removeTrait(currentTrait.getTrait());
+                    if (traitBox.existsNewTraits() & trait != null)
+                        removeTrait(trait.getTrait());
                 }
                 //tNum.setSelection(tNum.getText().length());
 
@@ -377,6 +328,28 @@ public class MainActivity extends AppCompatActivity {
                                       int arg3) {
             }
 
+        };
+    }
+    
+    private Runnable createDelayThread(final Editable en) {
+        return new Runnable() {
+            @Override public void run() {
+                final String strValue = etCurVal.getText().toString();
+                final TraitObject currentTrait = traitBox.getCurrentTrait();
+                final String trait = currentTrait.getTrait();
+                if (currentTrait.isValidValue(strValue)) {
+                    if (traitBox.existsNewTraits() & currentTrait != null)
+                        updateTrait(trait, currentTrait.getFormat(), strValue);
+                }
+                else {
+                    if (!currentTrait.isNotOver(strValue)) {
+                        makeToast(getString(R.string.trait_error_maximum_value)
+                        					+ " " + currentTrait.getMaximum());
+                    }
+                    en.clear();
+                    removeTrait(trait);
+                }
+            }
         };
     }
 
@@ -405,40 +378,9 @@ public class MainActivity extends AppCompatActivity {
 
         selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 3), (RecyclerView) findViewById(R.id.selectorList));
 
-        traitAngle = findViewById(R.id.angleLayout);
-        traitAngle.init();
-        traitAudio = findViewById(R.id.audioLayout);
-        traitAudio.init();
-        traitBarcode = findViewById(R.id.barcodeLayout);
-        traitBarcode.init();
-        traitBoolean = findViewById(R.id.booleanLayout);
-        traitBoolean.init();
-        traitCategorical = findViewById(R.id.categoricalLayout);
-        traitCategorical.init();
-        traitCounter = findViewById(R.id.counterLayout);
-        traitCounter.init();
-        traitDate =  findViewById(R.id.dateLayout);
-        traitDate.init();
-        traitDiseaseRating = findViewById(R.id.diseaseLayout);
-        traitDiseaseRating.init();
-        traitLocation = findViewById(R.id.locationLayout);
-        traitLocation.init();
-        traitMulticat = findViewById(R.id.multicatLayout);
-        traitMulticat.init();
-        traitNumeric = findViewById(R.id.numericLayout);
-        traitNumeric.init();
-        traitPercent = findViewById(R.id.percentLayout);
-        traitPercent.init();
-        traitPhoto = findViewById(R.id.photoLayout);
-        traitPhoto.init();
-        traitText = findViewById(R.id.textLayout);
-        traitText.init();
-        traitLabelprint = findViewById(R.id.labelprintLayout);
-        traitLabelprint.init();
-
-        traitType = findViewById(R.id.traitType);
-        newTraits = new HashMap();
-        traitDetails = findViewById(R.id.traitDetails);
+        traitLayouts = new LayoutCollections();
+		
+		traitBox = new TraitBox();
 
         rangeLeft = findViewById(R.id.rangeLeft);
         rangeRight = findViewById(R.id.rangeRight);
@@ -533,7 +475,7 @@ public class MainActivity extends AppCompatActivity {
                 return true; // return true to prevent calling btn onClick handler
             }
         });
-
+        
         // Go to next range
         rangeRight.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -541,176 +483,96 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        traitLeft = findViewById(R.id.traitLeft);
-        traitRight = findViewById(R.id.traitRight);
-
-        traitLeft.setOnTouchListener(new OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-
-                    case MotionEvent.ACTION_DOWN:
-                        traitLeft.setImageResource(R.drawable.main_trait_left_arrow_pressed);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        traitLeft.setImageResource(R.drawable.main_trait_left_arrow_unpressed);
-                    case MotionEvent.ACTION_CANCEL:
-                        break;
-                }
-
-                return false; // return true to prevent calling btn onClick handler
-            }
-        });
-
-        // Go to previous trait
-        traitLeft.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-                moveTrait("left");
-            }
-        });
-
-        traitRight.setOnTouchListener(new OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-
-                switch (event.getAction()) {
-
-                    case MotionEvent.ACTION_DOWN:
-                        traitRight.setImageResource(R.drawable.main_trait_right_pressed);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        traitRight.setImageResource(R.drawable.main_trait_right_unpressed);
-                    case MotionEvent.ACTION_CANCEL:
-                        break;
-                }
-
-                return false; // return true to prevent calling btn onClick handler
-            }
-        });
-
-        // Go to next trait
-        traitRight.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-                moveTrait("right");
-            }
-        });
     }
 
     private void moveEntryLeft() {
-        if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false) && !newTraits.containsKey(currentTrait.getTrait())) {
+        if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false)
+	        										&& !traitBox.existsTrait()) {
             playSound("error");
         } else {
             if (rangeID != null && rangeID.length > 0) {
                 //index.setEnabled(true);
-
-                // If ignore existing data is enabled, then skip accordingly
-                if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-                    int pos = paging;
-
-                    while (pos >= 0) {
-                        pos -= 1;
-
-                        if (pos < 1)
-                            return;
-
-                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
-                                currentTrait.getFormat())) {
-                            paging = pos;
-                            break;
-                        }
-                    }
-                } else {
-                    paging -= 1;
-
-                    if (paging < 1)
-                        paging = rangeID.length;
-                }
-
-                // Refresh onscreen controls
-                cRange = dt.getRange(rangeID[paging - 1]);
-
-                saveLastPlot();
-
-                displayRange(cRange);
-
-                if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
-                    if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                        lastRange = cRange.range;
-                        playSound("plonk");
-                    }
-                }
-
-                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                        .clone();
-
-                initWidgets(true);
+				paging = decrementPaging(paging);
+				refreshMain();
             }
         }
     }
 
     private void moveEntryRight() {
-        if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false) && !newTraits.containsKey(currentTrait.getTrait())) {
+        if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false)
+        											&& !traitBox.existsTrait()) {
             playSound("error");
         } else {
             if (rangeID != null && rangeID.length > 0) {
                 //index.setEnabled(true);
 
-                // If ignore existing data is enabled, then skip accordingly
-                if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-                    int pos = paging;
-
-                    if (pos == rangeID.length) {
-                        pos = 1;
-                        return;
-                    }
-
-                    while (pos <= rangeID.length) {
-                        pos += 1;
-
-                        if (pos > rangeID.length) {
-                            pos = 1;
-                            return;
-                        }
-
-                        if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
-                                currentTrait.getFormat())) {
-                            paging = pos;
-                            break;
-                        }
-                    }
-                } else {
-                    paging += 1;
-
-                    if (paging > rangeID.length)
-                        paging = 1;
-                }
-
-                // Refresh onscreen controls
-                cRange = dt.getRange(rangeID[paging - 1]);
-
-                saveLastPlot();
-
-                displayRange(cRange);
-                if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
-                    if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                        lastRange = cRange.range;
-                        playSound("plonk");
-                    }
-                }
-                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                        .clone();
-
-                initWidgets(true);
+				paging = incrementPaging(paging);
+				refreshMain();
             }
         }
     }
+    
+    private int decrementPaging(int pos) {
+		return movePaging(pos, -1);
+	}
+    
+    private int incrementPaging(int pos) {
+		return movePaging(pos, 1);
+	}
+	
+	private int movePaging(int pos, int step) {
+        // If ignore existing data is enabled, then skip accordingly
+        if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
+            if (step == 1 && pos == rangeID.length) {
+                return 1;
+            }
+
+            TraitObject trait = traitBox.getCurrentTrait();
+            while (0 <= pos && pos <= rangeID.length) {
+                pos += step;
+                if (pos < 1) {
+					return pos - step;
+				}
+                else if (pos > rangeID.length) {
+                    return 1;
+                }
+                else if (!dt.getTraitExists(rangeID[pos-1], trait.getTrait(),
+                										trait.getFormat())) {
+					return pos;
+                }
+            }
+            return pos;
+        } else {
+            pos += step;
+            if (pos > rangeID.length) {
+                return 1;
+            }
+            else if(pos < 1) {
+				return rangeID.length;
+			}
+			else {
+				return pos;
+			}
+        }
+	}
+	
+	private void refreshMain() {
+        // Refresh onscreen controls
+        cRange = dt.getRange(rangeID[paging - 1]);
+
+        saveLastPlot();
+
+        displayRange(cRange);
+        if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
+            if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
+                lastRange = cRange.range;
+                playSound("plonk");
+            }
+        }
+        traitBox.setNewTraits(cRange.plot_id);
+
+        initWidgets(true);
+	}
 
     private void playSound(String sound) {
         try {
@@ -727,44 +589,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void moveTrait(String direction) {
-        int pos = 0;
-
-        if(!validateData()) {
-            return;
-        }
-
-        // Force the keyboard to be hidden to handle bug
-        try {
-            imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
-        } catch (Exception ignore) {
-        }
-
-        if(direction.equals("left")) {
-            pos = traitType.getSelectedItemPosition() - 1;
-
-            if (pos < 0) {
-                pos = traitType.getCount() - 1;
-
-                if (ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false))
-                    rangeLeft.performClick();
-            }
-        }
-
-        if(direction.equals("right")) {
-            pos = traitType.getSelectedItemPosition() + 1;
-
-            if (pos > traitType.getCount() - 1) {
-                pos = 0;
-
-                if (ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false))
-                    rangeRight.performClick();
-            }
-        }
-
-        traitType.setSelection(pos);
-    }
-
     //TODO
     private boolean validateData() {
         //get rules
@@ -774,27 +598,16 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void setNaTraitsText() {
-        if (currentTrait.getFormat().equals("date")) {
-            traitDate.getMonth().setText("");
-            traitDate.getDay().setText("NA");
-        }
-
-        if (currentTrait.getFormat().equals("counter")) {
-            traitCounter.getCounterTv().setText("NA");
-        }
-    }
-
     private void setNaText() {
         etCurVal.setText("NA");
 
-        setNaTraitsText();
+        traitLayouts.setNaTraitsText(traitBox.getCurrentFormat());
     }
 
     private void setNaTextBrapiEmptyField() {
         etCurVal.setHint("NA");
 
-        setNaTraitsText();
+        traitLayouts.setNaTraitsText(traitBox.getCurrentFormat());
     }
 
     private void initToolbars() {
@@ -807,6 +620,7 @@ public class MainActivity extends AppCompatActivity {
         missingValue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+				TraitObject currentTrait = traitBox.getCurrentTrait();
                 updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
                 setNaText();
             }
@@ -818,8 +632,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 // if a brapi observation that has been synced, don't allow deleting
+				TraitObject currentTrait = traitBox.getCurrentTrait();
                 if (dt.isBrapiSynced(cRange.plot_id, currentTrait.getTrait())) {
                     if (currentTrait.getFormat().equals("photo")) {
+						// I want to use abstract method
+						Map newTraits = traitBox.getNewTraits();
+						PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                         traitPhoto.brapiDelete(newTraits);
                     }
                     else {
@@ -827,38 +645,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 else {
-                    switch (currentTrait.getFormat()) {
-                        case "categorical":
-                            traitCategorical.deleteTraitListener();
-                            break;
-                        case "percent":
-                            traitPercent.deleteTraitListener();
-                            break;
-                        case "date":
-                            traitDate.deleteTraitListener();
-                            break;
-                        case "boolean":
-                            traitBoolean.deleteTraitListener();
-                            break;
-                        case "photo":
-                            traitPhoto.deleteTraitListener();
-                            break;
-                        case "counter":
-                            traitCounter.deleteTraitListener();
-                            break;
-                        case "disease rating":
-                        case "rust rating":
-                            traitDiseaseRating.deleteTraitListener();
-                            break;
-                        case "audio":
-                            traitAudio.deleteTraitListener();
-                            break;
-                        default:
-                            newTraits.remove(currentTrait.getTrait());
-                            dt.deleteTrait(cRange.plot_id, currentTrait.getTrait());
-                            etCurVal.setText("");
-                            break;
-                    }
+					traitLayouts.deleteTraitListener(currentTrait.getFormat());
                 }
             }
         });
@@ -909,9 +696,11 @@ public class MainActivity extends AppCompatActivity {
             if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
                 int pos = left ? paging - 1 : paging + 1;
 
+                
                 while (pos != paging) {
-                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
-                            currentTrait.getFormat())) {
+                    TraitObject trait = traitBox.getCurrentTrait();
+                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1],
+                    					trait.getTrait(), trait.getFormat())) {
                         paging = pos;
                         break;
                     }
@@ -958,8 +747,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             displayRange(cRange);
-            newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                    .clone();
+            traitBox.setNewTraits(cRange.plot_id);
 
             initWidgets(true);
         }
@@ -970,8 +758,7 @@ public class MainActivity extends AppCompatActivity {
         if (rangeID == null)
             return;
 
-        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                .clone();
+        traitBox.setNewTraits(cRange.plot_id);
 
         initWidgets(true);
     }
@@ -992,24 +779,6 @@ public class MainActivity extends AppCompatActivity {
         tvPlot.setText(cRange.plot);
     }
 
-    private void hideLayouts() {
-        traitText.setVisibility(View.GONE);
-        traitNumeric.setVisibility(View.GONE);
-        traitPercent.setVisibility(View.GONE);
-        traitDate.setVisibility(View.GONE);
-        traitCategorical.setVisibility(View.GONE);
-        traitBoolean.setVisibility(View.GONE);
-        traitAudio.setVisibility(View.GONE);
-        traitPhoto.setVisibility(View.GONE);
-        traitCounter.setVisibility(View.GONE);
-        traitDiseaseRating.setVisibility(View.GONE);
-        traitMulticat.setVisibility(View.GONE);
-        traitLocation.setVisibility(View.GONE);
-        traitAngle.setVisibility(View.GONE);
-        traitBarcode.setVisibility(View.GONE);
-        traitLabelprint.setVisibility(View.GONE);
-    }
-
     // This is central to the application
     // Calling this function resets all the controls for traits, and picks one
     // to show based on the current trait data
@@ -1019,131 +788,17 @@ public class MainActivity extends AppCompatActivity {
         if (!dt.isTableEmpty(DataHelper.RANGE)) {
             selectorLayoutConfigurator.configureDropdownArray(cRange.plot_id);
         }
-
-        if (prefixTraits != null) {
-            final TextView traitDetails =  findViewById(R.id.traitDetails);
-
-            traitDetails.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch(event.getAction()){
-                        case MotionEvent.ACTION_DOWN:
-                            traitDetails.setMaxLines(10);
-                            break;
-                        case MotionEvent.ACTION_UP:
-                            traitDetails.setMaxLines(1);
-                            break;
-                    }
-                    return true;
-                }
-            });
-        }
-
+        
+        traitBox.initTraitDetails();
+        
         // trait is unique, format is not
-
         String[] traits = dt.getVisibleTrait();
-
-        int traitPosition;
-
-        try {
-            traitPosition = traitType.getSelectedItemPosition();
-        } catch (Exception f) {
-            traitPosition = 0;
-        }
-
         if (traits != null) {
             ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<>(
-                    this, R.layout.custom_spinnerlayout, traits);
+                    	this, R.layout.custom_spinnerlayout, traits);
             directionArrayAdapter
                     .setDropDownViewResource(R.layout.custom_spinnerlayout);
-            traitType.setAdapter(directionArrayAdapter);
-
-            traitType.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-                public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                           int arg2, long arg3) {
-
-                    // This updates the in memory hashmap from database
-                    currentTrait = dt.getDetail(traitType.getSelectedItem()
-                            .toString());
-
-                    imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    if (!currentTrait.getFormat().equals("text")) {
-                        try {
-                            imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
-                        } catch (Exception ignore) {
-                        }
-                    }
-
-                    traitDetails.setText(currentTrait.getDetails());
-
-                    if (!rangeSuppress | !currentTrait.getFormat().equals("numeric")) {
-                        if (etCurVal.getVisibility() == TextView.VISIBLE) {
-                            etCurVal.setVisibility(EditText.GONE);
-                            etCurVal.setEnabled(false);
-                        }
-                    }
-
-                    //Clear all layouts
-                    hideLayouts();
-
-                    //Get current layout object and make it visible
-                    TraitLayout currentTraitLayout = getCurrentTraitLayout(currentTrait.getFormat());
-                    currentTraitLayout.setVisibility(View.VISIBLE);
-
-                    //Call specific load layout code for the current trait layout
-                    if(currentTraitLayout != null) {
-                        currentTraitLayout.loadLayout();
-                    }else {
-                        etCurVal.removeTextChangedListener(cvText);
-                        etCurVal.setVisibility(EditText.VISIBLE);
-                        etCurVal.setEnabled(true);
-                    }
-                }
-
-                public void onNothingSelected(AdapterView<?> arg0) {
-                }
-            });
-
-            traitType.setSelection(traitPosition);
-        }
-    }
-
-    private TraitLayout getCurrentTraitLayout(String trait) {
-        switch (trait){
-            case "numeric":
-                return traitNumeric;
-            case "percent":
-                return traitPercent;
-            case "date":
-                return traitDate;
-            case "qualitative":
-            case "categorical":
-                return traitCategorical;
-            case "boolean":
-                return traitBoolean;
-            case "audio":
-                return traitAudio;
-            case "photo":
-                return traitPhoto;
-            case "counter":
-                return traitCounter;
-            case "rust rating":
-            case "disease rating":
-                return traitDiseaseRating;
-            case "multicat":
-                return traitMulticat;
-            case "location":
-                return traitLocation;
-            case "angle":
-                return traitAngle;
-            case "barcode":
-                return traitBarcode;
-            case "zebra label print":
-                return traitLabelprint;
-            case "text":
-            default:
-                return traitText;
+            traitBox.initTraitType(directionArrayAdapter, rangeSuppress);
         }
     }
 
@@ -1237,13 +892,13 @@ public class MainActivity extends AppCompatActivity {
                 lastRange = cRange.range;
                 displayRange(cRange);
 
-                newTraits = (HashMap) dt.getUserDetail(cRange.plot_id).clone();
+                traitBox.setNewTraits(cRange.plot_id);
             }
 
-            prefixTraits = dt.getRangeColumnNames();
+            traitBox.setPrefixTraits();
 
             initWidgets(false);
-            traitType.setSelection(0);
+            traitBox.setSelection(0);
 
             // try to go to last saved plot
             if(ep.getString("lastplot",null)!=null) {
@@ -1254,7 +909,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (partialReload) {
             partialReload = false;
             displayRange(cRange);
-            prefixTraits = dt.getRangeColumnNames();
+            traitBox.setPrefixTraits();
             initWidgets(false);
 
         } else if (searchReload) {
@@ -1277,13 +932,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        Log.w(trait, value);
-
-        if (newTraits.containsKey(parent)) {
-            newTraits.remove(parent);
-        }
-
-        newTraits.put(parent, value);
+		Log.w(parent, value);
+        traitBox.update(parent, value);
 
         Observation observation = dt.getObservation(cRange.plot_id, parent);
         String observationDbId = observation.getDbId();
@@ -1299,7 +949,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void brapiDelete(String parent, Boolean hint) {
         Toast.makeText(getApplicationContext(), getString(R.string.brapi_delete_message), Toast.LENGTH_LONG).show();
-        updateTrait(parent, currentTrait.getFormat(), getString(R.string.brapi_na));
+        TraitObject trait = traitBox.getCurrentTrait();
+        updateTrait(parent, trait.getFormat(), getString(R.string.brapi_na));
         if (hint) {
             setNaTextBrapiEmptyField();
         }
@@ -1314,18 +965,22 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (dt.isBrapiSynced(cRange.plot_id, currentTrait.getTrait())) {
+        TraitObject trait = traitBox.getCurrentTrait();
+        if (dt.isBrapiSynced(cRange.plot_id, trait.getTrait())) {
             brapiDelete(parent, true);
         }
         else {
-            if (newTraits.containsKey(parent))
-                newTraits.remove(parent);
-
             // Always remove existing trait before inserting again
             // Based on plot_id, prevent duplicate
-            dt.deleteTrait(cRange.plot_id, parent);
+            traitBox.remove(parent, cRange.plot_id);
         }
     }
+    
+    // for format without specific control
+    public void removeTrait() {
+        traitBox.remove(traitBox.getCurrentTrait(), cRange.plot_id);
+        etCurVal.setText("");
+	}
 
     public final Handler myGuiHandler = new Handler() {
         @Override
@@ -1364,7 +1019,7 @@ public class MainActivity extends AppCompatActivity {
         systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(PreferencesActivity.UNIQUE_CAMERA, false));
         systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(PreferencesActivity.DATAGRID_SETTING, false));
 
-        lockData(dataLocked);
+        traitLayouts.lockData(dataLocked);
 
         return true;
     }
@@ -1438,38 +1093,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.lockData:
                 dataLocked = !dataLocked;
-                lockData(dataLocked);
+                traitLayouts.lockData(dataLocked);
                 break;
             case android.R.id.home:
                 finish();
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void lockData(Boolean lock) {
-        LinearLayout[] traitViews = {traitText, traitNumeric, traitPercent, traitDate, traitCategorical,
-                traitBoolean, traitAudio, traitPhoto, traitCounter, traitDiseaseRating, traitMulticat};
-
-        if(lock) {
-            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
-            missingValue.setEnabled(false);
-            deleteValue.setEnabled(false);
-            etCurVal.setEnabled(false);
-
-            for(LinearLayout traitLayout : traitViews) {
-                disableViews(traitLayout);
-            }
-
-        } else {
-            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
-            missingValue.setEnabled(true);
-            deleteValue.setEnabled(true);
-
-            for(LinearLayout traitLayout : traitViews) {
-                enableViews(traitLayout);
-            }
-        }
     }
 
     private static void disableViews(ViewGroup layout) {
@@ -1562,8 +1192,9 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            if (!dt.getTraitExists(rangeID[pos - 1], currentTrait.getTrait(),
-                    currentTrait.getFormat())) {
+            TraitObject trait = traitBox.getCurrentTrait();
+            if (!dt.getTraitExists(rangeID[pos - 1], trait.getTrait(),
+                    								trait.getFormat())) {
                 paging = pos;
                 break;
             }
@@ -1571,8 +1202,7 @@ public class MainActivity extends AppCompatActivity {
         cRange = dt.getRange(rangeID[paging - 1]);
         displayRange(cRange);
         lastRange = cRange.range;
-        newTraits = (HashMap) dt.getUserDetail(cRange.plot_id)
-                .clone();
+        traitBox.setNewTraits(cRange.plot_id);
         initWidgets(true);
     }
 
@@ -1607,23 +1237,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        String[] traitList = dt.getAllTraits();
-        StringBuilder data = new StringBuilder();
-
-        //TODO this test crashes app
-        if (cRange != null) {
-            for (String s : prefixTraits) {
-                data.append(s).append(": ").append(dt.getDropDownRange(s, cRange.plot_id)[0]).append("\n");
-            }
-        }
-
-        for (String s : traitList) {
-            if (newTraits.containsKey(s)) {
-                data.append(s).append(": ").append(newTraits.get(s).toString()).append("\n");
-            }
-        }
-
-        summaryText.setText(data.toString());
+        summaryText.setText(traitBox.createSummaryText(cRange.plot_id));
 
         dialog.show();
     }
@@ -1658,7 +1272,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if(return_action.equals("2")) {
-                    moveTrait("right");
+                    traitBox.moveTrait("right");
                     return true;
                 }
 
@@ -1699,7 +1313,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case 252:
                 if (resultCode == RESULT_OK) {
-                    traitPhoto.makeImage(currentTrait, newTraits);
+					PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
+                    traitPhoto.makeImage(traitBox.getCurrentTrait(),
+                    						traitBox.getNewTraits());
                 }
                 break;
         }
@@ -1726,13 +1342,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public Map getNewTraits(){
-        return newTraits;
+        return traitBox.getNewTraits();
     }
     public void setNewTraits(Map newTraits){
-        this.newTraits = newTraits;
+        traitBox.setNewTraits(newTraits);
     }
     public TraitObject getCurrentTrait(){
-        return currentTrait;
+        return traitBox.getCurrentTrait();
     }
     public RangeObject getCRange(){
         return cRange;
@@ -1754,10 +1370,10 @@ public class MainActivity extends AppCompatActivity {
         return deleteValue;
     }
     public ImageView getTraitLeft(){
-        return traitLeft;
+        return traitBox.getTraitLeft();
     }
     public ImageView getTraitRight(){
-        return traitRight;
+        return traitBox.getTraitRight();
     }
     public ImageView getRangeLeft(){
         return rangeLeft;
@@ -1769,6 +1385,333 @@ public class MainActivity extends AppCompatActivity {
     public Boolean isDataLocked() {
         return dataLocked;
     }
+	
+	private class LayoutCollections {
+        ArrayList<TraitLayout> traitLayouts;
+        
+        public LayoutCollections() {
+			int[] traitIDs = {
+        		R.id.angleLayout, R.id.audioLayout, R.id.barcodeLayout,
+        		R.id.booleanLayout, R.id.categoricalLayout, R.id.counterLayout,
+        	 	R.id.dateLayout, R.id.diseaseLayout, R.id.locationLayout,
+        		R.id.multicatLayout, R.id.numericLayout, R.id.percentLayout,
+        		R.id.photoLayout, R.id.textLayout, R.id.labelprintLayout
+        	};
+        	
+        	traitLayouts = new ArrayList<TraitLayout>();
+        	for (int traitID : traitIDs) {
+				TraitLayout layout = findViewById(traitID);
+				layout.init();
+				traitLayouts.add(layout);
+			}
+        }
 
+    	public TraitLayout getTraitLayout(final String trait) {
+			for(TraitLayout layout : traitLayouts) {
+				if (layout.isTraitType(trait)) {
+					return layout;
+				}
+			}
+			return getTraitLayout("text");
+        }
+        
+        public PhotoTraitLayout getPhotoTrait() {
+			return (PhotoTraitLayout)getTraitLayout("photo");
+		}
+        
+	    public void hideLayouts() {
+			for (TraitLayout layout : traitLayouts) {
+				layout.setVisibility(View.GONE);
+	        }
+	    }
+	    
+	    public void deleteTraitListener(String format) {
+			getTraitLayout(format).deleteTraitListener();
+		}
+	    
+	    public void setNaTraitsText(String format) {
+			getTraitLayout(format).setNaTraitsText();
+		}
+		
+	    private void lockData(Boolean lock) {
+	        if(lock) {
+	            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
+	            missingValue.setEnabled(false);
+	            deleteValue.setEnabled(false);
+	            etCurVal.setEnabled(false);
+
+	            for(LinearLayout traitLayout : traitLayouts) {
+	                disableViews(traitLayout);
+	            }
+
+	        } else {
+	            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
+	            missingValue.setEnabled(true);
+	            deleteValue.setEnabled(true);
+
+	            for(LinearLayout traitLayout : traitLayouts) {
+	                enableViews(traitLayout);
+	            }
+	        }
+	    }
+	}
+	
+	// traitLeft, traitType, and traitRight
+	private class TraitBox {
+	    private String[] prefixTraits;
+	    private TraitObject currentTrait;
+		
+	    private Spinner traitType;
+	    private TextView traitDetails;
+	    private ImageView traitLeft;
+	    private ImageView traitRight;
+		
+	    private Map newTraits;
+		
+		public TraitBox() {
+    	    prefixTraits = null;
+    	    newTraits = new HashMap();
+        	
+	        traitType = findViewById(R.id.traitType);
+	        traitLeft = findViewById(R.id.traitLeft);
+	        traitRight = findViewById(R.id.traitRight);
+        	traitDetails = findViewById(R.id.traitDetails);
+			
+	        traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft,
+	        						R.drawable.main_trait_left_arrow_pressed));
+
+	        // Go to previous trait
+	        traitLeft.setOnClickListener(new OnClickListener() {
+
+	            public void onClick(View arg0) {
+	                moveTrait("left");
+	            }
+	        });
+
+	        traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight,
+		        							R.drawable.main_trait_right_pressed));
+
+	        // Go to next trait
+	        traitRight.setOnClickListener(new OnClickListener() {
+
+	            public void onClick(View arg0) {
+	                moveTrait("right");
+	            }
+	        });
+        }
+        
+        public void initTraitDetails() {
+	        if (prefixTraits != null) {
+	            final TextView traitDetails =  findViewById(R.id.traitDetails);
+
+	            traitDetails.setOnTouchListener(new OnTouchListener() {
+	                @Override
+	                public boolean onTouch(View v, MotionEvent event) {
+	                    switch(event.getAction()){
+	                        case MotionEvent.ACTION_DOWN:
+	                            traitDetails.setMaxLines(10);
+	                            break;
+	                        case MotionEvent.ACTION_UP:
+	                            traitDetails.setMaxLines(1);
+	                            break;
+	                    }
+	                    return true;
+	                }
+	            });
+	        }
+	    }
+		
+		public void initTraitType(ArrayAdapter<String> adaptor,
+											final boolean rangeSuppress) {
+            final int traitPosition = getSelectedItemPosition();
+            traitType.setAdapter(adaptor);
+
+            traitType.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+                public void onItemSelected(AdapterView<?> arg0, View arg1,
+                                           int arg2, long arg3) {
+
+                    // This updates the in memory hashmap from database
+                    currentTrait = dt.getDetail(traitType.getSelectedItem()
+                            .toString());
+
+                    imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (!currentTrait.getFormat().equals("text")) {
+                        try {
+                            imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
+                        } catch (Exception ignore) {
+                        }
+                    }
+
+                    traitDetails.setText(currentTrait.getDetails());
+
+                    if (!rangeSuppress | !currentTrait.getFormat().equals("numeric")) {
+                        if (etCurVal.getVisibility() == TextView.VISIBLE) {
+                            etCurVal.setVisibility(EditText.GONE);
+                            etCurVal.setEnabled(false);
+                        }
+                    }
+
+                    //Clear all layouts
+                    traitLayouts.hideLayouts();
+
+                    //Get current layout object and make it visible
+                    TraitLayout currentTraitLayout =
+                    	traitLayouts.getTraitLayout(currentTrait.getFormat());
+                    currentTraitLayout.setVisibility(View.VISIBLE);
+
+                    //Call specific load layout code for the current trait layout
+                    if(currentTraitLayout != null) {
+                        currentTraitLayout.loadLayout();
+                    }else {
+                        etCurVal.removeTextChangedListener(cvText);
+                        etCurVal.setVisibility(EditText.VISIBLE);
+                        etCurVal.setEnabled(true);
+                    }
+                }
+
+                public void onNothingSelected(AdapterView<?> arg0) {
+                }
+            });
+			
+            traitBox.setSelection(traitPosition);
+		}
+		
+		public Map getNewTraits() { return newTraits; }
+		public ImageView getTraitLeft() { return traitLeft; }
+		public ImageView getTraitRight() { return traitRight; }
+		public boolean existsNewTraits() { return newTraits != null; }
+		
+		public void setPrefixTraits() {
+            prefixTraits = dt.getRangeColumnNames();
+		}
+		
+		public void setNewTraits(final String plotID) {
+	        newTraits = (HashMap) dt.getUserDetail(plotID).clone();
+		}
+	    public void setNewTraits(Map newTraits){
+	        this.newTraits = newTraits;
+	    }
+	    public void setSelection(int pos) { traitType.setSelection(pos); }
+		
+		public int getSelectedItemPosition() {
+	        try {
+	            return traitType.getSelectedItemPosition();
+	        } catch (Exception f) {
+				return 0;
+	        }
+		}
+		
+		public final TraitObject getCurrentTrait() {
+			return currentTrait;
+		}
+		
+		public final String getCurrentFormat() {
+			return currentTrait.getFormat();
+		}
+		
+		public boolean existsTrait() {
+			return newTraits.containsKey(currentTrait.getTrait());
+		}
+		
+		public final String createSummaryText(final String plotID) {
+	        String[] traitList = dt.getAllTraits();
+	        StringBuilder data = new StringBuilder();
+
+	        //TODO this test crashes app
+	        if (cRange != null) {
+	            for (String s : traitBox.prefixTraits) {
+	                data.append(s).append(": ");
+	                data.append(dt.getDropDownRange(s, plotID)[0]).append("\n");
+	            }
+	        }
+
+	        for (String s : traitList) {
+	            if (newTraits.containsKey(s)) {
+	                data.append(s).append(": ");
+	                data.append(newTraits.get(s).toString()).append("\n");
+	            }
+	        }
+			return data.toString();
+		}
+		
+		public void remove(String traitName, String plotID) {
+			if (newTraits.containsKey(traitName))
+		        newTraits.remove(traitName);
+	        dt.deleteTrait(plotID, traitName);
+		}
+		
+		public void remove(TraitObject trait, String plotID) {
+			remove(trait.getTrait(), plotID);
+		}
+		
+	    private OnTouchListener createTraitOnTouchListener(final ImageView arrow,
+	    													final int imageID) {
+	    	return new OnTouchListener() {
+	            public boolean onTouch(View v, MotionEvent event) {
+	                switch (event.getAction()) {
+
+	                    case MotionEvent.ACTION_DOWN:
+	                        arrow.setImageResource(imageID);
+	                        break;
+	                    case MotionEvent.ACTION_MOVE:
+	                        break;
+	                    case MotionEvent.ACTION_UP:
+	                        arrow.setImageResource(imageID);
+	                    case MotionEvent.ACTION_CANCEL:
+	                        break;
+	                }
+
+	                // return true to prevent calling btn onClick handler
+	                return false;
+	            }
+	        };
+	    }
+
+	    public void moveTrait(String direction) {
+	        int pos = 0;
+
+	        if(!validateData()) {
+	            return;
+	        }
+
+	        // Force the keyboard to be hidden to handle bug
+	        try {
+	            imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
+	        } catch (Exception ignore) {
+	        }
+
+	        if (direction.equals("left")) {
+	            pos = traitType.getSelectedItemPosition() - 1;
+
+	            if (pos < 0) {
+	                pos = traitType.getCount() - 1;
+
+	                if (ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false))
+	                    rangeLeft.performClick();
+	            }
+	        }
+	        else if (direction.equals("right")) {
+	            pos = traitType.getSelectedItemPosition() + 1;
+
+	            if (pos > traitType.getCount() - 1) {
+	                pos = 0;
+
+	                if (ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false))
+	                    rangeRight.performClick();
+	            }
+	        }
+
+	        traitType.setSelection(pos);
+	    }
+		
+		public void update(String parent, String value) {
+	        if (newTraits.containsKey(parent)) {
+	            newTraits.remove(parent);
+	        }
+
+	        newTraits.put(parent, value);
+		}
+	}
 
 }

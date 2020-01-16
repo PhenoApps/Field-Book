@@ -33,7 +33,12 @@ public class MultiCatTraitLayout extends TraitLayout {
     public MultiCatTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "multicat"; }
+    
     @Override
     public void init(){
         gridMultiCat = findViewById(R.id.catGrid);
@@ -108,6 +113,6 @@ public class MultiCatTraitLayout extends TraitLayout {
     }
     @Override
     public void deleteTraitListener() {
-
+		((MainActivity) getContext()).removeTrait();
     }
 }

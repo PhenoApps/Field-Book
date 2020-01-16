@@ -46,13 +46,15 @@ public class DateTraitLayout extends TraitLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public TextView getMonth(){
-        return month;
-    }
-    public TextView getDay(){
-        return day;
-    }
-
+    @Override
+    public void setNaTraitsText() {
+        month.setText("");
+        day.setText("NA");
+	}
+    
+    @Override
+    public String type() { return "date"; }
+    
     @Override
     public void init(){
         date = "2000-01-01";

@@ -35,11 +35,15 @@ public class CounterTraitLayout extends TraitLayout {
     public CounterTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
-    public TextView getCounterTv(){
-        return counterTv;
-    }
-
+    
+    @Override
+    public void setNaTraitsText() {
+        counterTv.setText("NA");
+	}
+	
+    @Override
+    public String type() { return "counter"; }
+    
     @Override
     public void  init(){
         addCounterBtn= findViewById(R.id.addBtn);
