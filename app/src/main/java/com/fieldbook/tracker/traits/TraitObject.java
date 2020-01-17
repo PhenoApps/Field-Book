@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.traits;
 
+import android.util.Log;
+
 /**
  * Simple wrapper class for trait data
  */
@@ -109,33 +111,43 @@ public class TraitObject {
 		// this code is not perfect.
 		// I think that it is necessary to check
 		// the minimum and the maximum values
-		return isNotUnder(s) && isNotOver(s);
+		return !isUnder(s) && !isOver(s);
 	}
 	
-	public boolean isNotUnder(final String s) {
+	public boolean isUnder(final String s) {
 		if (!(format.equals("numeric") || format.equals("percent")))
-			return true;
+			return false;
 		
-		final double v = Double.parseDouble(s);
-		if (minimum.length() > 0) {
-			final double lowerValue = Double.parseDouble(minimum);
-			if (v < lowerValue)
-				return false;
+		if (minimum.length() > 0) {		// minimum exists
+			try {
+				final double v = Double.parseDouble(s);
+				final double lowerValue = Double.parseDouble(minimum);
+				return v < lowerValue;
+			} catch(NumberFormatException e) {
+				return true;
+			}
 		}
-		return true;
+		else {
+			return false;
+		}
 	}
 	
-	public boolean isNotOver(final String s) {
+	public boolean isOver(final String s) {
 		if (!(format.equals("numeric") || format.equals("percent")))
-			return true;
+			return false;
 		
-		final double v = Double.parseDouble(s);
-		if (maximum.length() > 0) {
-			final double upperValue = Double.parseDouble(maximum);
-			if (v > upperValue)
-				return false;
+		if (maximum.length() > 0) {		// maximum exists
+			try {
+				final double v = Double.parseDouble(s);
+				final double upperValue = Double.parseDouble(maximum);
+				return v > upperValue;
+			} catch(NumberFormatException e) {
+				return true;
+			}
 		}
-		return true;
+		else {
+			return false;
+		}
 	}
 
 }

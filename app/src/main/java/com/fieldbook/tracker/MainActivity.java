@@ -93,15 +93,10 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences ep;
     private static String displayColor = "#d50000";
-    private int paging;
 
     private String inputPlotId = "";
-    private int[] rangeID;
 
     private AlertDialog goToId;
-
-    private int delay = 100;
-    private int count = 1;
 
     private Object lock;
 
@@ -111,13 +106,9 @@ public class MainActivity extends AppCompatActivity {
     public static boolean reloadData;
     public static boolean partialReload;
 
-    private RangeObject cRange;
-    private String lastRange = "";
-
     public static Activity thisActivity;
 
     public static String TAG = "Field Book";
-    private Handler repeatHandler;
 
     /**
      * Main screen elements
@@ -127,18 +118,8 @@ public class MainActivity extends AppCompatActivity {
 
     private SelectorLayoutConfigurator selectorLayoutConfigurator;
 
-    private TextView rangeName;
-    private TextView plotName;
-
-    private EditText range;
-    private EditText plot;
-    private TextView tvRange;
-    private TextView tvPlot;
-
-    private ImageView rangeLeft;
-    private ImageView rangeRight;
-    
     private TraitBox traitBox;
+    private RangeBox rangeBox;
 
     /**
      * Trait-related elements
@@ -164,98 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
         ep = getSharedPreferences("Settings", 0);
 
-        cRange = new RangeObject();
-        cRange.plot = "";
-        cRange.plot_id = "";
-        cRange.range = "";
-
         loadScreen();
-    }
-
-    private void initRangeAndPlot(){
-        range = findViewById(R.id.range);
-        plot = findViewById(R.id.plot);
-
-        rangeName = findViewById(R.id.rangeName);
-        plotName = findViewById(R.id.plotName);
-
-        tvRange = findViewById(R.id.tvRange);
-        tvPlot = findViewById(R.id.tvPlot);
-
-        range.setOnEditorActionListener(new OnEditorActionListener() {
-            public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-                // do not do bit check on event, crashes keyboard
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    try {
-                        //moveToSearch("range",rangeID,range.getText().toString(),null,null);
-                        imm.hideSoftInputFromWindow(range.getWindowToken(), 0);
-                    } catch (Exception ignore) {
-                    }
-                    return true;
-                }
-
-                return false;
-            }
-        });
-
-        plot.setOnEditorActionListener(new OnEditorActionListener() {
-            public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-                // do not do bit check on event, crashes keyboard
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    try {
-                        //moveToSearch("plot",rangeID,null,plot.getText().toString(),null);
-                        imm.hideSoftInputFromWindow(plot.getWindowToken(), 0);
-                    } catch (Exception ignore) {
-                    }
-                    return true;
-                }
-
-                return false;
-            }
-        });
-
-        plot.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                plot.setCursorVisible(true);
-            }
-        });
-        range.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                range.setCursorVisible(true);
-            }
-        });
-
-        String primaryName = ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range));
-        String secondaryName = ep.getString("ImportSecondName", getString(R.string.search_results_dialog_plot));
-
-        if(primaryName.length()>10) {
-            primaryName = primaryName.substring(0,9) + ":";
-        }
-
-        if(secondaryName.length()>10) {
-            secondaryName = secondaryName.substring(0,9) + ":";
-        }
-
-        rangeName.setText(primaryName);
-        plotName.setText(secondaryName);
-
-        rangeName.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                makeToast(ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)));
-                return false;
-            }
-        });
-
-        plotName.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                makeToast(ep.getString("ImportSecondName", getString(R.string.search_results_dialog_range)));
-                return false;
-            }
-        });
     }
 
     private void initCurrentVals(){
@@ -265,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         etCurVal.setOnEditorActionListener(new OnEditorActionListener() {
             public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    rangeRight.performClick();
+                    rangeBox.rightClick();
                     return true;
                 }
 
@@ -342,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
                         updateTrait(trait, currentTrait.getFormat(), strValue);
                 }
                 else {
-                    if (!currentTrait.isNotOver(strValue)) {
+                    if (strValue.length() > 0 && currentTrait.isOver(strValue)) {
                         makeToast(getString(R.string.trait_error_maximum_value)
                         					+ " " + currentTrait.getMaximum());
                     }
@@ -371,206 +261,23 @@ public class MainActivity extends AppCompatActivity {
         thisActivity = this;
 
         // Keyboard service manager
-        imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        initRangeAndPlot();
-        initCurrentVals();
+        setIMM();
 
         selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 3), (RecyclerView) findViewById(R.id.selectorList));
 
         traitLayouts = new LayoutCollections();
 		
-		traitBox = new TraitBox();
-
-        rangeLeft = findViewById(R.id.rangeLeft);
-        rangeRight = findViewById(R.id.rangeRight);
-
-        rangeLeft.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        rangeLeft.setImageResource(R.drawable.main_entry_left_pressed);
-                        rangeLeft.performClick();
-
-                        if (repeatHandler != null) {
-                            return true;
-                        }
-                        repeatHandler = new Handler();
-                        repeatHandler.postDelayed(mActionLeft, 750);
-
-                        delay = 100;
-                        count = 1;
-
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        rangeLeft.setImageResource(R.drawable.main_entry_left_unpressed);
-
-                        if (repeatHandler == null) {
-                            return true;
-                        }
-                        repeatHandler.removeCallbacks(mActionLeft);
-                        repeatHandler = null;
-
-                        repeatUpdate();
-                        break;
-                    case MotionEvent.ACTION_CANCEL:
-                        rangeLeft.setImageResource(R.drawable.main_entry_left_unpressed);
-
-                        repeatHandler.removeCallbacks(mActionLeft);
-                        repeatHandler = null;
-
-                        v.setTag(null); // mark btn as not pressed
-                        break;
-                }
-
-                return true; // return true to prevent calling btn onClick handler
-            }
-        });
-
-        // Go to previous range
-        rangeLeft.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                moveEntryLeft();
-            }
-        });
-
-        rangeRight.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-
-                    case MotionEvent.ACTION_DOWN:
-                        rangeRight.setImageResource(R.drawable.main_entry_right_pressed);
-                        rangeRight.performClick();
-
-                        if (repeatHandler != null) return true;
-                        repeatHandler = new Handler();
-                        repeatHandler.postDelayed(mActionRight, 750);
-
-                        delay = 100;
-                        count = 1;
-
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        rangeRight.setImageResource(R.drawable.main_entry_right_unpressed);
-
-                        if (repeatHandler == null) return true;
-                        repeatHandler.removeCallbacks(mActionRight);
-                        repeatHandler = null;
-
-                        repeatUpdate();
-                        break;
-                    case MotionEvent.ACTION_CANCEL:
-                        rangeRight.setImageResource(R.drawable.main_entry_right_unpressed);
-
-                        repeatHandler.removeCallbacks(mActionRight);
-                        repeatHandler = null;
-
-                        v.setTag(null); // mark btn as not pressed
-                        break;
-                }
-                return true; // return true to prevent calling btn onClick handler
-            }
-        });
-        
-        // Go to next range
-        rangeRight.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                moveEntryRight();
-            }
-        });
+		traitBox = new TraitBox(this);
+        rangeBox = new RangeBox(this);
+        initCurrentVals();
 
     }
-
-    private void moveEntryLeft() {
-        if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false)
-	        										&& !traitBox.existsTrait()) {
-            playSound("error");
-        } else {
-            if (rangeID != null && rangeID.length > 0) {
-                //index.setEnabled(true);
-				paging = decrementPaging(paging);
-				refreshMain();
-            }
-        }
-    }
-
-    private void moveEntryRight() {
-        if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false)
-        											&& !traitBox.existsTrait()) {
-            playSound("error");
-        } else {
-            if (rangeID != null && rangeID.length > 0) {
-                //index.setEnabled(true);
-
-				paging = incrementPaging(paging);
-				refreshMain();
-            }
-        }
-    }
-    
-    private int decrementPaging(int pos) {
-		return movePaging(pos, -1);
-	}
-    
-    private int incrementPaging(int pos) {
-		return movePaging(pos, 1);
-	}
-	
-	private int movePaging(int pos, int step) {
-        // If ignore existing data is enabled, then skip accordingly
-        if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-            if (step == 1 && pos == rangeID.length) {
-                return 1;
-            }
-
-            TraitObject trait = traitBox.getCurrentTrait();
-            while (0 <= pos && pos <= rangeID.length) {
-                pos += step;
-                if (pos < 1) {
-					return pos - step;
-				}
-                else if (pos > rangeID.length) {
-                    return 1;
-                }
-                else if (!dt.getTraitExists(rangeID[pos-1], trait.getTrait(),
-                										trait.getFormat())) {
-					return pos;
-                }
-            }
-            return pos;
-        } else {
-            pos += step;
-            if (pos > rangeID.length) {
-                return 1;
-            }
-            else if(pos < 1) {
-				return rangeID.length;
-			}
-			else {
-				return pos;
-			}
-        }
-	}
 	
 	private void refreshMain() {
-        // Refresh onscreen controls
-        cRange = dt.getRange(rangeID[paging - 1]);
-
-        saveLastPlot();
-
-        displayRange(cRange);
-        if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
-            if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                lastRange = cRange.range;
-                playSound("plonk");
-            }
-        }
-        traitBox.setNewTraits(cRange.plot_id);
-
+        rangeBox.saveLastPlot();
+        rangeBox.refresh();
+	    traitBox.setNewTraits(rangeBox.getPlotID());
+		
         initWidgets(true);
 	}
 
@@ -633,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // if a brapi observation that has been synced, don't allow deleting
 				TraitObject currentTrait = traitBox.getCurrentTrait();
-                if (dt.isBrapiSynced(cRange.plot_id, currentTrait.getTrait())) {
+                if (dt.isBrapiSynced(rangeBox.getPlotID(), currentTrait.getTrait())) {
                     if (currentTrait.getFormat().equals("photo")) {
 						// I want to use abstract method
 						Map newTraits = traitBox.getNewTraits();
@@ -652,131 +359,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    Runnable mActionRight = new Runnable() {
-        @Override public void run() {
-            repeatKeyPress("right");
-
-            if((count % 5) ==0 ) {
-                if(delay>20) {
-                    delay = delay - 10;
-                }
-            }
-
-            count++;
-            if(repeatHandler!=null) {
-                repeatHandler.postDelayed(this, delay);
-            }
-        }
-    };
-
-    Runnable mActionLeft = new Runnable() {
-        @Override public void run() {
-            repeatKeyPress("left");
-
-            if((count % 5) ==0 ) {
-                if(delay>20) {
-                    delay = delay - 10;
-                }
-            }
-
-            count++;
-
-            if(repeatHandler!=null) {
-                repeatHandler.postDelayed(this, delay);
-            }
-        }
-    };
-
-    // Simulate range right key press
-    private void repeatKeyPress(String directionStr) {
-        boolean left = directionStr.equalsIgnoreCase("left");
-        if (rangeID != null && rangeID.length > 0) {
-
-            // If ignore existing data is enabled, then skip accordingly
-            if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-                int pos = left ? paging - 1 : paging + 1;
-
-                
-                while (pos != paging) {
-                    TraitObject trait = traitBox.getCurrentTrait();
-                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1],
-                    					trait.getTrait(), trait.getFormat())) {
-                        paging = pos;
-                        break;
-                    }
-                    pos = left ? pos - 1 : pos + 1;
-
-                    if (pos > rangeID.length)
-                        pos = 1;
-                    else if (pos < 1)
-                        pos = rangeID.length;
-                }
-            } else {
-                paging = left ? paging - 1 : paging + 1;
-
-                if (paging > rangeID.length)
-                    paging = 1;
-                else if (paging < 1)
-                    paging = rangeID.length;
-            }
-
-            // Refresh onscreen controls
-            cRange = dt.getRange(rangeID[paging - 1]);
-            saveLastPlot();
-
-            if (cRange.plot_id.length() == 0)
-                return;
-
-            if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
-                if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                    lastRange = cRange.range;
-
-                    try {
-                        int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                        MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
-                        chimePlayer.start();
-
-                        chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            public void onCompletion(MediaPlayer mp) {
-                                mp.release();
-                            }
-                        });
-                    } catch (Exception ignore) {
-                    }
-                }
-            }
-
-            displayRange(cRange);
-            traitBox.setNewTraits(cRange.plot_id);
-
-            initWidgets(true);
-        }
-    }
-
     // This update should only be called after repeating keypress ends
     private void repeatUpdate() {
-        if (rangeID == null)
+        if (rangeBox.getRangeID() == null)
             return;
 
-        traitBox.setNewTraits(cRange.plot_id);
+        traitBox.setNewTraits(rangeBox.getPlotID());
 
         initWidgets(true);
-    }
-
-    // Updates the data shown in the dropdown
-    private void displayRange(RangeObject cRange) {
-
-        if (cRange == null)
-            return;
-
-        range.setText(cRange.range);
-        plot.setText(cRange.plot);
-
-        range.setCursorVisible(false);
-        plot.setCursorVisible(false);
-
-        tvRange.setText(cRange.range);
-        tvPlot.setText(cRange.plot);
     }
 
     // This is central to the application
@@ -786,7 +376,8 @@ public class MainActivity extends AppCompatActivity {
         // Reset dropdowns
 
         if (!dt.isTableEmpty(DataHelper.RANGE)) {
-            selectorLayoutConfigurator.configureDropdownArray(cRange.plot_id);
+			final String plotID = rangeBox.getPlotID();
+            selectorLayoutConfigurator.configureDropdownArray(plotID);
         }
         
         traitBox.initTraitDetails();
@@ -823,7 +414,7 @@ public class MainActivity extends AppCompatActivity {
 
         //save last plot id
         if (ep.getBoolean("ImportFieldFinished", false)) {
-            saveLastPlot();
+            rangeBox.saveLastPlot();
         }
 
         try {
@@ -855,46 +446,7 @@ public class MainActivity extends AppCompatActivity {
             reloadData = false;
             partialReload = false;
 
-            if (ep.getBoolean(PreferencesActivity.QUICK_GOTO, false)) {
-                tvRange.setVisibility(TextView.GONE);
-                tvPlot.setVisibility(TextView.GONE);
-                range.setVisibility(EditText.VISIBLE);
-                plot.setVisibility(EditText.VISIBLE);
-            } else {
-                tvRange.setVisibility(TextView.VISIBLE);
-                tvPlot.setVisibility(TextView.VISIBLE);
-                range.setVisibility(EditText.GONE);
-                plot.setVisibility(EditText.GONE);
-            }
-
-            String primaryName = ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)) + ":";
-            String secondaryName = ep.getString("ImportSecondName", getString(R.string.search_results_dialog_plot)) + ":";
-
-            if(primaryName.length()>8) {
-                primaryName = primaryName.substring(0,7) + ":";
-            }
-
-            if(secondaryName.length()>8) {
-                secondaryName = secondaryName.substring(0,7) + ":";
-            }
-
-            rangeName.setText(primaryName);
-            plotName.setText(secondaryName);
-
-            paging = 1;
-
-            rangeID = dt.getAllRangeID();
-
-            if (rangeID != null) {
-                cRange = dt.getRange(rangeID[0]);
-
-                //TODO NullPointerException
-                lastRange = cRange.range;
-                displayRange(cRange);
-
-                traitBox.setNewTraits(cRange.plot_id);
-            }
-
+            rangeBox.reload();
             traitBox.setPrefixTraits();
 
             initWidgets(false);
@@ -902,19 +454,19 @@ public class MainActivity extends AppCompatActivity {
 
             // try to go to last saved plot
             if(ep.getString("lastplot",null)!=null) {
-                rangeID = dt.getAllRangeID();
+                rangeBox.setAllRangeID();
                 //moveToSearch("id",rangeID,null,null,ep.getString("lastplot",null));
             }
 
         } else if (partialReload) {
             partialReload = false;
-            displayRange(cRange);
+            rangeBox.display();
             traitBox.setPrefixTraits();
             initWidgets(false);
 
         } else if (searchReload) {
             searchReload = false;
-            paging = 1;
+            rangeBox.resetPaging();
 
             //if (rangeID != null) {
                 //moveToSearch("search",rangeID, searchRange, searchPlot, null);
@@ -928,23 +480,26 @@ public class MainActivity extends AppCompatActivity {
      */
     public void updateTrait(String parent, String trait, String value) {
 
-        if (cRange == null || cRange.plot_id.length() == 0) {
+        if (rangeBox.isEmpty()) {
             return;
         }
 
 		Log.w(parent, value);
         traitBox.update(parent, value);
 
-        Observation observation = dt.getObservation(cRange.plot_id, parent);
+        Observation observation = dt.getObservation(rangeBox.getPlotID(), parent);
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        dt.deleteTrait(cRange.plot_id, parent);
+        dt.deleteTrait(rangeBox.getPlotID(), parent);
 
         String exp_id = Integer.toString(ep.getInt("ExpID", 0));
-        dt.insertUserTraits(cRange.plot_id, parent, trait, value, ep.getString("FirstName", "") + " " + ep.getString("LastName", ""), ep.getString("Location", ""), "", exp_id, observationDbId, lastSyncedTime); //TODO add notes and exp_id
+        dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
+        	ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
+        	ep.getString("Location", ""), "", exp_id, observationDbId,
+        	lastSyncedTime); //TODO add notes and exp_id
     }
 
     private void brapiDelete(String parent, Boolean hint) {
@@ -961,24 +516,24 @@ public class MainActivity extends AppCompatActivity {
 
     // Delete trait, including from database
     public void removeTrait(String parent) {
-        if (cRange == null || cRange.plot_id.length() == 0) {
+        if (rangeBox.isEmpty()) {
             return;
         }
 
         TraitObject trait = traitBox.getCurrentTrait();
-        if (dt.isBrapiSynced(cRange.plot_id, trait.getTrait())) {
+        if (dt.isBrapiSynced(rangeBox.getPlotID(), trait.getTrait())) {
             brapiDelete(parent, true);
         }
         else {
             // Always remove existing trait before inserting again
             // Based on plot_id, prevent duplicate
-            traitBox.remove(parent, cRange.plot_id);
+            traitBox.remove(parent, rangeBox.getPlotID());
         }
     }
     
     // for format without specific control
     public void removeTrait() {
-        traitBox.remove(traitBox.getCurrentTrait(), cRange.plot_id);
+        traitBox.remove(traitBox.getCurrentTrait(), rangeBox.getPlotID());
         etCurVal.setText("");
 	}
 
@@ -989,13 +544,14 @@ public class MainActivity extends AppCompatActivity {
                 switch (msg.what) {
                     case 1:
                         ImageView btn = (ImageView) findViewById(msg.arg1);
-                        if (btn.getTag() != null) { // button is still pressed
-                            Message msg1 = new Message(); // schedule next btn pressed check
+                        if (btn.getTag() != null) {  // button is still pressed
+                            // schedule next btn pressed check
+                            Message msg1 = new Message();
                             msg1.copyFrom(msg);
                             if (msg.arg1 == R.id.rangeLeft) {
-                                repeatKeyPress("left");
+                                rangeBox.repeatKeyPress("left");
                             } else {
-                                repeatKeyPress("right");
+                                rangeBox.repeatKeyPress("right");
                             }
                             myGuiHandler.removeMessages(1);
                             myGuiHandler.sendMessageDelayed(msg1, msg1.arg2);
@@ -1019,7 +575,7 @@ public class MainActivity extends AppCompatActivity {
         systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(PreferencesActivity.UNIQUE_CAMERA, false));
         systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(PreferencesActivity.DATAGRID_SETTING, false));
 
-        traitLayouts.lockData(dataLocked);
+        lockData(dataLocked);
 
         return true;
     }
@@ -1093,13 +649,28 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.lockData:
                 dataLocked = !dataLocked;
-                traitLayouts.lockData(dataLocked);
+                lockData(dataLocked);
                 break;
             case android.R.id.home:
                 finish();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+	
+	void lockData(boolean lock) {
+	    if(lock) {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
+            missingValue.setEnabled(false);
+            deleteValue.setEnabled(false);
+            etCurVal.setEnabled(false);
+            traitLayouts.disableViews();
+        } else {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
+            missingValue.setEnabled(true);
+            deleteValue.setEnabled(true);
+            traitLayouts.enableViews();
+        }
     }
 
     private static void disableViews(ViewGroup layout) {
@@ -1165,7 +736,7 @@ public class MainActivity extends AppCompatActivity {
         exportButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 inputPlotId = barcodeId.getText().toString();
-                rangeID = dt.getAllRangeID();
+                rangeBox.setAllRangeID();
                 //moveToSearch("id",rangeID,null,null,inputPlotId);
                 goToId.dismiss();
             }
@@ -1179,37 +750,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void nextEmptyPlot() {
-        int pos = paging;
-
-        if (pos == rangeID.length) {
-            return;
-        }
-
-        while (pos <= rangeID.length) {
-            pos += 1;
-
-            if (pos > rangeID.length) {
-                return;
-            }
-
-            TraitObject trait = traitBox.getCurrentTrait();
-            if (!dt.getTraitExists(rangeID[pos - 1], trait.getTrait(),
-                    								trait.getFormat())) {
-                paging = pos;
-                break;
-            }
-        }
-        cRange = dt.getRange(rangeID[paging - 1]);
-        displayRange(cRange);
-        lastRange = cRange.range;
-        traitBox.setNewTraits(cRange.plot_id);
-        initWidgets(true);
-    }
-
-    private void saveLastPlot() {
-        Editor ed = ep.edit();
-        ed.putString("lastplot", cRange.plot_id);
-        ed.apply();
+		try {
+			final int id = rangeBox.nextEmptyPlot();
+	        rangeBox.setRange(id);
+	        rangeBox.display();
+	        rangeBox.setLastRange();
+	        traitBox.setNewTraits(rangeBox.getPlotID());
+	        initWidgets(true);
+	    }
+	    catch(Exception e) {
+			
+		}
     }
 
     private void showSummary() {
@@ -1237,7 +788,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        summaryText.setText(traitBox.createSummaryText(cRange.plot_id));
+        summaryText.setText(traitBox.createSummaryText(rangeBox.getPlotID()));
 
         dialog.show();
     }
@@ -1250,7 +801,7 @@ public class MainActivity extends AppCompatActivity {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if(ep.getBoolean(PreferencesActivity.VOLUME_NAVIGATION,false)) {
                     if (action == KeyEvent.ACTION_UP) {
-                        moveEntryRight();
+                        rangeBox.moveEntryRight();
                     }
                     return true;
                 }
@@ -1258,7 +809,7 @@ public class MainActivity extends AppCompatActivity {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 if(ep.getBoolean(PreferencesActivity.VOLUME_NAVIGATION,false)) {
                     if (action == KeyEvent.ACTION_UP) {
-                        moveEntryLeft();
+                        rangeBox.moveEntryLeft();
                     }
                     return true;
                 }
@@ -1267,7 +818,7 @@ public class MainActivity extends AppCompatActivity {
                 String return_action = ep.getString(PreferencesActivity.RETURN_CHARACTER,"1");
 
                 if(return_action.equals("1")) {
-                    moveEntryRight();
+                    rangeBox.moveEntryRight();
                     return true;
                 }
 
@@ -1307,7 +858,7 @@ public class MainActivity extends AppCompatActivity {
             case 2:
                 if (resultCode == RESULT_OK) {
                     inputPlotId = data.getStringExtra("result");
-                    rangeID = dt.getAllRangeID();
+                    rangeBox.setAllRangeID();
                     //moveToSearch("id",rangeID,null,null,inputPlotId);
                 }
                 break;
@@ -1323,7 +874,7 @@ public class MainActivity extends AppCompatActivity {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (scanResult != null) {
             inputPlotId = scanResult.getContents();
-            rangeID = ConfigActivity.dt.getAllRangeID();
+            rangeBox.setAllRangeID();
             //moveToSearch("id",rangeID,null,null,inputPlotId);
             if(goToId!=null) {
                 goToId.dismiss();
@@ -1340,7 +891,18 @@ public class MainActivity extends AppCompatActivity {
         onBackPressed();
         return true;
     }
+	
+	public InputMethodManager getIMM() { return imm; }
+	public void setIMM() {
+		imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
+	}
+	
+    public TraitBox getTraitBox() { return traitBox; }
+    public boolean existsTrait(final int ID) {
+        TraitObject trait = traitBox.getCurrentTrait();
+        return !dt.getTraitExists(ID, trait.getTrait(), trait.getFormat());
+	}
     public Map getNewTraits(){
         return traitBox.getNewTraits();
     }
@@ -1350,9 +912,12 @@ public class MainActivity extends AppCompatActivity {
     public TraitObject getCurrentTrait(){
         return traitBox.getCurrentTrait();
     }
+    
+    public RangeBox getRangeBox() { return rangeBox; }
     public RangeObject getCRange(){
-        return cRange;
+        return rangeBox.getCRange();
     }
+    
     public EditText getEtCurVal(){
         return etCurVal;
     }
@@ -1376,15 +941,24 @@ public class MainActivity extends AppCompatActivity {
         return traitBox.getTraitRight();
     }
     public ImageView getRangeLeft(){
-        return rangeLeft;
+        return rangeBox.getRangeLeft();
     }
     public ImageView getRangeRight(){
-        return rangeRight;
+        return rangeBox.getRangeRight();
     }
 
     public Boolean isDataLocked() {
         return dataLocked;
     }
+    
+	public SharedPreferences getPreference() {
+		return ep;
+	}
+	public boolean is_cycling_traits_advances() {
+		return ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false);
+	}
+	
+	///// class LayoutCollections /////
 	
 	private class LayoutCollections {
         ArrayList<TraitLayout> traitLayouts;
@@ -1433,31 +1007,22 @@ public class MainActivity extends AppCompatActivity {
 			getTraitLayout(format).setNaTraitsText();
 		}
 		
-	    private void lockData(Boolean lock) {
-	        if(lock) {
-	            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
-	            missingValue.setEnabled(false);
-	            deleteValue.setEnabled(false);
-	            etCurVal.setEnabled(false);
-
-	            for(LinearLayout traitLayout : traitLayouts) {
-	                disableViews(traitLayout);
-	            }
-
-	        } else {
-	            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
-	            missingValue.setEnabled(true);
-	            deleteValue.setEnabled(true);
-
-	            for(LinearLayout traitLayout : traitLayouts) {
-	                enableViews(traitLayout);
-	            }
-	        }
-	    }
+		public void enableViews() {
+            for(LinearLayout traitLayout : traitLayouts) {
+                MainActivity.enableViews(traitLayout);
+            }
+		}
+		
+		public void disableViews() {
+            for(LinearLayout traitLayout : traitLayouts) {
+                MainActivity.disableViews(traitLayout);
+            }
+		}
 	}
 	
 	// traitLeft, traitType, and traitRight
 	private class TraitBox {
+		private MainActivity parent;
 	    private String[] prefixTraits;
 	    private TraitObject currentTrait;
 		
@@ -1468,7 +1033,8 @@ public class MainActivity extends AppCompatActivity {
 		
 	    private Map newTraits;
 		
-		public TraitBox() {
+		public TraitBox(MainActivity parent_) {
+			parent = parent_;
     	    prefixTraits = null;
     	    newTraits = new HashMap();
         	
@@ -1535,7 +1101,9 @@ public class MainActivity extends AppCompatActivity {
                     currentTrait = dt.getDetail(traitType.getSelectedItem()
                             .toString());
 
-                    imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    etCurVal = parent.getEtCurVal();
+                    parent.setIMM();
+                    InputMethodManager imm = parent.getIMM();
                     if (!currentTrait.getFormat().equals("text")) {
                         try {
                             imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
@@ -1564,7 +1132,7 @@ public class MainActivity extends AppCompatActivity {
                     if(currentTraitLayout != null) {
                         currentTraitLayout.loadLayout();
                     }else {
-                        etCurVal.removeTextChangedListener(cvText);
+                        etCurVal.removeTextChangedListener(parent.getCvText());
                         etCurVal.setVisibility(EditText.VISIBLE);
                         etCurVal.setEnabled(true);
                     }
@@ -1619,7 +1187,7 @@ public class MainActivity extends AppCompatActivity {
 	        StringBuilder data = new StringBuilder();
 
 	        //TODO this test crashes app
-	        if (cRange != null) {
+	        if (rangeBox.getCRange() != null) {
 	            for (String s : traitBox.prefixTraits) {
 	                data.append(s).append(": ");
 	                data.append(dt.getDropDownRange(s, plotID)[0]).append("\n");
@@ -1677,18 +1245,21 @@ public class MainActivity extends AppCompatActivity {
 
 	        // Force the keyboard to be hidden to handle bug
 	        try {
+                etCurVal = parent.getEtCurVal();
+                InputMethodManager imm = parent.getIMM();
 	            imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
 	        } catch (Exception ignore) {
 	        }
 
+	        RangeBox rangeBox = parent.getRangeBox();
 	        if (direction.equals("left")) {
 	            pos = traitType.getSelectedItemPosition() - 1;
 
 	            if (pos < 0) {
 	                pos = traitType.getCount() - 1;
 
-	                if (ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false))
-	                    rangeLeft.performClick();
+	                if (parent.is_cycling_traits_advances())
+	                    rangeBox.clickLeft();
 	            }
 	        }
 	        else if (direction.equals("right")) {
@@ -1697,8 +1268,8 @@ public class MainActivity extends AppCompatActivity {
 	            if (pos > traitType.getCount() - 1) {
 	                pos = 0;
 
-	                if (ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false))
-	                    rangeRight.performClick();
+	                if (parent.is_cycling_traits_advances())
+	                    rangeBox.clickRight();
 	            }
 	        }
 
@@ -1713,5 +1284,477 @@ public class MainActivity extends AppCompatActivity {
 	        newTraits.put(parent, value);
 		}
 	}
+	
+	class RangeBox {
+	    private MainActivity parent;
+	    private int[] rangeID;
+	    private int paging;
+	    
+	    private RangeObject cRange;
+	    private String lastRange;
+		
+	    private TextView rangeName;
+	    private TextView plotName;
+		
+	    private EditText range;
+	    private EditText plot;
+	    private TextView tvRange;
+	    private TextView tvPlot;
+		
+	    private ImageView rangeLeft;
+	    private ImageView rangeRight;
+	    
+	    private Handler repeatHandler;
+	    
+	    private int delay = 100;
+    	private int count = 1;
+	    
+		public RangeBox(MainActivity parent_) {
+			parent = parent_;
+			rangeID = null;
+	        cRange = new RangeObject();
+	        cRange.plot = "";
+	        cRange.plot_id = "";
+	        cRange.range = "";
+			lastRange = "";
+			
+			initAndPlot();
+		}
+		
+		// getter
+		public RangeObject getCRange() { return cRange; }
+		public int[] getRangeID() { return rangeID; }
+		public ImageView getRangeLeft() { return rangeLeft; }
+		public ImageView getRangeRight() { return rangeRight; }
+		public final String getPlotID() { return cRange.plot_id; }
+		public boolean isEmpty() {
+        	return cRange == null || cRange.plot_id.length() == 0;
+        }
+		
+	    private void initAndPlot() {
+	        range = findViewById(R.id.range);
+	        plot = findViewById(R.id.plot);
 
+	        rangeName = findViewById(R.id.rangeName);
+	        plotName = findViewById(R.id.plotName);
+
+	        rangeLeft = findViewById(R.id.rangeLeft);
+	        rangeRight = findViewById(R.id.rangeRight);
+
+	        tvRange = findViewById(R.id.tvRange);
+	        tvPlot = findViewById(R.id.tvPlot);
+
+	        rangeLeft.setOnTouchListener(createOnLeftTouchListener());
+	        rangeRight.setOnTouchListener(createOnRightTouchListener());
+	        
+	        // Go to previous range
+	        rangeLeft.setOnClickListener(new OnClickListener() {
+	            public void onClick(View arg0) {
+	                moveEntryLeft();
+	            }
+	        });
+
+	        // Go to next range
+	        rangeRight.setOnClickListener(new OnClickListener() {
+	            public void onClick(View arg0) {
+	                moveEntryRight();
+	            }
+	        });
+
+	        range.setOnEditorActionListener(createOnEditorListener(range));
+	        plot.setOnEditorActionListener(createOnEditorListener(plot));
+			
+			setName();
+
+	        rangeName.setOnTouchListener(new OnTouchListener() {
+	            @Override
+	            public boolean onTouch(View v, MotionEvent event) {
+	                makeToast(ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)));
+	                return false;
+	            }
+	        });
+
+	        plotName.setOnTouchListener(new OnTouchListener() {
+	            @Override
+	            public boolean onTouch(View v, MotionEvent event) {
+	                makeToast(ep.getString("ImportSecondName", getString(R.string.search_results_dialog_range)));
+	                return false;
+	            }
+	        });
+	    }
+	    
+	    private String truncate(String s, int maxLen) {
+			if(s.length() > maxLen)
+				return s.substring(0, maxLen-1) + ":";
+			return s;
+		}
+	    
+	    private OnEditorActionListener createOnEditorListener(final EditText edit) {
+			return new OnEditorActionListener() {
+	            public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
+	                // do not do bit check on event, crashes keyboard
+	                if (actionId == EditorInfo.IME_ACTION_DONE) {
+	                    try {
+	                        //moveToSearch("range",rangeID,range.getText().toString(),null,null);
+	                        imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
+	                    } catch (Exception ignore) {
+	                    }
+	                    return true;
+	                }
+
+	                return false;
+	            }
+	        };
+	    }
+	    
+	    private Runnable createRunnable(final String directionStr) {
+	    	return new Runnable() {
+		        @Override public void run() {
+		            repeatKeyPress(directionStr);
+
+		            if((count % 5) ==0 ) {
+		                if(delay>20) {
+		                    delay = delay - 10;
+		                }
+		            }
+
+		            count++;
+		            if(repeatHandler!=null) {
+		                repeatHandler.postDelayed(this, delay);
+		            }
+		        }
+		    };
+		}
+
+	    private OnTouchListener createOnLeftTouchListener() {
+			Runnable actionLeft = createRunnable("left");
+			return createOnTouchListener(rangeLeft, actionLeft,
+										 R.drawable.main_entry_left_pressed,
+										 R.drawable.main_entry_left_unpressed);
+		}
+		
+	    private OnTouchListener createOnRightTouchListener() {
+			Runnable actionRight = createRunnable("right");
+			return createOnTouchListener(rangeRight, actionRight,
+										 R.drawable.main_entry_right_pressed,
+										 R.drawable.main_entry_right_unpressed);
+		}
+		
+		private OnTouchListener createOnTouchListener(final ImageView control,
+								final Runnable action, final int imageID, final int imageID2) {
+			return new OnTouchListener() {
+	            public boolean onTouch(View v, MotionEvent event) {
+	                switch (event.getAction()) {
+	                    case MotionEvent.ACTION_DOWN:
+	                        control.setImageResource(imageID);
+	                        control.performClick();
+
+	                        if (repeatHandler != null) {
+	                            return true;
+	                        }
+	                        repeatHandler = new Handler();
+	                        repeatHandler.postDelayed(action, 750);
+
+	                        delay = 100;
+	                        count = 1;
+
+	                        break;
+	                    case MotionEvent.ACTION_MOVE:
+	                        break;
+	                    case MotionEvent.ACTION_UP:
+	                        control.setImageResource(imageID2);
+
+	                        if (repeatHandler == null) {
+	                            return true;
+	                        }
+	                        repeatHandler.removeCallbacks(action);
+	                        repeatHandler = null;
+
+	                        repeatUpdate();
+	                        break;
+	                    case MotionEvent.ACTION_CANCEL:
+	                        control.setImageResource(imageID2);
+
+	                        repeatHandler.removeCallbacks(action);
+	                        repeatHandler = null;
+
+	                        v.setTag(null); // mark btn as not pressed
+	                        break;
+	                }
+
+	                // return true to prevent calling btn onClick handler
+	                return true;
+	            }
+	        };
+	    }
+	    
+	    // Simulate range right key press
+	    private void repeatKeyPress(final String directionStr) {
+	        boolean left = directionStr.equalsIgnoreCase("left");
+	        if (rangeID != null && rangeID.length > 0) {
+				final SharedPreferences ep = parent.getPreference();
+	            // If ignore existing data is enabled, then skip accordingly
+	            if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
+	                int pos = left ? paging - 1 : paging + 1;
+
+	                
+	                while (pos != paging) {
+	                    TraitObject trait = traitBox.getCurrentTrait();
+	                    if (!ConfigActivity.dt.getTraitExists(rangeID[pos - 1],
+	                    					trait.getTrait(), trait.getFormat())) {
+	                        paging = pos;
+	                        break;
+	                    }
+	                    pos = left ? pos - 1 : pos + 1;
+
+	                    if (pos > rangeID.length)
+	                        pos = 1;
+	                    else if (pos < 1)
+	                        pos = rangeID.length;
+	                }
+	            } else {
+	                paging = left ? paging - 1 : paging + 1;
+
+	                if (paging > rangeID.length)
+	                    paging = 1;
+	                else if (paging < 1)
+	                    paging = rangeID.length;
+	            }
+
+	            // Refresh onscreen controls
+	            cRange = dt.getRange(rangeID[paging - 1]);
+	            rangeBox.saveLastPlot();
+
+	            if (cRange.plot_id.length() == 0)
+	                return;
+
+	            if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
+	                if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
+	                    lastRange = cRange.range;
+
+	                    try {
+	                        int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
+	                        MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+	                        chimePlayer.start();
+
+	                        chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+	                            public void onCompletion(MediaPlayer mp) {
+	                                mp.release();
+	                            }
+	                        });
+	                    } catch (Exception ignore) {
+	                    }
+	                }
+	            }
+
+	            rangeBox.display();
+	            traitBox.setNewTraits(rangeBox.getPlotID());
+
+	            initWidgets(true);
+	        }
+	    }
+	    
+	    public void reload() {
+			final SharedPreferences ep = parent.getPreference();
+			switchVisibility(ep.getBoolean(PreferencesActivity.QUICK_GOTO, false));
+			
+			setName();
+
+            paging = 1;
+
+            setAllRangeID();
+            if (rangeID != null) {
+                cRange = dt.getRange(rangeID[0]);
+
+                //TODO NullPointerException
+                lastRange = cRange.range;
+                display();
+
+                traitBox.setNewTraits(cRange.plot_id);
+            }
+		}
+	    
+	    // Refresh onscreen controls
+	    public void refresh() {
+	        cRange = dt.getRange(rangeID[paging - 1]);
+
+	        display();
+			final SharedPreferences ep = parent.getPreference();
+	        if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
+	            if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
+	                lastRange = cRange.range;
+	                playSound("plonk");
+	            }
+	        }
+		}
+	    
+	    // Updates the data shown in the dropdown
+	    private void display() {
+	        if (cRange == null)
+	            return;
+
+	        range.setText(cRange.range);
+	        plot.setText(cRange.plot);
+
+	        range.setCursorVisible(false);
+	        plot.setCursorVisible(false);
+
+	        tvRange.setText(cRange.range);
+	        tvPlot.setText(cRange.plot);
+	    }
+	    
+	    public void rightClick() {
+			rangeRight.performClick();
+		}
+		
+	    private void saveLastPlot() {
+			final SharedPreferences ep = parent.getPreference();
+	        Editor ed = ep.edit();
+	        ed.putString("lastplot", cRange.plot_id);
+	        ed.apply();
+	    }
+	    
+	    public void switchVisibility(boolean textview) {
+            if (textview) {
+                tvRange.setVisibility(TextView.GONE);
+                tvPlot.setVisibility(TextView.GONE);
+                range.setVisibility(EditText.VISIBLE);
+                plot.setVisibility(EditText.VISIBLE);
+            } else {
+                tvRange.setVisibility(TextView.VISIBLE);
+                tvPlot.setVisibility(TextView.VISIBLE);
+                range.setVisibility(EditText.GONE);
+                plot.setVisibility(EditText.GONE);
+            }
+		}
+		
+		public void setName() {
+			final SharedPreferences ep = parent.getPreference();
+	        String primaryName = ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)) + ":";
+	        String secondaryName = ep.getString("ImportSecondName", getString(R.string.search_results_dialog_plot)) + ":";
+	        rangeName.setText(truncate(primaryName, 8));
+	        plotName.setText(truncate(secondaryName, 8));
+		}
+		
+		public void setAllRangeID() {
+			rangeID = dt.getAllRangeID();
+		}
+		
+		public void setRange(final int id) {
+			cRange = dt.getRange(id);
+		}
+		
+		public void setLastRange() {
+			lastRange = cRange.range;
+		}
+	    
+	    ///// paging /////
+	    
+	    private void moveEntryLeft() {
+			final SharedPreferences ep = parent.getPreference();
+	        if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false)
+		        						&& !parent.getTraitBox().existsTrait()) {
+	            playSound("error");
+	        } else {
+	            if (rangeID != null && rangeID.length > 0) {
+	                //index.setEnabled(true);
+					paging = decrementPaging(paging);
+					parent.refreshMain();
+	            }
+	        }
+	    }
+
+	    private void moveEntryRight() {
+			final SharedPreferences ep = parent.getPreference();
+	        if(ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false)
+		        						&& !parent.getTraitBox().existsTrait()) {
+	            playSound("error");
+	        } else {
+	            if (rangeID != null && rangeID.length > 0) {
+	                //index.setEnabled(true);
+
+					paging = incrementPaging(paging);
+					parent.refreshMain();
+	            }
+	        }
+	    }
+	    
+	    private int decrementPaging(int pos) {
+			return movePaging(pos, -1);
+		}
+	    
+	    private int incrementPaging(int pos) {
+			return movePaging(pos, 1);
+		}
+		
+		private int movePaging(int pos, int step) {
+	        // If ignore existing data is enabled, then skip accordingly
+			final SharedPreferences ep = parent.getPreference();
+	        if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
+	            if (step == 1 && pos == rangeID.length) {
+	                return 1;
+	            }
+
+	            TraitObject trait = parent.getTraitBox().getCurrentTrait();
+	            while (0 <= pos && pos <= rangeID.length) {
+	                pos += step;
+	                if (pos < 1) {
+						return pos - step;
+					}
+	                else if (pos > rangeID.length) {
+	                    return 1;
+	                }
+	                else if (!parent.existsTrait(rangeID[pos-1])) {
+						return pos;
+	                }
+	            }
+	            return pos;
+	        } else {
+	            pos += step;
+	            if (pos > rangeID.length) {
+	                return 1;
+	            }
+	            else if(pos < 1) {
+					return rangeID.length;
+				}
+				else {
+					return pos;
+				}
+	        }
+		}
+		
+		public void resetPaging() {
+			paging = 1;
+		}
+		
+		public final int nextEmptyPlot() throws Exception {
+	        int pos = paging;
+
+	        if (pos == rangeID.length) {
+	            throw new Exception();
+	        }
+
+	        while (pos <= rangeID.length) {
+	            pos += 1;
+
+	            if (pos > rangeID.length) {
+		            throw new Exception();
+	            }
+
+	            if (!parent.existsTrait(rangeID[pos-1])) {
+	                paging = pos;
+	                return rangeID[pos-1];
+	            }
+	        }
+	        throw new Exception();		// not come here
+		}
+		
+		public void clickLeft() {
+			rangeLeft.performClick();
+		}
+		
+		public void clickRight() {
+			rangeRight.performClick();
+		}
+	}
 }
