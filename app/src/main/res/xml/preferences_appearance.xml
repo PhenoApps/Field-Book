@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_tb_help"
+        android:key="Tips"
+        android:summary="@string/preferences_appearance_tutorial_description"
+        android:title="@string/tutorial_dialog_title" />
+
+    <Preference
+        android:icon="@drawable/ic_nav_drawer_translate"
+        android:key="language"
+        android:summary="@string/preferences_appearance_language_description"
+        android:title="@string/preferences_appearance_language">
+
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetClass="com.android.settings.LanguageSettings"
+            android:targetPackage="com.android.settings" />
+    </Preference>
+
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_quick_goto"
+        android:key="QuickGoTo"
+        android:summary="@string/preferences_appearance_quickgoto_description"
+        android:title="@string/preferences_appearance_quickgoto" />
+</PreferenceScreen>

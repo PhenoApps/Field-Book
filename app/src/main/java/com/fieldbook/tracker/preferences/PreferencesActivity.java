@@ -1,29 +1,20 @@
 package com.fieldbook.tracker.preferences;
 
-import android.annotation.SuppressLint;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
-import android.preference.PreferenceGroup;
-import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceFragmentCompat;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
-public class PreferencesActivity extends AppCompatActivity {
+public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback{
 
     // Appearance
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
@@ -86,15 +77,11 @@ public class PreferencesActivity extends AppCompatActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        // This is not related to the deep link, load normally.
-        preferencesFragment = new PreferencesFragment();
-        getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, preferencesFragment)
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(android.R.id.content, new PreferencesFragment())
                 .commit();
-        //TODO: The top tool bar disappears when you go into 'Brapi Configuration'. Fix it.
-
     }
-
 
     public void processMessage(BrapiControllerResponse brapiControllerResponse) {
         if (brapiControllerResponse.status != null) {
@@ -114,7 +101,8 @@ public class PreferencesActivity extends AppCompatActivity {
         brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
 
         // Set our button visibility and text
-        preferencesFragment.setButtonView();
+        //todo re-enable?
+         //preferencesFragment.setButtonView();
 
         processMessage(brapiControllerResponse);
     }
@@ -138,4 +126,20 @@ public class PreferencesActivity extends AppCompatActivity {
         setIntent(intent);
     }
 
+    @Override
+    public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, androidx.preference.Preference pref) {
+        // Instantiate the new Fragment
+        final Bundle args = pref.getExtras();
+        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(
+                getClassLoader(),
+                pref.getFragment());
+        fragment.setArguments(args);
+        fragment.setTargetFragment(caller, 0);
+        // Replace the existing Fragment with the new Fragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(android.R.id.content, fragment)
+                .addToBackStack(null)
+                .commit();
+        return true;
+    }
 }

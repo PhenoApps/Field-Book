@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_primary_order_sound"
+        android:key="RangeSound"
+        android:summary="@string/preferences_sound_primary_order_sound_description"
+        android:title="@string/preferences_sound_primary_order_sound" />
+
+</PreferenceScreen>

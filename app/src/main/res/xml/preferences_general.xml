@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_cycle_traits_advances"
+        android:key="CycleTraits"
+        android:summary="@string/preferences_behavior_cycle_traits_description"
+        android:title="@string/preferences_behavior_cycle_traits" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_tb_forward"
+        android:key="NextEmptyPlot"
+        android:summary="@string/preferences_general_feature_next_missing_description"
+        android:title="@string/preferences_general_feature_next_missing" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_tb_barcode_scan"
+        android:key="BarcodeScan"
+        android:summary="@string/preferences_general_barcode_camera_description"
+        android:title="@string/preferences_general_barcode_camera" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_tb_datagrid"
+        android:key="DataGrid"
+        android:summary="@string/preferences_general_feature_datagrid_description"
+        android:title="@string/preferences_general_feature_datagrid" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_action_ic_adv_disable_left"
+        android:key="DisableEntryNavLeft"
+        android:summary="@string/preferences_general_entry_left_disable_description"
+        android:title="@string/preferences_general_entry_left_disable" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_action_ic_adv_disable_right"
+        android:key="DisableEntryNavRight"
+        android:summary="@string/preferences_general_entry_right_disable_description"
+        android:title="@string/preferences_general_entry_right_disable" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_disable_file_sharing"
+        android:key="DisableShare"
+        android:summary="@string/preferences_general_share_disable_description"
+        android:title="@string/preferences_general_share_disable" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_unique"
+        android:key="JumpToPlot"
+        android:summary="@string/preferences_general_feature_barcode_text_description"
+        android:title="@string/preferences_general_feature_barcode_text" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_use_day"
+        android:key="UseDay"
+        android:summary="@string/preferences_general_use_day_number_description"
+        android:title="@string/preferences_general_use_day_number" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_hide_entries"
+        android:key="IgnoreExisting"
+        android:summary="@string/preferences_general_skip_entries_with_data_description"
+        android:title="@string/preferences_general_skip_entries_with_data" />
+
+</PreferenceScreen>

@@ -1,11 +1,9 @@
 package com.fieldbook.tracker;
 
-import androidx.arch.core.util.Function;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AlertDialog;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -23,7 +21,6 @@ import android.os.Handler;
 import android.provider.Settings;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.text.Html;
@@ -34,7 +31,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -68,7 +64,6 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -168,6 +163,7 @@ public class ConfigActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         ep = getSharedPreferences("Settings", 0);
+        //ep = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
 
         invalidateOptionsMenu();
         loadScreen();
@@ -286,10 +282,10 @@ public class ConfigActivity extends AppCompatActivity {
         ListView settingsList = findViewById(R.id.myList);
 
         String[] configList = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits),getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced)}; //, "API Test"};
+                getString(R.string.settings_traits),getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced),getString(R.string.about_title)}; //, "API Test"};
 
 
-        Integer image_id[] = {R.drawable.ic_nav_drawer_fields,R.drawable.ic_nav_drawer_traits,R.drawable.barley,R.drawable.ic_nav_drawer_person,R.drawable.trait_date_save,R.drawable.ic_nav_drawer_settings};
+        Integer image_id[] = {R.drawable.ic_nav_drawer_fields,R.drawable.ic_nav_drawer_traits,R.drawable.ic_nav_drawer_collect_data,R.drawable.ic_nav_drawer_person,R.drawable.trait_date_save,R.drawable.ic_nav_drawer_settings,R.drawable.ic_tb_info};
 
         //get list of items
         //make adapter
@@ -347,7 +343,9 @@ public class ConfigActivity extends AppCompatActivity {
                                 PreferencesActivity.class.getName());
                         startActivity(intent);
                         break;
-
+                    case 6:
+                        showAboutDialog();
+                        break;
                 }
             }
         });

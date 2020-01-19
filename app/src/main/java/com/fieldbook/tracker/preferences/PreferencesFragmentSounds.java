@@ -4,12 +4,13 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.preference.Preference;
-import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 
-public class PreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+
+public class PreferencesFragmentSounds extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     PreferenceManager prefMgr;
     Context context;
@@ -19,7 +20,7 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Pre
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName("Settings");
 
-        setPreferencesFromResource(R.xml.preferences, rootKey);
+        setPreferencesFromResource(R.xml.preferences_sounds, rootKey);
     }
 
     @Override
@@ -27,7 +28,7 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Pre
         super.onAttach(context);
 
         // Occurs before the on create function. We get the context this way.
-        PreferencesFragment.this.context = context;
+        PreferencesFragmentSounds.this.context = context;
     }
 
     @Override

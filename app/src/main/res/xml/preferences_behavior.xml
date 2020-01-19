@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_remap_volume_buttons"
+        android:key="VOLUME_NAVIGATION"
+        android:summary="@string/preferences_behavior_volume_buttons_navigate_description"
+        android:title="@string/preferences_behavior_volume_buttons_navigate" />
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/pref_return_character"
+        android:entryValues="@array/pref_return_character_values"
+        android:icon="@drawable/ic_return_character"
+        android:key="RETURN_CHARACTER"
+        android:summary="%s"
+        android:title="@string/preferences_behavior_return_character" />
+
+</PreferenceScreen>
