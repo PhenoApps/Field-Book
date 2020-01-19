@@ -90,7 +90,6 @@
     </style>
 
     <style name="MyToolbarTheme">
-        <!-- Used to tint the back arrow, menu and spinner arrow -->
         <item name="colorControlNormal">#343434</item>
     </style>
 

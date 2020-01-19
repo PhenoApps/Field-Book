@@ -91,7 +91,7 @@
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppThemeAction" />
         <activity
             android:name=".fields.FieldEditorActivity"
             android:alwaysRetainTaskState="false"
@@ -99,9 +99,7 @@
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" >
-
-        </activity>
+            android:theme="@style/AppThemeAction" />
         <activity
             android:name=".ChangelogActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
