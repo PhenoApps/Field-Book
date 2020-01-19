@@ -14,7 +14,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
-public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback{
+public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     // Appearance
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
@@ -62,7 +62,7 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
     public static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
     public static String BRAPI_TOKEN = "BRAPI_TOKEN";
 
-    private static PreferencesFragment preferencesFragment;
+    private static PreferencesFragmentBrapi preferencesFragmentBrapi;
     private static Preference brapiPrefCategory;
     private BrapiControllerResponse brapiControllerResponse;
 
@@ -76,6 +76,8 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+
+        preferencesFragmentBrapi = new PreferencesFragmentBrapi();
 
         getSupportFragmentManager()
                 .beginTransaction()
@@ -101,8 +103,8 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
         brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
 
         // Set our button visibility and text
-        //todo re-enable?
-         //preferencesFragment.setButtonView();
+        //todo null object reference
+        //preferencesFragmentBrapi.setButtonView();
 
         processMessage(brapiControllerResponse);
     }
@@ -110,14 +112,12 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                setResult(RESULT_OK);
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            setResult(RESULT_OK);
+            finish();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -128,6 +128,7 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
 
     @Override
     public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, androidx.preference.Preference pref) {
+
         // Instantiate the new Fragment
         final Bundle args = pref.getExtras();
         final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(
@@ -135,6 +136,7 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
                 pref.getFragment());
         fragment.setArguments(args);
         fragment.setTargetFragment(caller, 0);
+
         // Replace the existing Fragment with the new Fragment
         getSupportFragmentManager().beginTransaction()
                 .replace(android.R.id.content, fragment)

@@ -17,41 +17,31 @@ import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
 public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
-    PreferenceManager prefMgr;
-    Context context;
-    PreferenceCategory brapiPrefCategory;
+    private Context context;
+    private PreferenceManager prefMgr;
+    private PreferenceCategory brapiPrefCategory;
     private Preference brapiAuthButton;
     private Preference brapiLogoutButton;
     private Preference brapiURLPreference;
 
-    public static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
+    private static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
+    private BrapiControllerResponse brapiControllerResponse;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName("Settings");
+
+        setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
+        registerBrapiButtonListeners();
 
         brapiPrefCategory = prefMgr.findPreference("brapi_category");
         brapiAuthButton = findPreference("authorizeBrapi");
         brapiLogoutButton = findPreference("revokeBrapiAuth");
         brapiURLPreference = findPreference("BRAPI_BASE_URL");
+        brapiURLPreference.setOnPreferenceChangeListener(this);
 
-        if(brapiURLPreference!=null){
-            brapiURLPreference.setOnPreferenceChangeListener(this);
-        }
-
-        setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
-        registerBrapiButtonListeners();
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        // Occurs before the on create function. We get the context this way.
-        PreferencesFragmentBrapi.this.context = context;
-
+        setButtonView();
     }
 
     @Override
@@ -81,7 +71,15 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
         return true;
     }
 
-    public void processResponseMessage(BrapiControllerResponse brapiControllerResponse) {
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // Occurs before the on create function. We get the context this way.
+        PreferencesFragmentBrapi.this.context = context;
+    }
+
+    private void processResponseMessage(BrapiControllerResponse brapiControllerResponse) {
         // Only show the error message
         if (brapiControllerResponse.status != null) {
             if (!brapiControllerResponse.status) {
@@ -136,11 +134,10 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
     }
 
     public void setButtonView() {
-
         String brapiToken = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_TOKEN, null);
         String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
 
-        if (brapiHost != null && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
+        if (brapiHost != null){  // && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
 
             brapiPrefCategory.addPreference(brapiAuthButton);
 
@@ -161,6 +158,5 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
             brapiPrefCategory.removePreference(brapiAuthButton);
             brapiPrefCategory.removePreference(brapiLogoutButton);
         }
-
     }
 }
