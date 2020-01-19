@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
@@ -96,16 +97,13 @@ public class PreferencesActivity extends AppCompatActivity {
 
 
     public void processMessage(BrapiControllerResponse brapiControllerResponse) {
-
         if (brapiControllerResponse.status != null) {
             if (!brapiControllerResponse.status) {
                 Toast.makeText(this, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
-            }
-            else {
+            } else {
                 Toast.makeText(this, R.string.brapi_auth_success, Toast.LENGTH_LONG).show();
             }
         }
-
     }
 
     @Override
@@ -119,7 +117,6 @@ public class PreferencesActivity extends AppCompatActivity {
         preferencesFragment.setButtonView();
 
         processMessage(brapiControllerResponse);
-
     }
 
     @Override
