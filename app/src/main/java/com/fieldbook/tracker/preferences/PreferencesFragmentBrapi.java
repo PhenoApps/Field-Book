@@ -33,6 +33,9 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
         prefMgr.setSharedPreferencesName("Settings");
 
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
+
+        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.brapi_info_title));
+
         registerBrapiButtonListeners();
 
         brapiPrefCategory = prefMgr.findPreference("brapi_category");

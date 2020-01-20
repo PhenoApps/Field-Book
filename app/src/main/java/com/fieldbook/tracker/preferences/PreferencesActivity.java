@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -114,7 +115,6 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
 
         if (item.getItemId() == android.R.id.home) {
             setResult(RESULT_OK);
-            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);

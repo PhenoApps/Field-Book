@@ -20,6 +20,8 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Pre
         prefMgr.setSharedPreferencesName("Settings");
 
         setPreferencesFromResource(R.xml.preferences, rootKey);
+
+        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle("Settings");
     }
 
     @Override
@@ -34,5 +36,10 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Pre
     public boolean onPreferenceChange(Preference preference, Object newValue) {
 
         return false;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle("Settings");
     }
 }

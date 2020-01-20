@@ -19,14 +19,14 @@ public class PreferencesFragmentAppearance extends PreferenceFragmentCompat impl
     Context context;
     private static final String DIALOG_FRAGMENT_TAG =  "androidx.preference.PreferenceFragment.DIALOG";
 
-
-
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName("Settings");
 
         setPreferencesFromResource(R.xml.preferences_appearance, rootKey);
+
+        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
     }
 
     @Override

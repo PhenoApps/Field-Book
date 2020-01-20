@@ -39,6 +39,8 @@ public class PreferencesFragmentDatabase extends PreferenceFragmentCompat implem
 
         setPreferencesFromResource(R.xml.preferences_database, rootKey);
 
+        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.database_dialog_title));
+
         databaseImport = findPreference("pref_database_import");
         databaseExport = findPreference("pref_database_export");
         databaseDelete = findPreference("pref_database_delete");

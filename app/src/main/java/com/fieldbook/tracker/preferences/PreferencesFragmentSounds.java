@@ -21,6 +21,8 @@ public class PreferencesFragmentSounds extends PreferenceFragmentCompat implemen
         prefMgr.setSharedPreferencesName("Settings");
 
         setPreferencesFromResource(R.xml.preferences_sounds, rootKey);
+
+        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_sounds));
     }
 
     @Override

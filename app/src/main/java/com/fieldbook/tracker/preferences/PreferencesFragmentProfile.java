@@ -2,7 +2,9 @@ package com.fieldbook.tracker.preferences;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
@@ -21,6 +23,8 @@ public class PreferencesFragmentProfile extends PreferenceFragmentCompat impleme
         prefMgr.setSharedPreferencesName("Settings");
 
         setPreferencesFromResource(R.xml.preferences_profile, rootKey);
+
+        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
     }
 
     @Override
