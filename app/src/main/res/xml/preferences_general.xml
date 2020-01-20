@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        android:defaultValue="1"
+        android:icon="@drawable/ic_pref_source_default"
+        app:dialogTitle="@string/preferences_source_default"
+        app:entries="@array/pref_import_source_entries"
+        app:entryValues="@array/pref_import_source_values"
+        app:key="IMPORT_SOURCE_DEFAULT"
+        app:title="@string/preferences_source_default"
+        app:useSimpleSummaryProvider="true" />
 
     <CheckBoxPreference
         android:defaultValue="false"
@@ -70,5 +81,13 @@
         android:key="IgnoreExisting"
         android:summary="@string/preferences_general_skip_entries_with_data_description"
         android:title="@string/preferences_general_skip_entries_with_data" />
+
+
+    <!--
+    <PreferenceCategory
+        android:title="@string/preferences_files_naming"
+        android:key="pref_key_files_settings">
+    </PreferenceCategory>
+    -->
 
 </PreferenceScreen>
