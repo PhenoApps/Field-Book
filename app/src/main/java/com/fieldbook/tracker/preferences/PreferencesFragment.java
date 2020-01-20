@@ -37,6 +37,7 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Pre
 
         return false;
     }
+
     @Override
     public void onResume() {
         super.onResume();

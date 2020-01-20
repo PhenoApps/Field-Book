@@ -1659,7 +1659,17 @@ public class ConfigActivity extends AppCompatActivity {
             if (dialog.equals("database-delete")) {
                 showDatabaseResetDialog1();
             }
+
+            if (dialog.equals("person")) {
+                showPersonDialog();
+            }
+
+            if (dialog.equals("location")) {
+                showLocationDialog();
+            }
         }
+
+
     }
 
     @Override
