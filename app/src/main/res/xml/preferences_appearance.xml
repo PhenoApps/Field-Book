@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <CheckBoxPreference
         android:defaultValue="false"
         android:icon="@drawable/ic_tb_help"
@@ -19,6 +20,13 @@
             android:targetPackage="com.android.settings" />
     </Preference>
 
+    <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
+        android:icon="@drawable/ic_adv_infobar_count"
+        android:key="INFOBAR_NUMBER"
+        android:summary="@string/preferences_appearance_infobar_number_description"
+        android:title="@string/preferences_appearance_infobar_number"
+        app:nppc_maxValue="20"
+        app:nppc_minValue="1" />
 
     <CheckBoxPreference
         android:defaultValue="false"

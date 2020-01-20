@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.fieldbook.tracker"
-    android:versionCode="410"
-    android:versionName="4.1.0">
+    package="com.fieldbook.tracker">
 
     <uses-feature
         android:name="android.hardware.location"
@@ -50,9 +48,7 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustPan|stateHidden" >
-
-        </activity>
+            android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
             android:name=".search.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -167,7 +163,6 @@
             android:screenOrientation="portrait"
             tools:replace="android:screenOrientation"
             android:stateNotNeeded="true"/>
-
         <provider
             android:name=".GenericFileProvider"
             android:authorities="com.fieldbook.tracker.fileprovider"

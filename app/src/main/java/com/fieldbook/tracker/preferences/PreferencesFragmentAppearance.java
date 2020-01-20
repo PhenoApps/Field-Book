@@ -3,17 +3,23 @@ package com.fieldbook.tracker.preferences;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.fragment.app.DialogFragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
+import com.h6ah4i.android.preference.NumberPickerPreferenceCompat;
+import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
 
 
 public class PreferencesFragmentAppearance extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     PreferenceManager prefMgr;
     Context context;
+    private static final String DIALOG_FRAGMENT_TAG =  "androidx.preference.PreferenceFragment.DIALOG";
+
+
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -29,6 +35,29 @@ public class PreferencesFragmentAppearance extends PreferenceFragmentCompat impl
 
         // Occurs before the on create function. We get the context this way.
         PreferencesFragmentAppearance.this.context = context;
+    }
+
+    @Override
+    public void onDisplayPreferenceDialog(Preference preference) {
+        // check if dialog is already showing
+        if (getFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG) != null) {
+            return;
+        }
+
+        final DialogFragment f;
+
+        if (preference instanceof NumberPickerPreferenceCompat) {
+            f = NumberPickerPreferenceDialogFragmentCompat.newInstance(preference.getKey());
+        } else {
+            f = null;
+        }
+
+        if (f != null) {
+            f.setTargetFragment(this, 0);
+            f.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+        } else {
+            super.onDisplayPreferenceDialog(preference);
+        }
     }
 
     @Override

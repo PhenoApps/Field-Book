@@ -189,7 +189,7 @@ public class ConfigActivity extends AppCompatActivity {
         createDirs();
 
         dt = new DataHelper(this);
-
+        checkIntent();
     }
 
     private void createDirs() {
@@ -1643,6 +1643,25 @@ public class ConfigActivity extends AppCompatActivity {
         alert.show();
     }
 
+    private void checkIntent() {
+        Bundle extras = getIntent().getExtras();
+        String dialog = "";
+
+        if (extras != null) {
+            dialog = extras.getString("dialog");
+        }
+
+        if (dialog != null) {
+            if (dialog.equals("database-export")) {
+                showDatabaseExportDialog();
+            }
+
+            if (dialog.equals("database-delete")) {
+                showDatabaseResetDialog1();
+            }
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
@@ -1669,29 +1688,6 @@ public class ConfigActivity extends AppCompatActivity {
                 intent.setClassName(ConfigActivity.this,
                         TutorialSettingsActivity.class.getName());
                 startActivity(intent);
-                break;
-
-            case R.id.resources:
-                intent.setClassName(ConfigActivity.this,
-                        FileExploreActivity.class.getName());
-                startActivity(intent);
-                break;
-
-            case R.id.about:
-                showAboutDialog();
-                break;
-
-            case R.id.database:
-                showDatabaseDialog();
-                break;
-
-            case android.R.id.home:
-                if (!ep.getBoolean("ImportFieldFinished", false)) {
-                    makeToast(getString(R.string.warning_field_missing));
-                } else if (dt.getTraitColumnsAsString() == null) {
-                    makeToast(getString(R.string.warning_traits_missing));
-                } else
-                    finish();
                 break;
         }
 
