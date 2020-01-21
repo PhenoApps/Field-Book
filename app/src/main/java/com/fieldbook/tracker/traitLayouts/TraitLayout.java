@@ -27,7 +27,7 @@ public abstract class TraitLayout extends LinearLayout {
         super(context, attrs, defStyleAttr);
     }
     
-    public abstract String type();	// return trait type
+    public abstract String type();  // return trait type
     public boolean isTraitType(String trait) { return trait.equals(type()); }
 
     public abstract void init();

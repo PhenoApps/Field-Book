@@ -284,6 +284,9 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         thisActivity = this;
 
+		if (ConfigActivity.dt == null) {	// when resuming
+			ConfigActivity.dt = new DataHelper(this);
+		}
         HashMap visibility = ConfigActivity.dt.getTraitVisibility();
         traitList = findViewById(R.id.myList);
 
@@ -417,7 +420,6 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     // Helper function to load data
-    // 調査形質の追加画面を作る
     public static void loadData() {
         try {
 
@@ -439,7 +441,6 @@ public class TraitEditorActivity extends AppCompatActivity {
 
             mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
 
-            // リストをセットする
             traitList.setAdapter(mAdapter);
             traitList.setDropListener(onDrop);
             traitList.setRemoveListener(onRemove);

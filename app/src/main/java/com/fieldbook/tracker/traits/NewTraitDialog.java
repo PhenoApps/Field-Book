@@ -37,25 +37,25 @@ public class NewTraitDialog extends DialogFragment {
     private TraitEditorActivity originActivity;
     private AlertDialog createDialog;
 
-	private TraitFormatCollection	traitFormats;
+    private TraitFormatCollection   traitFormats;
     private TraitObject oldTrait;
 
     // elements of this dialog
-    private EditText		trait;
-    private Spinner			format;
-    private EditText		def;
-    private EditText		minimum;
-    private EditText		maximum;
-    private EditText		details;
-    private EditText		categories;
-    private TextView		defTv;
-    private ToggleButton	bool;
-    private LinearLayout	defBox;
-    private LinearLayout	minBox;
-    private LinearLayout	maxBox;
-    private LinearLayout	categoryBox;
+    private EditText        trait;
+    private Spinner         format;
+    private EditText        def;
+    private EditText        minimum;
+    private EditText        maximum;
+    private EditText        details;
+    private EditText        categories;
+    private TextView        defTv;
+    private ToggleButton    bool;
+    private LinearLayout    defBox;
+    private LinearLayout    minBox;
+    private LinearLayout    maxBox;
+    private LinearLayout    categoryBox;
     
-    private TraitFormat		traitFormat;
+    private TraitFormat     traitFormat;
 
     private int currentPosition;
     private boolean createVisible;
@@ -76,7 +76,7 @@ public class NewTraitDialog extends DialogFragment {
         createVisible = true;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(originActivity,
-        												R.style.AppAlertDialog);
+                                                        R.style.AppAlertDialog);
 
         builder.setTitle(R.string.traits_toolbar_add_trait)
                 .setCancelable(true)
@@ -109,7 +109,7 @@ public class NewTraitDialog extends DialogFragment {
         format.setOnItemSelectedListener(createFomatSelectionListener());
 
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(
-        										TraitEditorActivity.thisActivity,
+                                                TraitEditorActivity.thisActivity,
                                                 R.layout.custom_spinnerlayout,
                                                 traitFormats.getLocalStringList());
         format.setAdapter(itemsAdapter);
@@ -117,14 +117,14 @@ public class NewTraitDialog extends DialogFragment {
         closeBtn.setOnClickListener(createCloseButtonClickLister());
         saveBtn.setOnClickListener(createSaveButtonClickListener());
 
-	}
-	
-	public void show(boolean edit_) {
-		edit = edit_;
-		createDialog.show();
-	}
+    }
+    
+    public void show(boolean edit_) {
+        edit = edit_;
+        createDialog.show();
+    }
 
-	@Override
+    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         android.view.WindowManager.LayoutParams params = createDialog.getWindow().getAttributes();
         params.width = LinearLayout.LayoutParams.MATCH_PARENT;
@@ -209,30 +209,32 @@ public class NewTraitDialog extends DialogFragment {
 
     private View.OnClickListener createSaveButtonClickListener() {
         return new View.OnClickListener() {
-			@Override
+            @Override
             public void onClick(View arg0) {
-				final int index = format.getSelectedItemPosition();
-				final TraitFormat traitFormat = traitFormats.getTraitFormatByIndex(index);
-				final String errorMessage = traitFormat.ValidateItems();
-				if (errorMessage.length() > 0) {	// not valid
-					originActivity.makeToast(errorMessage);
-					return;
-				}
-				
+                final int index = format.getSelectedItemPosition();
+                final TraitFormat traitFormat = traitFormats.getTraitFormatByIndex(index);
+                final String errorMessage = traitFormat.ValidateItems();
+                if (errorMessage.length() > 0) {    // not valid
+                    originActivity.makeToast(errorMessage);
+                    return;
+                }
+                
                 final int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
-        		final int booleanIndex = traitFormats.findIndexByEnglishString("Boolean");
+                final int booleanIndex = traitFormats.findIndexByEnglishString("Boolean");
                 if (format.getSelectedItemPosition() == booleanIndex) {
                     def.setText(bool.isChecked() ? "true" : "false");
                 }
 
                 if (!edit) {
                     TraitObject t = createTraitObjectByDialogItems(pos);
+                    if (t == null)
+                        return;
 
                     // TODO: Add the local trait data_source name into other trait editing/inserting db functions.
                     t.setTraitDataSource("local");
                     ConfigActivity.dt.insertTraits(t);
                 } else {
-					restoreDialogItemsByTraitObject(oldTrait);
+                    restoreDialogItemsByTraitObject(oldTrait);
                 }
 
                 SharedPreferences.Editor ed = ep.edit();
@@ -274,14 +276,14 @@ public class NewTraitDialog extends DialogFragment {
         edit = false;
 
         createVisible = true;
-	}
+    }
     
     private TraitObject createTraitObjectByDialogItems(int pos) {
-	    /*MainActivity.dt.insertTraits(trait.getText().toString().trim(),
-	            enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
-	            minimum.getText().toString(), maximum.getText().toString(),
-	            details.getText().toString(), categories.getText().toString(),
-	            "true", String.valueOf(pos));*/
+        /*MainActivity.dt.insertTraits(trait.getText().toString().trim(),
+                enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
+                minimum.getText().toString(), maximum.getText().toString(),
+                details.getText().toString(), categories.getText().toString(),
+                "true", String.valueOf(pos));*/
         final int i = format.getSelectedItemPosition();
         final String englishFormat = traitFormats.getEnglishString(i);
         TraitObject t = new TraitObject();
@@ -296,13 +298,13 @@ public class NewTraitDialog extends DialogFragment {
         t.setRealPosition(String.valueOf(pos));
         return t;
     }
-	
-	private void restoreDialogItemsByTraitObject(TraitObject t) {
+    
+    private void restoreDialogItemsByTraitObject(TraitObject t) {
                     // TODO: Add the trait_data_source variable into the edit.
         final int i = format.getSelectedItemPosition();
         final String englishFormat = traitFormats.getEnglishString(i);
         ConfigActivity.dt.editTraits(t.getId(),
-                    	trait.getText().toString().trim(),
+                        trait.getText().toString().trim(),
                         englishFormat.toLowerCase(),
                         def.getText().toString(),
                         minimum.getText().toString(),
@@ -351,9 +353,9 @@ public class NewTraitDialog extends DialogFragment {
         }
     }
 
-	private int visibility(Boolean visible) {
-		return visible ? View.VISIBLE : View.GONE;
-	}
+    private int visibility(Boolean visible) {
+        return visible ? View.VISIBLE : View.GONE;
+    }
 
     // Helper function to see if any fields have been edited
     private boolean dataChanged(TraitObject o) {
@@ -374,39 +376,38 @@ public class NewTraitDialog extends DialogFragment {
             }
 
             return (!minimum.getText().toString().equals(o.getMinimum())) ||
-            	   (!maximum.getText().toString().equals(o.getMaximum())) ||
-            	   (!details.getText().toString().equals(o.getDetails())) ||
-            	   (!categories.getText().toString().equals(o.getCategories()));
+                   (!maximum.getText().toString().equals(o.getMaximum())) ||
+                   (!details.getText().toString().equals(o.getDetails())) ||
+                   (!categories.getText().toString().equals(o.getCategories()));
 
         } else {
             if (trait.getText().toString().length() > 0 ||
-            			def.getText().toString().length() > 0 ||
-            			minimum.getText().toString().length() > 0 ||
-            			maximum.getText().toString().length() > 0 ||
-            			details.getText().toString().length() > 0 ||
-            			categories.getText().toString().length() > 0)
+                        def.getText().toString().length() > 0 ||
+                        minimum.getText().toString().length() > 0 ||
+                        maximum.getText().toString().length() > 0 ||
+                        details.getText().toString().length() > 0 ||
+                        categories.getText().toString().length() > 0)
                 return true;
 
             if (format.getSelectedItemPosition() == booleanIndex) {
                 if (bool.isChecked())
                     return true;
             }
-        	return false;
+            return false;
         }
     }
     
     private String getResString(int id) {
-        Log.d("NewTraitDialog", "getResString start");
-		return originActivity.getResourceString(id);
-	}
+        return originActivity.getResourceString(id);
+    }
     
-	// when this value changes in this class,
-	// the value in TraitEditorActivity must change
-	private void setBrAPIDialogShown(boolean b) {
-		brapiDialogShown = b;
-		originActivity.setBrAPIDialogShown(b);
-	}
-	
+    // when this value changes in this class,
+    // the value in TraitEditorActivity must change
+    private void setBrAPIDialogShown(boolean b) {
+        brapiDialogShown = b;
+        originActivity.setBrAPIDialogShown(b);
+    }
+    
     // Non negative numbers only
     public static boolean isNumeric(String str, boolean positive) {
         if (str.length() == 0)
@@ -422,8 +423,8 @@ public class NewTraitDialog extends DialogFragment {
     }
     
     public static boolean isNumericOrEmpty(String str, boolean positive) {
-		return str.length() == 0 || isNumeric(str, positive);
-	}
+        return str.length() == 0 || isNumeric(str, positive);
+    }
 
     ///// Classes to absorb format differences /////
     
@@ -448,43 +449,43 @@ public class NewTraitDialog extends DialogFragment {
         abstract public String getEnglishString();
         abstract public int getResourceId();
         public String getLocalString() {
-			return getResString(getResourceId());
-		}
-		
-		public String ValidateItems() {
-			final String validation = ValidateItemsCommon();
-			if (validation.length() > 0) {
-				return validation;
-			}
-			else {
-				return ValidateItemsIndividual();
-			}
-		}
-		
-		protected String ValidateItemsCommon() {
-	        // Trait name is mandatory
-	        if (trait.getText().toString().length() == 0) {
-	            return getResString(R.string.traits_create_warning_name_blank);
-	        }
+            return getResString(getResourceId());
+        }
+        
+        public String ValidateItems() {
+            final String validation = ValidateItemsCommon();
+            if (validation.length() > 0) {
+                return validation;
+            }
+            else {
+                return ValidateItemsIndividual();
+            }
+        }
+        
+        protected String ValidateItemsCommon() {
+            // Trait name is mandatory
+            if (trait.getText().toString().length() == 0) {
+                return getResString(R.string.traits_create_warning_name_blank);
+            }
 
-	        // Disallow duplicate traits
-	        final String traitName = trait.getText().toString().trim();
-	        final boolean exists = ConfigActivity.dt.hasTrait(traitName);
-	        if (!edit) {
-	            if (exists) {
-	                return getResString(R.string.traits_create_warning_duplicate);
-	            }
-	        } else {
-	            if (exists & !oldTrait.getTrait().toLowerCase().equals(traitName.toLowerCase())) {
-	                return getResString(R.string.traits_create_warning_duplicate);
-	            }
-	        }
-	        return "";	// OK until here
-		}
-		
-		abstract public String ValidateItemsIndividual();
+            // Disallow duplicate traits
+            final String traitName = trait.getText().toString().trim();
+            final boolean exists = ConfigActivity.dt.hasTrait(traitName);
+            if (!edit) {
+                if (exists) {
+                    return getResString(R.string.traits_create_warning_duplicate);
+                }
+            } else {
+                if (exists & !oldTrait.getTrait().toLowerCase().equals(traitName.toLowerCase())) {
+                    return getResString(R.string.traits_create_warning_duplicate);
+                }
+            }
+            return "";  // OK until here
+        }
+        
+        abstract public String ValidateItemsIndividual();
     }
-	
+    
     abstract private class TraitFormatNotValue extends TraitFormat {
         public boolean isDefBoxVisible() { return false; }
         public boolean isDefaultVisible() { return false; }
@@ -499,9 +500,9 @@ public class NewTraitDialog extends DialogFragment {
         
         public boolean isNumericInputType() { return false; }
         
-		public String ValidateItemsIndividual() { return ""; }
+        public String ValidateItemsIndividual() { return ""; }
     }
-	
+    
     abstract private class TraitFormatWithRange extends TraitFormat {
         public boolean isDefBoxVisible() { return true; }
         public boolean isDefaultVisible() { return true; }
@@ -517,17 +518,31 @@ public class NewTraitDialog extends DialogFragment {
         
         abstract public boolean allowsNegative();
         
-		public String ValidateItemsIndividual() {
-			final boolean b = !allowsNegative();
+        public String ValidateItemsIndividual() {
+            final boolean b = !allowsNegative();
             if ((!isNumericOrEmpty(def.getText().toString(), b)) ||
-            		(!isNumericOrEmpty(minimum.getText().toString(), b)) ||
-		            (!isNumericOrEmpty(maximum.getText().toString(), b))) {
+                    (!isNumericOrEmpty(minimum.getText().toString(), b)) ||
+                    (!isNumericOrEmpty(maximum.getText().toString(), b))) {
                 return getResString(R.string.traits_create_warning_numeric_required);
             }
-			return "";
-		}
+            
+            // minimum <= def <= maximum
+            if (!isValidMagnitudeRelation(minimum, def) ||
+                    !isValidMagnitudeRelation(def, maximum) ||
+                    !isValidMagnitudeRelation(minimum, maximum)) {
+                return "Magnitude Relation Error";
+            }
+            return "";
+        }
+        
+        private boolean isValidMagnitudeRelation(final EditText e1, final EditText e2) {
+            final String s1 = e1.getText().toString();
+            final String s2 = e2.getText().toString();
+            return s1.length() == 0 || s2.length() == 0 ||
+                        Double.parseDouble(s1) <= Double.parseDouble(s2);
+        }
     }
-	
+    
     private class TraitFormatNumeric extends TraitFormatWithRange {
         public boolean displaysDefaultHint() { return true; }
         public boolean displaysMinimumHint() { return true; }
@@ -538,7 +553,7 @@ public class NewTraitDialog extends DialogFragment {
         
         public boolean allowsNegative() { return true; }
     }
-	
+    
     private class TraitFormatCategorical extends TraitFormat {
         public boolean isDefBoxVisible() { return false; }
         public boolean isDefaultVisible() { return false; }
@@ -556,19 +571,19 @@ public class NewTraitDialog extends DialogFragment {
         public String getEnglishString() { return "Categorical"; }
         public int getResourceId() { return R.string.traits_format_categorical; }
         
-		public String ValidateItemsIndividual() {
+        public String ValidateItemsIndividual() {
             if (categories.getText().toString().length() == 0) {
                 return getResString(R.string.traits_create_warning_categories_required);
             }
-			return "";
-		}
+            return "";
+        }
     }
-	
+    
     private class TraitFormatDate extends TraitFormatNotValue {
         public String getEnglishString() { return "Date"; }
         public int getResourceId() { return R.string.traits_format_date; }
     }
-	
+    
     private class TraitFormatPercent extends TraitFormatWithRange {
         public boolean displaysDefaultHint() { return false; }
         public boolean displaysMinimumHint() { return false; }
@@ -581,7 +596,7 @@ public class NewTraitDialog extends DialogFragment {
         
         public boolean allowsNegative() { return false; }
     }
-	
+    
     private class TraitFormatBoolean extends TraitFormat {
         public boolean isDefBoxVisible() { return true; }
         public boolean isDefaultVisible() { return false; }
@@ -599,9 +614,9 @@ public class NewTraitDialog extends DialogFragment {
         public String getEnglishString() { return "Boolean"; }
         public int getResourceId() { return R.string.traits_format_boolean; }
         
-		public String ValidateItemsIndividual() { return ""; }
+        public String ValidateItemsIndividual() { return ""; }
     }
-	
+    
     private class TraitFormatText extends TraitFormat {
         public boolean isDefBoxVisible() { return true; }
         public boolean isDefaultVisible() { return true; }
@@ -619,58 +634,58 @@ public class NewTraitDialog extends DialogFragment {
         public String getEnglishString() { return "Text"; }
         public int getResourceId() { return R.string.traits_format_text; }
         
-		public String ValidateItemsIndividual() { return ""; }
+        public String ValidateItemsIndividual() { return ""; }
     }
-	
+    
     private class TraitFormatPhoto extends TraitFormatNotValue {
         public String getEnglishString() { return "Photo"; }
         public int getResourceId() { return R.string.traits_format_photo; }
     }
-	
+    
     private class TraitFormatAudio extends TraitFormatNotValue {
         public String getEnglishString() { return "Audio"; }
         public int getResourceId() { return R.string.traits_format_audio; }
     }
-	
+    
     private class TraitFormatCounter extends TraitFormatNotValue {
         public String getEnglishString() { return "Counter"; }
         public int getResourceId() { return R.string.traits_format_counter; }
     }
-	
+    
     private class TraitFormatDiseaseRating extends TraitFormatNotValue {
         public String getEnglishString() { return "Disease Rating"; }
         public int getResourceId() {
-			return R.string.traits_format_disease_rating;
-		}
+            return R.string.traits_format_disease_rating;
+        }
     }
-	
+    
     private class TraitFormatMulticat extends TraitFormatNotValue {
         public String getEnglishString() { return "Multicat"; }
         public int getResourceId() {
-			return R.string.traits_format_multicategorical;
-		}
+            return R.string.traits_format_multicategorical;
+        }
     }
-	
+    
     private class TraitFormatLocation extends TraitFormatNotValue {
         public String getEnglishString() { return "Location"; }
         public int getResourceId() { return R.string.traits_format_location; }
     }
-	
+    
     private class TraitFormatBarcode extends TraitFormatNotValue {
         public String getEnglishString() { return "Barcode"; }
         public int getResourceId() { return R.string.traits_format_barcode; }
     }
-	
+    
     private class TraitFormatZebraLablePrint extends TraitFormatNotValue {
         public String getEnglishString() { return "Zebra Label Print"; }
         public int getResourceId() { return R.string.traits_format_labelprint; }
     }
     
     private class TraitFormatCollection {
-		private ArrayList<TraitFormat>	traitFormatList;
-		
-		public TraitFormatCollection() {
-			traitFormatList = new ArrayList<>();
+        private ArrayList<TraitFormat>  traitFormatList;
+        
+        public TraitFormatCollection() {
+            traitFormatList = new ArrayList<>();
             traitFormatList.add(new TraitFormatNumeric());
             traitFormatList.add(new TraitFormatCategorical());
             traitFormatList.add(new TraitFormatDate());
@@ -688,36 +703,36 @@ public class NewTraitDialog extends DialogFragment {
         }
         
         public int size() { return traitFormatList.size(); }
-		
-		public TraitFormat getTraitFormatByIndex(int index)
-        						throws ArrayIndexOutOfBoundsException {
-			if (index < 0 || index >= traitFormatList.size()) {
-				throw new ArrayIndexOutOfBoundsException("");
-			}
-			
-			return traitFormatList.get(index);
-		}
+        
+        public TraitFormat getTraitFormatByIndex(int index)
+                                throws ArrayIndexOutOfBoundsException {
+            if (index < 0 || index >= traitFormatList.size()) {
+                throw new ArrayIndexOutOfBoundsException("");
+            }
+            
+            return traitFormatList.get(index);
+        }
         
         public String getEnglishString(int index) {
-			return getTraitFormatByIndex(index).getEnglishString();
-		}
-		
-		public String[] getLocalStringList() {
-			String[] array = new String[size()];
-			for (int i = 0; i < size(); ++i) {
-				array[i] = traitFormatList.get(i).getLocalString();
-			};
-			return array;
-		}
-		
-		public int findIndexByEnglishString(String format) {
-			for (int i = 0; i < size(); ++i) {
-				if (getEnglishString(i).toLowerCase().equals(
-												format.toLowerCase())) {
-					return i;
-				}
-			}
-			return 0;
-		}
-	}
+            return getTraitFormatByIndex(index).getEnglishString();
+        }
+        
+        public String[] getLocalStringList() {
+            String[] array = new String[size()];
+            for (int i = 0; i < size(); ++i) {
+                array[i] = traitFormatList.get(i).getLocalString();
+            };
+            return array;
+        }
+        
+        public int findIndexByEnglishString(String format) {
+            for (int i = 0; i < size(); ++i) {
+                if (getEnglishString(i).toLowerCase().equals(
+                                                format.toLowerCase())) {
+                    return i;
+                }
+            }
+            return 0;
+        }
+    }
 }

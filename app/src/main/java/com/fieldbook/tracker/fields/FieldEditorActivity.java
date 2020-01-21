@@ -153,9 +153,11 @@ public class FieldEditorActivity extends AppCompatActivity {
             getActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        ConfigActivity.dt.updateExpTable(false, true, false, 0);
-
         thisActivity = this;
+        if (ConfigActivity.dt == null) {    // when resuming
+            ConfigActivity.dt = new DataHelper(this);
+        }
+        ConfigActivity.dt.updateExpTable(false, true, false, 0);
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);

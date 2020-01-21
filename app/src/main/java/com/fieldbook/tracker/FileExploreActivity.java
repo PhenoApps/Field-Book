@@ -24,7 +24,6 @@ import java.util.Comparator;
 public class FileExploreActivity extends AppCompatActivity {
 
     // Stores names of traversed directories
-    // もうちょっとマシな名前にならないか
     ArrayList<String> str = new ArrayList<>();
     public ListView mainListView;
 
@@ -120,8 +119,6 @@ public class FileExploreActivity extends AppCompatActivity {
         });
     }
 
-    // 要するにadaptorを作っているが、
-    // adaptorに新しいオブジェクトをセットしているだけなので分かりにくい
     private void loadFileList() {
         try {
             path.mkdirs();
@@ -130,8 +127,8 @@ public class FileExploreActivity extends AppCompatActivity {
 
         // Checks whether path exists
         if (path.exists()) {
-			// collect files in the specific directory
-			//           and to satisfy the requirement
+            // collect files in the specific directory
+            //           and to satisfy the requirement
             File[] filesList = path.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String filename) {
                     File sel = new File(dir, filename);
@@ -169,7 +166,6 @@ public class FileExploreActivity extends AppCompatActivity {
                 File sel = new File(path, fList[i]);
 
                 // Set drawables
-                // あとで関数にする
                 if (sel.isDirectory()) {
                     fileList[i].icon = R.drawable.ic_file_directory;
                     Log.d("DIRECTORY", fileList[i].file);
@@ -186,20 +182,15 @@ public class FileExploreActivity extends AppCompatActivity {
             }
 
             if (!firstLvl) {
-				// ..を頭にインサートしているだけ
-				// 関数にしたい
-				// あるいは、insertをサポートしているコレクションにして
-				// あとで配列に変換するか
                 Item temp[] = new Item[fileList.length + 1];
                 for (int i = 0; i < fileList.length; i++) {
                     temp[i + 1] = fileList[i];
                 }
                 temp[0] = new Item("Up", R.drawable.ic_file_up_dir);
-                fileList = temp;	// GCまかせ あまりよくない
+                fileList = temp;
             }
         }
 
-        // ちゃんとサブクラスを定義した方がいいのでは
         adapter = new ArrayAdapter<Item>(this,
                 R.layout.custom_dialog_item_select, android.R.id.text1,
                 fileList) {
