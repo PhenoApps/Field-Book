@@ -554,7 +554,7 @@ public class NewTraitDialog extends DialogFragment {
         public boolean allowsNegative() { return true; }
     }
     
-    private class TraitFormatCategorical extends TraitFormat {
+    private abstract class TraitFormatWithCategory extends TraitFormat {
         public boolean isDefBoxVisible() { return false; }
         public boolean isDefaultVisible() { return false; }
         public boolean isBooleanVisible() { return false; }
@@ -568,14 +568,42 @@ public class NewTraitDialog extends DialogFragment {
         
         public boolean isNumericInputType() { return false; }
         
-        public String getEnglishString() { return "Categorical"; }
-        public int getResourceId() { return R.string.traits_format_categorical; }
-        
         public String ValidateItemsIndividual() {
-            if (categories.getText().toString().length() == 0) {
+            final String strCategories = categories.getText().toString();
+            if (strCategories.length() == 0) {
                 return getResString(R.string.traits_create_warning_categories_required);
             }
+            
+            // check empty category
+            final String[] cats = strCategories.split("/");
+            for (int i = 0; i < cats.length; ++i) {
+                if (cats[i].length() == 0) {
+                    // temporary error message
+                    return "An empty category exists.";
+                }
+            }
+            
+            // check duplication
+            for (int i = 0; i < cats.length; ++i) {
+                for (int j = i+1; j < cats.length; ++j) {
+                    if (cats[i].equals(cats[j]))
+                        // temporary error message
+                        return "Categories have duplicates.";
+                }
+            }
             return "";
+        }
+    }
+    
+    private class TraitFormatCategorical extends TraitFormatWithCategory {
+        public String getEnglishString() { return "Categorical"; }
+        public int getResourceId() { return R.string.traits_format_categorical; }
+    }
+    
+    private class TraitFormatMulticat extends TraitFormatWithCategory {
+        public String getEnglishString() { return "Multicat"; }
+        public int getResourceId() {
+            return R.string.traits_format_multicategorical;
         }
     }
     
@@ -656,13 +684,6 @@ public class NewTraitDialog extends DialogFragment {
         public String getEnglishString() { return "Disease Rating"; }
         public int getResourceId() {
             return R.string.traits_format_disease_rating;
-        }
-    }
-    
-    private class TraitFormatMulticat extends TraitFormatNotValue {
-        public String getEnglishString() { return "Multicat"; }
-        public int getResourceId() {
-            return R.string.traits_format_multicategorical;
         }
     }
     

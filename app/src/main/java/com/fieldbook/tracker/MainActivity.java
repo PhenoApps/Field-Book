@@ -1026,6 +1026,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     
+    ///// class TraitBox /////
+    
     // traitLeft, traitType, and traitRight
     private class TraitBox {
         private MainActivity parent;
@@ -1290,6 +1292,8 @@ public class MainActivity extends AppCompatActivity {
             newTraits.put(parent, value);
         }
     }
+    
+    ///// class RangeBox /////
     
     class RangeBox {
         private MainActivity parent;
