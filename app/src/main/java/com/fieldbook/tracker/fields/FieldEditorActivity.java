@@ -71,26 +71,15 @@ public class FieldEditorActivity extends AppCompatActivity {
     public static Activity thisActivity;
     public static EditText trait;
 
-//    private static String mChosenFile;
     private static FieldFile.FieldFileBase fieldFile;
 
     private static SharedPreferences ep;
 
     private Menu systemMenu;
 
-//    private boolean columnFail;
-//    private boolean specialCharactersFail = false;
-//    private boolean isCSV;
-//    private boolean isXLS;
-
     private static final int DIALOG_LOAD_FIELDFILECSV = 1000;
     private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
-
-
-//    private int action;
-
-//    private Workbook wb;
 
     private String[] importColumns;
     private Dialog importFieldDialog;
@@ -98,10 +87,6 @@ public class FieldEditorActivity extends AppCompatActivity {
     Spinner unique;
     Spinner primary;
     Spinner secondary;
-
-//    String uniqueS;
-//    String primaryS;
-//    String secondaryS;
 
     private int idColPosition;
 

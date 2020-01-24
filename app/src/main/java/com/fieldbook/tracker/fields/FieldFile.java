@@ -15,7 +15,6 @@ public class FieldFile {
     static FieldFileBase create(final String path) {
         switch(getExtension(path)) {
             case "csv": return new FieldFileCSV(path);
-            // [TODO] xlsxでも動くか、あとで確認
             case "xls": return new FieldFileExcel(path);
             default:    return new FieldFileOther(path);
         }
