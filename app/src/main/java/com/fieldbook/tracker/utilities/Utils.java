@@ -54,7 +54,7 @@ public class Utils {
         return truncated.toString();
     }
 
-    public static boolean isConnected(Context context){
+    public static boolean isConnected(Context context) {
 
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();

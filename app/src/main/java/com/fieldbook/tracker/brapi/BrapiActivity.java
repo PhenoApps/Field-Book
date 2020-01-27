@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
@@ -57,7 +58,7 @@ public class BrapiActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(Utils.isConnected(this)) {
+        if (Utils.isConnected(this)) {
             if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi);
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
@@ -68,11 +69,11 @@ public class BrapiActivity extends AppCompatActivity {
 
                 loadToolbar();
                 loadStudiesList();
-            }else{
+            } else {
                 Toast.makeText(getApplicationContext(), R.string.brapi_must_configure_url, Toast.LENGTH_SHORT).show();
                 finish();
             }
-        }else{
+        } else {
             Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -138,9 +139,10 @@ public class BrapiActivity extends AppCompatActivity {
     }
 
     private ArrayAdapter buildStudiesArrayAdapter(List<BrapiStudySummary> studies) {
-        ArrayList<String> itemDataList = new ArrayList<>();;
+        ArrayList<String> itemDataList = new ArrayList<>();
+        ;
 
-        for(BrapiStudySummary study: studies) {
+        for (BrapiStudySummary study : studies) {
             itemDataList.add(study.getStudyName());
         }
 
@@ -150,7 +152,7 @@ public class BrapiActivity extends AppCompatActivity {
     }
 
     public void buttonClicked(View view) {
-        switch(view.getId()) {
+        switch (view.getId()) {
             case R.id.loadStudies:
                 loadStudiesList();
                 break;

@@ -57,6 +57,9 @@ import java.util.Set;
 
 public class BrAPIService {
 
+    public static String exportTarget = "export";
+    public static String notUniqueFieldMessage = "not_unique";
+    public static String notUniqueIdMessage = "not_unique_id";
     private DataHelper dataHelper;
     private ImagesApi imagesApi;
     private StudiesApi studiesApi;
@@ -64,9 +67,6 @@ public class BrAPIService {
     private ObservationsApi observationsApi;
     private ObservationVariablesApi traitsApi;
     private String brapiBaseURL;
-    public static String exportTarget = "export";
-    public static String notUniqueFieldMessage = "not_unique";
-    public static String notUniqueIdMessage = "not_unique_id";
 
     public BrAPIService(String brapiBaseURL, DataHelper dataHelper) {
         this.dataHelper = dataHelper;
@@ -77,12 +77,148 @@ public class BrAPIService {
         // Make timeout longer. Set it to 60 seconds for now
         apiClient.setReadTimeout(60000);
 
-        this.imagesApi = new ImagesApi(apiClient);        
+        this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
 
+    }
+
+    public static BrapiControllerResponse authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
+        editor.apply();
+
+        if (target == null) {
+            target = "";
+        }
+
+        try {
+            String url = sharedPreferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://%s";
+            url = String.format(url, target);
+            try {
+                // Go to url with the default browser
+                Uri uri = Uri.parse(url);
+                Intent i = new Intent(Intent.ACTION_VIEW, uri);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                context.startActivity(i);
+
+                // We require no response since this starts a new activity.
+                return new BrapiControllerResponse(null, "");
+
+            } catch (ActivityNotFoundException ex) {
+                Log.e("BrAPI", "Error starting BrAPI auth", ex);
+                return new BrapiControllerResponse(false, context.getString(R.string.brapi_auth_error_starting));
+
+            }
+        } catch (Exception ex) {
+            Log.e("BrAPI", "Error starting BrAPI auth", ex);
+            return new BrapiControllerResponse(false, context.getString(R.string.brapi_auth_error_starting));
+
+        }
+    }
+
+    // Returns true on successful parsing. False otherwise.
+    public static BrapiControllerResponse checkBrapiAuth(Activity activity) {
+
+        Uri data = activity.getIntent().getData();
+
+        if (data != null && data.isHierarchical()) {
+
+            // Clear our data from our deep link so the app doesn't think it is
+            // coming from a deep link if it is coming from deep link on pause and resume.
+            activity.getIntent().setData(null);
+
+            Integer status = Integer.parseInt(data.getQueryParameter("status"));
+
+            // Check that we actually have the data. If not return failure.
+            if (status == null) {
+                return new BrapiControllerResponse(false, "No data received from host.");
+            }
+
+            if (status == 200) {
+                SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
+                SharedPreferences.Editor editor = preferences.edit();
+                String token = data.getQueryParameter("token");
+
+                // Check that we received a token.
+                if (token == null) {
+                    return new BrapiControllerResponse(false, "No access token received in response from host.");
+                }
+
+                editor.putString(PreferencesActivity.BRAPI_TOKEN, token);
+                editor.apply();
+
+                return new BrapiControllerResponse(true, activity.getString(R.string.brapi_auth_success));
+            } else {
+                SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
+                editor.apply();
+
+                return new BrapiControllerResponse(false, activity.getString(R.string.brapi_auth_deny));
+            }
+        } else {
+            // Return null status when it is not a brapi response
+            return new BrapiControllerResponse(null, "");
+        }
+
+    }
+
+    // Helper functions for brapi configurations
+    public static Boolean isLoggedIn(Context context) {
+
+        String auth_token = context.getSharedPreferences("Settings", 0)
+                .getString(PreferencesActivity.BRAPI_TOKEN, "");
+
+        if (auth_token == null || auth_token == "") {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static Boolean hasValidBaseUrl(Context context) {
+        String url = getBrapiUrl(context);
+
+        return Patterns.WEB_URL.matcher(url).matches();
+    }
+
+    public static Boolean checkMatchBrapiUrl(Context context, String dataSource) {
+
+        try {
+            URL externalUrl = new URL(getBrapiUrl(context));
+            String hostURL = externalUrl.getHost();
+
+            return (hostURL.equals(dataSource));
+        } catch (MalformedURLException e) {
+            Log.e("error", e.toString());
+            return false;
+        }
+
+    }
+
+    public static String getHostUrl(String brapiURL) {
+
+        try {
+            URL externalUrl = new URL(brapiURL);
+            return externalUrl.getHost();
+        } catch (MalformedURLException e) {
+            Log.e("error", e.toString());
+            return null;
+        }
+    }
+
+    public static String getBrapiUrl(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
+        return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
+    }
+
+    public static String getBrapiToken(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
+        return "Bearer " + preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
     }
 
     public void postImageMetaData(com.fieldbook.tracker.brapi.Image image, String brapiToken,
@@ -121,7 +257,7 @@ public class BrAPIService {
         request.setDescription(image.getDescription());
         request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
         request.setImageFileName(image.getFileName());
-        request.setImageFileSize((int)image.getFileSize());
+        request.setImageFileSize((int) image.getFileSize());
         request.setImageHeight(image.getHeight());
         request.setImageLocation(image.getLocation());
         request.setImageName(image.getImageName());
@@ -132,7 +268,7 @@ public class BrAPIService {
         return request;
     }
 
-    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction){
+    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
@@ -141,9 +277,9 @@ public class BrAPIService {
 
                     final Image response = imageResponse.getResult();
                     function.apply(response);
-                    
+
                 }
-                    
+
                 @Override
                 public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
                     final ApiException error = e;
@@ -151,16 +287,16 @@ public class BrAPIService {
                     failFunction.apply(code);
                 }
             };
-                       
+
             imagesApi.imagesImageDbIdImagecontentPutAsync(image.getDbId(), image.getImageData(), brapiToken, callback);
-            
-        } catch (ApiException e){
+
+        } catch (ApiException e) {
             e.printStackTrace();
         }
-        
+
     }
 
-    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction){
+    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
@@ -168,10 +304,10 @@ public class BrAPIService {
                 public void onSuccess(ImageResponse imageResponse, int i, Map<String, List<String>> map) {
 
                     //function.apply(imageResponse.getresult());
-                    function.apply(imageResponse.getResult());                    
-                    
+                    function.apply(imageResponse.getResult());
+
                 }
-                    
+
                 @Override
                 public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
                     // report failure
@@ -184,14 +320,13 @@ public class BrAPIService {
             NewImageRequest request = mapImage(image);
             imagesApi.imagesImageDbIdPutAsync(image.getDbId(), request, brapiToken, callback);
 
-        } catch (ApiException e){
+        } catch (ApiException e) {
             e.printStackTrace();
         }
-        
+
     }
 
-    
-    public void getStudies(final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction){
+    public void getStudies(final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudiesResponse> callback = new BrapiApiCallBack<StudiesResponse>() {
@@ -199,7 +334,7 @@ public class BrAPIService {
                 public void onSuccess(StudiesResponse studiesResponse, int i, Map<String, List<String>> map) {
                     final List<BrapiStudySummary> studies = new ArrayList<>();
                     final List<StudySummary> studySummaryList = studiesResponse.getResult().getData();
-                    for(StudySummary studySummary: studySummaryList){
+                    for (StudySummary studySummary : studySummaryList) {
                         studies.add(mapStudy(studySummary));
                     }
 
@@ -210,14 +345,14 @@ public class BrAPIService {
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
 
-                // Close our current study and report failure
+                    // Close our current study and report failure
                     failFunction.apply("Error when loading studies.");
 
                 }
             };
 
             studiesApi.studiesGetAsync(
-                    null,null, null,null,
+                    null, null, null, null,
                     null, null, null, null, null,
                     null, null, null, null,
                     0, 1000, null, callback);
@@ -310,23 +445,23 @@ public class BrAPIService {
 
     private List<String> mapAttributes(ObservationUnit unit) {
         List<String> attributes = new ArrayList<>();
-        if(checkField(unit.getX(), unit.getPositionCoordinateX()))
+        if (checkField(unit.getX(), unit.getPositionCoordinateX()))
             attributes.add("Row");
-        if(checkField(unit.getY(), unit.getPositionCoordinateY()))
+        if (checkField(unit.getY(), unit.getPositionCoordinateY()))
             attributes.add("Column");
-        if(checkField(unit.getBlockNumber()))
+        if (checkField(unit.getBlockNumber()))
             attributes.add("Block");
-        if(checkField(unit.getReplicate()))
+        if (checkField(unit.getReplicate()))
             attributes.add("Replicate");
-        if(checkField(unit.getEntryNumber(), unit.getEntryType()))
+        if (checkField(unit.getEntryNumber(), unit.getEntryType()))
             attributes.add("Entry");
-        if(checkField(unit.getPlotNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId()))
+        if (checkField(unit.getPlotNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId()))
             attributes.add("Plot");
-        if(checkField(unit.getPlantNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId()))
+        if (checkField(unit.getPlantNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId()))
             attributes.add("Plant");
-        if(checkField(unit.getGermplasmName(), unit.getGermplasmDbId()))
+        if (checkField(unit.getGermplasmName(), unit.getGermplasmDbId()))
             attributes.add("Germplasm");
-        if(checkField(unit.getPedigree()))
+        if (checkField(unit.getPedigree()))
             attributes.add("Pedigree");
 
         // We always add the observationUnitDbId and observationName
@@ -339,9 +474,9 @@ public class BrAPIService {
 
     private List<List<String>> mapAttributeValues(List<String> attributes, List<ObservationUnit> data) {
         List<List<String>> attributesTable = new ArrayList<>();
-        for(ObservationUnit unit: data){
+        for (ObservationUnit unit : data) {
             List<String> dataRow = new ArrayList<>();
-            for(String attribute: attributes){
+            for (String attribute : attributes) {
                 if (attribute.equalsIgnoreCase("Row"))
                     addAttributeDataItem(dataRow, unit.getX(), unit.getPositionCoordinateX());
                 else if (attribute.equalsIgnoreCase("Column"))
@@ -373,17 +508,16 @@ public class BrAPIService {
         return attributesTable;
     }
 
-    private void addAttributeDataItem(List<String> dataRow, String ... values) {
+    private void addAttributeDataItem(List<String> dataRow, String... values) {
         String goodValue = getPrioritizedValue(values);
-        if (goodValue != null){
+        if (goodValue != null) {
             dataRow.add(goodValue);
         }
     }
 
-    private boolean checkField(String ... values) {
+    private boolean checkField(String... values) {
         return getPrioritizedValue(values) != null;
     }
-
 
     public void getOntology(Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
         try {
@@ -419,8 +553,12 @@ public class BrAPIService {
             };
 
             // Set defaults for page and pageSize if not specified.
-            if (page == null) { page = 0; }
-            if (pageSize == null) { pageSize = 50; }
+            if (page == null) {
+                page = 0;
+            }
+            if (pageSize == null) {
+                pageSize = 50;
+            }
 
             traitsApi.variablesGetAsync(page, pageSize, null, null,
                     null, callback);
@@ -477,7 +615,7 @@ public class BrAPIService {
                 request.addDataItem(request_data);
             }
 
-            phenotypesApi.phenotypesPostAsync(request, null,brapiToken, callback);
+            phenotypesApi.phenotypesPostAsync(request, null, brapiToken, callback);
 
         } catch (ApiException e) {
             e.printStackTrace();
@@ -530,7 +668,7 @@ public class BrAPIService {
 
                 List<NewObservationsRequestObservations> request_observations = new ArrayList<>();
 
-                for (Observation obs: studyObs) {
+                for (Observation obs : studyObs) {
                     NewObservationsRequestObservations o = new NewObservationsRequestObservations();
                     o.setCollector(obs.getCollector().trim());
                     o.setObservationDbId(obs.getDbId());
@@ -555,8 +693,8 @@ public class BrAPIService {
 
     private String getPrioritizedValue(String... values) {
         String returnValue = null;
-        for(String val: values){
-            if(val != null && !val.isEmpty()){
+        for (String val : values) {
+            if (val != null && !val.isEmpty()) {
                 returnValue = val;
                 break;
             }
@@ -573,7 +711,7 @@ public class BrAPIService {
                     final BrapiStudyDetails study = new BrapiStudyDetails();
                     study.setTraits(mapTraits(response.getResult().getData()));
 
-                            function.apply(study);
+                    function.apply(study);
 
                 }
 
@@ -595,7 +733,7 @@ public class BrAPIService {
 
     private List<TraitObject> mapTraits(List<ObservationVariable> variables) {
         List<TraitObject> traits = new ArrayList<>();
-        for(ObservationVariable var: variables){
+        for (ObservationVariable var : variables) {
             TraitObject trait = new TraitObject();
             trait.setDefaultValue(var.getDefaultValue());
 
@@ -611,37 +749,33 @@ public class BrAPIService {
             // external link than where the trait was retrieved from.
             if (getHostUrl(this.brapiBaseURL) != null) {
                 trait.setTraitDataSource(getHostUrl(this.brapiBaseURL));
-            }
-            else {
+            } else {
                 // return null to indicate we couldn't process the traits
                 return null;
             }
 
             // Parse out the scale of the variable
-            if(var.getScale() != null) {
-                if(var.getScale().getValidValues() != null) {
+            if (var.getScale() != null) {
+                if (var.getScale().getValidValues() != null) {
 
-                    if (var.getScale().getValidValues().getMin() != null){
+                    if (var.getScale().getValidValues().getMin() != null) {
                         trait.setMinimum(var.getScale().getValidValues().getMin().toString());
-                    }
-                    else {
+                    } else {
                         // Fieldbook requires empty string for min and maxes.
                         trait.setMinimum("");
                     }
 
                     if (var.getScale().getValidValues().getMax() != null) {
                         trait.setMaximum(var.getScale().getValidValues().getMax().toString());
-                    }
-                    else {
+                    } else {
                         trait.setMaximum("");
                     }
-                    
+
                     trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
                 }
-                if (var.getScale().getDataType() != null){
+                if (var.getScale().getDataType() != null) {
                     trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getValue()));
-                }
-                else {
+                } else {
                     trait.setFormat("text");
                 }
 
@@ -669,7 +803,7 @@ public class BrAPIService {
 
     private String convertBrAPIDataType(String dataType) {
         //TODO: Check these out and make sure they match with fieldbook data types.
-        switch (dataType){
+        switch (dataType) {
             case "Code":
                 // Not the ideal solution for this conversion
                 return "text";
@@ -766,156 +900,13 @@ public class BrAPIService {
 
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);
-            }
-            else {
+            } else {
                 return new BrapiControllerResponse(true, "");
             }
 
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return new BrapiControllerResponse(false, e.toString());
         }
-    }
-
-    public static BrapiControllerResponse authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
-        editor.apply();
-
-        if (target == null) {
-            target = "";
-        }
-
-        try {
-            String url = sharedPreferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://%s";
-            url = String.format(url, target);
-            try {
-                // Go to url with the default browser
-                Uri uri = Uri.parse(url);
-                Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                context.startActivity(i);
-
-                // We require no response since this starts a new activity.
-                return new BrapiControllerResponse(null, "");
-
-            } catch (ActivityNotFoundException ex) {
-                Log.e("BrAPI", "Error starting BrAPI auth", ex);
-                return new BrapiControllerResponse(false, context.getString(R.string.brapi_auth_error_starting));
-
-            }
-        } catch (Exception ex) {
-            Log.e("BrAPI", "Error starting BrAPI auth", ex);
-            return new BrapiControllerResponse(false, context.getString(R.string.brapi_auth_error_starting));
-
-        }
-    }
-
-
-    // Returns true on successful parsing. False otherwise.
-    public static BrapiControllerResponse checkBrapiAuth(Activity activity) {
-
-        Uri data = activity.getIntent().getData();
-
-        if (data != null && data.isHierarchical()) {
-
-            // Clear our data from our deep link so the app doesn't think it is
-            // coming from a deep link if it is coming from deep link on pause and resume.
-            activity.getIntent().setData(null);
-
-            Integer status = Integer.parseInt(data.getQueryParameter("status"));
-
-            // Check that we actually have the data. If not return failure.
-            if (status == null) {
-                return new BrapiControllerResponse(false, "No data received from host.");
-            }
-
-            if (status == 200) {
-                SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
-                SharedPreferences.Editor editor = preferences.edit();
-                String token = data.getQueryParameter("token");
-
-                // Check that we received a token.
-                if (token == null) {
-                    return new BrapiControllerResponse(false, "No access token received in response from host.");
-                }
-
-                editor.putString(PreferencesActivity.BRAPI_TOKEN, token);
-                editor.apply();
-
-                return new BrapiControllerResponse(true, activity.getString(R.string.brapi_auth_success));
-            }
-            else {
-                SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
-                editor.apply();
-
-                return new BrapiControllerResponse(false, activity.getString(R.string.brapi_auth_deny));
-            }
-        }
-        else {
-            // Return null status when it is not a brapi response
-            return new BrapiControllerResponse(null, "");
-        }
-
-    }
-
-    // Helper functions for brapi configurations
-    public static Boolean isLoggedIn(Context context) {
-
-        String auth_token = context.getSharedPreferences("Settings", 0)
-                .getString(PreferencesActivity.BRAPI_TOKEN, "");
-
-        if (auth_token == null || auth_token == "") {
-            return false;
-        }
-
-        return true;
-    }
-
-    public static Boolean hasValidBaseUrl(Context context) {
-        String url = getBrapiUrl(context);
-
-        return Patterns.WEB_URL.matcher(url).matches();
-    }
-
-    public static Boolean checkMatchBrapiUrl(Context context, String dataSource) {
-
-        try {
-            URL externalUrl = new URL(getBrapiUrl(context));
-            String hostURL = externalUrl.getHost();
-
-            return (hostURL.equals(dataSource));
-        }
-        catch (MalformedURLException e) {
-            Log.e("error", e.toString());
-            return false;
-        }
-
-    }
-
-    public static String getHostUrl(String brapiURL) {
-
-        try {
-            URL externalUrl = new URL(brapiURL);
-            return externalUrl.getHost();
-        }
-        catch (MalformedURLException e) {
-            Log.e("error", e.toString());
-            return null;
-        }
-    }
-
-    public static String getBrapiUrl(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
-        return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
-    }
-
-    public static String getBrapiToken(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
-        return "Bearer " + preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
     }
 }

@@ -6,8 +6,10 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.SharedPreferences;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -32,12 +34,19 @@ import com.fieldbook.tracker.R;
 import java.util.Arrays;
 
 public class SearchActivity extends AppCompatActivity {
-    private SharedPreferences ep;
-
-    private LinearLayout parent;
-    private static String TAG = "Field Book";
-    private int rangeUntil;
     public static String TICK = "`";
+    private static String TAG = "Field Book";
+    private SharedPreferences ep;
+    private LinearLayout parent;
+    private int rangeUntil;
+
+    // Helper function to merge arrays
+    public static <T> T[] concat(T[] first, T[] second) {
+        //TODO NullPointerException
+        T[] result = Arrays.copyOf(first, first.length + second.length);
+        System.arraycopy(second, 0, result, first.length, second.length);
+        return result;
+    }
 
     @Override
     public void onDestroy() {
@@ -79,7 +88,7 @@ public class SearchActivity extends AppCompatActivity {
                 try {
                     // Create the sql query based on user selection
                     String sql1 = "select range.id, range." + TICK + ep.getString("ImportFirstName", "") + TICK + "," + " range." + TICK + ep.getString("ImportSecondName", "") + TICK + " from range where range.id is not null ";
-                    String sql2 = "select range.id, range." + TICK + ep.getString("ImportFirstName", "") + TICK + "," +  "range." + TICK + ep.getString("ImportSecondName", "") + TICK + " from traits, range, user_traits where user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK + " and user_traits.parent = traits.trait and user_traits.trait = traits.format ";
+                    String sql2 = "select range.id, range." + TICK + ep.getString("ImportFirstName", "") + TICK + "," + "range." + TICK + ep.getString("ImportSecondName", "") + TICK + " from traits, range, user_traits where user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK + " and user_traits.parent = traits.trait and user_traits.trait = traits.format ";
 
                     String sql = "";
 
@@ -246,7 +255,7 @@ public class SearchActivity extends AppCompatActivity {
                         makeToast(getString(R.string.search_results_missing));
                     }
                 } catch (Exception z) {
-                    Log.e(TAG, "" +z.getMessage());
+                    Log.e(TAG, "" + z.getMessage());
                 }
             }
         });
@@ -317,14 +326,6 @@ public class SearchActivity extends AppCompatActivity {
 
             parent.addView(v);
         }
-    }
-
-    // Helper function to merge arrays
-    public static <T> T[] concat(T[] first, T[] second) {
-        //TODO NullPointerException
-        T[] result = Arrays.copyOf(first, first.length + second.length);
-        System.arraycopy(second, 0, result, first.length, second.length);
-        return result;
     }
 
     @Override

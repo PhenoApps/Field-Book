@@ -32,12 +32,21 @@ public class TextTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void init(){
+    public void setNaTraitsText() {
+    }
+
+    @Override
+    public String type() {
+        return "text";
+    }
+
+    @Override
+    public void init() {
 
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
 
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
@@ -79,8 +88,9 @@ public class TextTraitLayout extends TraitLayout {
             }
         }, 300);
     }
+
     @Override
     public void deleteTraitListener() {
-
+        ((MainActivity) getContext()).removeTrait();
     }
 }

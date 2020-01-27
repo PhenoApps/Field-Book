@@ -27,40 +27,60 @@ public abstract class TraitLayout extends LinearLayout {
         super(context, attrs, defStyleAttr);
     }
 
+    public abstract String type();  // return trait type
+
+    public boolean isTraitType(String trait) {
+        return trait.equals(type());
+    }
+
     public abstract void init();
+
     public abstract void loadLayout();
+
     public abstract void deleteTraitListener();
 
-    public Map getNewTraits(){
+    public abstract void setNaTraitsText();
+
+    public Map getNewTraits() {
         return ((MainActivity) getContext()).getNewTraits();
     }
-    public TraitObject getCurrentTrait(){
+
+    public TraitObject getCurrentTrait() {
         return ((MainActivity) getContext()).getCurrentTrait();
     }
-    public SharedPreferences getPrefs(){
+
+    public SharedPreferences getPrefs() {
         return getContext().getSharedPreferences("Settings", 0);
     }
-    public RangeObject getCRange(){
+
+    public RangeObject getCRange() {
         return ((MainActivity) getContext()).getCRange();
     }
-    public EditText getEtCurVal(){
+
+    public EditText getEtCurVal() {
         return ((MainActivity) getContext()).getEtCurVal();
     }
-    public TextWatcher getCvText(){
+
+    public TextWatcher getCvText() {
         return ((MainActivity) getContext()).getCvText();
     }
-    public TextWatcher getCvNum(){
+
+    public TextWatcher getCvNum() {
         return ((MainActivity) getContext()).getCvNum();
     }
-    public String getDisplayColor(){
+
+    public String getDisplayColor() {
         return ((MainActivity) getContext()).getDisplayColor();
     }
+
     public void makeToast(String message) {
         Toast.makeText(getContext().getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
+
     public void updateTrait(String parent, String trait, String value) {
         ((MainActivity) getContext()).updateTrait(parent, trait, value);
     }
+
     public void removeTrait(String parent) {
         ((MainActivity) getContext()).removeTrait(parent);
     }

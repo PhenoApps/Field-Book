@@ -35,7 +35,16 @@ public class NumericTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void init(){
+    public void setNaTraitsText() {
+    }
+
+    @Override
+    public String type() {
+        return "numeric";
+    }
+
+    @Override
+    public void init() {
         numberButtons = new LinkedHashMap<>();
         numberButtons.put(R.id.k1, (Button) findViewById(R.id.k1));
         numberButtons.put(R.id.k2, (Button) findViewById(R.id.k2));
@@ -54,7 +63,7 @@ public class NumericTraitLayout extends TraitLayout {
         numberButtons.put(R.id.k15, (Button) findViewById(R.id.k15));
         numberButtons.put(R.id.k16, (Button) findViewById(R.id.k16));
 
-        for(Button numButton: numberButtons.values()){
+        for (Button numButton : numberButtons.values()) {
             numButton.setOnClickListener(new NumberButtonOnClickListener());
         }
 
@@ -71,7 +80,7 @@ public class NumericTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
 
         // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
         getEtCurVal().setHint("");
@@ -99,27 +108,22 @@ public class NumericTraitLayout extends TraitLayout {
 
     @Override
     public void deleteTraitListener() {
-
+        ((MainActivity) getContext()).removeTrait();
     }
 
-    private class NumberButtonOnClickListener implements OnClickListener{
+    private class NumberButtonOnClickListener implements OnClickListener {
 
         @Override
         public void onClick(View view) {
-
-            String v = "";
-
-            if(numberButtons.containsKey(view.getId())){
-                v = numberButtons.get(view.getId()).getText().toString();
-            }
-
-            if (view.getId() == R.id.k16) {
-                //Backspace Key Pressed
-                if(getEtCurVal().getText().toString().length()>0) {
-                    getEtCurVal().setText(getEtCurVal().getText().toString().substring(0, getEtCurVal().getText().toString().length()-1));
+            final String curText = getEtCurVal().getText().toString();
+            if (view.getId() == R.id.k16) {        // Backspace Key Pressed
+                final int length = curText.length();
+                if (length > 0) {
+                    getEtCurVal().setText(curText.substring(0, length - 1));
                 }
-            } else {
-                getEtCurVal().setText(getEtCurVal().getText().toString() + v);
+            } else if (numberButtons.containsKey(view.getId())) {
+                final String v = numberButtons.get(view.getId()).getText().toString();
+                getEtCurVal().setText(curText + v);
             }
         }
     }

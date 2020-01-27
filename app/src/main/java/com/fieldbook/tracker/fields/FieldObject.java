@@ -19,7 +19,8 @@ public class FieldObject {
     private String count;
     private String exp_source;
 
-    public FieldObject() {}
+    public FieldObject() {
+    }
 
     public int getExp_id() {
         return exp_id;
@@ -125,7 +126,11 @@ public class FieldObject {
         this.count = count;
     }
 
-    public String getExp_source() {return exp_source;}
+    public String getExp_source() {
+        return exp_source;
+    }
 
-    public void setExp_source(String exp_source) { this.exp_source = exp_source; }
+    public void setExp_source(String exp_source) {
+        this.exp_source = exp_source;
+    }
 }

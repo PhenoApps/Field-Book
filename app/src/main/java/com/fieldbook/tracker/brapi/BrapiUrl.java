@@ -7,7 +7,7 @@ package com.fieldbook.tracker.brapi;
 public class BrapiUrl {
 
     private final String basePath = "https://test-server.brapi.org/brapi/v1";
-    private final  String header = "/studies/";
+    private final String header = "/studies/";
     private final String plotsTail = "/observationunits";
     private final String trailTail = "/observationVariables";
     private final String studiesURL = basePath + "/studies-search";

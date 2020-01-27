@@ -36,13 +36,19 @@ public class CounterTraitLayout extends TraitLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public TextView getCounterTv(){
-        return counterTv;
+    @Override
+    public void setNaTraitsText() {
+        counterTv.setText("NA");
     }
 
     @Override
-    public void  init(){
-        addCounterBtn= findViewById(R.id.addBtn);
+    public String type() {
+        return "counter";
+    }
+
+    @Override
+    public void init() {
+        addCounterBtn = findViewById(R.id.addBtn);
         minusCounterBtn = findViewById(R.id.minusBtn);
         counterTv = findViewById(R.id.curCount);
 
@@ -51,7 +57,7 @@ public class CounterTraitLayout extends TraitLayout {
         addCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 //TODO NullPointerException
-                if(getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
+                if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
                     counterTv.setText("1");
                 } else {
                     counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) + 1));
@@ -64,7 +70,7 @@ public class CounterTraitLayout extends TraitLayout {
         minusCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 //TODO NullPointerException
-                if(getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
+                if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
                     counterTv.setText("-1");
                 } else {
                     counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) - 1));
@@ -76,7 +82,7 @@ public class CounterTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
         getEtCurVal().setVisibility(EditText.GONE);
         getEtCurVal().setEnabled(false);
 
@@ -86,6 +92,7 @@ public class CounterTraitLayout extends TraitLayout {
             counterTv.setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
         }
     }
+
     @Override
     public void deleteTraitListener() {
         removeTrait(getCurrentTrait().getTrait());

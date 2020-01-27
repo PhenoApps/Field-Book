@@ -68,14 +68,23 @@ public class LabelPrintTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void init(){
+    public void setNaTraitsText() {
+    }
+
+    @Override
+    public String type() {
+        return "zebra label print";
+    }
+
+    @Override
+    public void init() {
         String[] prefixTraits = ConfigActivity.dt.getRangeColumnNames();
         optionsList = new ArrayList<>(Arrays.asList(prefixTraits));
         optionsList.add("date");
         optionsList.add("trial_name");
         optionsList.add("blank");
-        options = new String[ optionsList.size() ];
-        optionsList.toArray( options );
+        options = new String[optionsList.size()];
+        optionsList.toArray(options);
 
         fieldArrayAdapter = new ArrayAdapter<>(
                 getContext(), R.layout.custom_spinnerlayout, options);
@@ -106,7 +115,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
 
         getEtCurVal().setVisibility(EditText.GONE);
 
@@ -164,7 +173,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
                 @Override
                 public void onItemSelected(AdapterView<?> arg0, View arg1,
                                            int pos, long arg3) {
-                    Log.d(((MainActivity)getContext()).TAG, labelsize.getSelectedItem().toString());
+                    Log.d(((MainActivity) getContext()).TAG, labelsize.getSelectedItem().toString());
 
                     if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed") || labelsize.getSelectedItem().toString().equals("2\" x 1\" detailed")) {
                         ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
@@ -193,32 +202,32 @@ public class LabelPrintTraitLayout extends TraitLayout {
                     "com.zebra.printconnect.print.GetPrinterStatusService"));
 
             ResultReceiver buildIPCSafeReceiver2 = new ResultReceiver(null) {
-                        @Override
-                        protected void onReceiveResult(int resultCode, Bundle resultData) {
-                            if (resultCode == 0) { // Result code 0 indicates success
-                                // Handle successful printer status retrieval
-                                HashMap<String, String> printerStatusMap = (HashMap<String, String>)
-                                        resultData.getSerializable("PrinterStatusMap");
-                                final String successMessage = printerStatusMap.get("friendlyName") + " is connected.";
-                                Log.d(((MainActivity)getContext()).TAG, successMessage);
-                                ((Activity) getContext()).runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        printStatus.setText(successMessage);
-                                    }
-                                });
-                            } else {
-                                // Handle unsuccessful printer status retrieval
-                                final String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
-                                Log.e(((MainActivity)getContext()).TAG, errorMessage);
-                                ((Activity) getContext()).runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        printStatus.setText(errorMessage);
-                                    }
-                                });
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle resultData) {
+                    if (resultCode == 0) { // Result code 0 indicates success
+                        // Handle successful printer status retrieval
+                        HashMap<String, String> printerStatusMap = (HashMap<String, String>)
+                                resultData.getSerializable("PrinterStatusMap");
+                        final String successMessage = printerStatusMap.get("friendlyName") + " is connected.";
+                        Log.d(((MainActivity) getContext()).TAG, successMessage);
+                        ((Activity) getContext()).runOnUiThread(new Runnable() {
+                            public void run() {
+                                printStatus.setText(successMessage);
                             }
+                        });
+                    } else {
+                        // Handle unsuccessful printer status retrieval
+                        final String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
+                        Log.e(((MainActivity) getContext()).TAG, errorMessage);
+                        ((Activity) getContext()).runOnUiThread(new Runnable() {
+                            public void run() {
+                                printStatus.setText(errorMessage);
+                            }
+                        });
+                    }
 
-                        }
-                    };
+                }
+            };
 
             statusIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver2));
             getContext().startService(statusIntent);
@@ -260,13 +269,13 @@ public class LabelPrintTraitLayout extends TraitLayout {
 
                     // Scale barcode based on label size and variable field length
                     if (size.equals("3\" x 2\" simple")) {
-                        barcode_size = 10 - (length/15);
+                        barcode_size = 10 - (length / 15);
                     } else if (size.equals("3\" x 2\" detailed")) {
-                        barcode_size = 9 - (length/15);
+                        barcode_size = 9 - (length / 15);
                     } else if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
                         barcode_size = 5 - (length / 15);
                     } else {
-                        Log.d(((MainActivity)getContext()).TAG, "Matched no sizes");
+                        Log.d(((MainActivity) getContext()).TAG, "Matched no sizes");
                     }
 
                     Integer dotsAvailable1;
@@ -300,7 +309,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
                     labelData = labelData.replace("barcode", barcode);
                     labelData = labelData.replace("sizeb", Integer.toString(barcode_size));
 
-                    Log.d(((MainActivity)getContext()).TAG, labelData);
+                    Log.d(((MainActivity) getContext()).TAG, labelData);
 
                     String passthroughData = "";
                     for (int j = 0; j <= copiespos; j++) {
@@ -333,7 +342,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
                                 // Error message (null on successful print)
                                 // Handle unsuccessful print
                                 String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
-                                Log.e(((MainActivity)getContext()).TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
+                                Log.e(((MainActivity) getContext()).TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
                                 ((Activity) getContext()).runOnUiThread(new Runnable() {
                                     public void run() {
                                         printStatus.setText("Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
@@ -350,7 +359,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
             });
 
         } catch (PackageManager.NameNotFoundException e) {
-            Log.d(((MainActivity)getContext()).TAG, "Print Connect package not found");
+            Log.d(((MainActivity) getContext()).TAG, "Print Connect package not found");
             showDownloadDialog();
         }
     }
@@ -361,7 +370,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
     }
 
     private AlertDialog showDownloadDialog() {
-        Log.d(((MainActivity)getContext()).TAG, "Building Download dialog");
+        Log.d(((MainActivity) getContext()).TAG, "Building Download dialog");
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
         String title = "Install PrintConnect?";
         String message = "This application requires PrintConnect. Would you like to install it?";
@@ -381,7 +390,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
                     getContext().startActivity(intent);
                 } catch (ActivityNotFoundException anfe) {
                     // Hmm, market is not installed
-                    Log.w(((MainActivity)getContext()).TAG, "Google Play is not installed; cannot install " + PC_PACKAGE);
+                    Log.w(((MainActivity) getContext()).TAG, "Google Play is not installed; cannot install " + PC_PACKAGE);
                 }
             }
         });
@@ -392,7 +401,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
 
     public ResultReceiver receiverForSending(ResultReceiver actualReceiver) {
         Parcel parcel = Parcel.obtain();
-        actualReceiver.writeToParcel(parcel,0);
+        actualReceiver.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
         ResultReceiver receiverForSending = ResultReceiver.CREATOR.createFromParcel(parcel);
         parcel.recycle();

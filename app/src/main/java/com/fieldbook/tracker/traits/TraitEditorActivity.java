@@ -85,79 +85,22 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class TraitEditorActivity extends AppCompatActivity {
 
-    private static Handler mHandler = new Handler();
-
     public static DragSortListView traitList;
     public static TraitAdapter mAdapter;
-    public static boolean createVisible;
     public static boolean brapiDialogShown = false;
-
     public static Activity thisActivity;
-    public static EditText trait;
-
+    private static Handler mHandler = new Handler();
     private static String mChosenFile;
 
     private static SharedPreferences ep;
 
     private static OnItemClickListener traitListener;
-
-    private AlertDialog createDialog;
-
-    String currentId;
-
-    private boolean edit;
-
-    private Spinner format;
-    private EditText def;
-    private EditText minimum;
-    private EditText maximum;
-    private EditText details;
-    private EditText categories;
-    private TextView defTv;
-    private ToggleButton bool;
-
-    private String oldTrait;
-
-    private LinearLayout defBox;
-    private LinearLayout minBox;
-    private LinearLayout maxBox;
-    private LinearLayout categoryBox;
-
-    int currentPosition;
-
-    private TraitObject o;
-
-    private Menu systemMenu;
-
-    private final int PERMISSIONS_REQUEST_STORAGE_IMPORT = 999;
-    private final int PERMISSIONS_REQUEST_STORAGE_EXPORT = 998;
-
-    @Override
-    public void onDestroy() {
-        try {
-            thisActivity.finish();
-        } catch (Exception e) {
-            String TAG = "Field Book";
-            Log.e(TAG, "" + e.getMessage());
+    private static DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
+        @Override
+        public void remove(int which) {
+            mAdapter.list.remove(which);
         }
-
-        super.onDestroy();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (systemMenu != null) {
-            if (ep.getBoolean("Tips", false)) {
-                systemMenu.findItem(R.id.help).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.help).setVisible(false);
-            }
-        }
-        loadData();
-    }
-
+    };
     private static DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
 
         @Override
@@ -263,14 +206,155 @@ public class TraitEditorActivity extends AppCompatActivity {
             loadData();
         }
     };
-
-    private static DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
-        @Override
-        public void remove(int which) {
-            mAdapter.list.remove(which);
+    private final int PERMISSIONS_REQUEST_STORAGE_IMPORT = 999;
+    private final int PERMISSIONS_REQUEST_STORAGE_EXPORT = 998;
+    private NewTraitDialog traitDialog;
+    private Menu systemMenu;
+    // Creates a new thread to do importing
+    private Runnable importCSV = new Runnable() {
+        public void run() {
+            new ImportCSVTask().execute(0);
         }
     };
 
+    // Helper function to load data
+    public static void loadData() {
+        try {
+
+            HashMap visibility = ConfigActivity.dt.getTraitVisibility();
+
+            if (!traitList.isShown())
+                traitList.setVisibility(ListView.VISIBLE);
+
+            // Determine if our BrAPI dialog was shown with our current trait adapter
+            Boolean showBrapiDialog;
+            if (mAdapter != null) {
+                // Check if current trait adapter has shown a dialog
+                brapiDialogShown = !brapiDialogShown ? mAdapter.infoDialogShown : brapiDialogShown;
+            } else {
+                // We should show our brapi dialog if this is our creating of the mAdapter
+                brapiDialogShown = false;
+            }
+
+            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
+
+            traitList.setAdapter(mAdapter);
+            traitList.setDropListener(onDrop);
+            traitList.setRemoveListener(onRemove);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void scanFile(File filePath) {
+        MediaScannerConnection.scanFile(thisActivity, new String[]{filePath.getAbsolutePath()}, null, null);
+    }
+
+    public static Boolean displayBrapiInfo(Context context, DataHelper dt, String traitName, Boolean noCheckTrait) {
+
+        // Returns true if the dialog is shown, false if not.
+
+        // If we run into an error, do not warn the user since this is just a helper dialog
+        try {
+            // Check if this is a non-BrAPI field
+            String fieldName = context.getSharedPreferences("Settings", 0)
+                    .getString("FieldFile", "");
+            String fieldSource = context.getSharedPreferences("Settings", 0)
+                    .getString("ImportExpSource", "");
+
+            if (!fieldName.equals("") && !fieldSource.equals("local") && !fieldSource.equals("")) {
+
+                // noCheckTrait is used when the trait should not be checked, but the dialog
+                // should be shown.
+                if (noCheckTrait) {
+
+                    BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
+                    brapiInfo.show();
+                    return true;
+                }
+
+                // Check if this is a BrAPI trait
+                if (traitName != null) {
+
+                    // Just returns an empty trait object in the case the trait isn't found
+                    TraitObject trait = dt.getDetail(traitName);
+                    if (trait.getTrait() == null) {
+                        return false;
+                    }
+
+                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
+
+                        // Show info dialog if a BrAPI field is selected.
+                        BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
+                        brapiInfo.show();
+
+                        // Only show the info dialog on the first non-BrAPI trait selected.
+                        return true;
+
+                    } else {
+                        // Dialog was not shown
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("error", e.toString());
+            return false;
+        }
+
+        return false;
+    }
+
+    // getter (get them from NewTraitDialog)
+    public TraitAdapter getAdapter() {
+        return mAdapter;
+    }
+
+    public SharedPreferences getPreferences() {
+        return ep;
+    }
+
+    public boolean getBrAPIDialogShown() {
+        return brapiDialogShown;
+    }
+
+    // when this value changes in NewTraitDialog,
+    // the value in this class must change
+    public void setBrAPIDialogShown(boolean b) {
+        brapiDialogShown = b;
+    }
+
+    // because AlertDialog can't use getString
+    public String getResourceString(int id) {
+        return getString(id);
+    }
+
+    @Override
+    public void onDestroy() {
+        try {
+            thisActivity.finish();
+        } catch (Exception e) {
+            String TAG = "Field Book";
+            Log.e(TAG, "" + e.getMessage());
+        }
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (systemMenu != null) {
+            if (ep.getBoolean("Tips", false)) {
+                systemMenu.findItem(R.id.help).setVisible(true);
+            } else {
+                systemMenu.findItem(R.id.help).setVisible(false);
+            }
+        }
+        loadData();
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -296,12 +380,9 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         thisActivity = this;
 
-        final String[] data = new String[]{getString(R.string.traits_format_numeric), getString(R.string.traits_format_categorical), getString(R.string.traits_format_date), getString(R.string.traits_format_percent), getString(R.string.traits_format_boolean),
-                getString(R.string.traits_format_text), getString(R.string.traits_format_photo), getString(R.string.traits_format_audio), getString(R.string.traits_format_counter), getString(R.string.traits_format_disease_rating), getString(R.string.traits_format_multicategorical),
-                getString(R.string.traits_format_location), getString(R.string.traits_format_barcode), getString(R.string.traits_format_labelprint)};
-
-        final String[] enData = new String[]{"Numeric", "Categorical", "Date", "Percent", "Boolean", "Text", "Photo", "Audio", "Counter", "Disease Rating", "Multicat", "Location", "Barcode", "Zebra Label Print"};
-
+        if (ConfigActivity.dt == null) {    // when resuming
+            ConfigActivity.dt = new DataHelper(this);
+        }
         HashMap visibility = ConfigActivity.dt.getTraitVisibility();
         traitList = findViewById(R.id.myList);
 
@@ -327,52 +408,9 @@ public class TraitEditorActivity extends AppCompatActivity {
         traitList.setOnTouchListener(controller);
         traitList.setDragEnabled(true);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_new_trait, null);
-
-        builder.setTitle(R.string.traits_toolbar_add_trait)
-                .setCancelable(true)
-                .setView(layout);
-
-        createDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params = createDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-
-        createDialog.getWindow().setAttributes(params);
-        createDialog.setOnCancelListener(new OnCancelListener() {
-            public void onCancel(DialogInterface arg0) {
-                createVisible = false;
-            }
-        });
-        createDialog.setOnDismissListener(new OnDismissListener() {
-            public void onDismiss(DialogInterface arg0) {
-                createVisible = false;
-            }
-        });
-
-        trait = layout.findViewById(R.id.trait);
-        format = layout.findViewById(R.id.format);
-        def = layout.findViewById(R.id.def);
-        minimum = layout.findViewById(R.id.minimum);
-        maximum = layout.findViewById(R.id.maximum);
-        details = layout.findViewById(R.id.details);
-        categories = layout.findViewById(R.id.categories);
-
-        defBox = layout.findViewById(R.id.defbox);
-        minBox = layout.findViewById(R.id.minbox);
-        maxBox = layout.findViewById(R.id.maxbox);
-        categoryBox = layout.findViewById(R.id.categorybox);
-
-        bool = layout.findViewById(R.id.boolBtn);
-        defTv = layout.findViewById(R.id.defTv);
-
-        Button saveBtn = layout.findViewById(R.id.saveBtn);
-        Button closeBtn = layout.findViewById(R.id.closeBtn);
-
-        trait.isFocused();
+        traitDialog = new NewTraitDialog(layout, this);
 
         traitListener = new AdapterView.OnItemClickListener() {
 
@@ -380,226 +418,13 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 // When a trait is selected, alter the layout of the edit dialog accordingly
 
-                o = mAdapter.getItem(position);
-                currentId = o.getId();
-                trait.setText(o.getTrait());
-                oldTrait = o.getTrait();
+                TraitObject o = mAdapter.getItem(position);
+                traitDialog.setTraitObject(o);
 
-                for (int i = 0; i < data.length; i++) {
-                    if (data[i].toLowerCase().equals(o.getFormat().toLowerCase())) {
-                        currentPosition = i;
-                        format.setSelection(i, true);
-                        prepareFields(i);
-                        break;
-                    }
-                }
-
-                def.setText(o.getDefaultValue());
-
-                if (o.getDefaultValue().equals("true"))
-                    bool.setChecked(true);
-                else
-                    bool.setChecked(false);
-
-                minimum.setText(o.getMinimum());
-                maximum.setText(o.getMaximum());
-                details.setText(o.getDetails());
-                categories.setText(o.getCategories());
-
-                edit = true;
-                createVisible = true;
                 loadData();
-                createDialog.show();
+                traitDialog.show(true);
             }
         };
-
-        format.setOnItemSelectedListener(new OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> av, View arg1, int position, long arg3) {
-
-                // Change the layout of the dialog based on the trait
-                if (position != currentPosition) {
-                    def.setText("");
-                    minimum.setText("");
-                    maximum.setText("");
-                    details.setText("");
-                    categories.setText("");
-                    bool.setChecked(false);
-                    currentPosition = position;
-                    format.setSelection(currentPosition);
-                    prepareFields(currentPosition);
-                }
-            }
-
-            public void onNothingSelected(AdapterView<?> arg0) {
-            }
-        });
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.custom_spinnerlayout, data);
-        format.setAdapter(itemsAdapter);
-
-        closeBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-                // Prompt the user if fields have been edited
-
-                if (dataChanged()) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this, R.style.AppAlertDialog);
-
-                    builder.setTitle(getString(R.string.dialog_close));
-                    builder.setMessage(getString(R.string.dialog_confirm));
-
-                    builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            createDialog.dismiss();
-                        }
-
-                    });
-
-                    builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-
-                    });
-
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                } else {
-                    createDialog.dismiss();
-                }
-            }
-
-        });
-
-        saveBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
-                // Trait name is mandatory
-                if (trait.getText().toString().length() == 0) {
-                    makeToast(getString(R.string.traits_create_warning_name_blank));
-                    return;
-                }
-
-                // Disallow duplicate traits
-                boolean exists = ConfigActivity.dt.hasTrait(trait.getText().toString().trim());
-
-                if (!edit) {
-                    if (exists) {
-                        makeToast(getString(R.string.traits_create_warning_duplicate));
-                        return;
-                    }
-                } else {
-                    if (exists & !oldTrait.toLowerCase().equals(trait.getText().toString().trim().toLowerCase())) {
-                        makeToast(getString(R.string.traits_create_warning_duplicate));
-                        return;
-                    }
-                }
-
-                // The checks below are format specific
-
-                if (format.getSelectedItemPosition() == 0) {
-                    if (def.getText().toString().length() > 0 & !isNumeric(def.getText().toString(), false)) {
-                        makeToast(getString(R.string.traits_create_warning_numeric_required));
-                        return;
-                    }
-
-                    if (minimum.getText().toString().length() > 0 & !isNumeric(minimum.getText().toString(), false)) {
-                        makeToast(getString(R.string.traits_create_warning_numeric_required));
-                        return;
-                    }
-
-                    if (maximum.getText().toString().length() > 0 & !isNumeric(maximum.getText().toString(), false)) {
-                        makeToast(getString(R.string.traits_create_warning_numeric_required));
-                        return;
-                    }
-
-                }
-
-                if (format.getSelectedItemPosition() == 1) {
-                    if (categories.getText().toString().length() == 0) {
-                        makeToast(getString(R.string.traits_create_warning_categories_required));
-                        return;
-                    }
-                }
-
-                if (format.getSelectedItemPosition() == 3) {
-                    if (def.getText().toString().length() == 0 | !isNumeric(def.getText().toString(), true)) {
-                        makeToast(getString(R.string.traits_create_warning_numeric_required));
-                        return;
-                    }
-
-                    if (minimum.getText().toString().length() == 0 | !isNumeric(minimum.getText().toString(), true)) {
-                        makeToast(getString(R.string.traits_create_warning_numeric_required));
-                        return;
-                    }
-
-                    if (maximum.getText().toString().length() == 0 | !isNumeric(maximum.getText().toString(), true)) {
-                        makeToast(getString(R.string.traits_create_warning_numeric_required));
-                        return;
-                    }
-
-                }
-
-                int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
-
-                if (format.getSelectedItemPosition() == 4) {
-                    if (bool.isChecked())
-                        def.setText("true");
-                    else
-                        def.setText("false");
-                }
-
-                if (!edit) {
-                    /*MainActivity.dt.insertTraits(trait.getText().toString().trim(),
-                            enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
-                            minimum.getText().toString(), maximum.getText().toString(),
-                            details.getText().toString(), categories.getText().toString(),
-                            "true", String.valueOf(pos));*/
-                    TraitObject t = new TraitObject();
-                    t.setTrait(trait.getText().toString().trim());
-                    t.setFormat(enData[format.getSelectedItemPosition()].toLowerCase());
-                    t.setDefaultValue(def.getText().toString());
-                    t.setMinimum(minimum.getText().toString());
-                    t.setMaximum(maximum.getText().toString());
-                    t.setDetails(details.getText().toString());
-                    t.setCategories(categories.getText().toString());
-                    t.setVisible(true);
-                    t.setRealPosition(String.valueOf(pos));
-
-                    // TODO: Add the local trait data_source name into other trait editing/inserting db functions.
-                    t.setTraitDataSource("local");
-                    ConfigActivity.dt.insertTraits(t);
-                } else {
-                    // TODO: Add the trait_data_source variable into the edit.
-
-                    ConfigActivity.dt.editTraits(currentId, trait.getText().toString().trim(),
-                            enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
-                            minimum.getText().toString(), maximum.getText().toString(),
-                            details.getText().toString(), categories.getText().toString());
-                }
-
-                Editor ed = ep.edit();
-                ed.putBoolean("CreateTraitFinished", true);
-                ed.putBoolean("TraitsExported", false);
-                ed.apply();
-
-                // Display our BrAPI dialog if it has not been show already
-                // Get our dialog state from our adapter to see if a trait has been selected
-                brapiDialogShown = mAdapter.infoDialogShown;
-                if (!brapiDialogShown) {
-                    brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, ConfigActivity.dt, null, true);
-                }
-
-                loadData();
-
-                MainActivity.reloadData = true;
-                createDialog.dismiss();
-
-            }
-        });
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -608,230 +433,6 @@ public class TraitEditorActivity extends AppCompatActivity {
                 showCreateTraitDialog();
             }
         });
-    }
-
-    // Helper function to see if any fields have been edited
-    private boolean dataChanged() {
-        if (o != null) {
-            String defString;
-
-            if (bool.isChecked()) {
-                defString = "true";
-            } else {
-                defString = "false";
-            }
-
-            if (!trait.getText().toString().equals(o.getTrait()))
-                return true;
-
-            if (format.getSelectedItemPosition() == 4) {
-                if (!def.getText().toString().equals(defString))
-                    return true;
-            } else {
-                if (!def.getText().toString().equals(o.getDefaultValue()))
-                    return true;
-            }
-
-            if (!minimum.getText().toString().equals(o.getMinimum()))
-                return true;
-
-            if (!maximum.getText().toString().equals(o.getMaximum()))
-                return true;
-
-            if (!details.getText().toString().equals(o.getDetails()))
-                return true;
-
-            if (!categories.getText().toString().equals(o.getCategories()))
-                return true;
-
-        } else {
-            if (trait.getText().toString().length() > 0)
-                return true;
-
-            if (def.getText().toString().length() > 0)
-                return true;
-
-            if (minimum.getText().toString().length() > 0)
-                return true;
-
-            if (maximum.getText().toString().length() > 0)
-                return true;
-
-            if (details.getText().toString().length() > 0)
-                return true;
-
-            if (categories.getText().toString().length() > 0)
-                return true;
-
-            if (format.getSelectedItemPosition() == 4) {
-                if (bool.isChecked())
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    private void prepareFields(int position) {
-        details.setHint(getString(R.string.traits_create_optional));
-        def.setHint(null);
-        minimum.setHint(null);
-        maximum.setHint(null);
-
-        defBox.setVisibility(View.GONE);
-        minBox.setVisibility(View.GONE);
-        maxBox.setVisibility(View.GONE);
-        bool.setVisibility(View.GONE);
-        categoryBox.setVisibility(View.GONE);
-
-        switch (position) {
-            case 0: //numeric
-                defBox.setVisibility(View.VISIBLE);
-                def.setVisibility(View.VISIBLE);
-                bool.setVisibility(View.GONE);
-                minBox.setVisibility(View.VISIBLE);
-                maxBox.setVisibility(View.VISIBLE);
-                categoryBox.setVisibility(View.GONE);
-
-                def.setHint(getString(R.string.traits_create_optional));
-                minimum.setHint(getString(R.string.traits_create_optional));
-                maximum.setHint(getString(R.string.traits_create_optional));
-                break;
-            case 1: //categorical
-                defBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.VISIBLE);
-                break;
-            case 2: //date
-                defBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.GONE);
-                break;
-            case 3: //percent
-                defBox.setVisibility(View.VISIBLE);
-                def.setVisibility(View.VISIBLE);
-                bool.setVisibility(View.GONE);
-                minBox.setVisibility(View.VISIBLE);
-                maxBox.setVisibility(View.VISIBLE);
-                categoryBox.setVisibility(View.GONE);
-
-                def.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                minimum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                maximum.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                break;
-            case 4: //boolean
-                defBox.setVisibility(View.VISIBLE);
-                def.setVisibility(View.GONE);
-                defTv.setVisibility(View.VISIBLE);
-                bool.setVisibility(View.VISIBLE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.GONE);
-                break;
-            case 5: //text
-                defBox.setVisibility(View.VISIBLE);
-                def.setVisibility(View.VISIBLE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.GONE);
-
-                def.setHint(getString(R.string.traits_create_optional));
-                break;
-            case 6: //photo
-                defBox.setVisibility(View.GONE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.GONE);
-                break;
-            case 7: //audio
-                defBox.setVisibility(View.GONE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.GONE);
-                break;
-            case 8: //counter
-                defBox.setVisibility(View.GONE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.GONE);
-                break;
-            case 9: //rust rating
-                defBox.setVisibility(View.GONE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.GONE);
-                break;
-            case 10: //multicategorical
-                defBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.VISIBLE);
-                break;
-            case 11: //location
-                defBox.setVisibility(View.GONE);
-                minBox.setVisibility(View.GONE);
-                maxBox.setVisibility(View.GONE);
-                bool.setVisibility(View.GONE);
-                categoryBox.setVisibility(View.GONE);
-                break;
-        }
-    }
-
-    // Non negative numbers only
-    public static boolean isNumeric(String str, boolean positive) {
-        if (str.length() == 0)
-            return false;
-
-        try {
-            double d = Double.parseDouble(str);
-
-            if (positive & d < 0)
-                return false;
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
-
-        return true;
-    }
-
-    // Helper function to load data
-    public static void loadData() {
-        try {
-
-            HashMap visibility = ConfigActivity.dt.getTraitVisibility();
-
-            if (!traitList.isShown())
-                traitList.setVisibility(ListView.VISIBLE);
-
-            // Determine if our BrAPI dialog was shown with our current trait adapter
-            Boolean showBrapiDialog;
-            if (mAdapter != null ) {
-                // Check if current trait adapter has shown a dialog
-                brapiDialogShown = !brapiDialogShown ? mAdapter.infoDialogShown : brapiDialogShown;
-            }
-            else {
-                // We should show our brapi dialog if this is our creating of the mAdapter
-                brapiDialogShown = false;
-            }
-
-            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
-
-            traitList.setAdapter(mAdapter);
-            traitList.setDropListener(onDrop);
-            traitList.setRemoveListener(onRemove);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -1107,7 +708,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             try {
                 blankFile.getParentFile().mkdirs();
                 blankFile.createNewFile();
-                Utils.scanFile(TraitEditorActivity.this,blankFile);
+                Utils.scanFile(TraitEditorActivity.this, blankFile);
             } catch (IOException ignore) {
             }
         }
@@ -1191,28 +792,6 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
 
         loadData();
-    }
-
-    private class ArrayIndexComparator implements Comparator<Integer> {
-        private final String[] array;
-
-        ArrayIndexComparator(String[] array) {
-            this.array = array;
-        }
-
-        Integer[] createIndexArray() {
-            Arrays.sort(array);
-            Integer[] indexes = new Integer[array.length];
-            for (int i = 0; i < array.length; i++) {
-                indexes[i] = i;
-            }
-            return indexes;
-        }
-
-        @Override
-        public int compare(Integer index1, Integer index2) {
-            return array[index1].compareTo(array[index2]);
-        }
     }
 
     private void showExportDialog() {
@@ -1304,23 +883,9 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void showCreateTraitDialog() {
-        o = null;
-
-        trait.setText("");
-        format.setSelection(0);
-        def.setText("");
-        minimum.setText("");
-        maximum.setText("");
-        details.setText("");
-        categories.setText("");
-
-        edit = false;
-
-        createVisible = true;
-
-        createDialog.show();
-
-        prepareFields(0);
+        traitDialog.initTrait();
+        traitDialog.show(false);
+        traitDialog.prepareFields(0);
     }
 
     public void onBackPressed() {
@@ -1364,12 +929,54 @@ public class TraitEditorActivity extends AppCompatActivity {
         shareFile(file);
     }
 
-    // Creates a new thread to do importing
-    private Runnable importCSV = new Runnable() {
-        public void run() {
-            new ImportCSVTask().execute(0);
+    public void makeToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Scan file to update file list and share exported file
+     */
+    private void shareFile(File filePath) {
+        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
+
+        if (!ep.getBoolean(PreferencesActivity.DISABLE_SHARE, false)) {
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", filePath));
+            startActivity(Intent.createChooser(intent, "Sending File..."));
         }
-    };
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    private class ArrayIndexComparator implements Comparator<Integer> {
+        private final String[] array;
+
+        ArrayIndexComparator(String[] array) {
+            this.array = array;
+        }
+
+        Integer[] createIndexArray() {
+            Arrays.sort(array);
+            Integer[] indexes = new Integer[array.length];
+            for (int i = 0; i < array.length; i++) {
+                indexes[i] = i;
+            }
+            return indexes;
+        }
+
+        @Override
+        public int compare(Integer index1, Integer index2) {
+            return array[index1].compareTo(array[index2]);
+        }
+    }
 
     private class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
         ProgressDialog dialog;
@@ -1470,93 +1077,6 @@ public class TraitEditorActivity extends AppCompatActivity {
             if (fail)
                 makeToast(thisActivity.getString(R.string.import_error_general));
         }
-    }
-
-    public void makeToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    private static void scanFile(File filePath) {
-        MediaScannerConnection.scanFile(thisActivity, new String[]{filePath.getAbsolutePath()}, null, null);
-    }
-
-    /**
-     * Scan file to update file list and share exported file
-     */
-    private void shareFile(File filePath) {
-        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
-
-        if (!ep.getBoolean(PreferencesActivity.DISABLE_SHARE, false)) {
-            Intent intent = new Intent();
-            intent.setAction(android.content.Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", filePath));
-            startActivity(Intent.createChooser(intent, "Sending File..."));
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        // Forward results to EasyPermissions
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
-    }
-
-    public static Boolean displayBrapiInfo(Context context, DataHelper dt, String traitName, Boolean noCheckTrait) {
-
-        // Returns true if the dialog is shown, false if not.
-
-        // If we run into an error, do not warn the user since this is just a helper dialog
-        try {
-            // Check if this is a non-BrAPI field
-            String fieldName = context.getSharedPreferences("Settings", 0)
-                    .getString("FieldFile", "");
-            String fieldSource = context.getSharedPreferences("Settings", 0)
-                    .getString("ImportExpSource", "");
-
-            if (!fieldName.equals("") && !fieldSource.equals("local") && !fieldSource.equals("")) {
-
-                // noCheckTrait is used when the trait should not be checked, but the dialog
-                // should be shown.
-                if (noCheckTrait) {
-
-                    BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
-                    brapiInfo.show();
-                    return true;
-                }
-
-                // Check if this is a BrAPI trait
-                if (traitName != null) {
-
-                    // Just returns an empty trait object in the case the trait isn't found
-                    TraitObject trait = dt.getDetail(traitName);
-                    if (trait.getTrait() == null) {
-                        return false;
-                    }
-
-                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
-
-                        // Show info dialog if a BrAPI field is selected.
-                        BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
-                        brapiInfo.show();
-
-                        // Only show the info dialog on the first non-BrAPI trait selected.
-                        return true;
-
-                    }
-                    else {
-                        // Dialog was not shown
-                        return false;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Log.e("error", e.toString());
-            return false;
-        }
-
-        return false;
     }
 
 }

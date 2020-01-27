@@ -40,7 +40,16 @@ public class BooleanTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void init(){
+    public void setNaTraitsText() {
+    }
+
+    @Override
+    public String type() {
+        return "boolean";
+    }
+
+    @Override
+    public void init() {
 
         eImg = findViewById(R.id.eImg);
 
@@ -63,7 +72,7 @@ public class BooleanTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
 
         getEtCurVal().setVisibility(EditText.GONE);
         getEtCurVal().setEnabled(false);

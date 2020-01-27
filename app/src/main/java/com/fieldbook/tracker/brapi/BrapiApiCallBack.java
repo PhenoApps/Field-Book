@@ -18,8 +18,10 @@ public abstract class BrapiApiCallBack<T> implements ApiCallback<T> {
     }
 
     @Override
-    public void onUploadProgress(long l, long l1, boolean b) {}
+    public void onUploadProgress(long l, long l1, boolean b) {
+    }
 
     @Override
-    public void onDownloadProgress(long l, long l1, boolean b) {}
+    public void onDownloadProgress(long l, long l1, boolean b) {
+    }
 }

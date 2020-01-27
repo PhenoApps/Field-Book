@@ -36,7 +36,7 @@ import java.util.Arrays;
 
 import io.swagger.client.ApiException;
 
-public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener{
+public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener {
 
     private Button saveBtn, cancelBtn;
     private BrapiStudySummary study;
@@ -46,13 +46,19 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     private Boolean studyLoadStatus = false;
     private Boolean plotLoadStatus = false;
     private Boolean traitLoadStatus = false;
+    // Creates a new thread to do importing
+    private Runnable importRunnable = new Runnable() {
+        public void run() {
+            new BrapiLoadDialog.ImportRunnableTask().execute(0);
+        }
+    };
 
     public BrapiLoadDialog(@NonNull Context context) {
         super(context);
         this.context = context;
     }
 
-    public void setSelectedStudy(BrapiStudySummary selectedStudy){
+    public void setSelectedStudy(BrapiStudySummary selectedStudy) {
         this.study = selectedStudy;
     }
 
@@ -86,7 +92,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             @Override
             public Void apply(final BrapiStudyDetails study) {
 
-                ((Activity)context).runOnUiThread(new Runnable() {
+                ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         BrapiStudyDetails.merge(studyDetails, study);
@@ -106,7 +112,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
             @Override
             public Void apply(final ApiException error) {
-                ((Activity)context).runOnUiThread(new Runnable() {
+                ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
@@ -122,7 +128,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             @Override
             public Void apply(final BrapiStudyDetails study) {
 
-                ((Activity)context).runOnUiThread(new Runnable() {
+                ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         BrapiStudyDetails.merge(studyDetails, study);
@@ -143,7 +149,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
             @Override
             public Void apply(final ApiException error) {
-                ((Activity)context).runOnUiThread(new Runnable() {
+                ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
@@ -159,7 +165,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             @Override
             public Void apply(final BrapiStudyDetails study) {
 
-                ((Activity)context).runOnUiThread(new Runnable() {
+                ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         BrapiStudyDetails.merge(studyDetails, study);
@@ -179,7 +185,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
             @Override
             public Void apply(final ApiException error) {
-                ((Activity)context).runOnUiThread(new Runnable() {
+                ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
@@ -192,15 +198,15 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     }
 
     private void loadStudy() {
-        if(this.studyDetails.getStudyName() != null)
+        if (this.studyDetails.getStudyName() != null)
             ((TextView) findViewById(R.id.studyNameValue)).setText(this.studyDetails.getStudyName());
-        if(this.studyDetails.getStudyDescription() != null)
+        if (this.studyDetails.getStudyDescription() != null)
             ((TextView) findViewById(R.id.studyDescriptionValue)).setText(this.studyDetails.getStudyDescription());
-        if(this.studyDetails.getStudyLocation() != null)
+        if (this.studyDetails.getStudyLocation() != null)
             ((TextView) findViewById(R.id.studyLocationValue)).setText(this.studyDetails.getStudyLocation());
-        if(this.studyDetails.getNumberOfPlots() != null)
+        if (this.studyDetails.getNumberOfPlots() != null)
             ((TextView) findViewById(R.id.studyNumPlotsValue)).setText(this.studyDetails.getNumberOfPlots().toString());
-        if(this.studyDetails.getTraits() != null)
+        if (this.studyDetails.getTraits() != null)
             ((TextView) findViewById(R.id.studyNumTraitsValue)).setText(String.valueOf(this.studyDetails.getTraits().size()));
     }
 
@@ -208,8 +214,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
         if (studyLoadStatus && plotLoadStatus && traitLoadStatus) {
             return true;
-        }
-        else {
+        } else {
             return false;
         }
 
@@ -246,13 +251,6 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         mHandler.post(importRunnable);
 
     }
-
-    // Creates a new thread to do importing
-    private Runnable importRunnable = new Runnable() {
-        public void run() {
-            new BrapiLoadDialog.ImportRunnableTask().execute(0);
-        }
-    };
 
     // Mimics the class used in the csv field importer to run the saving
     // task in a different thread from the UI thread so the app doesn't freeze up.
@@ -299,11 +297,9 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             if (brapiControllerResponse.status == false) {
                 if (brapiControllerResponse.message == BrAPIService.notUniqueFieldMessage) {
                     Toast.makeText(context, R.string.fields_study_exists_message, Toast.LENGTH_LONG).show();
-                }
-                else if (brapiControllerResponse.message == BrAPIService.notUniqueIdMessage) {
+                } else if (brapiControllerResponse.message == BrAPIService.notUniqueIdMessage) {
                     Toast.makeText(context, R.string.import_error_unique, Toast.LENGTH_LONG).show();
-                }
-                else {
+                } else {
                     Log.e("error", brapiControllerResponse.message);
                     Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
                 }
