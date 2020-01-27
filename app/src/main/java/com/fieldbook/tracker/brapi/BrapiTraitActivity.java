@@ -2,6 +2,7 @@ package com.fieldbook.tracker.brapi;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
@@ -23,6 +24,7 @@ import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.fieldbook.tracker.traits.TraitObject;
 
 import io.swagger.client.ApiException;
@@ -54,7 +56,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Load the traits from breedbase if user is connected to the internet
-        if(Utils.isConnected(this)) {
+        if (Utils.isConnected(this)) {
             if (brAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_traits_brapi);
 
@@ -79,11 +81,11 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 baseURLText.setText(brapiBaseURL);
 
                 loadTraitsList(BrapiTraitActivity.this.currentPage, BrapiTraitActivity.this.resultsPerPage);
-            }else{
+            } else {
                 Toast.makeText(getApplicationContext(), R.string.brapi_must_configure_url, Toast.LENGTH_SHORT).show();
                 finish();
             }
-        }else{
+        } else {
             // Check if the user is connected. If not, pull from cache
             Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
@@ -145,10 +147,10 @@ public class BrapiTraitActivity extends AppCompatActivity {
                             // Check to see if any of the traits are selected traits
                             for (Integer i = 0; i < traits.size(); i++) {
 
-                                TraitObject  trait = traits.get(i);
+                                TraitObject trait = traits.get(i);
 
                                 // Check to see if it is a selected trait
-                                for (TraitObject selectedTrait: selectedTraits) {
+                                for (TraitObject selectedTrait : selectedTraits) {
 
                                     if (trait.getTrait().equals(selectedTrait.getTrait())) {
                                         traitList.setItemChecked(i, true);
@@ -169,7 +171,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                                         // It was checked before, remove from selection
                                         TraitObject trait = traits.get(position);
 
-                                        for (TraitObject selectedTrait: selectedTraits) {
+                                        for (TraitObject selectedTrait : selectedTraits) {
 
                                             if (trait.getTrait().equals(selectedTrait.getTrait())) {
                                                 selectedTraits.remove(selectedTrait);
@@ -212,7 +214,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         ArrayList<String> itemDataList = new ArrayList<>();
 
-        for(TraitObject trait: traits) {
+        for (TraitObject trait : traits) {
 
             itemDataList.add(trait.getTrait());
         }
@@ -225,7 +227,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
     // Button event for load and save traits
     public void buttonClicked(View view) {
-        switch(view.getId()) {
+        switch (view.getId()) {
             case R.id.loadTraits:
                 // Start from beginning
                 nextBtn.setVisibility(View.INVISIBLE);
@@ -300,7 +302,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 // Skip this one, continue on.
                 continue;
             }
-            
+
             // Insert our new trait
             long saveStatus = ConfigActivity.dt.insertTraits(trait);
 
@@ -319,8 +321,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
         // Check how successful we were at saving our traits.
         if (successfulSaves == 0) {
             return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_all_traits);
-        }
-        else if (successfulSaves < totalTraits) {
+        } else if (successfulSaves < totalTraits) {
             return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_some_traits);
         }
 
@@ -344,12 +345,18 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
     public void determineBtnVisibility() {
 
-        if (currentPage == 0) { prevBtn.setVisibility(View.INVISIBLE); }
-        else { prevBtn.setVisibility(View.VISIBLE); }
+        if (currentPage == 0) {
+            prevBtn.setVisibility(View.INVISIBLE);
+        } else {
+            prevBtn.setVisibility(View.VISIBLE);
+        }
 
         // Determine what buttons should be visible
-        if (currentPage == (totalPages - 1)) { nextBtn.setVisibility(View.INVISIBLE); }
-        else { nextBtn.setVisibility(View.VISIBLE); }
+        if (currentPage == (totalPages - 1)) {
+            nextBtn.setVisibility(View.INVISIBLE);
+        } else {
+            nextBtn.setVisibility(View.VISIBLE);
+        }
 
     }
 

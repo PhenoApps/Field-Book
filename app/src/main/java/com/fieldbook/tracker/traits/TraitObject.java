@@ -99,53 +99,59 @@ public class TraitObject {
         this.visible = visible;
     }
 
-    public String getExternalDbId() { return external_db_id; }
+    public String getExternalDbId() {
+        return external_db_id;
+    }
 
-    public void setExternalDbId(String externalDbId) { this.external_db_id = externalDbId; }
+    public void setExternalDbId(String externalDbId) {
+        this.external_db_id = externalDbId;
+    }
 
-    public String getTraitDataSource() { return trait_data_source; }
+    public String getTraitDataSource() {
+        return trait_data_source;
+    }
 
-    public void setTraitDataSource(String traitDataSource) { this.trait_data_source = traitDataSource; }
-    
+    public void setTraitDataSource(String traitDataSource) {
+        this.trait_data_source = traitDataSource;
+    }
+
     public boolean isValidValue(final String s) {
         // this code is not perfect.
         // I think that it is necessary to check
         // the minimum and the maximum values
         return !isUnder(s) && !isOver(s);
     }
-    
+
     public boolean isUnder(final String s) {
         if (!(format.equals("numeric") || format.equals("percent")))
             return false;
-        
+
         if (minimum.length() > 0) {     // minimum exists
             try {
                 final double v = Double.parseDouble(s);
                 final double lowerValue = Double.parseDouble(minimum);
                 return v < lowerValue;
-            } catch(NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 return true;
             }
-        }
-        else {
+        } else {
             return false;
         }
     }
-    
+
     public boolean isOver(final String s) {
         if (!(format.equals("numeric") || format.equals("percent")))
             return false;
-        
+
         if (maximum.length() > 0) {     // maximum exists
             try {
                 final double v = Double.parseDouble(s);
                 final double upperValue = Double.parseDouble(maximum);
                 return v > upperValue;
-            } catch(NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 return true;
             }
-        }
-        else {
+        } else {
             return false;
         }
     }

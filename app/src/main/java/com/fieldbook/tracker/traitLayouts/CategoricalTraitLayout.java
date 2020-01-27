@@ -34,19 +34,24 @@ public class CategoricalTraitLayout extends TraitLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public List<Button> getButtonArray(){
+    public List<Button> getButtonArray() {
         return buttonArray;
     }
-    
+
     @Override
-    public void setNaTraitsText() { }
+    public void setNaTraitsText() {
+    }
+
     @Override
-    public String type() { return "categorical"; }
+    public String type() {
+        return "categorical";
+    }
+
     public boolean isTraitType(String trait) {
-		return trait.equals("categorical") || trait.equals("qualitative");
-	}
-    
-    public void init(){
+        return trait.equals("categorical") || trait.equals("qualitative");
+    }
+
+    public void init() {
         buttonArray = new ArrayList<>();
         buttonArray.add((Button) findViewById(R.id.q1));
         buttonArray.add((Button) findViewById(R.id.q2));
@@ -104,7 +109,7 @@ public class CategoricalTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
 
         getEtCurVal().setVisibility(EditText.GONE);
         getEtCurVal().setEnabled(false);

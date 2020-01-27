@@ -5,6 +5,7 @@ import org.threeten.bp.format.DateTimeFormatter;
 import org.threeten.bp.format.DateTimeParseException;
 
 import java.util.Objects;
+
 import io.swagger.client.model.NewObservationDbIdsObservations;
 
 public class Observation extends BrapiObservation {
@@ -37,7 +38,7 @@ public class Observation extends BrapiObservation {
     public int hashCode() {
         return super.objectsHash(unitDbId, variableDbId);
     }
-    
+
     public String getSeason() {
         return season;
     }
@@ -70,7 +71,6 @@ public class Observation extends BrapiObservation {
     public void setCollector(String collector) {
         this.collector = collector;
     }
-
 
 
 }

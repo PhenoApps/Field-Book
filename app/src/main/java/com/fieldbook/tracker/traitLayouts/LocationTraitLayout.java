@@ -31,14 +31,18 @@ public class LocationTraitLayout extends TraitLayout {
     public LocationTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-    
+
     @Override
-    public void setNaTraitsText() { }
+    public void setNaTraitsText() {
+    }
+
     @Override
-    public String type() { return "location"; }
-    
+    public String type() {
+        return "location";
+    }
+
     @Override
-    public void init(){
+    public void init() {
         getLocation = findViewById(R.id.getLocationBtn);
         // Get Location
         getLocation.setOnClickListener(new OnClickListener() {
@@ -51,7 +55,7 @@ public class LocationTraitLayout extends TraitLayout {
                 if (gps.canGetLocation()) { //GPS enabled
                     lat = gps.getLatitude(); // returns latitude
                     lng = gps.getLongitude(); // returns longitude
-                    fullLocation = Utils.truncateDecimalString(String.valueOf(lat),8) + "; " + Utils.truncateDecimalString(String.valueOf(lng),8);
+                    fullLocation = Utils.truncateDecimalString(String.valueOf(lat), 8) + "; " + Utils.truncateDecimalString(String.valueOf(lng), 8);
                 } else {
                     Intent intent = new Intent(
                             Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -64,7 +68,7 @@ public class LocationTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
 
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
@@ -86,8 +90,9 @@ public class LocationTraitLayout extends TraitLayout {
             getEtCurVal().addTextChangedListener(getCvNum());
         }
     }
+
     @Override
     public void deleteTraitListener() {
-		((MainActivity) getContext()).removeTrait();
+        ((MainActivity) getContext()).removeTrait();
     }
 }

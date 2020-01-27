@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits;
 
 import androidx.appcompat.app.AlertDialog;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -36,11 +37,11 @@ import java.util.HashMap;
  */
 class TraitAdapter extends BaseAdapter {
 
+    public Boolean infoDialogShown = false;
     ArrayList<TraitObject> list;
     private Context context;
     private OnItemClickListener listener;
     private HashMap visibility;
-    public Boolean infoDialogShown = false;
 
     TraitAdapter(Context context, int resource, ArrayList<TraitObject> list, OnItemClickListener listener, HashMap visibility, Boolean dialogShown) {
         this.context = context;
@@ -66,16 +67,6 @@ class TraitAdapter extends BaseAdapter {
         }
 
         return position;
-    }
-
-    private class ViewHolder {
-        TextView name;
-        ImageView format;
-        CheckBox visible;
-        ImageView dragSort;
-        ImageView menuPopup;
-        String id;
-        String realPosition;
     }
 
     public View getView(final int position, View convertView, final ViewGroup parent) {
@@ -221,14 +212,14 @@ class TraitAdapter extends BaseAdapter {
 
         return convertView;
     }
-	
-	private PopupMenu.OnMenuItemClickListener createTraitListListener(
-								final ViewGroup parent, final ViewHolder holder,
-								final View v, final int position) {
-		return new PopupMenu.OnMenuItemClickListener() {
+
+    private PopupMenu.OnMenuItemClickListener createTraitListListener(
+            final ViewGroup parent, final ViewHolder holder,
+            final View v, final int position) {
+        return new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_copy))) {
-					copyTrait(position);
+                    copyTrait(position);
                 } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_delete))) {
                     delteTrait(holder);
                 } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_edit))) {
@@ -239,7 +230,7 @@ class TraitAdapter extends BaseAdapter {
             }
         };
     }
-    
+
     private void copyTrait(final int position) {
         int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
 
@@ -255,9 +246,9 @@ class TraitAdapter extends BaseAdapter {
         ConfigActivity.dt.insertTraits(trait);
         TraitEditorActivity.loadData();
         MainActivity.reloadData = true;
-	}
-	
-	private String copyTraitName(String traitName) {
+    }
+
+    private String copyTraitName(String traitName) {
         if (traitName.contains("-Copy")) {
             traitName = traitName.substring(0, traitName.indexOf("-Copy"));
         }
@@ -272,11 +263,11 @@ class TraitAdapter extends BaseAdapter {
                 return newTraitName;
             }
         }
-        return "";	// not come here
-	}
-	
-	private void delteTrait(final ViewHolder holder) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
+        return "";    // not come here
+    }
+
+    private void delteTrait(final ViewHolder holder) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
 
         builder.setTitle(context.getString(R.string.traits_options_delete_title));
         builder.setMessage(context.getString(R.string.traits_warning_delete));
@@ -303,5 +294,15 @@ class TraitAdapter extends BaseAdapter {
 
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private class ViewHolder {
+        TextView name;
+        ImageView format;
+        CheckBox visible;
+        ImageView dragSort;
+        ImageView menuPopup;
+        String id;
+        String realPosition;
     }
 }

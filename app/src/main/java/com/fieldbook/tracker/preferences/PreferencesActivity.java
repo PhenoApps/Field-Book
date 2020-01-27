@@ -100,8 +100,7 @@ public class PreferencesActivity extends AppCompatActivity {
         if (brapiControllerResponse.status != null) {
             if (!brapiControllerResponse.status) {
                 Toast.makeText(this, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
-            }
-            else {
+            } else {
                 Toast.makeText(this, R.string.brapi_auth_success, Toast.LENGTH_LONG).show();
             }
         }

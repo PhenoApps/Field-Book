@@ -5,7 +5,9 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,14 +23,13 @@ import java.util.Collections;
 
 public class DatagridActivity extends AppCompatActivity {
 
+    public GridView gridView;
+    public ArrayList<String> ArrayofName = new ArrayList<>();
+    Cursor databaseData;
+    ArrayAdapter<String> adapter;
     private String plotId;
     private int previousView = 0;
     private SharedPreferences ep;
-
-    Cursor databaseData;
-    public GridView gridView;
-    ArrayAdapter<String> adapter;
-    public ArrayList<String> ArrayofName = new ArrayList<>();
 
     @Override
     public void onDestroy() {

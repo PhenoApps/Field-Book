@@ -8,28 +8,28 @@ public class Trait {
     private String description;
     private String traitDbId;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setTraitDbId(String traitDbId) {
-        this.traitDbId = traitDbId;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getTraitDbId() {
         return traitDbId;
+    }
+
+    public void setTraitDbId(String traitDbId) {
+        this.traitDbId = traitDbId;
     }
 
 }

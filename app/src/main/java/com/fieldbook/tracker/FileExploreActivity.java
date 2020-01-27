@@ -2,7 +2,9 @@ package com.fieldbook.tracker;
 
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,18 +25,31 @@ import java.util.Comparator;
 
 public class FileExploreActivity extends AppCompatActivity {
 
+    public ListView mainListView;
     // Stores names of traversed directories
     ArrayList<String> str = new ArrayList<>();
-    public ListView mainListView;
-
+    Comparator comp = new Comparator() {
+        public int compare(Object o1, Object o2) {
+            File f1 = (File) o1;
+            File f2 = (File) o2;
+            if (f1.isDirectory() && !f2.isDirectory()) {
+                // Directory before non-directory
+                return -1;
+            } else if (!f1.isDirectory() && f2.isDirectory()) {
+                // Non-directory after directory
+                return 1;
+            } else {
+                // Alphabetic order otherwise
+                return f1.toString().compareToIgnoreCase(f2.toString());
+            }
+        }
+    };
     // Check if the first level of the directory structure is the one showing
     private Boolean firstLvl = true;
-
     private Item[] fileList;
     private File path;
     private String[] include = new String[0];
     private String[] exclude = new String[0];
-
     private String chosenFile;
     private ListAdapter adapter;
 
@@ -61,7 +76,7 @@ public class FileExploreActivity extends AppCompatActivity {
         loadFileList();
         mainListView.setAdapter(adapter);
 
-        if(title !=null && title.length()>0) {
+        if (title != null && title.length() > 0) {
             this.setTitle(title);
         }
 
@@ -148,7 +163,7 @@ public class FileExploreActivity extends AppCompatActivity {
             });
 
             Arrays.sort(filesList, comp);
-            
+
             // collect file names
             String[] fList = new String[filesList.length];
 
@@ -156,7 +171,7 @@ public class FileExploreActivity extends AppCompatActivity {
                 fList[i] = filesList[i].getName();
             }
 
-            // create file list for 
+            // create file list for
             fileList = new Item[fList.length];
 
             for (int i = 0; i < fList.length; i++) {
@@ -225,22 +240,17 @@ public class FileExploreActivity extends AppCompatActivity {
         return extension;
     }
 
-    Comparator comp = new Comparator() {
-        public int compare(Object o1, Object o2) {
-            File f1 = (File) o1;
-            File f2 = (File) o2;
-            if (f1.isDirectory() && !f2.isDirectory()) {
-                // Directory before non-directory
-                return -1;
-            } else if (!f1.isDirectory() && f2.isDirectory()) {
-                // Non-directory after directory
-                return 1;
-            } else {
-                // Alphabetic order otherwise
-                return f1.toString().compareToIgnoreCase(f2.toString());
-            }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
         }
-    };
+
+        return super.onOptionsItemSelected(item);
+    }
 
     // Wrapper class to hold file data
     private class Item {
@@ -256,17 +266,5 @@ public class FileExploreActivity extends AppCompatActivity {
         public String toString() {
             return file;
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

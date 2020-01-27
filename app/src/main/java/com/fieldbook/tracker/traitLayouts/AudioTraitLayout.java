@@ -46,14 +46,18 @@ public class AudioTraitLayout extends TraitLayout {
     public AudioTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-    
+
     @Override
-    public void setNaTraitsText() { }
+    public void setNaTraitsText() {
+    }
+
     @Override
-    public String type() { return "audio"; }
-    
+    public String type() {
+        return "audio";
+    }
+
     @Override
-    public void init(){
+    public void init() {
         audioRecordingText = findViewById(R.id.audioRecordingText);
         buttonState = ButtonState.WAITING_FOR_RECORDING;
         controlButton = findViewById(R.id.record);
@@ -61,19 +65,19 @@ public class AudioTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
         if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
             buttonState = ButtonState.WAITING_FOR_RECORDING;
             controlButton.setImageResource(buttonState.getImageId());
             audioRecordingText.setText("");
-        } else if(getNewTraits().containsKey(getCurrentTrait().getTrait())
+        } else if (getNewTraits().containsKey(getCurrentTrait().getTrait())
                 && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
             buttonState = ButtonState.WAITING_FOR_RECORDING;
             controlButton.setImageResource(buttonState.getImageId());
             audioRecordingText.setText("NA");
         } else {
             File recordingLocation = new File(getNewTraits().get(getCurrentTrait().getTrait()).toString());
-            if(recordingLocation.exists()) {
+            if (recordingLocation.exists()) {
                 this.recordingLocation = recordingLocation;
                 buttonState = ButtonState.WAITING_FOR_PLAYBACK;
                 controlButton.setImageResource(buttonState.getImageId());
@@ -83,6 +87,7 @@ public class AudioTraitLayout extends TraitLayout {
             }
         }
     }
+
     @Override
     public void deleteTraitListener() {
         deleteRecording();
@@ -102,14 +107,31 @@ public class AudioTraitLayout extends TraitLayout {
         }
     }
 
-    public class AudioTraitOnCLickListener implements OnClickListener{
+    private enum ButtonState {
+        WAITING_FOR_RECORDING(R.drawable.trait_audio),
+        RECORDING(R.drawable.trait_audio_stop),
+        WAITING_FOR_PLAYBACK(R.drawable.trait_audio_play),
+        PLAYING(R.drawable.trait_audio_stop);
+
+        private int imageId;
+
+        ButtonState(int imageId) {
+            this.imageId = imageId;
+        }
+
+        public int getImageId() {
+            return imageId;
+        }
+    }
+
+    public class AudioTraitOnCLickListener implements OnClickListener {
 
         @Override
         public void onClick(View view) {
-            ((MainActivity)getContext()).setNewTraits((HashMap) ConfigActivity.dt.getUserDetail(getCRange().plot_id).clone());
+            ((MainActivity) getContext()).setNewTraits((HashMap) ConfigActivity.dt.getUserDetail(getCRange().plot_id).clone());
 
             boolean enableNavigation = true;
-            switch (buttonState){
+            switch (buttonState) {
                 case PLAYING:
                     stopPlayback();
                     buttonState = ButtonState.WAITING_FOR_PLAYBACK;
@@ -136,8 +158,7 @@ public class AudioTraitLayout extends TraitLayout {
             toggleNavigationButtoms(enableNavigation);
         }
 
-        private void startPlayback()
-        {
+        private void startPlayback() {
             try {
                 mediaPlayer = MediaPlayer.create(getContext(), Uri.parse(recordingLocation.getAbsolutePath()));
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -160,19 +181,19 @@ public class AudioTraitLayout extends TraitLayout {
             }
         }
 
-        private void stopPlayback(){
-            if(mediaPlayer != null) {
+        private void stopPlayback() {
+            if (mediaPlayer != null) {
                 mediaPlayer.stop();
             }
         }
 
-        private void startRecording(){
-            try{
+        private void startRecording() {
+            try {
                 deleteRecording();
                 removeTrait(getCurrentTrait().getTrait());
                 audioRecordingText.setText("");
                 prepareRecorder();
-                if(mediaRecorder != null) {
+                if (mediaRecorder != null) {
                     mediaRecorder.start();
                 }
             } catch (Exception e) {
@@ -180,7 +201,7 @@ public class AudioTraitLayout extends TraitLayout {
             }
         }
 
-        private void stopRecording(){
+        private void stopRecording() {
             try {
                 mediaRecorder.stop();
                 File storedAudio = new File(recordingLocation.getAbsolutePath());
@@ -193,12 +214,12 @@ public class AudioTraitLayout extends TraitLayout {
             }
         }
 
-        private void toggleNavigationButtoms(boolean enabled){
-            ImageButton deleteValue = ((MainActivity)getContext()).getDeleteValue();
-            ImageView traitLeft = ((MainActivity)getContext()).getTraitLeft();
-            ImageView traitRight = ((MainActivity)getContext()).getTraitRight();
-            ImageView rangeLeft = ((MainActivity)getContext()).getRangeLeft();
-            ImageView rangeRight = ((MainActivity)getContext()).getRangeRight();
+        private void toggleNavigationButtoms(boolean enabled) {
+            ImageButton deleteValue = ((MainActivity) getContext()).getDeleteValue();
+            ImageView traitLeft = ((MainActivity) getContext()).getTraitLeft();
+            ImageView traitRight = ((MainActivity) getContext()).getTraitRight();
+            ImageView rangeLeft = ((MainActivity) getContext()).getRangeLeft();
+            ImageView rangeRight = ((MainActivity) getContext()).getRangeRight();
 
             rangeLeft.setEnabled(enabled);
             rangeRight.setEnabled(enabled);
@@ -260,23 +281,6 @@ public class AudioTraitLayout extends TraitLayout {
             if (mediaRecorder != null) {
                 mediaRecorder.release();
             }
-        }
-    }
-
-    private enum ButtonState{
-        WAITING_FOR_RECORDING(R.drawable.trait_audio),
-        RECORDING(R.drawable.trait_audio_stop),
-        WAITING_FOR_PLAYBACK(R.drawable.trait_audio_play),
-        PLAYING(R.drawable.trait_audio_stop);
-
-        private int imageId;
-
-        ButtonState(int imageId){
-            this.imageId = imageId;
-        }
-
-        public int getImageId() {
-            return imageId;
         }
     }
 }

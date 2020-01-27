@@ -25,14 +25,13 @@ import java.util.HashMap;
 
 public class DateTraitLayout extends TraitLayout {
 
-    private TextView month;
-    private TextView day;
-    private String date;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
     Button addDayBtn;
     Button minusDayBtn;
     ImageButton saveDayBtn;
+    private TextView month;
+    private TextView day;
+    private String date;
 
     public DateTraitLayout(Context context) {
         super(context);
@@ -50,13 +49,15 @@ public class DateTraitLayout extends TraitLayout {
     public void setNaTraitsText() {
         month.setText("");
         day.setText("NA");
-	}
-    
+    }
+
     @Override
-    public String type() { return "date"; }
-    
+    public String type() {
+        return "date";
+    }
+
     @Override
-    public void init(){
+    public void init() {
         date = "2000-01-01";
         month = findViewById(R.id.mth);
         day = findViewById(R.id.day);
@@ -108,7 +109,7 @@ public class DateTraitLayout extends TraitLayout {
                 }
 
                 //Subtract day, rewrite date
-                calendar.add(Calendar.DATE,-1);
+                calendar.add(Calendar.DATE, -1);
                 date = dateFormat.format(calendar.getTime());
 
                 //Set text
@@ -139,9 +140,9 @@ public class DateTraitLayout extends TraitLayout {
                 }
 
                 if (getPrefs().getBoolean(PreferencesActivity.USE_DAY_OF_YEAR, false)) {
-                    updateTrait(getCurrentTrait().getTrait(), "date",String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+                    updateTrait(getCurrentTrait().getTrait(), "date", String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
                 } else {
-                    updateTrait(getCurrentTrait().getTrait(), "date",dateFormat.format(calendar.getTime()));
+                    updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
                 }
 
                 // Change the text color accordingly
@@ -152,7 +153,7 @@ public class DateTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
         getEtCurVal().setEnabled(false);
         getEtCurVal().setVisibility(View.GONE);
 
@@ -160,7 +161,7 @@ public class DateTraitLayout extends TraitLayout {
         date = dateFormat.format(c.getTime());
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && !getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
-            if(getNewTraits().get(getCurrentTrait().getTrait()).toString().length() < 4 && getNewTraits().get(getCurrentTrait().getTrait()).toString().length() > 0) {
+            if (getNewTraits().get(getCurrentTrait().getTrait()).toString().length() < 4 && getNewTraits().get(getCurrentTrait().getTrait()).toString().length() > 0) {
                 Calendar calendar = Calendar.getInstance();
 
                 //convert day of year to yyyy-mm-dd string
@@ -181,7 +182,7 @@ public class DateTraitLayout extends TraitLayout {
                 date = oldDate[0] + "-" + String.format("%02d", Integer.parseInt(oldDate[1])) + "-" + String.format("%02d", Integer.parseInt(oldDate[2]));
 
                 //set month/day text and color
-                month.setText(getMonthForInt(Integer.parseInt(oldDate[1])-1));
+                month.setText(getMonthForInt(Integer.parseInt(oldDate[1]) - 1));
                 day.setText(oldDate[2]);
                 month.setTextColor(Color.parseColor(getDisplayColor()));
                 day.setTextColor(Color.parseColor(getDisplayColor()));
@@ -206,7 +207,7 @@ public class DateTraitLayout extends TraitLayout {
                 month.setTextColor(Color.parseColor(getDisplayColor()));
                 day.setTextColor(Color.parseColor(getDisplayColor()));
             }
-        } else if(getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
+        } else if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
             month.setText("");
             day.setText("NA");
         } else {

@@ -52,6 +52,12 @@ public class PhotoTraitLayout extends TraitLayout {
     private GalleryImageAdapter photoAdapter;
     private String mCurrentPhotoPath;
     private ArrayList<String> photoLocation;
+    // Creates a new thread to do importing
+    private Runnable importRunnable = new Runnable() {
+        public void run() {
+            new PhotoTraitLayout.LoadImagesRunnableTask().execute(0);
+        }
+    };
 
     public PhotoTraitLayout(Context context) {
         super(context);
@@ -64,21 +70,25 @@ public class PhotoTraitLayout extends TraitLayout {
     public PhotoTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-    
+
     @Override
-    public void setNaTraitsText() { }
+    public void setNaTraitsText() {
+    }
+
     @Override
-    public String type() { return "photo"; }
-    
+    public String type() {
+        return "photo";
+    }
+
     @Override
-    public void init(){
+    public void init() {
         ImageButton capture = findViewById(R.id.capture);
         capture.setOnClickListener(new PhotoTraitOnClickListener());
         photo = findViewById(R.id.photo);
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
         getEtCurVal().removeTextChangedListener(getCvText());
         getEtCurVal().removeTextChangedListener(getCvNum());
         getEtCurVal().setVisibility(EditText.GONE);
@@ -109,62 +119,6 @@ public class PhotoTraitLayout extends TraitLayout {
         if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
             if (!img.exists()) {
                 img.mkdirs();
-            }
-        }
-    }
-
-    // Creates a new thread to do importing
-    private Runnable importRunnable = new Runnable() {
-        public void run() {
-            new PhotoTraitLayout.LoadImagesRunnableTask().execute(0);
-        }
-    };
-
-    // Mimics the class used in the csv field importer to run the saving
-    // task in a different thread from the UI thread so the app doesn't freeze up.
-    private class LoadImagesRunnableTask extends AsyncTask<Integer, Integer, Integer> {
-
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = new ProgressDialog(getContext());
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html.fromHtml(getContext().getResources().getString(R.string.images_loading)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            loadLayoutWork();
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (dialog.isShowing())
-                dialog.dismiss();
-
-            File img = new File(Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/" + "/photos/");
-            if (img.listFiles() != null) {
-
-                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
-                photo.setAdapter(photoAdapter);
-                photo.setSelection(photo.getCount() - 1);
-                photo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                    @Override
-                    public void onItemClick(AdapterView<?> arg0,
-                                            View arg1, int pos, long arg3) {
-                        displayPlotImage(photoLocation.get(photo.getSelectedItemPosition()));
-                    }
-                });
-
-            } else {
-                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
-                photo.setAdapter(photoAdapter);
             }
         }
     }
@@ -225,11 +179,9 @@ public class PhotoTraitLayout extends TraitLayout {
 
                 if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
                     angle = 90;
-                }
-                else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
                     angle = 180;
-                }
-                else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
                     angle = 270;
                 }
 
@@ -237,14 +189,10 @@ public class PhotoTraitLayout extends TraitLayout {
                 mat.postRotate(angle);
 
                 correctBmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mat, true);
-            }
-
-            catch (IOException e) {
+            } catch (IOException e) {
                 Log.e(MainActivity.TAG, "-- Error in setting image");
                 return BitmapFactory.decodeResource(getResources(), R.drawable.trait_photo_missing);
-            }
-
-            catch(OutOfMemoryError oom) {
+            } catch (OutOfMemoryError oom) {
                 Log.e(MainActivity.TAG, "-- OOM Error in setting image");
             }
 
@@ -273,7 +221,7 @@ public class PhotoTraitLayout extends TraitLayout {
         File file = new File(Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/",
                 mCurrentPhotoPath);
 
-        Utils.scanFile(getContext(),file.getAbsoluteFile());
+        Utils.scanFile(getContext(), file.getAbsoluteFile());
 
         photoLocation.add(file.getAbsolutePath());
 
@@ -343,15 +291,14 @@ public class PhotoTraitLayout extends TraitLayout {
 
                     File f = new File(item);
                     f.delete();
-                    Utils.scanFile((Activity) getContext(),f);
+                    Utils.scanFile((Activity) getContext(), f);
 
                     // Remove individual images
                     if (brapiDelete) {
                         updateTraitAllowDuplicates(getCurrentTrait().getTrait(), "photo", item, "NA", newTraits);
                         //ConfigActivity.dt.updateTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), item, "NA");
                         loadLayout();
-                    }
-                    else {
+                    } else {
                         ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), item);
                     }
 
@@ -364,8 +311,7 @@ public class PhotoTraitLayout extends TraitLayout {
                     photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
 
                     photo.setAdapter(photoAdapter);
-                }
-                else {
+                } else {
                     // If an NA exists, delete it
                     ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), "NA");
                     ArrayList<Drawable> emptyList = new ArrayList<>();
@@ -412,7 +358,7 @@ public class PhotoTraitLayout extends TraitLayout {
         if (takePictureIntent.resolveActivity(getContext().getPackageManager()) != null) {
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                     FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".fileprovider", file));
-            ((Activity)getContext()).startActivityForResult(takePictureIntent, 252);
+            ((Activity) getContext()).startActivityForResult(takePictureIntent, 252);
         }
     }
 
@@ -421,9 +367,58 @@ public class PhotoTraitLayout extends TraitLayout {
         return String.valueOf(repInt);
     }
 
-    private class PhotoTraitOnClickListener implements OnClickListener{
+    // Mimics the class used in the csv field importer to run the saving
+    // task in a different thread from the UI thread so the app doesn't freeze up.
+    private class LoadImagesRunnableTask extends AsyncTask<Integer, Integer, Integer> {
+
+        ProgressDialog dialog;
+
         @Override
-        public void onClick(View view){
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(getContext());
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(false);
+            dialog.setMessage(Html.fromHtml(getContext().getResources().getString(R.string.images_loading)));
+            dialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... params) {
+            loadLayoutWork();
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if (dialog.isShowing())
+                dialog.dismiss();
+
+            File img = new File(Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/" + "/photos/");
+            if (img.listFiles() != null) {
+
+                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+                photo.setAdapter(photoAdapter);
+                photo.setSelection(photo.getCount() - 1);
+                photo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                    @Override
+                    public void onItemClick(AdapterView<?> arg0,
+                                            View arg1, int pos, long arg3) {
+                        displayPlotImage(photoLocation.get(photo.getSelectedItemPosition()));
+                    }
+                });
+
+            } else {
+                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+                photo.setAdapter(photoAdapter);
+            }
+        }
+    }
+
+    private class PhotoTraitOnClickListener implements OnClickListener {
+        @Override
+        public void onClick(View view) {
             try {
                 int m;
 

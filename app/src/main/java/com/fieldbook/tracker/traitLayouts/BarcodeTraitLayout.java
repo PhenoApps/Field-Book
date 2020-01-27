@@ -21,21 +21,26 @@ public class BarcodeTraitLayout extends TraitLayout {
     public BarcodeTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-    
+
     @Override
-    public void setNaTraitsText() { }
+    public void setNaTraitsText() {
+    }
+
     @Override
-    public String type() { return "barcode"; }
-    
+    public String type() {
+        return "barcode";
+    }
+
     @Override
-    public void init(){
+    public void init() {
 
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
         getEtCurVal().setVisibility(EditText.VISIBLE);
     }
+
     @Override
     public void deleteTraitListener() {
 

@@ -13,10 +13,13 @@ import jxl.WorkbookSettings;
 
 public class FieldFile {
     static FieldFileBase create(final String path) {
-        switch(getExtension(path)) {
-            case "csv": return new FieldFileCSV(path);
-            case "xls": return new FieldFileExcel(path);
-            default:    return new FieldFileOther(path);
+        switch (getExtension(path)) {
+            case "csv":
+                return new FieldFileCSV(path);
+            case "xls":
+                return new FieldFileExcel(path);
+            default:
+                return new FieldFileOther(path);
         }
     }
 
@@ -26,9 +29,9 @@ public class FieldFile {
     }
 
     public abstract static class FieldFileBase {
-        private String path_;
         protected boolean openFail;
         protected boolean specialCharactersFail;
+        private String path_;
 
         public FieldFileBase(final String path) {
             path_ = path;
@@ -36,7 +39,9 @@ public class FieldFile {
             specialCharactersFail = false;
         }
 
-        public final String getPath() { return path_; }
+        public final String getPath() {
+            return path_;
+        }
 
         public final String getStem() {
             final int first = path_.lastIndexOf("/") + 1;
@@ -56,16 +61,22 @@ public class FieldFile {
         }
 
         abstract public boolean isCSV();
+
         abstract public boolean isExcel();
+
         abstract public boolean isOther();
+
         abstract public String[] getColumns();
+
         // return {column name: column name}
         // if columns are duplicated, return an empty HshMap
         abstract public HashMap<String, String> getColumnSet(int idColPosition);
 
         // read file
         abstract public void open();
+
         abstract public String[] readNext();
+
         abstract public void close();
     }
 
@@ -76,9 +87,17 @@ public class FieldFile {
             super(path);
         }
 
-        public boolean isCSV() { return true; }
-        public boolean isExcel() { return false; }
-        public boolean isOther() { return false; }
+        public boolean isCSV() {
+            return true;
+        }
+
+        public boolean isExcel() {
+            return false;
+        }
+
+        public boolean isOther() {
+            return false;
+        }
 
         public String[] getColumns() {
             try {
@@ -86,7 +105,7 @@ public class FieldFile {
                 FileReader fr = new FileReader(super.getPath());
                 CSVReader cr = new CSVReader(fr);
                 return cr.readNext();
-            } catch(Exception ignore) {
+            } catch (Exception ignore) {
                 openFail = true;
                 return new String[0];
             }
@@ -117,7 +136,7 @@ public class FieldFile {
                     }
                 }
                 return check;
-            } catch(Exception n) {
+            } catch (Exception n) {
                 openFail = true;
                 n.printStackTrace();
                 return new HashMap<String, String>();
@@ -129,7 +148,7 @@ public class FieldFile {
                 openFail = false;
                 FileReader fr = new FileReader(super.getPath());
                 cr = new CSVReader(fr);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 openFail = true;
                 e.printStackTrace();
             }
@@ -138,7 +157,7 @@ public class FieldFile {
         public String[] readNext() {
             try {
                 return cr.readNext();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 openFail = true;
                 e.printStackTrace();
                 return new String[0];
@@ -148,7 +167,7 @@ public class FieldFile {
         public void close() {
             try {
                 cr.close();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 openFail = true;
                 e.printStackTrace();
             }
@@ -163,9 +182,17 @@ public class FieldFile {
             super(path);
         }
 
-        public boolean isCSV() { return false; }
-        public boolean isExcel() { return true; }
-        public boolean isOther() { return false; }
+        public boolean isCSV() {
+            return false;
+        }
+
+        public boolean isExcel() {
+            return true;
+        }
+
+        public boolean isOther() {
+            return false;
+        }
 
         public String[] getColumns() {
             try {
@@ -180,7 +207,7 @@ public class FieldFile {
                     importColumns[s] = wb.getSheet(0).getCell(s, 0).getContents();
                 }
                 return importColumns;
-            } catch(Exception ignore) {
+            } catch (Exception ignore) {
                 openFail = true;
                 return new String[0];
             }
@@ -211,7 +238,7 @@ public class FieldFile {
         }
 
         public String[] readNext() {
-            if(current_row >= wb.getSheet(0).getRows()) {
+            if (current_row >= wb.getSheet(0).getRows()) {
                 return null;
             }
 
@@ -223,7 +250,8 @@ public class FieldFile {
             return data;
         }
 
-        public void close() { }
+        public void close() {
+        }
     }
 
     public static class FieldFileOther extends FieldFileBase {
@@ -231,9 +259,18 @@ public class FieldFile {
             super(path);
         }
 
-        public boolean isCSV() { return false; }
-        public boolean isExcel() { return false; }
-        public boolean isOther() { return true; }
+        public boolean isCSV() {
+            return false;
+        }
+
+        public boolean isExcel() {
+            return false;
+        }
+
+        public boolean isOther() {
+            return true;
+        }
+
         public String[] getColumns() {
             return new String[0];
         }
@@ -242,8 +279,14 @@ public class FieldFile {
             return new HashMap<String, String>();
         }
 
-        public void open() { }
-        public String[] readNext() { return new String[0]; }
-        public void close() { }
+        public void open() {
+        }
+
+        public String[] readNext() {
+            return new String[0];
+        }
+
+        public void close() {
+        }
     }
 }

@@ -37,25 +37,25 @@ public class NewTraitDialog extends DialogFragment {
     private TraitEditorActivity originActivity;
     private AlertDialog createDialog;
 
-    private TraitFormatCollection   traitFormats;
+    private TraitFormatCollection traitFormats;
     private TraitObject oldTrait;
 
     // elements of this dialog
-    private EditText        trait;
-    private Spinner         format;
-    private EditText        def;
-    private EditText        minimum;
-    private EditText        maximum;
-    private EditText        details;
-    private EditText        categories;
-    private TextView        defTv;
-    private ToggleButton    bool;
-    private LinearLayout    defBox;
-    private LinearLayout    minBox;
-    private LinearLayout    maxBox;
-    private LinearLayout    categoryBox;
-    
-    private TraitFormat     traitFormat;
+    private EditText trait;
+    private Spinner format;
+    private EditText def;
+    private EditText minimum;
+    private EditText maximum;
+    private EditText details;
+    private EditText categories;
+    private TextView defTv;
+    private ToggleButton bool;
+    private LinearLayout defBox;
+    private LinearLayout minBox;
+    private LinearLayout maxBox;
+    private LinearLayout categoryBox;
+
+    private TraitFormat traitFormat;
 
     private int currentPosition;
     private boolean createVisible;
@@ -64,7 +64,7 @@ public class NewTraitDialog extends DialogFragment {
     private boolean brapiDialogShown;
 
     private TraitAdapter mAdapter;
-    
+
     public NewTraitDialog(View layout, TraitEditorActivity activity) {
         // fields
         originActivity = activity;
@@ -76,7 +76,7 @@ public class NewTraitDialog extends DialogFragment {
         createVisible = true;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(originActivity,
-                                                        R.style.AppAlertDialog);
+                R.style.AppAlertDialog);
 
         builder.setTitle(R.string.traits_toolbar_add_trait)
                 .setCancelable(true)
@@ -109,16 +109,34 @@ public class NewTraitDialog extends DialogFragment {
         format.setOnItemSelectedListener(createFomatSelectionListener());
 
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(
-                                                TraitEditorActivity.thisActivity,
-                                                R.layout.custom_spinnerlayout,
-                                                traitFormats.getLocalStringList());
+                TraitEditorActivity.thisActivity,
+                R.layout.custom_spinnerlayout,
+                traitFormats.getLocalStringList());
         format.setAdapter(itemsAdapter);
 
         closeBtn.setOnClickListener(createCloseButtonClickLister());
         saveBtn.setOnClickListener(createSaveButtonClickListener());
 
     }
-    
+
+    // Non negative numbers only
+    public static boolean isNumeric(String str, boolean positive) {
+        if (str.length() == 0)
+            return false;
+
+        try {
+            double d = Double.parseDouble(str);
+
+            return !positive || d >= 0;
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
+
+    public static boolean isNumericOrEmpty(String str, boolean positive) {
+        return str.length() == 0 || isNumeric(str, positive);
+    }
+
     public void show(boolean edit_) {
         edit = edit_;
         createDialog.show();
@@ -218,7 +236,7 @@ public class NewTraitDialog extends DialogFragment {
                     originActivity.makeToast(errorMessage);
                     return;
                 }
-                
+
                 final int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
                 final int booleanIndex = traitFormats.findIndexByEnglishString("Boolean");
                 if (format.getSelectedItemPosition() == booleanIndex) {
@@ -250,7 +268,7 @@ public class NewTraitDialog extends DialogFragment {
                     // brapiDialogShown = displayBrapiInfo(originActivity,
                     //                          ConfigActivity.dt, null, true);
                     setBrAPIDialogShown(displayBrapiInfo(originActivity,
-                                                ConfigActivity.dt, null, true));
+                            ConfigActivity.dt, null, true));
                 }
 
                 loadData();
@@ -277,7 +295,7 @@ public class NewTraitDialog extends DialogFragment {
 
         createVisible = true;
     }
-    
+
     private TraitObject createTraitObjectByDialogItems(int pos) {
         /*MainActivity.dt.insertTraits(trait.getText().toString().trim(),
                 enData[format.getSelectedItemPosition()].toLowerCase(), def.getText().toString(),
@@ -298,19 +316,19 @@ public class NewTraitDialog extends DialogFragment {
         t.setRealPosition(String.valueOf(pos));
         return t;
     }
-    
+
     private void restoreDialogItemsByTraitObject(TraitObject t) {
-                    // TODO: Add the trait_data_source variable into the edit.
+        // TODO: Add the trait_data_source variable into the edit.
         final int i = format.getSelectedItemPosition();
         final String englishFormat = traitFormats.getEnglishString(i);
         ConfigActivity.dt.editTraits(t.getId(),
-                        trait.getText().toString().trim(),
-                        englishFormat.toLowerCase(),
-                        def.getText().toString(),
-                        minimum.getText().toString(),
-                        maximum.getText().toString(),
-                        details.getText().toString(),
-                        categories.getText().toString());
+                trait.getText().toString().trim(),
+                englishFormat.toLowerCase(),
+                def.getText().toString(),
+                minimum.getText().toString(),
+                maximum.getText().toString(),
+                details.getText().toString(),
+                categories.getText().toString());
     }
 
     public void setTraitObject(TraitObject traitObject) {
@@ -330,7 +348,7 @@ public class NewTraitDialog extends DialogFragment {
 
     public void prepareFields(int index) {
         TraitFormat traitFormat = traitFormats.getTraitFormatByIndex(index);
-        
+
         final String optional = getResString(R.string.traits_create_optional);
         details.setHint(optional);
         def.setHint(traitFormat.displaysDefaultHint() ? optional : null);
@@ -344,9 +362,9 @@ public class NewTraitDialog extends DialogFragment {
         bool.setVisibility(visibility(traitFormat.isBooleanVisible()));
         categoryBox.setVisibility(visibility(traitFormat.isCategoryVisible()));
 
-        if(traitFormat.isNumericInputType()) {
+        if (traitFormat.isNumericInputType()) {
             final int inputType = InputType.TYPE_CLASS_NUMBER |
-                                  InputType.TYPE_NUMBER_FLAG_DECIMAL;
+                    InputType.TYPE_NUMBER_FLAG_DECIMAL;
             def.setInputType(inputType);
             minimum.setInputType(inputType);
             maximum.setInputType(inputType);
@@ -376,17 +394,17 @@ public class NewTraitDialog extends DialogFragment {
             }
 
             return (!minimum.getText().toString().equals(o.getMinimum())) ||
-                   (!maximum.getText().toString().equals(o.getMaximum())) ||
-                   (!details.getText().toString().equals(o.getDetails())) ||
-                   (!categories.getText().toString().equals(o.getCategories()));
+                    (!maximum.getText().toString().equals(o.getMaximum())) ||
+                    (!details.getText().toString().equals(o.getDetails())) ||
+                    (!categories.getText().toString().equals(o.getCategories()));
 
         } else {
             if (trait.getText().toString().length() > 0 ||
-                        def.getText().toString().length() > 0 ||
-                        minimum.getText().toString().length() > 0 ||
-                        maximum.getText().toString().length() > 0 ||
-                        details.getText().toString().length() > 0 ||
-                        categories.getText().toString().length() > 0)
+                    def.getText().toString().length() > 0 ||
+                    minimum.getText().toString().length() > 0 ||
+                    maximum.getText().toString().length() > 0 ||
+                    details.getText().toString().length() > 0 ||
+                    categories.getText().toString().length() > 0)
                 return true;
 
             if (format.getSelectedItemPosition() == booleanIndex) {
@@ -396,72 +414,62 @@ public class NewTraitDialog extends DialogFragment {
             return false;
         }
     }
-    
+
     private String getResString(int id) {
         return originActivity.getResourceString(id);
     }
-    
+
     // when this value changes in this class,
     // the value in TraitEditorActivity must change
     private void setBrAPIDialogShown(boolean b) {
         brapiDialogShown = b;
         originActivity.setBrAPIDialogShown(b);
     }
-    
-    // Non negative numbers only
-    public static boolean isNumeric(String str, boolean positive) {
-        if (str.length() == 0)
-            return false;
-
-        try {
-            double d = Double.parseDouble(str);
-
-            return !positive || d >= 0;
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
-    }
-    
-    public static boolean isNumericOrEmpty(String str, boolean positive) {
-        return str.length() == 0 || isNumeric(str, positive);
-    }
 
     ///// Classes to absorb format differences /////
-    
+
     // If you want add a new format, you create a class which extends TraitFormat
     private abstract class TraitFormat {
         // whether is each item of this dialog visible or not 
         abstract public boolean isDefBoxVisible();
+
         abstract public boolean isDefaultVisible();
+
         abstract public boolean isBooleanVisible();
+
         abstract public boolean isMinBoxVisible();
+
         abstract public boolean isMaxBoxVisible();
+
         abstract public boolean isCategoryVisible();
-        
+
         // whether does each item of this dialog display "option"
         abstract public boolean displaysDefaultHint();
+
         abstract public boolean displaysMinimumHint();
+
         abstract public boolean displaysMaximumHint();
-        
+
         // whether is the input type each item of this dialog number
         abstract public boolean isNumericInputType();
-        
+
         abstract public String getEnglishString();
+
         abstract public int getResourceId();
+
         public String getLocalString() {
             return getResString(getResourceId());
         }
-        
+
         public String ValidateItems() {
             final String validation = ValidateItemsCommon();
             if (validation.length() > 0) {
                 return validation;
-            }
-            else {
+            } else {
                 return ValidateItemsIndividual();
             }
         }
-        
+
         protected String ValidateItemsCommon() {
             // Trait name is mandatory
             if (trait.getText().toString().length() == 0) {
@@ -482,42 +490,95 @@ public class NewTraitDialog extends DialogFragment {
             }
             return "";  // OK until here
         }
-        
+
         abstract public String ValidateItemsIndividual();
     }
-    
+
     abstract private class TraitFormatNotValue extends TraitFormat {
-        public boolean isDefBoxVisible() { return false; }
-        public boolean isDefaultVisible() { return false; }
-        public boolean isBooleanVisible() { return false; }
-        public boolean isMinBoxVisible() { return false; }
-        public boolean isMaxBoxVisible() { return false; }
-        public boolean isCategoryVisible() { return false; }
-        
-        public boolean displaysDefaultHint() { return false; }
-        public boolean displaysMinimumHint() { return false; }
-        public boolean displaysMaximumHint() { return false; }
-        
-        public boolean isNumericInputType() { return false; }
-        
-        public String ValidateItemsIndividual() { return ""; }
+        public boolean isDefBoxVisible() {
+            return false;
+        }
+
+        public boolean isDefaultVisible() {
+            return false;
+        }
+
+        public boolean isBooleanVisible() {
+            return false;
+        }
+
+        public boolean isMinBoxVisible() {
+            return false;
+        }
+
+        public boolean isMaxBoxVisible() {
+            return false;
+        }
+
+        public boolean isCategoryVisible() {
+            return false;
+        }
+
+        public boolean displaysDefaultHint() {
+            return false;
+        }
+
+        public boolean displaysMinimumHint() {
+            return false;
+        }
+
+        public boolean displaysMaximumHint() {
+            return false;
+        }
+
+        public boolean isNumericInputType() {
+            return false;
+        }
+
+        public String ValidateItemsIndividual() {
+            return "";
+        }
     }
-    
+
     abstract private class TraitFormatWithRange extends TraitFormat {
-        public boolean isDefBoxVisible() { return true; }
-        public boolean isDefaultVisible() { return true; }
-        public boolean isBooleanVisible() { return false; }
-        public boolean isMinBoxVisible() { return true; }
-        public boolean isMaxBoxVisible() { return true; }
-        public boolean isCategoryVisible() { return false; }
-        
-        public boolean isNumericInputType() { return false; }
-        
-        public String getEnglishString() { return "Numeric"; }
-        public int getResourceId() { return R.string.traits_format_numeric; }
-        
+        public boolean isDefBoxVisible() {
+            return true;
+        }
+
+        public boolean isDefaultVisible() {
+            return true;
+        }
+
+        public boolean isBooleanVisible() {
+            return false;
+        }
+
+        public boolean isMinBoxVisible() {
+            return true;
+        }
+
+        public boolean isMaxBoxVisible() {
+            return true;
+        }
+
+        public boolean isCategoryVisible() {
+            return false;
+        }
+
+        public boolean isNumericInputType() {
+            return false;
+        }
+
+        public String getEnglishString() {
+            return "Numeric";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_numeric;
+        }
+
         abstract public boolean allowsNegative();
-        
+
         public String ValidateItemsIndividual() {
             final boolean b = !allowsNegative();
             if ((!isNumericOrEmpty(def.getText().toString(), b)) ||
@@ -525,7 +586,7 @@ public class NewTraitDialog extends DialogFragment {
                     (!isNumericOrEmpty(maximum.getText().toString(), b))) {
                 return getResString(R.string.traits_create_warning_numeric_required);
             }
-            
+
             // minimum <= def <= maximum
             if (!isValidMagnitudeRelation(minimum, def) ||
                     !isValidMagnitudeRelation(def, maximum) ||
@@ -534,46 +595,88 @@ public class NewTraitDialog extends DialogFragment {
             }
             return "";
         }
-        
+
         private boolean isValidMagnitudeRelation(final EditText e1, final EditText e2) {
             final String s1 = e1.getText().toString();
             final String s2 = e2.getText().toString();
             return s1.length() == 0 || s2.length() == 0 ||
-                        Double.parseDouble(s1) <= Double.parseDouble(s2);
+                    Double.parseDouble(s1) <= Double.parseDouble(s2);
         }
     }
-    
+
     private class TraitFormatNumeric extends TraitFormatWithRange {
-        public boolean displaysDefaultHint() { return true; }
-        public boolean displaysMinimumHint() { return true; }
-        public boolean displaysMaximumHint() { return true; }
-        
-        public String getEnglishString() { return "Numeric"; }
-        public int getResourceId() { return R.string.traits_format_numeric; }
-        
-        public boolean allowsNegative() { return true; }
+        public boolean displaysDefaultHint() {
+            return true;
+        }
+
+        public boolean displaysMinimumHint() {
+            return true;
+        }
+
+        public boolean displaysMaximumHint() {
+            return true;
+        }
+
+        public String getEnglishString() {
+            return "Numeric";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_numeric;
+        }
+
+        public boolean allowsNegative() {
+            return true;
+        }
     }
-    
+
     private abstract class TraitFormatWithCategory extends TraitFormat {
-        public boolean isDefBoxVisible() { return false; }
-        public boolean isDefaultVisible() { return false; }
-        public boolean isBooleanVisible() { return false; }
-        public boolean isMinBoxVisible() { return false; }
-        public boolean isMaxBoxVisible() { return false; }
-        public boolean isCategoryVisible() { return true; }
-        
-        public boolean displaysDefaultHint() { return false; }
-        public boolean displaysMinimumHint() { return false; }
-        public boolean displaysMaximumHint() { return false; }
-        
-        public boolean isNumericInputType() { return false; }
-        
+        public boolean isDefBoxVisible() {
+            return false;
+        }
+
+        public boolean isDefaultVisible() {
+            return false;
+        }
+
+        public boolean isBooleanVisible() {
+            return false;
+        }
+
+        public boolean isMinBoxVisible() {
+            return false;
+        }
+
+        public boolean isMaxBoxVisible() {
+            return false;
+        }
+
+        public boolean isCategoryVisible() {
+            return true;
+        }
+
+        public boolean displaysDefaultHint() {
+            return false;
+        }
+
+        public boolean displaysMinimumHint() {
+            return false;
+        }
+
+        public boolean displaysMaximumHint() {
+            return false;
+        }
+
+        public boolean isNumericInputType() {
+            return false;
+        }
+
         public String ValidateItemsIndividual() {
             final String strCategories = categories.getText().toString();
             if (strCategories.length() == 0) {
                 return getResString(R.string.traits_create_warning_categories_required);
             }
-            
+
             // check empty category
             final String[] cats = strCategories.split("/");
             for (int i = 0; i < cats.length; ++i) {
@@ -582,10 +685,10 @@ public class NewTraitDialog extends DialogFragment {
                     return "An empty category exists.";
                 }
             }
-            
+
             // check duplication
             for (int i = 0; i < cats.length; ++i) {
-                for (int j = i+1; j < cats.length; ++j) {
+                for (int j = i + 1; j < cats.length; ++j) {
                     if (cats[i].equals(cats[j]))
                         // temporary error message
                         return "Categories have duplicates.";
@@ -594,117 +697,248 @@ public class NewTraitDialog extends DialogFragment {
             return "";
         }
     }
-    
+
     private class TraitFormatCategorical extends TraitFormatWithCategory {
-        public String getEnglishString() { return "Categorical"; }
-        public int getResourceId() { return R.string.traits_format_categorical; }
+        public String getEnglishString() {
+            return "Categorical";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_categorical;
+        }
     }
-    
+
     private class TraitFormatMulticat extends TraitFormatWithCategory {
-        public String getEnglishString() { return "Multicat"; }
+        public String getEnglishString() {
+            return "Multicat";
+        }
+
         public int getResourceId() {
             return R.string.traits_format_multicategorical;
         }
     }
-    
+
     private class TraitFormatDate extends TraitFormatNotValue {
-        public String getEnglishString() { return "Date"; }
-        public int getResourceId() { return R.string.traits_format_date; }
+        public String getEnglishString() {
+            return "Date";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_date;
+        }
     }
-    
+
     private class TraitFormatPercent extends TraitFormatWithRange {
-        public boolean displaysDefaultHint() { return false; }
-        public boolean displaysMinimumHint() { return false; }
-        public boolean displaysMaximumHint() { return false; }
-        
-        public String getEnglishString() { return "Percent"; }
-        public int getResourceId() { return R.string.traits_format_percent; }
-        
-        public boolean isNumericInputType() { return true; }
-        
-        public boolean allowsNegative() { return false; }
+        public boolean displaysDefaultHint() {
+            return false;
+        }
+
+        public boolean displaysMinimumHint() {
+            return false;
+        }
+
+        public boolean displaysMaximumHint() {
+            return false;
+        }
+
+        public String getEnglishString() {
+            return "Percent";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_percent;
+        }
+
+        public boolean isNumericInputType() {
+            return true;
+        }
+
+        public boolean allowsNegative() {
+            return false;
+        }
     }
-    
+
     private class TraitFormatBoolean extends TraitFormat {
-        public boolean isDefBoxVisible() { return true; }
-        public boolean isDefaultVisible() { return false; }
-        public boolean isBooleanVisible() { return true; }
-        public boolean isMinBoxVisible() { return false; }
-        public boolean isMaxBoxVisible() { return false; }
-        public boolean isCategoryVisible() { return false; }
-        
-        public boolean displaysDefaultHint() { return false; }
-        public boolean displaysMinimumHint() { return false; }
-        public boolean displaysMaximumHint() { return false; }
-        
-        public boolean isNumericInputType() { return false; }
-        
-        public String getEnglishString() { return "Boolean"; }
-        public int getResourceId() { return R.string.traits_format_boolean; }
-        
-        public String ValidateItemsIndividual() { return ""; }
+        public boolean isDefBoxVisible() {
+            return true;
+        }
+
+        public boolean isDefaultVisible() {
+            return false;
+        }
+
+        public boolean isBooleanVisible() {
+            return true;
+        }
+
+        public boolean isMinBoxVisible() {
+            return false;
+        }
+
+        public boolean isMaxBoxVisible() {
+            return false;
+        }
+
+        public boolean isCategoryVisible() {
+            return false;
+        }
+
+        public boolean displaysDefaultHint() {
+            return false;
+        }
+
+        public boolean displaysMinimumHint() {
+            return false;
+        }
+
+        public boolean displaysMaximumHint() {
+            return false;
+        }
+
+        public boolean isNumericInputType() {
+            return false;
+        }
+
+        public String getEnglishString() {
+            return "Boolean";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_boolean;
+        }
+
+        public String ValidateItemsIndividual() {
+            return "";
+        }
     }
-    
+
     private class TraitFormatText extends TraitFormat {
-        public boolean isDefBoxVisible() { return true; }
-        public boolean isDefaultVisible() { return true; }
-        public boolean isBooleanVisible() { return false; }
-        public boolean isMinBoxVisible() { return false; }
-        public boolean isMaxBoxVisible() { return false; }
-        public boolean isCategoryVisible() { return false; }
-        
-        public boolean displaysDefaultHint() { return true; }
-        public boolean displaysMinimumHint() { return false; }
-        public boolean displaysMaximumHint() { return false; }
-        
-        public boolean isNumericInputType() { return false; }
-        
-        public String getEnglishString() { return "Text"; }
-        public int getResourceId() { return R.string.traits_format_text; }
-        
-        public String ValidateItemsIndividual() { return ""; }
+        public boolean isDefBoxVisible() {
+            return true;
+        }
+
+        public boolean isDefaultVisible() {
+            return true;
+        }
+
+        public boolean isBooleanVisible() {
+            return false;
+        }
+
+        public boolean isMinBoxVisible() {
+            return false;
+        }
+
+        public boolean isMaxBoxVisible() {
+            return false;
+        }
+
+        public boolean isCategoryVisible() {
+            return false;
+        }
+
+        public boolean displaysDefaultHint() {
+            return true;
+        }
+
+        public boolean displaysMinimumHint() {
+            return false;
+        }
+
+        public boolean displaysMaximumHint() {
+            return false;
+        }
+
+        public boolean isNumericInputType() {
+            return false;
+        }
+
+        public String getEnglishString() {
+            return "Text";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_text;
+        }
+
+        public String ValidateItemsIndividual() {
+            return "";
+        }
     }
-    
+
     private class TraitFormatPhoto extends TraitFormatNotValue {
-        public String getEnglishString() { return "Photo"; }
-        public int getResourceId() { return R.string.traits_format_photo; }
+        public String getEnglishString() {
+            return "Photo";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_photo;
+        }
     }
-    
+
     private class TraitFormatAudio extends TraitFormatNotValue {
-        public String getEnglishString() { return "Audio"; }
-        public int getResourceId() { return R.string.traits_format_audio; }
+        public String getEnglishString() {
+            return "Audio";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_audio;
+        }
     }
-    
+
     private class TraitFormatCounter extends TraitFormatNotValue {
-        public String getEnglishString() { return "Counter"; }
-        public int getResourceId() { return R.string.traits_format_counter; }
+        public String getEnglishString() {
+            return "Counter";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_counter;
+        }
     }
-    
+
     private class TraitFormatDiseaseRating extends TraitFormatNotValue {
-        public String getEnglishString() { return "Disease Rating"; }
+        public String getEnglishString() {
+            return "Disease Rating";
+        }
+
         public int getResourceId() {
             return R.string.traits_format_disease_rating;
         }
     }
-    
+
     private class TraitFormatLocation extends TraitFormatNotValue {
-        public String getEnglishString() { return "Location"; }
-        public int getResourceId() { return R.string.traits_format_location; }
+        public String getEnglishString() {
+            return "Location";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_location;
+        }
     }
-    
+
     private class TraitFormatBarcode extends TraitFormatNotValue {
-        public String getEnglishString() { return "Barcode"; }
-        public int getResourceId() { return R.string.traits_format_barcode; }
+        public String getEnglishString() {
+            return "Barcode";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_barcode;
+        }
     }
-    
+
     private class TraitFormatZebraLablePrint extends TraitFormatNotValue {
-        public String getEnglishString() { return "Zebra Label Print"; }
-        public int getResourceId() { return R.string.traits_format_labelprint; }
+        public String getEnglishString() {
+            return "Zebra Label Print";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_labelprint;
+        }
     }
-    
+
     private class TraitFormatCollection {
-        private ArrayList<TraitFormat>  traitFormatList;
-        
+        private ArrayList<TraitFormat> traitFormatList;
+
         public TraitFormatCollection() {
             traitFormatList = new ArrayList<>();
             traitFormatList.add(new TraitFormatNumeric());
@@ -722,34 +956,37 @@ public class NewTraitDialog extends DialogFragment {
             traitFormatList.add(new TraitFormatBarcode());
             traitFormatList.add(new TraitFormatZebraLablePrint());
         }
-        
-        public int size() { return traitFormatList.size(); }
-        
+
+        public int size() {
+            return traitFormatList.size();
+        }
+
         public TraitFormat getTraitFormatByIndex(int index)
-                                throws ArrayIndexOutOfBoundsException {
+                throws ArrayIndexOutOfBoundsException {
             if (index < 0 || index >= traitFormatList.size()) {
                 throw new ArrayIndexOutOfBoundsException("");
             }
-            
+
             return traitFormatList.get(index);
         }
-        
+
         public String getEnglishString(int index) {
             return getTraitFormatByIndex(index).getEnglishString();
         }
-        
+
         public String[] getLocalStringList() {
             String[] array = new String[size()];
             for (int i = 0; i < size(); ++i) {
                 array[i] = traitFormatList.get(i).getLocalString();
-            };
+            }
+            ;
             return array;
         }
-        
+
         public int findIndexByEnglishString(String format) {
             for (int i = 0; i < size(); ++i) {
                 if (getEnglishString(i).toLowerCase().equals(
-                                                format.toLowerCase())) {
+                        format.toLowerCase())) {
                     return i;
                 }
             }
