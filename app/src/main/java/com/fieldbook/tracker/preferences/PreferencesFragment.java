@@ -21,7 +21,7 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Pre
 
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
-        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle("Settings");
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle("Settings");
     }
 
     @Override
@@ -41,6 +41,6 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Pre
     @Override
     public void onResume() {
         super.onResume();
-        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle("Settings");
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle("Settings");
     }
 }

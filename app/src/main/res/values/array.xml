@@ -12,8 +12,7 @@
         <item>both</item>
     </string-array>
 
-    <string-array name="pref_toolbar_customize_default">
-    </string-array>
+    <string-array name="pref_toolbar_customize_default"></string-array>
 
     <string-array name="pref_toolbar_customize_title">
         <item>@string/preferences_appearance_toolbar_customize_search</item>

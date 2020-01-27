@@ -44,6 +44,6 @@
         android:id="@+id/lockData"
         android:icon="@drawable/ic_tb_lock"
         android:showAsAction="always"
-        android:title=""/>
+        android:title="" />
 </menu>
 

@@ -22,7 +22,7 @@ public class PreferencesFragmentGeneral extends PreferenceFragmentCompat impleme
 
         setPreferencesFromResource(R.xml.preferences_general, rootKey);
 
-        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_general_title));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_general_title));
     }
 
     @Override

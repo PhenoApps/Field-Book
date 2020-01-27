@@ -51,7 +51,7 @@
                 android:textColor="#000000"
                 android:textSize="@dimen/text_size_large"
                 android:textStyle="bold"
-                tools:ignore="HardcodedText"/>
+                tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/addBtn"

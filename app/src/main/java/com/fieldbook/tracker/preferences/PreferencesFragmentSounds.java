@@ -22,7 +22,7 @@ public class PreferencesFragmentSounds extends PreferenceFragmentCompat implemen
 
         setPreferencesFromResource(R.xml.preferences_sounds, rootKey);
 
-        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_sounds));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_sounds));
     }
 
     @Override

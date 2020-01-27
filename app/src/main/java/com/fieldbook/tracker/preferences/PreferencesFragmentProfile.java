@@ -31,7 +31,7 @@ public class PreferencesFragmentProfile extends PreferenceFragmentCompat impleme
 
         setPreferencesFromResource(R.xml.preferences_profile, rootKey);
 
-        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
 
         profilePerson = findPreference("pref_profile_person");
         profileLocation = findPreference("pref_profile_location");
@@ -54,7 +54,6 @@ public class PreferencesFragmentProfile extends PreferenceFragmentCompat impleme
             }
         });
     }
-
 
 
     @Override

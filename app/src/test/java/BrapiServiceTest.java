@@ -87,15 +87,14 @@ public class BrapiServiceTest {
         try {
             signal.await();
             assertTrue(BrapiServiceTest.this.checkGetStudiesResult);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail(e.toString());
         }
 
     }
 
     @Test
-    public void checkGetStudyDetails(){
+    public void checkGetStudyDetails() {
 
         // Set up our signal to wait for the callback to be called.
         final CountDownLatch signal = new CountDownLatch(1);
@@ -127,15 +126,14 @@ public class BrapiServiceTest {
         try {
             signal.await();
             assertTrue(BrapiServiceTest.this.checkGetStudyDetailsResult);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail(e.toString());
         }
 
     }
 
     @Test
-    public void checkGetPlotDetails(){
+    public void checkGetPlotDetails() {
 
         // Call our get plot details endpoint with the same parsing that our classes use.
         // Set up our signal to wait for the callback to be called.
@@ -168,15 +166,14 @@ public class BrapiServiceTest {
         try {
             signal.await();
             assertTrue(BrapiServiceTest.this.checkGetPlotDetailsResult);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail(e.toString());
         }
 
     }
 
     @Test
-    public void checkGetOntology(){
+    public void checkGetOntology() {
 
         // Call our get plot details endpoint with the same parsing that our classes use.
         // Set up our signal to wait for the callback to be called.
@@ -208,15 +205,14 @@ public class BrapiServiceTest {
         try {
             signal.await();
             assertTrue(BrapiServiceTest.this.checkGetOntologyResult);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail(e.toString());
         }
 
     }
 
     @Test
-    public void checkGetTraits(){
+    public void checkGetTraits() {
 
         // Call our get plot details endpoint with the same parsing that our classes use.
         // Set up our signal to wait for the callback to be called.
@@ -249,14 +245,13 @@ public class BrapiServiceTest {
         try {
             signal.await();
             assertTrue(BrapiServiceTest.this.checkGetTraitsResult);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail(e.toString());
         }
     }
 
     @Test
-    public void checkPutObservations(){
+    public void checkPutObservations() {
 
         putObservationsResponse = null;
         final CountDownLatch signal = new CountDownLatch(1);
@@ -304,14 +299,13 @@ public class BrapiServiceTest {
             assertTrue(putObservationsResponse.get(0).getObservationUnitDbId().equals("1"));
             assertTrue(putObservationsResponse.get(0).getObservationVariableDbId().equals("MO_123:100002"));
 
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail(e.toString());
         }
     }
 
     @Test
-    public void checkPostImageMetaData(){
+    public void checkPostImageMetaData() {
 
         postImageMetaDataResponse = null;
         final CountDownLatch signal = new CountDownLatch(1);
@@ -348,8 +342,7 @@ public class BrapiServiceTest {
 
             assertTrue(postImageMetaDataResponse != null);
 
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail(e.toString());
         }
     }

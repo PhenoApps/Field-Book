@@ -587,7 +587,7 @@ public class MainActivity extends AppCompatActivity {
             int[] rangeID = rangeBox.getRangeID();
 
             if (rangeID != null) {
-                moveToSearch("search",rangeID, searchRange, searchPlot, null);
+                moveToSearch("search", rangeID, searchRange, searchPlot, null);
             }
         }
     }
@@ -1048,7 +1048,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     ///// class LayoutCollections /////
-
 
 
     ///// class TraitBox /////

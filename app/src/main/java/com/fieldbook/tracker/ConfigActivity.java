@@ -193,7 +193,7 @@ public class ConfigActivity extends AppCompatActivity {
         createDirs();
 
         dt = new DataHelper(this);
-
+        checkIntent();
     }
 
     private void createDirs() {
@@ -286,10 +286,10 @@ public class ConfigActivity extends AppCompatActivity {
         ListView settingsList = findViewById(R.id.myList);
 
         String[] configList = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced)}; //, "API Test"};
+                getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)}; //, "API Test"};
 
 
-        Integer image_id[] = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.barley, R.drawable.ic_nav_drawer_person, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings};
+        Integer image_id[] = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.ic_nav_drawer_person, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
 
         //get list of items
         //make adapter
@@ -347,7 +347,9 @@ public class ConfigActivity extends AppCompatActivity {
                                 PreferencesActivity.class.getName());
                         startActivity(intent);
                         break;
-
+                    case 6:
+                        showAboutDialog();
+                        break;
                 }
             }
         });
@@ -1203,7 +1205,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)
     public void collectDataFilePermission() {
-        String[] perms = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE};
+        String[] perms = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
         if (EasyPermissions.hasPermissions(this, perms)) {
             Intent intent = new Intent();
 
@@ -1404,6 +1406,35 @@ public class ConfigActivity extends AppCompatActivity {
         alert.show();
     }
 
+    private void checkIntent() {
+        Bundle extras = getIntent().getExtras();
+        String dialog = "";
+
+        if (extras != null) {
+            dialog = extras.getString("dialog");
+        }
+
+        if (dialog != null) {
+            if (dialog.equals("database-export")) {
+                showDatabaseExportDialog();
+            }
+
+            if (dialog.equals("database-delete")) {
+                showDatabaseResetDialog1();
+            }
+
+            if (dialog.equals("person")) {
+                showPersonDialog();
+            }
+
+            if (dialog.equals("location")) {
+                showLocationDialog();
+            }
+        }
+
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
@@ -1430,29 +1461,6 @@ public class ConfigActivity extends AppCompatActivity {
                 intent.setClassName(ConfigActivity.this,
                         TutorialSettingsActivity.class.getName());
                 startActivity(intent);
-                break;
-
-            case R.id.resources:
-                intent.setClassName(ConfigActivity.this,
-                        FileExploreActivity.class.getName());
-                startActivity(intent);
-                break;
-
-            case R.id.about:
-                showAboutDialog();
-                break;
-
-            case R.id.database:
-                showDatabaseDialog();
-                break;
-
-            case android.R.id.home:
-                if (!ep.getBoolean("ImportFieldFinished", false)) {
-                    makeToast(getString(R.string.warning_field_missing));
-                } else if (dt.getTraitColumnsAsString() == null) {
-                    makeToast(getString(R.string.warning_traits_missing));
-                } else
-                    finish();
                 break;
         }
 

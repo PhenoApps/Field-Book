@@ -17,14 +17,13 @@ import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
 public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
+    private static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
     private Context context;
     private PreferenceManager prefMgr;
     private PreferenceCategory brapiPrefCategory;
     private Preference brapiAuthButton;
     private Preference brapiLogoutButton;
     private Preference brapiURLPreference;
-
-    private static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
     private BrapiControllerResponse brapiControllerResponse;
 
     @Override
@@ -34,7 +33,7 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
 
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
 
-        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.brapi_info_title));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.brapi_info_title));
 
         registerBrapiButtonListeners();
 
@@ -140,7 +139,7 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
         String brapiToken = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_TOKEN, null);
         String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
 
-        if (brapiHost != null){  // && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
+        if (brapiHost != null) {  // && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
 
             brapiPrefCategory.addPreference(brapiAuthButton);
 

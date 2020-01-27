@@ -39,7 +39,7 @@ public class PreferencesFragmentDatabase extends PreferenceFragmentCompat implem
 
         setPreferencesFromResource(R.xml.preferences_database, rootKey);
 
-        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.database_dialog_title));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.database_dialog_title));
 
         databaseImport = findPreference("pref_database_import");
         databaseExport = findPreference("pref_database_export");
@@ -53,7 +53,7 @@ public class PreferencesFragmentDatabase extends PreferenceFragmentCompat implem
                         FileExploreActivity.class.getName());
                 intent.putExtra("path", Constants.BACKUPPATH);
                 intent.putExtra("include", new String[]{"db"});
-                intent.putExtra("title",getString(R.string.database_import));
+                intent.putExtra("title", getString(R.string.database_import));
                 startActivityForResult(intent, 2);
                 return true;
             }

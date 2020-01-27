@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory
-        android:key="brapi_category">
+    <PreferenceCategory android:key="brapi_category">
         <EditTextPreference
             android:defaultValue="@string/brapi_base_url_default"
             android:dialogMessage="@string/brapi_base_url_desc"

@@ -22,7 +22,7 @@ public class PreferencesFragmentBehavior extends PreferenceFragmentCompat implem
 
         setPreferencesFromResource(R.xml.preferences_behavior, rootKey);
 
-        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_behavior_title));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_behavior_title));
     }
 
     @Override

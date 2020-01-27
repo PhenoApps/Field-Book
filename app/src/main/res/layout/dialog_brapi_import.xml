@@ -5,8 +5,8 @@
     android:background="#FFFFFF"
     android:orientation="vertical"
     android:paddingLeft="20dp"
-    android:paddingRight="20dp"
     android:paddingTop="5dp"
+    android:paddingRight="20dp"
     android:paddingBottom="5dp">
 
 
@@ -25,67 +25,67 @@
 
     <TextView
         android:id="@+id/studyNameLbl"
-        android:text="@string/brapi_study_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
         android:paddingTop="5dp"
         android:paddingBottom="10dp"
-        android:paddingLeft="10dp"
+        android:text="@string/brapi_study_name"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_medium"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/studyNameValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dip"
-        android:paddingBottom="10dp"
         android:paddingLeft="10dp"
+        android:paddingBottom="10dp"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/studyDescriptionLbl"
-        android:text="@string/brapi_study_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="5dp"
         android:paddingLeft="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/brapi_study_description"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_medium"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/studyDescriptionValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dip"
-        android:paddingBottom="10dp"
         android:paddingLeft="10dp"
+        android:paddingBottom="10dp"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/studyLocationLbl"
-        android:text="@string/brapi_study_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="5dp"
         android:paddingLeft="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/brapi_study_location"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_medium"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/studyLocationValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dip"
-        android:paddingBottom="10dp"
         android:paddingLeft="10dp"
+        android:paddingBottom="10dp"
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small"
         android:textStyle="bold" />
@@ -158,11 +158,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:minWidth="@dimen/button_default_width"
+            android:onClick="dialogButtonClicked"
             android:text="@string/dialog_ok"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
-            android:textStyle="bold"
-            android:onClick="dialogButtonClicked"/>
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/brapi_cancel_btn"
@@ -170,11 +170,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:minWidth="@dimen/button_default_width"
+            android:onClick="dialogButtonClicked"
             android:text="@string/dialog_cancel"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
-            android:textStyle="bold"
-            android:onClick="dialogButtonClicked"/>
+            android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>

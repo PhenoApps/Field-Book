@@ -3,8 +3,8 @@
     android:id="@+id/percentLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:visibility="gone"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:visibility="gone">
 
     <SeekBar
         android:id="@+id/seekbar"
@@ -13,10 +13,10 @@
         android:layout_margin="35dp"
         android:maxHeight="18dip"
         android:minHeight="18dip"
-        android:paddingBottom="10px"
         android:paddingLeft="30px"
-        android:paddingRight="30px"
         android:paddingTop="10px"
+        android:paddingRight="30px"
+        android:paddingBottom="10px"
         android:progressDrawable="@drawable/custom_seek_bar"
         android:thumb="@drawable/custom_seek_bar_thumb"
         android:thumbOffset="0dp" />

@@ -5,8 +5,8 @@
     android:background="#FFFFFF"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingBottom="4dp"
-    android:paddingTop="4dp">
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
     <RadioButton
         android:id="@+id/fieldRadio"

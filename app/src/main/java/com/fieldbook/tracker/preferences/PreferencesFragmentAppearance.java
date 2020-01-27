@@ -15,9 +15,9 @@ import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
 
 public class PreferencesFragmentAppearance extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
+    private static final String DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG";
     PreferenceManager prefMgr;
     Context context;
-    private static final String DIALOG_FRAGMENT_TAG =  "androidx.preference.PreferenceFragment.DIALOG";
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -26,7 +26,7 @@ public class PreferencesFragmentAppearance extends PreferenceFragmentCompat impl
 
         setPreferencesFromResource(R.xml.preferences_appearance, rootKey);
 
-        ((PreferencesActivity)this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
     }
 
     @Override
