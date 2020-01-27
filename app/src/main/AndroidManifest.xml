@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.fieldbook.tracker"
-    android:versionCode="409"
+    android:versionCode="410"
     android:versionName="4.1.0">
 
     <uses-feature
@@ -163,6 +163,12 @@
             </intent-filter>
         </activity>
 
+
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="portrait"
+            tools:replace="android:screenOrientation"
+            android:stateNotNeeded="true"/>
 
         <provider
             android:name=".GenericFileProvider"

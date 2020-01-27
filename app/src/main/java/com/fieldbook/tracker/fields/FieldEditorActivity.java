@@ -37,6 +37,7 @@ import com.fieldbook.tracker.ConfigActivity;
 //import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.io.CSVReader;
+import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
@@ -217,9 +218,8 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     public void loadDropbox() {
-        //DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
-        //mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
-        makeToast("If I forget to re-enable this, send me an angry email.");
+        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
+        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
     }
 
     public void loadBrAPI() {
