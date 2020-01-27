@@ -46,7 +46,12 @@ public class AudioTraitLayout extends TraitLayout {
     public AudioTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "audio"; }
+    
     @Override
     public void init(){
         audioRecordingText = findViewById(R.id.audioRecordingText);

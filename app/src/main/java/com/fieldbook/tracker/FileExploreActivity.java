@@ -127,6 +127,8 @@ public class FileExploreActivity extends AppCompatActivity {
 
         // Checks whether path exists
         if (path.exists()) {
+            // collect files in the specific directory
+            //           and to satisfy the requirement
             File[] filesList = path.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String filename) {
                     File sel = new File(dir, filename);
@@ -146,12 +148,15 @@ public class FileExploreActivity extends AppCompatActivity {
             });
 
             Arrays.sort(filesList, comp);
+            
+            // collect file names
             String[] fList = new String[filesList.length];
 
             for (int i = 0; i < filesList.length; ++i) {
                 fList[i] = filesList[i].getName();
             }
 
+            // create file list for 
             fileList = new Item[fList.length];
 
             for (int i = 0; i < fList.length; i++) {

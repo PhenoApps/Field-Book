@@ -160,7 +160,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         invalidateOptionsMenu();
         loadScreen();
-
     }
 
     @Override

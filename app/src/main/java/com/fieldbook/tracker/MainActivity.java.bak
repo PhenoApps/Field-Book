@@ -150,9 +150,6 @@ public class MainActivity extends AppCompatActivity {
 
         loadScreen();
     }
-    
-    // initRangeAndPlot moved to RangeBox#initAndPlot
-    // and moveToSearch came back
 
     private void initCurrentVals(){
         // Current value display
@@ -412,8 +409,7 @@ public class MainActivity extends AppCompatActivity {
         // search moveto
         if(type.equals("search")) {
             for (int j = 1; j <= rangeID.length; j++) {
-				rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
+                cRange = ConfigActivity.dt.getRange(rangeID[j - 1]);
 
                 if (cRange.range.equals(range) & cRange.plot.equals(plot)) {
                     moveToResult(j);
@@ -425,8 +421,7 @@ public class MainActivity extends AppCompatActivity {
         //move to plot
         if (type.equals("plot")) {
             for (int j = 1; j <= rangeID.length; j++) {
-				rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
+                cRange = ConfigActivity.dt.getRange(rangeID[j - 1]);
 
                 if (cRange.plot.equals(plot)) {
                     moveToResult(j);
@@ -438,8 +433,7 @@ public class MainActivity extends AppCompatActivity {
         //move to range
         if(type.equals("range")) {
             for (int j = 1; j <= rangeID.length; j++) {
-				rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
+                cRange = ConfigActivity.dt.getRange(rangeID[j - 1]);
 
                 if (cRange.range.equals(range)) {
                     moveToResult(j);
@@ -451,8 +445,7 @@ public class MainActivity extends AppCompatActivity {
         //move to plot id
         if(type.equals("id")) {
             for (int j = 1; j <= rangeID.length; j++) {
-				rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
+                cRange = ConfigActivity.dt.getRange(rangeID[j - 1]);
 
                 if (cRange.plot_id.equals(plotID)) {
                     moveToResult(j);
@@ -463,27 +456,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (!haveData)
             makeToast(getString(R.string.main_toolbar_moveto_no_match));
-    }
-    
-    private void moveToResult(int j) {
-        if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-            if (!existsTrait(rangeBox.getRangeIDByIndex(j - 1))) {
-                moveToResultCore(j);
-            }
-        } else {
-            moveToResultCore(j);
-        }
-    }
-    
-    private void moveToResultCore(int j) {
-        rangeBox.setPaging(j);
-
-        // Reload traits based on selected plot
-        rangeBox.display();
-
-        traitBox.setNewTraits(rangeBox.getPlotID());
-
-        initWidgets(false);
     }
     
     @Override
@@ -522,6 +494,8 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
+        loadScreen();
+
         // Update menu item visibility
         if (systemMenu != null) {
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
@@ -540,8 +514,6 @@ public class MainActivity extends AppCompatActivity {
             reloadData = false;
             partialReload = false;
 
-            // displayRange moved to RangeBox#display
-            // and display in RangeBox#reload is commented out
             rangeBox.reload();
             traitBox.setPrefixTraits();
 
@@ -551,8 +523,7 @@ public class MainActivity extends AppCompatActivity {
             // try to go to last saved plot
             if(ep.getString("lastplot",null)!=null) {
                 rangeBox.setAllRangeID();
-                int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id",rangeID,null,null,ep.getString("lastplot",null));
+                //moveToSearch("id",rangeID,null,null,ep.getString("lastplot",null));
             }
 
         } else if (partialReload) {
@@ -834,8 +805,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View arg0) {
                 inputPlotId = barcodeId.getText().toString();
                 rangeBox.setAllRangeID();
-                int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id",rangeID,null,null,inputPlotId);
+                //moveToSearch("id",rangeID,null,null,inputPlotId);
                 goToId.dismiss();
             }
         });
@@ -956,9 +926,8 @@ public class MainActivity extends AppCompatActivity {
             case 2:
                 if (resultCode == RESULT_OK) {
                     inputPlotId = data.getStringExtra("result");
-	                rangeBox.setAllRangeID();
-	                int[] rangeID = rangeBox.getRangeID();
-                    moveToSearch("id",rangeID,null,null,inputPlotId);
+                    rangeID = dt.getAllRangeID();
+                    //moveToSearch("id",rangeID,null,null,inputPlotId);
                 }
                 break;
             case 252:
@@ -970,14 +939,14 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            inputPlotId = result.getContents();
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (scanResult != null) {
+            inputPlotId = scanResult.getContents();
             rangeBox.setAllRangeID();
-            int[] rangeID = rangeBox.getRangeID();
-            moveToSearch("id",rangeID,null,null,inputPlotId);
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
+            //moveToSearch("id",rangeID,null,null,inputPlotId);
+            if(goToId!=null) {
+                goToId.dismiss();
+            }
         }
     }
     @Override
@@ -999,7 +968,7 @@ public class MainActivity extends AppCompatActivity {
     
     public TraitBox getTraitBox() { return traitBox; }
     public boolean existsTrait(final int ID) {
-        final TraitObject trait = traitBox.getCurrentTrait();
+        TraitObject trait = traitBox.getCurrentTrait();
         return dt.getTraitExists(ID, trait.getTrait(), trait.getFormat());
     }
     public Map getNewTraits(){
@@ -1427,7 +1396,6 @@ public class MainActivity extends AppCompatActivity {
         // getter
         public RangeObject getCRange() { return cRange; }
         public int[] getRangeID() { return rangeID; }
-        public int getRangeIDByIndex(int j) { return rangeID[j]; }
         public ImageView getRangeLeft() { return rangeLeft; }
         public ImageView getRangeRight() { return rangeRight; }
         public final String getPlotID() { return cRange.plot_id; }
@@ -1499,7 +1467,7 @@ public class MainActivity extends AppCompatActivity {
                     // do not do bit check on event, crashes keyboard
                     if (actionId == EditorInfo.IME_ACTION_DONE) {
                         try {
-                            moveToSearch("range",rangeID,range.getText().toString(),null,null);
+                            //moveToSearch("range",rangeID,range.getText().toString(),null,null);
                             InputMethodManager imm = parent.getIMM();
                             imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
                         } catch (Exception ignore) {
@@ -1648,7 +1616,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //TODO NullPointerException
                 lastRange = cRange.range;
-                //display();
+                display();
 
                 traitBox.setNewTraits(cRange.plot_id);
             }
@@ -1722,10 +1690,6 @@ public class MainActivity extends AppCompatActivity {
         
         public void setRange(final int id) {
             cRange = dt.getRange(id);
-        }
-        
-        public void setRangeByIndex(final int j) {
-            cRange = dt.getRange(rangeID[j]);
         }
         
         public void setLastRange() {
@@ -1824,8 +1788,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         
-        public void resetPaging() { paging = 1; }
-        public void setPaging(int j) { paging = j; }
+        public void resetPaging() {
+            paging = 1;
+        }
         
         public final int nextEmptyPlot() throws Exception {
             int pos = paging;

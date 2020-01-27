@@ -38,7 +38,12 @@ public class BooleanTraitLayout extends TraitLayout {
     public ImageView getEImg() {
         return eImg;
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "boolean"; }
+    
     @Override
     public void init(){
 

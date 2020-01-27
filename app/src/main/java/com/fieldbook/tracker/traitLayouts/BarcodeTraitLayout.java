@@ -21,7 +21,12 @@ public class BarcodeTraitLayout extends TraitLayout {
     public BarcodeTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "barcode"; }
+    
     @Override
     public void init(){
 

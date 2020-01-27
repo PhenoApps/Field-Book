@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
@@ -30,7 +31,12 @@ public class LocationTraitLayout extends TraitLayout {
     public LocationTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "location"; }
+    
     @Override
     public void init(){
         getLocation = findViewById(R.id.getLocationBtn);
@@ -82,6 +88,6 @@ public class LocationTraitLayout extends TraitLayout {
     }
     @Override
     public void deleteTraitListener() {
-
+		((MainActivity) getContext()).removeTrait();
     }
 }

@@ -37,7 +37,15 @@ public class CategoricalTraitLayout extends TraitLayout {
     public List<Button> getButtonArray(){
         return buttonArray;
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "categorical"; }
+    public boolean isTraitType(String trait) {
+		return trait.equals("categorical") || trait.equals("qualitative");
+	}
+    
     public void init(){
         buttonArray = new ArrayList<>();
         buttonArray.add((Button) findViewById(R.id.q1));

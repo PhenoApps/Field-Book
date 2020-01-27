@@ -64,7 +64,12 @@ public class PhotoTraitLayout extends TraitLayout {
     public PhotoTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
+    
+    @Override
+    public void setNaTraitsText() { }
+    @Override
+    public String type() { return "photo"; }
+    
     @Override
     public void init(){
         ImageButton capture = findViewById(R.id.capture);
