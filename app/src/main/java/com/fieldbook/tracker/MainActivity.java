@@ -565,9 +565,10 @@ public class MainActivity extends AppCompatActivity {
             searchReload = false;
             rangeBox.resetPaging();
 
-            //if (rangeID != null) {
-                //moveToSearch("search",rangeID, searchRange, searchPlot, null);
-            //}
+            int[] rangeID = rangeBox.getRangeID();
+            if (rangeID != null) {
+                moveToSearch("search",rangeID, searchRange, searchPlot, null);
+            }
         }
     }
 
