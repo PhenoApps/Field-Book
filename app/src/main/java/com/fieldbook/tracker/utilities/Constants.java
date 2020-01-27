@@ -39,7 +39,7 @@ public class Constants {
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET,
             Manifest.permission.RECORD_AUDIO, Manifest.permission.SYSTEM_ALERT_WINDOW,
-            Manifest.permission.ACCESS_NETWORK_STATE};
+            Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.CAMERA};
 
     public final static int PERM_REQ = 100;
 

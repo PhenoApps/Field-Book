@@ -85,7 +85,7 @@ public class DataHelper {
             this.insertTraits = db.compileStatement(INSERTTRAITS);
             this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
 
-            timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
+            timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ",
                     Locale.getDefault());
 
 
@@ -183,7 +183,7 @@ public class DataHelper {
                 this.insertUserTraits.bindNull(11);
             }
             if (lastSyncedTime != null) {
-                this.insertUserTraits.bindString(12, lastSyncedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+                this.insertUserTraits.bindString(12, lastSyncedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.getDefault())));
             } else {
                 this.insertUserTraits.bindNull(12);
             }
