@@ -190,10 +190,6 @@ class FieldAdapter extends BaseAdapter {
                             alert.show();
                         }
 
-                        if (item.getTitle().equals(FieldEditorActivity.thisActivity.getString(R.string.fields_study_statistics))) {
-                            Toast.makeText(FieldEditorActivity.thisActivity, "Coming soon!", Toast.LENGTH_SHORT).show();
-                        }
-
                         return false;
                     }
                 });
