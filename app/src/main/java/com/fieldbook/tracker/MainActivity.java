@@ -1075,7 +1075,7 @@ public class MainActivity extends AppCompatActivity {
             traitRight = findViewById(R.id.traitRight);
             traitDetails = findViewById(R.id.traitDetails);
 
-            traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft,
+            traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft,R.drawable.main_trait_left_arrow_unpressed,
                     R.drawable.main_trait_left_arrow_pressed));
 
             // Go to previous trait
@@ -1086,7 +1086,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight,
+            traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight,R.drawable.main_trait_right_unpressed,
                     R.drawable.main_trait_right_pressed));
 
             // Go to next trait
@@ -1261,18 +1261,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private OnTouchListener createTraitOnTouchListener(final ImageView arrow,
-                                                           final int imageID) {
+                                                           final int imageIdUp,final int imageIdDown) {
             return new OnTouchListener() {
                 public boolean onTouch(View v, MotionEvent event) {
                     switch (event.getAction()) {
 
                         case MotionEvent.ACTION_DOWN:
-                            arrow.setImageResource(imageID);
+                            arrow.setImageResource(imageIdDown);
                             break;
                         case MotionEvent.ACTION_MOVE:
                             break;
                         case MotionEvent.ACTION_UP:
-                            arrow.setImageResource(imageID);
+                            arrow.setImageResource(imageIdUp);
                         case MotionEvent.ACTION_CANCEL:
                             break;
                     }
