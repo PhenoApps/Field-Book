@@ -1,11 +1,7 @@
 package com.fieldbook.tracker.traitLayouts;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.widget.EditText;
 
 public class BarcodeTraitLayout extends TraitLayout {

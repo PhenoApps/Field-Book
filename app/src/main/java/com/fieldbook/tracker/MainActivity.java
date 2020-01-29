@@ -175,6 +175,8 @@ public class MainActivity extends AppCompatActivity {
             ConfigActivity.dt = new DataHelper(this);
         }
 
+        ConfigActivity.dt.open();
+
         loadScreen();
     }
 
@@ -293,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
         // Keyboard service manager
         setIMM();
 
-        selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 3), (RecyclerView) findViewById(R.id.selectorList));
+        selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
 
         traitLayouts = new LayoutCollections(this);
         traitBox = new TraitBox(this);
@@ -556,6 +558,9 @@ public class MainActivity extends AppCompatActivity {
         if (ConfigActivity.dt == null) {
             ConfigActivity.dt = new DataHelper(this);
         }
+
+        ConfigActivity.dt.open();
+
         if (reloadData) {
             reloadData = false;
             partialReload = false;
@@ -1047,11 +1052,7 @@ public class MainActivity extends AppCompatActivity {
         return ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false);
     }
 
-    ///// class LayoutCollections /////
-
-
     ///// class TraitBox /////
-
     // traitLeft, traitType, and traitRight
     private class TraitBox {
         private MainActivity parent;

@@ -2,26 +2,19 @@ package com.fieldbook.tracker.traitLayouts;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.traits.TraitObject;
 
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
 
 public class DateTraitLayout extends TraitLayout {
 

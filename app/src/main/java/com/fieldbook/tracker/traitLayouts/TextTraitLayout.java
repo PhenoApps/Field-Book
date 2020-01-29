@@ -4,16 +4,10 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.EditText;
-import android.widget.SeekBar;
-
 import com.fieldbook.tracker.MainActivity;
-import com.fieldbook.tracker.traits.TraitObject;
-
-import java.util.HashMap;
 
 public class TextTraitLayout extends TraitLayout {
 

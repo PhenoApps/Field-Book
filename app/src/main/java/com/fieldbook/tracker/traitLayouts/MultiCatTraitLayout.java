@@ -2,10 +2,7 @@ package com.fieldbook.tracker.traitLayouts;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +18,6 @@ import com.fieldbook.tracker.utilities.ExpandableHeightGridView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
 public class MultiCatTraitLayout extends TraitLayout {
 
