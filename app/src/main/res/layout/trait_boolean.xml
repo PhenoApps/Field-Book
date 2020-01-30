@@ -8,9 +8,9 @@
 
     <ImageView
         android:id="@+id/eImg"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
         android:src="@drawable/trait_boolean_true" />
 </com.fieldbook.tracker.traitLayouts.BooleanTraitLayout>

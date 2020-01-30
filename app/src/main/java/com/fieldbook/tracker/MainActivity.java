@@ -175,6 +175,8 @@ public class MainActivity extends AppCompatActivity {
             ConfigActivity.dt = new DataHelper(this);
         }
 
+        ConfigActivity.dt.open();
+
         loadScreen();
     }
 
@@ -293,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
         // Keyboard service manager
         setIMM();
 
-        selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 3), (RecyclerView) findViewById(R.id.selectorList));
+        selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
 
         traitLayouts = new LayoutCollections(this);
         traitBox = new TraitBox(this);
@@ -556,6 +558,9 @@ public class MainActivity extends AppCompatActivity {
         if (ConfigActivity.dt == null) {
             ConfigActivity.dt = new DataHelper(this);
         }
+
+        ConfigActivity.dt.open();
+
         if (reloadData) {
             reloadData = false;
             partialReload = false;
@@ -1047,11 +1052,7 @@ public class MainActivity extends AppCompatActivity {
         return ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false);
     }
 
-    ///// class LayoutCollections /////
-
-
     ///// class TraitBox /////
-
     // traitLeft, traitType, and traitRight
     private class TraitBox {
         private MainActivity parent;
@@ -1075,7 +1076,7 @@ public class MainActivity extends AppCompatActivity {
             traitRight = findViewById(R.id.traitRight);
             traitDetails = findViewById(R.id.traitDetails);
 
-            traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft,
+            traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft,R.drawable.main_trait_left_arrow_unpressed,
                     R.drawable.main_trait_left_arrow_pressed));
 
             // Go to previous trait
@@ -1086,7 +1087,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight,
+            traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight,R.drawable.main_trait_right_unpressed,
                     R.drawable.main_trait_right_pressed));
 
             // Go to next trait
@@ -1261,18 +1262,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private OnTouchListener createTraitOnTouchListener(final ImageView arrow,
-                                                           final int imageID) {
+                                                           final int imageIdUp,final int imageIdDown) {
             return new OnTouchListener() {
                 public boolean onTouch(View v, MotionEvent event) {
                     switch (event.getAction()) {
 
                         case MotionEvent.ACTION_DOWN:
-                            arrow.setImageResource(imageID);
+                            arrow.setImageResource(imageIdDown);
                             break;
                         case MotionEvent.ACTION_MOVE:
                             break;
                         case MotionEvent.ACTION_UP:
-                            arrow.setImageResource(imageID);
+                            arrow.setImageResource(imageIdUp);
                         case MotionEvent.ACTION_CANCEL:
                             break;
                     }
