@@ -41,7 +41,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -66,7 +65,6 @@ import com.fieldbook.tracker.utilities.Utils;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -102,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Main screen elements
      */
-
     private Menu systemMenu;
     private SelectorLayoutConfigurator selectorLayoutConfigurator;
     private TraitBox traitBox;
@@ -117,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             synchronized (lock) {
                 switch (msg.what) {
                     case 1:
-                        ImageView btn = (ImageView) findViewById(msg.arg1);
+                        ImageView btn = findViewById(msg.arg1);
                         if (btn.getTag() != null) {  // button is still pressed
                             // schedule next btn pressed check
                             Message msg1 = new Message();
@@ -280,10 +277,12 @@ public class MainActivity extends AppCompatActivity {
 
         initToolbars();
 
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(null);
+            getSupportActionBar().getThemedContext();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
 
         // If the app is just starting up, we must always allow refreshing of data onscreen
         reloadData = true;
@@ -1066,7 +1065,7 @@ public class MainActivity extends AppCompatActivity {
 
         private Map newTraits;  // { trait name: value }
 
-        public TraitBox(MainActivity parent_) {
+        TraitBox(MainActivity parent_) {
             parent = parent_;
             prefixTraits = null;
             newTraits = new HashMap();
@@ -1076,7 +1075,7 @@ public class MainActivity extends AppCompatActivity {
             traitRight = findViewById(R.id.traitRight);
             traitDetails = findViewById(R.id.traitDetails);
 
-            traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft,R.drawable.main_trait_left_arrow_unpressed,
+            traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft, R.drawable.main_trait_left_arrow_unpressed,
                     R.drawable.main_trait_left_arrow_pressed));
 
             // Go to previous trait
@@ -1087,7 +1086,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight,R.drawable.main_trait_right_unpressed,
+            traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight, R.drawable.main_trait_right_unpressed,
                     R.drawable.main_trait_right_pressed));
 
             // Go to next trait
@@ -1099,7 +1098,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        public void initTraitDetails() {
+        void initTraitDetails() {
             if (prefixTraits != null) {
                 final TextView traitDetails = findViewById(R.id.traitDetails);
 
@@ -1120,8 +1119,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        public void initTraitType(ArrayAdapter<String> adaptor,
-                                  final boolean rangeSuppress) {
+        void initTraitType(ArrayAdapter<String> adaptor,
+                           final boolean rangeSuppress) {
             final int traitPosition = getSelectedItemPosition();
             traitType.setAdapter(adaptor);
 
@@ -1182,35 +1181,35 @@ public class MainActivity extends AppCompatActivity {
             return newTraits;
         }
 
-        public void setNewTraits(final String plotID) {
+        void setNewTraits(final String plotID) {
             newTraits = (HashMap) dt.getUserDetail(plotID).clone();
         }
 
-        public void setNewTraits(Map newTraits) {
+        void setNewTraits(Map newTraits) {
             this.newTraits = newTraits;
         }
 
-        public ImageView getTraitLeft() {
+        ImageView getTraitLeft() {
             return traitLeft;
         }
 
-        public ImageView getTraitRight() {
+        ImageView getTraitRight() {
             return traitRight;
         }
 
-        public boolean existsNewTraits() {
+        boolean existsNewTraits() {
             return newTraits != null;
         }
 
-        public void setPrefixTraits() {
+        void setPrefixTraits() {
             prefixTraits = dt.getRangeColumnNames();
         }
 
-        public void setSelection(int pos) {
+        void setSelection(int pos) {
             traitType.setSelection(pos);
         }
 
-        public int getSelectedItemPosition() {
+        int getSelectedItemPosition() {
             try {
                 return traitType.getSelectedItemPosition();
             } catch (Exception f) {
@@ -1222,15 +1221,15 @@ public class MainActivity extends AppCompatActivity {
             return currentTrait;
         }
 
-        public final String getCurrentFormat() {
+        final String getCurrentFormat() {
             return currentTrait.getFormat();
         }
 
-        public boolean existsTrait() {
+        boolean existsTrait() {
             return newTraits.containsKey(currentTrait.getTrait());
         }
 
-        public final String createSummaryText(final String plotID) {
+        final String createSummaryText(final String plotID) {
             String[] traitList = dt.getAllTraits();
             StringBuilder data = new StringBuilder();
 
@@ -1262,7 +1261,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private OnTouchListener createTraitOnTouchListener(final ImageView arrow,
-                                                           final int imageIdUp,final int imageIdDown) {
+                                                           final int imageIdUp, final int imageIdDown) {
             return new OnTouchListener() {
                 public boolean onTouch(View v, MotionEvent event) {
                     switch (event.getAction()) {
@@ -1284,7 +1283,7 @@ public class MainActivity extends AppCompatActivity {
             };
         }
 
-        public void moveTrait(String direction) {
+        void moveTrait(String direction) {
             int pos = 0;
 
             if (!validateData()) {
@@ -1358,7 +1357,7 @@ public class MainActivity extends AppCompatActivity {
         private int delay = 100;
         private int count = 1;
 
-        public RangeBox(MainActivity parent_) {
+        RangeBox(MainActivity parent_) {
             parent = parent_;
             rangeID = null;
             cRange = new RangeObject();
@@ -1371,31 +1370,31 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // getter
-        public RangeObject getCRange() {
+        RangeObject getCRange() {
             return cRange;
         }
 
-        public int[] getRangeID() {
+        int[] getRangeID() {
             return rangeID;
         }
 
-        public int getRangeIDByIndex(int j) {
+        int getRangeIDByIndex(int j) {
             return rangeID[j];
         }
 
-        public ImageView getRangeLeft() {
+        ImageView getRangeLeft() {
             return rangeLeft;
         }
 
-        public ImageView getRangeRight() {
+        ImageView getRangeRight() {
             return rangeRight;
         }
 
-        public final String getPlotID() {
+        final String getPlotID() {
             return cRange.plot_id;
         }
 
-        public boolean isEmpty() {
+        boolean isEmpty() {
             return cRange == null || cRange.plot_id.length() == 0;
         }
 
@@ -1599,7 +1598,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        public void reload() {
+        void reload() {
             final SharedPreferences ep = parent.getPreference();
             switchVisibility(ep.getBoolean(PreferencesActivity.QUICK_GOTO, false));
 
@@ -1620,7 +1619,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Refresh onscreen controls
-        public void refresh() {
+        void refresh() {
             cRange = dt.getRange(rangeID[paging - 1]);
 
             display();
@@ -1648,7 +1647,7 @@ public class MainActivity extends AppCompatActivity {
             tvPlot.setText(cRange.plot);
         }
 
-        public void rightClick() {
+        void rightClick() {
             rangeRight.performClick();
         }
 
@@ -1659,7 +1658,7 @@ public class MainActivity extends AppCompatActivity {
             ed.apply();
         }
 
-        public void switchVisibility(boolean textview) {
+        void switchVisibility(boolean textview) {
             if (textview) {
                 tvRange.setVisibility(TextView.GONE);
                 tvPlot.setVisibility(TextView.GONE);
@@ -1681,7 +1680,7 @@ public class MainActivity extends AppCompatActivity {
             plotName.setText(truncate(secondaryName, maxLen));
         }
 
-        public void setAllRangeID() {
+        void setAllRangeID() {
             rangeID = dt.getAllRangeID();
         }
 
@@ -1689,11 +1688,11 @@ public class MainActivity extends AppCompatActivity {
             cRange = dt.getRange(id);
         }
 
-        public void setRangeByIndex(final int j) {
+        void setRangeByIndex(final int j) {
             cRange = dt.getRange(rangeID[j]);
         }
 
-        public void setLastRange() {
+        void setLastRange() {
             lastRange = cRange.range;
         }
 
@@ -1784,15 +1783,15 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        public void resetPaging() {
+        void resetPaging() {
             paging = 1;
         }
 
-        public void setPaging(int j) {
+        void setPaging(int j) {
             paging = j;
         }
 
-        public final int nextEmptyPlot() throws Exception {
+        final int nextEmptyPlot() throws Exception {
             int pos = paging;
 
             if (pos == rangeID.length) {
@@ -1814,11 +1813,11 @@ public class MainActivity extends AppCompatActivity {
             throw new Exception();      // not come here
         }
 
-        public void clickLeft() {
+        void clickLeft() {
             rangeLeft.performClick();
         }
 
-        public void clickRight() {
+        void clickRight() {
             rangeRight.performClick();
         }
     }

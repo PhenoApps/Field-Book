@@ -50,6 +50,8 @@ public class GPSTracker extends Service implements LocationListener {
             if (isGPSEnabled || isNetworkEnabled) {
                 this.canGetLocation = true;
 
+                //TODO implement permissions
+
                 // First get location from Network Provider
                 if (isNetworkEnabled) {
                     locationManager.requestLocationUpdates(
@@ -145,5 +147,4 @@ public class GPSTracker extends Service implements LocationListener {
     public IBinder onBind(Intent arg0) {
         return null;
     }
-
 }

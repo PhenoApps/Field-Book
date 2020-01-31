@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,26 +18,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.DataHelper;
-import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.fields.FieldEditorActivity;
-import com.fieldbook.tracker.fields.FieldObject;
-import com.fieldbook.tracker.io.CSVReader;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.utilities.Utils;
-
-import java.io.File;
-import java.io.FileReader;
-import java.util.Arrays;
 
 import io.swagger.client.ApiException;
 
 public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener {
 
-    private Button saveBtn, cancelBtn;
+    private Button saveBtn;
     private BrapiStudySummary study;
     private BrapiStudyDetails studyDetails;
     private BrAPIService brAPIService;
@@ -53,12 +42,12 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         }
     };
 
-    public BrapiLoadDialog(@NonNull Context context) {
+    BrapiLoadDialog(@NonNull Context context) {
         super(context);
         this.context = context;
     }
 
-    public void setSelectedStudy(BrapiStudySummary selectedStudy) {
+    void setSelectedStudy(BrapiStudySummary selectedStudy) {
         this.study = selectedStudy;
     }
 
@@ -69,13 +58,12 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_brapi_import);
 
-        ;
         String brapiBaseURL = this.context.getSharedPreferences("Settings", 0)
                 .getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
         brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this.context));
         saveBtn = findViewById(R.id.brapi_save_btn);
         saveBtn.setOnClickListener(this);
-        cancelBtn = findViewById(R.id.brapi_cancel_btn);
+        Button cancelBtn = findViewById(R.id.brapi_cancel_btn);
         cancelBtn.setOnClickListener(this);
         studyDetails = new BrapiStudyDetails();
 
@@ -211,13 +199,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     }
 
     private Boolean checkAllLoadsFinished() {
-
-        if (studyLoadStatus && plotLoadStatus && traitLoadStatus) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return studyLoadStatus && plotLoadStatus && traitLoadStatus;
     }
 
     private void resetLoadStatus() {
@@ -294,7 +276,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             ((Activity) context).finish();
 
             // Display our message.
-            if (brapiControllerResponse.status == false) {
+            if (!brapiControllerResponse.status) {
                 if (brapiControllerResponse.message == BrAPIService.notUniqueFieldMessage) {
                     Toast.makeText(context, R.string.fields_study_exists_message, Toast.LENGTH_LONG).show();
                 } else if (brapiControllerResponse.message == BrAPIService.notUniqueIdMessage) {

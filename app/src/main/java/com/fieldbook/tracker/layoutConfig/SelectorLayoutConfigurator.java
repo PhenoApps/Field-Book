@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -54,8 +53,7 @@ public class SelectorLayoutConfigurator extends RecyclerView.Adapter<SelectorLay
         // create a new view
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.selector_dropdown, parent, false);
-        SelectorLayoutConfigurator.ViewHolder vh = new SelectorLayoutConfigurator.ViewHolder(v);
-        return vh;
+        return new ViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)

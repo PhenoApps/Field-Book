@@ -3,26 +3,15 @@ package com.fieldbook.tracker.preferences;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.ConfigActivity;
-import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Constants;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-
 
 public class PreferencesFragmentDatabase extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 

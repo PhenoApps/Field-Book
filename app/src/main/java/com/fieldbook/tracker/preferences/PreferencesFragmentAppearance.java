@@ -12,7 +12,6 @@ import com.fieldbook.tracker.R;
 import com.h6ah4i.android.preference.NumberPickerPreferenceCompat;
 import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
 
-
 public class PreferencesFragmentAppearance extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     private static final String DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG";

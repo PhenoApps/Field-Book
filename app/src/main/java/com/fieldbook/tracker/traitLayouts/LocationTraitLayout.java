@@ -15,7 +15,6 @@ import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
 
 public class LocationTraitLayout extends TraitLayout {
-    private ImageButton getLocation;
 
     public LocationTraitLayout(Context context) {
         super(context);
@@ -40,7 +39,7 @@ public class LocationTraitLayout extends TraitLayout {
 
     @Override
     public void init() {
-        getLocation = findViewById(R.id.getLocationBtn);
+        ImageButton getLocation = findViewById(R.id.getLocationBtn);
         // Get Location
         getLocation.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {

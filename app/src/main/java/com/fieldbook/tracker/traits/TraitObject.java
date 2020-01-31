@@ -1,7 +1,5 @@
 package com.fieldbook.tracker.traits;
 
-import android.util.Log;
-
 /**
  * Simple wrapper class for trait data
  */
@@ -122,7 +120,7 @@ public class TraitObject {
         return !isUnder(s) && !isOver(s);
     }
 
-    public boolean isUnder(final String s) {
+    private boolean isUnder(final String s) {
         if (!(format.equals("numeric") || format.equals("percent")))
             return false;
 

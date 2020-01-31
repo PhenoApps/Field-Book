@@ -41,7 +41,6 @@ public class TextTraitLayout extends TraitLayout {
 
     @Override
     public void loadLayout() {
-
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
         getEtCurVal().setSelection(getEtCurVal().getText().length());

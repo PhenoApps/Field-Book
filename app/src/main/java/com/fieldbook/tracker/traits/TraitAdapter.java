@@ -4,8 +4,6 @@ import androidx.appcompat.app.AlertDialog;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,9 +22,6 @@ import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiAuthDialog;
-import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +32,7 @@ import java.util.HashMap;
  */
 class TraitAdapter extends BaseAdapter {
 
-    public Boolean infoDialogShown = false;
+    Boolean infoDialogShown = false;
     ArrayList<TraitObject> list;
     private Context context;
     private OnItemClickListener listener;

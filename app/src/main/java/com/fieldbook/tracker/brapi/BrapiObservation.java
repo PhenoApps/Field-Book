@@ -4,13 +4,11 @@ import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 import org.threeten.bp.format.DateTimeParseException;
 
-import java.util.Objects;
-
 public class BrapiObservation {
 
     protected OffsetDateTime timestamp;
-    protected String unitDbId;
-    protected String variableDbId;
+    String unitDbId;
+    String variableDbId;
     private String dbId;
     private OffsetDateTime lastSyncedTime;
     private String fieldbookDbId;
@@ -72,7 +70,7 @@ public class BrapiObservation {
 
         if (dbId == null) {
             status = BrapiObservation.Status.NEW;
-        } else if (dbId != null && lastSyncedTime == null) {
+        } else if (lastSyncedTime == null) {
             status = BrapiObservation.Status.INCOMPLETE;
         } else if (dbId != null && lastSyncedTime != null && timestamp != null && timestamp.compareTo(lastSyncedTime) < 0) {
             status = BrapiObservation.Status.SYNCED;
@@ -84,16 +82,15 @@ public class BrapiObservation {
     }
 
     // Objects.equals Jdk7
-    protected boolean objectsEquals(Object a, Object b) {
+    boolean objectsEquals(Object a, Object b) {
         return (a == b) || (a != null && a.equals(b));
     }
-
 
     // The objects methods used were added in API 19 so they'll just
     // be duplicated here to work around that
 
     // Objects.hash Jdk7
-    protected int objectsHash(Object... values) {
+    int objectsHash(Object... values) {
         return arraysHashCode(values);
     }
 
@@ -110,7 +107,7 @@ public class BrapiObservation {
         return result;
     }
 
-    public String getUnitDbId() {
+    String getUnitDbId() {
         return unitDbId;
     }
 
@@ -118,7 +115,7 @@ public class BrapiObservation {
         this.unitDbId = unitDbId;
     }
 
-    public String getVariableDbId() {
+    String getVariableDbId() {
         return variableDbId;
     }
 
@@ -126,7 +123,7 @@ public class BrapiObservation {
         this.variableDbId = variableDbId;
     }
 
-    public String getVariableName() {
+    String getVariableName() {
         return variableName;
     }
 
@@ -134,7 +131,7 @@ public class BrapiObservation {
         this.variableName = variableName;
     }
 
-    public String getFieldBookDbId() {
+    String getFieldBookDbId() {
         return fieldbookDbId;
     }
 
@@ -145,5 +142,4 @@ public class BrapiObservation {
     public enum Status {
         NEW, SYNCED, EDITED, INCOMPLETE, INVALID
     }
-
 }

@@ -9,48 +9,39 @@ import androidx.appcompat.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 
+import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.brapi.BrapiTraitActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import androidx.appcompat.widget.Toolbar;
 
 import android.text.Html;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -58,7 +49,7 @@ import android.view.MenuItem;
 import com.fieldbook.tracker.io.CSVReader;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
-//import com.fieldbook.tracker.utilities.ApiKeys;
+import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
@@ -247,14 +238,9 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
     }
 
-    private static void scanFile(File filePath) {
-        MediaScannerConnection.scanFile(thisActivity, new String[]{filePath.getAbsolutePath()}, null, null);
-    }
-
     public static Boolean displayBrapiInfo(Context context, DataHelper dt, String traitName, Boolean noCheckTrait) {
 
         // Returns true if the dialog is shown, false if not.
-
         // If we run into an error, do not warn the user since this is just a helper dialog
         try {
             // Check if this is a non-BrAPI field
@@ -488,7 +474,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void changeAllVisibility() {
-        Boolean globalVis = ep.getBoolean("allTraitsVisible", false);
+        boolean globalVis = ep.getBoolean("allTraitsVisible", false);
         String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
@@ -527,7 +513,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         params.height = LayoutParams.WRAP_CONTENT;
         importExport.getWindow().setAttributes(params);
 
-        ListView myList = (ListView) layout.findViewById(R.id.myList);
+        ListView myList = layout.findViewById(R.id.myList);
 
         String[] sortOptions = new String[2];
 
@@ -587,7 +573,6 @@ public class TraitEditorActivity extends AppCompatActivity {
             EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
                     PERMISSIONS_REQUEST_STORAGE_EXPORT, perms);
         }
-
     }
 
     private void showFileDialog() {
@@ -630,9 +615,8 @@ public class TraitEditorActivity extends AppCompatActivity {
                         startActivityForResult(intent, 1);
                         break;
                     case 1:
-                        //DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
-                        //mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
-                        makeToast("if i forget to reenable this email me");
+                        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
+                        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
                         break;
                     case 2:
                         intent.setClassName(thisActivity, BrapiTraitActivity.class.getName());
@@ -826,7 +810,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         exportFile.setText(exportName);
 
-        Button exportButton = (Button) layout.findViewById(R.id.saveBtn);
+        Button exportButton = layout.findViewById(R.id.saveBtn);
 
         exportButton.setOnClickListener(new OnClickListener() {
 
@@ -1072,5 +1056,4 @@ public class TraitEditorActivity extends AppCompatActivity {
                 makeToast(thisActivity.getString(R.string.import_error_general));
         }
     }
-
 }

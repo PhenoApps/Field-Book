@@ -1,65 +1,65 @@
 package com.fieldbook.tracker.brapi;
 
-import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.util.Log;
-import android.util.Patterns;
+        import android.app.Activity;
+        import android.content.ActivityNotFoundException;
+        import android.content.Context;
+        import android.content.Intent;
+        import android.content.SharedPreferences;
+        import android.net.Uri;
+        import android.util.Log;
+        import android.util.Patterns;
 
-import androidx.arch.core.util.Function;
+        import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.DataHelper;
-import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.fields.FieldObject;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.traits.TraitObject;
-import com.fieldbook.tracker.utilities.Constants;
+        import com.fieldbook.tracker.DataHelper;
+        import com.fieldbook.tracker.R;
+        import com.fieldbook.tracker.fields.FieldObject;
+        import com.fieldbook.tracker.preferences.PreferencesActivity;
+        import com.fieldbook.tracker.traits.TraitObject;
+        import com.fieldbook.tracker.utilities.Constants;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+        import java.net.MalformedURLException;
+        import java.net.URL;
+        import java.util.ArrayList;
+        import java.util.List;
+        import java.util.Map;
 
-import io.swagger.client.ApiClient;
-import io.swagger.client.ApiException;
-import io.swagger.client.api.ImagesApi;
-import io.swagger.client.api.ObservationsApi;
-import io.swagger.client.api.StudiesApi;
-import io.swagger.client.api.PhenotypesApi;
-import io.swagger.client.api.ObservationVariablesApi;
-import io.swagger.client.model.Image;
-import io.swagger.client.model.ImageResponse;
-import io.swagger.client.model.Metadata;
-import io.swagger.client.model.NewImageRequest;
-import io.swagger.client.model.NewObservationDbIdsObservations;
-import io.swagger.client.model.NewObservationsRequest;
-import io.swagger.client.model.NewObservationsRequestObservations;
-import io.swagger.client.model.ObservationUnit;
-import io.swagger.client.model.ObservationUnitsResponse1;
-import io.swagger.client.model.ObservationVariable;
-import io.swagger.client.model.ObservationVariablesResponse;
-import io.swagger.client.model.PhenotypesRequest;
-import io.swagger.client.model.PhenotypesRequestData;
-import io.swagger.client.model.PhenotypesRequestObservation;
-import io.swagger.client.model.StudiesResponse;
-import io.swagger.client.model.NewObservationDbIdsResponse;
-import io.swagger.client.model.Study;
-import io.swagger.client.model.StudyObservationVariablesResponse;
-import io.swagger.client.model.StudyResponse;
-import io.swagger.client.model.StudySummary;
+        import io.swagger.client.ApiClient;
+        import io.swagger.client.ApiException;
+        import io.swagger.client.api.ImagesApi;
+        import io.swagger.client.api.ObservationsApi;
+        import io.swagger.client.api.StudiesApi;
+        import io.swagger.client.api.PhenotypesApi;
+        import io.swagger.client.api.ObservationVariablesApi;
+        import io.swagger.client.model.Image;
+        import io.swagger.client.model.ImageResponse;
+        import io.swagger.client.model.Metadata;
+        import io.swagger.client.model.NewImageRequest;
+        import io.swagger.client.model.NewObservationDbIdsObservations;
+        import io.swagger.client.model.NewObservationsRequest;
+        import io.swagger.client.model.NewObservationsRequestObservations;
+        import io.swagger.client.model.ObservationUnit;
+        import io.swagger.client.model.ObservationUnitsResponse1;
+        import io.swagger.client.model.ObservationVariable;
+        import io.swagger.client.model.ObservationVariablesResponse;
+        import io.swagger.client.model.PhenotypesRequest;
+        import io.swagger.client.model.PhenotypesRequestData;
+        import io.swagger.client.model.PhenotypesRequestObservation;
+        import io.swagger.client.model.StudiesResponse;
+        import io.swagger.client.model.NewObservationDbIdsResponse;
+        import io.swagger.client.model.Study;
+        import io.swagger.client.model.StudyObservationVariablesResponse;
+        import io.swagger.client.model.StudyResponse;
+        import io.swagger.client.model.StudySummary;
 
-import java.util.HashMap;
-import java.util.Set;
+        import java.util.HashMap;
+        import java.util.Set;
 
 public class BrAPIService {
 
     public static String exportTarget = "export";
-    public static String notUniqueFieldMessage = "not_unique";
-    public static String notUniqueIdMessage = "not_unique_id";
+    static String notUniqueFieldMessage = "not_unique";
+    static String notUniqueIdMessage = "not_unique_id";
     private DataHelper dataHelper;
     private ImagesApi imagesApi;
     private StudiesApi studiesApi;
@@ -82,7 +82,6 @@ public class BrAPIService {
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
-
     }
 
     public static BrapiControllerResponse authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
@@ -180,7 +179,7 @@ public class BrAPIService {
         return true;
     }
 
-    public static Boolean hasValidBaseUrl(Context context) {
+    static Boolean hasValidBaseUrl(Context context) {
         String url = getBrapiUrl(context);
 
         return Patterns.WEB_URL.matcher(url).matches();
@@ -216,7 +215,7 @@ public class BrAPIService {
         return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
     }
 
-    public static String getBrapiToken(Context context) {
+    static String getBrapiToken(Context context) {
         SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
         return "Bearer " + preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
     }
@@ -268,7 +267,7 @@ public class BrAPIService {
         return request;
     }
 
-    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
+    void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
@@ -296,7 +295,7 @@ public class BrAPIService {
 
     }
 
-    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
+    void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
@@ -363,7 +362,7 @@ public class BrAPIService {
 
     }
 
-    public BrapiStudySummary mapStudy(StudySummary studySummary) {
+    private BrapiStudySummary mapStudy(StudySummary studySummary) {
         BrapiStudySummary study = new BrapiStudySummary();
         study.setStudyDbId(studySummary.getStudyDbId());
         study.setStudyName(studySummary.getStudyName());
@@ -399,7 +398,7 @@ public class BrAPIService {
         }
     }
 
-    public BrapiStudyDetails mapStudy(Study study) {
+    private BrapiStudyDetails mapStudy(Study study) {
         BrapiStudyDetails studyDetails = new BrapiStudyDetails();
         studyDetails.setStudyDbId(study.getStudyDbId());
         studyDetails.setStudyName(study.getStudyName());
@@ -824,7 +823,7 @@ public class BrAPIService {
         }
     }
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails) {
+    BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails) {
 
         try {
             FieldObject field = new FieldObject();

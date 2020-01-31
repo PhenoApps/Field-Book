@@ -10,9 +10,9 @@ import com.fieldbook.tracker.traitLayouts.TraitLayout;
 import java.util.ArrayList;
 
 public class LayoutCollections {
-    ArrayList<TraitLayout> traitLayouts;
+    private ArrayList<TraitLayout> traitLayouts;
 
-    public LayoutCollections(Activity _activity) {
+    LayoutCollections(Activity _activity) {
         int[] traitIDs = {
                 R.id.angleLayout, R.id.audioLayout, R.id.barcodeLayout,
                 R.id.booleanLayout, R.id.categoricalLayout, R.id.counterLayout,
@@ -29,7 +29,7 @@ public class LayoutCollections {
         }
     }
 
-    public TraitLayout getTraitLayout(final String trait) {
+    TraitLayout getTraitLayout(final String trait) {
         for (TraitLayout layout : traitLayouts) {
             if (layout.isTraitType(trait)) {
                 return layout;
@@ -38,11 +38,11 @@ public class LayoutCollections {
         return getTraitLayout("text");
     }
 
-    public PhotoTraitLayout getPhotoTrait() {
+    PhotoTraitLayout getPhotoTrait() {
         return (PhotoTraitLayout) getTraitLayout("photo");
     }
 
-    public void hideLayouts() {
+    void hideLayouts() {
         for (TraitLayout layout : traitLayouts) {
             layout.setVisibility(View.GONE);
         }
@@ -56,13 +56,13 @@ public class LayoutCollections {
         getTraitLayout(format).setNaTraitsText();
     }
 
-    public void enableViews() {
+    void enableViews() {
         for (LinearLayout traitLayout : traitLayouts) {
             MainActivity.enableViews(traitLayout);
         }
     }
 
-    public void disableViews() {
+    void disableViews() {
         for (LinearLayout traitLayout : traitLayouts) {
             MainActivity.disableViews(traitLayout);
         }

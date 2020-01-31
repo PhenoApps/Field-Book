@@ -13,17 +13,11 @@ import com.fieldbook.tracker.R;
 
 public class BrapiInfoDialog extends Dialog implements android.view.View.OnClickListener {
 
-    private Context context;
     private String bodyMessage;
-    private Button closeBtn;
-    private TextView bodyTextView;
 
     public BrapiInfoDialog(@NonNull Context context, String bodyMessage) {
-
         super(context);
-        this.context = context;
         this.bodyMessage = bodyMessage;
-
     }
 
     @Override
@@ -31,21 +25,18 @@ public class BrapiInfoDialog extends Dialog implements android.view.View.OnClick
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.dialog_info);
-        closeBtn = findViewById(R.id.closeBtn);
-        bodyTextView = findViewById(R.id.body_message);
+        Button closeBtn = findViewById(R.id.closeBtn);
+        TextView bodyTextView = findViewById(R.id.body_message);
 
         // Set our body text
         bodyTextView.setText(bodyMessage);
-
         closeBtn.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
-
-        switch (view.getId()) {
-            case R.id.closeBtn:
-                dismiss();
+        if (view.getId() == R.id.closeBtn) {
+            dismiss();
         }
     }
 }

@@ -15,7 +15,7 @@ public class BrapiStudyDetails {
     private List<List<String>> values;
     private List<TraitObject> traits;
 
-    public static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2) {
+    static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2) {
         if (sd2.getStudyDbId() != null)
             sd1.setStudyDbId(sd2.getStudyDbId());
         if (sd2.getStudyName() != null)
@@ -36,11 +36,11 @@ public class BrapiStudyDetails {
             sd1.setTraits(sd2.getTraits());
     }
 
-    public String getCommonCropName() {
+    String getCommonCropName() {
         return commonCropName;
     }
 
-    public void setCommonCropName(String commonCropName) {
+    void setCommonCropName(String commonCropName) {
         this.commonCropName = commonCropName;
     }
 
@@ -56,31 +56,31 @@ public class BrapiStudyDetails {
         return studyDbId;
     }
 
-    public void setStudyDbId(String studyDbId) {
+    void setStudyDbId(String studyDbId) {
         this.studyDbId = studyDbId;
     }
 
-    public String getStudyName() {
+    String getStudyName() {
         return studyName;
     }
 
-    public void setStudyName(String studyName) {
+    void setStudyName(String studyName) {
         this.studyName = studyName;
     }
 
-    public String getStudyDescription() {
+    String getStudyDescription() {
         return studyDescription;
     }
 
-    public void setStudyDescription(String studyDescription) {
+    void setStudyDescription(String studyDescription) {
         this.studyDescription = studyDescription;
     }
 
-    public String getStudyLocation() {
+    String getStudyLocation() {
         return studyLocation;
     }
 
-    public void setStudyLocation(String studyLocation) {
+    void setStudyLocation(String studyLocation) {
         this.studyLocation = studyLocation;
     }
 
@@ -88,7 +88,7 @@ public class BrapiStudyDetails {
         return numberOfPlots;
     }
 
-    public void setNumberOfPlots(Integer numberOfPlots) {
+    void setNumberOfPlots(Integer numberOfPlots) {
         this.numberOfPlots = numberOfPlots;
     }
 

@@ -1,16 +1,11 @@
 package com.fieldbook.tracker.brapi;
 
-import android.app.Activity;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,26 +16,17 @@ import android.widget.Toast;
 
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.Utils;
 
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import io.swagger.client.ApiCallback;
-import io.swagger.client.ApiException;
-import io.swagger.client.model.StudiesResponse;
-import io.swagger.client.model.StudySummary;
 
 /**
  * API test Screen
  */
 public class BrapiActivity extends AppCompatActivity {
 
-    private SharedPreferences preferences;
     private BrAPIService brAPIService;
     private BrapiStudySummary selectedStudy;
 
@@ -82,10 +68,12 @@ public class BrapiActivity extends AppCompatActivity {
     private void loadToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setTitle(null);
+            getSupportActionBar().getThemedContext();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
     }
 
     private void loadStudiesList() {
@@ -140,7 +128,6 @@ public class BrapiActivity extends AppCompatActivity {
 
     private ArrayAdapter buildStudiesArrayAdapter(List<BrapiStudySummary> studies) {
         ArrayList<String> itemDataList = new ArrayList<>();
-        ;
 
         for (BrapiStudySummary study : studies) {
             itemDataList.add(study.getStudyName());
@@ -170,10 +157,8 @@ public class BrapiActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                break;
+        if (item.getItemId() == android.R.id.home) {
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }

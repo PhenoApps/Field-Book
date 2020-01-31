@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.R;
 
-
 public class TutorialFieldActivity extends Activity {
     public static Activity thisActivity;
     private final int max = 4;
@@ -118,5 +117,4 @@ public class TutorialFieldActivity extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return super.onKeyDown(keyCode, event);
     }
-
 }

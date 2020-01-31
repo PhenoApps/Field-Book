@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
 
 import android.text.Html;
 import android.util.Log;
@@ -38,10 +37,8 @@ import android.view.MenuItem;
 
 import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
-//import com.fieldbook.tracker.utilities.ApiKeys;
-import com.fieldbook.tracker.brapi.BrapiActivity;
-import com.fieldbook.tracker.io.CSVReader;
 import com.fieldbook.tracker.utilities.ApiKeys;
+import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
@@ -54,15 +51,11 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-import jxl.Workbook;
-import jxl.WorkbookSettings;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -83,7 +76,6 @@ public class FieldEditorActivity extends AppCompatActivity {
     Spinner secondary;
     int exp_id;
     private Menu systemMenu;
-    private String[] importColumns;
     private Dialog importFieldDialog;
     private int idColPosition;
     // Creates a new thread to do importing
@@ -207,7 +199,7 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, importArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, importArray);
         myList.setAdapter(adapter);
         Button importCloseBtn = layout.findViewById(R.id.closeBtn);
         importCloseBtn.setOnClickListener(new OnClickListener() {
@@ -242,13 +234,18 @@ public class FieldEditorActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 
-    //todo
+    //TODO
     public void loadBox() {
 
     }
 
-    //todo
+    //TODO
     public void loadGoogleDrive() {
+
+    }
+
+    //TODO
+    public void loadOneDrive() {
 
     }
 
@@ -427,7 +424,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     private void loadFile(FieldFile.FieldFileBase fieldFile) {
-        importColumns = fieldFile.getColumns();
+        String[] importColumns = fieldFile.getColumns();
 
         String[] reservedNames = new String[]{"id"};
 
@@ -643,5 +640,4 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         }
     }
-
 }

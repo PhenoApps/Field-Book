@@ -112,5 +112,4 @@ public class TutorialSettingsActivity extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return super.onKeyDown(keyCode, event);
     }
-
 }

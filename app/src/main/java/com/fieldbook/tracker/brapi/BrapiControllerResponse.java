@@ -19,5 +19,4 @@ public class BrapiControllerResponse {
     public String getMessage() {
         return this.message;
     }
-
 }

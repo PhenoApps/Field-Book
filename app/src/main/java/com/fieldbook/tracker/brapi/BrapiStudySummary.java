@@ -5,19 +5,19 @@ public class BrapiStudySummary {
     private String studyName;
     private String studyDbId;
 
-    public String getStudyName() {
+    String getStudyName() {
         return studyName;
     }
 
-    public void setStudyName(String studyName) {
+    void setStudyName(String studyName) {
         this.studyName = studyName;
     }
 
-    public String getStudyDbId() {
+    String getStudyDbId() {
         return studyDbId;
     }
 
-    public void setStudyDbId(String studyDbId) {
+    void setStudyDbId(String studyDbId) {
         this.studyDbId = studyDbId;
     }
 }

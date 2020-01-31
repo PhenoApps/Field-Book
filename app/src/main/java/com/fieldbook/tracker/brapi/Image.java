@@ -27,11 +27,8 @@ public class Image extends BrapiObservation {
     private String fileName;
     private String imageName;
     private String mimeType;
-    private Object data;
-    private Bitmap bitmap;
     private Bitmap missing;
     private GeoJSON location;
-    private ExifInterface exif;
     private Map<String, String> additionalInfo;
     private byte[] bytes;
 
@@ -49,7 +46,7 @@ public class Image extends BrapiObservation {
         this.additionalInfo = new HashMap<>();
     }
 
-    public Image(io.swagger.client.model.Image response) {
+    Image(io.swagger.client.model.Image response) {
         this.setDbId(response.getImageDbId());
         this.setUnitDbId(response.getObservationUnitDbId());
         this.fileName = response.getImageFileName();
@@ -81,7 +78,7 @@ public class Image extends BrapiObservation {
         return height;
     }
 
-    public long getFileSize() {
+    long getFileSize() {
         return fileSize;
     }
 
@@ -101,19 +98,19 @@ public class Image extends BrapiObservation {
         return file;
     }
 
-    public String getCopyright() {
+    String getCopyright() {
         return String.valueOf(timestamp.getYear());
     }
 
-    public Map<String, String> getAdditionalInfo() {
+    Map<String, String> getAdditionalInfo() {
         return additionalInfo;
     }
 
-    public byte[] getImageData() {
+    byte[] getImageData() {
         return bytes;
     }
 
-    public List<String> getDescriptiveOntologyTerms() {
+    List<String> getDescriptiveOntologyTerms() {
         return this.descriptiveOntologyTerms;
     }
 
@@ -121,7 +118,7 @@ public class Image extends BrapiObservation {
         this.descriptiveOntologyTerms = descriptiveOntologyTerms;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return this.description;
     }
 
@@ -130,6 +127,7 @@ public class Image extends BrapiObservation {
     }
 
     public void loadImage() {
+        Bitmap bitmap;
         if (!file.exists()) {
             bitmap = missing;
             width = missing.getWidth();
@@ -147,7 +145,7 @@ public class Image extends BrapiObservation {
             bytes = new byte[(int) file.length()];
 
             try {
-                exif = new ExifInterface(file.getAbsolutePath());
+                ExifInterface exif = new ExifInterface(file.getAbsolutePath());
                 double latlon[] = exif.getLatLong();
                 if (latlon != null) {
                     double lat = latlon[0];

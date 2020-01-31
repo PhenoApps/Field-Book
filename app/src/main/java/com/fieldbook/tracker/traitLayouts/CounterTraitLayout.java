@@ -12,8 +12,6 @@ import com.fieldbook.tracker.R;
 public class CounterTraitLayout extends TraitLayout {
 
     private TextView counterTv;
-    private Button addCounterBtn;
-    private Button minusCounterBtn;
 
     public CounterTraitLayout(Context context) {
         super(context);
@@ -39,10 +37,9 @@ public class CounterTraitLayout extends TraitLayout {
 
     @Override
     public void init() {
-        addCounterBtn = findViewById(R.id.addBtn);
-        minusCounterBtn = findViewById(R.id.minusBtn);
+        Button addCounterBtn = findViewById(R.id.addBtn);
+        Button minusCounterBtn = findViewById(R.id.minusBtn);
         counterTv = findViewById(R.id.curCount);
-
 
         // Add counter
         addCounterBtn.setOnClickListener(new OnClickListener() {

@@ -197,7 +197,7 @@ public class FileExploreActivity extends AppCompatActivity {
             }
 
             if (!firstLvl) {
-                Item temp[] = new Item[fileList.length + 1];
+                Item[] temp = new Item[fileList.length + 1];
                 for (int i = 0; i < fileList.length; i++) {
                     temp[i + 1] = fileList[i];
                 }
@@ -242,11 +242,8 @@ public class FileExploreActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                break;
+        if (item.getItemId() == android.R.id.home) {
+            finish();
         }
 
         return super.onOptionsItemSelected(item);

@@ -123,7 +123,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
         try {
             pm.getPackageInfo("com.zebra.printconnect", PackageManager.GET_ACTIVITIES);
 
-            final ImageView exampleLabel = (ImageView) findViewById(R.id.labelPreview);
+            final ImageView exampleLabel = findViewById(R.id.labelPreview);
 
 
             if (!labelsize.equals(null)) {
@@ -250,7 +250,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
                     String text4 = getValueFromSpinner(textfield4, options);
                     String barcode = getValueFromSpinner(barcodefield, options);
 
-                    Integer copiespos = labelcopies.getSelectedItemPosition();
+                    int copiespos = labelcopies.getSelectedItemPosition();
                     String copies = labelcopies.getSelectedItem().toString();
 
                     // Save selected options for next time
@@ -264,22 +264,28 @@ public class LabelPrintTraitLayout extends TraitLayout {
                     ed.putString("COPIES", copies);
                     ed.apply();
 
-                    Integer length = barcode.length();
-                    Integer barcode_size = 6;
+                    int length = barcode.length();
+                    int barcode_size = 6;
 
                     // Scale barcode based on label size and variable field length
-                    if (size.equals("3\" x 2\" simple")) {
-                        barcode_size = 10 - (length / 15);
-                    } else if (size.equals("3\" x 2\" detailed")) {
-                        barcode_size = 9 - (length / 15);
-                    } else if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
-                        barcode_size = 5 - (length / 15);
-                    } else {
-                        Log.d(((MainActivity) getContext()).TAG, "Matched no sizes");
+                    switch (size) {
+                        case "3\" x 2\" simple":
+                            barcode_size = 10 - (length / 15);
+                            break;
+                        case "3\" x 2\" detailed":
+                            barcode_size = 9 - (length / 15);
+                            break;
+                        case "2\" x 1\" simple":
+                        case "2\" x 1\" detailed":
+                            barcode_size = 5 - (length / 15);
+                            break;
+                        default:
+                            //Log.d(((MainActivity) getContext()).TAG, "Matched no sizes");
+                            break;
                     }
 
-                    Integer dotsAvailable1;
-                    Integer dotsAvailable2;
+                    int dotsAvailable1;
+                    int dotsAvailable2;
 
                     // Scale text based on label size and variable field length
                     if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
@@ -309,7 +315,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
                     labelData = labelData.replace("barcode", barcode);
                     labelData = labelData.replace("sizeb", Integer.toString(barcode_size));
 
-                    Log.d(((MainActivity) getContext()).TAG, labelData);
+                    //Log.d(((MainActivity) getContext()).TAG, labelData);
 
                     String passthroughData = "";
                     for (int j = 0; j <= copiespos; j++) {
@@ -342,7 +348,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
                                 // Error message (null on successful print)
                                 // Handle unsuccessful print
                                 String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
-                                Log.e(((MainActivity) getContext()).TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
+                                //Log.e(((MainActivity) getContext()).TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
                                 ((Activity) getContext()).runOnUiThread(new Runnable() {
                                     public void run() {
                                         printStatus.setText("Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
@@ -359,7 +365,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
             });
 
         } catch (PackageManager.NameNotFoundException e) {
-            Log.d(((MainActivity) getContext()).TAG, "Print Connect package not found");
+            //Log.d(((MainActivity) getContext()).TAG, "Print Connect package not found");
             showDownloadDialog();
         }
     }
@@ -370,7 +376,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
     }
 
     private AlertDialog showDownloadDialog() {
-        Log.d(((MainActivity) getContext()).TAG, "Building Download dialog");
+        //Log.d(((MainActivity) getContext()).TAG, "Building Download dialog");
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
         String title = "Install PrintConnect?";
         String message = "This application requires PrintConnect. Would you like to install it?";
@@ -390,7 +396,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
                     getContext().startActivity(intent);
                 } catch (ActivityNotFoundException anfe) {
                     // Hmm, market is not installed
-                    Log.w(((MainActivity) getContext()).TAG, "Google Play is not installed; cannot install " + PC_PACKAGE);
+                    //Log.w(((MainActivity) getContext()).TAG, "Google Play is not installed; cannot install " + PC_PACKAGE);
                 }
             }
         });
@@ -419,7 +425,7 @@ public class LabelPrintTraitLayout extends TraitLayout {
         } else if (spinner.getSelectedItem().toString().equals("blank")) {
             value = "";
         } else {
-            Integer pos = spinner.getSelectedItemPosition();
+            int pos = spinner.getSelectedItemPosition();
             value = ConfigActivity.dt.getDropDownRange(options[pos], getCRange().plot_id)[0];
         }
         return value;
