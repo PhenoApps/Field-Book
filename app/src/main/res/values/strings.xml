@@ -25,7 +25,6 @@
     <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
     <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
 
-
     <!-- Miscellaneous  -->
     <string name="fields_name">Field Name</string>
     <string name="fields_load">Load</string>
@@ -353,7 +352,6 @@
     <string name="brapi_delete_message">Cannot delete synced BrAPI observation, using NA instead</string>
     <string name="images_loading">Loading Images...</string>
 
-
     <!-- Warnings/Catches -->
     <string name="warning_field_before_traits">A field must be imported before traits can be created.</string>
     <string name="warning_field_missing">No field is currently loaded. Please load a field before collecting data.</string>
@@ -380,7 +378,6 @@
     <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
     <string name="citation_text" translatable="false">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
 
-
     <!-- Brapi strings -->
     <string name="preferences_brapi">BrAPI</string>
     <string name="brapi_base_url">BrAPI Base URL</string>
@@ -394,7 +391,7 @@
     <string name="brapi_auth_deny">BrAPI Authorization Denied</string>
     <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
     <string name="brapi_btn_auth_summary">Brapi is currently authorized with %1$s</string>
-    <string name="brapi_base_url_default">https://example.org</string>
+    <string name="brapi_base_url_default">https://test-server.brapi.org</string>
     <string name="brapi_load_data_button">Load Fields</string>
     <string name="brapi_load_traits_button">Load Traits</string>
     <string name="brapi_save_data_button">Save Field</string>

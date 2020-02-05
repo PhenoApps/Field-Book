@@ -412,7 +412,7 @@ public class MainActivity extends AppCompatActivity {
         // search moveto
         if(type.equals("search")) {
             for (int j = 1; j <= rangeID.length; j++) {
-                rangeBox.setRangeByIndex(j - 1);
+				rangeBox.setRangeByIndex(j - 1);
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.range.equals(range) & cRange.plot.equals(plot)) {
@@ -425,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
         //move to plot
         if (type.equals("plot")) {
             for (int j = 1; j <= rangeID.length; j++) {
-                rangeBox.setRangeByIndex(j - 1);
+				rangeBox.setRangeByIndex(j - 1);
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.plot.equals(plot)) {
@@ -438,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
         //move to range
         if(type.equals("range")) {
             for (int j = 1; j <= rangeID.length; j++) {
-                rangeBox.setRangeByIndex(j - 1);
+				rangeBox.setRangeByIndex(j - 1);
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.range.equals(range)) {
@@ -451,7 +451,7 @@ public class MainActivity extends AppCompatActivity {
         //move to plot id
         if(type.equals("id")) {
             for (int j = 1; j <= rangeID.length; j++) {
-                rangeBox.setRangeByIndex(j - 1);
+				rangeBox.setRangeByIndex(j - 1);
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.plot_id.equals(plotID)) {
@@ -957,8 +957,8 @@ public class MainActivity extends AppCompatActivity {
             case 2:
                 if (resultCode == RESULT_OK) {
                     inputPlotId = data.getStringExtra("result");
-                    rangeBox.setAllRangeID();
-                    int[] rangeID = rangeBox.getRangeID();
+	                rangeBox.setAllRangeID();
+	                int[] rangeID = rangeBox.getRangeID();
                     moveToSearch("id",rangeID,null,null,inputPlotId);
                 }
                 break;
