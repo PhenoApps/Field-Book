@@ -62,33 +62,22 @@ class FieldAdapter extends BaseAdapter {
         return position;
     }
 
-    private class ViewHolder {
-        ImageView menuPopup;
-        TextView fieldName;
-        TextView count;
-        TextView importDate;
-        TextView editDate;
-        TextView exportDate;
-        RadioButton active;
-    }
-
     public void setEditorItem(SharedPreferences ep, FieldObject item) {
         SharedPreferences.Editor ed = ep.edit();
         boolean has_contents = item != null;
-        if(has_contents) {
+        if (has_contents) {
             ed.putString("FieldFile", item.getExp_name());
             ed.putString("ImportUniqueName", item.getUnique_id());
             ed.putString("ImportFirstName", item.getPrimary_id());
             ed.putString("ImportSecondName", item.getSecondary_id());
-        }
-        else {
+        } else {
             ed.putString("FieldFile", null);
             ed.putString("ImportUniqueName", null);
             ed.putString("ImportFirstName", null);
             ed.putString("ImportSecondName", null);
         }
         ed.putBoolean("ImportFieldFinished", has_contents);
-        ed.putBoolean("FieldSelected",has_contents);
+        ed.putBoolean("FieldSelected", has_contents);
         ed.putString("lastplot", null);
         ed.putString("DROP1", null);
         ed.putString("DROP2", null);
@@ -192,8 +181,7 @@ class FieldAdapter extends BaseAdapter {
                 if (item.getTitle().equals(strDel)) {
                     AlertDialog alert = createDeleteItemAlertDialog(position);
                     alert.show();
-                }
-                else if (item.getTitle().equals(strStat)) {
+                } else if (item.getTitle().equals(strStat)) {
                     Toast.makeText(thisActivity, "Coming soon!", Toast.LENGTH_SHORT).show();
                 }
 
@@ -226,7 +214,7 @@ class FieldAdapter extends BaseAdapter {
 
         builder.setTitle(context.getString(R.string.fields_delete_study));
         builder.setMessage(context.getString(R.string.fields_delete_study_confirmation));
-        builder.setPositiveButton(context.getString(R.string.dialog_yes),  makeConfirmDeleteListener(position));
+        builder.setPositiveButton(context.getString(R.string.dialog_yes), makeConfirmDeleteListener(position));
         builder.setNegativeButton(context.getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -249,11 +237,21 @@ class FieldAdapter extends BaseAdapter {
         // Check if this is a BrAPI field and show BrAPI info dialog if so
         if (selectedField.getExp_source() != null &&
                 selectedField.getExp_source() != "" &&
-                selectedField.getExp_source() != "local"){
+                selectedField.getExp_source() != "local") {
 
             BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context,
                     context.getResources().getString(R.string.brapi_info_message));
             brapiInfo.show();
         }
+    }
+
+    private class ViewHolder {
+        ImageView menuPopup;
+        TextView fieldName;
+        TextView count;
+        TextView importDate;
+        TextView editDate;
+        TextView exportDate;
+        RadioButton active;
     }
 }

@@ -12,8 +12,7 @@
         <item>both</item>
     </string-array>
 
-    <string-array name="pref_toolbar_customize_default">
-    </string-array>
+    <string-array name="pref_toolbar_customize_default"></string-array>
 
     <string-array name="pref_toolbar_customize_title">
         <item>@string/preferences_appearance_toolbar_customize_search</item>
@@ -41,4 +40,23 @@
         <item>2</item>
     </string-array>
 
+    <string-array name="pref_import_source_entries">
+        <item>@string/import_source_ask</item>
+        <item>@string/import_source_local</item>
+        <item>@string/import_source_dropbox</item>
+        <item>@string/import_source_googledrive</item>
+        <item>@string/import_source_box</item>
+        <item>@string/import_source_onedrive</item>
+        <item>@string/import_source_brapi</item>
+    </string-array>
+
+    <string-array name="pref_import_source_values">
+        <item>ask</item>
+        <item>local</item>
+        <item>dropbox</item>
+        <item>gdrive</item>
+        <item>box</item>
+        <item>onedrive</item>
+        <item>brapi</item>
+    </string-array>
 </resources>

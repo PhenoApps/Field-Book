@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2006 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2006 The Android Open Source Project
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
@@ -17,9 +16,9 @@
     android:id="@android:id/text1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceListItemSmall"
-    android:gravity="center"
     android:background="#FFFFFF"
-    android:singleLine="true"
+    android:gravity="center"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:padding="2dp"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall" />
+    android:singleLine="true"
+    android:textAppearance="?android:attr/textAppearanceListItemSmall" />

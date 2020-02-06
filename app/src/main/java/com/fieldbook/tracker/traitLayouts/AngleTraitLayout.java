@@ -6,8 +6,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Handler;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -16,7 +14,7 @@ import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 
 public class AngleTraitLayout extends TraitLayout {
-    SensorManager sensorManager ;
+    SensorManager sensorManager;
     Sensor accelerometer;
     Sensor magnetometer;
 
@@ -37,14 +35,18 @@ public class AngleTraitLayout extends TraitLayout {
     public AngleTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-    
+
     @Override
-    public void setNaTraitsText() { }
+    public void setNaTraitsText() {
+    }
+
     @Override
-    public String type() { return "angle"; }
-    
+    public String type() {
+        return "angle";
+    }
+
     @Override
-    public void init(){
+    public void init() {
         sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -55,14 +57,14 @@ public class AngleTraitLayout extends TraitLayout {
         etCurVal = findViewById(R.id.etCurVal);
 
         mEventListener = new SensorEventListener() {
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            }
-
             float[] mGravity;
             float[] mGeomagnetic;
             Float azimut;
             Float pitch;
             Float roll;
+
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            }
 
             public void onSensorChanged(SensorEvent event) {
                 if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
@@ -88,8 +90,9 @@ public class AngleTraitLayout extends TraitLayout {
             }
         };
     }
+
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
 
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
@@ -110,9 +113,9 @@ public class AngleTraitLayout extends TraitLayout {
                     SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
-    
+
     @Override
     public void deleteTraitListener() {
-		((MainActivity) getContext()).removeTrait();
+        ((MainActivity) getContext()).removeTrait();
     }
 }

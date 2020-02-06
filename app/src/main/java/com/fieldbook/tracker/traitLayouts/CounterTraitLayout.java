@@ -1,22 +1,13 @@
 package com.fieldbook.tracker.traitLayouts;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.os.Handler;
-import android.os.SystemClock;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.traits.TraitObject;
-
-import java.util.HashMap;
 
 public class CounterTraitLayout extends TraitLayout {
 
@@ -35,18 +26,20 @@ public class CounterTraitLayout extends TraitLayout {
     public CounterTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-    
+
     @Override
     public void setNaTraitsText() {
         counterTv.setText("NA");
-	}
-	
+    }
+
     @Override
-    public String type() { return "counter"; }
-    
+    public String type() {
+        return "counter";
+    }
+
     @Override
-    public void  init(){
-        addCounterBtn= findViewById(R.id.addBtn);
+    public void init() {
+        addCounterBtn = findViewById(R.id.addBtn);
         minusCounterBtn = findViewById(R.id.minusBtn);
         counterTv = findViewById(R.id.curCount);
 
@@ -55,7 +48,7 @@ public class CounterTraitLayout extends TraitLayout {
         addCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 //TODO NullPointerException
-                if(getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
+                if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
                     counterTv.setText("1");
                 } else {
                     counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) + 1));
@@ -68,7 +61,7 @@ public class CounterTraitLayout extends TraitLayout {
         minusCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 //TODO NullPointerException
-                if(getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
+                if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
                     counterTv.setText("-1");
                 } else {
                     counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) - 1));
@@ -80,7 +73,7 @@ public class CounterTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
         getEtCurVal().setVisibility(EditText.GONE);
         getEtCurVal().setEnabled(false);
 
@@ -90,6 +83,7 @@ public class CounterTraitLayout extends TraitLayout {
             counterTv.setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
         }
     }
+
     @Override
     public void deleteTraitListener() {
         removeTrait(getCurrentTrait().getTrait());

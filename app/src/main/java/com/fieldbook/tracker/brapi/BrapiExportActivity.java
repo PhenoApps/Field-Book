@@ -63,17 +63,6 @@ public class BrapiExportActivity extends AppCompatActivity {
     private UploadError putImageContentError;
     private UploadError putImageMetaDataError;
 
-    public enum UploadError {
-        NONE,
-        MISSING_OBSERVATION_IN_RESPONSE,
-        MULTIPLE_OBSERVATIONS_PER_VARIABLE,
-        WRONG_NUM_OBSERVATIONS_RETURNED,
-        API_CALLBACK_ERROR,
-        API_UNAUTHORIZED_ERROR,
-        API_NOTSUPPORTED_ERROR,
-        API_PERMISSION_ERROR
-    }
-
     public BrapiExportActivity() {
 
     }
@@ -82,7 +71,7 @@ public class BrapiExportActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(Utils.isConnected(this)) {
+        if (Utils.isConnected(this)) {
             if (BrAPIService.hasValidBaseUrl(this)) {
 
                 requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -117,11 +106,11 @@ public class BrapiExportActivity extends AppCompatActivity {
                 loadToolbar();
                 loadStatistics();
 
-            }else{
+            } else {
                 Toast.makeText(getApplicationContext(), R.string.brapi_must_configure_url, Toast.LENGTH_SHORT).show();
                 finish();
             }
-        }else{
+        } else {
             // Check if the user is connected. If not, pull from cache
             Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
@@ -166,8 +155,7 @@ public class BrapiExportActivity extends AppCompatActivity {
         if (brapiControllerResponse.status != null) {
             if (!brapiControllerResponse.status) {
                 Toast.makeText(this, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
-            }
-            else {
+            } else {
                 Toast.makeText(this, R.string.brapi_auth_success, Toast.LENGTH_LONG).show();
             }
         }
@@ -177,10 +165,9 @@ public class BrapiExportActivity extends AppCompatActivity {
         switch (v.getId()) {
             case R.id.brapi_export_btn:
                 if (numNewObservations == 0 && numEditedObservations == 0 &&
-                    numNewImages == 0 && numEditedImages == 0 && numIncompleteImages == 0) {
+                        numNewImages == 0 && numEditedImages == 0 && numIncompleteImages == 0) {
                     Toast.makeText(this, "Error: Nothing to sync", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     showSaving();
                     sendData();
                 }
@@ -200,8 +187,7 @@ public class BrapiExportActivity extends AppCompatActivity {
             public void run() {
                 if (numNewObservations > 0 || numEditedObservations > 0) {
                     putObservations();
-                }
-                else if (numNewObservations == 0 && numEditedObservations == 0) {
+                } else if (numNewObservations == 0 && numEditedObservations == 0) {
                     observationsComplete = true;
                 }
                 if (numNewImages > 0) {
@@ -247,43 +233,43 @@ public class BrapiExportActivity extends AppCompatActivity {
     private void putObservations() {
 
         brAPIService.putObservations(observationsNeedingSync,
-            BrAPIService.getBrapiToken(this),
-            new Function<List<NewObservationDbIdsObservations>, Void>() {
-                @Override
-                public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
+                BrAPIService.getBrapiToken(this),
+                new Function<List<NewObservationDbIdsObservations>, Void>() {
+                    @Override
+                    public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
 
-                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            processPutObservationsResponse(observationDbIds);
-                            observationsComplete = true;
-                            uploadComplete();
-                        }
-                    });
-                    return null;
+                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                processPutObservationsResponse(observationDbIds);
+                                observationsComplete = true;
+                                uploadComplete();
+                            }
+                        });
+                        return null;
+                    }
+                }, new Function<Integer, Void>() {
+
+                    @Override
+                    public Void apply(final Integer code) {
+
+                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                putObservationsError = processErrorCode(code);
+                                observationsComplete = true;
+                                uploadComplete();
+                            }
+                        });
+
+                        return null;
+                    }
                 }
-            }, new Function<Integer, Void>() {
-
-                @Override
-                public Void apply(final Integer code) {
-
-                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            putObservationsError = processErrorCode(code);
-                            observationsComplete = true;
-                            uploadComplete();
-                        }
-                    });
-
-                    return null;
-                }
-            }
         );
     }
 
     private void postImages() {
-        for(com.fieldbook.tracker.brapi.Image image : imagesNew) {
+        for (com.fieldbook.tracker.brapi.Image image : imagesNew) {
             postImage(image);
         }
     }
@@ -291,42 +277,42 @@ public class BrapiExportActivity extends AppCompatActivity {
     private void postImage(final com.fieldbook.tracker.brapi.Image imageData) {
 
         brAPIService.postImageMetaData(imageData,
-            BrAPIService.getBrapiToken(this),
-            new Function<Image, Void>() {
-                @Override
-                public Void apply(final Image image) {
+                BrAPIService.getBrapiToken(this),
+                new Function<Image, Void>() {
+                    @Override
+                    public Void apply(final Image image) {
 
-                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String fieldBookId = imageData.getFieldBookDbId();
-                            processPostImageResponse(image, fieldBookId);
-                            postImageMetaDataUpdatesCount++;
-                            imageData.setDbId(image.getImageDbId());
-                            putImageContent(imageData, imagesNew);
-                            uploadComplete();
-                        }
-                    });
-                    return null;
+                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String fieldBookId = imageData.getFieldBookDbId();
+                                processPostImageResponse(image, fieldBookId);
+                                postImageMetaDataUpdatesCount++;
+                                imageData.setDbId(image.getImageDbId());
+                                putImageContent(imageData, imagesNew);
+                                uploadComplete();
+                            }
+                        });
+                        return null;
+                    }
+                }, new Function<Integer, Void>() {
+
+                    @Override
+                    public Void apply(final Integer code) {
+
+                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                postImageMetaDataError = processErrorCode(code);
+                                postImageMetaDataUpdatesCount++;
+                                putImageContentUpdatesCount++; //since we aren't calling this
+                                uploadComplete();
+                            }
+                        });
+
+                        return null;
+                    }
                 }
-            }, new Function<Integer, Void>() {
-
-                @Override
-                public Void apply(final Integer code) {
-
-                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            postImageMetaDataError = processErrorCode(code);
-                            postImageMetaDataUpdatesCount++;
-                            putImageContentUpdatesCount++; //since we aren't calling this
-                            uploadComplete();
-                        }
-                    });
-
-                    return null;
-                }
-            }
         );
     }
 
@@ -334,43 +320,43 @@ public class BrapiExportActivity extends AppCompatActivity {
 
 
         brAPIService.putImageContent(image, BrAPIService.getBrapiToken(this),
-            new Function<Image, Void>() {
-                @Override
-                public Void apply(final Image responseImage) {
+                new Function<Image, Void>() {
+                    @Override
+                    public Void apply(final Image responseImage) {
 
-                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String fieldBookId = image.getFieldBookDbId();
-                            processPutImageContentResponse(responseImage, fieldBookId);
-                            putImageContentUpdatesCount++;
-                            uploadComplete();
-                        }
-                    });
-                    return null;
+                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String fieldBookId = image.getFieldBookDbId();
+                                processPutImageContentResponse(responseImage, fieldBookId);
+                                putImageContentUpdatesCount++;
+                                uploadComplete();
+                            }
+                        });
+                        return null;
+                    }
+                }, new Function<Integer, Void>() {
+
+                    @Override
+                    public Void apply(final Integer code) {
+
+                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                putImageContentError = processErrorCode(code);
+                                putImageContentUpdatesCount++;
+                                uploadComplete();
+                            }
+                        });
+
+                        return null;
+                    }
                 }
-            }, new Function<Integer, Void>() {
-
-                @Override
-                public Void apply(final Integer code) {
-
-                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            putImageContentError = processErrorCode(code);
-                            putImageContentUpdatesCount++;
-                            uploadComplete();
-                        }
-                    });
-
-                    return null;
-                }
-            }
         );
     }
 
     private void putImages() {
-        for(com.fieldbook.tracker.brapi.Image image : imagesEditedIncomplete) {
+        for (com.fieldbook.tracker.brapi.Image image : imagesEditedIncomplete) {
             putImage(image);
         }
     }
@@ -378,42 +364,42 @@ public class BrapiExportActivity extends AppCompatActivity {
     private void putImage(final com.fieldbook.tracker.brapi.Image imageData) {
 
         brAPIService.putImage(imageData,
-            BrAPIService.getBrapiToken(this),
-            new Function<Image, Void>() {
-                @Override
-                public Void apply(final Image image) {
+                BrAPIService.getBrapiToken(this),
+                new Function<Image, Void>() {
+                    @Override
+                    public Void apply(final Image image) {
 
-                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String fieldBookId = imageData.getFieldBookDbId();
-                            processPutImageResponse(image, fieldBookId);
-                            putImageMetaDataUpdatesCount++;
-                            imageData.setDbId(image.getImageDbId());
-                            putImageContent(imageData, imagesEditedIncomplete);
-                            uploadComplete();
-                        }
-                    });
-                    return null;
+                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String fieldBookId = imageData.getFieldBookDbId();
+                                processPutImageResponse(image, fieldBookId);
+                                putImageMetaDataUpdatesCount++;
+                                imageData.setDbId(image.getImageDbId());
+                                putImageContent(imageData, imagesEditedIncomplete);
+                                uploadComplete();
+                            }
+                        });
+                        return null;
+                    }
+                }, new Function<Integer, Void>() {
+
+                    @Override
+                    public Void apply(final Integer code) {
+
+                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                putImageMetaDataError = processErrorCode(code);
+                                putImageMetaDataUpdatesCount++;
+                                putImageContentUpdatesCount++; // since we aren't calling this
+                                uploadComplete();
+                            }
+                        });
+
+                        return null;
+                    }
                 }
-            }, new Function<Integer, Void>() {
-
-                @Override
-                public Void apply(final Integer code) {
-
-                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            putImageMetaDataError = processErrorCode(code);
-                            putImageMetaDataUpdatesCount++;
-                            putImageContentUpdatesCount++; // since we aren't calling this
-                            uploadComplete();
-                        }
-                    });
-
-                    return null;
-                }
-            }
         );
     }
 
@@ -448,7 +434,7 @@ public class BrapiExportActivity extends AppCompatActivity {
     private String getMessageForErrorCode(UploadError error) {
         String message;
 
-        switch(error) {
+        switch (error) {
             case API_CALLBACK_ERROR:
                 message = getString(R.string.brapi_export_failed);
                 break;
@@ -485,30 +471,25 @@ public class BrapiExportActivity extends AppCompatActivity {
 
             // show upload status
             if (putObservationsError == UploadError.API_UNAUTHORIZED_ERROR ||
-                postImageMetaDataError == UploadError.API_UNAUTHORIZED_ERROR ||
-                putImageContentError == UploadError.API_UNAUTHORIZED_ERROR ||
-                putImageMetaDataError == UploadError.API_UNAUTHORIZED_ERROR) {
+                    postImageMetaDataError == UploadError.API_UNAUTHORIZED_ERROR ||
+                    putImageContentError == UploadError.API_UNAUTHORIZED_ERROR ||
+                    putImageMetaDataError == UploadError.API_UNAUTHORIZED_ERROR) {
                 reset();
                 // Start the login process
                 BrapiAuthDialog brapiAuth = new BrapiAuthDialog(BrapiExportActivity.this, BrAPIService.exportTarget);
                 brapiAuth.show();
                 return;
-            }
-            else {
+            } else {
                 String message;
                 if (putObservationsError != UploadError.NONE) {
                     message = getMessageForErrorCode(putObservationsError);
-                }
-                else if (postImageMetaDataError != UploadError.NONE) {
+                } else if (postImageMetaDataError != UploadError.NONE) {
                     message = getMessageForErrorCode(postImageMetaDataError);
-                }
-                else if (putImageContentError != UploadError.NONE) {
+                } else if (putImageContentError != UploadError.NONE) {
                     message = getMessageForErrorCode(putImageContentError);
-                }
-                else if (putImageMetaDataError != UploadError.NONE){
+                } else if (putImageMetaDataError != UploadError.NONE) {
                     message = getMessageForErrorCode(putImageMetaDataError);
-                }
-                else {
+                } else {
                     message = getMessageForErrorCode(UploadError.NONE);
                 }
 
@@ -524,8 +505,8 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private Boolean imagesComplete() {
         return postImageMetaDataUpdatesCount == numNewImages &&
-               putImageContentUpdatesCount == (numNewImages + numEditedImages + numIncompleteImages) &&
-               putImageMetaDataUpdatesCount == (numEditedImages + numIncompleteImages);
+                putImageContentUpdatesCount == (numNewImages + numEditedImages + numIncompleteImages) &&
+                putImageMetaDataUpdatesCount == (numEditedImages + numIncompleteImages);
     }
 
     private Boolean observationsComplete() {
@@ -543,8 +524,7 @@ public class BrapiExportActivity extends AppCompatActivity {
         putImageMetaDataUpdatesCount = 0;
     }
 
-    private UploadError processResponse(List<NewObservationDbIdsObservations> observationDbIds, List<Observation> observationsNeedingSync)
-    {
+    private UploadError processResponse(List<NewObservationDbIdsObservations> observationDbIds, List<Observation> observationsNeedingSync) {
         UploadError retVal = UploadError.NONE;
         SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
                 Locale.getDefault());
@@ -552,8 +532,7 @@ public class BrapiExportActivity extends AppCompatActivity {
 
         if (observationDbIds.size() != observationsNeedingSync.size()) {
             retVal = UploadError.WRONG_NUM_OBSERVATIONS_RETURNED;
-        }
-        else {
+        } else {
             // TODO: update to work with multiple observations per variable
             // Also would be nice to have a cleaner 'find' mechanism
             // For now, just use observationUnitDbId and observationVariableId to key off
@@ -603,8 +582,7 @@ public class BrapiExportActivity extends AppCompatActivity {
 
         if (converted.getDbId() != null && converted.getFieldBookDbId() != null) {
             dataHelper.updateImage(converted, writeSyncTime);
-        }
-        else {
+        } else {
             retVal = UploadError.MISSING_OBSERVATION_IN_RESPONSE;
         }
 
@@ -664,7 +642,7 @@ public class BrapiExportActivity extends AppCompatActivity {
         wrongSourceImages = dataHelper.getWrongSourceImageObservations(hostURL);
 
         for (Observation observation : observations) {
-            switch(observation.getStatus()) {
+            switch (observation.getStatus()) {
                 case NEW:
                     numNewObservations++;
                     observationsNeedingSync.add(observation);
@@ -680,7 +658,7 @@ public class BrapiExportActivity extends AppCompatActivity {
         }
 
         for (com.fieldbook.tracker.brapi.Image image : images) {
-            switch(image.getStatus()) {
+            switch (image.getStatus()) {
                 case NEW:
                     numNewImages++;
                     imagesNew.add(image);
@@ -727,6 +705,17 @@ public class BrapiExportActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public enum UploadError {
+        NONE,
+        MISSING_OBSERVATION_IN_RESPONSE,
+        MULTIPLE_OBSERVATIONS_PER_VARIABLE,
+        WRONG_NUM_OBSERVATIONS_RETURNED,
+        API_CALLBACK_ERROR,
+        API_UNAUTHORIZED_ERROR,
+        API_NOTSUPPORTED_ERROR,
+        API_PERMISSION_ERROR
     }
 
 }

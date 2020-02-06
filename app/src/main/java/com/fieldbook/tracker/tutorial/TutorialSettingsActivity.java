@@ -17,10 +17,8 @@ import com.fieldbook.tracker.R;
 
 public class TutorialSettingsActivity extends Activity {
     public static Activity thisActivity;
-
-    private int screen;
-
     private final int max = 6;
+    private int screen;
 
     @Override
     public void onDestroy() {

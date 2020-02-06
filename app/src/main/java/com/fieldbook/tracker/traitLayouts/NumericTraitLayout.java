@@ -2,19 +2,14 @@ package com.fieldbook.tracker.traitLayouts;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SeekBar;
 
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.traits.TraitObject;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,14 +28,18 @@ public class NumericTraitLayout extends TraitLayout {
     public NumericTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-    
+
     @Override
-    public void setNaTraitsText() { }
+    public void setNaTraitsText() {
+    }
+
     @Override
-    public String type() { return "numeric"; }
-    
+    public String type() {
+        return "numeric";
+    }
+
     @Override
-    public void init(){
+    public void init() {
         numberButtons = new LinkedHashMap<>();
         numberButtons.put(R.id.k1, (Button) findViewById(R.id.k1));
         numberButtons.put(R.id.k2, (Button) findViewById(R.id.k2));
@@ -59,7 +58,7 @@ public class NumericTraitLayout extends TraitLayout {
         numberButtons.put(R.id.k15, (Button) findViewById(R.id.k15));
         numberButtons.put(R.id.k16, (Button) findViewById(R.id.k16));
 
-        for(Button numButton: numberButtons.values()){
+        for (Button numButton : numberButtons.values()) {
             numButton.setOnClickListener(new NumberButtonOnClickListener());
         }
 
@@ -76,7 +75,7 @@ public class NumericTraitLayout extends TraitLayout {
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
 
         // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
         getEtCurVal().setHint("");
@@ -104,21 +103,20 @@ public class NumericTraitLayout extends TraitLayout {
 
     @Override
     public void deleteTraitListener() {
-		((MainActivity) getContext()).removeTrait();
+        ((MainActivity) getContext()).removeTrait();
     }
 
     private class NumberButtonOnClickListener implements OnClickListener {
 
         @Override
         public void onClick(View view) {
-			final String curText = getEtCurVal().getText().toString();
-            if (view.getId() == R.id.k16) {		// Backspace Key Pressed
+            final String curText = getEtCurVal().getText().toString();
+            if (view.getId() == R.id.k16) {        // Backspace Key Pressed
                 final int length = curText.length();
                 if (length > 0) {
-                    getEtCurVal().setText(curText.substring(0, length-1));
+                    getEtCurVal().setText(curText.substring(0, length - 1));
                 }
-            }
-            else if(numberButtons.containsKey(view.getId())){
+            } else if (numberButtons.containsKey(view.getId())) {
                 final String v = numberButtons.get(view.getId()).getText().toString();
                 getEtCurVal().setText(curText + v);
             }

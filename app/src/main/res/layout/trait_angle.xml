@@ -11,26 +11,26 @@
         android:id="@+id/pitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="pitch"/>
+        android:text="pitch" />
 
     <TextView
         android:id="@+id/roll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="roll"/>
+        android:text="roll" />
 
     <TextView
         android:id="@+id/azimuth"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="azimuth"/>
+        android:text="azimuth" />
 
     <View
         android:id="@+id/angleMarker"
         android:layout_width="9dp"
-        android:gravity="center"
         android:layout_height="200dp"
         android:layout_gravity="center"
-        android:background="#000000" />
+        android:background="#000000"
+        android:gravity="center" />
 
 </com.fieldbook.tracker.traitLayouts.AngleTraitLayout>

@@ -209,6 +209,8 @@
     <string name="preferences_general_feature_datagrid">Datagrid</string>
     <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
 
+    <string name="preferences_source_default">Default data source</string>
+
     <!-- Trait text and errors -->
     <string name="trait_layout_data_stored">Saved</string>
     <string name="printlabeltitle">Print Label</string>
@@ -306,10 +308,13 @@
     <string name="database_reset_message">Database has been deleted</string>
 
     <!-- Import dialog -->
-    <string name="import_source_local">Local</string>
+    <string name="import_source_local">Local storage</string>
     <string name="import_source_dropbox">Dropbox</string>
     <string name="import_source_googledrive">Google Drive</string>
     <string name="import_source_box">Box</string>
+    <string name="import_source_onedrive">OneDrive</string>
+    <string name="import_source_brapi">BrAPI</string>
+    <string name="import_source_ask">Always ask</string>
 
     <string name="import_dialog_title_fields">Import field</string>
     <string name="import_dialog_title_traits">Import traits</string>
@@ -406,7 +411,6 @@
     <string name="brapi_ontology_error">Error loadings traits from BrAPI.</string>
     <string name="brapi_save_field_error">Error Saving Field</string>
     <string name="brapi_field_not_selected">Selected Field Must Be Imported From BrAPI.</string>
-    <string name="import_source_brapi">Remote (BrAPI)</string>
     <string name="brapi_save_trait">Save Traits</string>
     <string name="brapi_must_configure_url">Must configure a valid BrAPI URL in settings before proceeding</string>
     <string name="brapi_export_failed">BrAPI Export Failed</string>

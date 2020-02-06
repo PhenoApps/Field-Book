@@ -1,22 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-	<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/help"
-        android:title="@string/tutorial_dialog_title"
         android:icon="@drawable/ic_tb_help"
-        android:showAsAction="always" />
-
-    <item
-        android:id="@+id/database"
-        android:title="@string/export_format_database"
-        android:icon="@drawable/ic_tb_database"
-        android:showAsAction="ifRoom" />"
-
-    <item
-        android:id="@+id/about"
-        android:title="@string/about_title"
-        android:icon="@drawable/ic_tb_info"
-        android:showAsAction="ifRoom" />"
-
-	</menu>
+        android:showAsAction="always"
+        android:title="@string/tutorial_dialog_title" />
+</menu>
 

@@ -11,7 +11,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="15dp">
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -65,36 +66,36 @@
                     android:id="@+id/minusDateBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="65dp"
-                    android:gravity="center|center_vertical"
                     android:layout_margin="10dp"
+                    android:gravity="center|center_vertical"
                     android:minWidth="@dimen/button_default_width"
                     android:text="-1"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_xxlarge"
+                    android:textSize="@dimen/text_size_xlarge"
                     android:textStyle="bold" />
 
                 <ImageButton
                     android:id="@+id/enterBtn"
-                    android:layout_width="65dp"
-                    android:layout_height="65dp"
-                    android:layout_margin="10dp"
-                    android:scaleType="fitXY"
-                    android:background="@drawable/custom_round_button"
-                    android:padding="10dp"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/trait_date_save"
-                    android:gravity="center" />
+                    android:layout_margin="10dp"
+                    android:background="@drawable/custom_round_button"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/trait_date_save" />
 
                 <Button
                     android:id="@+id/addDateBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="65dp"
+                    android:layout_margin="10dp"
                     android:gravity="center"
                     android:minWidth="@dimen/button_default_width"
-                    android:layout_margin="10dp"
                     android:text="+1"
                     android:textColor="#000000"
-                    android:textSize="@dimen/text_size_xxlarge"
+                    android:textSize="@dimen/text_size_xlarge"
                     android:textStyle="bold" />
 
             </LinearLayout>

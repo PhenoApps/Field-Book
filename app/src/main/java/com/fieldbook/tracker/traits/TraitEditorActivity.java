@@ -85,67 +85,22 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class TraitEditorActivity extends AppCompatActivity {
 
-    private static Handler mHandler = new Handler();
-
     public static DragSortListView traitList;
     public static TraitAdapter mAdapter;
     public static boolean brapiDialogShown = false;
-
     public static Activity thisActivity;
-
+    private static Handler mHandler = new Handler();
     private static String mChosenFile;
 
     private static SharedPreferences ep;
 
     private static OnItemClickListener traitListener;
-
-	private NewTraitDialog traitDialog;
-
-    private Menu systemMenu;
-
-    private final int PERMISSIONS_REQUEST_STORAGE_IMPORT = 999;
-    private final int PERMISSIONS_REQUEST_STORAGE_EXPORT = 998;
-    
-    // getter (get them from NewTraitDialog)
-    public TraitAdapter getAdapter() { return mAdapter; }
-    public SharedPreferences getPreferences() { return ep; }
-    public boolean getBrAPIDialogShown() { return brapiDialogShown; }
-    
-    // because AlertDialog can't use getString
-    public String getResourceString(int id) {
-		return getString(id);
-	}
-	
-	// when this value changes in NewTraitDialog,
-	// the value in this class must change
-	public void setBrAPIDialogShown(boolean b) { brapiDialogShown = b; }
-
-    @Override
-    public void onDestroy() {
-        try {
-            thisActivity.finish();
-        } catch (Exception e) {
-            String TAG = "Field Book";
-            Log.e(TAG, "" + e.getMessage());
+    private static DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
+        @Override
+        public void remove(int which) {
+            mAdapter.list.remove(which);
         }
-
-        super.onDestroy();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (systemMenu != null) {
-            if (ep.getBoolean("Tips", false)) {
-                systemMenu.findItem(R.id.help).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.help).setVisible(false);
-            }
-        }
-        loadData();
-    }
-
+    };
     private static DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
 
         @Override
@@ -251,14 +206,155 @@ public class TraitEditorActivity extends AppCompatActivity {
             loadData();
         }
     };
-
-    private static DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
-        @Override
-        public void remove(int which) {
-            mAdapter.list.remove(which);
+    private final int PERMISSIONS_REQUEST_STORAGE_IMPORT = 999;
+    private final int PERMISSIONS_REQUEST_STORAGE_EXPORT = 998;
+    private NewTraitDialog traitDialog;
+    private Menu systemMenu;
+    // Creates a new thread to do importing
+    private Runnable importCSV = new Runnable() {
+        public void run() {
+            new ImportCSVTask().execute(0);
         }
     };
 
+    // Helper function to load data
+    public static void loadData() {
+        try {
+
+            HashMap visibility = ConfigActivity.dt.getTraitVisibility();
+
+            if (!traitList.isShown())
+                traitList.setVisibility(ListView.VISIBLE);
+
+            // Determine if our BrAPI dialog was shown with our current trait adapter
+            Boolean showBrapiDialog;
+            if (mAdapter != null) {
+                // Check if current trait adapter has shown a dialog
+                brapiDialogShown = !brapiDialogShown ? mAdapter.infoDialogShown : brapiDialogShown;
+            } else {
+                // We should show our brapi dialog if this is our creating of the mAdapter
+                brapiDialogShown = false;
+            }
+
+            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
+
+            traitList.setAdapter(mAdapter);
+            traitList.setDropListener(onDrop);
+            traitList.setRemoveListener(onRemove);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void scanFile(File filePath) {
+        MediaScannerConnection.scanFile(thisActivity, new String[]{filePath.getAbsolutePath()}, null, null);
+    }
+
+    public static Boolean displayBrapiInfo(Context context, DataHelper dt, String traitName, Boolean noCheckTrait) {
+
+        // Returns true if the dialog is shown, false if not.
+
+        // If we run into an error, do not warn the user since this is just a helper dialog
+        try {
+            // Check if this is a non-BrAPI field
+            String fieldName = context.getSharedPreferences("Settings", 0)
+                    .getString("FieldFile", "");
+            String fieldSource = context.getSharedPreferences("Settings", 0)
+                    .getString("ImportExpSource", "");
+
+            if (!fieldName.equals("") && !fieldSource.equals("local") && !fieldSource.equals("")) {
+
+                // noCheckTrait is used when the trait should not be checked, but the dialog
+                // should be shown.
+                if (noCheckTrait) {
+
+                    BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
+                    brapiInfo.show();
+                    return true;
+                }
+
+                // Check if this is a BrAPI trait
+                if (traitName != null) {
+
+                    // Just returns an empty trait object in the case the trait isn't found
+                    TraitObject trait = dt.getDetail(traitName);
+                    if (trait.getTrait() == null) {
+                        return false;
+                    }
+
+                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
+
+                        // Show info dialog if a BrAPI field is selected.
+                        BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
+                        brapiInfo.show();
+
+                        // Only show the info dialog on the first non-BrAPI trait selected.
+                        return true;
+
+                    } else {
+                        // Dialog was not shown
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("error", e.toString());
+            return false;
+        }
+
+        return false;
+    }
+
+    // getter (get them from NewTraitDialog)
+    public TraitAdapter getAdapter() {
+        return mAdapter;
+    }
+
+    public SharedPreferences getPreferences() {
+        return ep;
+    }
+
+    public boolean getBrAPIDialogShown() {
+        return brapiDialogShown;
+    }
+
+    // when this value changes in NewTraitDialog,
+    // the value in this class must change
+    public void setBrAPIDialogShown(boolean b) {
+        brapiDialogShown = b;
+    }
+
+    // because AlertDialog can't use getString
+    public String getResourceString(int id) {
+        return getString(id);
+    }
+
+    @Override
+    public void onDestroy() {
+        try {
+            thisActivity.finish();
+        } catch (Exception e) {
+            String TAG = "Field Book";
+            Log.e(TAG, "" + e.getMessage());
+        }
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (systemMenu != null) {
+            if (ep.getBoolean("Tips", false)) {
+                systemMenu.findItem(R.id.help).setVisible(true);
+            } else {
+                systemMenu.findItem(R.id.help).setVisible(false);
+            }
+        }
+        loadData();
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -269,24 +365,18 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_traits);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-
-        if (getActionBar() != null) {
-            getActionBar().setHomeButtonEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(getString(R.string.settings_traits));
+            getSupportActionBar().getThemedContext();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
         }
 
         thisActivity = this;
 
-		if (ConfigActivity.dt == null) {	// when resuming
-			ConfigActivity.dt = new DataHelper(this);
-		}
+        if (ConfigActivity.dt == null) {    // when resuming
+            ConfigActivity.dt = new DataHelper(this);
+        }
         HashMap visibility = ConfigActivity.dt.getTraitVisibility();
         traitList = findViewById(R.id.myList);
 
@@ -311,10 +401,10 @@ public class TraitEditorActivity extends AppCompatActivity {
         traitList.setFloatViewManager(controller);
         traitList.setOnTouchListener(controller);
         traitList.setDragEnabled(true);
-        
+
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_new_trait, null);
-		traitDialog = new NewTraitDialog(layout, this);
+        traitDialog = new NewTraitDialog(layout, this);
 
         traitListener = new AdapterView.OnItemClickListener() {
 
@@ -323,7 +413,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 // When a trait is selected, alter the layout of the edit dialog accordingly
 
                 TraitObject o = mAdapter.getItem(position);
-        		traitDialog.setTraitObject(o);
+                traitDialog.setTraitObject(o);
 
                 loadData();
                 traitDialog.show(true);
@@ -417,37 +507,6 @@ public class TraitEditorActivity extends AppCompatActivity {
         ed.putBoolean("allTraitsVisible", globalVis);
         ed.apply();
         loadData();
-    }
-
-    // Helper function to load data
-    public static void loadData() {
-        try {
-
-            HashMap visibility = ConfigActivity.dt.getTraitVisibility();
-
-            if (!traitList.isShown())
-                traitList.setVisibility(ListView.VISIBLE);
-
-            // Determine if our BrAPI dialog was shown with our current trait adapter
-            Boolean showBrapiDialog;
-            if (mAdapter != null ) {
-                // Check if current trait adapter has shown a dialog
-                brapiDialogShown = !brapiDialogShown ? mAdapter.infoDialogShown : brapiDialogShown;
-            }
-            else {
-                // We should show our brapi dialog if this is our creating of the mAdapter
-                brapiDialogShown = false;
-            }
-
-            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
-
-            traitList.setAdapter(mAdapter);
-            traitList.setDropListener(onDrop);
-            traitList.setRemoveListener(onRemove);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void importExportDialog() {
@@ -643,7 +702,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             try {
                 blankFile.getParentFile().mkdirs();
                 blankFile.createNewFile();
-                Utils.scanFile(TraitEditorActivity.this,blankFile);
+                Utils.scanFile(TraitEditorActivity.this, blankFile);
             } catch (IOException ignore) {
             }
         }
@@ -727,28 +786,6 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
 
         loadData();
-    }
-
-    private class ArrayIndexComparator implements Comparator<Integer> {
-        private final String[] array;
-
-        ArrayIndexComparator(String[] array) {
-            this.array = array;
-        }
-
-        Integer[] createIndexArray() {
-            Arrays.sort(array);
-            Integer[] indexes = new Integer[array.length];
-            for (int i = 0; i < array.length; i++) {
-                indexes[i] = i;
-            }
-            return indexes;
-        }
-
-        @Override
-        public int compare(Integer index1, Integer index2) {
-            return array[index1].compareTo(array[index2]);
-        }
     }
 
     private void showExportDialog() {
@@ -886,12 +923,54 @@ public class TraitEditorActivity extends AppCompatActivity {
         shareFile(file);
     }
 
-    // Creates a new thread to do importing
-    private Runnable importCSV = new Runnable() {
-        public void run() {
-            new ImportCSVTask().execute(0);
+    public void makeToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Scan file to update file list and share exported file
+     */
+    private void shareFile(File filePath) {
+        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
+
+        if (!ep.getBoolean(PreferencesActivity.DISABLE_SHARE, false)) {
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", filePath));
+            startActivity(Intent.createChooser(intent, "Sending File..."));
         }
-    };
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    private class ArrayIndexComparator implements Comparator<Integer> {
+        private final String[] array;
+
+        ArrayIndexComparator(String[] array) {
+            this.array = array;
+        }
+
+        Integer[] createIndexArray() {
+            Arrays.sort(array);
+            Integer[] indexes = new Integer[array.length];
+            for (int i = 0; i < array.length; i++) {
+                indexes[i] = i;
+            }
+            return indexes;
+        }
+
+        @Override
+        public int compare(Integer index1, Integer index2) {
+            return array[index1].compareTo(array[index2]);
+        }
+    }
 
     private class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
         ProgressDialog dialog;
@@ -992,93 +1071,6 @@ public class TraitEditorActivity extends AppCompatActivity {
             if (fail)
                 makeToast(thisActivity.getString(R.string.import_error_general));
         }
-    }
-
-    public void makeToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    private static void scanFile(File filePath) {
-        MediaScannerConnection.scanFile(thisActivity, new String[]{filePath.getAbsolutePath()}, null, null);
-    }
-
-    /**
-     * Scan file to update file list and share exported file
-     */
-    private void shareFile(File filePath) {
-        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
-
-        if (!ep.getBoolean(PreferencesActivity.DISABLE_SHARE, false)) {
-            Intent intent = new Intent();
-            intent.setAction(android.content.Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", filePath));
-            startActivity(Intent.createChooser(intent, "Sending File..."));
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        // Forward results to EasyPermissions
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
-    }
-
-    public static Boolean displayBrapiInfo(Context context, DataHelper dt, String traitName, Boolean noCheckTrait) {
-
-        // Returns true if the dialog is shown, false if not.
-
-        // If we run into an error, do not warn the user since this is just a helper dialog
-        try {
-            // Check if this is a non-BrAPI field
-            String fieldName = context.getSharedPreferences("Settings", 0)
-                    .getString("FieldFile", "");
-            String fieldSource = context.getSharedPreferences("Settings", 0)
-                    .getString("ImportExpSource", "");
-
-            if (!fieldName.equals("") && !fieldSource.equals("local") && !fieldSource.equals("")) {
-
-                // noCheckTrait is used when the trait should not be checked, but the dialog
-                // should be shown.
-                if (noCheckTrait) {
-
-                    BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
-                    brapiInfo.show();
-                    return true;
-                }
-
-                // Check if this is a BrAPI trait
-                if (traitName != null) {
-
-                    // Just returns an empty trait object in the case the trait isn't found
-                    TraitObject trait = dt.getDetail(traitName);
-                    if (trait.getTrait() == null) {
-                        return false;
-                    }
-
-                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
-
-                        // Show info dialog if a BrAPI field is selected.
-                        BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context, context.getResources().getString(R.string.brapi_info_message));
-                        brapiInfo.show();
-
-                        // Only show the info dialog on the first non-BrAPI trait selected.
-                        return true;
-
-                    }
-                    else {
-                        // Dialog was not shown
-                        return false;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Log.e("error", e.toString());
-            return false;
-        }
-
-        return false;
     }
 
 }

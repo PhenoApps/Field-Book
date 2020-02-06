@@ -11,4 +11,6 @@
 
     <dimen name="button_default_height">60dp</dimen>
     <dimen name="button_default_width">150dp</dimen>
+    <dimen name="button_width_numeric">120dp</dimen>
+    <dimen name="button_width_disease">75dp</dimen>
 </resources>

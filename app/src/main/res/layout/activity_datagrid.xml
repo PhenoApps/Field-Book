@@ -9,8 +9,8 @@
         android:id="@+id/gridtableLayout"
         android:layout_width="wrap_content"
         android:layout_height="500dp"
-        android:orientation="horizontal"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
         <GridView
             android:id="@+id/tableLayout1"
@@ -32,9 +32,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_weight="0"
         android:orientation="horizontal"
-        android:paddingTop="10dp"
-        android:layout_weight="0" >
+        android:paddingTop="10dp">
 
         <Button
             android:id="@+id/closeBtn"

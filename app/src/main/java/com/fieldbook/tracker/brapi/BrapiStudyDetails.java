@@ -15,24 +15,24 @@ public class BrapiStudyDetails {
     private List<List<String>> values;
     private List<TraitObject> traits;
 
-    public static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2){
-        if(sd2.getStudyDbId() != null)
+    public static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2) {
+        if (sd2.getStudyDbId() != null)
             sd1.setStudyDbId(sd2.getStudyDbId());
-        if(sd2.getStudyName() != null)
+        if (sd2.getStudyName() != null)
             sd1.setStudyName(sd2.getStudyName());
-        if(sd2.getStudyDescription() != null)
+        if (sd2.getStudyDescription() != null)
             sd1.setStudyDescription(sd2.getStudyDescription());
-        if(sd2.getStudyLocation() != null)
+        if (sd2.getStudyLocation() != null)
             sd1.setStudyLocation(sd2.getStudyLocation());
-        if(sd2.getCommonCropName() != null)
+        if (sd2.getCommonCropName() != null)
             sd1.setCommonCropName(sd2.getCommonCropName());
-        if(sd2.getNumberOfPlots() != null)
+        if (sd2.getNumberOfPlots() != null)
             sd1.setNumberOfPlots(sd2.getNumberOfPlots());
-        if(sd2.getAttributes() != null)
+        if (sd2.getAttributes() != null)
             sd1.setAttributes(sd2.getAttributes());
-        if(sd2.getValues() != null)
+        if (sd2.getValues() != null)
             sd1.setValues(sd2.getValues());
-        if(sd2.getTraits() != null)
+        if (sd2.getTraits() != null)
             sd1.setTraits(sd2.getTraits());
     }
 

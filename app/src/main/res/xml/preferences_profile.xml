@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:icon="@drawable/ic_nav_drawer_person"
+        android:key="pref_profile_person"
+        android:summary=""
+        android:title="@string/profile_person" />
+
+    <Preference
+        android:icon="@drawable/ic_nav_drawer_location"
+        android:key="pref_profile_location"
+        android:summary=""
+        android:title="@string/profile_location" />
+
+</PreferenceScreen>

@@ -10,21 +10,10 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/main_primary"
-            android:fitsSystemWindows="true"
-            android:minHeight="?attr/actionBarSize"
-            app:popupTheme="@style/AppToolbar"
-            app:theme="@style/AppToolbar" />
-
         <com.fieldbook.tracker.dragsort.DragSortListView xmlns:dslv="http://schemas.android.com/apk/res/com.fieldbook.tracker"
             android:id="@+id/myList"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/toolbar"
             android:choiceMode="singleChoice"
             android:dividerHeight="1px"
             android:padding="3dp"

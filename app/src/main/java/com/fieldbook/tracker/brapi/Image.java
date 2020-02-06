@@ -2,6 +2,7 @@ package com.fieldbook.tracker.brapi;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
 import androidx.exifinterface.media.ExifInterface;
 
 import com.google.gson.JsonArray;
@@ -59,7 +60,7 @@ public class Image extends BrapiObservation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Image that = (Image) o;
-        return  objectsEquals(unitDbId, that.getUnitDbId()) &&
+        return objectsEquals(unitDbId, that.getUnitDbId()) &&
                 objectsEquals(fileName, that.getFileName());
     }
 
@@ -120,7 +121,9 @@ public class Image extends BrapiObservation {
         this.descriptiveOntologyTerms = descriptiveOntologyTerms;
     }
 
-    public String getDescription(){ return this.description; }
+    public String getDescription() {
+        return this.description;
+    }
 
     public void setDescription(String description) {
         this.description = description;
@@ -135,14 +138,13 @@ public class Image extends BrapiObservation {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 95, stream);
             bytes = stream.toByteArray();
             fileSize = bytes.length;
-        }
-        else {
+        } else {
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inJustDecodeBounds = true;
             bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), bmOptions);
             width = bmOptions.outWidth;
             height = bmOptions.outHeight;
-            bytes = new byte[(int)file.length()];
+            bytes = new byte[(int) file.length()];
 
             try {
                 exif = new ExifInterface(file.getAbsolutePath());
@@ -162,7 +164,8 @@ public class Image extends BrapiObservation {
 
                 FileInputStream fin = new FileInputStream(file);
                 fin.read(bytes);
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            }
         }
 
         mimeType = "image/jpeg";

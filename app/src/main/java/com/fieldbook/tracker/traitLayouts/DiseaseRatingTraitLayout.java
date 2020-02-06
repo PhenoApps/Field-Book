@@ -2,16 +2,11 @@ package com.fieldbook.tracker.traitLayouts;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
-import android.os.SystemClock;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Constants;
 
@@ -23,7 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.TreeMap;
 
 public class DiseaseRatingTraitLayout extends TraitLayout {
 
@@ -41,17 +35,22 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
     public DiseaseRatingTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-    
+
     @Override
-    public void setNaTraitsText() { }
+    public void setNaTraitsText() {
+    }
+
     @Override
-    public String type() { return "audio"; }
+    public String type() {
+        return "audio";
+    }
+
     public boolean isTraitType(String trait) {
-		return trait.equals("rust rating") || trait.equals("disease rating");
-	}
-    
+        return trait.equals("rust rating") || trait.equals("disease rating");
+    }
+
     @Override
-    public void init(){
+    public void init() {
         rustButtons = new LinkedHashMap<>();
         rustButtons.put(R.id.rust0, (Button) findViewById(R.id.rust0));
         rustButtons.put(R.id.rust5, (Button) findViewById(R.id.rust5));
@@ -77,7 +76,7 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
         rustR = findViewById(R.id.rustR);
         rustM = findViewById(R.id.rustM);
         rustS = findViewById(R.id.rustS);
-        rustDelim =  findViewById(R.id.rustDelim);
+        rustDelim = findViewById(R.id.rustDelim);
 
         List<String> temps = getRustCodes();
         List<Button> rustBtnArray = new ArrayList<>(rustButtons.values());
@@ -104,7 +103,7 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
             e.printStackTrace();
         }
 
-        if(inFile1!=null) {
+        if (inFile1 != null) {
             while (inFile1.hasNext()) {
                 token1 = inFile1.next();
                 rustCodes.add(token1);
@@ -116,14 +115,14 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
             if (k > 21) {
                 rustCodes.subList(21, k).clear();
             }
-        }else {
-            rustCodes = Arrays.asList("0","5","10","15","20","25","30","35","40","45","50","55","60","65","70","75","80","85","90","95","100");
+        } else {
+            rustCodes = Arrays.asList("0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100");
         }
         return rustCodes;
     }
 
     @Override
-    public void loadLayout(){
+    public void loadLayout() {
         // clear NA hint
         getEtCurVal().setHint("");
         getEtCurVal().removeTextChangedListener(getCvText());
@@ -146,6 +145,7 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
             getEtCurVal().addTextChangedListener(getCvNum());
         }
     }
+
     @Override
     public void deleteTraitListener() {
         getEtCurVal().removeTextChangedListener(getCvNum());
@@ -154,20 +154,20 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
         getEtCurVal().addTextChangedListener(getCvNum());
     }
 
-    private class RustButtonOnClickListener implements OnClickListener{
+    private class RustButtonOnClickListener implements OnClickListener {
 
         @Override
         public void onClick(View view) {
             String v = "";
-            if(view.getId() == R.id.rustR) {
+            if (view.getId() == R.id.rustR) {
                 v = "R";
-            }else if(view.getId() == R.id.rustM) {
+            } else if (view.getId() == R.id.rustM) {
                 v = "M";
-            }else if(view.getId() == R.id.rustS) {
+            } else if (view.getId() == R.id.rustS) {
                 v = "S";
-            }else if(view.getId() == R.id.rustDelim) {
+            } else if (view.getId() == R.id.rustDelim) {
                 v = "/";
-            }else {
+            } else {
                 v = rustButtons.get(view.getId()).getText().toString();
             }
 

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.fieldbook.tracker"
-    android:versionCode="410"
-    android:versionName="4.1.0">
+    package="com.fieldbook.tracker">
 
     <uses-feature
         android:name="android.hardware.location"
@@ -31,8 +29,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/field_book"
         android:largeHeap="true"
-        tools:ignore="GoogleAppIndexingWarning"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -50,9 +48,7 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustPan|stateHidden" >
-
-        </activity>
+            android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
             android:name=".search.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -91,7 +87,7 @@
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppThemeAction" />
         <activity
             android:name=".fields.FieldEditorActivity"
             android:alwaysRetainTaskState="false"
@@ -99,9 +95,7 @@
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" >
-
-        </activity>
+            android:theme="@style/AppThemeAction" />
         <activity
             android:name=".ChangelogActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -136,15 +130,17 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppThemeAction" >
+            android:theme="@style/AppThemeAction">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
-                    android:scheme="fieldbook"
                     android:host=""
-                    tools:ignore="AppLinkUrlError"/> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
+                    android:scheme="fieldbook"
+                    tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
             </intent-filter>
         </activity>
         <activity
@@ -152,14 +148,16 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" >
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
-                    android:scheme="fieldbook"
-                    android:host="export"/>
+                    android:host="export"
+                    android:scheme="fieldbook" />
             </intent-filter>
         </activity>
 
@@ -167,8 +165,8 @@
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
-            tools:replace="android:screenOrientation"
-            android:stateNotNeeded="true"/>
+            android:stateNotNeeded="true"
+            tools:replace="android:screenOrientation" />
 
         <provider
             android:name=".GenericFileProvider"

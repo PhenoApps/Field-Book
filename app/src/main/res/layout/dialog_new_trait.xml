@@ -4,20 +4,20 @@
     android:layout_height="fill_parent"
     android:background="#FFFFFF"
     android:orientation="vertical"
-    android:paddingBottom="5dp"
     android:paddingLeft="20dp"
+    android:paddingTop="5dp"
     android:paddingRight="20dp"
-    android:paddingTop="5dp">
+    android:paddingBottom="5dp">
 
     <LinearLayout
         android:id="@+id/formatbox"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingBottom="5dp"
         android:paddingLeft="10dp"
+        android:paddingTop="5dp"
         android:paddingRight="10dp"
-        android:paddingTop="5dp">
+        android:paddingBottom="5dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -47,8 +47,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp">
+        android:paddingTop="5dp"
+        android:paddingRight="10dp">
 
         <TextView
             android:layout_width="100dp"
@@ -78,8 +78,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp">
+        android:paddingTop="5dp"
+        android:paddingRight="10dp">
 
         <TextView
             android:id="@+id/defTv"
@@ -120,8 +120,8 @@
         android:layout_weight=".2"
         android:orientation="horizontal"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp">
+        android:paddingTop="5dp"
+        android:paddingRight="10dp">
 
         <TextView
             android:layout_width="100dp"
@@ -152,8 +152,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp">
+        android:paddingTop="5dp"
+        android:paddingRight="10dp">
 
         <TextView
             android:layout_width="100dp"
@@ -185,8 +185,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp">
+        android:paddingTop="5dp"
+        android:paddingRight="10dp">
 
         <TextView
             android:layout_width="100dp"
@@ -217,8 +217,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp">
+        android:paddingTop="5dp"
+        android:paddingRight="10dp">
 
         <TextView
             android:layout_width="100dp"

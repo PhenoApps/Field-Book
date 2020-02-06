@@ -8,17 +8,13 @@ import java.util.Objects;
 
 public class BrapiObservation {
 
-    private String dbId;
-    private OffsetDateTime lastSyncedTime;
     protected OffsetDateTime timestamp;
-    private String fieldbookDbId;
     protected String unitDbId;
     protected String variableDbId;
+    private String dbId;
+    private OffsetDateTime lastSyncedTime;
+    private String fieldbookDbId;
     private String variableName;
-
-    public enum Status {
-        NEW, SYNCED, EDITED, INCOMPLETE, INVALID
-    }
 
     public String getFieldbookDbId() {
         return fieldbookDbId;
@@ -34,10 +30,6 @@ public class BrapiObservation {
 
     public void setDbId(String id) {
         this.dbId = id;
-    }
-
-    public void setLastSyncedTime(String timestamp) {
-        this.lastSyncedTime = convertTime(timestamp);
     }
 
     public OffsetDateTime getTimestamp() {
@@ -60,8 +52,7 @@ public class BrapiObservation {
             converted = OffsetDateTime.parse(time, formatter);
         } catch (DateTimeParseException e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             return converted;
         }
 
@@ -71,35 +62,35 @@ public class BrapiObservation {
         return lastSyncedTime;
     }
 
+    public void setLastSyncedTime(String timestamp) {
+        this.lastSyncedTime = convertTime(timestamp);
+    }
+
     public BrapiObservation.Status getStatus() {
 
         BrapiObservation.Status status = BrapiObservation.Status.INVALID;
 
         if (dbId == null) {
             status = BrapiObservation.Status.NEW;
-        }
-        else if (dbId != null && lastSyncedTime == null) {
+        } else if (dbId != null && lastSyncedTime == null) {
             status = BrapiObservation.Status.INCOMPLETE;
-        }
-        else if (dbId != null && lastSyncedTime != null && timestamp != null && timestamp.compareTo(lastSyncedTime) < 0) {
+        } else if (dbId != null && lastSyncedTime != null && timestamp != null && timestamp.compareTo(lastSyncedTime) < 0) {
             status = BrapiObservation.Status.SYNCED;
-        }
-        else if (dbId != null && lastSyncedTime != null && timestamp != null && timestamp.compareTo(lastSyncedTime) > 0) {
+        } else if (dbId != null && lastSyncedTime != null && timestamp != null && timestamp.compareTo(lastSyncedTime) > 0) {
             status = BrapiObservation.Status.EDITED;
         }
 
         return status;
     }
 
-
-
-    // The objects methods used were added in API 19 so they'll just
-    // be duplicated here to work around that
-
     // Objects.equals Jdk7
     protected boolean objectsEquals(Object a, Object b) {
         return (a == b) || (a != null && a.equals(b));
     }
+
+
+    // The objects methods used were added in API 19 so they'll just
+    // be duplicated here to work around that
 
     // Objects.hash Jdk7
     protected int objectsHash(Object... values) {
@@ -143,8 +134,16 @@ public class BrapiObservation {
         this.variableName = variableName;
     }
 
-    public String getFieldBookDbId() { return fieldbookDbId; }
+    public String getFieldBookDbId() {
+        return fieldbookDbId;
+    }
 
-    public void setFieldBookDbId(String fieldbookDbId) { this.fieldbookDbId = fieldbookDbId; }
+    public void setFieldBookDbId(String fieldbookDbId) {
+        this.fieldbookDbId = fieldbookDbId;
+    }
+
+    public enum Status {
+        NEW, SYNCED, EDITED, INCOMPLETE, INVALID
+    }
 
 }

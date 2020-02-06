@@ -2,17 +2,11 @@ package com.fieldbook.tracker.traitLayouts;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
-import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.traits.TraitObject;
-
-import java.util.HashMap;
 
 public class PercentTraitLayout extends TraitLayout {
     private SeekBar seekBar;
@@ -30,17 +24,21 @@ public class PercentTraitLayout extends TraitLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public SeekBar getSeekBar(){
+    public SeekBar getSeekBar() {
         return seekBar;
     }
-    
+
     @Override
-    public void setNaTraitsText() { }
+    public void setNaTraitsText() {
+    }
+
     @Override
-    public String type() { return "percent"; }
-    
+    public String type() {
+        return "percent";
+    }
+
     @Override
-    public void init(){
+    public void init() {
         // Progress bar
         seekBar = findViewById(R.id.seekbar);
         seekBar.setMax(100);
@@ -65,7 +63,7 @@ public class PercentTraitLayout extends TraitLayout {
         seekBar.setOnSeekBarChangeListener(seekListener);
     }
 
-    public void loadLayout(){
+    public void loadLayout() {
 
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
@@ -113,13 +111,13 @@ public class PercentTraitLayout extends TraitLayout {
         return defaultValue;
     }
 
-    private void setCurrentValueText(int value, int color){
+    private void setCurrentValueText(int value, int color) {
         setCurrentValueText(String.valueOf(value), color);
     }
 
-    private void setCurrentValueText(String value, int color){
+    private void setCurrentValueText(String value, int color) {
         getEtCurVal().setTextColor(color);
-        if(value.isEmpty())
+        if (value.isEmpty())
             getEtCurVal().setText(value);
         else
             getEtCurVal().setText(value + "%");
