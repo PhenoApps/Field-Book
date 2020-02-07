@@ -756,6 +756,33 @@ public class NewTraitDialog extends DialogFragment {
         public boolean allowsNegative() {
             return false;
         }
+        public String ValidateItemsIndividual() {
+            ArrayList<String> arrayEdits = new ArrayList<>();
+            if (def.getText().length() == 0) {
+                arrayEdits.add("default value");
+            }
+            if (minimum.getText().length() == 0) {
+                arrayEdits.add("minimum value");
+            }
+            if (maximum.getText().length() == 0) {
+                arrayEdits.add("maximum value");
+            }
+            
+            if (arrayEdits.isEmpty()) {
+                return super.ValidateItemsIndividual();
+            }
+            else if (arrayEdits.size() == 1) {
+                return arrayEdits.get(0) + " is necessary.";
+            }
+            else if (arrayEdits.size() == 2) {
+                return arrayEdits.get(0) + " and " +
+                        arrayEdits.get(1) + " are necessary";
+            }
+            else {
+                return arrayEdits.get(0) + ", " + arrayEdits.get(1) + " and " +
+                        arrayEdits.get(2) + " are necessary";
+            }
+        }
     }
 
     private class TraitFormatBoolean extends TraitFormat {

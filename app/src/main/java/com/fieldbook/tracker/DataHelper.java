@@ -1417,6 +1417,10 @@ public class DataHelper {
                 }
             }
         }
+        else {
+            // without this code, it crash
+            data = new String[0];
+        }
 
         if (!cursor.isClosed()) {
             cursor.close();

@@ -38,7 +38,7 @@ import android.view.MenuItem;
 
 import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
-import com.fieldbook.tracker.utilities.ApiKeys;
+//import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.io.CSVReader;
 //import com.fieldbook.tracker.utilities.ApiKeys;
@@ -230,8 +230,8 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     public void loadDropbox() {
-        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
-        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
+//        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
+//        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
     }
 
     public void loadBrAPI() {
