@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.EditText;
 import com.fieldbook.tracker.MainActivity;
@@ -41,20 +42,22 @@ public class TextTraitLayout extends TraitLayout {
 
     @Override
     public void loadLayout() {
-
+Log.d("TextTraitLayout", "loadLayout1");
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
         getEtCurVal().setSelection(getEtCurVal().getText().length());
         getEtCurVal().setEnabled(true);
+        getEtCurVal().removeTextChangedListener(getCvNum());
+        getEtCurVal().removeTextChangedListener(getCvText());
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().removeTextChangedListener(getCvText());
+Log.d("TextTraitLayout", "loadLayout2");
             getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
             getEtCurVal().addTextChangedListener(getCvText());
             getEtCurVal().setSelection(getEtCurVal().getText().length());
         } else {
-            getEtCurVal().removeTextChangedListener(getCvText());
+Log.d("TextTraitLayout", "loadLayout3");
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
 

@@ -202,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
             // if the trait has a range, updateTrait does not work
             public void afterTextChanged(final Editable en) {
                 final String strValue = etCurVal.getText().toString();
+Log.d("MainActivity", strValue + " cvNum");
                 if (strValue.equals(""))
                     return;
 
@@ -230,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
         // Validates the text entered for text format
         cvText = new TextWatcher() {
             public void afterTextChanged(Editable en) {
+Log.d("MainActivity", en.toString() + " cvText");
                 final TraitObject trait = traitBox.getCurrentTrait();
                 if (en.toString().length() > 0) {
                     if (traitBox.existsNewTraits() & trait != null)

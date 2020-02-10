@@ -55,17 +55,17 @@ public class MultiCatTraitLayout extends TraitLayout {
         final String trait = getCurrentTrait().getTrait();
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
+        getEtCurVal().removeTextChangedListener(getCvNum());
+        getEtCurVal().removeTextChangedListener(getCvText());
 
         if (!getNewTraits().containsKey(trait)) {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
-            getEtCurVal().addTextChangedListener(getCvNum());
+            getEtCurVal().addTextChangedListener(getCvText());
         } else {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText(getNewTraits().get(trait).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            getEtCurVal().addTextChangedListener(getCvNum());
+            getEtCurVal().addTextChangedListener(getCvText());
         }
 
         final String[] cat = getCurrentTrait().getCategories().split("/");

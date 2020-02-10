@@ -127,9 +127,10 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
         getEtCurVal().setHint("");
         getEtCurVal().removeTextChangedListener(getCvText());
         getEtCurVal().setVisibility(EditText.VISIBLE);
+        getEtCurVal().removeTextChangedListener(getCvNum());
+        getEtCurVal().removeTextChangedListener(getCvText());
 
         if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
 
@@ -137,21 +138,21 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
                     && getCurrentTrait().getDefaultValue().length() > 0)
                 getEtCurVal().setText(getCurrentTrait().getDefaultValue());
 
-            getEtCurVal().addTextChangedListener(getCvNum());
+            getEtCurVal().addTextChangedListener(getCvText());
         } else {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            getEtCurVal().addTextChangedListener(getCvNum());
+            getEtCurVal().addTextChangedListener(getCvText());
         }
     }
 
     @Override
     public void deleteTraitListener() {
         getEtCurVal().removeTextChangedListener(getCvNum());
+        getEtCurVal().removeTextChangedListener(getCvText());
         getEtCurVal().setText("");
         removeTrait(getCurrentTrait().getTrait());
-        getEtCurVal().addTextChangedListener(getCvNum());
+        getEtCurVal().addTextChangedListener(getCvText());
     }
 
     private class RustButtonOnClickListener implements OnClickListener {

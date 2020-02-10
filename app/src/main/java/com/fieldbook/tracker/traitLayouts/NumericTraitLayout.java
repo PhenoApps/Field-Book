@@ -3,6 +3,7 @@ package com.fieldbook.tracker.traitLayouts;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -66,6 +67,7 @@ public class NumericTraitLayout extends TraitLayout {
             @Override
             public boolean onLongClick(View v) {
                 getEtCurVal().removeTextChangedListener(getCvNum());
+                getEtCurVal().removeTextChangedListener(getCvText());
                 getEtCurVal().setText("");
                 removeTrait(getCurrentTrait().getTrait());
                 getEtCurVal().addTextChangedListener(getCvNum());
@@ -81,14 +83,14 @@ public class NumericTraitLayout extends TraitLayout {
         getEtCurVal().setHint("");
 
         getEtCurVal().setVisibility(EditText.VISIBLE);
+        getEtCurVal().removeTextChangedListener(getCvNum());
+        getEtCurVal().removeTextChangedListener(getCvText());
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
             getEtCurVal().addTextChangedListener(getCvNum());
         } else {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
 
