@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">Field Book</string>
-    <string name="settings_title">Configuración</string>
     <string name="main_toolbar_search">Buscar</string>
     <string name="main_toolbar_resources">Recursos</string>
     <string name="traits_format_audio">Audio</string>
@@ -54,7 +53,6 @@
     <string name="import_dialog_unique">Identificador único (ID)</string>
     <string name="import_dialog_primary">Nivel de Primer Orden</string>
     <string name="import_dialog_secondary">Nivel de Segundo Orden</string>
-    <string name="import_dialog_title">Importar archivo de campo</string>
     <string name="import_dialog_importing">Espere...</string>
     <string name="import_error_general">Hubo un error durante importación</string>
     <string name="import_error_unique">Identificador único (ID) tiene duplicados</string>

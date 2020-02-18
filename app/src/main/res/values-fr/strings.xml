@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">"Carnet d'essai"</string>
-    <string name="settings_title">Paramètres</string>
     <string name="main_toolbar_search">Rechercher</string>
     <string name="main_toolbar_resources">Resources</string>
     <string name="traits_format_audio">Audio</string>
@@ -54,7 +53,6 @@
     <string name="import_dialog_unique">identifiant unique</string>
     <string name="import_dialog_primary">premier ordre</string>
     <string name="import_dialog_secondary">deuxième ordre</string>
-    <string name="import_dialog_title">"importer l'essai"</string>
     <string name="import_dialog_importing">veuillez patienter</string>
     <string name="import_error_general">"erreur d'importation"</string>
     <string name="import_error_unique">"l'identifiant unique contient des doublons"</string>

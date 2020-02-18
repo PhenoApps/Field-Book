@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">Fieldbuch</string>
-    <string name="settings_title">Einstellungen</string>
     <string name="main_toolbar_search">Suchen</string>
     <string name="main_toolbar_resources">Resourcen</string>
     <string name="traits_format_audio">Audio</string>
@@ -54,7 +53,6 @@
     <string name="import_dialog_unique">eindeutiges Zuordnungsmerkmal</string>
     <string name="import_dialog_primary">Erste Ordung</string>
     <string name="import_dialog_secondary">Zweite Ordnung</string>
-    <string name="import_dialog_title">Feldinformationen importieren</string>
     <string name="import_dialog_importing">Bitte warten...</string>
     <string name="import_error_general">Fehler beim Importieren</string>
     <string name="import_error_unique">Eindeutiges Zuordnungsmerkmal kommt mehr als nur einmal vor</string>

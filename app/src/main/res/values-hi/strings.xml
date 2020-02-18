@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">फील्ड बुक</string>
-    <string name="settings_title">सेटिंग</string>
     <string name="main_toolbar_search">खोजें</string>
     <string name="main_toolbar_resources">संसाधन</string>
     <string name="traits_format_audio">श्रव्य</string>
@@ -54,7 +53,6 @@
     <string name="import_dialog_unique">अद्वितीय पहचानकर्ता</string>
     <string name="import_dialog_primary">प्राथमिक क्रम</string>
     <string name="import_dialog_secondary">माध्यमिक क्रम</string>
-    <string name="import_dialog_title">खेत आयात करें</string>
     <string name="import_dialog_importing">कृपया प्रतीक्षा करें...</string>
     <string name="import_error_general">आयात करने में त्रुटि</string>
     <string name="import_error_unique">अद्वितीय पहचानकर्ता में नकल</string>

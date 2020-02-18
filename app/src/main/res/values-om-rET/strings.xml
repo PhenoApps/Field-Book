@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">Baruule Dirree</string>
-    <string name="settings_title">Keessi haalli ittin jijjiramu</string>
     <string name="main_toolbar_search">Barbaacha</string>
     <string name="main_toolbar_resources">Qabiyeee</string>
     <string name="traits_format_audio">Sagalee</string>
@@ -49,7 +48,6 @@
     <string name="search_dialog_query_is_less_than">"ni hir'ata"</string>
     <string name="search_results_missing">barbaaduun deebi hin finne</string>
     <string name="import_dialog_unique">adda baasaa dhuunfaa</string>
-    <string name="import_dialog_title">Iddoo biraatii galchuu</string>
     <string name="import_dialog_importing">Eegi</string>
     <string name="import_error_general">Galchuurratti dogogora qaba</string>
     <string name="import_error_unique">"Maqaan dhuunfa deddeebi'e"</string>

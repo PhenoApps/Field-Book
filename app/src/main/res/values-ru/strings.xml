@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">Полевой журнал</string>
-    <string name="settings_title">Настройки</string>
     <string name="main_toolbar_search">Поиск</string>
     <string name="main_toolbar_resources">Ресурсы</string>
     <string name="traits_format_audio">Звук</string>
@@ -54,7 +53,6 @@
     <string name="import_dialog_unique">уникальный идентификатор</string>
     <string name="import_dialog_primary">первичный порядок</string>
     <string name="import_dialog_secondary">вторичный порядок</string>
-    <string name="import_dialog_title">Импорт делянки</string>
     <string name="import_dialog_importing">Пожалуйта, подождите ...</string>
     <string name="import_error_general">Ошибка импорта</string>
     <string name="import_error_unique">Уникальный идентификатор содержит повторения</string>
