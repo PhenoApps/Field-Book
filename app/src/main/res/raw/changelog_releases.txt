@@ -1,7 +1,5 @@
-35/4.1.1
-
-34/4.1.0
-Workflow improved
+34/4.1.1
+Improved workflow
 Updated permission management
 Advanced settings overhauled
 Brapi integration

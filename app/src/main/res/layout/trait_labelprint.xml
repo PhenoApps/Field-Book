@@ -45,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/labelsizetitle"
+            android:text="@string/trait_layout_print_label_size_title"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -70,7 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/textfieldtitle"
+            android:text="@string/trait_layout_print_text_field_title"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -96,7 +96,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/textfieldtitle2"
+            android:text="@string/trait_layout_print_text_field_title_2"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -122,7 +122,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/textfieldtitle3"
+            android:text="@string/trait_layout_print_text_field_title_3"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -148,7 +148,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/textfieldtitle4"
+            android:text="@string/trait_layout_print_text_field_title_4"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -173,7 +173,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/barcodefieldtitle"
+            android:text="@string/trait_layout_print_barcode_field_title"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -199,7 +199,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/labelcopiestitle"
+            android:text="@string/trait_layout_print_label_copies_title"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
@@ -227,7 +227,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:text="@string/printstatustitle"
+            android:text="@string/trait_layout_print_status_title"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_medium"
             android:textStyle="bold" />
@@ -238,7 +238,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/printStatusTitle"
             android:layout_centerHorizontal="true"
-            android:text="@string/printstatus"
+            android:text="@string/trait_layout_print_status"
             android:textColor="#595959"
             android:textSize="@dimen/text_size_small"
             android:textStyle="bold" />
