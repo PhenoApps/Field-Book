@@ -12,23 +12,15 @@ import java.util.List;
  */
 public class CSVReader {
 
-    private BufferedReader br;
-
-    private boolean hasNext = true;
-
-    private char separator;
-
-    private char quotechar;
-
-    private int skipLines;
-
-    private boolean linesSkiped;
-
     private static final char DEFAULT_SEPARATOR = ',';
-
     private static final char DEFAULT_QUOTE_CHARACTER = '"';
-
     private static final int DEFAULT_SKIP_LINES = 0;
+    private BufferedReader br;
+    private boolean hasNext = true;
+    private char separator;
+    private char quotechar;
+    private int skipLines;
+    private boolean linesSkiped;
 
     public CSVReader(Reader reader) {
         this(reader, DEFAULT_SEPARATOR, DEFAULT_QUOTE_CHARACTER,
@@ -135,7 +127,7 @@ public class CSVReader {
                             // an
                             // escape
                             // sequence
-                                ) {
+                        ) {
                             sb.append(c);
                         }
                     }

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources
-    tools:ignore="MissingTranslation"
-    xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">መረጃ መመዝገቢያ፤</string>
-    <string name="settings_title">የውስጥ መቀየየራ፤</string>
     <string name="main_toolbar_search">መፈለግ፤</string>
     <string name="main_toolbar_resources">የመረጀ ምንጮች፤</string>
     <string name="traits_format_audio">ድምጽ፤</string>
@@ -56,7 +53,6 @@
     <string name="import_dialog_unique">መለያ</string>
     <string name="import_dialog_primary">ዋና አደራደር</string>
     <string name="import_dialog_secondary">ሁለተኛ አደራደር</string>
-    <string name="import_dialog_title">የሙከራ ማሳ አስገባ</string>
     <string name="import_dialog_importing">እባክህ ጠብቅ</string>
     <string name="import_error_general">ማስገባት ላይ ስህተት አላ</string>
     <string name="import_error_unique">መለያዉ ተመላልስዋል</string>

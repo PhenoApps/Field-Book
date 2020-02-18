@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:paddingLeft="20dp"
+    android:paddingTop="5dp"
+    android:paddingRight="20dp"
+    android:paddingBottom="5dp">
+
+    <TextView
+        android:id="@+id/brapiExportStats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="10dp"
+        android:text="@string/brapi_auth_needed_title"
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_medium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/brapi_auth_explanation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/brapi_auth_needed"
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_medium" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/brapi_auth_cancel_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:minWidth="@dimen/button_default_width"
+            android:text="@string/dialog_cancel"
+            android:textColor="#000000"
+            android:textSize="@dimen/text_size_large"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/brapi_auth_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:minWidth="@dimen/button_default_width"
+            android:text="@string/brapi_auth_btn"
+            android:textColor="#000000"
+            android:textSize="@dimen/text_size_large"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

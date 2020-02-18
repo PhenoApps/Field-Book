@@ -16,8 +16,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:textColor="#000000"
             android:text="@string/search_results_dialog_range"
+            android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
 
@@ -26,9 +26,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="#000000"
             android:gravity="center"
             android:text="@string/search_results_dialog_plot"
+            android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
 
@@ -38,9 +38,9 @@
         android:id="@+id/myList"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:fastScrollEnabled="true"
         android:layout_weight="1"
-        android:choiceMode="singleChoice" />
+        android:choiceMode="singleChoice"
+        android:fastScrollEnabled="true" />
 
     <LinearLayout
         android:layout_width="wrap_content"

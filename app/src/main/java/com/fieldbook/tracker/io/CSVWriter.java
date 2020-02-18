@@ -14,43 +14,37 @@ import java.util.ArrayList;
  */
 public class CSVWriter {
 
+    /**
+     * The character used for escaping quotes.
+     */
+    private static final char DEFAULT_ESCAPE_CHARACTER = '"';
+    /**
+     * The default separator to use if none is supplied to the constructor.
+     */
+    private static final char DEFAULT_SEPARATOR = ',';
+    /**
+     * The default quote character to use if none is supplied to the
+     * constructor.
+     */
+    private static final char DEFAULT_QUOTE_CHARACTER = '"';
+    /**
+     * The quote constant to use when you wish to suppress all quoting.
+     */
+    private static final char NO_QUOTE_CHARACTER = '\u0000';
+    /**
+     * The escape constant to use when you wish to suppress all escaping.
+     */
+    private static final char NO_ESCAPE_CHARACTER = '\u0000';
+    /**
+     * Default line terminator uses platform encoding.
+     */
+    private static final String DEFAULT_LINE_END = "\n";
     private PrintWriter pw;
     private char separator;
     private char quotechar;
     private char escapechar;
     private String lineEnd;
     private Cursor curCSV;
-
-    /**
-     * The character used for escaping quotes.
-     */
-    private static final char DEFAULT_ESCAPE_CHARACTER = '"';
-
-    /**
-     * The default separator to use if none is supplied to the constructor.
-     */
-    private static final char DEFAULT_SEPARATOR = ',';
-
-    /**
-     * The default quote character to use if none is supplied to the
-     * constructor.
-     */
-    private static final char DEFAULT_QUOTE_CHARACTER = '"';
-
-    /**
-     * The quote constant to use when you wish to suppress all quoting.
-     */
-    private static final char NO_QUOTE_CHARACTER = '\u0000';
-
-    /**
-     * The escape constant to use when you wish to suppress all escaping.
-     */
-    private static final char NO_ESCAPE_CHARACTER = '\u0000';
-
-    /**
-     * Default line terminator uses platform encoding.
-     */
-    private static final String DEFAULT_LINE_END = "\n";
 
     /**
      * Constructs CSVWriter using a comma for the separator.

@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
 
@@ -8,6 +9,8 @@ android {
         applicationId "com.fieldbook.tracker"
         minSdkVersion 16
         targetSdkVersion 28
+        versionCode = 411
+        versionName = '4.1.1'
     }
 
     buildTypes {
@@ -28,19 +31,38 @@ android {
         checkReleaseBuilds false
         disable 'MissingTranslation'
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha05'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha05'
-    implementation 'com.google.android.material:material:1.1.0-alpha06'
+    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha01'
+    implementation 'com.google.android.material:material:1.2.0-alpha03'
     implementation 'org.jsoup:jsoup:1.8.1'
     implementation 'net.sourceforge.jexcelapi:jxl:2.6.10'
-    implementation 'androidx.exifinterface:exifinterface:1.0.0'
+    implementation 'androidx.exifinterface:exifinterface:1.1.0'
     implementation "androidx.legacy:legacy-preference-v14:1.0.0"
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta1'
-    implementation "androidx.preference:preference:1.0.0"
-    implementation project(':dropbox')
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
+    implementation "androidx.preference:preference:1.1.0"
+    implementation 'org.phenoapps:javalib:1.0.4'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation "androidx.preference:preference:1.1.0"
+    implementation 'pub.devrel:easypermissions:3.0.0'
     implementation 'com.android.volley:volley:1.1.1'
+    implementation('com.journeyapps:zxing-android-embedded:3.6.0') { transitive = false }
+    implementation 'com.google.zxing:core:3.3.0'
+    implementation 'com.android.support:appcompat-v7:28'
+    implementation 'com.h6ah4i.android.preference:numberpickerprefcompat:1.0.0'
+
+    implementation project(':dropbox')
+
+    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation 'org.robolectric:robolectric:4.3.1'
+    testImplementation 'junit:junit:4.12'
 }

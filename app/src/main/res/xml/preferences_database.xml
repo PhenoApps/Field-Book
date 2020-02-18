@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:icon="@drawable/ic_pref_database_import"
+        android:key="pref_database_import"
+        android:summary=""
+        android:title="@string/database_import" />
+
+    <Preference
+        android:icon="@drawable/ic_pref_database_export"
+        android:key="pref_database_export"
+        android:summary=""
+        android:title="@string/database_export" />
+
+    <Preference
+        android:icon="@drawable/ic_pref_database_delete"
+        android:key="pref_database_delete"
+        android:summary=""
+        android:title="@string/database_reset" />
+
+</PreferenceScreen>

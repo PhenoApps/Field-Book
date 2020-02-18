@@ -17,10 +17,12 @@ public class FieldObject {
     private String date_edit;
     private String date_export;
     private String count;
+    private String exp_source;
 
-    public FieldObject() {}
+    public FieldObject() {
+    }
 
-    public int getExp_id() {
+    int getExp_id() {
         return exp_id;
     }
 
@@ -122,5 +124,13 @@ public class FieldObject {
 
     public void setCount(String count) {
         this.count = count;
+    }
+
+    public String getExp_source() {
+        return exp_source;
+    }
+
+    public void setExp_source(String exp_source) {
+        this.exp_source = exp_source;
     }
 }

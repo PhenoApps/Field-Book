@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.fieldbook.tracker.traitLayouts.BooleanTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/booleanLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:visibility="gone"
-    android:id="@+id/booleanLayout"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:visibility="gone">
 
     <ImageView
         android:id="@+id/eImg"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:scaleType="fitXY"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
+        android:scaleType="fitCenter"
         android:src="@drawable/trait_boolean_true" />
-</LinearLayout>
+</com.fieldbook.tracker.traitLayouts.BooleanTraitLayout>

@@ -13,8 +13,8 @@ import android.widget.ImageView.ScaleType;
 
 public class GalleryImageAdapter extends BaseAdapter {
 
-    private Activity context;
     private static ImageView imageView;
+    private Activity context;
     private List<Drawable> plotsImages;
 
     public GalleryImageAdapter(Activity context, List<Drawable> plotsImages) {
@@ -64,5 +64,4 @@ public class GalleryImageAdapter extends BaseAdapter {
     private static class ViewHolder {
         ImageView imageView;
     }
-
 }

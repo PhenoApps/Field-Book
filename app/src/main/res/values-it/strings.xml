@@ -28,7 +28,6 @@
     <string name="trait_error_disease_severity">Severità già registrata</string>
     <string name="trait_delete_warning_photo">Sei sicuro di voler eliminare questa foto?</string>
     <!-- Settings -->
-    <string name="settings_title">Impostazioni</string>
     <string name="settings_fields">Campi</string>
     <string name="settings_traits">Caratteri</string>
     <string name="settings_profile">Profilo</string>
@@ -118,7 +117,6 @@
     <string name="tutorial_main_4">L\'icona sfoglia mostra la lista dei file presenti nella cartella Risorse</string>
     <string name="tutorial_main_5">L\'icona di ricerca consente di interrogare il database</string>
     <string name="tutorial_main_6">L\'icona documento mostra il sommario di tutti i dati per una data voce</string>
-    <string name="tutorial_main_7">Tutte le altre opzioni sono a sinistra nel pannello di navigazione</string>
     <string name="tutorial_settings_1">Per importare e gestire i campi, selezionare Campi</string>
     <string name="tutorial_settings_2">Per aggiungere, importare o gestire i caratteri, selezionare Caratteri</string>
     <string name="tutorial_settings_3">Per inserire l\'operatore e la località, selezionare Profilo</string>
@@ -181,7 +179,6 @@ I dati possono essere esportati in due formati: database o tabella. Le colonne d
     <string name="database_reset_warning1">Tramite il reset, tutti i dati verranno cancellati. Sei sicuro di voler procedere?</string>
     <string name="database_reset_warning2">Un database cancellato non potrà essere ripristinato. L\'applicazione si chiuderà subito dopo. Sei sicuro di voler continuare?</string>
     <!-- Import dialog -->
-    <string name="import_dialog_title">Importa campo</string>
     <string name="import_dialog_unique">Identificatore unico</string>
     <string name="import_dialog_primary">Ordine primario</string>
     <string name="import_dialog_secondary">Ordine secondario</string>
@@ -213,7 +210,6 @@ I dati possono essere esportati in due formati: database o tabella. Le colonne d
     <!-- Field management strings -->
     <string name="fields_delete_study">Rimuovi campo</string>
     <string name="fields_delete_study_confirmation">Sei sicuro di voler eliminare questo campo? Verranno cancellati anche tutti i dati associati a questo campo</string>
-    <string name="fields_study_exists_title">Campo esistente</string>
     <string name="fields_study_exists_message">Un campo con questo nome esiste già. Vuoi sovrascrivere?</string>
     <string name="fields_date_imported">Importa data</string>
     <string name="fields_date_edited">Modifica data</string>

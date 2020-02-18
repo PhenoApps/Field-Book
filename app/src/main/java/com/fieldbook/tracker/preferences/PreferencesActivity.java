@@ -1,12 +1,20 @@
 package com.fieldbook.tracker.preferences;
 
+import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
+import android.preference.Preference;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceFragmentCompat;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
-public class PreferencesActivity extends AppCompatActivity {
+public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     // Appearance
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
@@ -52,34 +60,89 @@ public class PreferencesActivity extends AppCompatActivity {
 
     //BrAPI
     public static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
+    public static String BRAPI_TOKEN = "BRAPI_TOKEN";
 
+    private static PreferencesFragmentBrapi preferencesFragmentBrapi;
+    private static Preference brapiPrefCategory;
+    private BrapiControllerResponse brapiControllerResponse;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.settings_advanced));
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        getFragmentManager().beginTransaction()
+        preferencesFragmentBrapi = new PreferencesFragmentBrapi();
+
+        getSupportFragmentManager()
+                .beginTransaction()
                 .replace(android.R.id.content, new PreferencesFragment())
                 .commit();
+    }
+
+    public void processMessage(BrapiControllerResponse brapiControllerResponse) {
+        if (brapiControllerResponse.status != null) {
+            if (!brapiControllerResponse.status) {
+                Toast.makeText(this, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, R.string.brapi_auth_success, Toast.LENGTH_LONG).show();
+            }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // If our preference page was resumed, we will want to see if it was resumed from a deep link.
+        brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
+
+        // Set our button visibility and text
+        //todo null object reference
+        //preferencesFragmentBrapi.setButtonView();
+
+        processMessage(brapiControllerResponse);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                setResult(RESULT_OK);
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            setResult(RESULT_OK);
+            onBackPressed();
+            return true;
         }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
+
+    @Override
+    public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, androidx.preference.Preference pref) {
+
+        // Instantiate the new Fragment
+        final Bundle args = pref.getExtras();
+        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(
+                getClassLoader(),
+                pref.getFragment());
+        fragment.setArguments(args);
+        fragment.setTargetFragment(caller, 0);
+
+        // Replace the existing Fragment with the new Fragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(android.R.id.content, fragment)
+                .addToBackStack(null)
+                .commit();
+        return true;
     }
 }

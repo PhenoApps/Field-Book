@@ -3,9 +3,10 @@ package com.fieldbook.tracker.layoutConfig;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.util.Log;
+
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,7 +20,7 @@ import android.widget.TextView;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.R;
 
-public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLayoutConfigurator.ViewHolder>{
+public class SelectorLayoutConfigurator extends RecyclerView.Adapter<SelectorLayoutConfigurator.ViewHolder> {
 
     private Context context;
     private int maxSelectors;
@@ -36,7 +37,7 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
         this.dataHelper = new DataHelper(context);
     }
 
-    public void configureDropdownArray(String plotId){
+    public void configureDropdownArray(String plotId) {
         this.plotId = plotId;
         selectorsView.setHasFixedSize(true);
 
@@ -52,8 +53,7 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
         // create a new view
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.selector_dropdown, parent, false);
-        SelectorLayoutConfigurator.ViewHolder vh = new SelectorLayoutConfigurator.ViewHolder(v);
-        return vh;
+        return new ViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -74,7 +74,7 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
         return maxSelectors;
     }
 
-    private SharedPreferences getSharedPref(){
+    private SharedPreferences getSharedPref() {
         return this.context.getSharedPreferences("Settings", 0);
     }
 
@@ -117,7 +117,7 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private void configureText(final TextView text){
+    private void configureText(final TextView text) {
         text.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -140,6 +140,7 @@ public class SelectorLayoutConfigurator  extends RecyclerView.Adapter<SelectorLa
     static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         LinearLayout mTextView;
+
         ViewHolder(LinearLayout v) {
             super(v);
             mTextView = v;

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources
-    tools:ignore="MissingTranslation"
-    xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">Field Book</string>
-    <string name="settings_title">設定</string>
     <string name="main_toolbar_search">検索</string>
     <string name="main_toolbar_resources">資料室</string>
     <string name="traits_format_audio">音声</string>
@@ -56,7 +53,6 @@
     <string name="import_dialog_unique">識別番号</string>
     <string name="import_dialog_primary">第一区分</string>
     <string name="import_dialog_secondary">第二区分</string>
-    <string name="import_dialog_title">圃場ファイルのインポート</string>
     <string name="import_dialog_importing">しばらくお待ちください・・・</string>
     <string name="import_error_general">インポート中にエラーが生じました。</string>
     <string name="import_error_unique">識別番号が重複しています。</string>

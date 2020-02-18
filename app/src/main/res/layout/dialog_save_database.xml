@@ -5,8 +5,8 @@
     android:background="#FFFFFF"
     android:orientation="vertical"
     android:paddingLeft="20dp"
-    android:paddingRight="20dp"
     android:paddingTop="5dp"
+    android:paddingRight="20dp"
     android:paddingBottom="5dp">
 
     <TextView
@@ -30,8 +30,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:paddingTop="10dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="10dp">
 
         <Button
             android:id="@+id/saveBtn"

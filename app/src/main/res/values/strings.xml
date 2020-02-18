@@ -17,6 +17,14 @@
     <string name="startup_sample_data_title">Sample data</string>
     <string name="startup_sample_data_message">Load sample data?</string>
 
+    <!-- Permissions  -->
+    <string name="permission_rationale_location">Location features require access to the device\'s location.</string>
+    <string name="permission_rationale_camera">Camera features require access to the device\'s camera.</string>
+    <string name="permission_rationale_microphone">Recording sound requires access to the device\'s microphone.</string>
+    <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
+    <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
+    <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
+
     <!-- Miscellaneous  -->
     <string name="fields_name">Field Name</string>
     <string name="fields_load">Load</string>
@@ -95,6 +103,7 @@
     <string name="traits_format_location">Location</string>
     <string name="traits_format_printer">Printer</string>
     <string name="traits_format_barcode">Barcode</string>
+    <string name="traits_format_labelprint">Zebra Label Print</string>
 
     <string name="traits_create_trait">Trait</string>
     <string name="traits_create_format">Format</string>
@@ -200,8 +209,21 @@
     <string name="preferences_general_feature_datagrid">Datagrid</string>
     <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
 
+    <string name="preferences_source_default">Default data source</string>
+
     <!-- Trait text and errors -->
     <string name="trait_layout_data_stored">Saved</string>
+    <string name="trait_layout_print_title">Print Label</string>
+    <string name="trait_layout_print_status_title">Printer status</string>
+    <string name="trait_layout_print_status">Retrieving connection status...</string>
+    <string name="trait_layout_print_label_size_title">Size:</string>
+    <string name="trait_layout_print_text_field_title">Text:</string>
+    <string name="trait_layout_print_text_field_title_2">Text2:</string>
+    <string name="trait_layout_print_text_field_title_3">Text3:</string>
+    <string name="trait_layout_print_text_field_title_4">Text4:</string>
+    <string name="trait_layout_print_barcode_field_title">Barcode:</string>
+    <string name="trait_layout_print_label_copies_title">Copies:</string>
+    <string name="trait_layout_print_clear_settings">Clear settings</string>
 
     <string name="trait_error_hardware_missing">Your device does not contain the necessary hardware for this feature</string>
     <string name="trait_error_photo_missing">Photo does not exist</string>
@@ -286,12 +308,16 @@
     <string name="database_reset_message">Database has been deleted</string>
 
     <!-- Import dialog -->
-    <string name="import_source_local">Local</string>
+    <string name="import_source_local">Local storage</string>
     <string name="import_source_dropbox">Dropbox</string>
     <string name="import_source_googledrive">Google Drive</string>
     <string name="import_source_box">Box</string>
+    <string name="import_source_onedrive">OneDrive</string>
+    <string name="import_source_brapi">BrAPI</string>
+    <string name="import_source_ask">Always ask</string>
 
-    <string name="import_dialog_title">Import field</string>
+    <string name="import_dialog_title_fields">Import field</string>
+    <string name="import_dialog_title_traits">Import traits</string>
     <string name="import_dialog_unique">Unique identifier</string>
     <string name="import_dialog_primary">Primary order</string>
     <string name="import_dialog_secondary">Secondary order</string>
@@ -304,6 +330,32 @@
     <string name="import_error_column_name">Column name in imported file cannot be: </string>
     <string name="import_error_unique_characters_illegal">Selected column contains characters which cannot be used in the unique identifier</string>
     <string name="import_error_column_choice">Columns cannot be used for the same assignment</string>
+
+    <!-- Export dialog -->
+    <string name="export_source_local">Local</string>
+    <string name="export_source_brapi">BrAPI</string>
+    <string name="export_dialog_title">Export Data</string>
+
+    <!-- BrAPI export dialog -->
+    <string name="brapi_export_button">Export</string>
+    <string name="brapi_export_title">BrAPI Export Statistics</string>
+    <string name="brapi_export_observations">Observations</string>
+    <string name="brapi_export_num_new_obs"> New Observations</string>
+    <string name="brapi_export_num_synced_obs"> Synced Observations</string>
+    <string name="brapi_export_num_ed_obs"> Edited Observations</string>
+    <string name="brapi_export_skipped_observations"> Skipped Observations</string>
+    <string name="brapi_export_skipped_user_created"> User Created Trait Observations</string>
+    <string name="brapi_export_skipped_wrong_source"> Different Data Source</string>
+    <string name="brapi_export_num_new_imgs">New Images</string>
+    <string name="brapi_export_num_synced_imgs">Synced Images</string>
+    <string name="brapi_export_num_ed_imgs">Edited Images</string>
+    <string name="brapi_export_num_incomplete_imgs">Incomplete Synced Images</string>
+    <string name="brapi_export_skipped_images">Skipped Images</string>
+    <string name="brapi_export_skipped_user_created_images">User Created Trait Images</string>
+    <string name="brapi_export_images">Images</string>
+    <string name="brapi_na">NA</string>
+    <string name="brapi_delete_message">Cannot delete synced BrAPI observation, using NA instead</string>
+    <string name="images_loading">Loading Images...</string>
 
     <!-- Warnings/Catches -->
     <string name="warning_field_before_traits">A field must be imported before traits can be created.</string>
@@ -331,18 +383,65 @@
     <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
     <string name="citation_text" translatable="false">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
 
-
     <!-- Brapi strings -->
     <string name="preferences_brapi">BrAPI</string>
     <string name="brapi_base_url">BrAPI Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
-    <string name="brapi_base_url_default">https://example.org/brapi/v1</string>
+    <string name="brapi_title">BrAPI Configuration</string>
+    <string name="brapi_save_authorize">Save and Authorize</string>
+    <string name="brapi_authorize">Authorize BrAPI</string>
+    <string name="brapi_reauthorize">Reauthorize BrAPI</string>
+    <string name="brapi_revoke_auth">Log Out</string>
+    <string name="brapi_auth_success">BrAPI Authorization Successful</string>
+    <string name="brapi_auth_deny">BrAPI Authorization Denied</string>
+    <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
+    <string name="brapi_btn_auth_summary">Brapi is currently authorized with %1$s</string>
+    <string name="brapi_base_url_default">https://test-server.brapi.org</string>
     <string name="brapi_load_data_button">Load Fields</string>
+    <string name="brapi_load_traits_button">Load Traits</string>
     <string name="brapi_save_data_button">Save Field</string>
     <string name="brapi_study_name">Name</string>
     <string name="brapi_study_description">Description</string>
     <string name="brapi_study_location">Location</string>
     <string name="brapi_study_num_plots"> Plots</string>
     <string name="brapi_study_num_traits"> Traits</string>
-    <string name="import_source_brapi">Remote (BrAPI)</string>
+    <string name="brapi_study_detail_error">Error when loading study details for study. Study not saved.</string>
+    <string name="brapi_plot_detail_error">Error when loading plots for study. Study not saved.</string>
+    <string name="brapi_study_traits_error">Error when loading traits for study. Study not saved.</string>
+    <string name="brapi_ontology_error">Error loadings traits from BrAPI.</string>
+    <string name="brapi_save_field_error">Error Saving Field</string>
+    <string name="brapi_field_not_selected">Selected Field Must Be Imported From BrAPI.</string>
+    <string name="brapi_save_trait">Save Traits</string>
+    <string name="brapi_must_configure_url">Must configure a valid BrAPI URL in settings before proceeding</string>
+    <string name="brapi_export_failed">BrAPI Export Failed</string>
+    <string name="brapi_export_permission_deny">ERROR: You do not have the permissions to send data to the specified system.</string>
+    <string name="brapi_export_not_supported">ERROR: Target system does not support sending observations via BrAPI.</string>
+    <string name="brapi_export_wrong_num_obs">ERROR: Response number of observations different from request</string>
+    <string name="brapi_export_missing_obs">ERROR: Missing observation in response</string>
+    <string name="brapi_export_multiple_obs">ERROR: Multiple observations per variable</string>
+    <string name="brapi_export_unknown_error">ERROR: Unknown Error</string>
+    <string name="brapi_export_successful">BrAPI Export Successful</string>
+    <string name="brapi_saving_indicator">Saving Observations...</string>
+    <string name="brapi_field_non_matching_sources">Unable to sync data. Field data originates from, %1$s, BrAPI url currently set to %2$s. Sources must match.</string>
+    <string name="brapi_trait_already_exists">Trait already exists: %1$s. Not saving.</string>
+    <string name="brapi_error_saving_all_traits">Error saving traits. No traits were saved.</string>
+    <string name="brapi_error_saving_some_traits">Error saving some traits. Some traits were not saved</string>
+    <string name="brapi_traits_saved_success">Selected traits saved successfully.</string>
+    <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
+    <string name="next">Next</string>
+    <string name="prev">Prev</string>
+    <string name="page_one_of_one">Page 1 of 1</string>
+    <string name="brapi_auth_needed_title">Login Needed</string>
+    <string name="brapi_auth_needed">
+    You need to be logged into the system you are attempting to sync data with in order
+        to sync your data.
+
+    Would you like to authenticate now?
+    </string>
+    <string name="brapi_info_message">
+        Traits and fields imported via BrAPI will be able to export their observations via the BrAPI export.
+        Traits and fields created manually or imported via CSV will need to be exported via CSV format.
+    </string>
+    <string name="brapi_info_title">BrAPI Syncing Info</string>
+    <string name="brapi_auth_btn">Log In to Site</string>
 </resources>

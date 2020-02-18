@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources
-    tools:ignore="MissingTranslation"
-    xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">Caderno de campo</string>
-    <string name="settings_title">Configurações</string>
     <string name="main_toolbar_search">Buscar</string>
     <string name="main_toolbar_resources">Recursos</string>
     <string name="traits_format_audio">Áudio</string>
@@ -56,7 +53,6 @@
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Ordem primária</string>
     <string name="import_dialog_secondary">ordem secundária</string>
-    <string name="import_dialog_title">Importar campo</string>
     <string name="import_dialog_importing">Por favor aguarde...</string>
     <string name="import_error_general">Erro na importação</string>
     <string name="import_error_unique">Identificador único contém duplicatas</string>

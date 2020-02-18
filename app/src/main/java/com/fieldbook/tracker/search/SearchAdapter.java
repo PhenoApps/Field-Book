@@ -38,11 +38,6 @@ class SearchAdapter extends BaseAdapter {
         return position;
     }
 
-    private class ViewHolder {
-        TextView range;
-        TextView plot;
-    }
-
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
@@ -62,4 +57,8 @@ class SearchAdapter extends BaseAdapter {
         return convertView;
     }
 
+    private class ViewHolder {
+        TextView range;
+        TextView plot;
+    }
 }

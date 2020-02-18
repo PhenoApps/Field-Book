@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:key="brapi_category">
+        <EditTextPreference
+            android:defaultValue="@string/brapi_base_url_default"
+            android:dialogMessage="@string/brapi_base_url_desc"
+            android:dialogTitle="@string/brapi_base_url"
+            android:icon="@drawable/ic_adv_brapi_base"
+            android:key="BRAPI_BASE_URL"
+            android:positiveButtonText="@string/brapi_save_authorize"
+            android:summary="@string/brapi_base_url_desc"
+            android:title="@string/brapi_base_url" />
+
+        <Preference
+            android:icon="@drawable/ic_launch"
+            android:key="authorizeBrapi"
+            android:title="@string/brapi_authorize" />
+
+        <Preference
+            android:icon="@drawable/ic_exit_to_app"
+            android:key="revokeBrapiAuth"
+            android:title="@string/brapi_revoke_auth" />
+    </PreferenceCategory>
+</PreferenceScreen>

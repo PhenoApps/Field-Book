@@ -1,6 +1,8 @@
-34/4.1.0
-Updated introduction and permission management
+34/4.1.1
+Improved workflow
+Updated permission management
 Advanced settings overhauled
+Brapi integration
 Lots of bug fixes
 
 33/4.0.3

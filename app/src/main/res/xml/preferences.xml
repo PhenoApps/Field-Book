@@ -1,178 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <Preference
+        android:icon="@drawable/ic_nav_drawer_person"
+        android:key="pref_key_profile_settings"
+        android:title="@string/settings_profile"
+        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentProfile" />
 
-    <PreferenceCategory
-        android:key="pref_key_ui_settings"
-        android:title="@string/preferences_appearance_title">
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_tb_help"
-            android:key="Tips"
-            android:summary="@string/preferences_appearance_tutorial_description"
-            android:title="@string/tutorial_dialog_title" />
-
-        <Preference
-            android:icon="@drawable/ic_nav_drawer_translate"
-            android:key="language"
-            android:summary="@string/preferences_appearance_language_description"
-            android:title="@string/preferences_appearance_language">
-
-            <intent
-                android:action="android.intent.action.MAIN"
-                android:targetClass="com.android.settings.LanguageSettings"
-                android:targetPackage="com.android.settings" />
-        </Preference>
-
-        <com.fieldbook.tracker.preferences.IntEditTextPreference
-            android:icon="@drawable/ic_adv_infobar_count"
-            android:key="INFOBAR_NUMBER"
-            android:maxLength="2"
-            android:numeric="integer"
-            android:summary="@string/preferences_appearance_infobar_number_description"
-            android:title="@string/preferences_appearance_infobar_number" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_quick_goto"
-            android:key="QuickGoTo"
-            android:summary="@string/preferences_appearance_quickgoto_description"
-            android:title="@string/preferences_appearance_quickgoto" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="pref_key_sounds_settings"
-        android:title="@string/preferences_sounds">
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_primary_order_sound"
-            android:key="RangeSound"
-            android:summary="@string/preferences_sound_primary_order_sound_description"
-            android:title="@string/preferences_sound_primary_order_sound" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="pref_key_ux_settings"
-        android:title="@string/preferences_behavior_title">
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_remap_volume_buttons"
-            android:key="VOLUME_NAVIGATION"
-            android:summary="@string/preferences_behavior_volume_buttons_navigate_description"
-            android:title="@string/preferences_behavior_volume_buttons_navigate" />
-
-        <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/pref_return_character"
-            android:entryValues="@array/pref_return_character_values"
-            android:icon="@drawable/ic_return_character"
-            android:key="RETURN_CHARACTER"
-            android:summary="%s"
-            android:title="@string/preferences_behavior_return_character" />
-        <!-- todo add measurement as an option-->
-    </PreferenceCategory>
-
-    <PreferenceCategory
+    <Preference
+        android:icon="@drawable/ic_pref_general"
         android:key="pref_key_general_settings"
-        android:title="@string/preferences_general_title">
+        android:title="@string/preferences_general_title"
+        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentGeneral" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_cycle_traits_advances"
-            android:key="CycleTraits"
-            android:summary="@string/preferences_behavior_cycle_traits_description"
-            android:title="@string/preferences_behavior_cycle_traits" />
+    <Preference
+        android:icon="@drawable/ic_pref_appearance"
+        android:key="pref_key_ui_settings"
+        android:title="@string/preferences_appearance_title"
+        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentAppearance" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_tb_forward"
-            android:key="NextEmptyPlot"
-            android:summary="@string/preferences_general_feature_next_missing_description"
-            android:title="@string/preferences_general_feature_next_missing" />
+    <Preference
+        android:icon="@drawable/ic_pref_sounds"
+        android:key="pref_key_sounds_settings"
+        android:title="@string/preferences_sounds"
+        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentSounds" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_tb_barcode_scan"
-            android:key="BarcodeScan"
-            android:summary="@string/preferences_general_barcode_camera_description"
-            android:title="@string/preferences_general_barcode_camera" />
+    <Preference
+        android:icon="@drawable/ic_pref_navigation"
+        android:key="pref_key_ux_settings"
+        android:title="@string/preferences_behavior_title"
+        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentBehavior" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_tb_datagrid"
-            android:key="DataGrid"
-            android:summary="@string/preferences_general_feature_datagrid_description"
-            android:title="@string/preferences_general_feature_datagrid" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_action_ic_adv_disable_left"
-            android:key="DisableEntryNavLeft"
-            android:summary="@string/preferences_general_entry_left_disable_description"
-            android:title="@string/preferences_general_entry_left_disable" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_action_ic_adv_disable_right"
-            android:key="DisableEntryNavRight"
-            android:summary="@string/preferences_general_entry_right_disable_description"
-            android:title="@string/preferences_general_entry_right_disable" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_disable_file_sharing"
-            android:key="DisableShare"
-            android:summary="@string/preferences_general_share_disable_description"
-            android:title="@string/preferences_general_share_disable" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_unique"
-            android:key="JumpToPlot"
-            android:summary="@string/preferences_general_feature_barcode_text_description"
-            android:title="@string/preferences_general_feature_barcode_text" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_use_day"
-            android:key="UseDay"
-            android:summary="@string/preferences_general_use_day_number_description"
-            android:title="@string/preferences_general_use_day_number" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_hide_entries"
-            android:key="IgnoreExisting"
-            android:summary="@string/preferences_general_skip_entries_with_data_description"
-            android:title="@string/preferences_general_skip_entries_with_data" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
+    <Preference
+        android:icon="@drawable/ic_adv_brapi"
         android:key="pref_key_brapi_settings"
-        android:title="@string/preferences_brapi">
+        android:title="@string/preferences_brapi"
+        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentBrapi" />
 
-        <EditTextPreference
-            android:icon="@drawable/ic_adv_infobar_count"
-            android:key="BRAPI_BASE_URL"
-            android:summary="@string/brapi_base_url_desc"
-            android:title="@string/brapi_base_url"
-            android:dialogTitle="@string/brapi_base_url"
-            android:dialogMessage="@string/brapi_base_url_desc"
-            android:defaultValue="@string/brapi_base_url_default"
-            />
+    <Preference
+        android:icon="@drawable/ic_pref_database"
+        android:key="pref_key_database_settings"
+        android:title="@string/database_dialog_title"
+        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentDatabase" />
 
-    </PreferenceCategory>
-
-
-    <!--
-
-<PreferenceCategory
-    android:title="@string/preferences_files_naming"
-    android:key="pref_key_files_settings">
-</PreferenceCategory>
--->
-</PreferenceScreen>
+</androidx.preference.PreferenceScreen>

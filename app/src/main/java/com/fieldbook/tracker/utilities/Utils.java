@@ -3,6 +3,8 @@ package com.fieldbook.tracker.utilities;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import java.io.File;
@@ -49,6 +51,16 @@ public class Utils {
         }
 
         return truncated.toString();
+    }
+
+    public static boolean isConnected(Context context) {
+
+        ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected())
+            return true;
+        else
+            return false;
     }
 
     //TODO language

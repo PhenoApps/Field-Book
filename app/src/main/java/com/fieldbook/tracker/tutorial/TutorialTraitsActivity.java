@@ -17,10 +17,8 @@ import com.fieldbook.tracker.R;
 
 public class TutorialTraitsActivity extends Activity {
     public static Activity thisActivity;
-
-    private int screen;
-
     private final int max = 4;
+    private int screen;
 
     @Override
     public void onDestroy() {
@@ -116,5 +114,4 @@ public class TutorialTraitsActivity extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return super.onKeyDown(keyCode, event);
     }
-
 }
