@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!--
-        <ListPreference
-            android:defaultValue="1"
-            android:icon="@drawable/ic_pref_source_default"
-            app:dialogTitle="@string/preferences_source_default"
-            app:entries="@array/pref_import_source_entries"
-            app:entryValues="@array/pref_import_source_values"
-            app:key="IMPORT_SOURCE_DEFAULT"
-            app:title="@string/preferences_source_default"
-            app:useSimpleSummaryProvider="true" />
-            -->
+    <ListPreference
+        android:defaultValue="1"
+        android:icon="@drawable/ic_pref_source_default"
+        app:dialogTitle="@string/preferences_source_default"
+        app:entries="@array/pref_import_source_entries"
+        app:entryValues="@array/pref_import_source_values"
+        app:key="IMPORT_SOURCE_DEFAULT"
+        app:title="@string/preferences_source_default"
+        app:useSimpleSummaryProvider="true"/>
+        -->
 
     <CheckBoxPreference
         android:defaultValue="false"

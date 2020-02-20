@@ -30,7 +30,8 @@
         android:label="@string/field_book"
         android:largeHeap="true"
         android:usesCleartextTraffic="true"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:name="androidx.multidex.MultiDexApplication">
         <activity
             android:name=".ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"

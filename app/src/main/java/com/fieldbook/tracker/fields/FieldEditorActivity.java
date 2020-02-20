@@ -35,6 +35,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.box.androidsdk.browse.activities.BoxBrowseFileActivity;
+import com.box.androidsdk.content.models.BoxSession;
 import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.utilities.ApiKeys;
@@ -177,9 +179,9 @@ public class FieldEditorActivity extends AppCompatActivity {
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_dropbox);
         importArray[2] = getString(R.string.import_source_brapi);
-
-        //TODO add google drive (requires Google Play Services)
-        //importArray[2] = getString(R.string.importgoogle);
+        //importArray[3] = getString(R.string.import_source_googledrive);
+        //importArray[4] = getString(R.string.import_source_box);
+        //importArray[5] = getString(R.string.import_source_onedrive);
 
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -192,6 +194,15 @@ public class FieldEditorActivity extends AppCompatActivity {
                         break;
                     case 2:
                         loadBrAPI();
+                        break;
+                    case 3:
+                        loadGoogleDrive();
+                        break;
+                    case 4:
+                        loadBox();
+                        break;
+                    case 5:
+                        loadOneDrive();
                         break;
 
                 }
@@ -236,17 +247,19 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     //TODO
     public void loadBox() {
-
+        BoxSession session = new BoxSession(FieldEditorActivity.this);
+        startActivityForResult(BoxBrowseFileActivity.getLaunchIntent(FieldEditorActivity.this, "<FOLDER_ID>", session), 4);
+        makeToast("Box");
     }
 
     //TODO
     public void loadGoogleDrive() {
-
+        makeToast("Google");
     }
 
     //TODO
     public void loadOneDrive() {
-
+        makeToast("OneDrive");
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE)
@@ -291,9 +304,31 @@ public class FieldEditorActivity extends AppCompatActivity {
                 break;
 
             case R.id.importField:
-                showFileDialog();
+                String choice = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
+                switch(choice)
+                {
+                    case "local":
+                        loadLocal();
+                        break;
+                    case "dropbox":
+                        loadDropbox();
+                        break;
+                    case "brapi":
+                        loadBrAPI();
+                        break;
+                    case "gdrive":
+                        loadGoogleDrive();
+                        break;
+                    case "box":
+                        loadBox();
+                        break;
+                    case "onedrive":
+                        loadOneDrive();
+                        break;
+                    default:
+                        showFileDialog();
+                }
                 break;
-
             case android.R.id.home:
                 fieldCheck();
                 break;
