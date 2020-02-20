@@ -437,7 +437,7 @@ public class MainActivity extends AppCompatActivity {
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.range.equals(range) & cRange.plot.equals(plot)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     haveData = true;
                 }
             }
@@ -450,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.plot.equals(plot)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     haveData = true;
                 }
             }
@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.range.equals(range)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     haveData = true;
                 }
             }
@@ -476,7 +476,7 @@ public class MainActivity extends AppCompatActivity {
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.plot_id.equals(plotID)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     return;
                 }
             }
@@ -486,22 +486,11 @@ public class MainActivity extends AppCompatActivity {
             makeToast(getString(R.string.main_toolbar_moveto_no_match));
     }
 
-    private void moveToResult(int j) {
-        if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-            if (!existsTrait(rangeBox.getRangeIDByIndex(j - 1))) {
-                moveToResultCore(j);
-            }
-        } else {
-            moveToResultCore(j);
-        }
-    }
-
     private void moveToResultCore(int j) {
         rangeBox.setPaging(j);
 
         // Reload traits based on selected plot
         rangeBox.display();
-
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         initWidgets(false);
