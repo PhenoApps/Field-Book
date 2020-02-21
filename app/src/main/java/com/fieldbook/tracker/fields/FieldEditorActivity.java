@@ -55,6 +55,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import android.view.View.OnClickListener;
+import com.microsoft.onedrivesdk.picker.*;
+
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -78,6 +81,8 @@ public class FieldEditorActivity extends AppCompatActivity {
     private Menu systemMenu;
     private Dialog importFieldDialog;
     private int idColPosition;
+    private IPicker mPicker;
+
     // Creates a new thread to do importing
     private Runnable importRunnable = new Runnable() {
         public void run() {
@@ -173,13 +178,15 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         ListView myList = layout.findViewById(R.id.myList);
 
-        String[] importArray = new String[3];
+        String[] importArray = new String[7];
         importArray[0] = getString(R.string.import_source_local);
-        importArray[1] = getString(R.string.import_source_dropbox);
-        importArray[2] = getString(R.string.import_source_brapi);
+        importArray[1] = getString(R.string.import_source_brapi);
+        importArray[2] = getString(R.string.import_source_dropbox);
+        importArray[3] = getString(R.string.import_source_onedrive);
+        importArray[4] = getString(R.string.import_source_box);
+        importArray[5] = getString(R.string.import_source_googledrive);
+        importArray[6] = "system test";
 
-        //TODO add google drive (requires Google Play Services)
-        //importArray[2] = getString(R.string.importgoogle);
 
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -188,10 +195,22 @@ public class FieldEditorActivity extends AppCompatActivity {
                         loadLocalPermission();
                         break;
                     case 1:
-                        loadDropbox();
+                        loadBrAPI();
                         break;
                     case 2:
-                        loadBrAPI();
+                        loadDropbox();
+                        break;
+                    case 3:
+                        loadOneDrive();
+                        break;
+                    case 4:
+                        loadBox();
+                        break;
+                    case 5:
+                        loadGoogleDrive();
+                        break;
+                    case 6:
+                        loadAndroidPicker();
                         break;
 
                 }
@@ -244,9 +263,21 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     }
 
-    //TODO
-    public void loadOneDrive() {
+    public void loadAndroidPicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        //intent.putExtra("browseCoa", itemToBrowse);
+        //Intent chooser = Intent.createChooser(intent, "Select a File to Upload");
+        //startActivityForResult(chooser, FILE_SELECT_CODE);
+        startActivityForResult(Intent.createChooser(intent, "Select a File to Upload"),5);
+    }
 
+    //TODO test this with personal account to verify that it works correctly
+    public void loadOneDrive() {
+        String ONEDRIVE_APP_ID = ApiKeys.ONEDRIVE_APP_ID;
+        mPicker = Picker.createPicker(ONEDRIVE_APP_ID);
+        mPicker.startPicking(this, LinkType.WebViewLink);
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE)
@@ -291,9 +322,35 @@ public class FieldEditorActivity extends AppCompatActivity {
                 break;
 
             case R.id.importField:
-                showFileDialog();
-                break;
+                String importer = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
 
+                switch (importer) {
+                    case "ask":
+                        showFileDialog();
+                        break;
+                    case "local":
+                        loadLocal();
+                        break;
+                    case "dropbox":
+                        loadDropbox();
+                        break;
+                    case "gdrive":
+                        loadGoogleDrive();
+                        break;
+                    case "box":
+                        loadBox();
+                        break;
+                    case "onedrive":
+                        loadOneDrive();
+                        break;
+                    case "brapi":
+                        loadBrAPI();
+                        break;
+                    default:
+                        showFileDialog();
+                }
+
+                break;
             case android.R.id.home:
                 fieldCheck();
                 break;
@@ -318,6 +375,8 @@ public class FieldEditorActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        IPickerResult onedriveResult = mPicker.getPickerResult(requestCode, resultCode, data);
+
         if (requestCode == 2) {
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra("result");
@@ -334,10 +393,21 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         if (requestCode == 3) {
             if (resultCode == RESULT_OK) {
-                DbxChooser.Result result = new DbxChooser.Result(data);
-                saveFileFromUri(result.getLink(), result.getName());
-                final String chosenFile = Constants.FIELDIMPORTPATH + "/" + result.getName();
+                DbxChooser.Result dropboxResult = new DbxChooser.Result(data);
+                saveFileFromUri(dropboxResult.getLink(), dropboxResult.getName());
+                final String chosenFile = Constants.FIELDIMPORTPATH + "/" + dropboxResult.getName();
                 showFieldFileDialog(chosenFile);
+            }
+        }
+
+        if (requestCode == resultCode) {
+            if (resultCode == RESULT_OK) {
+                if (onedriveResult != null) {
+                    //Log.d("main", "Link to file '" + onedriveResult.getName() + ": " + onedriveResult.getLink());
+                    saveFileFromUri(onedriveResult.getLink(),onedriveResult.getName());
+                    final String chosenFile = Constants.FIELDIMPORTPATH + "/" + onedriveResult.getName();
+                    showFieldFileDialog(chosenFile);
+                }
             }
         }
     }
