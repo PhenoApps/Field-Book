@@ -23,6 +23,7 @@ import android.provider.Settings;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
+import androidx.preference.PreferenceManager;
 
 import android.text.Html;
 import android.util.Log;

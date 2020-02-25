@@ -35,6 +35,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+//import com.box.androidsdk.browse.activities.BoxBrowseFileActivity;
+//import com.box.androidsdk.content.models.BoxSession;
 import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.utilities.ApiKeys;
@@ -255,12 +257,14 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     //TODO
     public void loadBox() {
-
+        //BoxSession session = new BoxSession(FieldEditorActivity.this);
+        //startActivityForResult(BoxBrowseFileActivity.getLaunchIntent(FieldEditorActivity.this, "<FOLDER_ID>", session), 4);
+        //makeToast("Box");
     }
 
     //TODO
     public void loadGoogleDrive() {
-
+        makeToast("Google");
     }
 
     public void loadAndroidPicker() {
@@ -275,6 +279,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     //TODO test this with personal account to verify that it works correctly
     public void loadOneDrive() {
+        makeToast("OneDrive");
         String ONEDRIVE_APP_ID = ApiKeys.ONEDRIVE_APP_ID;
         mPicker = Picker.createPicker(ONEDRIVE_APP_ID);
         mPicker.startPicking(this, LinkType.WebViewLink);
@@ -351,6 +356,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 }
 
                 break;
+
             case android.R.id.home:
                 fieldCheck();
                 break;
@@ -375,7 +381,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        IPickerResult onedriveResult = mPicker.getPickerResult(requestCode, resultCode, data);
+        //IPickerResult onedriveResult = mPicker.getPickerResult(requestCode, resultCode, data);
 
         if (requestCode == 2) {
             if (resultCode == RESULT_OK) {
@@ -400,16 +406,16 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         }
 
-        if (requestCode == resultCode) {
-            if (resultCode == RESULT_OK) {
-                if (onedriveResult != null) {
+        //if (requestCode == resultCode) {
+           // if (resultCode == RESULT_OK) {
+                //if (onedriveResult != null) {
                     //Log.d("main", "Link to file '" + onedriveResult.getName() + ": " + onedriveResult.getLink());
-                    saveFileFromUri(onedriveResult.getLink(),onedriveResult.getName());
-                    final String chosenFile = Constants.FIELDIMPORTPATH + "/" + onedriveResult.getName();
-                    showFieldFileDialog(chosenFile);
-                }
-            }
-        }
+                 //   saveFileFromUri(onedriveResult.getLink(),onedriveResult.getName());
+                  //  final String chosenFile = Constants.FIELDIMPORTPATH + "/" + onedriveResult.getName();
+                  //  showFieldFileDialog(chosenFile);
+              //  }
+            //}
+       // }
     }
 
     private void saveFileFromUri(Uri sourceUri, String fileName) {

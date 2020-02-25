@@ -34,4 +34,13 @@
         android:key="QuickGoTo"
         android:summary="@string/preferences_appearance_quickgoto_description"
         android:title="@string/preferences_appearance_quickgoto" />
+
+    <MultiSelectListPreference
+        android:defaultValue="@array/pref_toolbar_customize_default"
+        android:dialogTitle="@string/preferences_appearance_toolbar_customize"
+        android:entries="@array/pref_toolbar_customize_title"
+        android:entryValues="@array/pref_toolbar_customize_values"
+        android:key="TOOLBAR_CUSTOMIZE"
+        android:summary="@string/preferences_appearance_toolbar_customize_description"
+        android:title="@string/preferences_appearance_toolbar_customize" />
 </PreferenceScreen>

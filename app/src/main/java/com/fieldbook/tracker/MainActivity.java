@@ -17,6 +17,7 @@ import android.os.Message;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
@@ -66,7 +67,9 @@ import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -300,6 +303,7 @@ public class MainActivity extends AppCompatActivity {
         traitBox = new TraitBox(this);
         rangeBox = new RangeBox(this);
         initCurrentVals();
+
     }
 
     private void refreshMain() {
@@ -437,7 +441,7 @@ public class MainActivity extends AppCompatActivity {
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.range.equals(range) & cRange.plot.equals(plot)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     haveData = true;
                 }
             }
@@ -450,7 +454,7 @@ public class MainActivity extends AppCompatActivity {
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.plot.equals(plot)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     haveData = true;
                 }
             }
@@ -463,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.range.equals(range)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     haveData = true;
                 }
             }
@@ -476,7 +480,7 @@ public class MainActivity extends AppCompatActivity {
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.plot_id.equals(plotID)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     return;
                 }
             }
@@ -486,22 +490,11 @@ public class MainActivity extends AppCompatActivity {
             makeToast(getString(R.string.main_toolbar_moveto_no_match));
     }
 
-    private void moveToResult(int j) {
-        if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-            if (!existsTrait(rangeBox.getRangeIDByIndex(j - 1))) {
-                moveToResultCore(j);
-            }
-        } else {
-            moveToResultCore(j);
-        }
-    }
-
     private void moveToResultCore(int j) {
         rangeBox.setPaging(j);
 
         // Reload traits based on selected plot
         rangeBox.display();
-
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         initWidgets(false);
@@ -657,9 +650,19 @@ public class MainActivity extends AppCompatActivity {
         etCurVal.setText("");
     }
 
+    private void customizeToolbarIcons() {
+        Set<String> entries = ep.getStringSet(PreferencesActivity.TOOLBAR_CUSTOMIZE, new HashSet<String>());
+
+        if (systemMenu != null) {
+            systemMenu.findItem(R.id.search).setVisible(entries.contains("search"));
+            systemMenu.findItem(R.id.resources).setVisible(entries.contains("resources"));
+            systemMenu.findItem(R.id.summary).setVisible(entries.contains("summary"));
+            systemMenu.findItem(R.id.lockData).setVisible(entries.contains("lockData"));
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         new MenuInflater(MainActivity.this).inflate(R.menu.menu_main, menu);
 
         systemMenu = menu;
@@ -669,6 +672,8 @@ public class MainActivity extends AppCompatActivity {
         systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(PreferencesActivity.NEXT_ENTRY_NO_DATA, false));
         systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(PreferencesActivity.UNIQUE_CAMERA, false));
         systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(PreferencesActivity.DATAGRID_SETTING, false));
+
+        customizeToolbarIcons();
 
         lockData(dataLocked);
 
@@ -818,7 +823,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void makeToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
     public void nextEmptyPlot() {

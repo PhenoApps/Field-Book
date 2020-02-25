@@ -30,7 +30,8 @@
         android:label="@string/field_book"
         android:largeHeap="true"
         android:usesCleartextTraffic="true"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:name="androidx.multidex.MultiDexApplication">
         <activity
             android:name=".ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -53,14 +54,12 @@
             android:name=".search.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
             android:theme="@style/ActivityDialog"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".DatagridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
             android:theme="@style/ActivityDialog" />
         <activity
             android:name=".brapi.BrapiActivity"
@@ -78,7 +77,6 @@
             android:name=".FileExploreActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
             android:theme="@style/ActivityDialog" />
         <activity
             android:name=".traits.TraitEditorActivity"
@@ -99,7 +97,6 @@
         <activity
             android:name=".ChangelogActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:screenOrientation="portrait"
             android:theme="@style/ActivityDialog" />
         <activity
             android:name=".tutorial.TutorialMainActivity"

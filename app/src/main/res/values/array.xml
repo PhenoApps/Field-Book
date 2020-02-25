@@ -19,11 +19,18 @@
         <item>@string/preferences_appearance_toolbar_customize_lock</item>
     </string-array>
 
-    <string-array name="pref_toolbar_customize_key">
-        <item>@string/preferences_appearance_toolbar_customize_search</item>
-        <item>@string/preferences_appearance_toolbar_customize_resources</item>
-        <item>@string/preferences_appearance_toolbar_customize_summary</item>
-        <item>@string/preferences_appearance_toolbar_customize_lock</item>
+    <string-array name="pref_toolbar_customize_values">
+        <item>search</item>
+        <item>resources</item>
+        <item>summary</item>
+        <item>lockData</item>
+    </string-array>
+
+    <string-array name="pref_toolbar_customize_default">
+        <item>search</item>
+        <item>resources</item>
+        <item>summary</item>
+        <item>lockData</item>
     </string-array>
 
     <string-array name="pref_return_character">
