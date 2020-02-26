@@ -4,19 +4,14 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AlertDialog;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,7 +19,6 @@ import android.provider.Settings;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.DialogCompat;
 import androidx.core.content.FileProvider;
 
 import android.text.Html;
@@ -47,7 +41,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.brapi.BrAPIService;
@@ -60,13 +53,10 @@ import com.fieldbook.tracker.fields.FieldEditorActivity;
 import com.fieldbook.tracker.traits.TraitEditorActivity;
 import com.fieldbook.tracker.tutorial.TutorialSettingsActivity;
 import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.utilities.CustomListAdapter;
 import com.fieldbook.tracker.utilities.CustomListAdapter2;
 import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
 import com.michaelflisar.changelog.ChangelogBuilder;
-import com.michaelflisar.changelog.classes.ChangelogFilter;
-import com.michaelflisar.changelog.classes.DefaultAutoVersionNameFormatter;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
@@ -97,7 +87,6 @@ public class ConfigActivity extends AppCompatActivity {
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 995;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
-    String versionName;
     private SharedPreferences ep;
     private AlertDialog personDialog;
     private AlertDialog locationDialog;
@@ -260,7 +249,7 @@ public class ConfigActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(null);
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
@@ -358,7 +347,9 @@ public class ConfigActivity extends AppCompatActivity {
                         startActivity(intent);
                         break;
                     case 6:
-                        showAboutDialog();
+                        intent.setClassName(ConfigActivity.this,
+                                AboutActivity.class.getName());
+                        startActivity(intent);
                         break;
                 }
             }
@@ -563,114 +554,6 @@ public class ConfigActivity extends AppCompatActivity {
         }
 
         return truncated.toString();
-    }
-
-    private void showAboutDialog() {
-        final PackageManager packageManager = this.getPackageManager();
-
-        try {
-            PackageInfo packageInfo = packageManager.getPackageInfo(this.getPackageName(), 0);
-            versionName = packageInfo.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            versionName = null;
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_about, null);
-
-        builder.setTitle(R.string.about_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        final AlertDialog aboutDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams langParams = aboutDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.MATCH_PARENT;
-        aboutDialog.getWindow().setAttributes(langParams);
-
-        TextView versionText = layout.findViewById(R.id.tvVersion);
-        versionText.setText(getString(R.string.about_version_title) + " " + versionName);
-
-        TextView otherApps = layout.findViewById(R.id.tvOtherApps);
-
-        versionText.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showChangelog(false, false);
-            }
-        });
-
-        otherApps.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showOtherAppsDialog();
-            }
-        });
-
-        Button closeBtn = layout.findViewById(R.id.closeBtn);
-
-        closeBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                aboutDialog.dismiss();
-            }
-        });
-
-        aboutDialog.show();
-    }
-
-    private void showOtherAppsDialog() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list, null);
-
-        builder.setTitle(R.string.about_title_other_apps)
-                .setCancelable(true)
-                .setView(layout);
-
-        final AlertDialog otherAppsDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params = otherAppsDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        otherAppsDialog.getWindow().setAttributes(params);
-
-        ListView myList = layout.findViewById(R.id.myList);
-
-        String[] appsArray = new String[3];
-
-        appsArray[0] = "Inventory";
-        appsArray[1] = "Coordinate";
-        appsArray[2] = "1KK";
-
-        Integer app_images[] = {R.drawable.other_ic_inventory, R.drawable.other_ic_coordinate};
-        final String[] links = {"https://play.google.com/store/apps/details?id=org.wheatgenetics.inventory",
-                "https://play.google.com/store/apps/details?id=org.wheatgenetics.coordinate"};
-        final String[] desc = {"", "", ""};
-
-        myList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                Uri uri = Uri.parse(links[which]);
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            }
-        });
-
-        CustomListAdapter adapterImg = new CustomListAdapter(this, app_images, appsArray, desc);
-        myList.setAdapter(adapterImg);
-
-        Button langCloseBtn = layout.findViewById(R.id.closeBtn);
-
-        langCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                otherAppsDialog.dismiss();
-            }
-        });
-
-        otherAppsDialog.show();
     }
 
     /**
@@ -1391,7 +1274,13 @@ public class ConfigActivity extends AppCompatActivity {
         }
 
         if (item.getItemId() == R.id.changelog) {
-            showChangelog(false,false);
+            showChangelog(false, false);
+        }
+
+        if (item.getItemId() == R.id.about) {
+            intent.setClassName(ConfigActivity.this,
+                    AboutActivity.class.getName());
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);

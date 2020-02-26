@@ -269,19 +269,24 @@
     <!-- About dialog -->
     <string name="about_title">About</string>
     <string name="about_version_title">Version</string>
-    <string name="about_title_other_apps">Other Apps</string>
-
-    <string name="about_developer_title">Developers</string>
-    <string name="about_developer_trife" translatable="false">Trevor Rife, Kansas State University</string>
+    <string name="about_title_other_apps">Other PhenoApps</string>
+    <string name="about_project_lead_title">Project Lead</string>
+    <string name="about_developer_title">Developer</string>
+    <string name="about_developer_trife" translatable="false">Trevor Rife</string>
+    <string name="about_developer_trife_location" translatable="false">Kansas State University</string>
     <string name="about_developer_trife_email" translatable="false">trife@ksu.edu</string>
     <string name="about_developer_trife_website" translatable="false">https://github.com/PhenoApps/Field-Book</string>
     <string name="about_developer_jpoland" translatable="false">Jesse Poland, Kansas State University</string>
     <string name="about_developer_jpoland_email" translatable="false">jpoland@ksu.edu</string>
     <string name="about_developer_jpoland_website" translatable="false">http://wheatgenetics.org</string>
+    <string name="about_contributors_title">Contributors</string>
+    <string name="about_licenses_title">Licenses</string>
+    <string name="about_contributors_developers_title">Developers</string>
     <string name="about_translators_title">Translators</string>
     <string name="about_translators_list" translatable="false">Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa, Mokhlesur Rahman, Alice Brunazzi</string>
-
+    <string name="about_rate">Rate this app</string>
     <string name="changelog_title">Changelog</string>
+    <string name="libraries_title">Libraries</string>
 
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>

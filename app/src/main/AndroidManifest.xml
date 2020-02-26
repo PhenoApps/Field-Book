@@ -25,13 +25,13 @@
         android:xlargeScreens="true" />
 
     <application
+        android:name="androidx.multidex.MultiDexApplication"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/field_book"
         android:largeHeap="true"
         android:usesCleartextTraffic="true"
-        tools:ignore="GoogleAppIndexingWarning"
-        android:name="androidx.multidex.MultiDexApplication">
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -98,6 +98,10 @@
             android:name=".ChangelogActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:theme="@style/ActivityDialog" />
+        <activity
+            android:name=".AboutActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:theme="@style/AppTheme.MaterialAboutActivity" />
         <activity
             android:name=".tutorial.TutorialMainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"

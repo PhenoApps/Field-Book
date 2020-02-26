@@ -1,6 +1,8 @@
 36/4.2
 Added setting to hide icons on collect data screen
 Added new changelog
+Added new about dialog
+Added licenses used in app
 Added additional import sources
 Upgraded to Java 8
 

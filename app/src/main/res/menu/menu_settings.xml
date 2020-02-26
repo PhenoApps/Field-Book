@@ -7,7 +7,7 @@
         android:title="@string/tutorial_dialog_title" />
     <item
         android:id="@+id/changelog"
-        android:icon="@drawable/ic_tb_delta"
+        android:icon="@drawable/ic_tb_changelog"
         android:showAsAction="always"
         android:title="@string/changelog_title" />
 </menu>
