@@ -4,6 +4,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AlertDialog;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,6 +14,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -22,8 +24,8 @@ import android.provider.Settings;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.DialogCompat;
 import androidx.core.content.FileProvider;
-import androidx.preference.PreferenceManager;
 
 import android.text.Html;
 import android.util.Log;
@@ -62,6 +64,11 @@ import com.fieldbook.tracker.utilities.CustomListAdapter;
 import com.fieldbook.tracker.utilities.CustomListAdapter2;
 import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
+import com.michaelflisar.changelog.ChangelogBuilder;
+import com.michaelflisar.changelog.classes.ChangelogFilter;
+import com.michaelflisar.changelog.classes.DefaultAutoVersionNameFormatter;
+import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
+import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -173,16 +180,9 @@ public class ConfigActivity extends AppCompatActivity {
 
         helpActive = false;
 
-        // display intro tutorial
-        if (ep.getBoolean("FirstRun", true)) {
-            ep.edit().putBoolean("FirstRun", false).apply();
-        }
-
         if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
             ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
-            Intent intent = new Intent();
-            intent.setClass(ConfigActivity.this, ChangelogActivity.class);
-            startActivity(intent);
+            showChangelog(true, false);
             updateAssets();
         }
 
@@ -190,6 +190,18 @@ public class ConfigActivity extends AppCompatActivity {
 
         dt = new DataHelper(this);
         checkIntent();
+    }
+
+    private void showChangelog(Boolean managedShow, Boolean rateButton) {
+        ChangelogDialogFragment builder = new ChangelogBuilder()
+                .withUseBulletList(true) // true if you want to show bullets before each changelog row, false otherwise
+                .withManagedShowOnStart(managedShow)  // library will take care to show activity/dialog only if the changelog has new infos and will only show this new infos
+                .withRateButton(rateButton) // enable this to show a "rate app" button in the dialog => clicking it will open the play store; the parent activity or target fragment can also implement IChangelogRateHandler to handle the button click
+                .withSummary(false, true) // enable this to show a summary and a "show more" button, the second paramter describes if releases without summary items should be shown expanded or not
+                .withTitle(getString(R.string.changelog_title)) // provide a custom title if desired, default one is "Changelog <VERSION>"
+                .withOkButtonLabel("OK") // provide a custom ok button text if desired, default one is "OK"
+                .withSorter(new ImportanceChangelogSorter())
+                .buildAndShowDialog(this, false); // second parameter defines, if the dialog has a dark or light theme
     }
 
     private void createDirs() {
@@ -360,13 +372,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         SharedPreferences.Editor ed = ep.edit();
 
-        if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
-            ed.putInt("UpdateVersion", Utils.getVersion(this));
-            ed.apply();
-            Intent intent = new Intent();
-            intent.setClass(ConfigActivity.this, ChangelogActivity.class);
-            startActivity(intent);
-        }
         if (!ep.getBoolean("TipsConfigured", false)) {
             ed.putBoolean("TipsConfigured", true);
             ed.apply();
@@ -593,9 +598,7 @@ public class ConfigActivity extends AppCompatActivity {
         versionText.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setClass(ConfigActivity.this, ChangelogActivity.class);
-                startActivity(intent);
+                showChangelog(false, false);
             }
         });
 
@@ -1385,6 +1388,10 @@ public class ConfigActivity extends AppCompatActivity {
             intent.setClassName(ConfigActivity.this,
                     TutorialSettingsActivity.class.getName());
             startActivity(intent);
+        }
+
+        if (item.getItemId() == R.id.changelog) {
+            showChangelog(false,false);
         }
 
         return super.onOptionsItemSelected(item);

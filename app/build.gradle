@@ -30,6 +30,11 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     lintOptions {
         checkReleaseBuilds false
         disable 'MissingTranslation'
@@ -67,6 +72,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
     implementation 'com.google.firebase:firebase-crashlytics:17.0.0-beta01'
     implementation 'com.microsoft.onedrivesdk:onedrive-picker-android:v2.0'
+    implementation 'com.github.MFlisar:changelog:1.1.6'
 
     implementation project(':dropbox')
 

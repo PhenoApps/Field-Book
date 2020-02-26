@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_tb_help"
-        android:key="Tips"
-        android:summary="@string/preferences_appearance_tutorial_description"
-        android:title="@string/tutorial_dialog_title" />
 
     <Preference
         android:icon="@drawable/ic_nav_drawer_translate"
@@ -20,6 +14,16 @@
             android:targetPackage="com.android.settings" />
     </Preference>
 
+    <MultiSelectListPreference
+        android:icon="@drawable/ic_pref_appearance_toolbar"
+        android:defaultValue="@array/pref_toolbar_customize_default"
+        android:dialogTitle="@string/preferences_appearance_toolbar_customize"
+        android:entries="@array/pref_toolbar_customize_title"
+        android:entryValues="@array/pref_toolbar_customize_values"
+        android:key="TOOLBAR_CUSTOMIZE"
+        android:summary="@string/preferences_appearance_toolbar_customize_description"
+        android:title="@string/preferences_appearance_toolbar_customize" />
+
     <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
         android:icon="@drawable/ic_adv_infobar_count"
         android:key="INFOBAR_NUMBER"
@@ -30,17 +34,15 @@
 
     <CheckBoxPreference
         android:defaultValue="false"
+        android:icon="@drawable/ic_tb_help"
+        android:key="Tips"
+        android:summary="@string/preferences_appearance_tutorial_description"
+        android:title="@string/tutorial_dialog_title" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
         android:icon="@drawable/ic_adv_quick_goto"
         android:key="QuickGoTo"
         android:summary="@string/preferences_appearance_quickgoto_description"
         android:title="@string/preferences_appearance_quickgoto" />
-
-    <MultiSelectListPreference
-        android:defaultValue="@array/pref_toolbar_customize_default"
-        android:dialogTitle="@string/preferences_appearance_toolbar_customize"
-        android:entries="@array/pref_toolbar_customize_title"
-        android:entryValues="@array/pref_toolbar_customize_values"
-        android:key="TOOLBAR_CUSTOMIZE"
-        android:summary="@string/preferences_appearance_toolbar_customize_description"
-        android:title="@string/preferences_appearance_toolbar_customize" />
 </PreferenceScreen>

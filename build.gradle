@@ -4,6 +4,7 @@ buildscript {
         jcenter()
         google()
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.0'
         classpath 'com.google.gms:google-services:4.3.3'
@@ -16,5 +17,6 @@ allprojects {
         jcenter()
         google()
         maven { url "https://dl.bintray.com/pheno-apps/pheno-apps-java-client-library" }
+        maven { url "https://jitpack.io" }
     }
 }

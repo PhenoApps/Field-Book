@@ -158,8 +158,8 @@
     <string name="preferences_appearance_language_description">Language set by system</string>
     <string name="preferences_appearance_theme_title">Theme</string>
 
-    <string name="preferences_appearance_toolbar_customize">Main toolbar customize</string>
-    <string name="preferences_appearance_toolbar_customize_description">Modify which icons displayed on the collect screen</string>
+    <string name="preferences_appearance_toolbar_customize">Customize Collect Data toolbar</string>
+    <string name="preferences_appearance_toolbar_customize_description">Modify default icons on the collect screen</string>
     <string name="preferences_appearance_toolbar_customize_search">Search</string>
     <string name="preferences_appearance_toolbar_customize_resources">Resources</string>
     <string name="preferences_appearance_toolbar_customize_summary">Summary</string>

@@ -57,7 +57,7 @@ public class ChangelogActivity extends AppCompatActivity {
             }
         });
 
-        parseLog(R.raw.changelog_releases);
+        parseLog(R.raw.changelog_dev);
     }
 
     public int getVersion() {
