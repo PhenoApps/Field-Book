@@ -90,7 +90,6 @@ public class PhotoTraitLayout extends TraitLayout {
     @Override
     public void loadLayout() {
         getEtCurVal().removeTextChangedListener(getCvText());
-        getEtCurVal().removeTextChangedListener(getCvNum());
         getEtCurVal().setVisibility(EditText.GONE);
         getEtCurVal().setEnabled(false);
 

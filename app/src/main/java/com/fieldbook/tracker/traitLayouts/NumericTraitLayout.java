@@ -65,10 +65,8 @@ public class NumericTraitLayout extends TraitLayout {
         numberButtons.get(R.id.k16).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                getEtCurVal().removeTextChangedListener(getCvNum());
                 getEtCurVal().setText("");
                 removeTrait(getCurrentTrait().getTrait());
-                getEtCurVal().addTextChangedListener(getCvNum());
                 return false;
             }
         });
@@ -76,19 +74,14 @@ public class NumericTraitLayout extends TraitLayout {
 
     @Override
     public void loadLayout() {
-
         // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
         getEtCurVal().setHint("");
-
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            getEtCurVal().addTextChangedListener(getCvNum());
         } else {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
 
@@ -96,8 +89,6 @@ public class NumericTraitLayout extends TraitLayout {
                 getEtCurVal().setText(getCurrentTrait().getDefaultValue());
                 updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
             }
-
-            getEtCurVal().addTextChangedListener(getCvNum());
         }
     }
 
@@ -115,10 +106,12 @@ public class NumericTraitLayout extends TraitLayout {
                 final int length = curText.length();
                 if (length > 0) {
                     getEtCurVal().setText(curText.substring(0, length - 1));
+                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
                 }
             } else if (numberButtons.containsKey(view.getId())) {
                 final String v = numberButtons.get(view.getId()).getText().toString();
                 getEtCurVal().setText(curText + v);
+                updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
             }
         }
     }
