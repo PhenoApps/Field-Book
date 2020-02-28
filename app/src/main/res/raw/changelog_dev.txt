@@ -1,4 +1,4 @@
-36/4.2
+37/4.2
 Added setting to hide icons on collect data screen
 Added new changelog
 Added new about dialog
@@ -6,6 +6,9 @@ Added licenses used in app
 Added new tutorial
 Added additional import sources
 Upgraded to Java 8
+
+36/4.1.4
+Fix for data save delay
 
 35/4.1.3
 Fix for local import bug
