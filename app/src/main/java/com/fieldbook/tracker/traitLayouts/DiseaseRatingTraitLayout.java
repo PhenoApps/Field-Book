@@ -182,6 +182,7 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
                     makeToast(getContext().getString(R.string.trait_error_disease_severity));
                 } else {
                     getEtCurVal().setText(getEtCurVal().getText().toString() + v);
+                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
                 }
             }
         }
