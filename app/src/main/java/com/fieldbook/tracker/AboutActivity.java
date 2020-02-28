@@ -84,7 +84,7 @@ public class AboutActivity extends MaterialAboutActivity {
         ));
 
         MaterialAboutCard.Builder authorCardBuilder = new MaterialAboutCard.Builder();
-        authorCardBuilder.title(getString(R.string.about_developer_title));
+        authorCardBuilder.title(getString(R.string.about_project_lead_title));
 
         authorCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(getString(R.string.about_developer_trife))

@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -51,11 +52,13 @@ import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
 import com.fieldbook.tracker.traits.TraitEditorActivity;
-import com.fieldbook.tracker.tutorial.TutorialSettingsActivity;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.CustomListAdapter2;
 import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -111,6 +114,7 @@ public class ConfigActivity extends AppCompatActivity {
     private ArrayList<String> newRange;
     private ArrayList<String> exportTrait;
     private Menu systemMenu;
+    ListView settingsList;
     private Runnable exportData = new Runnable() {
         public void run() {
             new ExportDataTask().execute(0);
@@ -129,12 +133,6 @@ public class ConfigActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        try {
-            TutorialSettingsActivity.thisActivity.finish();
-        } catch (Exception e) {
-            Log.e("Field Book", "");
-        }
-
         ConfigActivity.dt.close();
         super.onDestroy();
     }
@@ -144,11 +142,7 @@ public class ConfigActivity extends AppCompatActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            if (ep.getBoolean(PreferencesActivity.TUTORIAL_MODE, false)) {
-                systemMenu.findItem(R.id.help).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.help).setVisible(false);
-            }
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
         }
 
         invalidateOptionsMenu();
@@ -282,7 +276,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        ListView settingsList = findViewById(R.id.myList);
+        settingsList = findViewById(R.id.myList);
 
         String[] configList = new String[]{getString(R.string.settings_fields),
                 getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)}; //, "API Test"};
@@ -1249,40 +1243,83 @@ public class ConfigActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
-
         systemMenu = menu;
-
-        if (systemMenu != null) {
-
-            if (ep.getBoolean(PreferencesActivity.TUTORIAL_MODE, false)) {
-                systemMenu.findItem(R.id.help).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.help).setVisible(false);
-            }
-        }
+        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
         return true;
+    }
+
+    private Rect settingsListItemLocation(int item) {
+        View v = settingsList.getChildAt(item);
+        final int[] location = new int[2];
+        v.getLocationOnScreen(location);
+        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth()/5, location[1] + v.getHeight());
+        return droidTarget;
+    }
+
+    private TapTarget settingsTapTargetRect(Rect item, String title, String desc) {
+        return TapTarget.forBounds(item, title, desc)
+                // All options below are optional
+                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
+                .outerCircleAlpha(0.92f)            // Specify the alpha amount for the outer circle
+                .targetCircleColor(R.color.black)   // Specify a color for the target circle
+                .titleTextSize(30)                  // Specify the size (in sp) of the title text
+                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
+                .descriptionTextColor(R.color.black)  // Specify the color of the description text
+                .textColor(R.color.black)            // Specify a color for both the title and description text
+                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
+                .drawShadow(true)                   // Whether to draw a drop shadow or not
+                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                .tintTarget(true)                   // Whether to tint the target view's color
+                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
+                .targetRadius(60);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        if (item.getItemId() == R.id.help) {
-            intent.setClassName(ConfigActivity.this,
-                    TutorialSettingsActivity.class.getName());
-            startActivity(intent);
-        }
+        switch (item.getItemId()) {
+            case R.id.help:
+                TapTargetSequence sequence = new TapTargetSequence(this)
+                        .targets(settingsTapTargetRect(settingsListItemLocation(0), "Main", getString(R.string.tutorial_settings_1)),
+                                settingsTapTargetRect(settingsListItemLocation(1), "Main", getString(R.string.tutorial_settings_2)),
+                                settingsTapTargetRect(settingsListItemLocation(2), "Main", getString(R.string.tutorial_settings_3)),
+                                settingsTapTargetRect(settingsListItemLocation(3), "Main", getString(R.string.tutorial_settings_4)),
+                                settingsTapTargetRect(settingsListItemLocation(4), "Main", getString(R.string.tutorial_settings_5)),
+                                settingsTapTargetRect(settingsListItemLocation(5), "Main", getString(R.string.tutorial_settings_6))
+                        )
+                        .listener(new TapTargetSequence.Listener() {
+                            // This listener will tell us when interesting(tm) events happen in regards to the sequence
+                            @Override
+                            public void onSequenceFinish() {
+                                TapTargetView.showFor(ConfigActivity.this, settingsTapTargetRect(settingsListItemLocation(0), "Main", getString(R.string.tutorial_settings_1)),
+                                        new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
+                                            @Override
+                                            public void onTargetClick(TapTargetView view) {
+                                                super.onTargetClick(view);      // This call is optional
+                                                intent.setClassName(ConfigActivity.this,
+                                                        FieldEditorActivity.class.getName());
+                                                startActivity(intent);
+                                            }
+                                        });
+                            }
 
-        if (item.getItemId() == R.id.changelog) {
-            showChangelog(false, false);
-        }
+                            @Override
+                            public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
+                                Log.d("TapTargetView", "Clicked on " + lastTarget.id());
+                            }
 
-        if (item.getItemId() == R.id.about) {
-            intent.setClassName(ConfigActivity.this,
-                    AboutActivity.class.getName());
-            startActivity(intent);
-        }
+                            @Override
+                            public void onSequenceCanceled(TapTarget lastTarget) {
 
+                            }
+                        });
+                sequence.start();
+                break;
+            case R.id.changelog:
+                showChangelog(false, false);
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,7 +18,6 @@ import android.os.Message;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
@@ -58,10 +58,11 @@ import com.fieldbook.tracker.search.*;
 import com.fieldbook.tracker.traitLayouts.PhotoTraitLayout;
 import com.fieldbook.tracker.traitLayouts.TraitLayout;
 import com.fieldbook.tracker.traits.*;
-import com.fieldbook.tracker.tutorial.*;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.Utils;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
 
 import org.threeten.bp.OffsetDateTime;
 
@@ -518,15 +519,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-
         //save last plot id
         if (ep.getBoolean("ImportFieldFinished", false)) {
             rangeBox.saveLastPlot();
-        }
-
-        try {
-            TutorialMainActivity.thisActivity.finish();
-        } catch (Exception ignore) {
         }
 
         super.onDestroy();
@@ -661,6 +656,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(MainActivity.this).inflate(R.menu.menu_main, menu);
@@ -690,19 +687,57 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
     }
 
+    private TapTarget collectDataTapTargetView(int id, String title, String desc, int color, int targetRadius) {
+        return TapTarget.forView(findViewById(id), title, desc)
+                // All options below are optional
+                .outerCircleColor(color)      // Specify a color for the outer circle
+                .outerCircleAlpha(0.92f)            // Specify the alpha amount for the outer circle
+                .targetCircleColor(R.color.black)   // Specify a color for the target circle
+                .titleTextSize(30)                  // Specify the size (in sp) of the title text
+                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
+                .descriptionTextColor(R.color.black)  // Specify the color of the description text
+                .textColor(R.color.black)            // Specify a color for both the title and description text
+                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
+                .drawShadow(true)                   // Whether to draw a drop shadow or not
+                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                .tintTarget(true)                   // Whether to tint the target view's color
+                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
+                .targetRadius(targetRadius);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         switch (item.getItemId()) {
-            case R.id.search:
-                try {
-                    TutorialMainActivity.thisActivity.finish();
-                } catch (Exception e) {
-                    Log.e(TAG, "" + e.getMessage());
+            case R.id.help:
+                TapTargetSequence sequence = new TapTargetSequence(this)
+                        .targets(collectDataTapTargetView(R.id.selectorList, "Main", getString(R.string.tutorial_main_1), R.color.main_primaryDark,200),
+                                collectDataTapTargetView(R.id.traitLeft, "Main", getString(R.string.tutorial_main_5), R.color.main_primaryDark,60),
+                                collectDataTapTargetView(R.id.traitType, "Main", getString(R.string.tutorial_main_3), R.color.main_primaryDark,80),
+                                collectDataTapTargetView(R.id.rangeLeft, "Main", getString(R.string.tutorial_main_2), R.color.main_primaryDark,60),
+                                collectDataTapTargetView(R.id.valuesPlotRangeHolder, "Main", getString(R.string.tutorial_main_5), R.color.main_primaryDark,60),
+                                collectDataTapTargetView(R.id.traitHolder, "Main", getString(R.string.tutorial_main_5), R.color.main_primaryDark,200),
+                                collectDataTapTargetView(R.id.missingValue, "Main", getString(R.string.tutorial_main_5), R.color.main_primary,60),
+                                collectDataTapTargetView(R.id.deleteValue, "Main", getString(R.string.tutorial_main_5), R.color.main_primary,60)
+                        );
+                if (systemMenu.findItem(R.id.search).isVisible()) {
+                    sequence.target(collectDataTapTargetView(R.id.search, "Main", getString(R.string.tutorial_main_5), R.color.main_primaryDark,60));
+                }
+                if (systemMenu.findItem(R.id.resources).isVisible()) {
+                    sequence.target(collectDataTapTargetView(R.id.resources, "Main", getString(R.string.tutorial_main_4), R.color.main_primaryDark,60));
+                }
+                if (systemMenu.findItem(R.id.summary).isVisible()) {
+                    sequence.target(collectDataTapTargetView(R.id.summary, "Main", getString(R.string.tutorial_main_6), R.color.main_primaryDark,60));
+                }
+                if (systemMenu.findItem(R.id.lockData).isVisible()) {
+                    sequence.target(collectDataTapTargetView(R.id.lockData, "Main", getString(R.string.tutorial_main_5), R.color.main_primaryDark,60));
                 }
 
+                sequence.start();
+                break;
+            case R.id.search:
                 intent.setClassName(MainActivity.this,
                         SearchActivity.class.getName());
                 startActivity(intent);
@@ -715,13 +750,6 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("exclude", new String[]{"fieldbook"});
                 intent.putExtra("title", getString(R.string.main_toolbar_resources));
                 startActivityForResult(intent, 1);
-                break;
-
-            case R.id.help:
-                Intent helpIntent = new Intent();
-                helpIntent.setClassName(MainActivity.this,
-                        TutorialMainActivity.class.getName());
-                startActivity(helpIntent);
                 break;
             case R.id.nextEmptyPlot:
                 nextEmptyPlot();
@@ -737,12 +765,6 @@ public class MainActivity extends AppCompatActivity {
                 showSummary();
                 break;
             case R.id.datagrid:
-                try {
-                    TutorialMainActivity.thisActivity.finish();
-                } catch (Exception e) {
-                    Log.e(TAG, "" + e.getMessage());
-                }
-
                 intent.setClassName(MainActivity.this,
                         DatagridActivity.class.getName());
                 startActivityForResult(intent, 2);

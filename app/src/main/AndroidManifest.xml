@@ -103,30 +103,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:theme="@style/AppTheme.MaterialAboutActivity" />
         <activity
-            android:name=".tutorial.TutorialMainActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
-        <activity
-            android:name=".tutorial.TutorialSettingsActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
-        <activity
-            android:name=".tutorial.TutorialTraitsActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
-        <activity
-            android:name=".tutorial.TutorialFieldActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
-        <activity
             android:name=".preferences.PreferencesActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
