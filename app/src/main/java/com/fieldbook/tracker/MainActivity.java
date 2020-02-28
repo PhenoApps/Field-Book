@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-    private TextWatcher cvNum;
+
     private TextWatcher cvText;
     private InputMethodManager imm;
     private Boolean dataLocked = false;
@@ -196,38 +196,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Validates the text entered for numeric format
-        //todo get rid of this- validate/delete in next/last plot
-        cvNum = new TextWatcher() {
-
-            // if the trait has a range, updateTrait does not work
-            public void afterTextChanged(final Editable en) {
-                final String strValue = etCurVal.getText().toString();
-                if (strValue.equals(""))
-                    return;
-
-                Timer timer = new Timer();
-                final long DELAY = 750; // in ms
-
-                timer.cancel();
-                timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    public void run() {
-                        runOnUiThread(createDelayThread(en));
-                    }
-                }, DELAY);
-            }
-
-            public void beforeTextChanged(CharSequence arg0,
-                                          int arg1, int arg2, int arg3) {
-            }
-
-            public void onTextChanged(CharSequence arg0,
-                                      int arg1, int arg2, int arg3) {
-            }
-
-        };
-
         // Validates the text entered for text format
         cvText = new TextWatcher() {
             public void afterTextChanged(Editable en) {
@@ -240,7 +208,6 @@ public class MainActivity extends AppCompatActivity {
                         removeTrait(trait.getTrait());
                 }
                 //tNum.setSelection(tNum.getText().length());
-
             }
 
             public void beforeTextChanged(CharSequence arg0, int arg1,
@@ -251,28 +218,6 @@ public class MainActivity extends AppCompatActivity {
                                       int arg3) {
             }
 
-        };
-    }
-
-    private Runnable createDelayThread(final Editable en) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                final String strValue = etCurVal.getText().toString();
-                final TraitObject currentTrait = traitBox.getCurrentTrait();
-                final String trait = currentTrait.getTrait();
-                if (currentTrait.isValidValue(strValue)) {
-                    if (traitBox.existsNewTraits() & currentTrait != null)
-                        updateTrait(trait, currentTrait.getFormat(), strValue);
-                } else {
-                    if (strValue.length() > 0 && currentTrait.isOver(strValue)) {
-                        makeToast(getString(R.string.trait_error_maximum_value)
-                                + " " + currentTrait.getMaximum());
-                    }
-                    en.clear();
-                    removeTrait(trait);
-                }
-            }
         };
     }
 
@@ -330,11 +275,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //TODO
     private boolean validateData() {
-        //get rules
+        final String strValue = etCurVal.getText().toString();
+        final TraitObject currentTrait = traitBox.getCurrentTrait();
+        final String trait = currentTrait.getTrait();
 
-        //get data
+        if (traitBox.existsNewTraits()
+                && traitBox.getCurrentTrait() != null
+                && etCurVal.getText().toString().length() > 0
+                && !traitBox.getCurrentTrait().isValidValue(etCurVal.getText().toString())) {
+
+            if (strValue.length() > 0 && currentTrait.isOver(strValue)) {
+                makeToast(getString(R.string.trait_error_maximum_value)
+                        + ": " + currentTrait.getMaximum());
+            } else if (strValue.length() > 0 && currentTrait.isUnder(strValue)) {
+                makeToast(getString(R.string.trait_error_minimum_value)
+                        + ": " + currentTrait.getMinimum());
+            }
+
+            removeTrait(trait);
+            etCurVal.getText().clear();
+
+            playSound("error");
+
+            return false;
+        }
 
         return true;
     }
@@ -609,7 +574,7 @@ public class MainActivity extends AppCompatActivity {
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
                 ep.getString("Location", ""), "", exp_id, observationDbId,
-                lastSyncedTime); //TODO add notes and exp_id
+                lastSyncedTime);
     }
 
     private void brapiDelete(String parent, Boolean hint) {
@@ -1036,10 +1001,6 @@ public class MainActivity extends AppCompatActivity {
 
     public TextWatcher getCvText() {
         return cvText;
-    }
-
-    public TextWatcher getCvNum() {
-        return cvNum;
     }
 
     public String getDisplayColor() {
@@ -1587,6 +1548,11 @@ public class MainActivity extends AppCompatActivity {
         // Simulate range right key press
         private void repeatKeyPress(final String directionStr) {
             boolean left = directionStr.equalsIgnoreCase("left");
+
+            if (!validateData()) {
+                return;
+            }
+
             if (rangeID != null && rangeID.length > 0) {
                 final int step = left ? -1 : 1;
                 paging = movePaging(paging, step, true);
@@ -1727,6 +1693,11 @@ public class MainActivity extends AppCompatActivity {
 
         private void moveEntryLeft() {
             final SharedPreferences ep = parent.getPreference();
+
+            if (!validateData()) {
+                return;
+            }
+
             if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false)
                     && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
@@ -1741,13 +1712,17 @@ public class MainActivity extends AppCompatActivity {
 
         private void moveEntryRight() {
             final SharedPreferences ep = parent.getPreference();
+
+            if (!validateData()) {
+                return;
+            }
+
             if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false)
                     && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
             } else {
                 if (rangeID != null && rangeID.length > 0) {
                     //index.setEnabled(true);
-
                     paging = incrementPaging(paging);
                     parent.refreshMain();
                 }
@@ -1765,6 +1740,7 @@ public class MainActivity extends AppCompatActivity {
         private int movePaging(int pos, int step, boolean cyclic) {
             // If ignore existing data is enabled, then skip accordingly
             final SharedPreferences ep = parent.getPreference();
+
             if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
                 if (step == 1 && pos == rangeID.length) {
                     return 1;

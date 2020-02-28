@@ -65,10 +65,6 @@ public abstract class TraitLayout extends LinearLayout {
         return ((MainActivity) getContext()).getCvText();
     }
 
-    public TextWatcher getCvNum() {
-        return ((MainActivity) getContext()).getCvNum();
-    }
-
     public String getDisplayColor() {
         return ((MainActivity) getContext()).getDisplayColor();
     }

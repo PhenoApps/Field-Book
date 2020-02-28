@@ -120,7 +120,7 @@ public class TraitObject {
         return !isUnder(s) && !isOver(s);
     }
 
-    private boolean isUnder(final String s) {
+    public boolean isUnder(final String s) {
         if (!(format.equals("numeric") || format.equals("percent")))
             return false;
 
