@@ -42,6 +42,7 @@
     <string name="main_toolbar_barcode_scan">Scan barcode</string>
     <string name="main_toolbar_moveto_scan">Scan</string>
     <string name="main_infobar_title">InfoBar</string>
+    <string name="main_barcode_text">Scan a barcode</string>
 
     <!-- Fields Activity  -->
     <string name="fields_delete_study">Delete field</string>

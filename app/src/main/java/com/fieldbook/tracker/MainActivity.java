@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,7 +49,6 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 
-import com.fieldbook.tracker.barcodes.*;
 import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.layoutConfig.SelectorLayoutConfigurator;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
@@ -63,6 +61,8 @@ import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import org.threeten.bp.OffsetDateTime;
 
@@ -71,8 +71,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.fieldbook.tracker.ConfigActivity.dt;
 
@@ -723,8 +721,10 @@ public class MainActivity extends AppCompatActivity {
                 moveToPlotID();
                 break;
             case R.id.barcodeScan:
-                IntentIntegrator integrator = new IntentIntegrator(thisActivity);
-                integrator.initiateScan();
+                new IntentIntegrator(this)
+                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setBeepEnabled(true)
+                        .initiateScan();
                 break;
             case R.id.summary:
                 showSummary();
