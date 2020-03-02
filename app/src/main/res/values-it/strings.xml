@@ -109,30 +109,6 @@
     <!-- Tutorial -->
     <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">Vuoi attivare il tutorial? Questa impostazione può essere cambiata in Impostazioni Avanzate</string>
-    <string name="tutorial_previous">Precedente</string>
-    <string name="tutorial_next">Successivo</string>
-    <string name="tutorial_main_1">La barra di informazione nella parte superiore della schermata mostra dati aggiuntivi per ogni voce. Queste possono essere cambiate usando il menù a tendina</string>
-    <string name="tutorial_main_2">La grande freccia nera si muove tra le voci. La freccia piccola e verde si muove tra i caratteri</string>
-    <string name="tutorial_main_3">Una lista dei caratteri attivi viene mostrata quando un carattere viene compresso</string>
-    <string name="tutorial_main_4">L\'icona sfoglia mostra la lista dei file presenti nella cartella Risorse</string>
-    <string name="tutorial_main_5">L\'icona di ricerca consente di interrogare il database</string>
-    <string name="tutorial_main_6">L\'icona documento mostra il sommario di tutti i dati per una data voce</string>
-    <string name="tutorial_settings_1">Per importare e gestire i campi, selezionare Campi</string>
-    <string name="tutorial_settings_2">Per aggiungere, importare o gestire i caratteri, selezionare Caratteri</string>
-    <string name="tutorial_settings_3">Per inserire l\'operatore e la località, selezionare Profilo</string>
-    <string name="tutorial_settings_4">Per esportare i dati, selezionare Esporta.
-I dati possono essere esportati in due formati: database o tabella. Le colonne del file originale possono essere incluse o escluse dal file esportato.</string>
-    <string name="tutorial_settings_5">Impostazioni Avanzate contiene impostazioni opzionali riguardo alle modalità di raccoglimento dati.</string>
-    <string name="tutorial_settings_6">Una volta che i dati sono importati, il pulsante \"indietro\" in alto a sinistra ti porterà alla schermata principale</string>
-    <string name="tutorial_traits_1">Aggiungi Carattere dal menù crea un nuovo carattere. Non è possibile usare la tastiera e il tutorial contemporaneamente. I caratteri con un formato diverso avranno strutture differenti</string>
-    <string name="tutorial_traits_2">Per importare i caratteri, scegli Importa sulla barra degli strumenti</string>
-    <string name="tutorial_traits_3">Consulta il manuale dell app per ulteriori informazioni riguardo alla creazione dei caratteri</string>
-    <string name="tutorial_traits_4">Usa il box di controllo su ogni carattere per azionare la sua visibilità nella schermata principale. Deseleziona i caratteri che non vuoi selezionare</string>
-    <string name="tutorial_traits_5">Premi il pulsante \"indietro\" in alto a sinistra per tornare alle Impostazioni</string>
-    <string name="tutorial_fields_1">Aggiungi Campo sulla barra degli strumenti permette di importare nuovi campi</string>
-    <string name="tutorial_fields_2">I file devono contenere tre colonne: l\'identificatore unico, l\'ordine primario e l\'ordine secondario. L\'ordine primario/secondario vengono usati per muoverti nel campo</string>
-    <string name="tutorial_fields_3">Il campo con il bottone marrone è il campo attualmente attivo</string>
-    <string name="tutorial_fields_4">Per cancellare un campo, aprire il menu a sinistra del nome del campo e selezionare Cancella</string>
     <!-- About dialog -->
     <string name="about_title">A proposito</string>
     <string name="about_version_title">Versione</string>

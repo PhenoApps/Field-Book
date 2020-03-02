@@ -343,33 +343,26 @@ public class FieldEditorActivity extends AppCompatActivity {
                 .targetRadius(60);
     }
 
+    //TODO
+    private Boolean fieldExists() {
+
+        return false;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.help:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(fieldsTapTargetMenu(R.id.importField, "Fields", getString(R.string.tutorial_fields_1)),
-                                fieldsTapTargetMenu(R.id.importField, "Fields", getString(R.string.tutorial_fields_2)),
-                                fieldsTapTargetRect(fieldsListItemLocation(0), "Fields", getString(R.string.tutorial_fields_3)),
-                                fieldsTapTargetRect(fieldsListItemLocation(0), "Fields", getString(R.string.tutorial_fields_4))
-                        )
-                        .listener(new TapTargetSequence.Listener() {
-                            // This listener will tell us when interesting(tm) events happen in regards to the sequence
-                            @Override
-                            public void onSequenceFinish() {
+                        .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description)),
+                                fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description))
+                        );
 
-                            }
+                if (fieldExists()) {
+                    sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_select_title), getString(R.string.tutorial_fields_select_description)));
+                    sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_delete_title), getString(R.string.tutorial_fields_delete_description)));
+                }
 
-                            @Override
-                            public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
-                                Log.d("TapTargetView", "Clicked on " + lastTarget.id());
-                            }
-
-                            @Override
-                            public void onSequenceCanceled(TapTarget lastTarget) {
-
-                            }
-                        });
                 sequence.start();
 
                 break;

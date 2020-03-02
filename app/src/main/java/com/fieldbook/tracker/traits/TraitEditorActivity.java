@@ -428,11 +428,11 @@ public class TraitEditorActivity extends AppCompatActivity {
         return true;
     }
 
-    private Rect traitsListItemLocation(int item) {
+    private Rect traitsListItemLocation(int item, int adjust) {
         View v = traitList.getChildAt(item);
         final int[] location = new int[2];
         v.getLocationOnScreen(location);
-        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth()/5, location[1] + v.getHeight());
+        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth()/adjust, location[1] + v.getHeight());
         return droidTarget;
     }
 
@@ -478,27 +478,15 @@ public class TraitEditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.help:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(traitsTapTargetMenu(R.id.addTrait, "Traits", getString(R.string.tutorial_traits_1)),
-                                traitsTapTargetRect(traitsListItemLocation(0), "Traits", getString(R.string.tutorial_traits_3)),
-                                traitsTapTargetRect(traitsListItemLocation(0), "Traits", getString(R.string.tutorial_traits_4))
-                        )
-                        .listener(new TapTargetSequence.Listener() {
-                            // This listener will tell us when interesting(tm) events happen in regards to the sequence
-                            @Override
-                            public void onSequenceFinish() {
+                        .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description))
+                                //Todo add overflow menu action
+                        );
 
-                            }
+                if (ConfigActivity.dt.getTraitColumnData("trait") != null) {
+                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0,4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
+                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0,2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
+                }
 
-                            @Override
-                            public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
-                                Log.d("TapTargetView", "Clicked on " + lastTarget.id());
-                            }
-
-                            @Override
-                            public void onSequenceCanceled(TapTarget lastTarget) {
-
-                            }
-                        });
                 sequence.start();
                 break;
 

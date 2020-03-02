@@ -678,26 +678,26 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.help:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(collectDataTapTargetView(R.id.selectorList, "Main", getString(R.string.tutorial_main_1), R.color.main_primaryDark,200),
-                                collectDataTapTargetView(R.id.traitLeft, "Main", getString(R.string.tutorial_main_5), R.color.main_primaryDark,60),
-                                collectDataTapTargetView(R.id.traitType, "Main", getString(R.string.tutorial_main_3), R.color.main_primaryDark,80),
-                                collectDataTapTargetView(R.id.rangeLeft, "Main", getString(R.string.tutorial_main_2), R.color.main_primaryDark,60),
-                                collectDataTapTargetView(R.id.valuesPlotRangeHolder, "Main", getString(R.string.tutorial_main_5), R.color.main_primaryDark,60),
-                                collectDataTapTargetView(R.id.traitHolder, "Main", getString(R.string.tutorial_main_5), R.color.main_primaryDark,200),
-                                collectDataTapTargetView(R.id.missingValue, "Main", getString(R.string.tutorial_main_5), R.color.main_primary,60),
-                                collectDataTapTargetView(R.id.deleteValue, "Main", getString(R.string.tutorial_main_5), R.color.main_primary,60)
+                        .targets(collectDataTapTargetView(R.id.selectorList, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), R.color.main_primaryDark,200),
+                                collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), R.color.main_primaryDark,60),
+                                collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), R.color.main_primaryDark,80),
+                                collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), R.color.main_primaryDark,60),
+                                collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), R.color.main_primaryDark,60),
+                                collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), R.color.main_primaryDark,200),
+                                collectDataTapTargetView(R.id.missingValue, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), R.color.main_primary,60),
+                                collectDataTapTargetView(R.id.deleteValue, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), R.color.main_primary,60)
                         );
                 if (systemMenu.findItem(R.id.search).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.search, "Main", getString(R.string.tutorial_main_5), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.search, getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), R.color.main_primaryDark,60));
                 }
                 if (systemMenu.findItem(R.id.resources).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.resources, "Main", getString(R.string.tutorial_main_4), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.resources, getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), R.color.main_primaryDark,60));
                 }
                 if (systemMenu.findItem(R.id.summary).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.summary, "Main", getString(R.string.tutorial_main_6), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.summary, getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), R.color.main_primaryDark,60));
                 }
                 if (systemMenu.findItem(R.id.lockData).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.lockData, "Main", getString(R.string.tutorial_main_5), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), R.color.main_primaryDark,60));
                 }
 
                 sequence.start();

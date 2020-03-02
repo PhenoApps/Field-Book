@@ -1281,18 +1281,18 @@ public class ConfigActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.help:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(settingsTapTargetRect(settingsListItemLocation(0), "Main", getString(R.string.tutorial_settings_1)),
-                                settingsTapTargetRect(settingsListItemLocation(1), "Main", getString(R.string.tutorial_settings_2)),
-                                settingsTapTargetRect(settingsListItemLocation(2), "Main", getString(R.string.tutorial_settings_3)),
-                                settingsTapTargetRect(settingsListItemLocation(3), "Main", getString(R.string.tutorial_settings_4)),
-                                settingsTapTargetRect(settingsListItemLocation(4), "Main", getString(R.string.tutorial_settings_5)),
-                                settingsTapTargetRect(settingsListItemLocation(5), "Main", getString(R.string.tutorial_settings_6))
+                        .targets(settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_description)),
+                                settingsTapTargetRect(settingsListItemLocation(1), getString(R.string.tutorial_settings_traits_title), getString(R.string.tutorial_settings_traits_description)),
+                                settingsTapTargetRect(settingsListItemLocation(2), getString(R.string.tutorial_settings_collect_title), getString(R.string.tutorial_settings_collect_description)),
+                                settingsTapTargetRect(settingsListItemLocation(3), getString(R.string.tutorial_settings_profile_title), getString(R.string.tutorial_settings_profile_description)),
+                                settingsTapTargetRect(settingsListItemLocation(4), getString(R.string.tutorial_settings_settings_title), getString(R.string.tutorial_settings_settings_description)),
+                                settingsTapTargetRect(settingsListItemLocation(5), getString(R.string.tutorial_settings_export_title), getString(R.string.tutorial_settings_export_description))
                         )
                         .listener(new TapTargetSequence.Listener() {
                             // This listener will tell us when interesting(tm) events happen in regards to the sequence
                             @Override
                             public void onSequenceFinish() {
-                                TapTargetView.showFor(ConfigActivity.this, settingsTapTargetRect(settingsListItemLocation(0), "Main", getString(R.string.tutorial_settings_1)),
+                                TapTargetView.showFor(ConfigActivity.this, settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_import)),
                                         new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
                                             @Override
                                             public void onTargetClick(TapTargetView view) {

@@ -95,10 +95,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeAction" />
         <activity
-            android:name=".ChangelogActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:theme="@style/ActivityDialog" />
-        <activity
             android:name=".AboutActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:theme="@style/AppTheme.MaterialAboutActivity" />
