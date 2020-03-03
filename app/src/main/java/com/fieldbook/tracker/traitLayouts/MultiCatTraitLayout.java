@@ -247,7 +247,6 @@ public class MultiCatTraitLayout extends TraitLayout {
     }
 }
 
-
 class MutlticatTraitAdapter extends RecyclerView.Adapter<MulticatTraitViewHolder> {
 
     private Context mContext;

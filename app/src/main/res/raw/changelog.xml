@@ -1,5 +1,20 @@
 <changelog>
 
+    <release versionCode="420" versionName="v4.2" date="2020-02-28">
+        <info>Upgraded to Java 8</info>
+        <new>Added new tutorial</new>
+        <new>Added additional import sources</new>
+        <new>Added setting to customize icons on collect data screen</new>
+        <new>Improved multicat layout</new>
+        <new>Added new changelog</new>
+        <new>Added new about dialog</new>
+        <new>Added libraries used in app</new>
+    </release>
+
+    <release versionCode="414" versionName="v4.1.4" date="2020-02-28">
+        <bugfix>Fix for data save delay</bugfix>
+    </release>
+
     <release versionCode="413" versionName="v4.1.3" date="2020-02-21">
         <bugfix>Fix for local storage crash</bugfix>
     </release>
