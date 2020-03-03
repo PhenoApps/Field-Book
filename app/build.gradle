@@ -76,6 +76,8 @@ dependencies {
     implementation 'com.github.daniel-stoneuk:material-about-library:2.4.2'
     implementation "com.mikepenz:aboutlibraries:6.2.3"
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.0'
+    implementation 'com.google.android:flexbox:2.0.1'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 
     implementation project(':dropbox')
 
