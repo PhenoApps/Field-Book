@@ -342,12 +342,8 @@
 
     <!-- Import dialog -->
     <string name="import_source_local">Local storage</string>
-    <string name="import_source_dropbox">Dropbox</string>
-    <string name="import_source_googledrive">Google Drive</string>
-    <string name="import_source_box">Box</string>
-    <string name="import_source_onedrive">OneDrive</string>
-    <string name="import_source_brapi">BrAPI</string>
     <string name="import_source_cloud">Cloud storage</string>
+    <string name="import_source_brapi">BrAPI</string>
     <string name="import_source_ask">Always ask</string>
 
     <string name="import_dialog_title_fields">Import field</string>
@@ -418,7 +414,7 @@
     <string name="citation_text" translatable="false">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
 
     <!-- Brapi strings -->
-    <string name="preferences_brapi">BrAPI</string>
+    <string name="preferences_brapi" translatable="false">BrAPI</string>
     <string name="brapi_base_url">BrAPI Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
     <string name="brapi_title">BrAPI Configuration</string>

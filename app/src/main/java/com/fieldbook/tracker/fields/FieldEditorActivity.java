@@ -4,9 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
 import android.graphics.Rect;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -16,6 +18,8 @@ import android.os.Handler;
 
 import androidx.appcompat.app.AlertDialog;
 
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,11 +40,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-//import com.box.androidsdk.browse.activities.BoxBrowseFileActivity;
-//import com.box.androidsdk.content.models.BoxSession;
-import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
-import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
@@ -48,16 +48,12 @@ import com.fieldbook.tracker.FileExploreActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -175,14 +171,10 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         ListView myList = layout.findViewById(R.id.myList);
 
-        String[] importArray = new String[7];
+        String[] importArray = new String[3];
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_cloud);
         importArray[2] = getString(R.string.import_source_brapi);
-        importArray[3] = getString(R.string.import_source_onedrive);
-        importArray[4] = getString(R.string.import_source_box);
-        importArray[5] = getString(R.string.import_source_googledrive);
-        importArray[6] = getString(R.string.import_source_dropbox);
 
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -195,18 +187,6 @@ public class FieldEditorActivity extends AppCompatActivity {
                         break;
                     case 2:
                         loadBrAPI();
-                        break;
-                    case 3:
-                        loadOneDrive();
-                        break;
-                    case 4:
-                        loadBox();
-                        break;
-                    case 5:
-                        loadGoogleDrive();
-                        break;
-                    case 6:
-                        loadDropbox();
                         break;
 
                 }
@@ -236,11 +216,6 @@ public class FieldEditorActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 
-    public void loadDropbox() {
-        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
-        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
-    }
-
     public void loadBrAPI() {
         Intent intent = new Intent();
 
@@ -249,39 +224,16 @@ public class FieldEditorActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 
-    //TODO
-    public void loadBox() {
-        //BoxSession session = new BoxSession(FieldEditorActivity.this);
-        //startActivityForResult(BoxBrowseFileActivity.getLaunchIntent(FieldEditorActivity.this, "<FOLDER_ID>", session), 4);
-        //makeToast("Box");
-    }
-
-    //TODO
-    public void loadGoogleDrive() {
-        makeToast("Google");
-    }
-
     public void loadCloud() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
+        intent.setType("*/*");;
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        //intent.putExtra("browseCoa", itemToBrowse);
-        //Intent chooser = Intent.createChooser(intent, "Select a File to Upload");
-        //startActivityForResult(chooser, FILE_SELECT_CODE);
 
         try {
-            startActivityForResult(Intent.createChooser(intent, "cloudFile"),5);
+            startActivityForResult(Intent.createChooser(intent, "cloudFile"), 5);
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(getApplicationContext(), "No suitable File Manager was found.", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    //TODO test this with personal account to verify that it works correctly
-    public void loadOneDrive() {
-        makeToast("OneDrive");
-        String ONEDRIVE_APP_ID = ApiKeys.ONEDRIVE_APP_ID;
-        mPicker = Picker.createPicker(ONEDRIVE_APP_ID);
-        mPicker.startPicking(this, LinkType.WebViewLink);
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE)
@@ -311,7 +263,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         View v = fieldList.getChildAt(item);
         final int[] location = new int[2];
         v.getLocationOnScreen(location);
-        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth()/5, location[1] + v.getHeight());
+        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth() / 5, location[1] + v.getHeight());
         return droidTarget;
     }
 
@@ -385,28 +337,15 @@ public class FieldEditorActivity extends AppCompatActivity {
                     case "local":
                         loadLocal();
                         break;
-                    case "dropbox":
-                        loadDropbox();
-                        break;
-                    case "gdrive":
-                        loadGoogleDrive();
-                        break;
-                    case "box":
-                        loadBox();
-                        break;
-                    case "onedrive":
-                        loadOneDrive();
-                        break;
                     case "brapi":
                         loadBrAPI();
                         break;
                     case "cloud":
-
+                        loadCloud();
                         break;
                     default:
                         showFileDialog();
                 }
-
                 break;
 
             case android.R.id.home:
@@ -414,6 +353,28 @@ public class FieldEditorActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public String getFileName(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
     }
 
     private void fieldCheck() {
@@ -448,90 +409,55 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         }
 
-        if (requestCode == 3) {
-            if (resultCode == RESULT_OK) {
-                DbxChooser.Result dropboxResult = new DbxChooser.Result(data);
-                saveFileFromUri(dropboxResult.getLink(), dropboxResult.getName());
-                final String chosenFile = Constants.FIELDIMPORTPATH + "/" + dropboxResult.getName();
-                showFieldFileDialog(chosenFile);
-            }
-        }
-
-        if (requestCode == 5) {
-            if (resultCode == RESULT_OK) {
-                Uri content_describer = data.getData();
-                BufferedReader reader = null;
-                try {
-                    // open the user-picked file for reading:
-                    InputStream in = getContentResolver().openInputStream(content_describer);
-                    // now read the content:
-                    reader = new BufferedReader(new InputStreamReader(in));
-                    String line;
-                    StringBuilder builder = new StringBuilder();
-                    while ((line = reader.readLine()) != null){
-                        builder.append(line);
+        if (requestCode == 5 && resultCode == RESULT_OK && data.getData() != null) {
+            Uri content_describer = data.getData();
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                in = getContentResolver().openInputStream(content_describer);
+                out = new FileOutputStream(new File(Constants.FIELDIMPORTPATH + "/" + getFileName(content_describer)));
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                    // Do something with the content in
-                    Log.d("Field Book",builder.toString());
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                }
+                if (out != null){
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
-        }
 
-        //IPickerResult onedriveResult = mPicker.getPickerResult(requestCode, resultCode, data);
-        //if (requestCode == resultCode) {
-           // if (resultCode == RESULT_OK) {
-                //if (onedriveResult != null) {
-                    //Log.d("main", "Link to file '" + onedriveResult.getName() + ": " + onedriveResult.getLink());
-                 //   saveFileFromUri(onedriveResult.getLink(),onedriveResult.getName());
-                  //  final String chosenFile = Constants.FIELDIMPORTPATH + "/" + onedriveResult.getName();
-                  //  showFieldFileDialog(chosenFile);
-              //  }
-            //}
-       // }
-    }
+            final String chosenFile = Constants.FIELDIMPORTPATH + "/" + getFileName(content_describer);
 
-    private void saveFileFromUri(Uri sourceUri, String fileName) {
-        String sourceFilename = sourceUri.getPath();
-        String destinationFilename = Constants.FIELDIMPORTPATH + File.separatorChar + fileName;
-
-        BufferedInputStream bis = null;
-        BufferedOutputStream bos = null;
-
-        try {
-            bis = new BufferedInputStream(new FileInputStream(sourceFilename));
-            bos = new BufferedOutputStream(new FileOutputStream(destinationFilename, false));
-            byte[] buf = new byte[1024];
-            int length;
-
-            while ((length = bis.read(buf)) > 0) {
-                bos.write(buf, 0, length);
+            String extension = "";
+            int i = chosenFile.lastIndexOf('.');
+            if (i > 0) {
+                extension = chosenFile.substring(i+1);
             }
 
-        } catch (IOException ignore) {
-
-        } finally {
-            try {
-                if (bis != null) bis.close();
-                if (bos != null) bos.close();
-            } catch (IOException ignore) {
-
+            if(!extension.equals("csv") && !extension.equals("xls")) {
+                //TODO add to strings
+                makeToast("Only CSV and XLS files can be loaded into Field Book.");
+                return;
             }
-        }
 
-        File tempFile = new File(destinationFilename);
-        scanFile(tempFile);
+            showFieldFileDialog(chosenFile);
+        }
     }
 
     private void showFieldFileDialog(final String chosenFile) {

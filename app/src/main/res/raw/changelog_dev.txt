@@ -5,7 +5,6 @@ Added new about dialog
 Added libraries used in app
 Added new tutorial
 Added additional import sources
-Added software license
 Upgraded to Java 8
 
 36/4.1.4

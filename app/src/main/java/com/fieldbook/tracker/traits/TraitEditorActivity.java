@@ -12,23 +12,24 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
 import android.graphics.Rect;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 
-import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.brapi.BrapiTraitActivity;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
-import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
+import android.provider.OpenableColumns;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -54,7 +55,6 @@ import android.view.MenuItem;
 import com.fieldbook.tracker.io.CSVReader;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
@@ -64,9 +64,13 @@ import com.fieldbook.tracker.dragsort.DragSortListView;
 import com.fieldbook.tracker.dragsort.DragSortController;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -641,11 +645,8 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         String[] importArray = new String[3];
         importArray[0] = getString(R.string.import_source_local);
-        importArray[1] = getString(R.string.import_source_dropbox);
+        importArray[1] = getString(R.string.import_source_cloud);
         importArray[2] = getString(R.string.import_source_brapi);
-
-        //TODO add google drive (requires Google Play Services)
-        //importArray[2] = getString(R.string.importgoogle);
 
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -660,8 +661,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                         startActivityForResult(intent, 1);
                         break;
                     case 1:
-                        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
-                        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
+                        loadCloud();
                         break;
                     case 2:
                         intent.setClassName(thisActivity, BrapiTraitActivity.class.getName());
@@ -681,6 +681,18 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
         importDialog.show();
+    }
+
+    private void loadCloud() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");;
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        try {
+            startActivityForResult(Intent.createChooser(intent, "cloudFile"), 5);
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(getApplicationContext(), "No suitable File Manager was found.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void checkTraitExportDialog() {
@@ -931,6 +943,79 @@ public class TraitEditorActivity extends AppCompatActivity {
                 }
             }
         }
+
+        if (requestCode == 5 && resultCode == RESULT_OK && data.getData() != null) {
+            Uri content_describer = data.getData();
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                in = getContentResolver().openInputStream(content_describer);
+                out = new FileOutputStream(new File(Constants.FIELDIMPORTPATH + "/" + getFileName(content_describer)));
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (out != null){
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            final String chosenFile = Constants.TRAITPATH + "/" + getFileName(content_describer);
+
+            String extension = "";
+            int i = chosenFile.lastIndexOf('.');
+            if (i > 0) {
+                extension = chosenFile.substring(i+1);
+            }
+
+            if(!extension.equals("trt")) {
+                //TODO add to strings
+                makeToast("Only TRT files can be loaded into Field Book.");
+                return;
+            }
+
+            mChosenFile = chosenFile;
+            mHandler.post(importCSV);
+        }
+    }
+
+    public String getFileName(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
     }
 
     // Helper function export data as CSV

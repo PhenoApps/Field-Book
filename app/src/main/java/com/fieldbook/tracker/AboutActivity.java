@@ -56,13 +56,6 @@ public class AboutActivity extends MaterialAboutActivity {
                 })
                 .build());
 
-        appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
-                .text("GitHub")
-                .icon(R.drawable.ic_about_github)
-                .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
-                .build());
-
-
         appCardBuilder.addItem(ConvenienceBuilder.createRateActionItem(c,
                 getResources().getDrawable(R.drawable.ic_about_rate),
                 getString(R.string.about_rate),
@@ -116,6 +109,12 @@ public class AboutActivity extends MaterialAboutActivity {
         technicalCardBuilder.title(getString(R.string.about_technical_title));
 
         technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+                .text("GitHub")
+                .icon(R.drawable.ic_about_github)
+                .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
+                .build());
+
+        technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(R.string.libraries_title)
                 .icon(R.drawable.ic_about_libraries)
                 .setOnClickAction(new MaterialAboutItemOnClickAction() {
@@ -146,6 +145,18 @@ public class AboutActivity extends MaterialAboutActivity {
                 .text("Inventory")
                 .icon(R.drawable.other_ic_inventory)
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://play.google.com/store/apps/details?id=org.wheatgenetics.inventory")))
+                .build());
+
+        otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+                .text("Verify")
+                .icon(R.drawable.other_ic_verify)
+                .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://play.google.com/store/apps/details?id=org.phenoapps.verify")))
+                .build());
+
+        otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+                .text("Intercross")
+                .icon(R.drawable.other_ic_intercross)
+                .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://play.google.com/store/apps/details?id=org.phenoapps.intercross")))
                 .build());
 
         return new MaterialAboutList(appCardBuilder.build(), authorCardBuilder.build(), contributorsCardBuilder.build(), otherAppsCardBuilder.build(), technicalCardBuilder.build());
