@@ -2,12 +2,12 @@
 
     <release versionCode="420" versionName="v4.2" date="2020-02-28">
         <info>Upgraded to Java 8</info>
-        <new>Added new tutorial</new>
-        <new>Added additional import sources</new>
-        <new>Added setting to customize icons on collect data screen</new>
+        <new>New tutorial</new>
+        <new>Additional import sources</new>
+        <new>Customize icons on collect data screen</new>
         <new>Improved multicat layout</new>
-        <new>Added new changelog</new>
-        <new>Added new about dialog</new>
+        <new>Updated changelog</new>
+        <new>Updated about dialog</new>
         <new>Added libraries used in app</new>
     </release>
 

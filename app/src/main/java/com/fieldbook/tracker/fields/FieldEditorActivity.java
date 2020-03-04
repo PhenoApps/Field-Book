@@ -50,10 +50,14 @@ import com.fieldbook.tracker.R;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -173,13 +177,12 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         String[] importArray = new String[7];
         importArray[0] = getString(R.string.import_source_local);
-        importArray[1] = getString(R.string.import_source_brapi);
-        importArray[2] = getString(R.string.import_source_dropbox);
+        importArray[1] = getString(R.string.import_source_cloud);
+        importArray[2] = getString(R.string.import_source_brapi);
         importArray[3] = getString(R.string.import_source_onedrive);
         importArray[4] = getString(R.string.import_source_box);
         importArray[5] = getString(R.string.import_source_googledrive);
-        importArray[6] = "system test";
-
+        importArray[6] = getString(R.string.import_source_dropbox);
 
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -188,10 +191,10 @@ public class FieldEditorActivity extends AppCompatActivity {
                         loadLocalPermission();
                         break;
                     case 1:
-                        loadBrAPI();
+                        loadCloud();
                         break;
                     case 2:
-                        loadDropbox();
+                        loadBrAPI();
                         break;
                     case 3:
                         loadOneDrive();
@@ -203,7 +206,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                         loadGoogleDrive();
                         break;
                     case 6:
-                        loadAndroidPicker();
+                        loadDropbox();
                         break;
 
                 }
@@ -258,14 +261,19 @@ public class FieldEditorActivity extends AppCompatActivity {
         makeToast("Google");
     }
 
-    public void loadAndroidPicker() {
+    public void loadCloud() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         //intent.putExtra("browseCoa", itemToBrowse);
         //Intent chooser = Intent.createChooser(intent, "Select a File to Upload");
         //startActivityForResult(chooser, FILE_SELECT_CODE);
-        startActivityForResult(Intent.createChooser(intent, "Select a File to Upload"),5);
+
+        try {
+            startActivityForResult(Intent.createChooser(intent, "cloudFile"),5);
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(getApplicationContext(), "No suitable File Manager was found.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     //TODO test this with personal account to verify that it works correctly
@@ -392,6 +400,9 @@ public class FieldEditorActivity extends AppCompatActivity {
                     case "brapi":
                         loadBrAPI();
                         break;
+                    case "cloud":
+
+                        break;
                     default:
                         showFileDialog();
                 }
@@ -422,7 +433,6 @@ public class FieldEditorActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        //IPickerResult onedriveResult = mPicker.getPickerResult(requestCode, resultCode, data);
 
         if (requestCode == 2) {
             if (resultCode == RESULT_OK) {
@@ -447,6 +457,39 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         }
 
+        if (requestCode == 5) {
+            if (resultCode == RESULT_OK) {
+                Uri content_describer = data.getData();
+                BufferedReader reader = null;
+                try {
+                    // open the user-picked file for reading:
+                    InputStream in = getContentResolver().openInputStream(content_describer);
+                    // now read the content:
+                    reader = new BufferedReader(new InputStreamReader(in));
+                    String line;
+                    StringBuilder builder = new StringBuilder();
+                    while ((line = reader.readLine()) != null){
+                        builder.append(line);
+                    }
+                    // Do something with the content in
+                    Log.d("Field Book",builder.toString());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+
+        //IPickerResult onedriveResult = mPicker.getPickerResult(requestCode, resultCode, data);
         //if (requestCode == resultCode) {
            // if (resultCode == RESULT_OK) {
                 //if (onedriveResult != null) {

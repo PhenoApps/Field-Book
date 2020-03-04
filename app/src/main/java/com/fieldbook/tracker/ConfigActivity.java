@@ -97,7 +97,7 @@ public class ConfigActivity extends AppCompatActivity {
     private AlertDialog setupDialog;
     private AlertDialog dbSaveDialog;
     private String mChosenFile = "";
-    private ListView setupList;
+    private ListView profileList;
     private double lat;
     private double lng;
     private EditText exportFile;
@@ -236,10 +236,7 @@ public class ConfigActivity extends AppCompatActivity {
         dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
     }
 
-    private void loadScreen() {
-        setContentView(R.layout.activity_config);
-
-        // Toolbar
+    private void initToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -249,6 +246,11 @@ public class ConfigActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setHomeButtonEnabled(false);
         }
+    }
+
+    private void loadScreen() {
+        setContentView(R.layout.activity_config);
+        initToolbar();
 
         //setup
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
@@ -268,7 +270,8 @@ public class ConfigActivity extends AppCompatActivity {
         setupDialog.getWindow().setAttributes(params);
 
         // This is the list of items shown on the settings screen itself
-        setupList = layout.findViewById(R.id.myList);
+        profileList = layout.findViewById(R.id.myList);
+
         Button setupCloseBtn = layout.findViewById(R.id.closeBtn);
         setupCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -283,9 +286,6 @@ public class ConfigActivity extends AppCompatActivity {
 
 
         Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.ic_nav_drawer_person, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
-
-        //get list of items
-        //make adapter
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
@@ -322,7 +322,7 @@ public class ConfigActivity extends AppCompatActivity {
                             return;
                         }
 
-                        showSetupDialog();
+                        showProfileDialog();
                         break;
                     case 4:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
@@ -351,9 +351,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         CustomListAdapter2 adapterImg = new CustomListAdapter2(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
-
-        //ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, configList);
-        //settingsList.setAdapter(adapter);
 
         SharedPreferences.Editor ed = ep.edit();
 
@@ -444,9 +441,7 @@ public class ConfigActivity extends AppCompatActivity {
                 intent.setClassName(ConfigActivity.this,
                         ConfigActivity.class.getName());
                 startActivity(intent);
-
             }
-
         });
 
         AlertDialog alert = builder.create();
@@ -476,7 +471,6 @@ public class ConfigActivity extends AppCompatActivity {
                         ConfigActivity.class.getName());
                 startActivity(intent);
             }
-
         });
 
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
@@ -493,7 +487,6 @@ public class ConfigActivity extends AppCompatActivity {
                         ConfigActivity.class.getName());
                 startActivity(intent);
             }
-
         });
 
         AlertDialog alert = builder.create();
@@ -603,7 +596,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void updateSetupList() {
-        ArrayAdapter<String> ga = (ArrayAdapter) setupList.getAdapter();
+        ArrayAdapter<String> ga = (ArrayAdapter) profileList.getAdapter();
 
         if (ga != null) {
             ga.clear();
@@ -845,11 +838,11 @@ public class ConfigActivity extends AppCompatActivity {
         saveDialog.show();
     }
 
-    private void showSetupDialog() {
+    private void showProfileDialog() {
         String[] array = prepareSetup();
         ArrayList<String> lst = new ArrayList<>(Arrays.asList(array));
 
-        setupList.setOnItemClickListener(new OnItemClickListener() {
+        profileList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 switch (which) {
                     case 0:
@@ -870,7 +863,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, lst);
 
-        setupList.setAdapter(adapter);
+        profileList.setAdapter(adapter);
         setupDialog.show();
     }
 

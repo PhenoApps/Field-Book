@@ -13,10 +13,12 @@ import com.danielstone.materialaboutlibrary.items.MaterialAboutItemOnClickAction
 import com.danielstone.materialaboutlibrary.items.MaterialAboutTitleItem;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
+import com.danielstone.materialaboutlibrary.util.OpenSourceLicense;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 import com.mikepenz.aboutlibraries.LibsBuilder;
+
 
 public class AboutActivity extends MaterialAboutActivity {
 
@@ -60,22 +62,6 @@ public class AboutActivity extends MaterialAboutActivity {
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
                 .build());
 
-        appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
-                .text(R.string.libraries_title)
-                .icon(R.drawable.ic_about_libraries)
-                .setOnClickAction(new MaterialAboutItemOnClickAction() {
-                    @Override
-                    public void onClick() {
-                        new LibsBuilder()
-                                .withActivityTheme(R.style.AppTheme)
-                                .withAutoDetect(true)
-                                .withActivityTitle(getString(R.string.libraries_title))
-                                .withLicenseShown(true)
-                                .withVersionShown(true)
-                                .start(getApplicationContext());
-                    }
-                })
-                .build());
 
         appCardBuilder.addItem(ConvenienceBuilder.createRateActionItem(c,
                 getResources().getDrawable(R.drawable.ic_about_rate),
@@ -116,8 +102,34 @@ public class AboutActivity extends MaterialAboutActivity {
 
         contributorsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(getString(R.string.about_translators_title))
-                .subText(getString(R.string.about_translators_list))
+                .subText(getString(R.string.about_translators_text))
                 .icon(R.drawable.ic_about_translators)
+                .build());
+
+        contributorsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+                .text(getString(R.string.about_contributors_funding_title))
+                .subText(getString(R.string.about_contributors_funding_text))
+                .icon(R.drawable.ic_about_funding)
+                .build());
+
+        MaterialAboutCard.Builder technicalCardBuilder = new MaterialAboutCard.Builder();
+        technicalCardBuilder.title(getString(R.string.about_technical_title));
+
+        technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+                .text(R.string.libraries_title)
+                .icon(R.drawable.ic_about_libraries)
+                .setOnClickAction(new MaterialAboutItemOnClickAction() {
+                    @Override
+                    public void onClick() {
+                        new LibsBuilder()
+                                .withActivityTheme(R.style.AppTheme)
+                                .withAutoDetect(true)
+                                .withActivityTitle(getString(R.string.libraries_title))
+                                .withLicenseShown(true)
+                                .withVersionShown(true)
+                                .start(getApplicationContext());
+                    }
+                })
                 .build());
 
 
@@ -136,8 +148,7 @@ public class AboutActivity extends MaterialAboutActivity {
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://play.google.com/store/apps/details?id=org.wheatgenetics.inventory")))
                 .build());
 
-        return new MaterialAboutList(appCardBuilder.build(), authorCardBuilder.build(), contributorsCardBuilder.build(), otherAppsCardBuilder.build());
-
+        return new MaterialAboutList(appCardBuilder.build(), authorCardBuilder.build(), contributorsCardBuilder.build(), otherAppsCardBuilder.build(), technicalCardBuilder.build());
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
@@ -154,7 +165,6 @@ public class AboutActivity extends MaterialAboutActivity {
 
     @Override
     protected CharSequence getActivityTitle() {
-
         return getString(R.string.mal_title_about);
     }
 

@@ -53,6 +53,7 @@
         <item>@string/import_source_box</item>
         <item>@string/import_source_onedrive</item>
         <item>@string/import_source_brapi</item>
+        <item>@string/import_source_cloud</item>
     </string-array>
 
     <string-array name="pref_import_source_values">
@@ -63,5 +64,6 @@
         <item>box</item>
         <item>onedrive</item>
         <item>brapi</item>
+        <item>cloud</item>
     </string-array>
 </resources>
