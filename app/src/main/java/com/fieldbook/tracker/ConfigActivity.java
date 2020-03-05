@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -1269,10 +1270,11 @@ public class ConfigActivity extends AppCompatActivity {
         return TapTarget.forBounds(item, title, desc)
                 // All options below are optional
                 .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.92f)            // Specify the alpha amount for the outer circle
+                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
                 .targetCircleColor(R.color.black)   // Specify a color for the target circle
                 .titleTextSize(30)                  // Specify the size (in sp) of the title text
                 .descriptionTextSize(20)            // Specify the size (in sp) of the description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD)
                 .descriptionTextColor(R.color.black)  // Specify the color of the description text
                 .textColor(R.color.black)            // Specify a color for both the title and description text
                 .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color

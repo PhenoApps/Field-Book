@@ -1,6 +1,8 @@
 package com.fieldbook.tracker;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -13,7 +15,6 @@ import com.danielstone.materialaboutlibrary.items.MaterialAboutItemOnClickAction
 import com.danielstone.materialaboutlibrary.items.MaterialAboutTitleItem;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
-import com.danielstone.materialaboutlibrary.util.OpenSourceLicense;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -138,25 +139,24 @@ public class AboutActivity extends MaterialAboutActivity {
         otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text("Coordinate")
                 .icon(R.drawable.other_ic_coordinate)
-                .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://play.google.com/store/apps/details?id=org.wheatgenetics.coordinate")))
+                .setOnClickAction(openAppOrStore("org.wheatgenetics.coordinate",c))
                 .build());
 
         otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text("Inventory")
                 .icon(R.drawable.other_ic_inventory)
-                .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://play.google.com/store/apps/details?id=org.wheatgenetics.inventory")))
+                .setOnClickAction(openAppOrStore("org.wheatgenetics.inventory",c))
                 .build());
 
         otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text("Verify")
                 .icon(R.drawable.other_ic_verify)
-                .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://play.google.com/store/apps/details?id=org.phenoapps.verify")))
                 .build());
 
         otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text("Intercross")
                 .icon(R.drawable.other_ic_intercross)
-                .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://play.google.com/store/apps/details?id=org.phenoapps.intercross")))
+                .setOnClickAction(openAppOrStore("org.phenoapps.intercross",c))
                 .build());
 
         return new MaterialAboutList(appCardBuilder.build(), authorCardBuilder.build(), contributorsCardBuilder.build(), otherAppsCardBuilder.build(), technicalCardBuilder.build());
@@ -179,4 +179,21 @@ public class AboutActivity extends MaterialAboutActivity {
         return getString(R.string.mal_title_about);
     }
 
+
+    private MaterialAboutItemOnClickAction openAppOrStore(String packageName, Context c) {
+        PackageManager packageManager = getBaseContext().getPackageManager();
+        try {
+            packageManager.getPackageInfo(packageName, 0);
+
+            return new MaterialAboutItemOnClickAction() {
+                @Override
+                public void onClick() {
+                    Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
+                    startActivity( launchIntent );
+                }
+            };
+        } catch (PackageManager.NameNotFoundException e) {
+            return ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://play.google.com/store/apps/details?id=" + packageName));
+        }
+    }
 }

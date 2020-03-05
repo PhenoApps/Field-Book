@@ -4,12 +4,12 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -18,10 +18,8 @@ import android.os.Handler;
 
 import androidx.appcompat.app.AlertDialog;
 
-import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -269,11 +267,12 @@ public class FieldEditorActivity extends AppCompatActivity {
         return TapTarget.forBounds(item, title, desc)
                 // All options below are optional
                 .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.92f)            // Specify the alpha amount for the outer circle
+                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
                 .targetCircleColor(R.color.black)   // Specify a color for the target circle
                 .titleTextSize(30)                  // Specify the size (in sp) of the title text
                 .descriptionTextSize(20)            // Specify the size (in sp) of the description text
                 .descriptionTextColor(R.color.black)  // Specify the color of the description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD)
                 .textColor(R.color.black)            // Specify a color for both the title and description text
                 .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
                 .drawShadow(true)                   // Whether to draw a drop shadow or not
@@ -287,11 +286,12 @@ public class FieldEditorActivity extends AppCompatActivity {
         return TapTarget.forView(findViewById(id), title, desc)
                 // All options below are optional
                 .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.92f)            // Specify the alpha amount for the outer circle
+                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
                 .targetCircleColor(R.color.black)   // Specify a color for the target circle
                 .titleTextSize(30)                  // Specify the size (in sp) of the title text
                 .descriptionTextSize(20)            // Specify the size (in sp) of the description text
                 .descriptionTextColor(R.color.black)  // Specify the color of the description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD)
                 .textColor(R.color.black)            // Specify a color for both the title and description text
                 .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
                 .drawShadow(true)                   // Whether to draw a drop shadow or not
@@ -449,8 +449,7 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
 
             if(!extension.equals("csv") && !extension.equals("xls")) {
-                //TODO add to strings
-                makeToast("Only CSV and XLS files can be loaded into Field Book.");
+                Toast.makeText(FieldEditorActivity.thisActivity, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
                 return;
             }
 

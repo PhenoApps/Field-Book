@@ -4,11 +4,13 @@
         <info>Upgraded to Java 8</info>
         <new>New tutorial</new>
         <new>Additional import sources</new>
-        <new>Customize icons on collect data screen</new>
+        <new>Choose default import/export source</new>
+        <new>Customize icons on collect screen</new>
         <new>Improved multicat layout</new>
         <new>Updated changelog</new>
         <new>Updated about dialog</new>
         <new>Added libraries used in app</new>
+        <bugfix>Fix for return key setting</bugfix>
     </release>
 
     <release versionCode="414" versionName="v4.1.4" date="2020-02-28">

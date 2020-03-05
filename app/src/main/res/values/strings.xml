@@ -64,8 +64,8 @@
     <!-- Settings Activity  -->
     <string name="settings_fields">Fields</string>
     <string name="settings_traits">Traits</string>
-    <string name="settings_collect">Collect data</string>
-    <string name="settings_export">Export data</string>
+    <string name="settings_collect">Collect</string>
+    <string name="settings_export">Export</string>
     <string name="settings_advanced">Settings</string>
     <string name="settings_profile">Profile</string>
 
@@ -168,14 +168,14 @@
 
     <string name="preferences_behavior_title">Behavior</string>
     <string name="preferences_behavior_volume_buttons_navigate">Map volume keys to entry navigation</string>
-    <string name="preferences_behavior_volume_buttons_navigate_description">Volume keys go to next or last entry</string>
-    <string name="preferences_behavior_return_character">Return key</string>
+    <string name="preferences_behavior_volume_buttons_navigate_description">Volume keys go to next or previous entry</string>
+    <string name="preferences_behavior_return_character">Return key signal</string>
     <string name="preferences_behavior_return_character_description">Change how the return key signal is interpreted</string>
     <string name="preferences_behavior_return_character_next_plot">Next plot</string>
     <string name="preferences_behavior_return_character_next_trait">Next trait</string>
     <string name="preferences_behavior_return_character_do_nothing">Do nothing</string>
     <string name="preferences_behavior_cycle_traits">Cycling traits advances entry</string>
-    <string name="preferences_behavior_cycle_traits_description">After going through all traits, the app goes to the next entry</string>
+    <string name="preferences_behavior_cycle_traits_description">After going through all traits, Field Book goes to the next entry</string>
     <string name="preferences_behavior_import_source">Choose your default import source</string>
     <string name="preferences_behavior_export_source">Choose your export import source</string>
     <string name="preferences_behavior_disable_entry_arrow">Disable entry arrow</string>
@@ -211,15 +211,18 @@
     <string name="preferences_general_feature_datagrid">Datagrid</string>
     <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
 
-    <string name="preferences_source_default_category_title">Default data source</string>
+    <string name="preferences_source_default_category_title">Default data</string>
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
+
+    <string name="preferences_appearance_system_category_title">Application</string>
+    <string name="preferences_appearance_collection_category_title">Collect Screen</string>
 
     <!-- Trait text and errors -->
     <string name="trait_layout_data_stored">Saved</string>
     <string name="trait_layout_print_title">Print Label</string>
     <string name="trait_layout_print_status_title">Printer status</string>
-    <string name="trait_layout_print_status">Retrieving connection status...</string>
+    <string name="trait_layout_print_status">Retrieving connection status…</string>
     <string name="trait_layout_print_label_size_title">Size:</string>
     <string name="trait_layout_print_text_field_title">Text:</string>
     <string name="trait_layout_print_text_field_title_2">Text2:</string>
@@ -271,7 +274,7 @@
     <string name="tutorial_settings_fields_import">To start using Field Book, first import a field file.</string>
     <string name="tutorial_settings_traits_title">Traits</string>
     <string name="tutorial_settings_traits_description">allows you to add, import, and manage traits.</string>
-    <string name="tutorial_settings_collect_title">Collect Data</string>
+    <string name="tutorial_settings_collect_title">Collect data</string>
     <string name="tutorial_settings_collect_description">allows you to collect phenotypic data.</string>
     <string name="tutorial_settings_profile_title">Profile</string>
     <string name="tutorial_settings_profile_description">allows you to set the person and location.</string>
@@ -314,7 +317,7 @@
     <string name="about_contributors_funding_title">Funding</string>
     <string name="about_contributors_funding_text" translatable="false">Development of Field Book has been supported by the Collaborative Crop Research Program of The McKnight Foundation, the National Science Foundation (#1543958), and the National Institute of Food and Agriculture (#2019-67021-29931).</string>
     <string name="about_rate">Rate this app</string>
-    <string name="about_technical_title">Technical</string>
+    <string name="about_technical_title">Technical Details1</string>
     <string name="about_licenses_title">Licenses</string>
     <string name="changelog_title">Changelog</string>
     <string name="libraries_title">Libraries</string>
@@ -363,6 +366,8 @@
     <string name="import_error_column_name">Column name in imported file cannot be: </string>
     <string name="import_error_unique_characters_illegal">Selected column contains characters which cannot be used in the unique identifier</string>
     <string name="import_error_column_choice">Columns cannot be used for the same assignment</string>
+    <string name="import_error_format_field">Only CSV and XLS files can be imported as a field</string>
+    <string name="import_error_format_trait">Only TRT files can be imported as a trait list</string>
 
     <!-- Export dialog -->
     <string name="export_source_local">Local</string>
@@ -388,7 +393,7 @@
     <string name="brapi_export_images">Images</string>
     <string name="brapi_na">NA</string>
     <string name="brapi_delete_message">Cannot delete synced BrAPI observation, using NA instead</string>
-    <string name="images_loading">Loading Images...</string>
+    <string name="images_loading">Loading Images…</string>
 
     <!-- Warnings/Catches -->
     <string name="warning_field_before_traits">A field must be imported before traits can be created.</string>
@@ -454,7 +459,7 @@
     <string name="brapi_export_multiple_obs">ERROR: Multiple observations per variable</string>
     <string name="brapi_export_unknown_error">ERROR: Unknown Error</string>
     <string name="brapi_export_successful">BrAPI Export Successful</string>
-    <string name="brapi_saving_indicator">Saving Observations...</string>
+    <string name="brapi_saving_indicator">Saving Observations…</string>
     <string name="brapi_field_non_matching_sources">Unable to sync data. Field data originates from, %1$s, BrAPI url currently set to %2$s. Sources must match.</string>
     <string name="brapi_trait_already_exists">Trait already exists: %1$s. Not saving.</string>
     <string name="brapi_error_saving_all_traits">Error saving traits. No traits were saved.</string>

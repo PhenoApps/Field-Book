@@ -66,10 +66,4 @@ public class Utils {
         else
             return false;
     }
-
-    //TODO language
-
-
-    //TODO sharefile
-
 }
