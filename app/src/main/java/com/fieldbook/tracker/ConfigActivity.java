@@ -10,11 +10,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,7 +43,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.brapi.BrAPIService;
@@ -55,12 +53,16 @@ import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.fields.FieldEditorActivity;
 import com.fieldbook.tracker.traits.TraitEditorActivity;
-import com.fieldbook.tracker.tutorial.TutorialSettingsActivity;
 import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.utilities.CustomListAdapter;
 import com.fieldbook.tracker.utilities.CustomListAdapter2;
 import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.getkeepsafe.taptargetview.TapTargetView;
+import com.michaelflisar.changelog.ChangelogBuilder;
+import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
+import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -89,7 +91,6 @@ public class ConfigActivity extends AppCompatActivity {
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 995;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
-    String versionName;
     private SharedPreferences ep;
     private AlertDialog personDialog;
     private AlertDialog locationDialog;
@@ -97,7 +98,7 @@ public class ConfigActivity extends AppCompatActivity {
     private AlertDialog setupDialog;
     private AlertDialog dbSaveDialog;
     private String mChosenFile = "";
-    private ListView setupList;
+    private ListView profileList;
     private double lat;
     private double lng;
     private EditText exportFile;
@@ -114,6 +115,7 @@ public class ConfigActivity extends AppCompatActivity {
     private ArrayList<String> newRange;
     private ArrayList<String> exportTrait;
     private Menu systemMenu;
+    ListView settingsList;
     private Runnable exportData = new Runnable() {
         public void run() {
             new ExportDataTask().execute(0);
@@ -132,12 +134,6 @@ public class ConfigActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        try {
-            TutorialSettingsActivity.thisActivity.finish();
-        } catch (Exception e) {
-            Log.e("Field Book", "");
-        }
-
         ConfigActivity.dt.close();
         super.onDestroy();
     }
@@ -147,11 +143,7 @@ public class ConfigActivity extends AppCompatActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            if (ep.getBoolean(PreferencesActivity.TUTORIAL_MODE, false)) {
-                systemMenu.findItem(R.id.help).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.help).setVisible(false);
-            }
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
         }
 
         invalidateOptionsMenu();
@@ -172,16 +164,9 @@ public class ConfigActivity extends AppCompatActivity {
 
         helpActive = false;
 
-        // display intro tutorial
-        if (ep.getBoolean("FirstRun", true)) {
-            ep.edit().putBoolean("FirstRun", false).apply();
-        }
-
         if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
             ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
-            Intent intent = new Intent();
-            intent.setClass(ConfigActivity.this, ChangelogActivity.class);
-            startActivity(intent);
+            showChangelog(true, false);
             updateAssets();
         }
 
@@ -189,6 +174,18 @@ public class ConfigActivity extends AppCompatActivity {
 
         dt = new DataHelper(this);
         checkIntent();
+    }
+
+    private void showChangelog(Boolean managedShow, Boolean rateButton) {
+        ChangelogDialogFragment builder = new ChangelogBuilder()
+                .withUseBulletList(true) // true if you want to show bullets before each changelog row, false otherwise
+                .withManagedShowOnStart(managedShow)  // library will take care to show activity/dialog only if the changelog has new infos and will only show this new infos
+                .withRateButton(rateButton) // enable this to show a "rate app" button in the dialog => clicking it will open the play store; the parent activity or target fragment can also implement IChangelogRateHandler to handle the button click
+                .withSummary(false, true) // enable this to show a summary and a "show more" button, the second paramter describes if releases without summary items should be shown expanded or not
+                .withTitle(getString(R.string.changelog_title)) // provide a custom title if desired, default one is "Changelog <VERSION>"
+                .withOkButtonLabel("OK") // provide a custom ok button text if desired, default one is "OK"
+                .withSorter(new ImportanceChangelogSorter())
+                .buildAndShowDialog(this, false); // second parameter defines, if the dialog has a dark or light theme
     }
 
     private void createDirs() {
@@ -240,19 +237,21 @@ public class ConfigActivity extends AppCompatActivity {
         dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
     }
 
-    private void loadScreen() {
-        setContentView(R.layout.activity_config);
-
-        // Toolbar
+    private void initToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(null);
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setHomeButtonEnabled(false);
         }
+    }
+
+    private void loadScreen() {
+        setContentView(R.layout.activity_config);
+        initToolbar();
 
         //setup
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
@@ -272,7 +271,8 @@ public class ConfigActivity extends AppCompatActivity {
         setupDialog.getWindow().setAttributes(params);
 
         // This is the list of items shown on the settings screen itself
-        setupList = layout.findViewById(R.id.myList);
+        profileList = layout.findViewById(R.id.myList);
+
         Button setupCloseBtn = layout.findViewById(R.id.closeBtn);
         setupCloseBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -280,16 +280,13 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        ListView settingsList = findViewById(R.id.myList);
+        settingsList = findViewById(R.id.myList);
 
         String[] configList = new String[]{getString(R.string.settings_fields),
                 getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)}; //, "API Test"};
 
 
         Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.ic_nav_drawer_person, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
-
-        //get list of items
-        //make adapter
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
@@ -326,7 +323,7 @@ public class ConfigActivity extends AppCompatActivity {
                             return;
                         }
 
-                        showSetupDialog();
+                        showProfileDialog();
                         break;
                     case 4:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
@@ -337,7 +334,22 @@ public class ConfigActivity extends AppCompatActivity {
                             return;
                         }
 
-                        showExportDialog();
+                        String exporter = ep.getString("EXPORT_SOURCE_DEFAULT", "ask");
+
+                        switch (exporter) {
+                            case "ask":
+                                showExportDialog();
+                                break;
+                            case "local":
+                                exportPermission();
+                                break;
+                            case "brapi":
+                                exportBrAPI();
+                                break;
+                            default:
+                                showExportDialog();
+                        }
+
                         break;
                     case 5:
                         intent.setClassName(ConfigActivity.this,
@@ -345,7 +357,9 @@ public class ConfigActivity extends AppCompatActivity {
                         startActivity(intent);
                         break;
                     case 6:
-                        showAboutDialog();
+                        intent.setClassName(ConfigActivity.this,
+                                AboutActivity.class.getName());
+                        startActivity(intent);
                         break;
                 }
             }
@@ -354,18 +368,8 @@ public class ConfigActivity extends AppCompatActivity {
         CustomListAdapter2 adapterImg = new CustomListAdapter2(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
 
-        //ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, configList);
-        //settingsList.setAdapter(adapter);
-
         SharedPreferences.Editor ed = ep.edit();
 
-        if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
-            ed.putInt("UpdateVersion", Utils.getVersion(this));
-            ed.apply();
-            Intent intent = new Intent();
-            intent.setClass(ConfigActivity.this, ChangelogActivity.class);
-            startActivity(intent);
-        }
         if (!ep.getBoolean("TipsConfigured", false)) {
             ed.putBoolean("TipsConfigured", true);
             ed.apply();
@@ -453,9 +457,7 @@ public class ConfigActivity extends AppCompatActivity {
                 intent.setClassName(ConfigActivity.this,
                         ConfigActivity.class.getName());
                 startActivity(intent);
-
             }
-
         });
 
         AlertDialog alert = builder.create();
@@ -485,7 +487,6 @@ public class ConfigActivity extends AppCompatActivity {
                         ConfigActivity.class.getName());
                 startActivity(intent);
             }
-
         });
 
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
@@ -502,7 +503,6 @@ public class ConfigActivity extends AppCompatActivity {
                         ConfigActivity.class.getName());
                 startActivity(intent);
             }
-
         });
 
         AlertDialog alert = builder.create();
@@ -559,116 +559,6 @@ public class ConfigActivity extends AppCompatActivity {
         return truncated.toString();
     }
 
-    private void showAboutDialog() {
-        final PackageManager packageManager = this.getPackageManager();
-
-        try {
-            PackageInfo packageInfo = packageManager.getPackageInfo(this.getPackageName(), 0);
-            versionName = packageInfo.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            versionName = null;
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_about, null);
-
-        builder.setTitle(R.string.about_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        final AlertDialog aboutDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams langParams = aboutDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.MATCH_PARENT;
-        aboutDialog.getWindow().setAttributes(langParams);
-
-        TextView versionText = layout.findViewById(R.id.tvVersion);
-        versionText.setText(getString(R.string.about_version_title) + " " + versionName);
-
-        TextView otherApps = layout.findViewById(R.id.tvOtherApps);
-
-        versionText.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setClass(ConfigActivity.this, ChangelogActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        otherApps.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showOtherAppsDialog();
-            }
-        });
-
-        Button closeBtn = layout.findViewById(R.id.closeBtn);
-
-        closeBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                aboutDialog.dismiss();
-            }
-        });
-
-        aboutDialog.show();
-    }
-
-    private void showOtherAppsDialog() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list, null);
-
-        builder.setTitle(R.string.about_title_other_apps)
-                .setCancelable(true)
-                .setView(layout);
-
-        final AlertDialog otherAppsDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params = otherAppsDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        otherAppsDialog.getWindow().setAttributes(params);
-
-        ListView myList = layout.findViewById(R.id.myList);
-
-        String[] appsArray = new String[3];
-
-        appsArray[0] = "Inventory";
-        appsArray[1] = "Coordinate";
-        appsArray[2] = "1KK";
-
-        Integer app_images[] = {R.drawable.other_ic_inventory, R.drawable.other_ic_coordinate};
-        final String[] links = {"https://play.google.com/store/apps/details?id=org.wheatgenetics.inventory",
-                "https://play.google.com/store/apps/details?id=org.wheatgenetics.coordinate"};
-        final String[] desc = {"", "", ""};
-
-        myList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                Uri uri = Uri.parse(links[which]);
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            }
-        });
-
-        CustomListAdapter adapterImg = new CustomListAdapter(this, app_images, appsArray, desc);
-        myList.setAdapter(adapterImg);
-
-        Button langCloseBtn = layout.findViewById(R.id.closeBtn);
-
-        langCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                otherAppsDialog.dismiss();
-            }
-        });
-
-        otherAppsDialog.show();
-    }
-
     /**
      * Scan file to update file list and share exported file
      */
@@ -722,7 +612,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void updateSetupList() {
-        ArrayAdapter<String> ga = (ArrayAdapter) setupList.getAdapter();
+        ArrayAdapter<String> ga = (ArrayAdapter) profileList.getAdapter();
 
         if (ga != null) {
             ga.clear();
@@ -772,48 +662,8 @@ public class ConfigActivity extends AppCompatActivity {
                         exportPermission();
                         break;
                     case 1:
-
-                        // Get our active field
-                        Integer activeFieldId = dt.checkFieldName(ep.getString("FieldFile", ""));
-                        FieldObject activeField;
-                        if (activeFieldId != -1) {
-                            activeField = dt.getFieldObject(activeFieldId);
-                        } else {
-                            activeField = null;
-                            Toast.makeText(ConfigActivity.this, R.string.warning_field_missing, Toast.LENGTH_LONG).show();
-                            break;
-                        }
-
-                        // Check that our field is a brapi field
-                        if (activeField.getExp_source() == null ||
-                                activeField.getExp_source() == "" ||
-                                activeField.getExp_source() == "local") {
-
-                            Toast.makeText(ConfigActivity.this, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show();
-                            break;
-                        }
-
-                        // Check that the field data source is the same as the current target
-                        if (!BrAPIService.checkMatchBrapiUrl(ConfigActivity.this, activeField.getExp_source())) {
-
-                            String hostURL = BrAPIService.getHostUrl(BrAPIService.getBrapiUrl(ConfigActivity.this));
-                            String badSourceMsg = getResources().getString(R.string.brapi_field_non_matching_sources, activeField.getExp_source(), hostURL);
-                            Toast.makeText(ConfigActivity.this, badSourceMsg, Toast.LENGTH_LONG).show();
-                            break;
-                        }
-
-                        // Check if we are authorized and force authorization if not.
-                        if (BrAPIService.isLoggedIn(getApplicationContext())) {
-                            Intent exportIntent = new Intent(ConfigActivity.this, BrapiExportActivity.class);
-                            startActivity(exportIntent);
-                        } else {
-                            // Show our login dialog
-                            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this, BrAPIService.exportTarget);
-                            brapiAuth.show();
-                        }
-
+                        exportBrAPI();
                         break;
-
                 }
 
                 exportDialog.dismiss();
@@ -829,6 +679,47 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
         exportDialog.show();
+    }
+
+    private void exportBrAPI() {
+        // Get our active field
+        Integer activeFieldId = dt.checkFieldName(ep.getString("FieldFile", ""));
+        FieldObject activeField;
+        if (activeFieldId != -1) {
+            activeField = dt.getFieldObject(activeFieldId);
+        } else {
+            activeField = null;
+            Toast.makeText(ConfigActivity.this, R.string.warning_field_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Check that our field is a brapi field
+        if (activeField.getExp_source() == null ||
+                activeField.getExp_source() == "" ||
+                activeField.getExp_source() == "local") {
+
+            Toast.makeText(ConfigActivity.this, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Check that the field data source is the same as the current target
+        if (!BrAPIService.checkMatchBrapiUrl(ConfigActivity.this, activeField.getExp_source())) {
+
+            String hostURL = BrAPIService.getHostUrl(BrAPIService.getBrapiUrl(ConfigActivity.this));
+            String badSourceMsg = getResources().getString(R.string.brapi_field_non_matching_sources, activeField.getExp_source(), hostURL);
+            Toast.makeText(ConfigActivity.this, badSourceMsg, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Check if we are authorized and force authorization if not.
+        if (BrAPIService.isLoggedIn(getApplicationContext())) {
+            Intent exportIntent = new Intent(ConfigActivity.this, BrapiExportActivity.class);
+            startActivity(exportIntent);
+        } else {
+            // Show our login dialog
+            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this, BrAPIService.exportTarget);
+            brapiAuth.show();
+        }
     }
 
     private void showSaveDialog() {
@@ -964,11 +855,11 @@ public class ConfigActivity extends AppCompatActivity {
         saveDialog.show();
     }
 
-    private void showSetupDialog() {
+    private void showProfileDialog() {
         String[] array = prepareSetup();
         ArrayList<String> lst = new ArrayList<>(Arrays.asList(array));
 
-        setupList.setOnItemClickListener(new OnItemClickListener() {
+        profileList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 switch (which) {
                     case 0:
@@ -989,7 +880,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, lst);
 
-        setupList.setAdapter(adapter);
+        profileList.setAdapter(adapter);
         setupDialog.show();
     }
 
@@ -1362,30 +1253,84 @@ public class ConfigActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
-
         systemMenu = menu;
-
-        if (systemMenu != null) {
-
-            if (ep.getBoolean(PreferencesActivity.TUTORIAL_MODE, false)) {
-                systemMenu.findItem(R.id.help).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.help).setVisible(false);
-            }
-        }
+        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
         return true;
+    }
+
+    private Rect settingsListItemLocation(int item) {
+        View v = settingsList.getChildAt(item);
+        final int[] location = new int[2];
+        v.getLocationOnScreen(location);
+        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth()/5, location[1] + v.getHeight());
+        return droidTarget;
+    }
+
+    private TapTarget settingsTapTargetRect(Rect item, String title, String desc) {
+        return TapTarget.forBounds(item, title, desc)
+                // All options below are optional
+                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
+                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
+                .targetCircleColor(R.color.black)   // Specify a color for the target circle
+                .titleTextSize(30)                  // Specify the size (in sp) of the title text
+                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD)
+                .descriptionTextColor(R.color.black)  // Specify the color of the description text
+                .textColor(R.color.black)            // Specify a color for both the title and description text
+                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
+                .drawShadow(true)                   // Whether to draw a drop shadow or not
+                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                .tintTarget(true)                   // Whether to tint the target view's color
+                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
+                .targetRadius(60);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        if (item.getItemId() == R.id.help) {
-            intent.setClassName(ConfigActivity.this,
-                    TutorialSettingsActivity.class.getName());
-            startActivity(intent);
-        }
+        switch (item.getItemId()) {
+            case R.id.help:
+                TapTargetSequence sequence = new TapTargetSequence(this)
+                        .targets(settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_description)),
+                                settingsTapTargetRect(settingsListItemLocation(1), getString(R.string.tutorial_settings_traits_title), getString(R.string.tutorial_settings_traits_description)),
+                                settingsTapTargetRect(settingsListItemLocation(2), getString(R.string.tutorial_settings_collect_title), getString(R.string.tutorial_settings_collect_description)),
+                                settingsTapTargetRect(settingsListItemLocation(3), getString(R.string.tutorial_settings_profile_title), getString(R.string.tutorial_settings_profile_description)),
+                                settingsTapTargetRect(settingsListItemLocation(4), getString(R.string.tutorial_settings_settings_title), getString(R.string.tutorial_settings_settings_description)),
+                                settingsTapTargetRect(settingsListItemLocation(5), getString(R.string.tutorial_settings_export_title), getString(R.string.tutorial_settings_export_description))
+                        )
+                        .listener(new TapTargetSequence.Listener() {
+                            // This listener will tell us when interesting(tm) events happen in regards to the sequence
+                            @Override
+                            public void onSequenceFinish() {
+                                TapTargetView.showFor(ConfigActivity.this, settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_import)),
+                                        new TapTargetView.Listener() {          // The listener can listen for regular clicks, long clicks or cancels
+                                            @Override
+                                            public void onTargetClick(TapTargetView view) {
+                                                super.onTargetClick(view);      // This call is optional
+                                                intent.setClassName(ConfigActivity.this,
+                                                        FieldEditorActivity.class.getName());
+                                                startActivity(intent);
+                                            }
+                                        });
+                            }
 
+                            @Override
+                            public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
+                                Log.d("TapTargetView", "Clicked on " + lastTarget.id());
+                            }
+
+                            @Override
+                            public void onSequenceCanceled(TapTarget lastTarget) {
+
+                            }
+                        });
+                sequence.start();
+                break;
+            case R.id.changelog:
+                showChangelog(false, false);
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 

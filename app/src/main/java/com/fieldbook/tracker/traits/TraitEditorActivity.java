@@ -12,19 +12,25 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 
-import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.brapi.BrapiTraitActivity;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
+import android.provider.OpenableColumns;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +44,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
 import android.widget.ListView;
@@ -49,20 +56,22 @@ import android.view.MenuItem;
 import com.fieldbook.tracker.io.CSVReader;
 import com.fieldbook.tracker.io.CSVWriter;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.tutorial.TutorialTraitsActivity;
 import com.fieldbook.tracker.dragsort.DragSortListView;
 import com.fieldbook.tracker.dragsort.DragSortController;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -333,12 +342,9 @@ public class TraitEditorActivity extends AppCompatActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            if (ep.getBoolean("Tips", false)) {
-                systemMenu.findItem(R.id.help).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.help).setVisible(false);
-            }
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
         }
+
         loadData();
     }
 
@@ -357,6 +363,8 @@ public class TraitEditorActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+
+        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
 
         thisActivity = this;
 
@@ -420,18 +428,55 @@ public class TraitEditorActivity extends AppCompatActivity {
         new MenuInflater(TraitEditorActivity.this).inflate(R.menu.menu_traits, menu);
 
         systemMenu = menu;
-
-        // Check to see if visibility should be toggled
-        if (systemMenu != null) {
-
-            if (ep.getBoolean("Tips", false)) {
-                systemMenu.findItem(R.id.help).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.help).setVisible(false);
-            }
-        }
+        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
 
         return true;
+    }
+
+    private Rect traitsListItemLocation(int item, int adjust) {
+        View v = traitList.getChildAt(item);
+        final int[] location = new int[2];
+        v.getLocationOnScreen(location);
+        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth()/adjust, location[1] + v.getHeight());
+        return droidTarget;
+    }
+
+    private TapTarget traitsTapTargetRect(Rect item, String title, String desc) {
+        return TapTarget.forBounds(item, title, desc)
+                // All options below are optional
+                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
+                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
+                .targetCircleColor(R.color.black)   // Specify a color for the target circle
+                .titleTextSize(30)                  // Specify the size (in sp) of the title text
+                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
+                .descriptionTextColor(R.color.black)  // Specify the color of the description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD)
+                .textColor(R.color.black)            // Specify a color for both the title and description text
+                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
+                .drawShadow(true)                   // Whether to draw a drop shadow or not
+                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                .tintTarget(true)                   // Whether to tint the target view's color
+                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
+                .targetRadius(60);
+    }
+
+    private TapTarget traitsTapTargetMenu(int id, String title, String desc) {
+        return TapTarget.forView(findViewById(id), title, desc)
+                // All options below are optional
+                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
+                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
+                .targetCircleColor(R.color.black)   // Specify a color for the target circle
+                .titleTextSize(30)                  // Specify the size (in sp) of the title text
+                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
+                .descriptionTextColor(R.color.black)  // Specify the color of the description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD)
+                .textColor(R.color.black)            // Specify a color for both the title and description text
+                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
+                .drawShadow(true)                   // Whether to draw a drop shadow or not
+                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                .tintTarget(true)                   // Whether to tint the target view's color
+                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
+                .targetRadius(60);
     }
 
     @Override
@@ -439,10 +484,17 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.help:
-                Intent intent = new Intent();
-                intent.setClassName(TraitEditorActivity.this,
-                        TutorialTraitsActivity.class.getName());
-                startActivity(intent);
+                TapTargetSequence sequence = new TapTargetSequence(this)
+                        .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description))
+                                //Todo add overflow menu action
+                        );
+
+                if (ConfigActivity.dt.getTraitColumnData("trait") != null) {
+                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0,4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
+                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0,2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
+                }
+
+                sequence.start();
                 break;
 
             case R.id.deleteTrait:
@@ -596,11 +648,8 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         String[] importArray = new String[3];
         importArray[0] = getString(R.string.import_source_local);
-        importArray[1] = getString(R.string.import_source_dropbox);
+        importArray[1] = getString(R.string.import_source_cloud);
         importArray[2] = getString(R.string.import_source_brapi);
-
-        //TODO add google drive (requires Google Play Services)
-        //importArray[2] = getString(R.string.importgoogle);
 
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -615,8 +664,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                         startActivityForResult(intent, 1);
                         break;
                     case 1:
-                        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
-                        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
+                        loadCloud();
                         break;
                     case 2:
                         intent.setClassName(thisActivity, BrapiTraitActivity.class.getName());
@@ -636,6 +684,18 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
         importDialog.show();
+    }
+
+    private void loadCloud() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");;
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        try {
+            startActivityForResult(Intent.createChooser(intent, "cloudFile"), 5);
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(getApplicationContext(), "No suitable File Manager was found.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void checkTraitExportDialog() {
@@ -886,6 +946,81 @@ public class TraitEditorActivity extends AppCompatActivity {
                 }
             }
         }
+
+        if (requestCode == 5 && resultCode == RESULT_OK && data.getData() != null) {
+            Uri content_describer = data.getData();
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                in = getContentResolver().openInputStream(content_describer);
+                out = new FileOutputStream(new File(Constants.FIELDIMPORTPATH + "/" + getFileName(content_describer)));
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (out != null){
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            final String chosenFile = Constants.TRAITPATH + "/" + getFileName(content_describer);
+
+            String extension = "";
+            int i = chosenFile.lastIndexOf('.');
+            if (i > 0) {
+                extension = chosenFile.substring(i+1);
+            }
+
+            if(!extension.equals("trt")) {
+                //TODO add to strings
+                makeToast("Only TRT files can be loaded into Field Book.");
+                Toast.makeText(TraitEditorActivity.thisActivity, getString(R.string.import_error_format_trait), Toast.LENGTH_LONG).show();
+
+                return;
+            }
+
+            mChosenFile = chosenFile;
+            mHandler.post(importCSV);
+        }
+    }
+
+    public String getFileName(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
     }
 
     // Helper function export data as CSV

@@ -17,6 +17,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
@@ -25,13 +27,13 @@
         android:xlargeScreens="true" />
 
     <application
+        android:name="androidx.multidex.MultiDexApplication"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/field_book"
         android:largeHeap="true"
         android:usesCleartextTraffic="true"
-        tools:ignore="GoogleAppIndexingWarning"
-        android:name="androidx.multidex.MultiDexApplication">
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -95,33 +97,9 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeAction" />
         <activity
-            android:name=".ChangelogActivity"
+            android:name=".AboutActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:theme="@style/ActivityDialog" />
-        <activity
-            android:name=".tutorial.TutorialMainActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
-        <activity
-            android:name=".tutorial.TutorialSettingsActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
-        <activity
-            android:name=".tutorial.TutorialTraitsActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
-        <activity
-            android:name=".tutorial.TutorialFieldActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDialog" />
+            android:theme="@style/AppTheme.MaterialAboutActivity" />
         <activity
             android:name=".preferences.PreferencesActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"

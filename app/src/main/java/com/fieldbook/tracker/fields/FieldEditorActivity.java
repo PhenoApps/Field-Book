@@ -7,6 +7,9 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -15,8 +18,8 @@ import android.os.Handler;
 
 import androidx.appcompat.app.AlertDialog;
 
+import android.provider.OpenableColumns;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,28 +38,27 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.box.androidsdk.browse.activities.BoxBrowseFileActivity;
-import com.box.androidsdk.content.models.BoxSession;
-import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
-import com.fieldbook.tracker.utilities.ApiKeys;
 import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.tutorial.TutorialFieldActivity;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
+
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -80,6 +82,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     private Menu systemMenu;
     private Dialog importFieldDialog;
     private int idColPosition;
+
     // Creates a new thread to do importing
     private Runnable importRunnable = new Runnable() {
         public void run() {
@@ -107,25 +110,14 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        try {
-            TutorialFieldActivity.thisActivity.finish();
-        } catch (Exception e) {
-            Log.e(Constants.TAG, "" + e.getMessage());
-        }
-
         super.onDestroy();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
         if (systemMenu != null) {
-            if (ep.getBoolean("Tips", false)) {
-                systemMenu.findItem(R.id.help).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.help).setVisible(false);
-            }
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
         }
         loadData();
     }
@@ -177,11 +169,8 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         String[] importArray = new String[3];
         importArray[0] = getString(R.string.import_source_local);
-        importArray[1] = getString(R.string.import_source_dropbox);
+        importArray[1] = getString(R.string.import_source_cloud);
         importArray[2] = getString(R.string.import_source_brapi);
-        //importArray[3] = getString(R.string.import_source_googledrive);
-        //importArray[4] = getString(R.string.import_source_box);
-        //importArray[5] = getString(R.string.import_source_onedrive);
 
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -190,19 +179,10 @@ public class FieldEditorActivity extends AppCompatActivity {
                         loadLocalPermission();
                         break;
                     case 1:
-                        loadDropbox();
+                        loadCloud();
                         break;
                     case 2:
                         loadBrAPI();
-                        break;
-                    case 3:
-                        loadGoogleDrive();
-                        break;
-                    case 4:
-                        loadBox();
-                        break;
-                    case 5:
-                        loadOneDrive();
                         break;
 
                 }
@@ -232,11 +212,6 @@ public class FieldEditorActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 
-    public void loadDropbox() {
-        DbxChooser mChooser = new DbxChooser(ApiKeys.DROPBOX_APP_KEY);
-        mChooser.forResultType(DbxChooser.ResultType.FILE_CONTENT).launch(thisActivity, 3);
-    }
-
     public void loadBrAPI() {
         Intent intent = new Intent();
 
@@ -245,21 +220,16 @@ public class FieldEditorActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 
-    //TODO
-    public void loadBox() {
-        BoxSession session = new BoxSession(FieldEditorActivity.this);
-        startActivityForResult(BoxBrowseFileActivity.getLaunchIntent(FieldEditorActivity.this, "<FOLDER_ID>", session), 4);
-        makeToast("Box");
-    }
+    public void loadCloud() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");;
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
 
-    //TODO
-    public void loadGoogleDrive() {
-        makeToast("Google");
-    }
-
-    //TODO
-    public void loadOneDrive() {
-        makeToast("OneDrive");
+        try {
+            startActivityForResult(Intent.createChooser(intent, "cloudFile"), 5);
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(getApplicationContext(), "No suitable File Manager was found.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE)
@@ -280,60 +250,129 @@ public class FieldEditorActivity extends AppCompatActivity {
         new MenuInflater(com.fieldbook.tracker.fields.FieldEditorActivity.this).inflate(R.menu.menu_fields, menu);
 
         systemMenu = menu;
-
-        // Check to see if visibility should be toggled
-        if (systemMenu != null) {
-            if (ep.getBoolean("Tips", false)) {
-                systemMenu.findItem(R.id.help).setVisible(true);
-            } else {
-                systemMenu.findItem(R.id.help).setVisible(false);
-            }
-        }
+        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
 
         return true;
+    }
+
+    private Rect fieldsListItemLocation(int item) {
+        View v = fieldList.getChildAt(item);
+        final int[] location = new int[2];
+        v.getLocationOnScreen(location);
+        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth() / 5, location[1] + v.getHeight());
+        return droidTarget;
+    }
+
+    private TapTarget fieldsTapTargetRect(Rect item, String title, String desc) {
+        return TapTarget.forBounds(item, title, desc)
+                // All options below are optional
+                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
+                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
+                .targetCircleColor(R.color.black)   // Specify a color for the target circle
+                .titleTextSize(30)                  // Specify the size (in sp) of the title text
+                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
+                .descriptionTextColor(R.color.black)  // Specify the color of the description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD)
+                .textColor(R.color.black)            // Specify a color for both the title and description text
+                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
+                .drawShadow(true)                   // Whether to draw a drop shadow or not
+                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                .tintTarget(true)                   // Whether to tint the target view's color
+                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
+                .targetRadius(60);
+    }
+
+    private TapTarget fieldsTapTargetMenu(int id, String title, String desc) {
+        return TapTarget.forView(findViewById(id), title, desc)
+                // All options below are optional
+                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
+                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
+                .targetCircleColor(R.color.black)   // Specify a color for the target circle
+                .titleTextSize(30)                  // Specify the size (in sp) of the title text
+                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
+                .descriptionTextColor(R.color.black)  // Specify the color of the description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD)
+                .textColor(R.color.black)            // Specify a color for both the title and description text
+                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
+                .drawShadow(true)                   // Whether to draw a drop shadow or not
+                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                .tintTarget(true)                   // Whether to tint the target view's color
+                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
+                .targetRadius(60);
+    }
+
+    //TODO
+    private Boolean fieldExists() {
+
+        return false;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.help:
-                Intent intent = new Intent();
-                intent.setClassName(com.fieldbook.tracker.fields.FieldEditorActivity.this,
-                        TutorialFieldActivity.class.getName());
-                startActivity(intent);
+                TapTargetSequence sequence = new TapTargetSequence(this)
+                        .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description)),
+                                fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description))
+                        );
+
+                if (fieldExists()) {
+                    sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_select_title), getString(R.string.tutorial_fields_select_description)));
+                    sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_delete_title), getString(R.string.tutorial_fields_delete_description)));
+                }
+
+                sequence.start();
+
                 break;
 
             case R.id.importField:
-                String choice = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
-                switch(choice)
-                {
+                String importer = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
+
+                switch (importer) {
+                    case "ask":
+                        showFileDialog();
+                        break;
                     case "local":
                         loadLocal();
-                        break;
-                    case "dropbox":
-                        loadDropbox();
                         break;
                     case "brapi":
                         loadBrAPI();
                         break;
-                    case "gdrive":
-                        loadGoogleDrive();
-                        break;
-                    case "box":
-                        loadBox();
-                        break;
-                    case "onedrive":
-                        loadOneDrive();
+                    case "cloud":
+                        loadCloud();
                         break;
                     default:
                         showFileDialog();
                 }
                 break;
+
             case android.R.id.home:
                 fieldCheck();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public String getFileName(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
     }
 
     private void fieldCheck() {
@@ -353,6 +392,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+
         if (requestCode == 2) {
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra("result");
@@ -367,46 +407,54 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         }
 
-        if (requestCode == 3) {
-            if (resultCode == RESULT_OK) {
-                DbxChooser.Result result = new DbxChooser.Result(data);
-                saveFileFromUri(result.getLink(), result.getName());
-                final String chosenFile = Constants.FIELDIMPORTPATH + "/" + result.getName();
-                showFieldFileDialog(chosenFile);
-            }
-        }
-    }
-
-    private void saveFileFromUri(Uri sourceUri, String fileName) {
-        String sourceFilename = sourceUri.getPath();
-        String destinationFilename = Constants.FIELDIMPORTPATH + File.separatorChar + fileName;
-
-        BufferedInputStream bis = null;
-        BufferedOutputStream bos = null;
-
-        try {
-            bis = new BufferedInputStream(new FileInputStream(sourceFilename));
-            bos = new BufferedOutputStream(new FileOutputStream(destinationFilename, false));
-            byte[] buf = new byte[1024];
-            int length;
-
-            while ((length = bis.read(buf)) > 0) {
-                bos.write(buf, 0, length);
-            }
-
-        } catch (IOException ignore) {
-
-        } finally {
+        if (requestCode == 5 && resultCode == RESULT_OK && data.getData() != null) {
+            Uri content_describer = data.getData();
+            InputStream in = null;
+            OutputStream out = null;
             try {
-                if (bis != null) bis.close();
-                if (bos != null) bos.close();
-            } catch (IOException ignore) {
-
+                in = getContentResolver().openInputStream(content_describer);
+                out = new FileOutputStream(new File(Constants.FIELDIMPORTPATH + "/" + getFileName(content_describer)));
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (out != null){
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        }
 
-        File tempFile = new File(destinationFilename);
-        scanFile(tempFile);
+            final String chosenFile = Constants.FIELDIMPORTPATH + "/" + getFileName(content_describer);
+
+            String extension = "";
+            int i = chosenFile.lastIndexOf('.');
+            if (i > 0) {
+                extension = chosenFile.substring(i+1);
+            }
+
+            if(!extension.equals("csv") && !extension.equals("xls")) {
+                Toast.makeText(FieldEditorActivity.thisActivity, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            showFieldFileDialog(chosenFile);
+        }
     }
 
     private void showFieldFileDialog(final String chosenFile) {

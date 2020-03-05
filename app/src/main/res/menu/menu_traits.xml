@@ -6,6 +6,16 @@
         android:showAsAction="always"
         android:title="@string/tutorial_dialog_title" />
     <item
+        android:id="@+id/toggleTrait"
+        android:icon="@drawable/ic_tb_toggle_all"
+        android:showAsAction="always"
+        android:title="@string/traits_sort_visibility" />
+    <item
+        android:id="@+id/addTrait"
+        android:icon="@drawable/ic_tb_add_circle"
+        android:showAsAction="always"
+        android:title="@string/traits_toolbar_add_trait" />
+    <item
         android:id="@+id/sortTrait"
         android:icon="@drawable/ic_tb_sort"
         android:showAsAction="ifRoom"
@@ -15,16 +25,6 @@
         android:icon="@drawable/ic_tb_delete"
         android:showAsAction="ifRoom"
         android:title="@string/traits_toolbar_delete_all" />
-    <item
-        android:id="@+id/toggleTrait"
-        android:icon="@drawable/ic_tb_toggle_all"
-        android:showAsAction="always"
-        android:title="@string/traits_sort_visibility" />
-    <item
-        android:id="@+id/addTrait"
-        android:icon="@drawable/ic_tb_add_circle"
-        android:showAsAction="ifRoom"
-        android:title="@string/traits_toolbar_add_trait" />
     <item
         android:id="@+id/importexport"
         android:icon="@drawable/ic_tb_import_export"

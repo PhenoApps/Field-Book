@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,7 +50,6 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 
-import com.fieldbook.tracker.barcodes.*;
 import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.layoutConfig.SelectorLayoutConfigurator;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
@@ -57,18 +57,21 @@ import com.fieldbook.tracker.search.*;
 import com.fieldbook.tracker.traitLayouts.PhotoTraitLayout;
 import com.fieldbook.tracker.traitLayouts.TraitLayout;
 import com.fieldbook.tracker.traits.*;
-import com.fieldbook.tracker.tutorial.*;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.Utils;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Set;
 
 import static com.fieldbook.tracker.ConfigActivity.dt;
 
@@ -245,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
         traitBox = new TraitBox(this);
         rangeBox = new RangeBox(this);
         initCurrentVals();
+
     }
 
     private void refreshMain() {
@@ -479,15 +483,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-
         //save last plot id
         if (ep.getBoolean("ImportFieldFinished", false)) {
             rangeBox.saveLastPlot();
-        }
-
-        try {
-            TutorialMainActivity.thisActivity.finish();
-        } catch (Exception ignore) {
         }
 
         super.onDestroy();
@@ -611,9 +609,21 @@ public class MainActivity extends AppCompatActivity {
         etCurVal.setText("");
     }
 
+    private void customizeToolbarIcons() {
+        Set<String> entries = ep.getStringSet(PreferencesActivity.TOOLBAR_CUSTOMIZE, new HashSet<String>());
+
+        if (systemMenu != null) {
+            systemMenu.findItem(R.id.search).setVisible(entries.contains("search"));
+            systemMenu.findItem(R.id.resources).setVisible(entries.contains("resources"));
+            systemMenu.findItem(R.id.summary).setVisible(entries.contains("summary"));
+            systemMenu.findItem(R.id.lockData).setVisible(entries.contains("lockData"));
+        }
+    }
+
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         new MenuInflater(MainActivity.this).inflate(R.menu.menu_main, menu);
 
         systemMenu = menu;
@@ -623,6 +633,8 @@ public class MainActivity extends AppCompatActivity {
         systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(PreferencesActivity.NEXT_ENTRY_NO_DATA, false));
         systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(PreferencesActivity.UNIQUE_CAMERA, false));
         systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(PreferencesActivity.DATAGRID_SETTING, false));
+
+        customizeToolbarIcons();
 
         lockData(dataLocked);
 
@@ -639,19 +651,58 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
     }
 
+    private TapTarget collectDataTapTargetView(int id, String title, String desc, int color, int targetRadius) {
+        return TapTarget.forView(findViewById(id), title, desc)
+                // All options below are optional
+                .outerCircleColor(color)      // Specify a color for the outer circle
+                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
+                .targetCircleColor(R.color.black)   // Specify a color for the target circle
+                .titleTextSize(30)                  // Specify the size (in sp) of the title text
+                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
+                .descriptionTextColor(R.color.black)  // Specify the color of the description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD)
+                .textColor(R.color.black)            // Specify a color for both the title and description text
+                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
+                .drawShadow(true)                   // Whether to draw a drop shadow or not
+                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
+                .tintTarget(true)                   // Whether to tint the target view's color
+                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
+                .targetRadius(targetRadius);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         switch (item.getItemId()) {
-            case R.id.search:
-                try {
-                    TutorialMainActivity.thisActivity.finish();
-                } catch (Exception e) {
-                    Log.e(TAG, "" + e.getMessage());
+            case R.id.help:
+                TapTargetSequence sequence = new TapTargetSequence(this)
+                        .targets(collectDataTapTargetView(R.id.selectorList, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), R.color.main_primaryDark,200),
+                                collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), R.color.main_primaryDark,60),
+                                collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), R.color.main_primaryDark,80),
+                                collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), R.color.main_primaryDark,60),
+                                collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), R.color.main_primaryDark,60),
+                                collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), R.color.main_primaryDark,200),
+                                collectDataTapTargetView(R.id.missingValue, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), R.color.main_primary,60),
+                                collectDataTapTargetView(R.id.deleteValue, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), R.color.main_primary,60)
+                        );
+                if (systemMenu.findItem(R.id.search).isVisible()) {
+                    sequence.target(collectDataTapTargetView(R.id.search, getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), R.color.main_primaryDark,60));
+                }
+                if (systemMenu.findItem(R.id.resources).isVisible()) {
+                    sequence.target(collectDataTapTargetView(R.id.resources, getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), R.color.main_primaryDark,60));
+                }
+                if (systemMenu.findItem(R.id.summary).isVisible()) {
+                    sequence.target(collectDataTapTargetView(R.id.summary, getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), R.color.main_primaryDark,60));
+                }
+                if (systemMenu.findItem(R.id.lockData).isVisible()) {
+                    sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), R.color.main_primaryDark,60));
                 }
 
+                sequence.start();
+                break;
+            case R.id.search:
                 intent.setClassName(MainActivity.this,
                         SearchActivity.class.getName());
                 startActivity(intent);
@@ -665,13 +716,6 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("title", getString(R.string.main_toolbar_resources));
                 startActivityForResult(intent, 1);
                 break;
-
-            case R.id.help:
-                Intent helpIntent = new Intent();
-                helpIntent.setClassName(MainActivity.this,
-                        TutorialMainActivity.class.getName());
-                startActivity(helpIntent);
-                break;
             case R.id.nextEmptyPlot:
                 nextEmptyPlot();
                 break;
@@ -679,19 +723,15 @@ public class MainActivity extends AppCompatActivity {
                 moveToPlotID();
                 break;
             case R.id.barcodeScan:
-                IntentIntegrator integrator = new IntentIntegrator(thisActivity);
-                integrator.initiateScan();
+                new IntentIntegrator(this)
+                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setBeepEnabled(true)
+                        .initiateScan();
                 break;
             case R.id.summary:
                 showSummary();
                 break;
             case R.id.datagrid:
-                try {
-                    TutorialMainActivity.thisActivity.finish();
-                } catch (Exception e) {
-                    Log.e(TAG, "" + e.getMessage());
-                }
-
                 intent.setClassName(MainActivity.this,
                         DatagridActivity.class.getName());
                 startActivityForResult(intent, 2);
@@ -772,7 +812,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void makeToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
     public void nextEmptyPlot() {
@@ -840,19 +880,23 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return false;
             case KeyEvent.KEYCODE_ENTER:
-                String return_action = ep.getString(PreferencesActivity.RETURN_CHARACTER, "1");
+                String return_action = ep.getString(PreferencesActivity.RETURN_CHARACTER, "0");
+
+                if (return_action.equals("0")) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        rangeBox.moveEntryRight();
+                        return false;
+                    }
+                }
 
                 if (return_action.equals("1")) {
-                    rangeBox.moveEntryRight();
-                    return true;
+                    if (action == KeyEvent.ACTION_UP) {
+                        traitBox.moveTrait("right");
+                        return true;
+                    }
                 }
 
                 if (return_action.equals("2")) {
-                    traitBox.moveTrait("right");
-                    return true;
-                }
-
-                if (return_action.equals("3")) {
                     return true;
                 }
 

@@ -2,7 +2,10 @@ package com.fieldbook.tracker.preferences;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ListView;
 
+import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;

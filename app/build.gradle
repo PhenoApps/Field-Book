@@ -30,6 +30,11 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     lintOptions {
         checkReleaseBuilds false
         disable 'MissingTranslation'
@@ -66,8 +71,12 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
     implementation 'com.google.firebase:firebase-crashlytics:17.0.0-beta01'
-
-    implementation project(':dropbox')
+    implementation 'com.github.MFlisar:changelog:1.1.6'
+    implementation 'com.github.daniel-stoneuk:material-about-library:2.4.2'
+    implementation "com.mikepenz:aboutlibraries:6.2.3"
+    implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.0'
+    implementation 'com.google.android:flexbox:2.0.1'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 
     testImplementation 'androidx.test:core:1.2.0'
     testImplementation 'org.robolectric:robolectric:4.3.1'

@@ -4,11 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
@@ -20,14 +24,10 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
     public static String LANGUAGE = "language";
     public static String INFOBAR_NUMBER = "INFOBAR_NUMBER";
-    public static String TOOLBAR_SEARCH = "TOOLBAR_SEARCH";
-    public static String TOOLBAR_RESOURCES = "TOOLBAR_RESOURCES";
-    public static String TOOLBAR_SUMMARY = "TOOLBAR_SUMMARY";
-    public static String TOOLBAR_LOCK = "TOOLBAR_LOCK";
 
     // Profile
-    public static String PROFILE_FIRSTNAME = "FirstName";
-    public static String PROFILE_LASTNAME = "LastName";
+    public static String PROFILE_NAME_FIRST = "FirstName";
+    public static String PROFILE_NAME_LAST = "LastName";
     public static String PROFILE_LOCATION = "Location";
 
     // Behavior
