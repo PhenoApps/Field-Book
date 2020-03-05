@@ -878,19 +878,23 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return false;
             case KeyEvent.KEYCODE_ENTER:
-                String return_action = ep.getString(PreferencesActivity.RETURN_CHARACTER, "1");
+                String return_action = ep.getString(PreferencesActivity.RETURN_CHARACTER, "0");
+
+                if (return_action.equals("0")) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        rangeBox.moveEntryRight();
+                        return false;
+                    }
+                }
 
                 if (return_action.equals("1")) {
-                    rangeBox.moveEntryRight();
-                    return true;
+                    if (action == KeyEvent.ACTION_UP) {
+                        traitBox.moveTrait("right");
+                        return true;
+                    }
                 }
 
                 if (return_action.equals("2")) {
-                    traitBox.moveTrait("right");
-                    return true;
-                }
-
-                if (return_action.equals("3")) {
                     return true;
                 }
 
