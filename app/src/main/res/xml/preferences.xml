@@ -21,16 +21,16 @@
         app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentAppearance" />
 
     <Preference
-        android:icon="@drawable/ic_pref_sounds"
-        android:key="pref_key_sounds_settings"
-        android:title="@string/preferences_sounds"
-        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentSounds" />
-
-    <Preference
         android:icon="@drawable/ic_pref_navigation"
         android:key="pref_key_ux_settings"
         android:title="@string/preferences_behavior_title"
         app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentBehavior" />
+
+    <Preference
+        android:icon="@drawable/ic_pref_sounds"
+        android:key="pref_key_sounds_settings"
+        android:title="@string/preferences_sounds"
+        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentSounds" />
 
     <Preference
         android:icon="@drawable/ic_adv_brapi"

@@ -159,7 +159,7 @@
     <string name="preferences_appearance_language_description">Language set by system</string>
     <string name="preferences_appearance_theme_title">Theme</string>
 
-    <string name="preferences_appearance_toolbar_customize">Customize Collect Data toolbar</string>
+    <string name="preferences_appearance_toolbar_customize">Customize toolbar icons</string>
     <string name="preferences_appearance_toolbar_customize_description">Modify default icons on the collect screen</string>
     <string name="preferences_appearance_toolbar_customize_search">Search</string>
     <string name="preferences_appearance_toolbar_customize_resources">Resources</string>
@@ -177,6 +177,7 @@
     <string name="preferences_behavior_cycle_traits">Cycling traits advances entry</string>
     <string name="preferences_behavior_cycle_traits_description">After going through all traits, the app goes to the next entry</string>
     <string name="preferences_behavior_import_source">Choose your default import source</string>
+    <string name="preferences_behavior_export_source">Choose your export import source</string>
     <string name="preferences_behavior_disable_entry_arrow">Disable entry arrow</string>
     <string name="preferences_behavior_disable_entry_arrow_left">Left</string>
     <string name="preferences_behavior_disable_entry_arrow_right">Right</string>
@@ -201,8 +202,8 @@
     <string name="preferences_general_entry_left_disable_description">If no data has been collected, left entry arrow disabled</string>
     <string name="preferences_general_entry_right_disable">Disable right entry arrow</string>
     <string name="preferences_general_entry_right_disable_description">If no data has been collected, right entry arrow disabled</string>
-    <string name="preferences_general_barcode_camera">Camera barcode scanner</string>
-    <string name="preferences_general_barcode_camera_description">Opens camera to scan barcode and move to the specific entry</string>
+    <string name="preferences_general_barcode_camera">Move to entry via barcode</string>
+    <string name="preferences_general_barcode_camera_description">Scan barcode and move to the specific entry</string>
     <string name="preferences_general_feature_next_missing">Next entry with no data</string>
     <string name="preferences_general_feature_next_missing_description">Adds a button to the toolbar that jumps to the next entry with no data for the current trait</string>
     <string name="preferences_general_feature_barcode_text">Move to unique identifier</string>
@@ -210,7 +211,9 @@
     <string name="preferences_general_feature_datagrid">Datagrid</string>
     <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
 
-    <string name="preferences_source_default">Default data source</string>
+    <string name="preferences_source_default_category_title">Default data source</string>
+    <string name="preferences_source_default_import">Default import source</string>
+    <string name="preferences_source_default_export">Default export source</string>
 
     <!-- Trait text and errors -->
     <string name="trait_layout_data_stored">Saved</string>

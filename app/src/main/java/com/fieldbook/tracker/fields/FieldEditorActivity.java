@@ -60,7 +60,6 @@ import java.util.List;
 
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
-import com.microsoft.onedrivesdk.picker.*;
 
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -85,7 +84,6 @@ public class FieldEditorActivity extends AppCompatActivity {
     private Menu systemMenu;
     private Dialog importFieldDialog;
     private int idColPosition;
-    private IPicker mPicker;
 
     // Creates a new thread to do importing
     private Runnable importRunnable = new Runnable() {

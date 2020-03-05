@@ -333,7 +333,22 @@ public class ConfigActivity extends AppCompatActivity {
                             return;
                         }
 
-                        showExportDialog();
+                        String exporter = ep.getString("EXPORT_SOURCE_DEFAULT", "ask");
+
+                        switch (exporter) {
+                            case "ask":
+                                showExportDialog();
+                                break;
+                            case "local":
+                                exportPermission();
+                                break;
+                            case "brapi":
+                                exportBrAPI();
+                                break;
+                            default:
+                                showExportDialog();
+                        }
+
                         break;
                     case 5:
                         intent.setClassName(ConfigActivity.this,
@@ -646,48 +661,8 @@ public class ConfigActivity extends AppCompatActivity {
                         exportPermission();
                         break;
                     case 1:
-
-                        // Get our active field
-                        Integer activeFieldId = dt.checkFieldName(ep.getString("FieldFile", ""));
-                        FieldObject activeField;
-                        if (activeFieldId != -1) {
-                            activeField = dt.getFieldObject(activeFieldId);
-                        } else {
-                            activeField = null;
-                            Toast.makeText(ConfigActivity.this, R.string.warning_field_missing, Toast.LENGTH_LONG).show();
-                            break;
-                        }
-
-                        // Check that our field is a brapi field
-                        if (activeField.getExp_source() == null ||
-                                activeField.getExp_source() == "" ||
-                                activeField.getExp_source() == "local") {
-
-                            Toast.makeText(ConfigActivity.this, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show();
-                            break;
-                        }
-
-                        // Check that the field data source is the same as the current target
-                        if (!BrAPIService.checkMatchBrapiUrl(ConfigActivity.this, activeField.getExp_source())) {
-
-                            String hostURL = BrAPIService.getHostUrl(BrAPIService.getBrapiUrl(ConfigActivity.this));
-                            String badSourceMsg = getResources().getString(R.string.brapi_field_non_matching_sources, activeField.getExp_source(), hostURL);
-                            Toast.makeText(ConfigActivity.this, badSourceMsg, Toast.LENGTH_LONG).show();
-                            break;
-                        }
-
-                        // Check if we are authorized and force authorization if not.
-                        if (BrAPIService.isLoggedIn(getApplicationContext())) {
-                            Intent exportIntent = new Intent(ConfigActivity.this, BrapiExportActivity.class);
-                            startActivity(exportIntent);
-                        } else {
-                            // Show our login dialog
-                            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this, BrAPIService.exportTarget);
-                            brapiAuth.show();
-                        }
-
+                        exportBrAPI();
                         break;
-
                 }
 
                 exportDialog.dismiss();
@@ -703,6 +678,47 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
         exportDialog.show();
+    }
+
+    private void exportBrAPI() {
+        // Get our active field
+        Integer activeFieldId = dt.checkFieldName(ep.getString("FieldFile", ""));
+        FieldObject activeField;
+        if (activeFieldId != -1) {
+            activeField = dt.getFieldObject(activeFieldId);
+        } else {
+            activeField = null;
+            Toast.makeText(ConfigActivity.this, R.string.warning_field_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Check that our field is a brapi field
+        if (activeField.getExp_source() == null ||
+                activeField.getExp_source() == "" ||
+                activeField.getExp_source() == "local") {
+
+            Toast.makeText(ConfigActivity.this, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Check that the field data source is the same as the current target
+        if (!BrAPIService.checkMatchBrapiUrl(ConfigActivity.this, activeField.getExp_source())) {
+
+            String hostURL = BrAPIService.getHostUrl(BrAPIService.getBrapiUrl(ConfigActivity.this));
+            String badSourceMsg = getResources().getString(R.string.brapi_field_non_matching_sources, activeField.getExp_source(), hostURL);
+            Toast.makeText(ConfigActivity.this, badSourceMsg, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Check if we are authorized and force authorization if not.
+        if (BrAPIService.isLoggedIn(getApplicationContext())) {
+            Intent exportIntent = new Intent(ConfigActivity.this, BrapiExportActivity.class);
+            startActivity(exportIntent);
+        } else {
+            // Show our login dialog
+            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this, BrAPIService.exportTarget);
+            brapiAuth.show();
+        }
     }
 
     private void showSaveDialog() {

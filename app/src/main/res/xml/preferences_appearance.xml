@@ -14,6 +14,13 @@
             android:targetPackage="com.android.settings" />
     </Preference>
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_tb_help"
+        android:key="Tips"
+        android:summary="@string/preferences_appearance_tutorial_description"
+        android:title="@string/tutorial_dialog_title" />
+
     <MultiSelectListPreference
         android:icon="@drawable/ic_pref_appearance_toolbar"
         android:defaultValue="@array/pref_toolbar_customize_default"
@@ -31,13 +38,6 @@
         android:title="@string/preferences_appearance_infobar_number"
         app:nppc_maxValue="20"
         app:nppc_minValue="1" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_tb_help"
-        android:key="Tips"
-        android:summary="@string/preferences_appearance_tutorial_description"
-        android:title="@string/tutorial_dialog_title" />
 
     <CheckBoxPreference
         android:defaultValue="false"
