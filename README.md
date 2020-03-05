@@ -12,11 +12,7 @@ Development of Field Book has been supported by the [Collaborative Crop Research
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 
 ### Translators
-Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa, Mokhlesur Rahman
-
-## Libraries used in this project
-* [jsoup][1]
-* [ZXing Android Embedded][2]
+Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa, Mokhlesur Rahman, Alice Brunazzi
 
 ## License
     Licensed under the GNU General Public License version 2 (GPLv2)
