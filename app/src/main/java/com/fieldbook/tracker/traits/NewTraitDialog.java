@@ -946,7 +946,7 @@ public class NewTraitDialog extends DialogFragment {
             traitFormatList.add(new TraitFormatDiseaseRating());
             traitFormatList.add(new TraitFormatMulticat());
             traitFormatList.add(new TraitFormatLocation());
-            traitFormatList.add(new TraitFormatBarcode());
+            //traitFormatList.add(new TraitFormatBarcode());
             traitFormatList.add(new TraitFormatZebraLablePrint());
         }
 

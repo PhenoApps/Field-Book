@@ -2,31 +2,41 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!--
+    <PreferenceCategory
+        android:key="transfer_defaults"
+        android:title="@string/preferences_source_default_category_title"
+        app:iconSpaceReserved="false">
+
         <ListPreference
             android:defaultValue="1"
-            android:icon="@drawable/ic_pref_source_default"
-            app:dialogTitle="@string/preferences_source_default"
+            android:icon="@drawable/ic_pref_source_import_default"
+            app:dialogTitle="@string/preferences_source_default_import"
             app:entries="@array/pref_import_source_entries"
             app:entryValues="@array/pref_import_source_values"
             app:key="IMPORT_SOURCE_DEFAULT"
-            app:title="@string/preferences_source_default"
+            app:title="@string/preferences_source_default_import"
             app:useSimpleSummaryProvider="true" />
-            -->
 
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_adv_cycle_traits_advances"
-        android:key="CycleTraits"
-        android:summary="@string/preferences_behavior_cycle_traits_description"
-        android:title="@string/preferences_behavior_cycle_traits" />
+        <ListPreference
+            android:defaultValue="1"
+            android:icon="@drawable/ic_pref_source_export_default"
+            app:allowDividerBelow="true"
+            app:dialogTitle="@string/preferences_source_default_export"
+            app:entries="@array/pref_export_source_entries"
+            app:entryValues="@array/pref_export_source_values"
+            app:key="EXPORT_SOURCE_DEFAULT"
+            app:title="@string/preferences_source_default_export"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
 
     <CheckBoxPreference
         android:defaultValue="false"
         android:icon="@drawable/ic_tb_forward"
         android:key="NextEmptyPlot"
         android:summary="@string/preferences_general_feature_next_missing_description"
-        android:title="@string/preferences_general_feature_next_missing" />
+        android:title="@string/preferences_general_feature_next_missing"
+        app:allowDividerAbove="true" />
 
     <CheckBoxPreference
         android:defaultValue="false"
@@ -41,20 +51,6 @@
         android:key="DataGrid"
         android:summary="@string/preferences_general_feature_datagrid_description"
         android:title="@string/preferences_general_feature_datagrid" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_action_ic_adv_disable_left"
-        android:key="DisableEntryNavLeft"
-        android:summary="@string/preferences_general_entry_left_disable_description"
-        android:title="@string/preferences_general_entry_left_disable" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_action_ic_adv_disable_right"
-        android:key="DisableEntryNavRight"
-        android:summary="@string/preferences_general_entry_right_disable_description"
-        android:title="@string/preferences_general_entry_right_disable" />
 
     <CheckBoxPreference
         android:defaultValue="false"

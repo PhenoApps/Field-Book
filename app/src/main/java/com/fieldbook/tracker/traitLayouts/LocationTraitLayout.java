@@ -69,21 +69,15 @@ public class LocationTraitLayout extends TraitLayout {
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            getEtCurVal().addTextChangedListener(getCvNum());
         } else {
-            getEtCurVal().removeTextChangedListener(getCvNum());
-
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
 
             if (getCurrentTrait().getDefaultValue() != null
                     && getCurrentTrait().getDefaultValue().length() > 0)
                 getEtCurVal().setText(getCurrentTrait().getDefaultValue());
-
-            getEtCurVal().addTextChangedListener(getCvNum());
         }
     }
 

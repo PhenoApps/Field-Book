@@ -24,6 +24,7 @@ public class PreferencesFragmentAppearance extends PreferenceFragmentCompat impl
         prefMgr.setSharedPreferencesName("Settings");
 
         setPreferencesFromResource(R.xml.preferences_appearance, rootKey);
+        PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences_appearance, true);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
     }

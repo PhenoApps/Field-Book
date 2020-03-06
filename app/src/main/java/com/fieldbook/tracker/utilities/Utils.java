@@ -2,10 +2,14 @@ package com.fieldbook.tracker.utilities;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+
+import com.fieldbook.tracker.R;
+import com.getkeepsafe.taptargetview.TapTarget;
 
 import java.io.File;
 
@@ -62,10 +66,4 @@ public class Utils {
         else
             return false;
     }
-
-    //TODO language
-
-
-    //TODO sharefile
-
 }

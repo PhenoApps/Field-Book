@@ -97,15 +97,11 @@ public class AngleTraitLayout extends TraitLayout {
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            getEtCurVal().addTextChangedListener(getCvNum());
         } else {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
-            getEtCurVal().addTextChangedListener(getCvNum());
 
             sensorManager.registerListener(mEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                     SensorManager.SENSOR_DELAY_NORMAL);

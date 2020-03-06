@@ -2,26 +2,33 @@ package com.fieldbook.tracker.traitLayouts;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.utilities.ExpandableHeightGridView;
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayoutManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
 public class MultiCatTraitLayout extends TraitLayout {
 
-    private ExpandableHeightGridView gridMultiCat;
+    //private StaggeredGridView gridMultiCat;
+    private RecyclerView gridMultiCat;
 
     public MultiCatTraitLayout(Context context) {
         super(context);
@@ -47,7 +54,8 @@ public class MultiCatTraitLayout extends TraitLayout {
     @Override
     public void init() {
         gridMultiCat = findViewById(R.id.catGrid);
-        gridMultiCat.setExpanded(true);
+
+        //gridMultiCat.setExpanded(true);
     }
 
     @Override
@@ -57,44 +65,39 @@ public class MultiCatTraitLayout extends TraitLayout {
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
         if (!getNewTraits().containsKey(trait)) {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
-            getEtCurVal().addTextChangedListener(getCvNum());
         } else {
-            getEtCurVal().removeTextChangedListener(getCvNum());
             getEtCurVal().setText(getNewTraits().get(trait).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            getEtCurVal().addTextChangedListener(getCvNum());
         }
 
         final String[] cat = getCurrentTrait().getCategories().split("/");
 
+        FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
+        layoutManager.setFlexWrap(FlexWrap.WRAP);
+        layoutManager.setFlexDirection(FlexDirection.ROW);
+        layoutManager.setAlignItems(AlignItems.STRETCH);
+        gridMultiCat.setLayoutManager(layoutManager);
+        //RecyclerView.Adapter adapter = new CatAdapter(getContext());
+        //gridMultiCat.setAdapter(adapter);
+
         if (!((MainActivity) getContext()).isDataLocked()) {
-            gridMultiCat.setAdapter(new BaseAdapter() {
-                @Override
-                public int getCount() {
-                    return cat.length;
-                }
+
+            gridMultiCat.setAdapter(new MutlticatTraitAdapter(getContext()) {
 
                 @Override
-                public Object getItem(int position) {
-                    return null;
-                }
-
-                @Override
-                public long getItemId(int position) {
-                    return 0;
-                }
-
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-                    final Button newButton = (Button) LayoutInflater.from(getContext()).inflate(R.layout.custom_button_multicat, null);
-                    newButton.setText(cat[position]);
-                    newButton.setOnClickListener(createClickListener(newButton, position));
+                public void onBindViewHolder(MulticatTraitViewHolder holder, int position) {
+                    holder.bindTo();
+                    holder.mButton.setText(cat[position]);
+                    holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
                     if (hasCategory(cat[position], getEtCurVal().getText().toString()))
-                        pressOnButton(newButton);
-                    return newButton;
+                        pressOnButton(holder.mButton);;
+                }
+
+                @Override
+                public int getItemCount() {
+                    return cat.length;
                 }
             });
         }
@@ -107,6 +110,27 @@ public class MultiCatTraitLayout extends TraitLayout {
                 gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, lastChild.getBottom()));
             }
         });
+    }
+
+    private OnClickListener createClickListener2(final Button button, int position) {
+        return new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String normalizedCategory = normalizeCategory();
+                getEtCurVal().setText(normalizedCategory);
+                final String category = button.getText().toString();
+                if (hasCategory(category, normalizedCategory)) {
+                    pressOffButton(button);
+                    removeCategory(category);
+                } else {
+                    pressOnButton(button);
+                    addCategory(category);
+                }
+                updateTrait(getCurrentTrait().getTrait(),
+                        getCurrentTrait().getFormat(),
+                        getEtCurVal().getText().toString());
+            }
+        };
     }
 
     private OnClickListener createClickListener(final Button button, int position) {
@@ -178,12 +202,13 @@ public class MultiCatTraitLayout extends TraitLayout {
 
     private void pressOnButton(Button button) {
         button.setTextColor(Color.parseColor(getDisplayColor()));
-        button.setBackgroundColor(getResources().getColor(R.color.button_pressed));
+        button.getBackground().setColorFilter(button.getContext().getResources().getColor(R.color.button_pressed), PorterDuff.Mode.MULTIPLY);
+
     }
 
     private void pressOffButton(Button button) {
         button.setTextColor(Color.BLACK);
-        button.setBackgroundColor(getResources().getColor(R.color.button_normal));
+        button.getBackground().setColorFilter(button.getContext().getResources().getColor(R.color.button_normal), PorterDuff.Mode.MULTIPLY);
     }
 
     private void addCategory(final String category) {
@@ -219,5 +244,55 @@ public class MultiCatTraitLayout extends TraitLayout {
     @Override
     public void deleteTraitListener() {
         ((MainActivity) getContext()).removeTrait();
+    }
+}
+
+class MutlticatTraitAdapter extends RecyclerView.Adapter<MulticatTraitViewHolder> {
+
+    private Context mContext;
+
+    MutlticatTraitAdapter(Context context) {
+        mContext = context;
+    }
+
+    @Override
+    public MulticatTraitViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.trait_multicat_button, parent, false);
+        return new MulticatTraitViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(MulticatTraitViewHolder holder, int position) {
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return 0;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+}
+
+class MulticatTraitViewHolder extends RecyclerView.ViewHolder {
+
+    Button mButton;
+
+    MulticatTraitViewHolder(View itemView) {
+        super(itemView);
+        mButton = (Button) itemView.findViewById(R.id.multicatButton);
+    }
+
+    void bindTo() {
+        ViewGroup.LayoutParams lp = mButton.getLayoutParams();
+        if (lp instanceof FlexboxLayoutManager.LayoutParams) {
+            FlexboxLayoutManager.LayoutParams flexboxLp = (FlexboxLayoutManager.LayoutParams) lp;
+            flexboxLp.setFlexGrow(1.0f);
+        }
     }
 }

@@ -3,6 +3,13 @@
 
     <CheckBoxPreference
         android:defaultValue="false"
+        android:icon="@drawable/ic_adv_cycle_traits_advances"
+        android:key="CycleTraits"
+        android:summary="@string/preferences_behavior_cycle_traits_description"
+        android:title="@string/preferences_behavior_cycle_traits" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
         android:icon="@drawable/ic_remap_volume_buttons"
         android:key="VOLUME_NAVIGATION"
         android:summary="@string/preferences_behavior_volume_buttons_navigate_description"
@@ -16,5 +23,19 @@
         android:key="RETURN_CHARACTER"
         android:summary="%s"
         android:title="@string/preferences_behavior_return_character" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_action_ic_adv_disable_left"
+        android:key="DisableEntryNavLeft"
+        android:summary="@string/preferences_general_entry_left_disable_description"
+        android:title="@string/preferences_general_entry_left_disable" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_action_ic_adv_disable_right"
+        android:key="DisableEntryNavRight"
+        android:summary="@string/preferences_general_entry_right_disable_description"
+        android:title="@string/preferences_general_entry_right_disable" />
 
 </PreferenceScreen>
