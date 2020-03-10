@@ -82,7 +82,6 @@ import pub.devrel.easypermissions.EasyPermissions;
  */
 public class ConfigActivity extends AppCompatActivity {
 
-    public static boolean helpActive;
     public static DataHelper dt;
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 999;
     private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 998;
@@ -155,6 +154,7 @@ public class ConfigActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dt = new DataHelper(this);
 
         ep = getSharedPreferences("Settings", 0);
 
@@ -162,18 +162,15 @@ public class ConfigActivity extends AppCompatActivity {
         loadScreen();
 
         // request permissions
+
         makeDirsPermission();
         updateAssetsPermission();
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
-
-        helpActive = false;
 
         if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
             ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
             showChangelog(true, false);
         }
-
-        dt = new DataHelper(this);
 
         checkIntent();
     }
