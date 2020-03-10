@@ -89,6 +89,8 @@ public class ConfigActivity extends AppCompatActivity {
     private final int PERMISSIONS_REQUEST_DATABASE_EXPORT = 997;
     private final int PERMISSIONS_REQUEST_LOCATION = 996;
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 995;
+    private final int PERMISSIONS_REQUEST_UPDATE_ASSETS = 994;
+    private final int PERMISSIONS_REQUEST_MAKE_DIRS = 993;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     private SharedPreferences ep;
@@ -160,6 +162,8 @@ public class ConfigActivity extends AppCompatActivity {
         loadScreen();
 
         // request permissions
+        makeDirsPermission();
+        updateAssetsPermission();
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
         helpActive = false;
@@ -167,12 +171,10 @@ public class ConfigActivity extends AppCompatActivity {
         if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
             ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
             showChangelog(true, false);
-            updateAssets();
         }
 
-        createDirs();
-
         dt = new DataHelper(this);
+
         checkIntent();
     }
 
@@ -1089,6 +1091,30 @@ public class ConfigActivity extends AppCompatActivity {
             // Do not have permissions, request them now
             EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_trait_features),
                     PERMISSIONS_REQUEST_TRAIT_DATA, perms);
+        }
+    }
+
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_UPDATE_ASSETS)
+    public void makeDirsPermission() {
+        String[] perms = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            createDirs();
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_file_creation),
+                    PERMISSIONS_REQUEST_UPDATE_ASSETS, perms);
+        }
+    }
+
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_MAKE_DIRS)
+    public void updateAssetsPermission() {
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            updateAssets();
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_file_creation),
+                    PERMISSIONS_REQUEST_MAKE_DIRS, perms);
         }
     }
 

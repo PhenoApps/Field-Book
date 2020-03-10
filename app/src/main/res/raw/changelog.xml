@@ -1,6 +1,12 @@
 <changelog>
 
-    <release versionCode="420" versionName="v4.2" date="2020-02-28">
+    <release versionCode="421" versionName="v4.2.1" date="2020-03-10">
+        <info>Updated Chinese translation</info>
+        <info>Updated Italian translation</info>
+        <bugfix>Fix for missing sample files and crash</bugfix>
+    </release>
+
+    <release versionCode="420" versionName="v4.2" date="2020-03-06">
         <info>Upgraded to Java 8</info>
         <new>New tutorial</new>
         <new>Additional import sources</new>

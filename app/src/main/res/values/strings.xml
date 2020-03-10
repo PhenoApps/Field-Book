@@ -24,6 +24,7 @@
     <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
     <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
     <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
+    <string name="permission_rationale_file_creation">Creating sample files and directories requires access to the device\'s files.</string>
 
     <!-- Miscellaneous  -->
     <string name="fields_name">Field Name</string>

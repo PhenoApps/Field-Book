@@ -1945,6 +1945,7 @@ public class DataHelper {
         }
     }
 
+
     /**
      * V2 - Helper function to copy multiple files from asset to SDCard
      */
@@ -1975,6 +1976,7 @@ public class DataHelper {
     /**
      * V2 - Helper function to copy files from asset to SDCard
      */
+
     private void copyFile(String fullPath, String filename) {
         AssetManager assetManager = context.getAssets();
 
