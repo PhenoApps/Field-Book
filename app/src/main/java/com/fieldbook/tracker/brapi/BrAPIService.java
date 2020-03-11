@@ -58,8 +58,8 @@ import java.util.Set;
 public class BrAPIService {
 
     public static String exportTarget = "export";
-    public static String notUniqueFieldMessage = "not_unique";
-    public static String notUniqueIdMessage = "not_unique_id";
+    static String notUniqueFieldMessage = "not_unique";
+    static String notUniqueIdMessage = "not_unique_id";
     private DataHelper dataHelper;
     private ImagesApi imagesApi;
     private StudiesApi studiesApi;
@@ -82,7 +82,6 @@ public class BrAPIService {
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
-
     }
 
     public static BrapiControllerResponse authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
@@ -180,7 +179,7 @@ public class BrAPIService {
         return true;
     }
 
-    public static Boolean hasValidBaseUrl(Context context) {
+    static Boolean hasValidBaseUrl(Context context) {
         String url = getBrapiUrl(context);
 
         return Patterns.WEB_URL.matcher(url).matches();
@@ -216,7 +215,7 @@ public class BrAPIService {
         return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
     }
 
-    public static String getBrapiToken(Context context) {
+    static String getBrapiToken(Context context) {
         SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
         return "Bearer " + preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
     }
@@ -268,7 +267,7 @@ public class BrAPIService {
         return request;
     }
 
-    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
+    void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
@@ -296,7 +295,7 @@ public class BrAPIService {
 
     }
 
-    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
+    void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
@@ -363,7 +362,7 @@ public class BrAPIService {
 
     }
 
-    public BrapiStudySummary mapStudy(StudySummary studySummary) {
+    private BrapiStudySummary mapStudy(StudySummary studySummary) {
         BrapiStudySummary study = new BrapiStudySummary();
         study.setStudyDbId(studySummary.getStudyDbId());
         study.setStudyName(studySummary.getStudyName());
@@ -399,7 +398,7 @@ public class BrAPIService {
         }
     }
 
-    public BrapiStudyDetails mapStudy(Study study) {
+    private BrapiStudyDetails mapStudy(Study study) {
         BrapiStudyDetails studyDetails = new BrapiStudyDetails();
         studyDetails.setStudyDbId(study.getStudyDbId());
         studyDetails.setStudyName(study.getStudyName());
@@ -824,7 +823,7 @@ public class BrAPIService {
         }
     }
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails) {
+    BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails) {
 
         try {
             FieldObject field = new FieldObject();

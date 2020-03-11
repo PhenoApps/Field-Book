@@ -127,8 +127,6 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
         getEtCurVal().setHint("");
         getEtCurVal().removeTextChangedListener(getCvText());
         getEtCurVal().setVisibility(EditText.VISIBLE);
-        getEtCurVal().removeTextChangedListener(getCvNum());
-        getEtCurVal().removeTextChangedListener(getCvText());
 
         if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
             getEtCurVal().setText("");
@@ -138,21 +136,16 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
                     && getCurrentTrait().getDefaultValue().length() > 0)
                 getEtCurVal().setText(getCurrentTrait().getDefaultValue());
 
-            getEtCurVal().addTextChangedListener(getCvText());
         } else {
             getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            getEtCurVal().addTextChangedListener(getCvText());
         }
     }
 
     @Override
     public void deleteTraitListener() {
-        getEtCurVal().removeTextChangedListener(getCvNum());
-        getEtCurVal().removeTextChangedListener(getCvText());
         getEtCurVal().setText("");
         removeTrait(getCurrentTrait().getTrait());
-        getEtCurVal().addTextChangedListener(getCvText());
     }
 
     private class RustButtonOnClickListener implements OnClickListener {
@@ -189,6 +182,7 @@ public class DiseaseRatingTraitLayout extends TraitLayout {
                     makeToast(getContext().getString(R.string.trait_error_disease_severity));
                 } else {
                     getEtCurVal().setText(getEtCurVal().getText().toString() + v);
+                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
                 }
             }
         }

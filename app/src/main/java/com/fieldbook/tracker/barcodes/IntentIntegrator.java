@@ -165,6 +165,17 @@ public class IntentIntegrator {
         initializeConfiguration();
     }
 
+    /**
+     * <p>Call this from your {@link Activity}'s
+     * {@link Activity#onActivityResult(int, int, Intent)} method.</p>
+     *
+     * @param requestCode request code from {@code onActivityResult()}
+     * @param resultCode  result code from {@code onActivityResult()}
+     * @param intent      {@link Intent} from {@code onActivityResult()}
+     * @return null if the event handled here was not related to this class, or
+     * else an {@link IntentResult} containing the result of the scan. If the user cancelled scanning,
+     * the fields will be null.
+     */
     private static boolean contains(Iterable<ResolveInfo> availableApps, String targetApp) {
         for (ResolveInfo availableApp : availableApps) {
             String packageName = availableApp.activityInfo.packageName;

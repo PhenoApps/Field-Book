@@ -9,7 +9,6 @@ import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 
-
 public class PreferencesFragmentGeneral extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     PreferenceManager prefMgr;

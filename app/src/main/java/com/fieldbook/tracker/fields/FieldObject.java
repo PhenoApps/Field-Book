@@ -22,7 +22,7 @@ public class FieldObject {
     public FieldObject() {
     }
 
-    public int getExp_id() {
+    int getExp_id() {
         return exp_id;
     }
 

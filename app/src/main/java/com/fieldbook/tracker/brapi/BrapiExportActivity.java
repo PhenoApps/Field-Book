@@ -32,16 +32,9 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private BrAPIService brAPIService;
     private DataHelper dataHelper;
-    private List<Observation> observations;
     private List<Observation> observationsNeedingSync;
-    private List<Observation> userCreatedTraitObservations;
-    private List<Observation> wrongSourceObservations;
-    private List<com.fieldbook.tracker.brapi.Image> images;
     private List<com.fieldbook.tracker.brapi.Image> imagesNew;
     private List<com.fieldbook.tracker.brapi.Image> imagesEditedIncomplete;
-
-    private List<com.fieldbook.tracker.brapi.Image> userCreatedTraitImages;
-    private List<com.fieldbook.tracker.brapi.Image> wrongSourceImages;
 
     private int postImageMetaDataUpdatesCount;
     private int putImageContentUpdatesCount;
@@ -49,8 +42,6 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private Boolean observationsComplete;
 
-
-    private BrapiControllerResponse brapiControllerResponse;
     private int numNewObservations;
     private int numSyncedObservations;
     private int numEditedObservations;
@@ -120,10 +111,13 @@ public class BrapiExportActivity extends AppCompatActivity {
     private void loadToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("BrAPI Export");
-        getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setTitle("BrAPI Export");
+            getSupportActionBar().getThemedContext();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
     }
 
     @Override
@@ -131,7 +125,7 @@ public class BrapiExportActivity extends AppCompatActivity {
         super.onResume();
 
         // Check out brapi auth
-        brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
+        BrapiControllerResponse brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
 
         // Check whether our brapi auth response was exists or was successful
         processBrapiControllerMessage(brapiControllerResponse);
@@ -216,7 +210,7 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private void showSaving() {
         // Disable the export button so that can't click it again
-        Button exportBtn = (Button) this.findViewById(R.id.brapi_export_btn);
+        Button exportBtn = this.findViewById(R.id.brapi_export_btn);
         exportBtn.setEnabled(false);
         // Show our saving wheel
         this.findViewById(R.id.saving_panel).setVisibility(View.VISIBLE);
@@ -225,7 +219,7 @@ public class BrapiExportActivity extends AppCompatActivity {
     private void hideSaving() {
         // Re-enable our login button
         // Disable the export button so that can't click it again
-        Button exportBtn = (Button) this.findViewById(R.id.brapi_export_btn);
+        Button exportBtn = this.findViewById(R.id.brapi_export_btn);
         exportBtn.setEnabled(true);
         this.findViewById(R.id.saving_panel).setVisibility(View.GONE);
     }
@@ -317,7 +311,6 @@ public class BrapiExportActivity extends AppCompatActivity {
     }
 
     private void putImageContent(final com.fieldbook.tracker.brapi.Image image, final List<com.fieldbook.tracker.brapi.Image> uploads) {
-
 
         brAPIService.putImageContent(image, BrAPIService.getBrapiToken(this),
                 new Function<Image, Void>() {
@@ -630,16 +623,16 @@ public class BrapiExportActivity extends AppCompatActivity {
         numIncompleteImages = 0;
 
         String hostURL = BrAPIService.getHostUrl(BrAPIService.getBrapiUrl(this));
-        observations = dataHelper.getObservations(hostURL);
+        List<Observation> observations = dataHelper.getObservations(hostURL);
         observationsNeedingSync.clear();
-        userCreatedTraitObservations = dataHelper.getUserTraitObservations();
-        wrongSourceObservations = dataHelper.getWrongSourceObservations(hostURL);
+        List<Observation> userCreatedTraitObservations = dataHelper.getUserTraitObservations();
+        List<Observation> wrongSourceObservations = dataHelper.getWrongSourceObservations(hostURL);
 
-        images = dataHelper.getImageObservations(hostURL);
+        List<com.fieldbook.tracker.brapi.Image> images = dataHelper.getImageObservations(hostURL);
         imagesNew.clear();
         imagesEditedIncomplete.clear();
-        userCreatedTraitImages = dataHelper.getUserTraitImageObservations();
-        wrongSourceImages = dataHelper.getWrongSourceImageObservations(hostURL);
+        List<com.fieldbook.tracker.brapi.Image> userCreatedTraitImages = dataHelper.getUserTraitImageObservations();
+        List<com.fieldbook.tracker.brapi.Image> wrongSourceImages = dataHelper.getWrongSourceImageObservations(hostURL);
 
         for (Observation observation : observations) {
             switch (observation.getStatus()) {
@@ -699,10 +692,8 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                break;
+        if (item.getItemId() == android.R.id.home) {
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -717,6 +708,4 @@ public class BrapiExportActivity extends AppCompatActivity {
         API_NOTSUPPORTED_ERROR,
         API_PERMISSION_ERROR
     }
-
 }
-

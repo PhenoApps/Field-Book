@@ -133,12 +133,10 @@ public class AudioTraitLayout extends TraitLayout {
                 case PLAYING:
                     stopPlayback();
                     buttonState = ButtonState.WAITING_FOR_PLAYBACK;
-                    enableNavigation = true;
                     break;
                 case RECORDING:
                     stopRecording();
                     buttonState = ButtonState.WAITING_FOR_PLAYBACK;
-                    enableNavigation = true;
                     break;
                 case WAITING_FOR_PLAYBACK:
                     startPlayback();

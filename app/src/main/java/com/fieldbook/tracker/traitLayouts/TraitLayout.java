@@ -14,7 +14,15 @@ import com.fieldbook.tracker.traits.TraitObject;
 
 import java.util.Map;
 
+import static com.fieldbook.tracker.MainActivity.thisActivity;
+
 public abstract class TraitLayout extends LinearLayout {
+    protected enum BarcodeTarget {
+        PlotID, Value
+    };
+    
+    protected BarcodeTarget barcodeTarget;
+    
     public TraitLayout(Context context) {
         super(context);
     }
@@ -26,12 +34,19 @@ public abstract class TraitLayout extends LinearLayout {
     public TraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
+    
+    public boolean isValidData(String value) { return true; }
 
     public abstract String type();  // return trait type
 
     public boolean isTraitType(String trait) {
         return trait.equals(type());
     }
+
+    public void setBarcodeTargetValue()    { barcodeTarget = BarcodeTarget.Value; }
+    public void setBarcodeTargetPlotID()   { barcodeTarget = BarcodeTarget.PlotID; }
+    public boolean isBarcodeTargetValue()  { return barcodeTarget == BarcodeTarget.Value; }
+    public boolean isBarcodeTargetPlotID() { return barcodeTarget == BarcodeTarget.PlotID; }
 
     public abstract void init();
 
@@ -65,10 +80,6 @@ public abstract class TraitLayout extends LinearLayout {
         return ((MainActivity) getContext()).getCvText();
     }
 
-    public TextWatcher getCvNum() {
-        return ((MainActivity) getContext()).getCvNum();
-    }
-
     public String getDisplayColor() {
         return ((MainActivity) getContext()).getDisplayColor();
     }
@@ -83,5 +94,12 @@ public abstract class TraitLayout extends LinearLayout {
 
     public void removeTrait(String parent) {
         ((MainActivity) getContext()).removeTrait(parent);
+    }
+    
+    // if the value is not set to etCurVal, overload this method
+    public void setValue(String value) {
+        TraitObject trait = ((MainActivity)thisActivity).getCurrentTrait();
+        getEtCurVal().setText(value);
+        updateTrait(getCurrentTrait().getTrait(), trait.getFormat(), value);
     }
 }

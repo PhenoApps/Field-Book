@@ -2,9 +2,6 @@ package com.fieldbook.tracker;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-
-import androidx.appcompat.app.AlertDialog;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,17 +11,13 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,36 +34,37 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
-import android.view.Menu;
-import android.view.MenuInflater;
 
-import com.fieldbook.tracker.barcodes.*;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.fieldbook.tracker.barcodes.IntentIntegrator;
+import com.fieldbook.tracker.barcodes.IntentResult;
 import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.layoutConfig.SelectorLayoutConfigurator;
+import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.search.*;
+import com.fieldbook.tracker.search.SearchActivity;
 import com.fieldbook.tracker.traitLayouts.PhotoTraitLayout;
 import com.fieldbook.tracker.traitLayouts.TraitLayout;
-import com.fieldbook.tracker.traits.*;
-import com.fieldbook.tracker.tutorial.*;
+import com.fieldbook.tracker.traits.TraitObject;
+import com.fieldbook.tracker.tutorial.TutorialMainActivity;
 import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.Utils;
 
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.fieldbook.tracker.ConfigActivity.dt;
 
@@ -102,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Main screen elements
      */
-
     private Menu systemMenu;
     private SelectorLayoutConfigurator selectorLayoutConfigurator;
     private TraitBox traitBox;
@@ -135,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-    private TextWatcher cvNum;
     private TextWatcher cvText;
     private InputMethodManager imm;
     private Boolean dataLocked = false;
@@ -195,43 +187,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Validates the text entered for numeric format
-        //todo get rid of this- validate/delete in next/last plot
-        cvNum = new TextWatcher() {
-
-            // if the trait has a range, updateTrait does not work
-            public void afterTextChanged(final Editable en) {
-                final String strValue = etCurVal.getText().toString();
-Log.d("MainActivity", strValue + " cvNum");
-                if (strValue.equals(""))
-                    return;
-
-                Timer timer = new Timer();
-                final long DELAY = 750; // in ms
-
-                timer.cancel();
-                timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    public void run() {
-                        runOnUiThread(createDelayThread(en));
-                    }
-                }, DELAY);
-            }
-
-            public void beforeTextChanged(CharSequence arg0,
-                                          int arg1, int arg2, int arg3) {
-            }
-
-            public void onTextChanged(CharSequence arg0,
-                                      int arg1, int arg2, int arg3) {
-            }
-
-        };
-
         // Validates the text entered for text format
         cvText = new TextWatcher() {
             public void afterTextChanged(Editable en) {
-Log.d("MainActivity", en.toString() + " cvText");
                 final TraitObject trait = traitBox.getCurrentTrait();
                 if (en.toString().length() > 0) {
                     if (traitBox.existsNewTraits() & trait != null)
@@ -241,7 +199,6 @@ Log.d("MainActivity", en.toString() + " cvText");
                         removeTrait(trait.getTrait());
                 }
                 //tNum.setSelection(tNum.getText().length());
-
             }
 
             public void beforeTextChanged(CharSequence arg0, int arg1,
@@ -255,37 +212,17 @@ Log.d("MainActivity", en.toString() + " cvText");
         };
     }
 
-    private Runnable createDelayThread(final Editable en) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                final String strValue = etCurVal.getText().toString();
-                final TraitObject currentTrait = traitBox.getCurrentTrait();
-                final String trait = currentTrait.getTrait();
-                if (currentTrait.isValidValue(strValue)) {
-                    if (traitBox.existsNewTraits() & currentTrait != null)
-                        updateTrait(trait, currentTrait.getFormat(), strValue);
-                } else {
-                    if (strValue.length() > 0 && currentTrait.isOver(strValue)) {
-                        makeToast(getString(R.string.trait_error_maximum_value)
-                                + " " + currentTrait.getMaximum());
-                    }
-                    en.clear();
-                    removeTrait(trait);
-                }
-            }
-        };
-    }
-
     private void loadScreen() {
         setContentView(R.layout.activity_main);
 
         initToolbars();
 
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(null);
+            getSupportActionBar().getThemedContext();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
 
         // If the app is just starting up, we must always allow refreshing of data onscreen
         reloadData = true;
@@ -328,11 +265,31 @@ Log.d("MainActivity", en.toString() + " cvText");
         }
     }
 
-    //TODO
     private boolean validateData() {
-        //get rules
+        final String strValue = etCurVal.getText().toString();
+        final TraitObject currentTrait = traitBox.getCurrentTrait();
+        final String trait = currentTrait.getTrait();
 
-        //get data
+        if (traitBox.existsNewTraits()
+                && traitBox.getCurrentTrait() != null
+                && etCurVal.getText().toString().length() > 0
+                && !traitBox.getCurrentTrait().isValidValue(etCurVal.getText().toString())) {
+
+            if (strValue.length() > 0 && currentTrait.isOver(strValue)) {
+                makeToast(getString(R.string.trait_error_maximum_value)
+                        + ": " + currentTrait.getMaximum());
+            } else if (strValue.length() > 0 && currentTrait.isUnder(strValue)) {
+                makeToast(getString(R.string.trait_error_minimum_value)
+                        + ": " + currentTrait.getMinimum());
+            }
+
+            removeTrait(trait);
+            etCurVal.getText().clear();
+
+            playSound("error");
+
+            return false;
+        }
 
         return true;
     }
@@ -440,7 +397,7 @@ Log.d("MainActivity", en.toString() + " cvText");
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.range.equals(range) & cRange.plot.equals(plot)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     haveData = true;
                 }
             }
@@ -453,7 +410,7 @@ Log.d("MainActivity", en.toString() + " cvText");
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.plot.equals(plot)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     haveData = true;
                 }
             }
@@ -466,7 +423,7 @@ Log.d("MainActivity", en.toString() + " cvText");
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.range.equals(range)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     haveData = true;
                 }
             }
@@ -479,7 +436,7 @@ Log.d("MainActivity", en.toString() + " cvText");
                 RangeObject cRange = rangeBox.getCRange();
 
                 if (cRange.plot_id.equals(plotID)) {
-                    moveToResult(j);
+                    moveToResultCore(j);
                     return;
                 }
             }
@@ -489,22 +446,11 @@ Log.d("MainActivity", en.toString() + " cvText");
             makeToast(getString(R.string.main_toolbar_moveto_no_match));
     }
 
-    private void moveToResult(int j) {
-        if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
-            if (!existsTrait(rangeBox.getRangeIDByIndex(j - 1))) {
-                moveToResultCore(j);
-            }
-        } else {
-            moveToResultCore(j);
-        }
-    }
-
     private void moveToResultCore(int j) {
         rangeBox.setPaging(j);
 
         // Reload traits based on selected plot
         rangeBox.display();
-
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         initWidgets(false);
@@ -624,7 +570,7 @@ Log.d("MainActivity", en.toString() + " cvText");
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
                 ep.getString("Location", ""), "", exp_id, observationDbId,
-                lastSyncedTime); //TODO add notes and exp_id
+                lastSyncedTime);
     }
 
     private void brapiDelete(String parent, Boolean hint) {
@@ -728,6 +674,9 @@ Log.d("MainActivity", en.toString() + " cvText");
                 moveToPlotID();
                 break;
             case R.id.barcodeScan:
+                TraitObject trait = traitBox.getCurrentTrait();
+                TraitLayout layout = traitLayouts.getTraitLayout(trait.getFormat());
+                layout.setBarcodeTargetPlotID();   // mark for input plot id by barcode
                 IntentIntegrator integrator = new IntentIntegrator(thisActivity);
                 integrator.initiateScan();
                 break;
@@ -914,6 +863,7 @@ Log.d("MainActivity", en.toString() + " cvText");
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        final TraitObject trait = traitBox.getCurrentTrait();
         switch (requestCode) {
             case 1:
                 if (resultCode == RESULT_OK) {
@@ -940,20 +890,31 @@ Log.d("MainActivity", en.toString() + " cvText");
             case 252:
                 if (resultCode == RESULT_OK) {
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                    traitPhoto.makeImage(traitBox.getCurrentTrait(),
-                            traitBox.getNewTraits());
+                    traitPhoto.makeImage(trait, traitBox.getNewTraits());
                 }
                 break;
         }
 
+        TraitLayout layout = traitLayouts.getTraitLayout(trait.getFormat());
+
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
+        if (result == null) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+        else if (layout.isBarcodeTargetPlotID()) {
             inputPlotId = result.getContents();
             rangeBox.setAllRangeID();
             int[] rangeID = rangeBox.getRangeID();
             moveToSearch("id", rangeID, null, null, inputPlotId);
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
+        }
+        else if (layout.isBarcodeTargetValue()) {
+            final String value = result.getContents();
+            if (layout.isValidData(value)) {
+                layout.setValue(value);
+            }
+            else {
+                makeToast(String.format("%s is invalid data.", value));
+            }
         }
     }
 
@@ -1014,10 +975,6 @@ Log.d("MainActivity", en.toString() + " cvText");
         return cvText;
     }
 
-    public TextWatcher getCvNum() {
-        return cvNum;
-    }
-
     public String getDisplayColor() {
         return displayColor;
     }
@@ -1068,7 +1025,7 @@ Log.d("MainActivity", en.toString() + " cvText");
 
         private Map newTraits;  // { trait name: value }
 
-        public TraitBox(MainActivity parent_) {
+        TraitBox(MainActivity parent_) {
             parent = parent_;
             prefixTraits = null;
             newTraits = new HashMap();
@@ -1101,7 +1058,7 @@ Log.d("MainActivity", en.toString() + " cvText");
             });
         }
 
-        public void initTraitDetails() {
+        void initTraitDetails() {
             if (prefixTraits != null) {
                 final TextView traitDetails = findViewById(R.id.traitDetails);
 
@@ -1122,7 +1079,7 @@ Log.d("MainActivity", en.toString() + " cvText");
             }
         }
 
-        public void initTraitType(ArrayAdapter<String> adaptor,
+        void initTraitType(ArrayAdapter<String> adaptor,
                                   final boolean rangeSuppress) {
             final int traitPosition = getSelectedItemPosition();
             traitType.setAdapter(adaptor);
@@ -1184,35 +1141,35 @@ Log.d("MainActivity", en.toString() + " cvText");
             return newTraits;
         }
 
-        public void setNewTraits(final String plotID) {
+        void setNewTraits(final String plotID) {
             newTraits = (HashMap) dt.getUserDetail(plotID).clone();
         }
 
-        public void setNewTraits(Map newTraits) {
+        void setNewTraits(Map newTraits) {
             this.newTraits = newTraits;
         }
 
-        public ImageView getTraitLeft() {
+        ImageView getTraitLeft() {
             return traitLeft;
         }
 
-        public ImageView getTraitRight() {
+        ImageView getTraitRight() {
             return traitRight;
         }
 
-        public boolean existsNewTraits() {
+        boolean existsNewTraits() {
             return newTraits != null;
         }
 
-        public void setPrefixTraits() {
+        void setPrefixTraits() {
             prefixTraits = dt.getRangeColumnNames();
         }
 
-        public void setSelection(int pos) {
+        void setSelection(int pos) {
             traitType.setSelection(pos);
         }
 
-        public int getSelectedItemPosition() {
+        int getSelectedItemPosition() {
             try {
                 return traitType.getSelectedItemPosition();
             } catch (Exception f) {
@@ -1224,15 +1181,15 @@ Log.d("MainActivity", en.toString() + " cvText");
             return currentTrait;
         }
 
-        public final String getCurrentFormat() {
+        final String getCurrentFormat() {
             return currentTrait.getFormat();
         }
 
-        public boolean existsTrait() {
+        boolean existsTrait() {
             return newTraits.containsKey(currentTrait.getTrait());
         }
 
-        public final String createSummaryText(final String plotID) {
+        final String createSummaryText(final String plotID) {
             String[] traitList = dt.getAllTraits();
             StringBuilder data = new StringBuilder();
 
@@ -1286,7 +1243,7 @@ Log.d("MainActivity", en.toString() + " cvText");
             };
         }
 
-        public void moveTrait(String direction) {
+        void moveTrait(String direction) {
             int pos = 0;
 
             if (!validateData()) {
@@ -1360,7 +1317,7 @@ Log.d("MainActivity", en.toString() + " cvText");
         private int delay = 100;
         private int count = 1;
 
-        public RangeBox(MainActivity parent_) {
+        RangeBox(MainActivity parent_) {
             parent = parent_;
             rangeID = null;
             cRange = new RangeObject();
@@ -1373,31 +1330,31 @@ Log.d("MainActivity", en.toString() + " cvText");
         }
 
         // getter
-        public RangeObject getCRange() {
+        RangeObject getCRange() {
             return cRange;
         }
 
-        public int[] getRangeID() {
+        int[] getRangeID() {
             return rangeID;
         }
 
-        public int getRangeIDByIndex(int j) {
+        int getRangeIDByIndex(int j) {
             return rangeID[j];
         }
 
-        public ImageView getRangeLeft() {
+        ImageView getRangeLeft() {
             return rangeLeft;
         }
 
-        public ImageView getRangeRight() {
+        ImageView getRangeRight() {
             return rangeRight;
         }
 
-        public final String getPlotID() {
+        final String getPlotID() {
             return cRange.plot_id;
         }
 
-        public boolean isEmpty() {
+        boolean isEmpty() {
             return cRange == null || cRange.plot_id.length() == 0;
         }
 
@@ -1563,6 +1520,11 @@ Log.d("MainActivity", en.toString() + " cvText");
         // Simulate range right key press
         private void repeatKeyPress(final String directionStr) {
             boolean left = directionStr.equalsIgnoreCase("left");
+
+            if (!validateData()) {
+                return;
+            }
+
             if (rangeID != null && rangeID.length > 0) {
                 final int step = left ? -1 : 1;
                 paging = movePaging(paging, step, true);
@@ -1601,7 +1563,7 @@ Log.d("MainActivity", en.toString() + " cvText");
             }
         }
 
-        public void reload() {
+        void reload() {
             final SharedPreferences ep = parent.getPreference();
             switchVisibility(ep.getBoolean(PreferencesActivity.QUICK_GOTO, false));
 
@@ -1622,7 +1584,7 @@ Log.d("MainActivity", en.toString() + " cvText");
         }
 
         // Refresh onscreen controls
-        public void refresh() {
+        void refresh() {
             cRange = dt.getRange(rangeID[paging - 1]);
 
             display();
@@ -1650,7 +1612,7 @@ Log.d("MainActivity", en.toString() + " cvText");
             tvPlot.setText(cRange.plot);
         }
 
-        public void rightClick() {
+        void rightClick() {
             rangeRight.performClick();
         }
 
@@ -1661,7 +1623,7 @@ Log.d("MainActivity", en.toString() + " cvText");
             ed.apply();
         }
 
-        public void switchVisibility(boolean textview) {
+        void switchVisibility(boolean textview) {
             if (textview) {
                 tvRange.setVisibility(TextView.GONE);
                 tvPlot.setVisibility(TextView.GONE);
@@ -1683,7 +1645,7 @@ Log.d("MainActivity", en.toString() + " cvText");
             plotName.setText(truncate(secondaryName, maxLen));
         }
 
-        public void setAllRangeID() {
+        void setAllRangeID() {
             rangeID = dt.getAllRangeID();
         }
 
@@ -1691,11 +1653,11 @@ Log.d("MainActivity", en.toString() + " cvText");
             cRange = dt.getRange(id);
         }
 
-        public void setRangeByIndex(final int j) {
+        void setRangeByIndex(final int j) {
             cRange = dt.getRange(rangeID[j]);
         }
 
-        public void setLastRange() {
+        void setLastRange() {
             lastRange = cRange.range;
         }
 
@@ -1703,6 +1665,11 @@ Log.d("MainActivity", en.toString() + " cvText");
 
         private void moveEntryLeft() {
             final SharedPreferences ep = parent.getPreference();
+
+            if (!validateData()) {
+                return;
+            }
+
             if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false)
                     && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
@@ -1717,13 +1684,17 @@ Log.d("MainActivity", en.toString() + " cvText");
 
         private void moveEntryRight() {
             final SharedPreferences ep = parent.getPreference();
+
+            if (!validateData()) {
+                return;
+            }
+
             if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false)
                     && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
             } else {
                 if (rangeID != null && rangeID.length > 0) {
                     //index.setEnabled(true);
-
                     paging = incrementPaging(paging);
                     parent.refreshMain();
                 }
@@ -1741,6 +1712,7 @@ Log.d("MainActivity", en.toString() + " cvText");
         private int movePaging(int pos, int step, boolean cyclic) {
             // If ignore existing data is enabled, then skip accordingly
             final SharedPreferences ep = parent.getPreference();
+            
             if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
                 if (step == 1 && pos == rangeID.length) {
                     return 1;
@@ -1786,15 +1758,15 @@ Log.d("MainActivity", en.toString() + " cvText");
             }
         }
 
-        public void resetPaging() {
+        void resetPaging() {
             paging = 1;
         }
 
-        public void setPaging(int j) {
+        void setPaging(int j) {
             paging = j;
         }
 
-        public final int nextEmptyPlot() throws Exception {
+        final int nextEmptyPlot() throws Exception {
             int pos = paging;
 
             if (pos == rangeID.length) {
@@ -1816,11 +1788,11 @@ Log.d("MainActivity", en.toString() + " cvText");
             throw new Exception();      // not come here
         }
 
-        public void clickLeft() {
+        void clickLeft() {
             rangeLeft.performClick();
         }
 
-        public void clickRight() {
+        void clickRight() {
             rangeRight.performClick();
         }
     }

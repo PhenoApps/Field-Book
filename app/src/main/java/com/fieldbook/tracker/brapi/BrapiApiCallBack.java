@@ -1,8 +1,6 @@
 package com.fieldbook.tracker.brapi;
 
-import android.app.Activity;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.List;
 import java.util.Map;

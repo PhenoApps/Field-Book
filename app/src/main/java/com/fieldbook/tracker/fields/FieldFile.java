@@ -1,7 +1,5 @@
 package com.fieldbook.tracker.fields;
 
-import android.widget.Toast;
-
 import com.fieldbook.tracker.io.CSVReader;
 
 import java.io.File;
@@ -23,17 +21,17 @@ public class FieldFile {
         }
     }
 
-    static String getExtension(final String path) {
+    private static String getExtension(final String path) {
         final int first = path.lastIndexOf(".") + 1;
         return path.substring(first).toLowerCase();
     }
 
     public abstract static class FieldFileBase {
-        protected boolean openFail;
-        protected boolean specialCharactersFail;
+        boolean openFail;
+        boolean specialCharactersFail;
         private String path_;
 
-        public FieldFileBase(final String path) {
+        FieldFileBase(final String path) {
             path_ = path;
             openFail = false;
             specialCharactersFail = false;
@@ -43,17 +41,17 @@ public class FieldFile {
             return path_;
         }
 
-        public final String getStem() {
+        final String getStem() {
             final int first = path_.lastIndexOf("/") + 1;
             final int last = path_.lastIndexOf(".");
             return path_.substring(first, last);
         }
 
-        public final boolean hasSpecialCharasters() {
+        final boolean hasSpecialCharasters() {
             return specialCharactersFail;
         }
 
-        public FieldObject createFieldObject() {
+        FieldObject createFieldObject() {
             FieldObject f = new FieldObject();
             f.setExp_name(this.getStem());
             f.setExp_alias(this.getStem());
@@ -83,7 +81,7 @@ public class FieldFile {
     public static class FieldFileCSV extends FieldFileBase {
         CSVReader cr;
 
-        public FieldFileCSV(final String path) {
+        FieldFileCSV(final String path) {
             super(path);
         }
 
@@ -125,7 +123,7 @@ public class FieldFile {
                     if (columns != null) {
                         if (check.containsKey(columns[idColPosition])) {
                             cr.close();
-                            return new HashMap<String, String>();
+                            return new HashMap<>();
                         } else {
                             check.put(columns[idColPosition], columns[idColPosition]);
                         }
@@ -139,7 +137,7 @@ public class FieldFile {
             } catch (Exception n) {
                 openFail = true;
                 n.printStackTrace();
-                return new HashMap<String, String>();
+                return new HashMap<>();
             }
         }
 
@@ -178,7 +176,7 @@ public class FieldFile {
         private Workbook wb;
         private int current_row;
 
-        public FieldFileExcel(final String path) {
+        FieldFileExcel(final String path) {
             super(path);
         }
 
@@ -220,7 +218,7 @@ public class FieldFile {
                 String value = wb.getSheet(0).getCell(idColPosition, s).getContents();
 
                 if (check.containsKey(value)) {
-                    return new HashMap<String, String>();
+                    return new HashMap<>();
                 } else {
                     check.put(value, value);
                 }
@@ -229,7 +227,6 @@ public class FieldFile {
                     specialCharactersFail = true;
                 }
             }
-//            Toast.makeText(FieldEditorActivity.thisActivity, message, Toast.LENGTH_SHORT).show();
             return check;
         }
 
@@ -255,7 +252,7 @@ public class FieldFile {
     }
 
     public static class FieldFileOther extends FieldFileBase {
-        public FieldFileOther(final String path) {
+        FieldFileOther(final String path) {
             super(path);
         }
 
@@ -276,7 +273,7 @@ public class FieldFile {
         }
 
         public HashMap<String, String> getColumnSet(int idColPosition) {
-            return new HashMap<String, String>();
+            return new HashMap<>();
         }
 
         public void open() {

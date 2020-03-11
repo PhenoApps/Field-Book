@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.utilities;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;

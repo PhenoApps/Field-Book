@@ -123,7 +123,7 @@ public class TraitObject {
     }
 
     public boolean isUnder(final String s) {
-        if (!(format.equals("numeric") || format.equals("percent")))
+        if (!(format.equals("numeric")))
             return false;
 
         if (minimum.length() > 0) {     // minimum exists
@@ -140,7 +140,7 @@ public class TraitObject {
     }
 
     public boolean isOver(final String s) {
-        if (!(format.equals("numeric") || format.equals("percent")))
+        if (!(format.equals("numeric")))
             return false;
 
         if (maximum.length() > 0) {     // maximum exists

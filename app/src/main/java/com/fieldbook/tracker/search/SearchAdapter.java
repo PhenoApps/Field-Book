@@ -61,5 +61,4 @@ class SearchAdapter extends BaseAdapter {
         TextView range;
         TextView plot;
     }
-
 }

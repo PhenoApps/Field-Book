@@ -30,7 +30,6 @@ import com.fieldbook.tracker.traits.TraitObject;
 import io.swagger.client.ApiException;
 import io.swagger.client.model.Metadata;
 
-
 public class BrapiTraitActivity extends AppCompatActivity {
 
     private BrAPIService brAPIService;
@@ -96,10 +95,13 @@ public class BrapiTraitActivity extends AppCompatActivity {
     private void loadToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(null);
+            getSupportActionBar().getThemedContext();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
     }
 
     // Load the traits from breedbase
@@ -208,7 +210,6 @@ public class BrapiTraitActivity extends AppCompatActivity {
         });
     }
 
-
     // Transforms the trait data to display it on the screen.
     private ArrayAdapter buildTraitsArrayAdapter(List<TraitObject> traits) {
 
@@ -223,7 +224,6 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         return arrayAdapter;
     }
-
 
     // Button event for load and save traits
     public void buttonClicked(View view) {
@@ -273,11 +273,8 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
                 }
                 break;
-
         }
-
     }
-
 
     // Save our select traits
     public String saveTraits() {
@@ -330,15 +327,12 @@ public class BrapiTraitActivity extends AppCompatActivity {
         // Putting selection for secondaryMessage in here now for potential future use with
         // more detailed success and failure messages. 
         return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_traits_saved_success);
-
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                break;
+        if (item.getItemId() == android.R.id.home) {
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -359,5 +353,4 @@ public class BrapiTraitActivity extends AppCompatActivity {
         }
 
     }
-
 }

@@ -5,7 +5,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AlertDialog;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,7 +23,6 @@ import android.provider.Settings;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.text.Html;
@@ -35,7 +33,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -69,7 +66,6 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -252,11 +248,13 @@ public class ConfigActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().getThemedContext();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        getSupportActionBar().setHomeButtonEnabled(false);
-
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setTitle(null);
+            getSupportActionBar().getThemedContext();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            getSupportActionBar().setHomeButtonEnabled(false);
+        }
+        
         //setup
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
@@ -289,7 +287,7 @@ public class ConfigActivity extends AppCompatActivity {
                 getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)}; //, "API Test"};
 
 
-        Integer image_id[] = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.ic_nav_drawer_person, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
+        Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.ic_nav_drawer_person, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
 
         //get list of items
         //make adapter
@@ -645,31 +643,16 @@ public class ConfigActivity extends AppCompatActivity {
         appsArray[1] = "Coordinate";
         appsArray[2] = "1KK";
 
-        Integer app_images[] = {R.drawable.other_ic_inventory, R.drawable.other_ic_coordinate, R.drawable.other_ic_1kk};
+        Integer app_images[] = {R.drawable.other_ic_inventory, R.drawable.other_ic_coordinate};
         final String[] links = {"https://play.google.com/store/apps/details?id=org.wheatgenetics.inventory",
-                "https://play.google.com/store/apps/details?id=org.wheatgenetics.coordinate",
-                "https://play.google.com/store/apps/details?id=org.wheatgenetics.onekk"};
+                "https://play.google.com/store/apps/details?id=org.wheatgenetics.coordinate"};
         final String[] desc = {"", "", ""};
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 Uri uri = Uri.parse(links[which]);
-                Intent intent;
-
-                switch (which) {
-                    case 0:
-                        intent = new Intent(Intent.ACTION_VIEW, uri);
-                        startActivity(intent);
-                        break;
-                    case 1:
-                        intent = new Intent(Intent.ACTION_VIEW, uri);
-                        startActivity(intent);
-                        break;
-                    case 2:
-                        intent = new Intent(Intent.ACTION_VIEW, uri);
-                        startActivity(intent);
-                        break;
-                }
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
             }
         });
 
@@ -1219,61 +1202,6 @@ public class ConfigActivity extends AppCompatActivity {
         }
     }
 
-    private void showDatabaseDialog() {
-        String[] items = new String[3];
-        items[0] = getString(R.string.database_export);
-        items[1] = getString(R.string.database_import);
-        items[2] = getString(R.string.database_reset);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list, null);
-
-        builder.setTitle(R.string.database_dialog_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        final AlertDialog chooseBackupDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params = chooseBackupDialog.getWindow().getAttributes();
-        params.width = LayoutParams.WRAP_CONTENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        chooseBackupDialog.getWindow().setAttributes(params);
-
-        setupList = layout.findViewById(R.id.myList);
-        Button setupCloseBtn = layout.findViewById(R.id.closeBtn);
-
-        setupCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                chooseBackupDialog.dismiss();
-            }
-        });
-
-        setupList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                chooseBackupDialog.dismiss();
-                switch (which) {
-                    case 0:
-                        exportDatabaseFilePermission();
-                        break;
-                    case 1:
-                        importDatabaseFilePermission();
-                        break;
-                    case 2:
-                        showDatabaseResetDialog1();
-                        break;
-                }
-            }
-
-
-        });
-
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.listitem, items);
-        setupList.setAdapter(itemsAdapter);
-        chooseBackupDialog.show();
-    }
-
     private void showDatabaseImportDialog() {
         Intent intent = new Intent();
 
@@ -1355,7 +1283,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-
     }
 
     // Second confirmation
@@ -1431,8 +1358,6 @@ public class ConfigActivity extends AppCompatActivity {
                 showLocationDialog();
             }
         }
-
-
     }
 
     @Override
@@ -1456,12 +1381,10 @@ public class ConfigActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        switch (item.getItemId()) {
-            case R.id.help:
-                intent.setClassName(ConfigActivity.this,
-                        TutorialSettingsActivity.class.getName());
-                startActivity(intent);
-                break;
+        if (item.getItemId() == R.id.help) {
+            intent.setClassName(ConfigActivity.this,
+                    TutorialSettingsActivity.class.getName());
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -1663,7 +1586,6 @@ public class ConfigActivity extends AppCompatActivity {
             } else {
                 makeToast(getString(R.string.export_complete));
             }
-
         }
     }
 
@@ -1713,5 +1635,4 @@ public class ConfigActivity extends AppCompatActivity {
             MainActivity.reloadData = true;
         }
     }
-
 }

@@ -6,4 +6,9 @@
     android:orientation="vertical"
     android:visibility="gone">
 
+    <Button
+        android:id="@+id/barcode_for_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/main_toolbar_barcode_scan" />
 </com.fieldbook.tracker.traitLayouts.TextTraitLayout>

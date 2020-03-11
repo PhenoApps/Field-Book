@@ -7,23 +7,34 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+
 import com.fieldbook.tracker.MainActivity;
+import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.barcodes.IntentIntegrator;
+
+import static com.fieldbook.tracker.MainActivity.thisActivity;
 
 public class TextTraitLayout extends TraitLayout {
 
+    private TraitLayout thisLayout;
     private Handler mHandler = new Handler();
 
     public TextTraitLayout(Context context) {
         super(context);
+        thisLayout = this;
     }
 
     public TextTraitLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        thisLayout = this;
     }
 
     public TextTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        thisLayout = this;
     }
 
     @Override
@@ -37,27 +48,25 @@ public class TextTraitLayout extends TraitLayout {
 
     @Override
     public void init() {
-
+        Button button = (Button) findViewById(R.id.barcode_for_value);
+        button.setOnClickListener(new NumberButtonOnClickListener());
     }
 
     @Override
     public void loadLayout() {
-Log.d("TextTraitLayout", "loadLayout1");
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
         getEtCurVal().setSelection(getEtCurVal().getText().length());
         getEtCurVal().setEnabled(true);
-        getEtCurVal().removeTextChangedListener(getCvNum());
-        getEtCurVal().removeTextChangedListener(getCvText());
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-Log.d("TextTraitLayout", "loadLayout2");
+            getEtCurVal().removeTextChangedListener(getCvText());
             getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
             getEtCurVal().addTextChangedListener(getCvText());
             getEtCurVal().setSelection(getEtCurVal().getText().length());
         } else {
-Log.d("TextTraitLayout", "loadLayout3");
+            getEtCurVal().removeTextChangedListener(getCvText());
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
 
@@ -89,5 +98,15 @@ Log.d("TextTraitLayout", "loadLayout3");
     @Override
     public void deleteTraitListener() {
         ((MainActivity) getContext()).removeTrait();
+    }
+    
+    private class NumberButtonOnClickListener implements OnClickListener {
+        @Override
+        public void onClick(View view) {
+            final String curText = getEtCurVal().getText().toString();
+            IntentIntegrator integrator = new IntentIntegrator(thisActivity);
+            integrator.initiateScan();
+            thisLayout.setBarcodeTargetValue();
+        }
     }
 }

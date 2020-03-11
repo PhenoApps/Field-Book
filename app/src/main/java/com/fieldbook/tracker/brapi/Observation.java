@@ -1,11 +1,5 @@
 package com.fieldbook.tracker.brapi;
 
-import org.threeten.bp.OffsetDateTime;
-import org.threeten.bp.format.DateTimeFormatter;
-import org.threeten.bp.format.DateTimeParseException;
-
-import java.util.Objects;
-
 import io.swagger.client.model.NewObservationDbIdsObservations;
 
 public class Observation extends BrapiObservation {
@@ -19,7 +13,7 @@ public class Observation extends BrapiObservation {
     public Observation() {
     }
 
-    public Observation(NewObservationDbIdsObservations response) {
+    Observation(NewObservationDbIdsObservations response) {
         this.setDbId(response.getObservationDbId());
         this.setUnitDbId(response.getObservationUnitDbId());
         this.setVariableDbId(response.getObservationVariableDbId());
@@ -47,7 +41,7 @@ public class Observation extends BrapiObservation {
         this.season = season;
     }
 
-    public String getStudyId() {
+    String getStudyId() {
         return studyId;
     }
 
@@ -63,14 +57,12 @@ public class Observation extends BrapiObservation {
         this.value = value;
     }
 
-
-    public String getCollector() {
+    String getCollector() {
         return collector;
     }
 
     public void setCollector(String collector) {
         this.collector = collector;
     }
-
 
 }

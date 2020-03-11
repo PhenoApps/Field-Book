@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.fields;
 
-
 import androidx.appcompat.app.AlertDialog;
 
 import android.app.Activity;
@@ -22,8 +21,6 @@ import android.widget.Toast;
 import com.fieldbook.tracker.ConfigActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 
 import java.util.ArrayList;
@@ -62,7 +59,7 @@ class FieldAdapter extends BaseAdapter {
         return position;
     }
 
-    public void setEditorItem(SharedPreferences ep, FieldObject item) {
+    private void setEditorItem(SharedPreferences ep, FieldObject item) {
         SharedPreferences.Editor ed = ep.edit();
         boolean has_contents = item != null;
         if (has_contents) {
@@ -226,7 +223,7 @@ class FieldAdapter extends BaseAdapter {
         return alert;
     }
 
-    public void fieldClick(FieldObject selectedField) {
+    private void fieldClick(FieldObject selectedField) {
 
         setEditorItem(ep, selectedField);
 

@@ -14,7 +14,6 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
-
 public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     private static String BRAPI_BASE_URL = "BRAPI_BASE_URL";

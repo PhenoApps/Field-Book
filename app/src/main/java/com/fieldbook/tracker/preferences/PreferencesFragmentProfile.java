@@ -3,19 +3,13 @@ package com.fieldbook.tracker.preferences;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.View;
 
-import androidx.appcompat.widget.Toolbar;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.ConfigActivity;
-import com.fieldbook.tracker.FileExploreActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.utilities.Constants;
-
 
 public class PreferencesFragmentProfile extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 

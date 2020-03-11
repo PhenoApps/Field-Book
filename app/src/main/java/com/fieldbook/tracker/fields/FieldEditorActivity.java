@@ -12,13 +12,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -26,43 +25,33 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
-
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.dropbox.chooser.android.DbxChooser;
 import com.fieldbook.tracker.ConfigActivity;
-//import com.fieldbook.tracker.utilities.ApiKeys;
-import com.fieldbook.tracker.brapi.BrapiActivity;
-import com.fieldbook.tracker.io.CSVReader;
-//import com.fieldbook.tracker.utilities.ApiKeys;
-import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.DataHelper;
 import com.fieldbook.tracker.FileExploreActivity;
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.tutorial.TutorialFieldActivity;
+import com.fieldbook.tracker.utilities.Constants;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-import jxl.Workbook;
-import jxl.WorkbookSettings;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -83,7 +72,6 @@ public class FieldEditorActivity extends AppCompatActivity {
     Spinner secondary;
     int exp_id;
     private Menu systemMenu;
-    private String[] importColumns;
     private Dialog importFieldDialog;
     private int idColPosition;
     // Creates a new thread to do importing
@@ -185,9 +173,9 @@ public class FieldEditorActivity extends AppCompatActivity {
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_dropbox);
         importArray[2] = getString(R.string.import_source_brapi);
-
-        //TODO add google drive (requires Google Play Services)
-        //importArray[2] = getString(R.string.importgoogle);
+        //importArray[3] = getString(R.string.import_source_googledrive);
+        //importArray[4] = getString(R.string.import_source_box);
+        //importArray[5] = getString(R.string.import_source_onedrive);
 
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -201,13 +189,22 @@ public class FieldEditorActivity extends AppCompatActivity {
                     case 2:
                         loadBrAPI();
                         break;
+                    case 3:
+                        loadGoogleDrive();
+                        break;
+                    case 4:
+                        loadBox();
+                        break;
+                    case 5:
+                        loadOneDrive();
+                        break;
 
                 }
                 importDialog.dismiss();
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, importArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, importArray);
         myList.setAdapter(adapter);
         Button importCloseBtn = layout.findViewById(R.id.closeBtn);
         importCloseBtn.setOnClickListener(new OnClickListener() {
@@ -242,14 +239,21 @@ public class FieldEditorActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 
-    //todo
+    //TODO
     public void loadBox() {
-
+//        BoxSession session = new BoxSession(FieldEditorActivity.this);
+//        startActivityForResult(BoxBrowseFileActivity.getLaunchIntent(FieldEditorActivity.this, "<FOLDER_ID>", session), 4);
+        makeToast("Box");
     }
 
-    //todo
+    //TODO
     public void loadGoogleDrive() {
+        makeToast("Google");
+    }
 
+    //TODO
+    public void loadOneDrive() {
+        makeToast("OneDrive");
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE)
@@ -294,9 +298,31 @@ public class FieldEditorActivity extends AppCompatActivity {
                 break;
 
             case R.id.importField:
-                showFileDialog();
+                String choice = ep.getString("IMPORT_SOURCE_DEFAULT", "ask");
+                switch(choice)
+                {
+                    case "local":
+                        loadLocal();
+                        break;
+                    case "dropbox":
+                        loadDropbox();
+                        break;
+                    case "brapi":
+                        loadBrAPI();
+                        break;
+                    case "gdrive":
+                        loadGoogleDrive();
+                        break;
+                    case "box":
+                        loadBox();
+                        break;
+                    case "onedrive":
+                        loadOneDrive();
+                        break;
+                    default:
+                        showFileDialog();
+                }
                 break;
-
             case android.R.id.home:
                 fieldCheck();
                 break;
@@ -427,7 +453,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     private void loadFile(FieldFile.FieldFileBase fieldFile) {
-        importColumns = fieldFile.getColumns();
+        String[] importColumns = fieldFile.getColumns();
 
         String[] reservedNames = new String[]{"id"};
 
@@ -643,5 +669,4 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         }
     }
-
 }

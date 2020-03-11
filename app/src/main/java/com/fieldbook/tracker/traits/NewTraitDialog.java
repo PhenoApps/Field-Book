@@ -1,20 +1,16 @@
 package com.fieldbook.tracker.traits;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -27,9 +23,7 @@ import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-import static com.fieldbook.tracker.fields.FieldEditorActivity.makeToast;
 import static com.fieldbook.tracker.traits.TraitEditorActivity.displayBrapiInfo;
 import static com.fieldbook.tracker.traits.TraitEditorActivity.loadData;
 
@@ -65,7 +59,7 @@ public class NewTraitDialog extends DialogFragment {
 
     private TraitAdapter mAdapter;
 
-    public NewTraitDialog(View layout, TraitEditorActivity activity) {
+    NewTraitDialog(View layout, TraitEditorActivity activity) {
         // fields
         originActivity = activity;
         mAdapter = activity.getAdapter();
@@ -120,7 +114,7 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     // Non negative numbers only
-    public static boolean isNumeric(String str, boolean positive) {
+    private static boolean isNumeric(String str, boolean positive) {
         if (str.length() == 0)
             return false;
 
@@ -133,7 +127,7 @@ public class NewTraitDialog extends DialogFragment {
         }
     }
 
-    public static boolean isNumericOrEmpty(String str, boolean positive) {
+    private static boolean isNumericOrEmpty(String str, boolean positive) {
         return str.length() == 0 || isNumeric(str, positive);
     }
 
@@ -280,7 +274,7 @@ public class NewTraitDialog extends DialogFragment {
         };
     }
 
-    public void initTrait() {
+    void initTrait() {
         oldTrait = null;
 
         trait.setText("");
@@ -331,7 +325,7 @@ public class NewTraitDialog extends DialogFragment {
                 categories.getText().toString());
     }
 
-    public void setTraitObject(TraitObject traitObject) {
+    void setTraitObject(TraitObject traitObject) {
         oldTrait = traitObject;
         trait.setText(traitObject.getTrait());
         currentPosition = traitFormats.findIndexByEnglishString(traitObject.getFormat());
@@ -346,7 +340,7 @@ public class NewTraitDialog extends DialogFragment {
         categories.setText(traitObject.getCategories());
     }
 
-    public void prepareFields(int index) {
+    void prepareFields(int index) {
         TraitFormat traitFormat = traitFormats.getTraitFormatByIndex(index);
 
         final String optional = getResString(R.string.traits_create_optional);
@@ -407,11 +401,7 @@ public class NewTraitDialog extends DialogFragment {
                     categories.getText().toString().length() > 0)
                 return true;
 
-            if (format.getSelectedItemPosition() == booleanIndex) {
-                if (bool.isChecked())
-                    return true;
-            }
-            return false;
+            return format.getSelectedItemPosition() == booleanIndex && bool.isChecked();
         }
     }
 
@@ -457,11 +447,11 @@ public class NewTraitDialog extends DialogFragment {
 
         abstract public int getResourceId();
 
-        public String getLocalString() {
+        String getLocalString() {
             return getResString(getResourceId());
         }
 
-        public String ValidateItems() {
+        String ValidateItems() {
             final String validation = ValidateItemsCommon();
             if (validation.length() > 0) {
                 return validation;
@@ -470,7 +460,7 @@ public class NewTraitDialog extends DialogFragment {
             }
         }
 
-        protected String ValidateItemsCommon() {
+        String ValidateItemsCommon() {
             // Trait name is mandatory
             if (trait.getText().toString().length() == 0) {
                 return getResString(R.string.traits_create_warning_name_blank);
@@ -679,8 +669,8 @@ public class NewTraitDialog extends DialogFragment {
 
             // check empty category
             final String[] cats = strCategories.split("/");
-            for (int i = 0; i < cats.length; ++i) {
-                if (cats[i].length() == 0) {
+            for (String cat : cats) {
+                if (cat.length() == 0) {
                     // temporary error message
                     return "An empty category exists.";
                 }
@@ -755,33 +745,6 @@ public class NewTraitDialog extends DialogFragment {
 
         public boolean allowsNegative() {
             return false;
-        }
-        public String ValidateItemsIndividual() {
-            ArrayList<String> arrayEdits = new ArrayList<>();
-            if (def.getText().length() == 0) {
-                arrayEdits.add("default value");
-            }
-            if (minimum.getText().length() == 0) {
-                arrayEdits.add("minimum value");
-            }
-            if (maximum.getText().length() == 0) {
-                arrayEdits.add("maximum value");
-            }
-            
-            if (arrayEdits.isEmpty()) {
-                return super.ValidateItemsIndividual();
-            }
-            else if (arrayEdits.size() == 1) {
-                return arrayEdits.get(0) + " is necessary.";
-            }
-            else if (arrayEdits.size() == 2) {
-                return arrayEdits.get(0) + " and " +
-                        arrayEdits.get(1) + " are necessary";
-            }
-            else {
-                return arrayEdits.get(0) + ", " + arrayEdits.get(1) + " and " +
-                        arrayEdits.get(2) + " are necessary";
-            }
         }
     }
 
@@ -966,7 +929,7 @@ public class NewTraitDialog extends DialogFragment {
     private class TraitFormatCollection {
         private ArrayList<TraitFormat> traitFormatList;
 
-        public TraitFormatCollection() {
+        TraitFormatCollection() {
             traitFormatList = new ArrayList<>();
             traitFormatList.add(new TraitFormatNumeric());
             traitFormatList.add(new TraitFormatCategorical());
@@ -988,7 +951,7 @@ public class NewTraitDialog extends DialogFragment {
             return traitFormatList.size();
         }
 
-        public TraitFormat getTraitFormatByIndex(int index)
+        TraitFormat getTraitFormatByIndex(int index)
                 throws ArrayIndexOutOfBoundsException {
             if (index < 0 || index >= traitFormatList.size()) {
                 throw new ArrayIndexOutOfBoundsException("");
@@ -997,11 +960,11 @@ public class NewTraitDialog extends DialogFragment {
             return traitFormatList.get(index);
         }
 
-        public String getEnglishString(int index) {
+        String getEnglishString(int index) {
             return getTraitFormatByIndex(index).getEnglishString();
         }
 
-        public String[] getLocalStringList() {
+        String[] getLocalStringList() {
             String[] array = new String[size()];
             for (int i = 0; i < size(); ++i) {
                 array[i] = traitFormatList.get(i).getLocalString();
@@ -1010,7 +973,7 @@ public class NewTraitDialog extends DialogFragment {
             return array;
         }
 
-        public int findIndexByEnglishString(String format) {
+        int findIndexByEnglishString(String format) {
             for (int i = 0; i < size(); ++i) {
                 if (getEnglishString(i).toLowerCase().equals(
                         format.toLowerCase())) {

@@ -6,15 +6,14 @@ import io.swagger.client.model.Metadata;
 
 public class BrapiListResponse<T> {
 
-    Metadata metadata;
-    List<T> data;
+    private Metadata metadata;
+    private List<T> data;
 
-
-    public Metadata getMetadata() {
+    Metadata getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(Metadata metadata) {
+    void setMetadata(Metadata metadata) {
         this.metadata = metadata;
     }
 

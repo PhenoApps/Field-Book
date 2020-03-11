@@ -15,7 +15,6 @@ import com.fieldbook.tracker.utilities.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
 
 public class LocationTraitLayout extends TraitLayout {
-    private ImageButton getLocation;
 
     public LocationTraitLayout(Context context) {
         super(context);
@@ -40,7 +39,7 @@ public class LocationTraitLayout extends TraitLayout {
 
     @Override
     public void init() {
-        getLocation = findViewById(R.id.getLocationBtn);
+        ImageButton getLocation = findViewById(R.id.getLocationBtn);
         // Get Location
         getLocation.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -68,13 +67,10 @@ public class LocationTraitLayout extends TraitLayout {
     public void loadLayout() {
 
         getEtCurVal().setVisibility(EditText.VISIBLE);
-        getEtCurVal().removeTextChangedListener(getCvNum());
-        getEtCurVal().removeTextChangedListener(getCvText());
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
             getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            getEtCurVal().addTextChangedListener(getCvText());
         } else {
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
@@ -82,8 +78,6 @@ public class LocationTraitLayout extends TraitLayout {
             if (getCurrentTrait().getDefaultValue() != null
                     && getCurrentTrait().getDefaultValue().length() > 0)
                 getEtCurVal().setText(getCurrentTrait().getDefaultValue());
-
-            getEtCurVal().addTextChangedListener(getCvText());
         }
     }
 

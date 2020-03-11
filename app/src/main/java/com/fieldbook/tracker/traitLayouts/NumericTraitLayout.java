@@ -3,31 +3,47 @@ package com.fieldbook.tracker.traitLayouts;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.fieldbook.tracker.MainActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.barcodes.IntentIntegrator;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static com.fieldbook.tracker.MainActivity.thisActivity;
+
 public class NumericTraitLayout extends TraitLayout {
 
+    private TraitLayout thisLayout;
     private Map<Integer, Button> numberButtons;
 
     public NumericTraitLayout(Context context) {
         super(context);
+        thisLayout = this;
     }
 
     public NumericTraitLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        thisLayout = this;
     }
 
     public NumericTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        thisLayout = this;
+    }
+    
+    public boolean isValidData(String value) {
+        try {
+            final float n = Float.parseFloat(value);
+            return true;
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     @Override
@@ -58,6 +74,7 @@ public class NumericTraitLayout extends TraitLayout {
         numberButtons.put(R.id.k14, (Button) findViewById(R.id.k14));
         numberButtons.put(R.id.k15, (Button) findViewById(R.id.k15));
         numberButtons.put(R.id.k16, (Button) findViewById(R.id.k16));
+        numberButtons.put(R.id.k17, (Button) findViewById(R.id.k17));
 
         for (Button numButton : numberButtons.values()) {
             numButton.setOnClickListener(new NumberButtonOnClickListener());
@@ -66,11 +83,8 @@ public class NumericTraitLayout extends TraitLayout {
         numberButtons.get(R.id.k16).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                getEtCurVal().removeTextChangedListener(getCvNum());
-                getEtCurVal().removeTextChangedListener(getCvText());
                 getEtCurVal().setText("");
                 removeTrait(getCurrentTrait().getTrait());
-                getEtCurVal().addTextChangedListener(getCvNum());
                 return false;
             }
         });
@@ -78,18 +92,13 @@ public class NumericTraitLayout extends TraitLayout {
 
     @Override
     public void loadLayout() {
-
         // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
         getEtCurVal().setHint("");
-
         getEtCurVal().setVisibility(EditText.VISIBLE);
-        getEtCurVal().removeTextChangedListener(getCvNum());
-        getEtCurVal().removeTextChangedListener(getCvText());
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
             getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            getEtCurVal().addTextChangedListener(getCvNum());
         } else {
             getEtCurVal().setText("");
             getEtCurVal().setTextColor(Color.BLACK);
@@ -98,8 +107,6 @@ public class NumericTraitLayout extends TraitLayout {
                 getEtCurVal().setText(getCurrentTrait().getDefaultValue());
                 updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
             }
-
-            getEtCurVal().addTextChangedListener(getCvNum());
         }
     }
 
@@ -117,10 +124,16 @@ public class NumericTraitLayout extends TraitLayout {
                 final int length = curText.length();
                 if (length > 0) {
                     getEtCurVal().setText(curText.substring(0, length - 1));
+                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
                 }
+            } else if (view.getId() == R.id.k17) {  // input a trait value by barcode
+                IntentIntegrator integrator = new IntentIntegrator(thisActivity);
+                integrator.initiateScan();
+                thisLayout.setBarcodeTargetValue();
             } else if (numberButtons.containsKey(view.getId())) {
                 final String v = numberButtons.get(view.getId()).getText().toString();
                 getEtCurVal().setText(curText + v);
+                updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
             }
         }
     }

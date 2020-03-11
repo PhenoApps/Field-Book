@@ -66,7 +66,6 @@ public class PercentTraitLayout extends TraitLayout {
     public void loadLayout() {
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
-        getEtCurVal().removeTextChangedListener(getCvNum());
         getEtCurVal().removeTextChangedListener(getCvText());
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())
