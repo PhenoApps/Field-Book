@@ -33,6 +33,7 @@
         android:label="@string/field_book"
         android:largeHeap="true"
         android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ConfigActivity"
