@@ -14,6 +14,7 @@
         <item name="colorAccent">@color/main_colorAccent</item>
         <item name="buttonStyle">@style/ButtonStyle</item>
         <item name="toolbarStyle">@style/AppToolbar</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
 
     <style name="AppTheme.MaterialAboutActivity" parent="Theme.Mal.Light">

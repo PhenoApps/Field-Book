@@ -1,5 +1,12 @@
 <changelog>
 
+    <release versionCode="430" versionName="v4.3" date="2020-04-01">
+        <new>Search widget in Settings</new>
+        <info></info>
+        <new></new>
+        <bugfix></bugfix>
+    </release>
+
     <release versionCode="421" versionName="v4.2.1" date="2020-03-10">
         <info>Updated Chinese translation</info>
         <info>Updated Italian translation</info>
@@ -120,7 +127,6 @@
         <new>Option to disable automatic file sharing</new>
         <new>Option to disable plot navigation if no data collected with sound notification</new>
         <new>Saves most recent plot</new>
-        <bugfix>Some bugfix</bugfix>
     </release>
 
     <release versionCode="234" versionName="v2.3.4" date="2015-04-22">
@@ -130,7 +136,6 @@
         <info>Updated summary dialog</info>
         <info>Reworked location code</info>
         <info>Updated sample files</info>
-        <new>Some improvement</new>
         <bugfix>Fixed a bug in Lollipop with MediaContentScanner</bugfix>
         <bugfix>Fixed some issues with search layout</bugfix>
     </release>
@@ -150,7 +155,7 @@
         <info>XLS support readded</info>
         <info>Clear categorical traits by reclicking the current choice</info>
         <new>Option to make sound when primary organizer changes</new>
-        <new>Option to go to specific unique ID (for barcodes)</new>
+        <new>Option to go to specific unique ID</new>
         <new>Option to go to next plot without data</new>
         <new>File chooser added</new>
         <bugfix>Traits can now be made in other languages</bugfix>
@@ -172,7 +177,7 @@
         <bugfix>Minimum in numeric traits is enforced</bugfix>
         <bugfix>All text in text traits is deletable with the keyboard</bugfix>
         <bugfix>Cursor now appears at end of text in text traits</bugfix>
-        <bugfix>Files are now visible via computer after export</bugfix>
+        <bugfix>Files now visible via computer after export</bugfix>
     </release>
 
     <release versionCode="201" versionName="v2.0.1" date="2014-05-18">

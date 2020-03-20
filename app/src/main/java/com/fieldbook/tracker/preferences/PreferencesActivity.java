@@ -2,23 +2,22 @@ package com.fieldbook.tracker.preferences;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.Preference;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
+import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
-public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, SearchPreferenceResultListener {
 
     // Appearance
     public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
@@ -65,6 +64,7 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
     private static PreferencesFragmentBrapi preferencesFragmentBrapi;
     private static Preference brapiPrefCategory;
     private BrapiControllerResponse brapiControllerResponse;
+    private PreferencesFragment prefsFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,10 +79,24 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
 
         preferencesFragmentBrapi = new PreferencesFragmentBrapi();
 
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(android.R.id.content, new PreferencesFragment())
-                .commit();
+        prefsFragment = new PreferencesFragment();
+        getSupportFragmentManager().beginTransaction()
+                .replace(android.R.id.content, prefsFragment).commit();
+    }
+
+    @Override
+    public void onSearchResultClicked(SearchPreferenceResult result) {
+        prefsFragment = new PreferencesFragment();
+        getSupportFragmentManager().beginTransaction()
+                .replace(android.R.id.content, prefsFragment).addToBackStack("PrefsFragment")
+                .commit(); // Allow to navigate back to search
+
+        new Handler().post(new Runnable() { // Allow fragment to get created
+            @Override
+            public void run() {
+                prefsFragment.onSearchResultClicked(result);
+            }
+        });
     }
 
     public void processMessage(BrapiControllerResponse brapiControllerResponse) {

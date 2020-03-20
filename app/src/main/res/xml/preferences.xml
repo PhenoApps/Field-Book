@@ -2,6 +2,9 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <com.bytehamster.lib.preferencesearch.SearchPreference
+        android:key="searchPreference" />
+
     <Preference
         android:icon="@drawable/ic_nav_drawer_person"
         android:key="pref_key_profile_settings"
