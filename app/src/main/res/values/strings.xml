@@ -310,6 +310,7 @@
     <string name="about_developer_trife" translatable="false">Trevor Rife</string>
     <string name="about_developer_trife_location" translatable="false">Kansas State University</string>
     <string name="about_developer_trife_email" translatable="false">trife@ksu.edu</string>
+    <string name="about_email_title">Email</string>
     <string name="about_developer_trife_website" translatable="false">https://github.com/PhenoApps/Field-Book</string>
     <string name="about_contributors_title">Contributors</string>
     <string name="about_contributors_developers_title">Developers</string>
@@ -318,8 +319,10 @@
     <string name="about_contributors_funding_title">Funding</string>
     <string name="about_contributors_funding_text" translatable="false">Development of Field Book has been supported by the Collaborative Crop Research Program of The McKnight Foundation, the National Science Foundation (#1543958), and the National Institute of Food and Agriculture (#2019-67021-29931).</string>
     <string name="about_rate">Rate this app</string>
-    <string name="about_technical_title">Technical Details1</string>
+    <string name="about_technical_title">Technical Details</string>
+    <string name="about_github_title">GitHub</string>
     <string name="about_licenses_title">Licenses</string>
+    <string name="about_help_translate_title">Help translate</string>
     <string name="changelog_title">Changelog</string>
     <string name="libraries_title">Libraries</string>
 

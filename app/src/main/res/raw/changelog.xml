@@ -2,10 +2,11 @@
 
     <release versionCode="430" versionName="v4.3" date="2020-04-01">
         <new>Search widget in Settings</new>
+        <new>Added link to translate app in About section</new>
         <bugfix>Multicat layout updates when deleting values</bugfix>
-        <info></info>
-        <new></new>
-        <bugfix></bugfix>
+        <new>2</new>
+        <info>1</info>
+        <bugfix>3</bugfix>
     </release>
 
     <release versionCode="421" versionName="v4.2.1" date="2020-03-10">

@@ -3,6 +3,7 @@ Fixed tutorial order
 Cleaned up official changelog
 Added search widget to settings
 Fix for multicat layout not updating
+Added translation link
 
 37/4.2
 Added setting to hide icons on collect data screen

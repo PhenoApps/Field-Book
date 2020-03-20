@@ -20,7 +20,6 @@ import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
-
 public class AboutActivity extends MaterialAboutActivity {
 
     @Override
@@ -63,6 +62,12 @@ public class AboutActivity extends MaterialAboutActivity {
                 null
         ));
 
+        appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
+                .text(R.string.about_help_translate_title)
+                .icon(R.drawable.ic_about_help_translate)
+                .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://osij6hx.oneskyapp.com/collaboration/project?id=28259")))
+                .build());
+
         MaterialAboutCard.Builder authorCardBuilder = new MaterialAboutCard.Builder();
         authorCardBuilder.title(getString(R.string.about_project_lead_title));
 
@@ -74,7 +79,7 @@ public class AboutActivity extends MaterialAboutActivity {
 
         authorCardBuilder.addItem(ConvenienceBuilder.createEmailItem(c,
                 getResources().getDrawable(R.drawable.ic_about_email),
-                "Send an email",
+                getString(R.string.about_email_title),
                 true,
                 getString(R.string.about_developer_trife_email),
                 "Field Book Question"));
@@ -110,7 +115,7 @@ public class AboutActivity extends MaterialAboutActivity {
         technicalCardBuilder.title(getString(R.string.about_technical_title));
 
         technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
-                .text("GitHub")
+                .text(R.string.about_github_title)
                 .icon(R.drawable.ic_about_github)
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
                 .build());
@@ -132,20 +137,19 @@ public class AboutActivity extends MaterialAboutActivity {
                 })
                 .build());
 
-
         MaterialAboutCard.Builder otherAppsCardBuilder = new MaterialAboutCard.Builder();
         otherAppsCardBuilder.title(getString(R.string.about_title_other_apps));
 
         otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text("Coordinate")
                 .icon(R.drawable.other_ic_coordinate)
-                .setOnClickAction(openAppOrStore("org.wheatgenetics.coordinate",c))
+                .setOnClickAction(openAppOrStore("org.wheatgenetics.coordinate", c))
                 .build());
 
         otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text("Inventory")
                 .icon(R.drawable.other_ic_inventory)
-                .setOnClickAction(openAppOrStore("org.wheatgenetics.inventory",c))
+                .setOnClickAction(openAppOrStore("org.wheatgenetics.inventory", c))
                 .build());
 
         otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
@@ -156,7 +160,7 @@ public class AboutActivity extends MaterialAboutActivity {
         otherAppsCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text("Intercross")
                 .icon(R.drawable.other_ic_intercross)
-                .setOnClickAction(openAppOrStore("org.phenoapps.intercross",c))
+                .setOnClickAction(openAppOrStore("org.phenoapps.intercross", c))
                 .build());
 
         return new MaterialAboutList(appCardBuilder.build(), authorCardBuilder.build(), contributorsCardBuilder.build(), otherAppsCardBuilder.build(), technicalCardBuilder.build());
@@ -189,7 +193,7 @@ public class AboutActivity extends MaterialAboutActivity {
                 @Override
                 public void onClick() {
                     Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
-                    startActivity( launchIntent );
+                    startActivity(launchIntent);
                 }
             };
         } catch (PackageManager.NameNotFoundException e) {
