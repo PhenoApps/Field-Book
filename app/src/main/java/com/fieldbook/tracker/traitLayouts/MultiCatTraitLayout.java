@@ -54,8 +54,6 @@ public class MultiCatTraitLayout extends TraitLayout {
     @Override
     public void init() {
         gridMultiCat = findViewById(R.id.catGrid);
-
-        //gridMultiCat.setExpanded(true);
     }
 
     @Override
@@ -79,8 +77,6 @@ public class MultiCatTraitLayout extends TraitLayout {
         layoutManager.setFlexDirection(FlexDirection.ROW);
         layoutManager.setAlignItems(AlignItems.STRETCH);
         gridMultiCat.setLayoutManager(layoutManager);
-        //RecyclerView.Adapter adapter = new CatAdapter(getContext());
-        //gridMultiCat.setAdapter(adapter);
 
         if (!((MainActivity) getContext()).isDataLocked()) {
 
@@ -92,7 +88,7 @@ public class MultiCatTraitLayout extends TraitLayout {
                     holder.mButton.setText(cat[position]);
                     holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
                     if (hasCategory(cat[position], getEtCurVal().getText().toString()))
-                        pressOnButton(holder.mButton);;
+                        pressOnButton(holder.mButton);
                 }
 
                 @Override
@@ -110,27 +106,6 @@ public class MultiCatTraitLayout extends TraitLayout {
                 gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, lastChild.getBottom()));
             }
         });
-    }
-
-    private OnClickListener createClickListener2(final Button button, int position) {
-        return new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String normalizedCategory = normalizeCategory();
-                getEtCurVal().setText(normalizedCategory);
-                final String category = button.getText().toString();
-                if (hasCategory(category, normalizedCategory)) {
-                    pressOffButton(button);
-                    removeCategory(category);
-                } else {
-                    pressOnButton(button);
-                    addCategory(category);
-                }
-                updateTrait(getCurrentTrait().getTrait(),
-                        getCurrentTrait().getFormat(),
-                        getEtCurVal().getText().toString());
-            }
-        };
     }
 
     private OnClickListener createClickListener(final Button button, int position) {
@@ -244,6 +219,7 @@ public class MultiCatTraitLayout extends TraitLayout {
     @Override
     public void deleteTraitListener() {
         ((MainActivity) getContext()).removeTrait();
+        loadLayout();
     }
 }
 
@@ -276,7 +252,6 @@ class MutlticatTraitAdapter extends RecyclerView.Adapter<MulticatTraitViewHolder
     public long getItemId(int position) {
         return 0;
     }
-
 }
 
 class MulticatTraitViewHolder extends RecyclerView.ViewHolder {

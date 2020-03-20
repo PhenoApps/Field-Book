@@ -2,6 +2,7 @@
 
     <release versionCode="430" versionName="v4.3" date="2020-04-01">
         <new>Search widget in Settings</new>
+        <bugfix>Multicat layout updates when deleting values</bugfix>
         <info></info>
         <new></new>
         <bugfix></bugfix>
