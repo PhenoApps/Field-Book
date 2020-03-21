@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.fieldbook.tracker.traitLayouts.DiseaseRatingTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.fieldbook.tracker.traits.DiseaseRatingTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/diseaseLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -359,4 +359,4 @@
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
-</com.fieldbook.tracker.traitLayouts.DiseaseRatingTraitLayout>
+</com.fieldbook.tracker.traits.DiseaseRatingTraitLayout>

@@ -8,8 +8,8 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
-import com.fieldbook.tracker.ConfigActivity;
-import com.fieldbook.tracker.FileExploreActivity;
+import com.fieldbook.tracker.activities.ConfigActivity;
+import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Constants;
 

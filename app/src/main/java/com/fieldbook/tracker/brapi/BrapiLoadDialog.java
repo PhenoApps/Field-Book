@@ -18,7 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.DataHelper;
+import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
@@ -42,12 +42,12 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         }
     };
 
-    BrapiLoadDialog(@NonNull Context context) {
+    public BrapiLoadDialog(@NonNull Context context) {
         super(context);
         this.context = context;
     }
 
-    void setSelectedStudy(BrapiStudySummary selectedStudy) {
+    public void setSelectedStudy(BrapiStudySummary selectedStudy) {
         this.study = selectedStudy;
     }
 

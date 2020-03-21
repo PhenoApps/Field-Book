@@ -1,17 +1,13 @@
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
-import android.view.View;
 
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiExportActivity;
 import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.brapi.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
 import com.fieldbook.tracker.brapi.Observation;
-import com.fieldbook.tracker.traits.TraitObject;
+import com.fieldbook.tracker.objects.TraitObject;
 
 import org.junit.Before;
 import org.junit.Test;

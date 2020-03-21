@@ -11,11 +11,11 @@ package com.fieldbook.tracker.brapi;
 
         import androidx.arch.core.util.Function;
 
-        import com.fieldbook.tracker.DataHelper;
+        import com.fieldbook.tracker.database.DataHelper;
         import com.fieldbook.tracker.R;
-        import com.fieldbook.tracker.fields.FieldObject;
+        import com.fieldbook.tracker.objects.FieldObject;
         import com.fieldbook.tracker.preferences.PreferencesActivity;
-        import com.fieldbook.tracker.traits.TraitObject;
+        import com.fieldbook.tracker.objects.TraitObject;
         import com.fieldbook.tracker.utilities.Constants;
 
         import java.net.MalformedURLException;
@@ -179,7 +179,7 @@ public class BrAPIService {
         return true;
     }
 
-    static Boolean hasValidBaseUrl(Context context) {
+    public static Boolean hasValidBaseUrl(Context context) {
         String url = getBrapiUrl(context);
 
         return Patterns.WEB_URL.matcher(url).matches();

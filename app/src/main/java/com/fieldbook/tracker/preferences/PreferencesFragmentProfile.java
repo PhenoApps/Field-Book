@@ -8,7 +8,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
-import com.fieldbook.tracker.ConfigActivity;
+import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
 
 public class PreferencesFragmentProfile extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {

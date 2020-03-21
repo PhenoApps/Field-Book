@@ -16,16 +16,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fieldbook.tracker.ConfigActivity;
-import com.fieldbook.tracker.DataHelper;
-import com.fieldbook.tracker.MainActivity;
+import com.fieldbook.tracker.activities.ConfigActivity;
+import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.activities.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fieldbook.tracker.traits.TraitObject;
+import com.fieldbook.tracker.objects.TraitObject;
 
 import io.swagger.client.ApiException;
 import io.swagger.client.model.Metadata;

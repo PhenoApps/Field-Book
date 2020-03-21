@@ -35,7 +35,7 @@
         android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".ConfigActivity"
+            android:name=".activities.ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -46,20 +46,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale|keyboard"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
-            android:name=".search.SearchActivity"
+            android:name=".activities.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:theme="@style/ActivityDialog"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".DatagridActivity"
+            android:name=".activities.DatagridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:theme="@style/ActivityDialog" />
@@ -76,12 +76,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".FileExploreActivity"
+            android:name=".activities.FileExploreActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:theme="@style/ActivityDialog" />
         <activity
-            android:name=".traits.TraitEditorActivity"
+            android:name=".activities.TraitEditorActivity"
             android:alwaysRetainTaskState="false"
             android:configChanges="keyboardHidden|orientation"
             android:finishOnTaskLaunch="true"
@@ -89,7 +89,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeAction" />
         <activity
-            android:name=".fields.FieldEditorActivity"
+            android:name=".activities.FieldEditorActivity"
             android:alwaysRetainTaskState="false"
             android:configChanges="keyboardHidden|orientation"
             android:finishOnTaskLaunch="true"
@@ -97,7 +97,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeAction" />
         <activity
-            android:name=".AboutActivity"
+            android:name=".activities.AboutActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:theme="@style/AppTheme.MaterialAboutActivity" />
         <activity
@@ -144,7 +144,7 @@
             tools:replace="android:screenOrientation" />
 
         <provider
-            android:name=".GenericFileProvider"
+            android:name=".provider.GenericFileProvider"
             android:authorities="com.fieldbook.tracker.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
