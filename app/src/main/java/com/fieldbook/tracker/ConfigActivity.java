@@ -10,12 +10,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
 
@@ -83,13 +85,12 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class ConfigActivity extends AppCompatActivity {
 
     public static DataHelper dt;
-    private final int PERMISSIONS_REQUEST_EXPORT_DATA = 999;
-    private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 998;
-    private final int PERMISSIONS_REQUEST_DATABASE_EXPORT = 997;
-    private final int PERMISSIONS_REQUEST_LOCATION = 996;
-    private final int PERMISSIONS_REQUEST_TRAIT_DATA = 995;
-    private final int PERMISSIONS_REQUEST_UPDATE_ASSETS = 994;
-    private final int PERMISSIONS_REQUEST_MAKE_DIRS = 993;
+    private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
+    private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 9980;
+    private final int PERMISSIONS_REQUEST_DATABASE_EXPORT = 9970;
+    private final int PERMISSIONS_REQUEST_LOCATION = 9960;
+    private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
+    private final int PERMISSIONS_REQUEST_MAKE_DIRS = 9930;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     private SharedPreferences ep;
@@ -162,10 +163,8 @@ public class ConfigActivity extends AppCompatActivity {
         loadScreen();
 
         // request permissions
-
-        makeDirsPermission();
-        updateAssetsPermission();
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
+        createDirs();
 
         if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
             ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
@@ -198,6 +197,7 @@ public class ConfigActivity extends AppCompatActivity {
         createDir(Constants.UPDATEPATH);
         createDir(Constants.ARCHIVEPATH);
 
+        updateAssets();
         scanSampleFiles();
     }
 
@@ -213,7 +213,8 @@ public class ConfigActivity extends AppCompatActivity {
                 blankFile.getParentFile().mkdirs();
                 blankFile.createNewFile();
                 Utils.scanFile(ConfigActivity.this, blankFile);
-            } catch (IOException ignore) {
+            } catch (IOException e) {
+                Log.d("CreateDir",e.toString());
             }
         }
     }
@@ -1028,6 +1029,7 @@ public class ConfigActivity extends AppCompatActivity {
         alert.show();
     }
 
+    //todo use annotations correctly
     @AfterPermissionGranted(PERMISSIONS_REQUEST_LOCATION)
     private void locationDialogPermission() {
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
@@ -1091,23 +1093,10 @@ public class ConfigActivity extends AppCompatActivity {
         }
     }
 
-    @AfterPermissionGranted(PERMISSIONS_REQUEST_UPDATE_ASSETS)
     public void makeDirsPermission() {
-        String[] perms = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(this, perms)) {
             createDirs();
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_file_creation),
-                    PERMISSIONS_REQUEST_UPDATE_ASSETS, perms);
-        }
-    }
-
-    @AfterPermissionGranted(PERMISSIONS_REQUEST_MAKE_DIRS)
-    public void updateAssetsPermission() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
-        if (EasyPermissions.hasPermissions(this, perms)) {
-            updateAssets();
         } else {
             // Do not have permissions, request them now
             EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_file_creation),
@@ -1360,6 +1349,15 @@ public class ConfigActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 100) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                String state = Environment.getExternalStorageState();
+                if (Environment.MEDIA_MOUNTED.equals(state)) {
+                    createDirs();
+                }
+            }
+        }
 
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
