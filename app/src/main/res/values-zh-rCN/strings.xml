@@ -279,7 +279,6 @@
     <string name="about_translators_title">翻译着</string>
     <string name="about_contributors_funding_title">经费支持</string>
     <string name="about_rate">评价这个软件</string>
-    <string name="about_technical_title">技术细节1</string>
     <string name="about_licenses_title">许可</string>
     <string name="changelog_title">更改记录</string>
     <string name="libraries_title">函数库</string>
@@ -426,4 +425,5 @@
 通过手工创建或通过CSV导入的性状和地块需要用CSV格式导出。</string>
     <string name="brapi_info_title">BrAPI同步信息中</string>
     <string name="brapi_auth_btn">登录进入站点</string>
+    <string name="about_technical_title">技术细节</string>
 </resources>

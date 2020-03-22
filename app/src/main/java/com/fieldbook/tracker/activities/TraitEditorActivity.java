@@ -24,6 +24,7 @@ import android.os.Handler;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.NewTraitDialog;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.brapi.BrapiTraitActivity;
@@ -57,7 +58,6 @@ import android.view.MenuItem;
 
 import com.fieldbook.tracker.utilities.CSVReader;
 import com.fieldbook.tracker.utilities.CSVWriter;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
@@ -1052,7 +1052,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
 
-        if (!ep.getBoolean(PreferencesActivity.DISABLE_SHARE, false)) {
+        if (!ep.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");

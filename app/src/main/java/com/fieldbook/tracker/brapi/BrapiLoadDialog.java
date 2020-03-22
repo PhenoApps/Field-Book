@@ -20,7 +20,7 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Constants;
 
 import io.swagger.client.ApiException;
@@ -59,7 +59,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         setContentView(R.layout.dialog_brapi_import);
 
         String brapiBaseURL = this.context.getSharedPreferences("Settings", 0)
-                .getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
+                .getString(GeneralKeys.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
         brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this.context));
         saveBtn = findViewById(R.id.brapi_save_btn);
         saveBtn.setOnClickListener(this);

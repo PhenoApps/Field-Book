@@ -11,7 +11,7 @@ import android.widget.ImageButton;
 
 import com.fieldbook.tracker.activities.MainActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.geo.GPSTracker;
+import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
 
 public class LocationTraitLayout extends BaseTraitLayout {

@@ -50,13 +50,13 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.Observation;
-import com.fieldbook.tracker.adapters.SelectorLayoutConfigurator;
+import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.utilities.Constants;
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
      * Main screen elements
      */
     private Menu systemMenu;
-    private SelectorLayoutConfigurator selectorLayoutConfigurator;
+    private InfoBarAdapter infoBarAdapter;
     private TraitBox traitBox;
     private RangeBox rangeBox;
     /**
@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
         // Keyboard service manager
         setIMM();
 
-        selectorLayoutConfigurator = new SelectorLayoutConfigurator(this, ep.getInt(PreferencesActivity.INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
+        infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
 
         traitLayouts = new LayoutCollections(this);
         traitBox = new TraitBox(this);
@@ -375,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (!dt.isTableEmpty(DataHelper.RANGE)) {
             final String plotID = rangeBox.getPlotID();
-            selectorLayoutConfigurator.configureDropdownArray(plotID);
+            infoBarAdapter.configureDropdownArray(plotID);
         }
 
         traitBox.initTraitDetails();
@@ -500,10 +500,10 @@ public class MainActivity extends AppCompatActivity {
         // Update menu item visibility
         if (systemMenu != null) {
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
-            systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(PreferencesActivity.UNIQUE_TEXT, false));
-            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(PreferencesActivity.NEXT_ENTRY_NO_DATA, false));
-            systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(PreferencesActivity.UNIQUE_CAMERA, false));
-            systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(PreferencesActivity.DATAGRID_SETTING, false));
+            systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_TEXT, false));
+            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(GeneralKeys.NEXT_ENTRY_NO_DATA, false));
+            systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
+            systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
         }
 
         // If reload data is true, it means there was an import operation, and
@@ -612,7 +612,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void customizeToolbarIcons() {
-        Set<String> entries = ep.getStringSet(PreferencesActivity.TOOLBAR_CUSTOMIZE, new HashSet<String>());
+        Set<String> entries = ep.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<String>());
 
         if (systemMenu != null) {
             systemMenu.findItem(R.id.search).setVisible(entries.contains("search"));
@@ -631,10 +631,10 @@ public class MainActivity extends AppCompatActivity {
         systemMenu = menu;
 
         systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
-        systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(PreferencesActivity.UNIQUE_TEXT, false));
-        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(PreferencesActivity.NEXT_ENTRY_NO_DATA, false));
-        systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(PreferencesActivity.UNIQUE_CAMERA, false));
-        systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(PreferencesActivity.DATAGRID_SETTING, false));
+        systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_TEXT, false));
+        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(GeneralKeys.NEXT_ENTRY_NO_DATA, false));
+        systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
+        systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
 
         customizeToolbarIcons();
 
@@ -866,7 +866,7 @@ public class MainActivity extends AppCompatActivity {
         int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
-                if (ep.getBoolean(PreferencesActivity.VOLUME_NAVIGATION, false)) {
+                if (ep.getBoolean(GeneralKeys.VOLUME_NAVIGATION, false)) {
                     if (action == KeyEvent.ACTION_UP) {
                         rangeBox.moveEntryRight();
                     }
@@ -874,7 +874,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return false;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-                if (ep.getBoolean(PreferencesActivity.VOLUME_NAVIGATION, false)) {
+                if (ep.getBoolean(GeneralKeys.VOLUME_NAVIGATION, false)) {
                     if (action == KeyEvent.ACTION_UP) {
                         rangeBox.moveEntryLeft();
                     }
@@ -882,7 +882,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return false;
             case KeyEvent.KEYCODE_ENTER:
-                String return_action = ep.getString(PreferencesActivity.RETURN_CHARACTER, "0");
+                String return_action = ep.getString(GeneralKeys.RETURN_CHARACTER, "0");
 
                 if (return_action.equals("0")) {
                     if (action == KeyEvent.ACTION_UP) {
@@ -1044,7 +1044,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean is_cycling_traits_advances() {
-        return ep.getBoolean(PreferencesActivity.CYCLING_TRAITS_ADVANCES, false);
+        return ep.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
     }
 
     ///// class TraitBox /////
@@ -1573,7 +1573,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
 
                 final SharedPreferences ep = parent.getPreference();
-                if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
+                if (ep.getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
                     if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                         lastRange = cRange.range;
 
@@ -1601,7 +1601,7 @@ public class MainActivity extends AppCompatActivity {
 
         void reload() {
             final SharedPreferences ep = parent.getPreference();
-            switchVisibility(ep.getBoolean(PreferencesActivity.QUICK_GOTO, false));
+            switchVisibility(ep.getBoolean(GeneralKeys.QUICK_GOTO, false));
 
             setName(8);
 
@@ -1625,7 +1625,7 @@ public class MainActivity extends AppCompatActivity {
 
             display();
             final SharedPreferences ep = parent.getPreference();
-            if (ep.getBoolean(PreferencesActivity.PRIMARY_SOUND, false)) {
+            if (ep.getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
                 if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                     lastRange = cRange.range;
                     playSound("plonk");
@@ -1706,7 +1706,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_LEFT, false)
+            if (ep.getBoolean(GeneralKeys.DISABLE_ENTRY_ARROW_LEFT, false)
                     && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
             } else {
@@ -1725,7 +1725,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            if (ep.getBoolean(PreferencesActivity.DISABLE_ENTRY_ARROW_RIGHT, false)
+            if (ep.getBoolean(GeneralKeys.DISABLE_ENTRY_ARROW_RIGHT, false)
                     && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
             } else {
@@ -1749,7 +1749,7 @@ public class MainActivity extends AppCompatActivity {
             // If ignore existing data is enabled, then skip accordingly
             final SharedPreferences ep = parent.getPreference();
 
-            if (ep.getBoolean(PreferencesActivity.HIDE_ENTRIES_WITH_DATA, false)) {
+            if (ep.getBoolean(GeneralKeys.HIDE_ENTRIES_WITH_DATA, false)) {
                 if (step == 1 && pos == rangeID.length) {
                     return 1;
                 }

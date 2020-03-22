@@ -40,7 +40,7 @@ import android.view.MenuItem;
 
 import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.brapi.BrapiActivity;
-import com.fieldbook.tracker.objects.FieldFile;
+import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.database.DataHelper;
@@ -72,7 +72,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     public static Activity thisActivity;
     public static EditText trait;
     private static Handler mHandler = new Handler();
-    private static FieldFile.FieldFileBase fieldFile;
+    private static FieldFileObject.FieldFileBase fieldFile;
     private static SharedPreferences ep;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
     Spinner unique;
@@ -458,7 +458,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     private void showFieldFileDialog(final String chosenFile) {
-        fieldFile = FieldFile.create(chosenFile);
+        fieldFile = FieldFileObject.create(chosenFile);
         //todo get URI instead of string
         Editor e = ep.edit();
         e.putString("FieldFile", fieldFile.getStem());
@@ -506,7 +506,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         }
     }
 
-    private void loadFile(FieldFile.FieldFileBase fieldFile) {
+    private void loadFile(FieldFileObject.FieldFileBase fieldFile) {
         String[] importColumns = fieldFile.getColumns();
 
         String[] reservedNames = new String[]{"id"};
@@ -568,7 +568,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         importFieldDialog.show();
     }
 
-    private boolean verifyUniqueColumn(FieldFile.FieldFileBase fieldFile) {
+    private boolean verifyUniqueColumn(FieldFileObject.FieldFileBase fieldFile) {
         HashMap<String, String> check = fieldFile.getColumnSet(idColPosition);
         if (check.isEmpty()) {
             return false;

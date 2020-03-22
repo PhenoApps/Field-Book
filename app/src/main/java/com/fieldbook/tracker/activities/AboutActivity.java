@@ -22,6 +22,7 @@ import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
 public class AboutActivity extends MaterialAboutActivity {
+    //todo move to fragments so aboutactivity can extend base activity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

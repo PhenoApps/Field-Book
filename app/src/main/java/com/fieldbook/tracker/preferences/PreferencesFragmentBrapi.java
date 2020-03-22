@@ -52,7 +52,7 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
 
             // This is done after this function, but set the value for our brapi function
             SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
-            editor.putString(PreferencesActivity.BRAPI_BASE_URL, newValue.toString());
+            editor.putString(GeneralKeys.BRAPI_BASE_URL, newValue.toString());
             editor.apply();
 
             // Call our brapi authorize function
@@ -92,7 +92,7 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
     private void registerBrapiButtonListeners() {
 
         if (brapiAuthButton != null) {
-            String brapiToken = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_TOKEN, null);
+            String brapiToken = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_TOKEN, null);
             String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
 
             brapiAuthButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -122,7 +122,7 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
 
                     // Clear our brapi token
                     SharedPreferences.Editor editor = preferences.edit();
-                    editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
+                    editor.putString(GeneralKeys.BRAPI_TOKEN, null);
                     editor.apply();
 
                     // Set our button visibility and text
@@ -135,7 +135,7 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
     }
 
     public void setButtonView() {
-        String brapiToken = prefMgr.getSharedPreferences().getString(PreferencesActivity.BRAPI_TOKEN, null);
+        String brapiToken = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_TOKEN, null);
         String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
 
         if (brapiHost != null) {  // && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {

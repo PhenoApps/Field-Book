@@ -53,11 +53,12 @@ import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiExportActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.adapters.CustomListAdapter2;
-import com.fieldbook.tracker.geo.GPSTracker;
+import com.fieldbook.tracker.adapters.ImageListAdapter;
+import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -365,7 +366,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        CustomListAdapter2 adapterImg = new CustomListAdapter2(this, image_id, configList);
+        ImageListAdapter adapterImg = new ImageListAdapter(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
 
         SharedPreferences.Editor ed = ep.edit();
@@ -565,7 +566,7 @@ public class ConfigActivity extends AppCompatActivity {
     private void shareFile(File filePath) {
         MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
 
-        if (!ep.getBoolean(PreferencesActivity.DISABLE_SHARE, false)) {
+        if (!ep.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");

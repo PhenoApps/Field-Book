@@ -34,7 +34,6 @@ public class PreferencesFragmentSounds extends PreferenceFragmentCompat implemen
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-
         return false;
     }
 }

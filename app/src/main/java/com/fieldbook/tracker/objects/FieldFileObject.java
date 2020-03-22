@@ -10,7 +10,7 @@ import java.util.HashMap;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 
-public class FieldFile {
+public class FieldFileObject {
     public static FieldFileBase create(final String path) {
         switch (getExtension(path)) {
             case "csv":

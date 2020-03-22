@@ -4,16 +4,14 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
-import androidx.preference.PreferenceFragmentCompat;
 
 import com.bytehamster.lib.preferencesearch.SearchPreference;
 import com.bytehamster.lib.preferencesearch.SearchConfiguration;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
 import com.fieldbook.tracker.R;
 
-public class PreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class PreferencesFragment extends BasePreferenceFragment {
 
     private PreferenceManager prefMgr;
     private Context context;
@@ -62,11 +60,6 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Pre
         PreferencesFragment.this.context = context;
     }
 
-    @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-
-        return false;
-    }
 
     @Override
     public void onResume() {

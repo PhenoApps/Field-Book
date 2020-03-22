@@ -19,48 +19,6 @@ import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
 public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, SearchPreferenceResultListener {
 
-    // Appearance
-    public static String TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE";
-    public static String LANGUAGE = "language";
-    public static String INFOBAR_NUMBER = "INFOBAR_NUMBER";
-
-    // Profile
-    public static String PROFILE_NAME_FIRST = "FirstName";
-    public static String PROFILE_NAME_LAST = "LastName";
-    public static String PROFILE_LOCATION = "Location";
-
-    // Behavior
-    public static String RETURN_CHARACTER = "RETURN_CHARACTER";
-    public static String VOLUME_NAVIGATION = "VOLUME_NAVIGATION";
-
-    // General
-    public static String TUTORIAL_MODE = "Tips";
-    public static String NEXT_ENTRY_NO_DATA = "NextEmptyPlot";
-    public static String QUICK_GOTO = "QuickGoTo";
-    public static String UNIQUE_CAMERA = "BarcodeScan";
-    public static String UNIQUE_TEXT = "JumpToPlot";
-    public static String DATAGRID_SETTING = "DataGrid";
-    public static String DISABLE_ENTRY_ARROW_LEFT = "DisableEntryNavLeft";
-    public static String DISABLE_ENTRY_ARROW_RIGHT = "DisableEntryNavRight";
-    public static String CYCLING_TRAITS_ADVANCES = "CycleTraits";
-    public static String HIDE_ENTRIES_WITH_DATA = "IgnoreExisting";
-    public static String USE_DAY_OF_YEAR = "UseDay";
-    public static String DISABLE_SHARE = "DisableShare";
-
-    // Files and Naming
-    public static String DEFAULT_STORAGE_LOCATION = "DEFAULT_STORAGE_LOCATION";
-    public static String DATE_FORMAT = "DATE_FORMAT";
-    public static String FILE_NAME_FORMAT = "FILE_NAME_FORMAT";
-    public static String PHOTO_NAME_FORMAT = "PHOTO_NAME_FORMAT";
-
-    // Sounds
-    public static String PRIMARY_SOUND = "RangeSound";
-    public static String TRAIT_SOUND = "TRAIT_SOUND";
-
-    //BrAPI
-    public static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
-    public static String BRAPI_TOKEN = "BRAPI_TOKEN";
-
     private static PreferencesFragmentBrapi preferencesFragmentBrapi;
     private static Preference brapiPrefCategory;
     private BrapiControllerResponse brapiControllerResponse;

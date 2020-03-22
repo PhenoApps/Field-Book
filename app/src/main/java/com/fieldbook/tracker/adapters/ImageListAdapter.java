@@ -11,12 +11,12 @@ import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
 
-public class CustomListAdapter2 extends ArrayAdapter<String> {
+public class ImageListAdapter extends ArrayAdapter<String> {
     String[] color_names;
     Integer[] image_id;
     Context context;
 
-    public CustomListAdapter2(Activity context, Integer[] image_id, String[] text) {
+    public ImageListAdapter(Activity context, Integer[] image_id, String[] text) {
         super(context, R.layout.listitem_language, text);
         this.color_names = text;
         this.image_id = image_id;

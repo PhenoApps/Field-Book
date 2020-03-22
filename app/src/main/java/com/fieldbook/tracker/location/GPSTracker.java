@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.geo;
+package com.fieldbook.tracker.location;
 
 import android.app.Service;
 import android.content.Context;

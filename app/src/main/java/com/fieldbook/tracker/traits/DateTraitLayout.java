@@ -9,7 +9,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -132,7 +132,7 @@ public class DateTraitLayout extends BaseTraitLayout {
                     e.printStackTrace();
                 }
 
-                if (getPrefs().getBoolean(PreferencesActivity.USE_DAY_OF_YEAR, false)) {
+                if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
                     updateTrait(getCurrentTrait().getTrait(), "date", String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
                 } else {
                     updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));

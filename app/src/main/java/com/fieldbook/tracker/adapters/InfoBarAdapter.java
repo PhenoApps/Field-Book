@@ -20,7 +20,7 @@ import android.widget.TextView;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
 
-public class SelectorLayoutConfigurator extends RecyclerView.Adapter<SelectorLayoutConfigurator.ViewHolder> {
+public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHolder> {
 
     private Context context;
     private int maxSelectors;
@@ -29,7 +29,7 @@ public class SelectorLayoutConfigurator extends RecyclerView.Adapter<SelectorLay
     private RecyclerView selectorsView;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public SelectorLayoutConfigurator(Context context, int maxSelectors, RecyclerView selectorsView) {
+    public InfoBarAdapter(Context context, int maxSelectors, RecyclerView selectorsView) {
         this.context = context;
         this.maxSelectors = maxSelectors;
         this.selectorsView = selectorsView;
@@ -49,7 +49,7 @@ public class SelectorLayoutConfigurator extends RecyclerView.Adapter<SelectorLay
 
     // Create new views (invoked by the layout manager)
     @Override
-    public SelectorLayoutConfigurator.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public InfoBarAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.selector_dropdown, parent, false);
@@ -58,7 +58,7 @@ public class SelectorLayoutConfigurator extends RecyclerView.Adapter<SelectorLay
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(SelectorLayoutConfigurator.ViewHolder holder, int position) {
+    public void onBindViewHolder(InfoBarAdapter.ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
 
