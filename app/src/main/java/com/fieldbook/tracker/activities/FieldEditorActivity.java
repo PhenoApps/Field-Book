@@ -340,13 +340,12 @@ public class FieldEditorActivity extends AppCompatActivity {
                     case "cloud":
                         loadCloud();
                         break;
-                    default:
-                        showFileDialog();
                 }
                 break;
 
             case android.R.id.home:
-                fieldCheck();
+                CollectActivity.reloadData = true;
+                finish();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -374,18 +373,9 @@ public class FieldEditorActivity extends AppCompatActivity {
         return result;
     }
 
-    private void fieldCheck() {
-        if (!ep.getBoolean("FieldSelected", true)) {
-            makeToast(getString(R.string.fields_select_study));
-        } else {
-            CollectActivity.reloadData = true;
-            finish();
-        }
-    }
-
     public void onBackPressed() {
         CollectActivity.reloadData = true;
-        fieldCheck();
+        finish();
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -468,7 +458,6 @@ public class FieldEditorActivity extends AppCompatActivity {
             SharedPreferences.Editor ed = ep.edit();
             ed.putString("FieldFile", null);
             ed.putBoolean("ImportFieldFinished", false);
-            ed.putBoolean("FieldSelected", false);
             ed.apply();
             return;
         }
@@ -713,7 +702,6 @@ public class FieldEditorActivity extends AppCompatActivity {
                 ed.putString("ImportFirstName", primary.getSelectedItem().toString());
                 ed.putString("ImportSecondName", secondary.getSelectedItem().toString());
                 ed.putBoolean("ImportFieldFinished", true);
-                ed.putBoolean("FieldSelected", true);
                 ed.apply();
 
                 CollectActivity.reloadData = true;

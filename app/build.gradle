@@ -58,7 +58,7 @@ dependencies {
     implementation "androidx.legacy:legacy-preference-v14:1.0.0"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
     implementation "androidx.preference:preference:1.1.0"
-    implementation 'org.phenoapps:javalib:1.0.4'
+    implementation 'org.phenoapps:javalib:1.0.5'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation "androidx.preference:preference:1.1.0"
     implementation 'pub.devrel:easypermissions:3.0.0'

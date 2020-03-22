@@ -76,7 +76,6 @@ public class FieldAdapter extends BaseAdapter {
             ed.putString("ImportSecondName", null);
         }
         ed.putBoolean("ImportFieldFinished", has_contents);
-        ed.putBoolean("FieldSelected", has_contents);
         ed.putString("lastplot", null);
         ed.putString("DROP1", null);
         ed.putString("DROP2", null);

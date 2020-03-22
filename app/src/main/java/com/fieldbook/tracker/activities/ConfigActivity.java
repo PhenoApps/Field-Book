@@ -299,11 +299,6 @@ public class ConfigActivity extends AppCompatActivity {
 
                         break;
                     case 1:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.warning_field_before_traits));
-                            return;
-                        }
-
                         intent.setClassName(ConfigActivity.this,
                                 TraitEditorActivity.class.getName());
                         startActivity(intent);
@@ -318,11 +313,6 @@ public class ConfigActivity extends AppCompatActivity {
                         collectDataFilePermission();
                         break;
                     case 3:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.warning_field_missing));
-                            return;
-                        }
-
                         showProfileDialog();
                         break;
                     case 4:
@@ -346,8 +336,6 @@ public class ConfigActivity extends AppCompatActivity {
                             case "brapi":
                                 exportBrAPI();
                                 break;
-                            default:
-                                showExportDialog();
                         }
 
                         break;
