@@ -142,9 +142,6 @@ public class CollectActivity extends AppCompatActivity {
     private InputMethodManager imm;
     private Boolean dataLocked = false;
 
-    // initRangeAndPlot moved to RangeBox#initAndPlot
-    // and moveToSearch came back
-
     public static void disableViews(ViewGroup layout) {
         layout.setEnabled(false);
         for (int i = 0; i < layout.getChildCount(); i++) {
@@ -223,7 +220,7 @@ public class CollectActivity extends AppCompatActivity {
     }
 
     private void loadScreen() {
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_collect);
 
         initToolbars();
 
@@ -393,7 +390,7 @@ public class CollectActivity extends AppCompatActivity {
     }
 
     // Moves to specific plot/range/plot_id
-    private void moveToSearch(String type, int[] rangeID, String range, String plot, String plotID) {
+    private void moveToSearch(String type, int[] rangeID, String range, String plot, String data) {
 
         if (rangeID == null) {
             return;
@@ -420,7 +417,7 @@ public class CollectActivity extends AppCompatActivity {
                 rangeBox.setRangeByIndex(j - 1);
                 RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.plot.equals(plot)) {
+                if (cRange.plot.equals(data)) {
                     moveToResultCore(j);
                     haveData = true;
                 }
@@ -433,7 +430,7 @@ public class CollectActivity extends AppCompatActivity {
                 rangeBox.setRangeByIndex(j - 1);
                 RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.range.equals(range)) {
+                if (cRange.range.equals(data)) {
                     moveToResultCore(j);
                     haveData = true;
                 }
@@ -446,7 +443,7 @@ public class CollectActivity extends AppCompatActivity {
                 rangeBox.setRangeByIndex(j - 1);
                 RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.plot_id.equals(plotID)) {
+                if (cRange.plot_id.equals(data)) {
                     moveToResultCore(j);
                     return;
                 }
@@ -1424,8 +1421,24 @@ public class CollectActivity extends AppCompatActivity {
                 }
             });
 
-            range.setOnEditorActionListener(createOnEditorListener(range));
-            plot.setOnEditorActionListener(createOnEditorListener(plot));
+            range.setOnEditorActionListener(createOnEditorListener(range,"range"));
+            plot.setOnEditorActionListener(createOnEditorListener(plot,"plot"));
+
+            range.setOnTouchListener(new OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    range.setCursorVisible(true);
+                    return false;
+                }
+            });
+
+            plot.setOnTouchListener(new OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    plot.setCursorVisible(true);
+                    return false;
+                }
+            });
 
             setName(10);
 
@@ -1452,13 +1465,13 @@ public class CollectActivity extends AppCompatActivity {
             return s;
         }
 
-        private OnEditorActionListener createOnEditorListener(final EditText edit) {
+        private OnEditorActionListener createOnEditorListener(final EditText edit, final String searchType) {
             return new OnEditorActionListener() {
                 public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                     // do not do bit check on event, crashes keyboard
                     if (actionId == EditorInfo.IME_ACTION_DONE) {
                         try {
-                            moveToSearch("range", rangeID, range.getText().toString(), null, null);
+                            moveToSearch(searchType, rangeID, null, null, view.getText().toString());
                             InputMethodManager imm = parent.getIMM();
                             imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
                         } catch (Exception ignore) {
