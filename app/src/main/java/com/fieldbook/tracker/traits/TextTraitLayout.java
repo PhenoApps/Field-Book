@@ -7,7 +7,7 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.EditText;
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 
 public class TextTraitLayout extends BaseTraitLayout {
 
@@ -84,6 +84,6 @@ public class TextTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        ((MainActivity) getContext()).removeTrait();
+        ((CollectActivity) getContext()).removeTrait();
     }
 }

@@ -14,7 +14,7 @@ import android.widget.LinearLayout;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
@@ -77,7 +77,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         layoutManager.setAlignItems(AlignItems.STRETCH);
         gridMultiCat.setLayoutManager(layoutManager);
 
-        if (!((MainActivity) getContext()).isDataLocked()) {
+        if (!((CollectActivity) getContext()).isDataLocked()) {
 
             gridMultiCat.setAdapter(new MutlticatTraitAdapter(getContext()) {
 
@@ -217,7 +217,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        ((MainActivity) getContext()).removeTrait();
+        ((CollectActivity) getContext()).removeTrait();
         loadLayout();
     }
 }

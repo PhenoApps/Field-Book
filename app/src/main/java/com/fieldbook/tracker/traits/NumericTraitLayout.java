@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 
 import java.util.LinkedHashMap;
@@ -94,7 +94,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        ((MainActivity) getContext()).removeTrait();
+        ((CollectActivity) getContext()).removeTrait();
     }
 
     private class NumberButtonOnClickListener implements OnClickListener {

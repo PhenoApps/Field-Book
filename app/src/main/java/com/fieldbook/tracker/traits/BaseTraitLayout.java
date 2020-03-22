@@ -8,7 +8,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 
@@ -42,11 +42,11 @@ public abstract class BaseTraitLayout extends LinearLayout {
     public abstract void setNaTraitsText();
 
     public Map getNewTraits() {
-        return ((MainActivity) getContext()).getNewTraits();
+        return ((CollectActivity) getContext()).getNewTraits();
     }
 
     public TraitObject getCurrentTrait() {
-        return ((MainActivity) getContext()).getCurrentTrait();
+        return ((CollectActivity) getContext()).getCurrentTrait();
     }
 
     public SharedPreferences getPrefs() {
@@ -54,19 +54,19 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public RangeObject getCRange() {
-        return ((MainActivity) getContext()).getCRange();
+        return ((CollectActivity) getContext()).getCRange();
     }
 
     public EditText getEtCurVal() {
-        return ((MainActivity) getContext()).getEtCurVal();
+        return ((CollectActivity) getContext()).getEtCurVal();
     }
 
     public TextWatcher getCvText() {
-        return ((MainActivity) getContext()).getCvText();
+        return ((CollectActivity) getContext()).getCvText();
     }
 
     public String getDisplayColor() {
-        return ((MainActivity) getContext()).getDisplayColor();
+        return ((CollectActivity) getContext()).getDisplayColor();
     }
 
     public void makeToast(String message) {
@@ -74,10 +74,10 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public void updateTrait(String parent, String trait, String value) {
-        ((MainActivity) getContext()).updateTrait(parent, trait, value);
+        ((CollectActivity) getContext()).updateTrait(parent, trait, value);
     }
 
     public void removeTrait(String parent) {
-        ((MainActivity) getContext()).removeTrait(parent);
+        ((CollectActivity) getContext()).removeTrait(parent);
     }
 }

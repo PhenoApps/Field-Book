@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
@@ -242,7 +242,7 @@ public class TraitAdapter extends BaseAdapter {
         //MainActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
         ConfigActivity.dt.insertTraits(trait);
         TraitEditorActivity.loadData();
-        MainActivity.reloadData = true;
+        CollectActivity.reloadData = true;
     }
 
     private String copyTraitName(String traitName) {
@@ -276,7 +276,7 @@ public class TraitAdapter extends BaseAdapter {
 
                 ConfigActivity.dt.deleteTrait(holder.id);
                 TraitEditorActivity.loadData();
-                MainActivity.reloadData = true;
+                CollectActivity.reloadData = true;
             }
 
         });

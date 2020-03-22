@@ -29,7 +29,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
@@ -189,10 +189,10 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
                 correctBmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mat, true);
             } catch (IOException e) {
-                Log.e(MainActivity.TAG, "-- Error in setting image");
+                Log.e(CollectActivity.TAG, "-- Error in setting image");
                 return BitmapFactory.decodeResource(getResources(), R.drawable.trait_photo_missing);
             } catch (OutOfMemoryError oom) {
-                Log.e(MainActivity.TAG, "-- OOM Error in setting image");
+                Log.e(CollectActivity.TAG, "-- OOM Error in setting image");
             }
 
             return correctBmp;

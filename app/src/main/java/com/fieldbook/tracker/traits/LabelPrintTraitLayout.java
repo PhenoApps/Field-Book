@@ -26,7 +26,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 
 import java.io.UnsupportedEncodingException;
@@ -173,7 +173,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 @Override
                 public void onItemSelected(AdapterView<?> arg0, View arg1,
                                            int pos, long arg3) {
-                    Log.d(((MainActivity) getContext()).TAG, labelsize.getSelectedItem().toString());
+                    Log.d(((CollectActivity) getContext()).TAG, labelsize.getSelectedItem().toString());
 
                     if (labelsize.getSelectedItem().toString().equals("3\" x 2\" detailed") || labelsize.getSelectedItem().toString().equals("2\" x 1\" detailed")) {
                         ((View) textfield2.getParent()).setVisibility(View.VISIBLE);
@@ -209,7 +209,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                         HashMap<String, String> printerStatusMap = (HashMap<String, String>)
                                 resultData.getSerializable("PrinterStatusMap");
                         final String successMessage = printerStatusMap.get("friendlyName") + " is connected.";
-                        Log.d(((MainActivity) getContext()).TAG, successMessage);
+                        Log.d(((CollectActivity) getContext()).TAG, successMessage);
                         ((Activity) getContext()).runOnUiThread(new Runnable() {
                             public void run() {
                                 printStatus.setText(successMessage);
@@ -218,7 +218,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                     } else {
                         // Handle unsuccessful printer status retrieval
                         final String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
-                        Log.e(((MainActivity) getContext()).TAG, errorMessage);
+                        Log.e(((CollectActivity) getContext()).TAG, errorMessage);
                         ((Activity) getContext()).runOnUiThread(new Runnable() {
                             public void run() {
                                 printStatus.setText(errorMessage);

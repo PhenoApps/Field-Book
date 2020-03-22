@@ -378,13 +378,13 @@ public class FieldEditorActivity extends AppCompatActivity {
         if (!ep.getBoolean("FieldSelected", true)) {
             makeToast(getString(R.string.fields_select_study));
         } else {
-            MainActivity.reloadData = true;
+            CollectActivity.reloadData = true;
             finish();
         }
     }
 
     public void onBackPressed() {
-        MainActivity.reloadData = true;
+        CollectActivity.reloadData = true;
         fieldCheck();
     }
 
@@ -716,7 +716,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 ed.putBoolean("FieldSelected", true);
                 ed.apply();
 
-                MainActivity.reloadData = true;
+                CollectActivity.reloadData = true;
                 loadData();
                 ConfigActivity.dt.switchField(exp_id);
             }

@@ -19,7 +19,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
@@ -270,7 +270,7 @@ public class NewTraitDialog extends DialogFragment {
 
                 loadData();
 
-                MainActivity.reloadData = true;
+                CollectActivity.reloadData = true;
                 createDialog.dismiss();
 
             }

@@ -133,7 +133,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                             newCount++;
                         }
 
-                        MainActivity.reloadData = true;
+                        CollectActivity.reloadData = true;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -201,7 +201,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
             }
 
-            MainActivity.reloadData = true;
+            CollectActivity.reloadData = true;
             loadData();
         }
     };
@@ -517,7 +517,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 break;
 
             case android.R.id.home:
-                MainActivity.reloadData = true;
+                CollectActivity.reloadData = true;
                 finish();
                 break;
         }
@@ -926,7 +926,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     public void onBackPressed() {
-        MainActivity.reloadData = true;
+        CollectActivity.reloadData = true;
         finish();
     }
 
@@ -1181,7 +1181,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
             loadData();
 
-            MainActivity.reloadData = true;
+            CollectActivity.reloadData = true;
 
             if (dialog.isShowing())
                 dialog.dismiss();

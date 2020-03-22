@@ -1084,7 +1084,7 @@ public class ConfigActivity extends AppCompatActivity {
             Intent intent = new Intent();
 
             intent.setClassName(ConfigActivity.this,
-                    MainActivity.class.getName());
+                    CollectActivity.class.getName());
             startActivity(intent);
         } else {
             // Do not have permissions, request them now
@@ -1215,7 +1215,7 @@ public class ConfigActivity extends AppCompatActivity {
                 }
 
                 try {
-                    MainActivity.thisActivity.finish();
+                    CollectActivity.thisActivity.finish();
                 } catch (Exception e) {
                     Log.e("Field Book", "" + e.getMessage());
                 }
@@ -1597,7 +1597,7 @@ public class ConfigActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = prefs.edit();
             editor.apply();
 
-            MainActivity.reloadData = true;
+            CollectActivity.reloadData = true;
         }
     }
 }

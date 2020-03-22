@@ -313,7 +313,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
         ed.putBoolean("TraitsExported", false);
         ed.apply();
 
-        MainActivity.reloadData = true;
+        CollectActivity.reloadData = true;
 
         // Check how successful we were at saving our traits.
         if (successfulSaves == 0) {

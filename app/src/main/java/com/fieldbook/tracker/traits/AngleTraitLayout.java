@@ -10,7 +10,7 @@ import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 
 public class AngleTraitLayout extends BaseTraitLayout {
@@ -112,6 +112,6 @@ public class AngleTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        ((MainActivity) getContext()).removeTrait();
+        ((CollectActivity) getContext()).removeTrait();
     }
 }

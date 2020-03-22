@@ -5,7 +5,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 
 import java.util.ArrayList;
 
@@ -58,13 +58,13 @@ public class LayoutCollections {
 
     public void enableViews() {
         for (LinearLayout traitLayout : traitLayouts) {
-            MainActivity.enableViews(traitLayout);
+            CollectActivity.enableViews(traitLayout);
         }
     }
 
     public void disableViews() {
         for (LinearLayout traitLayout : traitLayouts) {
-            MainActivity.disableViews(traitLayout);
+            CollectActivity.disableViews(traitLayout);
         }
     }
 }

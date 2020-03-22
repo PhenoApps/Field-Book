@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.Utils;
@@ -126,7 +126,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         @Override
         public void onClick(View view) {
-            ((MainActivity) getContext()).setNewTraits((HashMap) ConfigActivity.dt.getUserDetail(getCRange().plot_id).clone());
+            ((CollectActivity) getContext()).setNewTraits((HashMap) ConfigActivity.dt.getUserDetail(getCRange().plot_id).clone());
 
             boolean enableNavigation = true;
             switch (buttonState) {
@@ -211,11 +211,11 @@ public class AudioTraitLayout extends BaseTraitLayout {
         }
 
         private void toggleNavigationButtoms(boolean enabled) {
-            ImageButton deleteValue = ((MainActivity) getContext()).getDeleteValue();
-            ImageView traitLeft = ((MainActivity) getContext()).getTraitLeft();
-            ImageView traitRight = ((MainActivity) getContext()).getTraitRight();
-            ImageView rangeLeft = ((MainActivity) getContext()).getRangeLeft();
-            ImageView rangeRight = ((MainActivity) getContext()).getRangeRight();
+            ImageButton deleteValue = ((CollectActivity) getContext()).getDeleteValue();
+            ImageView traitLeft = ((CollectActivity) getContext()).getTraitLeft();
+            ImageView traitRight = ((CollectActivity) getContext()).getTraitRight();
+            ImageView rangeLeft = ((CollectActivity) getContext()).getRangeLeft();
+            ImageView rangeRight = ((CollectActivity) getContext()).getRangeRight();
 
             rangeLeft.setEnabled(enabled);
             rangeRight.setEnabled(enabled);

@@ -222,9 +222,9 @@ public class SearchActivity extends AppCompatActivity {
                         public void onItemClick(AdapterView<?> arg0, View arg1,
                                                 int position, long arg3) {
                             // When you click on an item, send the data back to the main screen
-                            MainActivity.searchRange = data[position].range;
-                            MainActivity.searchPlot = data[position].plot;
-                            MainActivity.searchReload = true;
+                            CollectActivity.searchRange = data[position].range;
+                            CollectActivity.searchPlot = data[position].plot;
+                            CollectActivity.searchReload = true;
 
                             dialog.dismiss();
                             finish();

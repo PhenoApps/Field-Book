@@ -19,7 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.MainActivity;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
@@ -203,7 +203,7 @@ public class FieldAdapter extends BaseAdapter {
                 }
 
                 FieldEditorActivity.loadData();
-                MainActivity.reloadData = true;
+                CollectActivity.reloadData = true;
             }
         };
     }
@@ -230,7 +230,7 @@ public class FieldAdapter extends BaseAdapter {
         setEditorItem(ep, selectedField);
 
         ConfigActivity.dt.switchField(selectedField.getExp_id());
-        MainActivity.reloadData = true;
+        CollectActivity.reloadData = true;
         notifyDataSetChanged();
 
         // Check if this is a BrAPI field and show BrAPI info dialog if so

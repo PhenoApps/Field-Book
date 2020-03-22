@@ -82,7 +82,7 @@ import static com.fieldbook.tracker.activities.ConfigActivity.dt;
  */
 
 @SuppressLint("ClickableViewAccessibility")
-public class MainActivity extends AppCompatActivity {
+public class CollectActivity extends AppCompatActivity {
 
     public static boolean searchReload;
     public static String searchRange;
@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
     private void playSound(String sound) {
         try {
             int resID = getResources().getIdentifier(sound, "raw", getPackageName());
-            MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+            MediaPlayer chimePlayer = MediaPlayer.create(CollectActivity.this, resID);
             chimePlayer.start();
 
             chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -474,8 +474,8 @@ public class MainActivity extends AppCompatActivity {
             dt.exportDatabase("backup");
             File exportedDb = new File(Constants.BACKUPPATH + "/" + "backup.db");
             File exportedSp = new File(Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
-            Utils.scanFile(MainActivity.this, exportedDb);
-            Utils.scanFile(MainActivity.this, exportedSp);
+            Utils.scanFile(CollectActivity.this, exportedDb);
+            Utils.scanFile(CollectActivity.this, exportedSp);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -626,7 +626,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        new MenuInflater(MainActivity.this).inflate(R.menu.menu_main, menu);
+        new MenuInflater(CollectActivity.this).inflate(R.menu.menu_main, menu);
 
         systemMenu = menu;
 
@@ -705,13 +705,13 @@ public class MainActivity extends AppCompatActivity {
                 sequence.start();
                 break;
             case R.id.search:
-                intent.setClassName(MainActivity.this,
+                intent.setClassName(CollectActivity.this,
                         SearchActivity.class.getName());
                 startActivity(intent);
                 break;
 
             case R.id.resources:
-                intent.setClassName(MainActivity.this,
+                intent.setClassName(CollectActivity.this,
                         FileExploreActivity.class.getName());
                 intent.putExtra("path", Constants.RESOURCEPATH);
                 intent.putExtra("exclude", new String[]{"fieldbook"});
@@ -734,7 +734,7 @@ public class MainActivity extends AppCompatActivity {
                 showSummary();
                 break;
             case R.id.datagrid:
-                intent.setClassName(MainActivity.this,
+                intent.setClassName(CollectActivity.this,
                         DatagridActivity.class.getName());
                 startActivityForResult(intent, 2);
                 break;
@@ -1050,7 +1050,7 @@ public class MainActivity extends AppCompatActivity {
     ///// class TraitBox /////
     // traitLeft, traitType, and traitRight
     private class TraitBox {
-        private MainActivity parent;
+        private CollectActivity parent;
         private String[] prefixTraits;
         private TraitObject currentTrait;
 
@@ -1061,7 +1061,7 @@ public class MainActivity extends AppCompatActivity {
 
         private Map newTraits;  // { trait name: value }
 
-        TraitBox(MainActivity parent_) {
+        TraitBox(CollectActivity parent_) {
             parent = parent_;
             prefixTraits = null;
             newTraits = new HashMap();
@@ -1330,7 +1330,7 @@ public class MainActivity extends AppCompatActivity {
     ///// class RangeBox /////
 
     class RangeBox {
-        private MainActivity parent;
+        private CollectActivity parent;
         private int[] rangeID;
         private int paging;
 
@@ -1353,7 +1353,7 @@ public class MainActivity extends AppCompatActivity {
         private int delay = 100;
         private int count = 1;
 
-        RangeBox(MainActivity parent_) {
+        RangeBox(CollectActivity parent_) {
             parent = parent_;
             rangeID = null;
             cRange = new RangeObject();
@@ -1579,7 +1579,7 @@ public class MainActivity extends AppCompatActivity {
 
                         try {
                             int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                            MediaPlayer chimePlayer = MediaPlayer.create(MainActivity.this, resID);
+                            MediaPlayer chimePlayer = MediaPlayer.create(CollectActivity.this, resID);
                             chimePlayer.start();
 
                             chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
