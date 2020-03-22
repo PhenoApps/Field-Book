@@ -5,6 +5,8 @@
         <new>Added link to translate app in About section</new>
         <bugfix>Multicat layout updates when deleting values</bugfix>
         <bugfix>Fix for sample directories and sample files not being created</bugfix>
+        <bugfix>Fix for database importing</bugfix>
+        <info>Substantial refactoring</info>
         <new>2</new>
         <info>1</info>
         <bugfix>3</bugfix>

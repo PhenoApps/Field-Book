@@ -1248,6 +1248,10 @@ public class ConfigActivity extends AppCompatActivity {
                 showDatabaseExportDialog();
             }
 
+            if (dialog.equals("database-import")) {
+                showDatabaseImportDialog();
+            }
+
             if (dialog.equals("database-delete")) {
                 showDatabaseResetDialog1();
             }
@@ -1340,7 +1344,7 @@ public class ConfigActivity extends AppCompatActivity {
                 sequence.start();
                 break;
             case R.id.changelog:
-                showChangelog(false, false);
+                showDatabaseImportDialog();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -1557,7 +1561,6 @@ public class ConfigActivity extends AppCompatActivity {
     private class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {
         boolean fail;
         ProgressDialog dialog;
-        String error;
 
         @Override
         protected void onPreExecute() {
@@ -1577,8 +1580,8 @@ public class ConfigActivity extends AppCompatActivity {
             try {
                 dt.importDatabase(mChosenFile);
             } catch (Exception e) {
+                Log.d("Database",e.toString());
                 e.printStackTrace();
-                error = "" + e.getMessage();
                 fail = true;
             }
             return 0;

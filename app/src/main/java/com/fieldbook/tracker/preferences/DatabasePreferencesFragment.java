@@ -36,14 +36,9 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
         databaseImport.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent();
-
-                intent.setClassName(context,
-                        FileExploreActivity.class.getName());
-                intent.putExtra("path", Constants.BACKUPPATH);
-                intent.putExtra("include", new String[]{"db"});
-                intent.putExtra("title", getString(R.string.database_import));
-                startActivityForResult(intent, 2);
+                Intent d = new Intent(context, ConfigActivity.class);
+                d.putExtra("dialog", "database-import");
+                startActivity(d);
                 return true;
             }
         });

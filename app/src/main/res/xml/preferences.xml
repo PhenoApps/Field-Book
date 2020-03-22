@@ -9,42 +9,42 @@
         android:icon="@drawable/ic_nav_drawer_person"
         android:key="pref_key_profile_settings"
         android:title="@string/settings_profile"
-        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentProfile" />
+        app:fragment="com.fieldbook.tracker.preferences.ProfilePreferencesFragment" />
 
     <Preference
         android:icon="@drawable/ic_pref_general"
         android:key="pref_key_general_settings"
         android:title="@string/preferences_general_title"
-        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentGeneral" />
+        app:fragment="com.fieldbook.tracker.preferences.GeneralPreferencesFragment" />
 
     <Preference
         android:icon="@drawable/ic_pref_appearance"
         android:key="pref_key_ui_settings"
         android:title="@string/preferences_appearance_title"
-        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentAppearance" />
+        app:fragment="com.fieldbook.tracker.preferences.AppearancePreferencesFragment" />
 
     <Preference
         android:icon="@drawable/ic_pref_navigation"
         android:key="pref_key_ux_settings"
         android:title="@string/preferences_behavior_title"
-        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentBehavior" />
+        app:fragment="com.fieldbook.tracker.preferences.BehaviorPreferencesFragment" />
 
     <Preference
         android:icon="@drawable/ic_pref_sounds"
         android:key="pref_key_sounds_settings"
         android:title="@string/preferences_sounds"
-        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentSounds" />
+        app:fragment="com.fieldbook.tracker.preferences.SoundsPreferencesFragment" />
 
     <Preference
         android:icon="@drawable/ic_adv_brapi"
         android:key="pref_key_brapi_settings"
         android:title="@string/preferences_brapi"
-        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentBrapi" />
+        app:fragment="com.fieldbook.tracker.preferences.BrapiPreferencesFragment" />
 
     <Preference
         android:icon="@drawable/ic_pref_database"
         android:key="pref_key_database_settings"
         android:title="@string/database_dialog_title"
-        app:fragment="com.fieldbook.tracker.preferences.PreferencesFragmentDatabase" />
+        app:fragment="com.fieldbook.tracker.preferences.DatabasePreferencesFragment" />
 
 </androidx.preference.PreferenceScreen>

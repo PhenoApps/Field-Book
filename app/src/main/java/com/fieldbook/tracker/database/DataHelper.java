@@ -1906,7 +1906,7 @@ public class DataHelper {
             copyFile(newDb, oldDb);
             copyFile(newSp, oldSp);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.d("Database",e.toString());
         }
     }
 
