@@ -1626,7 +1626,7 @@ public class CollectActivity extends AppCompatActivity {
 
                 //TODO NullPointerException
                 lastRange = cRange.range;
-                //display();
+                display();
 
                 traitBox.setNewTraits(cRange.plot_id);
             }
