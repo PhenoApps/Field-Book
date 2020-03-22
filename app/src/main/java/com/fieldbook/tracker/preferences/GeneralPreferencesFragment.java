@@ -9,7 +9,7 @@ import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 
-public class PreferencesFragmentBehavior extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class GeneralPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     PreferenceManager prefMgr;
     Context context;
@@ -19,9 +19,9 @@ public class PreferencesFragmentBehavior extends PreferenceFragmentCompat implem
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName("Settings");
 
-        setPreferencesFromResource(R.xml.preferences_behavior, rootKey);
+        setPreferencesFromResource(R.xml.preferences_general, rootKey);
 
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_behavior_title));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_general_title));
     }
 
     @Override
@@ -29,7 +29,7 @@ public class PreferencesFragmentBehavior extends PreferenceFragmentCompat implem
         super.onAttach(context);
 
         // Occurs before the on create function. We get the context this way.
-        PreferencesFragmentBehavior.this.context = context;
+        GeneralPreferencesFragment.this.context = context;
     }
 
     @Override

@@ -215,7 +215,7 @@ public class BrAPIService {
         return preferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
     }
 
-    static String getBrapiToken(Context context) {
+    public static String getBrapiToken(Context context) {
         SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
         return "Bearer " + preferences.getString(GeneralKeys.BRAPI_TOKEN, "");
     }
@@ -267,7 +267,7 @@ public class BrAPIService {
         return request;
     }
 
-    void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
+    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
@@ -295,7 +295,7 @@ public class BrAPIService {
 
     }
 
-    void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
+    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {

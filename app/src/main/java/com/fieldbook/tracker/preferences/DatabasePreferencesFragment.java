@@ -13,7 +13,7 @@ import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Constants;
 
-public class PreferencesFragmentDatabase extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class DatabasePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     PreferenceManager prefMgr;
     Context context;
@@ -72,7 +72,7 @@ public class PreferencesFragmentDatabase extends PreferenceFragmentCompat implem
         super.onAttach(context);
 
         // Occurs before the on create function. We get the context this way.
-        PreferencesFragmentDatabase.this.context = context;
+        DatabasePreferencesFragment.this.context = context;
     }
 
     @Override

@@ -2,17 +2,14 @@ package com.fieldbook.tracker.preferences;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ListView;
 
-import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 
-public class PreferencesFragmentGeneral extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class SoundsPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     PreferenceManager prefMgr;
     Context context;
@@ -22,9 +19,9 @@ public class PreferencesFragmentGeneral extends PreferenceFragmentCompat impleme
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName("Settings");
 
-        setPreferencesFromResource(R.xml.preferences_general, rootKey);
+        setPreferencesFromResource(R.xml.preferences_sounds, rootKey);
 
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_general_title));
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_sounds));
     }
 
     @Override
@@ -32,12 +29,11 @@ public class PreferencesFragmentGeneral extends PreferenceFragmentCompat impleme
         super.onAttach(context);
 
         // Occurs before the on create function. We get the context this way.
-        PreferencesFragmentGeneral.this.context = context;
+        SoundsPreferencesFragment.this.context = context;
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-
         return false;
     }
 }

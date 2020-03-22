@@ -46,7 +46,7 @@ public class Image extends BrapiObservation {
         this.additionalInfo = new HashMap<>();
     }
 
-    Image(io.swagger.client.model.Image response) {
+    public Image(io.swagger.client.model.Image response) {
         this.setDbId(response.getImageDbId());
         this.setUnitDbId(response.getObservationUnitDbId());
         this.fileName = response.getImageFileName();

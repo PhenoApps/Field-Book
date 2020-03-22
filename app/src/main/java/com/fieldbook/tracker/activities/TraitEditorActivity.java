@@ -27,7 +27,6 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.NewTraitDialog;
 import com.fieldbook.tracker.utilities.Utils;
-import com.fieldbook.tracker.brapi.BrapiTraitActivity;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;

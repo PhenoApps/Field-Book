@@ -9,7 +9,7 @@ public class BrapiListResponse<T> {
     private Metadata metadata;
     private List<T> data;
 
-    Metadata getMetadata() {
+    public Metadata getMetadata() {
         return metadata;
     }
 

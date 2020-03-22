@@ -64,13 +64,13 @@
             android:launchMode="singleTop"
             android:theme="@style/ActivityDialog" />
         <activity
-            android:name=".brapi.BrapiActivity"
+            android:name=".activities.BrapiActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".brapi.BrapiTraitActivity"
+            android:name=".activities.BrapiTraitActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -119,7 +119,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".brapi.BrapiExportActivity"
+            android:name=".activities.BrapiExportActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"

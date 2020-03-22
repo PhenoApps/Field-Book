@@ -19,7 +19,7 @@ import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
 public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, SearchPreferenceResultListener {
 
-    private static PreferencesFragmentBrapi preferencesFragmentBrapi;
+    private static BrapiPreferencesFragment preferencesFragmentBrapi;
     private static Preference brapiPrefCategory;
     private BrapiControllerResponse brapiControllerResponse;
     private PreferencesFragment prefsFragment;
@@ -35,7 +35,7 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        preferencesFragmentBrapi = new PreferencesFragmentBrapi();
+        preferencesFragmentBrapi = new BrapiPreferencesFragment();
 
         prefsFragment = new PreferencesFragment();
         getSupportFragmentManager().beginTransaction()

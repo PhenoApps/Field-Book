@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiAuthDialog;
+import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Utils;

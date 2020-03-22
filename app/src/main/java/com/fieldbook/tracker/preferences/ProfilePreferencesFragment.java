@@ -11,7 +11,7 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
 
-public class PreferencesFragmentProfile extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class ProfilePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     PreferenceManager prefMgr;
     Context context;
@@ -55,7 +55,7 @@ public class PreferencesFragmentProfile extends PreferenceFragmentCompat impleme
         super.onAttach(context);
 
         // Occurs before the on create function. We get the context this way.
-        PreferencesFragmentProfile.this.context = context;
+        ProfilePreferencesFragment.this.context = context;
     }
 
     @Override

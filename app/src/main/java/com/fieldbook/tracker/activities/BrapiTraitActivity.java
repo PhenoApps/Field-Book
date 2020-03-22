@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.activities;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,9 +16,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fieldbook.tracker.activities.ConfigActivity;
+import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.activities.MainActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Utils;
 

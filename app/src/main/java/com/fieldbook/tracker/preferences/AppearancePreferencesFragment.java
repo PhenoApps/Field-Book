@@ -12,7 +12,7 @@ import com.fieldbook.tracker.R;
 import com.h6ah4i.android.preference.NumberPickerPreferenceCompat;
 import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
 
-public class PreferencesFragmentAppearance extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class AppearancePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     private static final String DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG";
     PreferenceManager prefMgr;
@@ -34,7 +34,7 @@ public class PreferencesFragmentAppearance extends PreferenceFragmentCompat impl
         super.onAttach(context);
 
         // Occurs before the on create function. We get the context this way.
-        PreferencesFragmentAppearance.this.context = context;
+        AppearancePreferencesFragment.this.context = context;
     }
 
     @Override

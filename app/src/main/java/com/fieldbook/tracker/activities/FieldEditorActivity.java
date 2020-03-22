@@ -39,7 +39,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.adapters.FieldAdapter;
-import com.fieldbook.tracker.brapi.BrapiActivity;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.utilities.Constants;

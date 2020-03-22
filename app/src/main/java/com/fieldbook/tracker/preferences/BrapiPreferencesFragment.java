@@ -14,7 +14,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
-public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class BrapiPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     private static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
     private Context context;
@@ -77,7 +77,7 @@ public class PreferencesFragmentBrapi extends PreferenceFragmentCompat implement
         super.onAttach(context);
 
         // Occurs before the on create function. We get the context this way.
-        PreferencesFragmentBrapi.this.context = context;
+        BrapiPreferencesFragment.this.context = context;
     }
 
     private void processResponseMessage(BrapiControllerResponse brapiControllerResponse) {
