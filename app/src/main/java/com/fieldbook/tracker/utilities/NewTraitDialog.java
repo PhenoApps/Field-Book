@@ -24,8 +24,11 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
+
+import io.swagger.client.model.Trait;
 
 import static com.fieldbook.tracker.activities.TraitEditorActivity.displayBrapiInfo;
 import static com.fieldbook.tracker.activities.TraitEditorActivity.loadData;
@@ -36,6 +39,9 @@ public class NewTraitDialog extends DialogFragment {
 
     private TraitFormatCollection traitFormats;
     private TraitObject oldTrait;
+
+    String optionalHint;
+    String categoriesHint;
 
     // elements of this dialog
     private EditText trait;
@@ -71,6 +77,9 @@ public class NewTraitDialog extends DialogFragment {
         ep = activity.getPreferences();
         setBrAPIDialogShown(originActivity.getBrAPIDialogShown());
         createVisible = true;
+
+        optionalHint = getResString(R.string.traits_create_optional);
+        categoriesHint = getResString(R.string.traits_create_categories_text);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(originActivity,
                 R.style.AppAlertDialog);
@@ -113,7 +122,6 @@ public class NewTraitDialog extends DialogFragment {
 
         closeBtn.setOnClickListener(createCloseButtonClickLister());
         saveBtn.setOnClickListener(createSaveButtonClickListener());
-
     }
 
     // Non negative numbers only
@@ -346,18 +354,21 @@ public class NewTraitDialog extends DialogFragment {
     public void prepareFields(int index) {
         TraitFormat traitFormat = traitFormats.getTraitFormatByIndex(index);
 
-        final String optional = getResString(R.string.traits_create_optional);
-        details.setHint(optional);
-        def.setHint(traitFormat.displaysDefaultHint() ? optional : null);
-        minimum.setHint(traitFormat.displaysMinimumHint() ? optional : null);
-        maximum.setHint(traitFormat.displaysMaximumHint() ? optional : null);
+        details.setHint(traitFormat.detailsBox().getParameterHint());
+        def.setHint(traitFormat.defaultBox().getParameterHint());
+        minimum.setHint(traitFormat.minimumBox().getParameterHint());
+        maximum.setHint(traitFormat.maximumBox().getParameterHint());
 
         defBox.setVisibility(visibility(traitFormat.isDefBoxVisible()));
-        def.setVisibility(visibility(traitFormat.isDefaultVisible()));
-        minBox.setVisibility(visibility(traitFormat.isMinBoxVisible()));
-        maxBox.setVisibility(visibility(traitFormat.isMaxBoxVisible()));
+        def.setVisibility(visibility(traitFormat.defaultBox().getParameterVisibility()));
+        minBox.setVisibility(visibility(traitFormat.minimumBox().getParameterVisibility()));
+        maxBox.setVisibility(visibility(traitFormat.maximumBox().getParameterVisibility()));
         bool.setVisibility(visibility(traitFormat.isBooleanVisible()));
-        categoryBox.setVisibility(visibility(traitFormat.isCategoryVisible()));
+        categoryBox.setVisibility(visibility(traitFormat.categoriesBox().getParameterVisibility()));
+
+        minimum.setText(traitFormat.minimumBox().getParameterDefaultValue());
+        maximum.setText(traitFormat.maximumBox().getParameterDefaultValue());
+        def.setText(traitFormat.defaultBox().getParameterDefaultValue());
 
         if (traitFormat.isNumericInputType()) {
             final int inputType = InputType.TYPE_CLASS_NUMBER |
@@ -422,29 +433,111 @@ public class NewTraitDialog extends DialogFragment {
         originActivity.setBrAPIDialogShown(b);
     }
 
-    ///// Classes to absorb format differences /////
+    private class ParameterObject {
 
+        String parameterTitle = null;
+        Boolean visibility = false;
+        Boolean required = false;
+        String defaultValue = null;
+        String hintValue = null;
+
+        ParameterObject() {
+        }
+
+        ParameterObject(Boolean vis) {
+            visibility = vis;
+        }
+
+        ParameterObject(Boolean vis, Boolean req, String def) {
+            visibility = vis;
+            required = req;
+            defaultValue = def;
+        }
+
+        ParameterObject(Boolean vis, Boolean req, String def, String hint) {
+            visibility = vis;
+            required = req;
+            defaultValue = def;
+            hintValue = hint;
+        }
+
+        public String getTitle() {
+            return parameterTitle;
+        }
+
+        public ParameterObject setTitle(String title) {
+            this.parameterTitle = title;
+            return this;
+        }
+
+
+        public boolean getParameterVisibility() {
+            return visibility;
+        }
+
+        public ParameterObject setParameterVisibility(Boolean visible) {
+            this.visibility = visible;
+            return this;
+        }
+
+        public boolean getParameterRequired() {
+            return required;
+        }
+
+        public ParameterObject setParameterRequired(Boolean required) {
+            this.required = required;
+            return this;
+        }
+
+        public String getParameterDefaultValue() {
+            return defaultValue;
+        }
+
+        public ParameterObject setParameterDefaultValue(String defaultValue) {
+            this.defaultValue = defaultValue;
+            return this;
+        }
+
+        public String getParameterHint() {
+            return hintValue;
+        }
+
+        public ParameterObject setParameterHint(String hint) {
+            this.hintValue = hint;
+            return this;
+        }
+    }
+
+    ///// Classes to absorb format differences /////
     // If you want add a new format, you create a class which extends TraitFormat
     private abstract class TraitFormat {
-        // whether is each item of this dialog visible or not 
-        abstract public boolean isDefBoxVisible();
 
-        abstract public boolean isDefaultVisible();
+        public ParameterObject defaultBox() {
+            return new ParameterObject(false);
+        }
+
+        public ParameterObject minimumBox() {
+            return new ParameterObject(false);
+        }
+
+        public ParameterObject maximumBox() {
+            return new ParameterObject(false);
+        }
+
+        public ParameterObject categoriesBox() {
+            return new ParameterObject(false);
+        }
+
+        public ParameterObject detailsBox() {
+            return new ParameterObject(false);
+        }
+
+        // whether is each item of this dialog visible or not
+
+        abstract public boolean isDefBoxVisible();
 
         abstract public boolean isBooleanVisible();
 
-        abstract public boolean isMinBoxVisible();
-
-        abstract public boolean isMaxBoxVisible();
-
-        abstract public boolean isCategoryVisible();
-
-        // whether does each item of this dialog display "option"
-        abstract public boolean displaysDefaultHint();
-
-        abstract public boolean displaysMinimumHint();
-
-        abstract public boolean displaysMaximumHint();
 
         // whether is the input type each item of this dialog number
         abstract public boolean isNumericInputType();
@@ -491,39 +584,12 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     abstract private class TraitFormatNotValue extends TraitFormat {
+
         public boolean isDefBoxVisible() {
             return false;
         }
 
-        public boolean isDefaultVisible() {
-            return false;
-        }
-
         public boolean isBooleanVisible() {
-            return false;
-        }
-
-        public boolean isMinBoxVisible() {
-            return false;
-        }
-
-        public boolean isMaxBoxVisible() {
-            return false;
-        }
-
-        public boolean isCategoryVisible() {
-            return false;
-        }
-
-        public boolean displaysDefaultHint() {
-            return false;
-        }
-
-        public boolean displaysMinimumHint() {
-            return false;
-        }
-
-        public boolean displaysMaximumHint() {
             return false;
         }
 
@@ -541,23 +607,7 @@ public class NewTraitDialog extends DialogFragment {
             return true;
         }
 
-        public boolean isDefaultVisible() {
-            return true;
-        }
-
         public boolean isBooleanVisible() {
-            return false;
-        }
-
-        public boolean isMinBoxVisible() {
-            return true;
-        }
-
-        public boolean isMaxBoxVisible() {
-            return true;
-        }
-
-        public boolean isCategoryVisible() {
             return false;
         }
 
@@ -589,6 +639,7 @@ public class NewTraitDialog extends DialogFragment {
                     !isValidMagnitudeRelation(minimum, maximum)) {
                 return "Magnitude Relation Error";
             }
+
             return "";
         }
 
@@ -601,16 +652,24 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatNumeric extends TraitFormatWithRange {
-        public boolean displaysDefaultHint() {
-            return true;
+        @Override
+        public ParameterObject minimumBox() {
+            return new ParameterObject(true, false, null, optionalHint);
         }
 
-        public boolean displaysMinimumHint() {
-            return true;
+        @Override
+        public ParameterObject maximumBox() {
+            return new ParameterObject(true, false, null, optionalHint);
         }
 
-        public boolean displaysMaximumHint() {
-            return true;
+        @Override
+        public ParameterObject defaultBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
         }
 
         public String getEnglishString() {
@@ -631,35 +690,7 @@ public class NewTraitDialog extends DialogFragment {
             return false;
         }
 
-        public boolean isDefaultVisible() {
-            return false;
-        }
-
         public boolean isBooleanVisible() {
-            return false;
-        }
-
-        public boolean isMinBoxVisible() {
-            return false;
-        }
-
-        public boolean isMaxBoxVisible() {
-            return false;
-        }
-
-        public boolean isCategoryVisible() {
-            return true;
-        }
-
-        public boolean displaysDefaultHint() {
-            return false;
-        }
-
-        public boolean displaysMinimumHint() {
-            return false;
-        }
-
-        public boolean displaysMaximumHint() {
             return false;
         }
 
@@ -695,6 +726,17 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatCategorical extends TraitFormatWithCategory {
+
+        @Override
+        public ParameterObject categoriesBox() {
+            return new ParameterObject(true, true, null, categoriesHint);
+        }
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public String getEnglishString() {
             return "Categorical";
         }
@@ -705,6 +747,17 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatMulticat extends TraitFormatWithCategory {
+
+        @Override
+        public ParameterObject categoriesBox() {
+            return new ParameterObject(true, true, null, categoriesHint);
+        }
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null);
+        }
+
         public String getEnglishString() {
             return "Multicat";
         }
@@ -715,6 +768,12 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatDate extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public String getEnglishString() {
             return "Date";
         }
@@ -725,16 +784,25 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatPercent extends TraitFormatWithRange {
-        public boolean displaysDefaultHint() {
-            return false;
+
+        @Override
+        public ParameterObject defaultBox() {
+            return new ParameterObject(true, true, "0");
         }
 
-        public boolean displaysMinimumHint() {
-            return false;
+        @Override
+        public ParameterObject minimumBox() {
+            return new ParameterObject(true, true, "0");
         }
 
-        public boolean displaysMaximumHint() {
-            return false;
+        @Override
+        public ParameterObject maximumBox() {
+            return new ParameterObject(true, true, "100");
+        }
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
         }
 
         public String getEnglishString() {
@@ -752,43 +820,50 @@ public class NewTraitDialog extends DialogFragment {
         public boolean allowsNegative() {
             return false;
         }
+
+        public String ValidateItemsIndividual() {
+            if (def.getText().toString().length() == 0 || minimum.getText().toString().length() == 0 || maximum.getText().toString().length() == 0) {
+                return getResString(R.string.traits_create_warning_numeric_required);
+            }
+
+            final boolean b = !allowsNegative();
+            if ((!isNumericOrEmpty(def.getText().toString(), b)) ||
+                    (!isNumericOrEmpty(minimum.getText().toString(), b)) ||
+                    (!isNumericOrEmpty(maximum.getText().toString(), b))) {
+                return getResString(R.string.traits_create_warning_numeric_required);
+            }
+
+            // minimum <= def <= maximum
+            if (!isValidMagnitudeRelation(minimum, def) ||
+                    !isValidMagnitudeRelation(def, maximum) ||
+                    !isValidMagnitudeRelation(minimum, maximum)) {
+                return "Magnitude Relation Error";
+            }
+
+            return "";
+        }
+
+        private boolean isValidMagnitudeRelation(final EditText e1, final EditText e2) {
+            final String s1 = e1.getText().toString();
+            final String s2 = e2.getText().toString();
+            return s1.length() == 0 || s2.length() == 0 ||
+                    Double.parseDouble(s1) <= Double.parseDouble(s2);
+        }
     }
 
     private class TraitFormatBoolean extends TraitFormat {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public boolean isDefBoxVisible() {
             return true;
         }
 
-        public boolean isDefaultVisible() {
-            return false;
-        }
-
         public boolean isBooleanVisible() {
             return true;
-        }
-
-        public boolean isMinBoxVisible() {
-            return false;
-        }
-
-        public boolean isMaxBoxVisible() {
-            return false;
-        }
-
-        public boolean isCategoryVisible() {
-            return false;
-        }
-
-        public boolean displaysDefaultHint() {
-            return false;
-        }
-
-        public boolean displaysMinimumHint() {
-            return false;
-        }
-
-        public boolean displaysMaximumHint() {
-            return false;
         }
 
         public boolean isNumericInputType() {
@@ -809,39 +884,22 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatText extends TraitFormat {
+
+        @Override
+        public ParameterObject defaultBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public boolean isDefBoxVisible() {
             return true;
         }
 
-        public boolean isDefaultVisible() {
-            return true;
-        }
-
         public boolean isBooleanVisible() {
-            return false;
-        }
-
-        public boolean isMinBoxVisible() {
-            return false;
-        }
-
-        public boolean isMaxBoxVisible() {
-            return false;
-        }
-
-        public boolean isCategoryVisible() {
-            return false;
-        }
-
-        public boolean displaysDefaultHint() {
-            return true;
-        }
-
-        public boolean displaysMinimumHint() {
-            return false;
-        }
-
-        public boolean displaysMaximumHint() {
             return false;
         }
 
@@ -860,9 +918,16 @@ public class NewTraitDialog extends DialogFragment {
         public String ValidateItemsIndividual() {
             return "";
         }
+
     }
 
     private class TraitFormatPhoto extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public String getEnglishString() {
             return "Photo";
         }
@@ -873,6 +938,12 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatAudio extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public String getEnglishString() {
             return "Audio";
         }
@@ -883,6 +954,12 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatCounter extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public String getEnglishString() {
             return "Counter";
         }
@@ -893,6 +970,12 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatDiseaseRating extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public String getEnglishString() {
             return "Disease Rating";
         }
@@ -903,6 +986,12 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatLocation extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public String getEnglishString() {
             return "Location";
         }
@@ -913,6 +1002,12 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatBarcode extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public String getEnglishString() {
             return "Barcode";
         }
@@ -923,6 +1018,12 @@ public class NewTraitDialog extends DialogFragment {
     }
 
     private class TraitFormatZebraLablePrint extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
         public String getEnglishString() {
             return "Zebra Label Print";
         }
