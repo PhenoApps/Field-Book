@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 
@@ -95,10 +96,6 @@ public class FieldEditorActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static void makeToast(String message) {
-        Toast.makeText(FieldEditorActivity.thisActivity, message, Toast.LENGTH_SHORT).show();
     }
 
     private static void scanFile(File filePath) {
@@ -454,7 +451,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         e.apply();
 
         if (ConfigActivity.dt.checkFieldName(fieldFile.getStem()) >= 0) {
-            makeToast(getString(R.string.fields_study_exists_message));
+            Utils.makeToast(getApplicationContext(),getString(R.string.fields_study_exists_message));
             SharedPreferences.Editor ed = ep.edit();
             ed.putString("FieldFile", null);
             ed.putBoolean("ImportFieldFinished", false);
@@ -463,7 +460,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         }
 
         if (fieldFile.isOther()) {
-            makeToast(getString(R.string.import_error_unsupported));
+            Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unsupported));
         }
 
         makeDirs(fieldFile.getStem());
@@ -504,12 +501,12 @@ public class FieldEditorActivity extends AppCompatActivity {
         //TODO causing crash
         for (String s : importColumns) {
             if (DataHelper.hasSpecialChars(s)) {
-                makeToast(getString(R.string.import_error_columns) + " (\"" + s + "\")");
+                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns) + " (\"" + s + "\")");
                 return;
             }
 
             if (list.contains(s.toLowerCase())) {
-                makeToast(getString(R.string.import_error_column_name) + " \"" + s + "\"");
+                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_name) + " \"" + s + "\"");
                 return;
             }
         }
@@ -578,7 +575,8 @@ public class FieldEditorActivity extends AppCompatActivity {
         idColPosition = unique.getSelectedItemPosition();
 
         if (uniqueS.equals(primaryS) || uniqueS.equals(secondaryS) || primaryS.equals(secondaryS)) {
-            makeToast(getString(R.string.import_error_column_choice));
+            Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_choice));
+            return false;
         }
 
         return true;
@@ -687,11 +685,11 @@ public class FieldEditorActivity extends AppCompatActivity {
                 ed.apply();
             }
             if (fail) {
-//                makeToast(getString(R.string.import_error_general));
+                //makeToast(getString(R.string.import_error_general));
             } else if (uniqueFail) {
-                makeToast(getString(R.string.import_error_unique));
+                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unique));
             } else if (fieldFile.hasSpecialCharasters()) {
-                makeToast(getString(R.string.import_error_unique_characters_illegal));
+                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unique_characters_illegal));
             } else {
                 Editor ed = ep.edit();
                 ed.putString("ImportUniqueName", unique.getSelectedItem().toString());

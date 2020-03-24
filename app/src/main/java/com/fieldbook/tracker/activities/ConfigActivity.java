@@ -279,7 +279,7 @@ public class ConfigActivity extends AppCompatActivity {
                         break;
                     case 2:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.warning_field_missing));
+                            Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
                             return;
                         }
 
@@ -290,10 +290,10 @@ public class ConfigActivity extends AppCompatActivity {
                         break;
                     case 4:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            makeToast(getString(R.string.warning_field_missing));
+                            Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
                             return;
                         } else if (dt.getTraitColumnsAsString() == null) {
-                            makeToast(getString(R.string.warning_traits_missing));
+                            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing));
                             return;
                         }
 
@@ -546,10 +546,6 @@ public class ConfigActivity extends AppCompatActivity {
         return n;
     }
 
-    public void makeToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
     private String[] prepareSetup() {
         String tagName = "";
         String tagLocation = "";
@@ -727,21 +723,42 @@ public class ConfigActivity extends AppCompatActivity {
                 .setCancelable(true)
                 .setView(layout);
 
-        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_save), null);
+
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+            public void onClick(DialogInterface dialog, int i) {
+                dialog.dismiss();
+            }
+        });
+
+        saveDialog = builder.create();
+        saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        saveDialog.show();
+        DialogUtils.styleDialogs(saveDialog);
+
+        android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
+        params2.width = LayoutParams.MATCH_PARENT;
+        saveDialog.getWindow().setAttributes(params2);
+
+        // Override positive button so it doesnt automatically dismiss dialog
+        Button positiveButton = saveDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        positiveButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+
                 if (!checkDB.isChecked() & !checkExcel.isChecked()) {
-                    makeToast(getString(R.string.export_error_missing_format));
+                    Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_format));
                     return;
                 }
 
                 if (!onlyUnique.isChecked() & !allColumns.isChecked()) {
-                    makeToast(getString(R.string.export_error_missing_column));
+                    Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_column));
                     return;
                 }
 
                 if (!activeTraits.isChecked() & !allTraits.isChecked()) {
-                    makeToast(getString(R.string.export_error_missing_trait));
+                    Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_trait));
                     return;
                 }
 
@@ -786,23 +803,6 @@ public class ConfigActivity extends AppCompatActivity {
                 mHandler.post(exportData);
             }
         });
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
-
-        saveDialog = builder.create();
-        saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        saveDialog.show();
-        DialogUtils.styleDialogs(saveDialog);
-
-        android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        saveDialog.getWindow().setAttributes(params2);
     }
 
     private void showProfileDialog() {
@@ -959,12 +959,15 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        builder.setNeutralButton(getString(R.string.profile_location_get), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
+        builder.setNeutralButton(getString(R.string.profile_location_get), null);
 
-            }
-        });
+        locationDialog = builder.create();
+        locationDialog.show();
+        DialogUtils.styleDialogs(locationDialog);
+
+        android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
+        langParams.width = LayoutParams.MATCH_PARENT;
+        locationDialog.getWindow().setAttributes(langParams);
 
         // Override neutral button so it doesnt automatically dismiss location dialog
         Button neutralButton = locationDialog.getButton(AlertDialog.BUTTON_NEUTRAL);
@@ -974,14 +977,6 @@ public class ConfigActivity extends AppCompatActivity {
                 longitude.setText(truncateDecimalString(String.valueOf(lng)));
             }
         });
-
-        locationDialog = builder.create();
-        locationDialog.show();
-        DialogUtils.styleDialogs(locationDialog);
-
-        android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.MATCH_PARENT;
-        locationDialog.getWindow().setAttributes(langParams);
     }
 
     private void showClearSettingsDialog() {
@@ -1184,7 +1179,7 @@ public class ConfigActivity extends AppCompatActivity {
                 ed.apply();
 
                 dialog.dismiss();
-                makeToast(getString(R.string.database_reset_message));
+                Utils.makeToast(getApplicationContext(),getString(R.string.database_reset_message));
 
                 try {
                     ConfigActivity.this.finish();
@@ -1473,15 +1468,16 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (fail) {
-                makeToast(getString(R.string.export_error_general));
+                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_general));
             }
 
             if (noData) {
-                makeToast(getString(R.string.export_error_data_missing));
+                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_data_missing));
             }
 
             if (tooManyTraits) {
-                makeToast("Unfortunately, an SQLite limitation only allows 64 traits to be exported from Field Book at a time. Select fewer traits to export.");
+                //TODO add to strings
+                Utils.makeToast(getApplicationContext(),"Unfortunately, an SQLite limitation only allows 64 traits to be exported from Field Book at a time. Select fewer traits to export.");
             }
         }
     }
@@ -1530,9 +1526,9 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (fail) {
-                makeToast(getString(R.string.export_error_general));
+                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_general));
             } else {
-                makeToast(getString(R.string.export_complete));
+                Utils.makeToast(getApplicationContext(),getString(R.string.export_complete));
             }
         }
     }
@@ -1572,7 +1568,7 @@ public class ConfigActivity extends AppCompatActivity {
                 dialog.dismiss();
 
             if (fail) {
-                makeToast(getString(R.string.import_error_general));
+                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_general));
             }
 
             SharedPreferences prefs = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);

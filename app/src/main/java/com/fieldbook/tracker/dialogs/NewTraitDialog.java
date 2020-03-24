@@ -25,6 +25,7 @@ import com.fieldbook.tracker.activities.TraitEditorActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 
@@ -207,7 +208,7 @@ public class NewTraitDialog extends DialogFragment {
         final TraitFormat traitFormat = traitFormats.getTraitFormatByIndex(index);
         final String errorMessage = traitFormat.ValidateItems();
         if (errorMessage.length() > 0) {    // not valid
-            originActivity.makeToast(errorMessage);
+            Utils.makeToast(originActivity,errorMessage);
             return;
         }
 

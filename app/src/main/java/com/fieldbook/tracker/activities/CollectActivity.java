@@ -285,10 +285,10 @@ public class CollectActivity extends AppCompatActivity {
                 && !traitBox.getCurrentTrait().isValidValue(etCurVal.getText().toString())) {
 
             if (strValue.length() > 0 && currentTrait.isOver(strValue)) {
-                makeToast(getString(R.string.trait_error_maximum_value)
+                Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_maximum_value)
                         + ": " + currentTrait.getMaximum());
             } else if (strValue.length() > 0 && currentTrait.isUnder(strValue)) {
-                makeToast(getString(R.string.trait_error_minimum_value)
+                Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_minimum_value)
                         + ": " + currentTrait.getMinimum());
             }
 
@@ -451,8 +451,9 @@ public class CollectActivity extends AppCompatActivity {
             }
         }
 
-        if (!haveData)
-            makeToast(getString(R.string.main_toolbar_moveto_no_match));
+        if (!haveData) {
+            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+        }
     }
 
     private void moveToResultCore(int j) {
@@ -803,10 +804,6 @@ public class CollectActivity extends AppCompatActivity {
         android.view.WindowManager.LayoutParams langParams = goToId.getWindow().getAttributes();
         langParams.width = LayoutParams.MATCH_PARENT;
         goToId.getWindow().setAttributes(langParams);
-    }
-
-    public void makeToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
     public void nextEmptyPlot() {
@@ -1437,7 +1434,7 @@ public class CollectActivity extends AppCompatActivity {
             rangeName.setOnTouchListener(new OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    makeToast(ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)));
+                    Utils.makeToast(getApplicationContext(),ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)));
                     return false;
                 }
             });
@@ -1445,7 +1442,7 @@ public class CollectActivity extends AppCompatActivity {
             plotName.setOnTouchListener(new OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    makeToast(ep.getString("ImportSecondName", getString(R.string.search_results_dialog_range)));
+                    Utils.makeToast(getApplicationContext(),ep.getString("ImportSecondName", getString(R.string.search_results_dialog_range)));
                     return false;
                 }
             });

@@ -7,6 +7,8 @@ import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -65,5 +67,11 @@ public class Utils {
             return true;
         else
             return false;
+    }
+
+    public static void makeToast(Context context, String message) {
+        Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.TOP,0,0);
+        toast.show();
     }
 }

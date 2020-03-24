@@ -69,10 +69,6 @@ public abstract class BaseTraitLayout extends LinearLayout {
         return ((CollectActivity) getContext()).getDisplayColor();
     }
 
-    public void makeToast(String message) {
-        Toast.makeText(getContext().getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
     public void updateTrait(String parent, String trait, String value) {
         ((CollectActivity) getContext()).updateTrait(parent, trait, value);
     }

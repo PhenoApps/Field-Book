@@ -433,10 +433,10 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                 if (m == 0 || photoLocation.size() < m) {
                     takePicture();
                 } else
-                    makeToast(getContext().getString(R.string.traits_create_photo_maximum));
+                    Utils.makeToast(getContext(),getContext().getString(R.string.traits_create_photo_maximum));
             } catch (Exception e) {
                 e.printStackTrace();
-                makeToast(getContext().getString(R.string.trait_error_hardware_missing));
+                Utils.makeToast(getContext(),getContext().getString(R.string.trait_error_hardware_missing));
             }
         }
     }

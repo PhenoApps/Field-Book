@@ -528,7 +528,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
-            makeToast(getString(R.string.warning_traits_missing_modify));
+            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing_modify));
             return;
         }
 
@@ -751,7 +751,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
         if (allTraits == null) {
-            makeToast(getString(R.string.warning_traits_missing_modify));
+            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing_modify));
             return;
         }
 
@@ -864,7 +864,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
-            makeToast(getString(R.string.warning_traits_missing_modify));
+            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing_modify));
             return;
         }
 
@@ -960,10 +960,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
 
             if(!extension.equals("trt")) {
-                //TODO add to strings
-                makeToast("Only TRT files can be loaded into Field Book.");
-                Toast.makeText(TraitEditorActivity.thisActivity, getString(R.string.import_error_format_trait), Toast.LENGTH_LONG).show();
-
+                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_format_trait));
                 return;
             }
 
@@ -1011,10 +1008,6 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
 
         shareFile(file);
-    }
-
-    public void makeToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -1155,11 +1148,13 @@ public class TraitEditorActivity extends AppCompatActivity {
 
             CollectActivity.reloadData = true;
 
-            if (dialog.isShowing())
+            if (dialog.isShowing()) {
                 dialog.dismiss();
+            }
 
-            if (fail)
-                makeToast(thisActivity.getString(R.string.import_error_general));
+            if (fail) {
+                Utils.makeToast(getApplicationContext(),thisActivity.getString(R.string.import_error_general));
+            }
         }
     }
 }

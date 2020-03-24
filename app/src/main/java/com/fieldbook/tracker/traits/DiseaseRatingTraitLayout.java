@@ -9,6 +9,7 @@ import android.widget.EditText;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -179,7 +180,7 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
                 if (getEtCurVal().getText().toString().matches(".*\\d.*")
                         && v.matches(".*\\d.*")
                         && !getEtCurVal().getText().toString().contains("/")) {
-                    makeToast(getContext().getString(R.string.trait_error_disease_severity));
+                    Utils.makeToast(getContext(),getContext().getString(R.string.trait_error_disease_severity));
                 } else {
                     getEtCurVal().setText(getEtCurVal().getText().toString() + v);
                     updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());

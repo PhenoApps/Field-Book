@@ -19,6 +19,7 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -122,7 +123,7 @@ public class DatagridActivity extends AppCompatActivity {
                 } catch (ArrayIndexOutOfBoundsException e) {
                     Log.e("Field Book", "" + e.getMessage());
                 }
-                makeToast(plotId);
+                Utils.makeToast(getApplicationContext(),plotId);
             }
         });
 
@@ -132,7 +133,7 @@ public class DatagridActivity extends AppCompatActivity {
                 //TODO go to trait as well as plotId
 
                 plotId = plotIdData[(position / cols) - 1];
-                makeToast(plotId);
+                Utils.makeToast(getApplicationContext(),plotId);
                 Intent returnIntent = new Intent();
                 returnIntent.putExtra("result", plotId);
                 setResult(RESULT_OK, returnIntent);
@@ -141,9 +142,5 @@ public class DatagridActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-    public void makeToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 }

@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.SearchAdapter;
 import com.fieldbook.tracker.objects.SearchData;
+import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.Arrays;
 
@@ -252,7 +253,7 @@ public class SearchActivity extends AppCompatActivity {
 
                         dialog.show();
                     } else {
-                        makeToast(getString(R.string.search_results_missing));
+                        Utils.makeToast(getApplicationContext(),getString(R.string.search_results_missing));
                     }
                 } catch (Exception z) {
                     Log.e(TAG, "" + z.getMessage());
@@ -337,9 +338,5 @@ public class SearchActivity extends AppCompatActivity {
 
         // Delegate everything else to Activity.
         return super.onTouchEvent(event);
-    }
-
-    public void makeToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 }
