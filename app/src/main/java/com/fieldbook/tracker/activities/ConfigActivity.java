@@ -58,6 +58,7 @@ import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.location.GPSTracker;
+import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -97,7 +98,7 @@ public class ConfigActivity extends AppCompatActivity {
     private AlertDialog personDialog;
     private AlertDialog locationDialog;
     private AlertDialog saveDialog;
-    private AlertDialog setupDialog;
+    private AlertDialog profileDialog;
     private AlertDialog dbSaveDialog;
     private String mChosenFile = "";
     private ListView profileList;
@@ -214,7 +215,7 @@ public class ConfigActivity extends AppCompatActivity {
                 blankFile.createNewFile();
                 Utils.scanFile(ConfigActivity.this, blankFile);
             } catch (IOException e) {
-                Log.d("CreateDir",e.toString());
+                Log.d("CreateDir", e.toString());
             }
         }
     }
@@ -253,38 +254,10 @@ public class ConfigActivity extends AppCompatActivity {
         setContentView(R.layout.activity_config);
         initToolbar();
 
-        //setup
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list, null);
-
-        builder.setTitle(R.string.settings_profile)
-                .setCancelable(true)
-                .setView(layout);
-
-        setupDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params = setupDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        setupDialog.getWindow().setAttributes(params);
-
-        // This is the list of items shown on the settings screen itself
-        profileList = layout.findViewById(R.id.myList);
-
-        Button setupCloseBtn = layout.findViewById(R.id.closeBtn);
-        setupCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                setupDialog.dismiss();
-            }
-        });
-
         settingsList = findViewById(R.id.myList);
 
         String[] configList = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)}; //, "API Test"};
-
+                getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)};
 
         Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.ic_nav_drawer_person, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
 
@@ -429,18 +402,15 @@ public class ConfigActivity extends AppCompatActivity {
     private void showCitationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
 
-        builder.setTitle(getString(R.string.citation_title));
-        builder.setMessage(getString(R.string.citation_string) + "\n\n" + getString(R.string.citation_text));
-        builder.setCancelable(false);
+        builder.setTitle(getString(R.string.citation_title))
+                .setMessage(getString(R.string.citation_string) + "\n\n" + getString(R.string.citation_text))
+                .setCancelable(false);
 
         builder.setPositiveButton(getString(R.string.dialog_ok), new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
 
                 dialog.dismiss();
-
                 invalidateOptionsMenu();
-
                 Intent intent = new Intent();
                 intent.setClassName(ConfigActivity.this,
                         ConfigActivity.class.getName());
@@ -450,6 +420,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     private void showTipsDialog() {
@@ -459,7 +430,6 @@ public class ConfigActivity extends AppCompatActivity {
         builder.setMessage(getString(R.string.tutorial_dialog_description));
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
                 ed.putBoolean("Tips", true);
@@ -478,7 +448,6 @@ public class ConfigActivity extends AppCompatActivity {
         });
 
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
                 ed.putBoolean("TipsConfigured", true);
@@ -495,6 +464,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     private void loadSampleDataDialog() {
@@ -519,6 +489,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     // Only used for truncating lat long values
@@ -596,7 +567,7 @@ public class ConfigActivity extends AppCompatActivity {
             tagLocation += getString(R.string.profile_location) + ": " + getString(R.string.profile_missing);
         }
 
-        return new String[]{tagName, tagLocation, getString(R.string.profile_reset)};
+        return new String[]{tagName, tagLocation};
     }
 
     private void updateSetupList() {
@@ -618,31 +589,40 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showExportDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list, null);
+        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
+        ListView exportSourceList = layout.findViewById(R.id.myList);
+
+        String[] exportArray = new String[2];
+        exportArray[0] = getString(R.string.export_source_local);
+        exportArray[1] = getString(R.string.export_source_brapi);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, exportArray);
+        exportSourceList.setAdapter(adapter);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
         builder.setTitle(R.string.export_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
+        builder.setPositiveButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+
         final AlertDialog exportDialog = builder.create();
+        exportDialog.show();
+        DialogUtils.styleDialogs(exportDialog);
 
         android.view.WindowManager.LayoutParams params = exportDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
         params.height = LayoutParams.WRAP_CONTENT;
         exportDialog.getWindow().setAttributes(params);
 
-        ListView myList = layout.findViewById(R.id.myList);
-
-        String[] exportArray = new String[2];
-        exportArray[0] = getString(R.string.export_source_local);
-        exportArray[1] = getString(R.string.export_source_brapi);
-
-        final Context context = this;
-
-        myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        exportSourceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
                 Intent intent = new Intent();
                 switch (which) {
@@ -653,20 +633,9 @@ public class ConfigActivity extends AppCompatActivity {
                         exportBrAPI();
                         break;
                 }
-
                 exportDialog.dismiss();
             }
         });
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, exportArray);
-        myList.setAdapter(adapter);
-        Button importCloseBtn = layout.findViewById(R.id.closeBtn);
-        importCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                exportDialog.dismiss();
-            }
-        });
-        exportDialog.show();
     }
 
     private void exportBrAPI() {
@@ -711,34 +680,16 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showSaveDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_export, null);
-
-        builder.setTitle(R.string.settings_export)
-                .setCancelable(true)
-                .setView(layout);
-
-        saveDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        saveDialog.getWindow().setAttributes(params2);
-
-
-        Button closeBtn = layout.findViewById(R.id.closeBtn);
-
-        closeBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                saveDialog.dismiss();
-            }
-        });
-
         exportFile = layout.findViewById(R.id.fileName);
         checkDB = layout.findViewById(R.id.formatDB);
         checkExcel = layout.findViewById(R.id.formatExcel);
         CheckBox checkOverwrite = layout.findViewById(R.id.overwrite);
+        allColumns = layout.findViewById(R.id.allColumns);
+        onlyUnique = layout.findViewById(R.id.onlyUnique);
+        allTraits = layout.findViewById(R.id.allTraits);
+        activeTraits = layout.findViewById(R.id.activeTraits);
 
         if (ep.getBoolean("Overwrite", false)) {
             checkOverwrite.setChecked(true);
@@ -759,17 +710,26 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        allColumns = layout.findViewById(R.id.allColumns);
-        onlyUnique = layout.findViewById(R.id.onlyUnique);
-        allTraits = layout.findViewById(R.id.allTraits);
-        activeTraits = layout.findViewById(R.id.activeTraits);
+        SimpleDateFormat timeStamp = new SimpleDateFormat(
+                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
-        Button exportButton = layout.findViewById(R.id.saveBtn);
+        fFile = ep.getString("FieldFile", "");
 
-        exportButton.setOnClickListener(new OnClickListener() {
+        if (fFile.length() > 4 & fFile.toLowerCase().endsWith(".csv")) {
+            fFile = fFile.substring(0, fFile.length() - 4);
+        }
 
-            public void onClick(View arg0) {
-                // Ensure at least one export type is checked
+        String exportString = timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile;
+        exportFile.setText(exportString);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+        builder.setTitle(R.string.settings_export)
+                .setCancelable(true)
+                .setView(layout);
+
+        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
                 if (!checkDB.isChecked() & !checkExcel.isChecked()) {
                     makeToast(getString(R.string.export_error_missing_format));
                     return;
@@ -827,23 +787,30 @@ public class ConfigActivity extends AppCompatActivity {
             }
         });
 
-        SimpleDateFormat timeStamp = new SimpleDateFormat(
-                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
 
-        fFile = ep.getString("FieldFile", "");
+            }
+        });
 
-        if (fFile.length() > 4 & fFile.toLowerCase().endsWith(".csv")) {
-            fFile = fFile.substring(0, fFile.length() - 4);
-        }
-
-        exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + fFile);
-
+        saveDialog = builder.create();
         saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         saveDialog.show();
+        DialogUtils.styleDialogs(saveDialog);
+
+        android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
+        params2.width = LayoutParams.MATCH_PARENT;
+        saveDialog.getWindow().setAttributes(params2);
     }
 
     private void showProfileDialog() {
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
+
+        profileList = layout.findViewById(R.id.myList);
+
         String[] array = prepareSetup();
         ArrayList<String> lst = new ArrayList<>(Arrays.asList(array));
 
@@ -857,37 +824,44 @@ public class ConfigActivity extends AppCompatActivity {
                     case 1:
                         locationDialogPermission();
                         break;
-
-                    case 2:
-                        showClearSettingsDialog();
-                        break;
-
                 }
             }
         });
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, lst);
-
         profileList.setAdapter(adapter);
-        setupDialog.show();
-    }
 
-    private void showPersonDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_person, null);
-
-        builder.setTitle(R.string.profile_person_title)
+        builder.setTitle(R.string.settings_profile)
                 .setCancelable(true)
                 .setView(layout);
 
-        personDialog = builder.create();
+        builder.setPositiveButton(getString(R.string.dialog_close), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
 
-        android.view.WindowManager.LayoutParams langParams = personDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.MATCH_PARENT;
-        personDialog.getWindow().setAttributes(langParams);
+        builder.setNeutralButton(getString(R.string.profile_reset), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                showClearSettingsDialog();
+            }
+        });
 
+        profileDialog = builder.create();
+        profileDialog.show();
+        DialogUtils.styleDialogs(profileDialog);
+
+        android.view.WindowManager.LayoutParams params = profileDialog.getWindow().getAttributes();
+        params.width = LayoutParams.MATCH_PARENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        profileDialog.getWindow().setAttributes(params);
+    }
+
+    private void showPersonDialog() {
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.dialog_person, null);
         final EditText firstName = layout.findViewById(R.id.firstName);
         final EditText lastName = layout.findViewById(R.id.lastName);
 
@@ -897,11 +871,13 @@ public class ConfigActivity extends AppCompatActivity {
         firstName.setSelectAllOnFocus(true);
         lastName.setSelectAllOnFocus(true);
 
-        Button yesButton = layout.findViewById(R.id.saveBtn);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+        builder.setTitle(R.string.profile_person_title)
+                .setCancelable(true)
+                .setView(layout);
 
-        yesButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
+        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
                 Editor e = ep.edit();
 
                 e.putString("FirstName", firstName.getText().toString());
@@ -909,31 +885,31 @@ public class ConfigActivity extends AppCompatActivity {
 
                 e.apply();
 
-                if (setupDialog.isShowing()) {
+                if (profileDialog.isShowing()) {
                     updateSetupList();
                 }
-
-                personDialog.dismiss();
             }
         });
+
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int i) {
+                dialog.dismiss();
+            }
+        });
+
+        personDialog = builder.create();
         personDialog.show();
+        DialogUtils.styleDialogs(personDialog);
+
+        android.view.WindowManager.LayoutParams langParams = personDialog.getWindow().getAttributes();
+        langParams.width = LayoutParams.MATCH_PARENT;
+        personDialog.getWindow().setAttributes(langParams);
     }
 
     private void showLocationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_location, null);
-
-        builder.setTitle(R.string.profile_location_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        locationDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.MATCH_PARENT;
-        locationDialog.getWindow().setAttributes(langParams);
 
         GPSTracker gps = new GPSTracker(this);
         if (gps.canGetLocation()) { //GPS enabled
@@ -945,27 +921,20 @@ public class ConfigActivity extends AppCompatActivity {
             startActivity(intent);
         }
 
-        Button findLocation = layout
-                .findViewById(R.id.getLctnBtn);
-        Button yesLocation = layout.findViewById(R.id.saveBtn);
-
-        final EditText longitude = layout
-                .findViewById(R.id.longitude);
-        final EditText latitude = layout
-                .findViewById(R.id.latitude);
+        final EditText longitude = layout.findViewById(R.id.longitude);
+        final EditText latitude = layout.findViewById(R.id.latitude);
 
         longitude.setText(ep.getString("Longitude", ""));
         latitude.setText(ep.getString("Latitude", ""));
 
-        findLocation.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                latitude.setText(truncateDecimalString(String.valueOf(lat)));
-                longitude.setText(truncateDecimalString(String.valueOf(lng)));
-            }
-        });
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
 
-        yesLocation.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
+        builder.setTitle(R.string.profile_location_title)
+                .setCancelable(true)
+                .setView(layout);
+
+        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
                 Editor e = ep.edit();
                 if (latitude.getText().toString().length() > 0 && longitude.getText().toString().length() > 0) {
                     e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
@@ -976,32 +945,62 @@ public class ConfigActivity extends AppCompatActivity {
                 }
 
                 e.apply();
-                if (setupDialog.isShowing()) {
+                if (profileDialog.isShowing()) {
                     updateSetupList();
                 }
                 locationDialog.dismiss();
             }
         });
 
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int i) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.setNeutralButton(getString(R.string.profile_location_get), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int i) {
+
+            }
+        });
+
+        // Override neutral button so it doesnt automatically dismiss location dialog
+        Button neutralButton = locationDialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+        neutralButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View arg0) {
+                latitude.setText(truncateDecimalString(String.valueOf(lat)));
+                longitude.setText(truncateDecimalString(String.valueOf(lng)));
+            }
+        });
+
+        locationDialog = builder.create();
         locationDialog.show();
+        DialogUtils.styleDialogs(locationDialog);
+
+        android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
+        langParams.width = LayoutParams.MATCH_PARENT;
+        locationDialog.getWindow().setAttributes(langParams);
     }
 
     private void showClearSettingsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
-
         builder.setTitle(getString(R.string.profile_reset));
         builder.setMessage(getString(R.string.dialog_confirm));
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
-                setupDialog.dismiss();
+                profileDialog.dismiss();
                 dialog.dismiss();
 
                 Editor ed = ep.edit();
                 ed.putString("FirstName", "");
                 ed.putString("LastName", "");
                 ed.putString("Location", "");
+                ed.putString("Latitude", "");
+                ed.putString("Longitude", "");
                 ed.apply();
             }
         });
@@ -1015,6 +1014,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     //todo use annotations correctly
@@ -1104,47 +1104,40 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void showDatabaseExportDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_save_database, null);
 
+        exportFile = layout.findViewById(R.id.fileName);
+        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
+        String autoFillName = timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + DataHelper.DATABASE_VERSION;
+        exportFile.setText(autoFillName);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
         builder.setTitle(R.string.database_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
 
-        dbSaveDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params2 = dbSaveDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        dbSaveDialog.getWindow().setAttributes(params2);
-
-        exportFile = layout.findViewById(R.id.fileName);
-
-        Button closeBtn = layout.findViewById(R.id.closeBtn);
-
-        closeBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                dbSaveDialog.dismiss();
-            }
-        });
-
-        Button exportButton = layout.findViewById(R.id.saveBtn);
-
-        exportButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
+        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
                 dbSaveDialog.dismiss();
                 exportFileString = exportFile.getText().toString();
                 mHandler.post(exportDB);
             }
         });
 
-        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
 
-        exportFile.setText(timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + DataHelper.DATABASE_VERSION);
+        dbSaveDialog = builder.create();
         dbSaveDialog.show();
+        DialogUtils.styleDialogs(dbSaveDialog);
+
+        android.view.WindowManager.LayoutParams params = dbSaveDialog.getWindow().getAttributes();
+        params.width = LayoutParams.MATCH_PARENT;
+        dbSaveDialog.getWindow().setAttributes(params);
     }
 
     // First confirmation
@@ -1155,24 +1148,21 @@ public class ConfigActivity extends AppCompatActivity {
         builder.setMessage(getString(R.string.database_reset_warning1));
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 showDatabaseResetDialog2();
             }
-
         });
 
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
-
         });
 
         AlertDialog alert = builder.create();
         alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     // Second confirmation
@@ -1221,6 +1211,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     private void checkIntent() {
@@ -1266,7 +1257,7 @@ public class ConfigActivity extends AppCompatActivity {
         View v = settingsList.getChildAt(item);
         final int[] location = new int[2];
         v.getLocationOnScreen(location);
-        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth()/5, location[1] + v.getHeight());
+        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth() / 5, location[1] + v.getHeight());
         return droidTarget;
     }
 
@@ -1332,7 +1323,7 @@ public class ConfigActivity extends AppCompatActivity {
                 sequence.start();
                 break;
             case R.id.changelog:
-                showDatabaseImportDialog();
+                showChangelog(false, false);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -1568,7 +1559,7 @@ public class ConfigActivity extends AppCompatActivity {
             try {
                 dt.importDatabase(mChosenFile);
             } catch (Exception e) {
-                Log.d("Database",e.toString());
+                Log.d("Database", e.toString());
                 e.printStackTrace();
                 fail = true;
             }

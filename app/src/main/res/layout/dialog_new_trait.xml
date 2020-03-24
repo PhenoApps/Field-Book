@@ -9,275 +9,250 @@
     android:paddingRight="20dp"
     android:paddingBottom="5dp">
 
-    <LinearLayout
-        android:id="@+id/formatbox"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingRight="10dp"
-        android:paddingBottom="5dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:layout_weight=".2"
-            android:paddingRight="10dp"
-            android:text="@string/traits_create_format"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-        <Spinner
-            android:id="@+id/format"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight=".8"
-            android:textColor="#FFFFFF"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/traitbox"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingRight="10dp">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:paddingRight="10dp"
-            android:text="@string/traits_create_trait"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/trait"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:inputType="textCapWords"
-            android:paddingRight="10dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/defbox"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingRight="10dp">
-
-        <TextView
-            android:id="@+id/defTv"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:paddingRight="10dp"
-            android:text="@string/traits_create_value_default"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/def"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:imeOptions="actionNext"
-            android:inputType="textCapWords"
-            android:paddingRight="10dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small" />
-
-        <ToggleButton
-            android:id="@+id/boolBtn"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textOff="@string/traits_create_false"
-            android:textOn="@string/traits_create_true"
-            android:textSize="@dimen/text_size_small"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/minbox"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight=".2"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingRight="10dp">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:paddingRight="10dp"
-            android:text="@string/traits_create_value_minimum"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/minimum"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:imeOptions="actionNext"
-            android:inputType="textCapWords"
-            android:paddingRight="10dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/maxbox"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingRight="10dp">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:paddingRight="10dp"
-            android:text="@string/traits_create_value_maximum"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/maximum"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:imeOptions="actionNext"
-            android:inputType="textCapWords"
-            android:paddingRight="10dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small" />
-
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/detailsbox"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingRight="10dp">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:paddingRight="10dp"
-            android:text="@string/traits_create_details"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/details"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:imeOptions="actionNext"
-            android:inputType="textCapWords"
-            android:paddingRight="10dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/categorybox"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:paddingRight="10dp">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:paddingRight="10dp"
-            android:text="@string/traits_create_categories_title"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/categories"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:hint="@string/traits_create_categories_text"
-            android:imeOptions="actionNext"
-            android:inputType="textCapWords"
-            android:paddingRight="10dp"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_small" />
-
-    </LinearLayout>
-
-    <View
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="10dp"
-        android:background="#FFFFFF" />
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/closeBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_default_width"
-            android:text="@string/dialog_close"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            <LinearLayout
+                android:id="@+id/formatbox"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="5dp">
 
-        <Button
-            android:id="@+id/saveBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_default_width"
-            android:text="@string/dialog_save"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical"
+                    android:layout_weight=".2"
+                    android:paddingRight="10dp"
+                    android:text="@string/traits_create_format"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/format"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".8"
+                    android:textColor="#FFFFFF"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/traitbox"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical"
+                    android:paddingRight="10dp"
+                    android:text="@string/traits_create_trait"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/trait"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:inputType="textCapWords"
+                    android:paddingRight="10dp"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/defbox"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp">
+
+                <TextView
+                    android:id="@+id/defTv"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical"
+                    android:paddingRight="10dp"
+                    android:text="@string/traits_create_value_default"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/def"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapWords"
+                    android:paddingRight="10dp"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small" />
+
+                <ToggleButton
+                    android:id="@+id/boolBtn"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:textOff="@string/traits_create_false"
+                    android:textOn="@string/traits_create_true"
+                    android:textSize="@dimen/text_size_small"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/minbox"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical"
+                    android:paddingRight="10dp"
+                    android:text="@string/traits_create_value_minimum"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/minimum"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapWords"
+                    android:paddingRight="10dp"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/maxbox"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical"
+                    android:paddingRight="10dp"
+                    android:text="@string/traits_create_value_maximum"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/maximum"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapWords"
+                    android:paddingRight="10dp"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small" />
 
 
-    </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/detailsbox"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical"
+                    android:paddingRight="10dp"
+                    android:text="@string/traits_create_details"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/details"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapWords"
+                    android:paddingRight="10dp"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/categorybox"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical"
+                    android:paddingRight="10dp"
+                    android:text="@string/traits_create_categories_title"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/categories"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:hint="@string/traits_create_categories_text"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapWords"
+                    android:paddingRight="10dp"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

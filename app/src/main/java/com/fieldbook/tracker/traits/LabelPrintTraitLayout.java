@@ -377,32 +377,27 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
     private AlertDialog showDownloadDialog() {
         //Log.d(((MainActivity) getContext()).TAG, "Building Download dialog");
-        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
-        String title = "Install PrintConnect?";
-        String message = "This application requires PrintConnect. Would you like to install it?";
-        String buttonYes = "Yes";
-        String buttonNo = "No";
-        final String PC_PACKAGE = "com.zebra.printconnect";
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
 
-        downloadDialog.setTitle(title);
-        downloadDialog.setMessage(message);
-        downloadDialog.setPositiveButton(buttonYes, new DialogInterface.OnClickListener() {
+        builder.setTitle("Install PrintConnect?")
+                .setMessage("This trait requires PrintConnect. Would you like to install it?");
+
+        builder.setPositiveButton("Install", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                Uri uri = Uri.parse("market://details?id=" + PC_PACKAGE);
+                Uri uri = Uri.parse("market://details?id=com.zebra.printconnect");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 try {
                     getContext().startActivity(intent);
-                } catch (ActivityNotFoundException anfe) {
-                    // Hmm, market is not installed
-                    //Log.w(((MainActivity) getContext()).TAG, "Google Play is not installed; cannot install " + PC_PACKAGE);
+                } catch (ActivityNotFoundException ignored) {
+
                 }
             }
         });
-        downloadDialog.setNegativeButton(buttonNo, null);
-        downloadDialog.setCancelable(true);
-        return downloadDialog.show();
+        builder.setNegativeButton("Cancel", null);
+
+        return builder.show();
     }
 
     public ResultReceiver receiverForSending(ResultReceiver actualReceiver) {

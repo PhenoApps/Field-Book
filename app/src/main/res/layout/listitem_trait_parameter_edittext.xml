@@ -29,6 +29,6 @@
         android:textSize="@dimen/text_size_small"
         android:hint="SAMPLE HINT TEXT"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="traitParameterTitle" />
+        app:layout_constraintTop_toBottomOf="@id/traitParameterText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

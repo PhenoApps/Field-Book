@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="fill_parent"
     android:background="#FFFFFF"
     android:orientation="vertical"
     android:paddingLeft="20dp"
@@ -9,15 +9,12 @@
     android:paddingRight="20dp"
     android:paddingBottom="5dp">
 
-    <EditText
-        android:id="@+id/fileName"
+    <ListView
+        android:id="@+id/myList"
         android:layout_width="fill_parent"
-        android:inputType="textVisiblePassword"
         android:layout_height="wrap_content"
-        android:maxLength="200"
-        android:hint="@string/export_file_name"
-        android:singleLine="true"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_medium" />
+        android:layout_weight="1"
+        android:choiceMode="singleChoice"
+        android:divider="@drawable/custom_list_divider" />
 
 </LinearLayout>

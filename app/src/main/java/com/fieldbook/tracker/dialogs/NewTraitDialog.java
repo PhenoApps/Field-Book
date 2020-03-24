@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.utilities;
+package com.fieldbook.tracker.dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -6,9 +6,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -24,11 +24,9 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
-
-import io.swagger.client.model.Trait;
 
 import static com.fieldbook.tracker.activities.TraitEditorActivity.displayBrapiInfo;
 import static com.fieldbook.tracker.activities.TraitEditorActivity.loadData;
@@ -88,6 +86,20 @@ public class NewTraitDialog extends DialogFragment {
                 .setCancelable(true)
                 .setView(layout);
 
+        builder.setPositiveButton(getResString(R.string.dialog_save), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                onSave();
+            }
+        });
+
+        builder.setNegativeButton(getResString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                onCancel();
+            }
+        });
+
         createDialog = builder.create();
 
         // each element of Dialog
@@ -107,12 +119,9 @@ public class NewTraitDialog extends DialogFragment {
         bool = layout.findViewById(R.id.boolBtn);
         defTv = layout.findViewById(R.id.defTv);
 
-        Button saveBtn = layout.findViewById(R.id.saveBtn);
-        Button closeBtn = layout.findViewById(R.id.closeBtn);
-
         trait.isFocused();
 
-        format.setOnItemSelectedListener(createFomatSelectionListener());
+        format.setOnItemSelectedListener(createFormatSelectionListener());
 
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(
                 TraitEditorActivity.thisActivity,
@@ -120,8 +129,6 @@ public class NewTraitDialog extends DialogFragment {
                 traitFormats.getLocalStringList());
         format.setAdapter(itemsAdapter);
 
-        closeBtn.setOnClickListener(createCloseButtonClickLister());
-        saveBtn.setOnClickListener(createSaveButtonClickListener());
     }
 
     // Non negative numbers only
@@ -145,6 +152,7 @@ public class NewTraitDialog extends DialogFragment {
     public void show(boolean edit_) {
         edit = edit_;
         createDialog.show();
+        DialogUtils.styleDialogs(createDialog);
     }
 
     @Override
@@ -153,6 +161,8 @@ public class NewTraitDialog extends DialogFragment {
         params.width = LinearLayout.LayoutParams.MATCH_PARENT;
 
         createDialog.getWindow().setAttributes(params);
+        createDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
         createDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             public void onCancel(DialogInterface arg0) {
                 createVisible = false;
@@ -167,7 +177,7 @@ public class NewTraitDialog extends DialogFragment {
         return createDialog;
     }
 
-    private AdapterView.OnItemSelectedListener createFomatSelectionListener() {
+    private AdapterView.OnItemSelectedListener createFormatSelectionListener() {
         return new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> av, View arg1, int position, long arg3) {
@@ -192,97 +202,84 @@ public class NewTraitDialog extends DialogFragment {
         };
     }
 
-    private View.OnClickListener createCloseButtonClickLister() {
-        return new View.OnClickListener() {
+    private void onSave() {
+        final int index = format.getSelectedItemPosition();
+        final TraitFormat traitFormat = traitFormats.getTraitFormatByIndex(index);
+        final String errorMessage = traitFormat.ValidateItems();
+        if (errorMessage.length() > 0) {    // not valid
+            originActivity.makeToast(errorMessage);
+            return;
+        }
 
-            public void onClick(View arg0) {
-                // Prompt the user if fields have been edited
+        final int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
+        final int booleanIndex = traitFormats.findIndexByEnglishString("Boolean");
+        if (format.getSelectedItemPosition() == booleanIndex) {
+            def.setText(bool.isChecked() ? "true" : "false");
+        }
 
-                if (dataChanged(oldTrait)) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
+        if (!edit) {
+            TraitObject t = createTraitObjectByDialogItems(pos);
+            if (t == null)
+                return;
 
-                    builder.setTitle(getResString(R.string.dialog_close));
-                    builder.setMessage(getResString(R.string.dialog_confirm));
+            // TODO: Add the local trait data_source name into other trait editing/inserting db functions.
+            t.setTraitDataSource("local");
+            ConfigActivity.dt.insertTraits(t);
+        } else {
+            restoreDialogItemsByTraitObject(oldTrait);
+        }
 
-                    builder.setPositiveButton(getResString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+        SharedPreferences.Editor ed = ep.edit();
+        ed.putBoolean("CreateTraitFinished", true);
+        ed.putBoolean("TraitsExported", false);
+        ed.apply();
 
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            createDialog.dismiss();
-                        }
+        // Display our BrAPI dialog if it has not been show already
+        // Get our dialog state from our adapter to see if a trait has been selected
+        // brapiDialogShown = mAdapter.infoDialogShown;
+        setBrAPIDialogShown(mAdapter.infoDialogShown);
+        if (!brapiDialogShown) {
+            // brapiDialogShown = displayBrapiInfo(originActivity,
+            //                          ConfigActivity.dt, null, true);
+            setBrAPIDialogShown(displayBrapiInfo(originActivity,
+                    ConfigActivity.dt, null, true));
+        }
 
-                    });
+        loadData();
 
-                    builder.setNegativeButton(getResString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+        CollectActivity.reloadData = true;
+        createDialog.dismiss();
 
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-
-                    });
-
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                } else {
-                    createDialog.dismiss();
-                }
-            }
-        };
     }
 
-    private View.OnClickListener createSaveButtonClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                final int index = format.getSelectedItemPosition();
-                final TraitFormat traitFormat = traitFormats.getTraitFormatByIndex(index);
-                final String errorMessage = traitFormat.ValidateItems();
-                if (errorMessage.length() > 0) {    // not valid
-                    originActivity.makeToast(errorMessage);
-                    return;
+    private void onCancel() {
+        if (dataChanged(oldTrait)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
+
+            builder.setTitle(getResString(R.string.dialog_close));
+            builder.setMessage(getResString(R.string.dialog_confirm));
+
+            builder.setPositiveButton(getResString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    createDialog.dismiss();
+                }
+            });
+
+            builder.setNegativeButton(getResString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
                 }
 
-                final int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
-                final int booleanIndex = traitFormats.findIndexByEnglishString("Boolean");
-                if (format.getSelectedItemPosition() == booleanIndex) {
-                    def.setText(bool.isChecked() ? "true" : "false");
-                }
+            });
 
-                if (!edit) {
-                    TraitObject t = createTraitObjectByDialogItems(pos);
-                    if (t == null)
-                        return;
-
-                    // TODO: Add the local trait data_source name into other trait editing/inserting db functions.
-                    t.setTraitDataSource("local");
-                    ConfigActivity.dt.insertTraits(t);
-                } else {
-                    restoreDialogItemsByTraitObject(oldTrait);
-                }
-
-                SharedPreferences.Editor ed = ep.edit();
-                ed.putBoolean("CreateTraitFinished", true);
-                ed.putBoolean("TraitsExported", false);
-                ed.apply();
-
-                // Display our BrAPI dialog if it has not been show already
-                // Get our dialog state from our adapter to see if a trait has been selected
-                // brapiDialogShown = mAdapter.infoDialogShown;
-                setBrAPIDialogShown(mAdapter.infoDialogShown);
-                if (!brapiDialogShown) {
-                    // brapiDialogShown = displayBrapiInfo(originActivity,
-                    //                          ConfigActivity.dt, null, true);
-                    setBrAPIDialogShown(displayBrapiInfo(originActivity,
-                            ConfigActivity.dt, null, true));
-                }
-
-                loadData();
-
-                CollectActivity.reloadData = true;
-                createDialog.dismiss();
-
-            }
-        };
+            AlertDialog alert = builder.create();
+            alert.show();
+            DialogUtils.styleDialogs(alert);
+        } else {
+            createDialog.dismiss();
+        }
     }
 
     public void initTrait() {
@@ -359,12 +356,12 @@ public class NewTraitDialog extends DialogFragment {
         minimum.setHint(traitFormat.minimumBox().getParameterHint());
         maximum.setHint(traitFormat.maximumBox().getParameterHint());
 
-        defBox.setVisibility(visibility(traitFormat.isDefBoxVisible()));
-        def.setVisibility(visibility(traitFormat.defaultBox().getParameterVisibility()));
-        minBox.setVisibility(visibility(traitFormat.minimumBox().getParameterVisibility()));
-        maxBox.setVisibility(visibility(traitFormat.maximumBox().getParameterVisibility()));
-        bool.setVisibility(visibility(traitFormat.isBooleanVisible()));
-        categoryBox.setVisibility(visibility(traitFormat.categoriesBox().getParameterVisibility()));
+        defBox.setVisibility(viewVisibility(traitFormat.isDefBoxVisible()));
+        def.setVisibility(viewVisibility(traitFormat.defaultBox().getParameterVisibility()));
+        minBox.setVisibility(viewVisibility(traitFormat.minimumBox().getParameterVisibility()));
+        maxBox.setVisibility(viewVisibility(traitFormat.maximumBox().getParameterVisibility()));
+        bool.setVisibility(viewVisibility(traitFormat.isBooleanVisible()));
+        categoryBox.setVisibility(viewVisibility(traitFormat.categoriesBox().getParameterVisibility()));
 
         minimum.setText(traitFormat.minimumBox().getParameterDefaultValue());
         maximum.setText(traitFormat.maximumBox().getParameterDefaultValue());
@@ -379,7 +376,7 @@ public class NewTraitDialog extends DialogFragment {
         }
     }
 
-    private int visibility(Boolean visible) {
+    private int viewVisibility(Boolean visible) {
         return visible ? View.VISIBLE : View.GONE;
     }
 
@@ -440,9 +437,6 @@ public class NewTraitDialog extends DialogFragment {
         Boolean required = false;
         String defaultValue = null;
         String hintValue = null;
-
-        ParameterObject() {
-        }
 
         ParameterObject(Boolean vis) {
             visibility = vis;

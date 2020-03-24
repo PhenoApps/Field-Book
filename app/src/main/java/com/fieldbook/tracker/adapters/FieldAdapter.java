@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.CollectActivity;
@@ -24,6 +23,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
 
@@ -175,12 +175,11 @@ public class FieldAdapter extends BaseAdapter {
             public boolean onMenuItemClick(MenuItem item) {
                 final Activity thisActivity = FieldEditorActivity.thisActivity;
                 final String strDel = thisActivity.getString(R.string.fields_delete);
-                final String strStat = thisActivity.getString(R.string.fields_study_statistics);
+
                 if (item.getTitle().equals(strDel)) {
                     AlertDialog alert = createDeleteItemAlertDialog(position);
                     alert.show();
-                } else if (item.getTitle().equals(strStat)) {
-                    Toast.makeText(thisActivity, "Coming soon!", Toast.LENGTH_SHORT).show();
+                    DialogUtils.styleDialogs(alert);
                 }
 
                 return false;

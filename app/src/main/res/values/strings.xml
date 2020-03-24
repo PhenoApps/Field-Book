@@ -12,6 +12,7 @@
     <string name="dialog_import">Import</string>
     <string name="dialog_warning">Warning</string>
     <string name="dialog_save">Save</string>
+    <string name="dialog_go">Go</string>
 
     <!-- Startup  -->
     <string name="startup_sample_data_title">Sample data</string>
@@ -329,7 +330,7 @@
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>
     <string name="profile_location">Location</string>
-    <string name="profile_reset">Clear settings</string>
+    <string name="profile_reset">Clear</string>
 
     <string name="profile_person_title">Set person</string>
     <string name="profile_name_first">First name</string>

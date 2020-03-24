@@ -24,6 +24,7 @@ import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
+import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -218,7 +219,7 @@ public class TraitAdapter extends BaseAdapter {
                 if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_copy))) {
                     copyTrait(position);
                 } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_delete))) {
-                    delteTrait(holder);
+                    deleteTrait(holder);
                 } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_edit))) {
                     listener.onItemClick((AdapterView) parent, v, position, v.getId());
                 }
@@ -263,34 +264,29 @@ public class TraitAdapter extends BaseAdapter {
         return "";    // not come here
     }
 
-    private void delteTrait(final ViewHolder holder) {
+    private void deleteTrait(final ViewHolder holder) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
 
         builder.setTitle(context.getString(R.string.traits_options_delete_title));
         builder.setMessage(context.getString(R.string.traits_warning_delete));
 
         builder.setPositiveButton(context.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-
                 ConfigActivity.dt.deleteTrait(holder.id);
                 TraitEditorActivity.loadData();
                 CollectActivity.reloadData = true;
             }
-
         });
 
         builder.setNegativeButton(context.getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
-
         });
 
         AlertDialog alert = builder.create();
         alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     private class ViewHolder {

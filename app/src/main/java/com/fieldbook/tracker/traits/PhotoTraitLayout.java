@@ -35,6 +35,7 @@ import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.adapters.GalleryImageAdapter;
+import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.File;
@@ -333,6 +334,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
         AlertDialog alert = builder.create();
         alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     private void takePicture() {

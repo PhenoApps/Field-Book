@@ -25,7 +25,8 @@ import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.NewTraitDialog;
+import com.fieldbook.tracker.dialogs.NewTraitDialog;
+import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -37,11 +38,9 @@ import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 
@@ -547,29 +546,35 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void importExportDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list, null);
+        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
 
+        ListView myList = layout.findViewById(R.id.myList);
+        String[] sortOptions = new String[2];
+        sortOptions[0] = getString(R.string.dialog_import);
+        sortOptions[1] = getString(R.string.traits_dialog_export);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, sortOptions);
+        myList.setAdapter(adapter);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
         builder.setTitle(R.string.settings_traits)
                 .setCancelable(true)
                 .setView(layout);
 
-        final AlertDialog importExport = builder.create();
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
 
+        final AlertDialog importExport = builder.create();
+        importExport.show();
+        DialogUtils.styleDialogs(importExport);
 
         android.view.WindowManager.LayoutParams params = importExport.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
         params.height = LayoutParams.WRAP_CONTENT;
         importExport.getWindow().setAttributes(params);
-
-        ListView myList = layout.findViewById(R.id.myList);
-
-        String[] sortOptions = new String[2];
-
-        sortOptions[0] = getString(R.string.dialog_import);
-        sortOptions[1] = getString(R.string.traits_dialog_export);
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -585,16 +590,6 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, sortOptions);
-        myList.setAdapter(adapter);
-        Button sortCloseBtn = layout.findViewById(R.id.closeBtn);
-
-        sortCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                importExport.dismiss();
-            }
-        });
-        importExport.show();
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE_IMPORT)
@@ -627,28 +622,37 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void showFileDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
         LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list, null);
+        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
 
+        ListView myList = layout.findViewById(R.id.myList);
+        String[] importArray = new String[3];
+        importArray[0] = getString(R.string.import_source_local);
+        importArray[1] = getString(R.string.import_source_cloud);
+        importArray[2] = getString(R.string.import_source_brapi);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, importArray);
+        myList.setAdapter(adapter);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
         builder.setTitle(R.string.import_dialog_title_traits)
                 .setCancelable(true)
                 .setView(layout);
 
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
         final AlertDialog importDialog = builder.create();
+        importDialog.show();
+        DialogUtils.styleDialogs(importDialog);
 
         android.view.WindowManager.LayoutParams params = importDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
         params.height = LayoutParams.WRAP_CONTENT;
         importDialog.getWindow().setAttributes(params);
-
-        ListView myList = layout.findViewById(R.id.myList);
-
-        String[] importArray = new String[3];
-        importArray[0] = getString(R.string.import_source_local);
-        importArray[1] = getString(R.string.import_source_cloud);
-        importArray[2] = getString(R.string.import_source_brapi);
 
         myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -673,16 +677,6 @@ public class TraitEditorActivity extends AppCompatActivity {
                 importDialog.dismiss();
             }
         });
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, importArray);
-        myList.setAdapter(adapter);
-        Button importCloseBtn = layout.findViewById(R.id.closeBtn);
-        importCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                importDialog.dismiss();
-            }
-        });
-        importDialog.show();
     }
 
     private void loadCloud() {
@@ -719,7 +713,6 @@ public class TraitEditorActivity extends AppCompatActivity {
                 showExportDialog();
                 dialog.dismiss();
             }
-
         });
 
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
@@ -733,6 +726,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     private void createDir(String path) {
@@ -752,36 +746,44 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void sortDialog() {
-        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
+        LayoutInflater inflater = this.getLayoutInflater();
+        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
 
+        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
         if (allTraits == null) {
             makeToast(getString(R.string.warning_traits_missing_modify));
             return;
         }
 
+        ListView myList = layout.findViewById(R.id.myList);
+
+        String[] sortOptions = new String[3];
+        sortOptions[0] = getString(R.string.traits_sort_name);
+        sortOptions[1] = getString(R.string.traits_sort_format);
+        sortOptions[2] = getString(R.string.traits_sort_visibility);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, sortOptions);
+        myList.setAdapter(adapter);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list, null);
-
         builder.setTitle(R.string.traits_sort_title)
                 .setCancelable(true)
                 .setView(layout);
 
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
         final AlertDialog sortDialog = builder.create();
+        sortDialog.show();
+        DialogUtils.styleDialogs(sortDialog);
 
         android.view.WindowManager.LayoutParams params = sortDialog.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
         params.height = LayoutParams.WRAP_CONTENT;
         sortDialog.getWindow().setAttributes(params);
-
-        ListView myList = layout.findViewById(R.id.myList);
-
-        String[] sortOptions = new String[3];
-
-        sortOptions[0] = getString(R.string.traits_sort_name);
-        sortOptions[1] = getString(R.string.traits_sort_format);
-        sortOptions[2] = getString(R.string.traits_sort_visibility);
 
         myList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
@@ -799,17 +801,6 @@ public class TraitEditorActivity extends AppCompatActivity {
                 sortDialog.dismiss();
             }
         });
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, sortOptions);
-        myList.setAdapter(adapter);
-        Button sortCloseBtn = layout.findViewById(R.id.closeBtn);
-
-        sortCloseBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                sortDialog.dismiss();
-            }
-        });
-        sortDialog.show();
     }
 
     private void sortTraitList(String colName) {
@@ -832,57 +823,41 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void showExportDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_save_database, null);
 
+        final EditText exportFile = layout.findViewById(R.id.fileName);
+        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
+        String exportName = "trait_export_" + timeStamp.format(Calendar.getInstance().getTime()) + ".trt";
+        exportFile.setText(exportName);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
         builder.setTitle(R.string.traits_dialog_export)
                 .setCancelable(true)
                 .setView(layout);
 
-        final AlertDialog exportDialog = builder.create();
-
-        android.view.WindowManager.LayoutParams langParams = exportDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.MATCH_PARENT;
-        exportDialog.getWindow().setAttributes(langParams);
-
-        Button closeBtn = layout.findViewById(R.id.closeBtn);
-
-        closeBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                exportDialog.dismiss();
-            }
-        });
-
-        final EditText exportFile = layout.findViewById(R.id.fileName);
-
-        // As the export filename uses the import file name as well,
-        // we parse it out here
-        SimpleDateFormat timeStamp = new SimpleDateFormat(
-                "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
-
-        String exportName = "trait_export_"
-                + timeStamp.format(Calendar.getInstance().getTime())
-                + ".trt";
-
-        exportFile.setText(exportName);
-
-        Button exportButton = layout.findViewById(R.id.saveBtn);
-
-        exportButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View arg0) {
+        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
                 exportTable(exportFile.getText().toString());
                 Editor ed = ep.edit();
                 ed.putBoolean("TraitsExported", true);
                 ed.apply();
-                exportDialog.dismiss();
             }
         });
 
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        final AlertDialog exportDialog = builder.create();
         exportDialog.show();
+        DialogUtils.styleDialogs(exportDialog);
+
+        android.view.WindowManager.LayoutParams langParams = exportDialog.getWindow().getAttributes();
+        langParams.width = LayoutParams.MATCH_PARENT;
+        exportDialog.getWindow().setAttributes(langParams);
     }
 
     private void showDeleteTraitDialog() {
@@ -894,7 +869,6 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this, R.style.AppAlertDialog);
-
         builder.setTitle(getString(R.string.traits_toolbar_delete_all));
         builder.setMessage(getString(R.string.dialog_confirm));
 
@@ -904,19 +878,17 @@ public class TraitEditorActivity extends AppCompatActivity {
                 loadData();
                 dialog.dismiss();
             }
-
         });
 
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
-
         });
 
         AlertDialog alert = builder.create();
         alert.show();
+        DialogUtils.styleDialogs(alert);
     }
 
     private void showCreateTraitDialog() {

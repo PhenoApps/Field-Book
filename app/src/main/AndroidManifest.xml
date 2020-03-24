@@ -86,6 +86,7 @@
             android:configChanges="keyboardHidden|orientation"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeAction" />
         <activity

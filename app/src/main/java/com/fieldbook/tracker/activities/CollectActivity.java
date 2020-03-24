@@ -6,6 +6,7 @@ import android.app.Activity;
 import androidx.appcompat.app.AlertDialog;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -38,7 +39,6 @@ import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -61,6 +61,7 @@ import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.RangeObject;
+import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -762,43 +763,17 @@ public class CollectActivity extends AppCompatActivity {
     }
 
     private void moveToPlotID() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_gotobarcode, null);
+        final EditText barcodeId = layout.findViewById(R.id.barcodeid);
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
         builder.setTitle(R.string.main_toolbar_moveto)
                 .setCancelable(true)
                 .setView(layout);
 
-        goToId = builder.create();
-
-        android.view.WindowManager.LayoutParams langParams = goToId.getWindow().getAttributes();
-        langParams.width = LayoutParams.MATCH_PARENT;
-        goToId.getWindow().setAttributes(langParams);
-
-        final EditText barcodeId = layout.findViewById(R.id.barcodeid);
-        Button exportButton = layout.findViewById(R.id.saveBtn);
-        Button closeBtn = layout.findViewById(R.id.closeBtn);
-        Button camBtn = layout.findViewById(R.id.camBtn);
-
-        camBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                IntentIntegrator integrator = new IntentIntegrator(thisActivity);
-                integrator.initiateScan();
-            }
-        });
-
-        closeBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                goToId.dismiss();
-            }
-        });
-
-        exportButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
+        builder.setPositiveButton(getString(R.string.dialog_go), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
                 inputPlotId = barcodeId.getText().toString();
                 rangeBox.setAllRangeID();
                 int[] rangeID = rangeBox.getRangeID();
@@ -807,7 +782,27 @@ public class CollectActivity extends AppCompatActivity {
             }
         });
 
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                IntentIntegrator integrator = new IntentIntegrator(thisActivity);
+                integrator.initiateScan();
+            }
+        });
+
+        goToId = builder.create();
         goToId.show();
+        DialogUtils.styleDialogs(goToId);
+
+        android.view.WindowManager.LayoutParams langParams = goToId.getWindow().getAttributes();
+        langParams.width = LayoutParams.MATCH_PARENT;
+        goToId.getWindow().setAttributes(langParams);
     }
 
     public void makeToast(String message) {
@@ -828,33 +823,30 @@ public class CollectActivity extends AppCompatActivity {
     }
 
     private void showSummary() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_summary, null);
+        TextView summaryText = layout.findViewById(R.id.field_name);
+        summaryText.setText(traitBox.createSummaryText(rangeBox.getPlotID()));
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
         builder.setTitle(R.string.preferences_appearance_toolbar_customize_summary)
                 .setCancelable(true)
                 .setView(layout);
 
-        final AlertDialog dialog = builder.create();
-
-        android.view.WindowManager.LayoutParams params2 = dialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        dialog.getWindow().setAttributes(params2);
-
-        Button closeBtn = layout.findViewById(R.id.closeBtn);
-        TextView summaryText = layout.findViewById(R.id.field_name);
-
-        closeBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
+        builder.setNegativeButton(getString(R.string.dialog_close), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int i) {
                 dialog.dismiss();
             }
         });
 
-        summaryText.setText(traitBox.createSummaryText(rangeBox.getPlotID()));
+        final AlertDialog summaryDialog = builder.create();
+        summaryDialog.show();
+        DialogUtils.styleDialogs(summaryDialog);
 
-        dialog.show();
+        android.view.WindowManager.LayoutParams params2 = summaryDialog.getWindow().getAttributes();
+        params2.width = LayoutParams.MATCH_PARENT;
+        summaryDialog.getWindow().setAttributes(params2);
     }
 
     @Override
