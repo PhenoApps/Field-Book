@@ -167,7 +167,6 @@ public class DataHelper {
         int rep = cursor.getCount() + 1;
 
         try {
-            String now = timeStamp.format(Calendar.getInstance().getTime());
             this.insertUserTraits.bindString(1, rid);
             this.insertUserTraits.bindString(2, parent);
             this.insertUserTraits.bindString(3, trait);
