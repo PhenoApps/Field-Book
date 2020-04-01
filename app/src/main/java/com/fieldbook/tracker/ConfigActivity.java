@@ -683,7 +683,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void exportBrAPI() {
         // Get our active field
-        Integer activeFieldId = dt.checkFieldName(ep.getString("FieldFile", ""));
+        Integer activeFieldId = ep.getInt("SelectedFieldExpId", -1);
         FieldObject activeField;
         if (activeFieldId != -1) {
             activeField = dt.getFieldObject(activeFieldId);
@@ -1465,7 +1465,7 @@ public class ConfigActivity extends AppCompatActivity {
 
             if (!fail) {
                 showCitationDialog();
-                dt.updateExpTable(false, false, true, ep.getInt("ExpID", 0));
+                dt.updateExpTable(false, false, true, ep.getInt("SelectedFieldExpId", 0));
             }
 
             if (fail) {
