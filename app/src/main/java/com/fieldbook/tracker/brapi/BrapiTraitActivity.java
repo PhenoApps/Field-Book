@@ -121,7 +121,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
         determineBtnVisibility();
 
         // Call our API to get the data
-        brAPIService.getOntology(page, pageSize, new Function<BrapiListResponse<TraitObject>, Void>() {
+        brAPIService.getOntology(BrAPIService.getBrapiToken(this), page, pageSize, new Function<BrapiListResponse<TraitObject>, Void>() {
             @Override
             public Void apply(final BrapiListResponse<TraitObject> input) {
 
