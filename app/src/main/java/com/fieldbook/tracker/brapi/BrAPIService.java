@@ -325,7 +325,7 @@ public class BrAPIService {
 
     }
 
-    public void getStudies(final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction) {
+    public void getStudies(final String brapiToken, final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudiesResponse> callback = new BrapiApiCallBack<StudiesResponse>() {
@@ -354,7 +354,7 @@ public class BrAPIService {
                     null, null, null, null,
                     null, null, null, null, null,
                     null, null, null, null,
-                    0, 1000, null, callback);
+                    0, 1000, brapiToken, callback);
 
         } catch (ApiException e) {
             e.printStackTrace();
@@ -369,7 +369,7 @@ public class BrAPIService {
         return study;
     }
 
-    public void getStudyDetails(String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getStudyDetails(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudyResponse> callback = new BrapiApiCallBack<StudyResponse>() {
@@ -390,7 +390,7 @@ public class BrAPIService {
             };
 
             studiesApi.studiesStudyDbIdGetAsync(
-                    studyDbId, null, callback);
+                    studyDbId, brapiToken, callback);
 
         } catch (ApiException e) {
             failFunction.apply(e);
@@ -408,7 +408,7 @@ public class BrAPIService {
         return studyDetails;
     }
 
-    public void getPlotDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getPlotDetails(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ObservationUnitsResponse1> callback = new BrapiApiCallBack<ObservationUnitsResponse1>() {
@@ -434,7 +434,7 @@ public class BrAPIService {
 
             studiesApi.studiesStudyDbIdObservationunitsGetAsync(
                     studyDbId, "plot", 0, 1000,
-                    null, callback);
+                    brapiToken, callback);
 
         } catch (ApiException e) {
             failFunction.apply(e);
@@ -518,7 +518,7 @@ public class BrAPIService {
         return getPrioritizedValue(values) != null;
     }
 
-    public void getOntology(Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getOntology(final String brapiToken, Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ObservationVariablesResponse> callback = new BrapiApiCallBack<ObservationVariablesResponse>() {
@@ -559,7 +559,7 @@ public class BrAPIService {
                 pageSize = 50;
             }
 
-            traitsApi.variablesGetAsync(page, pageSize, null, null,
+            traitsApi.variablesGetAsync(page, pageSize, brapiToken, null,
                     null, callback);
 
         } catch (ApiException e) {
@@ -701,7 +701,7 @@ public class BrAPIService {
         return returnValue;
     }
 
-    public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getTraits(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudyObservationVariablesResponse> callback = new BrapiApiCallBack<StudyObservationVariablesResponse>() {
@@ -723,7 +723,7 @@ public class BrAPIService {
             };
             studiesApi.studiesStudyDbIdObservationvariablesGetAsync(
                     studyDbId, 0, 200,
-                    null, callback);
+                    brapiToken, callback);
         } catch (ApiException e) {
             failFunction.apply(e);
             e.printStackTrace();
