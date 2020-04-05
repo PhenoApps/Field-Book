@@ -4,6 +4,7 @@
         <new>Search widget in Settings</new>
         <new>Added link to translate app in About section</new>
         <new>Quick GoTo allows full keyboard input</new>
+        <info>Updated Japanese translation</info>
         <bugfix>Multicat layout updates when deleting values</bugfix>
         <bugfix>Fix for sample directories and sample files not being created</bugfix>
         <bugfix>Fix for database importing</bugfix>
