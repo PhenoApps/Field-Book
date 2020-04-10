@@ -673,13 +673,6 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                 ConfigActivity.dt.updateExpTable(true, false, false, exp_id);
 
-                Editor e = ep.edit();
-                e.putString("DROP1", null);
-                e.putString("DROP2", null);
-                e.putString("DROP3", null);
-                e.putInt("ExpID", exp_id);
-                e.apply();
-
             } catch (Exception e) {
                 e.printStackTrace();
                 fail = true;

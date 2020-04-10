@@ -569,7 +569,7 @@ public class MainActivity extends AppCompatActivity {
         // Based on plot_id, prevent duplicates
         dt.deleteTrait(rangeBox.getPlotID(), parent);
 
-        String exp_id = Integer.toString(ep.getInt("ExpID", 0));
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
                 ep.getString("Location", ""), "", exp_id, observationDbId,

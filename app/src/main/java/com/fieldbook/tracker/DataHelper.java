@@ -251,7 +251,7 @@ public class DataHelper {
         List<Observation> observations = new ArrayList<>();
 
         // get currently selected study
-        String exp_id = Integer.toString(ep.getInt("ExpID", 0));
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
         String query = "SELECT " +
                 "user_traits.id, " +
@@ -293,7 +293,7 @@ public class DataHelper {
         List<Image> images = new ArrayList<>();
 
         // get currently selected study
-        String exp_id = Integer.toString(ep.getInt("ExpID", 0));
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
         String query = "SELECT " +
                 "user_traits.id, " +
@@ -568,7 +568,7 @@ public class DataHelper {
 
         for (Observation observation : observations) {
             update.bindString(1, observation.getDbId());
-            update.bindString(2, observation.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            update.bindString(2, observation.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.getDefault())));
             update.bindString(3, observation.getFieldbookDbId());
             update.execute();
         }
