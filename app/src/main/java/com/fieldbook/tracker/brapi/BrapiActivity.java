@@ -81,7 +81,7 @@ public class BrapiActivity extends AppCompatActivity {
         listStudies.setVisibility(View.GONE);
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
-        brAPIService.getStudies(new Function<List<BrapiStudySummary>, Void>() {
+        brAPIService.getStudies(BrAPIService.getBrapiToken(this), new Function<List<BrapiStudySummary>, Void>() {
             @Override
             public Void apply(final List<BrapiStudySummary> studies) {
 

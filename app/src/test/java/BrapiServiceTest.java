@@ -57,12 +57,13 @@ public class BrapiServiceTest {
     @Test
     public void checkGetStudies() {
 
+        final String brapiToken = "Bearer YYYY";
 
         // Set up our signal to wait for the callback to be called.
         final CountDownLatch signal = new CountDownLatch(1);
 
         // Call our get studies endpoint with the same parsing that our classes use.
-        this.brAPIService.getStudies(new Function<List<BrapiStudySummary>, Void>() {
+        this.brAPIService.getStudies(brapiToken, new Function<List<BrapiStudySummary>, Void>() {
             @Override
             public Void apply(List<BrapiStudySummary> input) {
                 // Check that there is atleast one study returned.
@@ -99,9 +100,10 @@ public class BrapiServiceTest {
         // Set up our signal to wait for the callback to be called.
         final CountDownLatch signal = new CountDownLatch(1);
         final String studyDbId = "1001";
+        final String brapiToken = "Bearer YYYY";
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getStudyDetails(studyDbId, new Function<BrapiStudyDetails, Void>() {
+        this.brAPIService.getStudyDetails(brapiToken, studyDbId, new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(BrapiStudyDetails input) {
                 // Check that the study db id we passed is what we are getting back
@@ -139,9 +141,10 @@ public class BrapiServiceTest {
         // Set up our signal to wait for the callback to be called.
         final CountDownLatch signal = new CountDownLatch(1);
         final String studyDbId = "1001";
+        final String brapiToken = "Bearer YYYY";
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getPlotDetails(studyDbId, new Function<BrapiStudyDetails, Void>() {
+        this.brAPIService.getPlotDetails(brapiToken, studyDbId, new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(BrapiStudyDetails input) {
                 // Check that we are getting some results back
@@ -178,9 +181,10 @@ public class BrapiServiceTest {
         // Call our get plot details endpoint with the same parsing that our classes use.
         // Set up our signal to wait for the callback to be called.
         final CountDownLatch signal = new CountDownLatch(1);
+        final String brapiToken = "Bearer YYYY";
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getOntology(null, null, new Function<BrapiListResponse<TraitObject>, Void>() {
+        this.brAPIService.getOntology(brapiToken,null, null, new Function<BrapiListResponse<TraitObject>, Void>() {
             @Override
             public Void apply(BrapiListResponse<TraitObject> input) {
                 // Check that we are getting some results back
@@ -218,9 +222,10 @@ public class BrapiServiceTest {
         // Set up our signal to wait for the callback to be called.
         final CountDownLatch signal = new CountDownLatch(1);
         final String studyDbId = "1001";
+        final String brapiToken = "Bearer YYYY";
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getTraits(studyDbId, new Function<BrapiStudyDetails, Void>() {
+        this.brAPIService.getTraits(brapiToken, studyDbId, new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(BrapiStudyDetails input) {
                 // Check that we are getting some results back
