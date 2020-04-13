@@ -840,7 +840,7 @@ public class BrAPIService {
                 return new BrapiControllerResponse(false, "Host is null");
             }
 
-            field.setUnique_id("Plot");
+            field.setUnique_id("observationUnitDbId");
             field.setPrimary_id("Row");
             field.setSecondary_id("Column");
             field.setExp_sort("Plot");
