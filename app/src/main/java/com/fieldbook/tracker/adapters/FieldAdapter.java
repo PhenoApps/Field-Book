@@ -66,20 +66,19 @@ public class FieldAdapter extends BaseAdapter {
         boolean has_contents = item != null;
         if (has_contents) {
             ed.putString("FieldFile", item.getExp_name());
+            ed.putInt("SelectedFieldExpId", item.getExp_id());
             ed.putString("ImportUniqueName", item.getUnique_id());
             ed.putString("ImportFirstName", item.getPrimary_id());
             ed.putString("ImportSecondName", item.getSecondary_id());
         } else {
             ed.putString("FieldFile", null);
+            ed.putInt("SelectedFieldExpId", -1);
             ed.putString("ImportUniqueName", null);
             ed.putString("ImportFirstName", null);
             ed.putString("ImportSecondName", null);
         }
         ed.putBoolean("ImportFieldFinished", has_contents);
         ed.putString("lastplot", null);
-        ed.putString("DROP1", null);
-        ed.putString("DROP2", null);
-        ed.putString("DROP3", null);
         ed.apply();
     }
 
@@ -196,7 +195,7 @@ public class FieldAdapter extends BaseAdapter {
 
                 ConfigActivity.dt.deleteField(getItem(position).getExp_id());
 
-                if (getItem(position).getExp_name().equals(ep.getString("FieldFile", ""))) {
+                if (getItem(position).getExp_id() == ep.getInt("SelectedFieldExpId", -1)) {
                     setEditorItem(ep, null);
                 }
 

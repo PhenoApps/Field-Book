@@ -75,8 +75,10 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
     private void buildStudyDetails() {
 
+        final String brapiToken = BrAPIService.getBrapiToken(this.context);
+
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-        brAPIService.getStudyDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
+        brAPIService.getStudyDetails(brapiToken, study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
 
@@ -112,7 +114,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         });
 
 
-        brAPIService.getPlotDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
+        brAPIService.getPlotDetails(brapiToken, study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
 
@@ -149,7 +151,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         });
 
 
-        brAPIService.getTraits(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
+        brAPIService.getTraits(brapiToken, study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
 

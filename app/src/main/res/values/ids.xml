@@ -40,9 +40,6 @@
     <item name="drop1prefix" type="id" />
     <item name="drop2prefix" type="id" />
     <item name="drop3prefix" type="id" />
-    <item name="drop1" type="id" />
-    <item name="drop2" type="id" />
-    <item name="drop3" type="id" />
     <item name="traitLeft" type="id" />
     <item name="traitType" type="id" />
     <item name="traitRight" type="id" />
