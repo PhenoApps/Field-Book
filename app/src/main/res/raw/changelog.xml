@@ -1,18 +1,16 @@
 <changelog>
 
-    <release versionCode="430" versionName="v4.3" date="2020-04-01">
+    <release versionCode="430" versionName="v4.3" date="2020-04-20">
         <new>Search widget in Settings</new>
         <new>Added link to translate app in About section</new>
         <new>Quick GoTo allows full keyboard input</new>
         <info>Updated Japanese translation</info>
-        <bugfix>Multicat layout updates when deleting values</bugfix>
+        <info>Substantial refactoring</info>
+        <bugfix>Multicat layout updates correctly when deleting values</bugfix>
         <bugfix>Fix for sample directories and sample files not being created</bugfix>
         <bugfix>Fix for database importing</bugfix>
         <bugfix>Fix for Quick GoTo secondary order</bugfix>
-        <info>Substantial refactoring</info>
-        <new>2</new>
-        <info>1</info>
-        <bugfix>3</bugfix>
+        <bugfix>Fixed tutorial order</bugfix>
     </release>
 
     <release versionCode="421" versionName="v4.2.1" date="2020-03-10">
