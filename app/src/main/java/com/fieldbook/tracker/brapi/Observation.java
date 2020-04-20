@@ -13,7 +13,7 @@ public class Observation extends BrapiObservation {
     public Observation() {
     }
 
-    Observation(NewObservationDbIdsObservations response) {
+    public Observation(NewObservationDbIdsObservations response) {
         this.setDbId(response.getObservationDbId());
         this.setUnitDbId(response.getObservationUnitDbId());
         this.setVariableDbId(response.getObservationVariableDbId());

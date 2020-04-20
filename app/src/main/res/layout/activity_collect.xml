@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:fitsSystemWindows="true"
+    app:layout_constraintWidth_default="percent">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/main_primary"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/AppToolbar"
+        app:theme="@style/AppToolbar" />
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarBottom"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/main_primaryDark"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:popupTheme="@style/AppToolbar"
+        app:theme="@style/AppToolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:weightSum="1">
+
+            <ImageButton
+                android:id="@+id/missingValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="0.4"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center"
+                android:src="@drawable/main_ic_missing"
+                android:textColor="#FFFFFF" />
+
+            <ImageButton
+                android:id="@+id/deleteValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="0.4"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center"
+                android:src="@drawable/main_ic_delete_forever"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/selectorList"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <ImageView
+        android:id="@+id/traitLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:paddingRight="5dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/main_trait_left_arrow_unpressed"
+        app:layout_constraintBottom_toTopOf="@id/traitDetails"
+        app:layout_constraintRight_toLeftOf="@id/traitType"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/selectorList"
+        app:layout_constraintHeight_percent="0.08"/>
+
+    <Spinner
+        android:id="@+id/traitType"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@id/traitDetails"
+        app:layout_constraintLeft_toRightOf="@id/traitLeft"
+        app:layout_constraintRight_toLeftOf="@id/traitRight"
+        app:layout_constraintTop_toBottomOf="@id/selectorList" />
+
+    <ImageView
+        android:id="@+id/traitRight"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:paddingLeft="5dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/main_trait_right_unpressed"
+        app:layout_constraintBottom_toTopOf="@id/traitDetails"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/traitType"
+        app:layout_constraintTop_toBottomOf="@id/selectorList"
+        app:layout_constraintHeight_percent="0.08" />
+
+    <TextView
+        android:id="@+id/traitDetails"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="@string/main_trait_details"
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_small"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/rangeLeft"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/traitRight" />
+
+    <ImageView
+        android:id="@+id/rangeLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:src="@drawable/main_entry_left_unpressed"
+        app:layout_constraintBottom_toTopOf="@id/etCurVal"
+        app:layout_constraintRight_toLeftOf="@id/namesPlotRangeHolder"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/traitDetails"
+        app:layout_constraintHeight_percent="0.13" />
+
+    <LinearLayout
+        android:id="@+id/namesPlotRangeHolder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/etCurVal"
+        app:layout_constraintLeft_toRightOf="@id/rangeLeft"
+        app:layout_constraintRight_toLeftOf="@id/valuesPlotRangeHolder"
+        app:layout_constraintTop_toBottomOf="@id/traitDetails">
+
+        <TextView
+            android:id="@+id/rangeName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:paddingRight="10dp"
+            android:text="@string/search_results_dialog_range"
+            android:textColor="@color/s_text"
+            android:textSize="@dimen/text_size_xlarge"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/plotName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:paddingRight="10dp"
+            android:text="@string/search_results_dialog_plot"
+            android:textColor="@color/s_text"
+            android:textSize="@dimen/text_size_xlarge"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/valuesPlotRangeHolder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/etCurVal"
+        app:layout_constraintLeft_toRightOf="@id/namesPlotRangeHolder"
+        app:layout_constraintRight_toLeftOf="@id/rangeRight"
+        app:layout_constraintTop_toBottomOf="@id/traitDetails">
+
+        <EditText
+            android:id="@+id/range"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:imeOptions="actionDone"
+            android:inputType="textVisiblePassword"
+            android:singleLine="true"
+            android:text=""
+            android:textColor="#000000"
+            android:textSize="@dimen/text_size_large"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvRange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="0dp"
+            android:singleLine="true"
+            android:text=""
+            android:textColor="#000000"
+            android:textSize="@dimen/text_size_xlarge"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/plot"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:imeOptions="actionDone"
+            android:inputType="textVisiblePassword"
+            android:singleLine="true"
+            android:text=""
+            android:textColor="#000000"
+            android:textSize="@dimen/text_size_large"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvPlot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text=""
+            android:textColor="#000000"
+            android:textSize="@dimen/text_size_xlarge"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/rangeRight"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:src="@drawable/main_entry_right_unpressed"
+        app:layout_constraintBottom_toTopOf="@id/etCurVal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/valuesPlotRangeHolder"
+        app:layout_constraintTop_toBottomOf="@id/traitDetails"
+        app:layout_constraintHeight_percent="0.13" />
+
+    <EditText
+        android:id="@+id/etCurVal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:enabled="false"
+        android:gravity="center"
+        android:inputType="textNoSuggestions"
+        android:maxLines="1"
+        android:text=""
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_xlarge"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/svTraitContainer"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/valuesPlotRangeHolder" />
+
+    <ScrollView
+        android:id="@+id/svTraitContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:isScrollContainer="true"
+        app:layout_constraintBottom_toTopOf="@id/toolbarBottom"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etCurVal">
+
+        <LinearLayout
+            android:id="@+id/traitHolder"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <include
+                layout="@layout/trait_audio"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_boolean"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" />
+
+            <include
+                layout="@layout/trait_categorical"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_date"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_numeric"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_percent"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_photo"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_counter"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_diseaserating"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_multicat"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_location"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_angle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_barcode"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                layout="@layout/trait_labelprint"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

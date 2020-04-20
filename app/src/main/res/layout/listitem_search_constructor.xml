@@ -41,7 +41,7 @@
             android:layout_height="0dp"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:inputType="text"
+            android:inputType="textVisiblePassword"
             android:singleLine="true"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_xlarge" />

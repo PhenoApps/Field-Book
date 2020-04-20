@@ -11,11 +11,11 @@ package com.fieldbook.tracker.brapi;
 
         import androidx.arch.core.util.Function;
 
-        import com.fieldbook.tracker.DataHelper;
+        import com.fieldbook.tracker.database.DataHelper;
         import com.fieldbook.tracker.R;
-        import com.fieldbook.tracker.fields.FieldObject;
-        import com.fieldbook.tracker.preferences.PreferencesActivity;
-        import com.fieldbook.tracker.traits.TraitObject;
+        import com.fieldbook.tracker.objects.FieldObject;
+        import com.fieldbook.tracker.preferences.GeneralKeys;
+        import com.fieldbook.tracker.objects.TraitObject;
         import com.fieldbook.tracker.utilities.Constants;
 
         import java.net.MalformedURLException;
@@ -86,7 +86,7 @@ public class BrAPIService {
 
     public static BrapiControllerResponse authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
+        editor.putString(GeneralKeys.BRAPI_TOKEN, null);
         editor.apply();
 
         if (target == null) {
@@ -94,7 +94,7 @@ public class BrAPIService {
         }
 
         try {
-            String url = sharedPreferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://%s";
+            String url = sharedPreferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://%s";
             url = String.format(url, target);
             try {
                 // Go to url with the default browser
@@ -147,14 +147,14 @@ public class BrAPIService {
                     return new BrapiControllerResponse(false, "No access token received in response from host.");
                 }
 
-                editor.putString(PreferencesActivity.BRAPI_TOKEN, token);
+                editor.putString(GeneralKeys.BRAPI_TOKEN, token);
                 editor.apply();
 
                 return new BrapiControllerResponse(true, activity.getString(R.string.brapi_auth_success));
             } else {
                 SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(PreferencesActivity.BRAPI_TOKEN, null);
+                editor.putString(GeneralKeys.BRAPI_TOKEN, null);
                 editor.apply();
 
                 return new BrapiControllerResponse(false, activity.getString(R.string.brapi_auth_deny));
@@ -170,7 +170,7 @@ public class BrAPIService {
     public static Boolean isLoggedIn(Context context) {
 
         String auth_token = context.getSharedPreferences("Settings", 0)
-                .getString(PreferencesActivity.BRAPI_TOKEN, "");
+                .getString(GeneralKeys.BRAPI_TOKEN, "");
 
         if (auth_token == null || auth_token == "") {
             return false;
@@ -179,7 +179,7 @@ public class BrAPIService {
         return true;
     }
 
-    static Boolean hasValidBaseUrl(Context context) {
+    public static Boolean hasValidBaseUrl(Context context) {
         String url = getBrapiUrl(context);
 
         return Patterns.WEB_URL.matcher(url).matches();
@@ -212,12 +212,12 @@ public class BrAPIService {
 
     public static String getBrapiUrl(Context context) {
         SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
-        return preferences.getString(PreferencesActivity.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
+        return preferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
     }
 
-    static String getBrapiToken(Context context) {
+    public static String getBrapiToken(Context context) {
         SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
-        return "Bearer " + preferences.getString(PreferencesActivity.BRAPI_TOKEN, "");
+        return "Bearer " + preferences.getString(GeneralKeys.BRAPI_TOKEN, "");
     }
 
     public void postImageMetaData(com.fieldbook.tracker.brapi.Image image, String brapiToken,
@@ -267,7 +267,7 @@ public class BrAPIService {
         return request;
     }
 
-    void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
+    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
@@ -295,7 +295,7 @@ public class BrAPIService {
 
     }
 
-    void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
+    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ImageResponse> callback = new BrapiApiCallBack<ImageResponse>() {
@@ -325,7 +325,7 @@ public class BrAPIService {
 
     }
 
-    public void getStudies(final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction) {
+    public void getStudies(final String brapiToken, final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudiesResponse> callback = new BrapiApiCallBack<StudiesResponse>() {
@@ -354,7 +354,7 @@ public class BrAPIService {
                     null, null, null, null,
                     null, null, null, null, null,
                     null, null, null, null,
-                    0, 1000, null, callback);
+                    0, 1000, brapiToken, callback);
 
         } catch (ApiException e) {
             e.printStackTrace();
@@ -369,7 +369,7 @@ public class BrAPIService {
         return study;
     }
 
-    public void getStudyDetails(String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getStudyDetails(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudyResponse> callback = new BrapiApiCallBack<StudyResponse>() {
@@ -390,7 +390,7 @@ public class BrAPIService {
             };
 
             studiesApi.studiesStudyDbIdGetAsync(
-                    studyDbId, null, callback);
+                    studyDbId, brapiToken, callback);
 
         } catch (ApiException e) {
             failFunction.apply(e);
@@ -408,7 +408,7 @@ public class BrAPIService {
         return studyDetails;
     }
 
-    public void getPlotDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getPlotDetails(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ObservationUnitsResponse1> callback = new BrapiApiCallBack<ObservationUnitsResponse1>() {
@@ -434,7 +434,7 @@ public class BrAPIService {
 
             studiesApi.studiesStudyDbIdObservationunitsGetAsync(
                     studyDbId, "plot", 0, 1000,
-                    null, callback);
+                    brapiToken, callback);
 
         } catch (ApiException e) {
             failFunction.apply(e);
@@ -518,7 +518,7 @@ public class BrAPIService {
         return getPrioritizedValue(values) != null;
     }
 
-    public void getOntology(Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getOntology(final String brapiToken, Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<ObservationVariablesResponse> callback = new BrapiApiCallBack<ObservationVariablesResponse>() {
@@ -559,7 +559,7 @@ public class BrAPIService {
                 pageSize = 50;
             }
 
-            traitsApi.variablesGetAsync(page, pageSize, null, null,
+            traitsApi.variablesGetAsync(page, pageSize, brapiToken, null,
                     null, callback);
 
         } catch (ApiException e) {
@@ -701,7 +701,7 @@ public class BrAPIService {
         return returnValue;
     }
 
-    public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getTraits(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudyObservationVariablesResponse> callback = new BrapiApiCallBack<StudyObservationVariablesResponse>() {
@@ -723,7 +723,7 @@ public class BrAPIService {
             };
             studiesApi.studiesStudyDbIdObservationvariablesGetAsync(
                     studyDbId, 0, 200,
-                    null, callback);
+                    brapiToken, callback);
         } catch (ApiException e) {
             failFunction.apply(e);
             e.printStackTrace();
@@ -840,7 +840,7 @@ public class BrAPIService {
                 return new BrapiControllerResponse(false, "Host is null");
             }
 
-            field.setUnique_id("Plot");
+            field.setUnique_id("observationUnitDbId");
             field.setPrimary_id("Row");
             field.setSecondary_id("Column");
             field.setExp_sort("Plot");

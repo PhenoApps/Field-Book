@@ -9,9 +9,9 @@
     <dimen name="text_size_xlarge">22sp</dimen>
     <dimen name="text_size_xxlarge">30sp</dimen>
 
-
     <dimen name="button_default_height">40dp</dimen>
     <dimen name="button_default_width">110dp</dimen>
     <dimen name="button_width_numeric">85dp</dimen>
     <dimen name="button_width_disease">60dp</dimen>
+
 </resources>

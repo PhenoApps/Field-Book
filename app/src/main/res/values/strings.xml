@@ -12,6 +12,7 @@
     <string name="dialog_import">Import</string>
     <string name="dialog_warning">Warning</string>
     <string name="dialog_save">Save</string>
+    <string name="dialog_go">Go</string>
 
     <!-- Startup  -->
     <string name="startup_sample_data_title">Sample data</string>
@@ -24,6 +25,7 @@
     <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
     <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
     <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
+    <string name="permission_rationale_file_creation">Creating sample files and directories requires access to the device\'s files.</string>
 
     <!-- Miscellaneous  -->
     <string name="fields_name">Field Name</string>
@@ -309,6 +311,7 @@
     <string name="about_developer_trife" translatable="false">Trevor Rife</string>
     <string name="about_developer_trife_location" translatable="false">Kansas State University</string>
     <string name="about_developer_trife_email" translatable="false">trife@ksu.edu</string>
+    <string name="about_email_title">Email</string>
     <string name="about_developer_trife_website" translatable="false">https://github.com/PhenoApps/Field-Book</string>
     <string name="about_contributors_title">Contributors</string>
     <string name="about_contributors_developers_title">Developers</string>
@@ -317,15 +320,17 @@
     <string name="about_contributors_funding_title">Funding</string>
     <string name="about_contributors_funding_text" translatable="false">Development of Field Book has been supported by the Collaborative Crop Research Program of The McKnight Foundation, the National Science Foundation (#1543958), and the National Institute of Food and Agriculture (#2019-67021-29931).</string>
     <string name="about_rate">Rate this app</string>
-    <string name="about_technical_title">Technical Details1</string>
+    <string name="about_technical_title">Technical Details</string>
+    <string name="about_github_title">GitHub</string>
     <string name="about_licenses_title">Licenses</string>
+    <string name="about_help_translate_title">Help translate</string>
     <string name="changelog_title">Changelog</string>
     <string name="libraries_title">Libraries</string>
 
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>
     <string name="profile_location">Location</string>
-    <string name="profile_reset">Clear settings</string>
+    <string name="profile_reset">Clear</string>
 
     <string name="profile_person_title">Set person</string>
     <string name="profile_name_first">First name</string>

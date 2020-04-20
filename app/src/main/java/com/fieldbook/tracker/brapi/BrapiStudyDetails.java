@@ -1,6 +1,6 @@
 package com.fieldbook.tracker.brapi;
 
-import com.fieldbook.tracker.traits.TraitObject;
+import com.fieldbook.tracker.objects.TraitObject;
 
 import java.util.List;
 

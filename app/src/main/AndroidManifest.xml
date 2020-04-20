@@ -12,10 +12,10 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
 
@@ -32,10 +32,10 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/field_book"
         android:largeHeap="true"
-        android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".ConfigActivity"
+            android:name=".activities.ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -46,42 +46,51 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.CollectActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale|keyboard"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
-            android:name=".search.SearchActivity"
+            android:name=".activities.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:theme="@style/ActivityDialog"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".DatagridActivity"
+            android:name=".activities.DatagridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:theme="@style/ActivityDialog" />
         <activity
-            android:name=".brapi.BrapiActivity"
+            android:name=".activities.BrapiActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".brapi.BrapiTraitActivity"
+            android:name=".activities.BrapiTraitActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".FileExploreActivity"
+            android:name=".activities.FileExploreActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:theme="@style/ActivityDialog" />
         <activity
-            android:name=".traits.TraitEditorActivity"
+            android:name=".activities.TraitEditorActivity"
+            android:alwaysRetainTaskState="false"
+            android:configChanges="keyboardHidden|orientation"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeAction" />
+        <activity
+            android:name=".activities.FieldEditorActivity"
             android:alwaysRetainTaskState="false"
             android:configChanges="keyboardHidden|orientation"
             android:finishOnTaskLaunch="true"
@@ -89,15 +98,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeAction" />
         <activity
-            android:name=".fields.FieldEditorActivity"
-            android:alwaysRetainTaskState="false"
-            android:configChanges="keyboardHidden|orientation"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeAction" />
-        <activity
-            android:name=".AboutActivity"
+            android:name=".activities.AboutActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:theme="@style/AppTheme.MaterialAboutActivity" />
         <activity
@@ -119,7 +120,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".brapi.BrapiExportActivity"
+            android:name=".activities.BrapiExportActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -144,7 +145,7 @@
             tools:replace="android:screenOrientation" />
 
         <provider
-            android:name=".GenericFileProvider"
+            android:name=".provider.GenericFileProvider"
             android:authorities="com.fieldbook.tracker.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -153,5 +154,4 @@
                 android:resource="@xml/provider_paths" />
         </provider>
     </application>
-
 </manifest>
