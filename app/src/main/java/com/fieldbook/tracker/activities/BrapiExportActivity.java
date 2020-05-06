@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
@@ -402,21 +403,26 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private UploadError processErrorCode(Integer code) {
         UploadError retVal;
+        ApiError apiError = ApiError.processErrorCode(code);
 
-        switch (code) {
-            case 403:
+        if (apiError == null) {
+            return UploadError.API_CALLBACK_ERROR;
+        }
+
+        switch (apiError) {
+            case FORBIDDEN:
                 // Warn that they do not have permissions to push traits
                 retVal = UploadError.API_PERMISSION_ERROR;
                 break;
-            case 401:
+            case UNAUTHORIZED:
                 // Start the login process
                 retVal = UploadError.API_UNAUTHORIZED_ERROR;
                 break;
-            case 400:
+            case BAD_REQUEST:
                 // Bad request
                 retVal = UploadError.API_CALLBACK_ERROR;
                 break;
-            case 404:
+            case NOT_FOUND:
                 // End point not supported
                 retVal = UploadError.API_NOTSUPPORTED_ERROR;
                 break;

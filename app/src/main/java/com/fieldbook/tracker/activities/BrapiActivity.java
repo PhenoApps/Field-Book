@@ -14,7 +14,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiLoadDialog;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
 import com.fieldbook.tracker.database.DataHelper;
@@ -24,6 +26,8 @@ import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.swagger.client.ApiException;
 
 /**
  * API test Screen
@@ -108,18 +112,19 @@ public class BrapiActivity extends AppCompatActivity {
 
                 return null;
             }
-        }, new Function<String, Void>() {
+        }, new Function<ApiException, Void>() {
 
 
             @Override
-            public Void apply(final String input) {
+            public Void apply(final ApiException error) {
 
                 (BrapiActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
+                        String message = getMessageForErrorCode(error.getCode());
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        Toast.makeText(getApplicationContext(), input, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -127,6 +132,30 @@ public class BrapiActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private String getMessageForErrorCode(int code) {
+        ApiError apiError = ApiError.processErrorCode(code);
+
+        if (apiError == null) {
+            return getString(R.string.brapi_studies_error);
+        }
+
+        switch (apiError) {
+            case UNAUTHORIZED:
+                // Start the login process
+                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(BrapiActivity.this, null);
+                brapiAuth.show();
+                return getString(R.string.brapi_auth_deny);
+            case FORBIDDEN:
+                return getString(R.string.brapi_auth_permission_deny);
+            case NOT_FOUND:
+                return getString(R.string.brapi_not_found);
+            case BAD_REQUEST:
+                return getString(R.string.brapi_studies_error);
+            default:
+                return null;
+        }
     }
 
     private ArrayAdapter buildStudiesArrayAdapter(List<BrapiStudySummary> studies) {

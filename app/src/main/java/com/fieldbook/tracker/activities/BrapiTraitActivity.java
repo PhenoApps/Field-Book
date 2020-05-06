@@ -16,7 +16,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
@@ -200,14 +202,39 @@ public class BrapiTraitActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         // Display error message but don't finish the activity.
+                        String message = getMessageForErrorCode(input.getCode());
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        Toast.makeText(getApplicationContext(), R.string.brapi_ontology_error, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                     }
                 });
 
                 return null;
             }
         });
+    }
+
+    private String getMessageForErrorCode(int code) {
+        ApiError apiError = ApiError.processErrorCode(code);
+
+        if (apiError == null) {
+            return getString(R.string.brapi_ontology_error);
+        }
+
+        switch (apiError) {
+            case UNAUTHORIZED:
+                // Start the login process
+                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(BrapiTraitActivity.this, null);
+                brapiAuth.show();
+                return getString(R.string.brapi_auth_deny);
+            case FORBIDDEN:
+                return getString(R.string.brapi_auth_permission_deny);
+            case NOT_FOUND:
+                return getString(R.string.brapi_not_found);
+            case BAD_REQUEST:
+                return getString(R.string.brapi_ontology_error);
+            default:
+                return null;
+        }
     }
 
     // Transforms the trait data to display it on the screen.

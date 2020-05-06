@@ -70,9 +70,9 @@ public class BrapiServiceTest {
 
                 return null;
             }
-        }, new Function<String, Void>() {
+        }, new Function<ApiException, Void>() {
             @Override
-            public Void apply(String input) {
+            public Void apply(ApiException error) {
                 BrapiServiceTest.this.checkGetStudiesResult = false;
                 // Notify the countdown that we are finish
                 signal.countDown();
