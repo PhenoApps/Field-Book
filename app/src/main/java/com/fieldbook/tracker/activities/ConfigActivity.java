@@ -309,6 +309,9 @@ public class ConfigActivity extends AppCompatActivity {
                             case "brapi":
                                 exportBrAPI();
                                 break;
+                            default:
+                                showExportDialog();
+                                break;
                         }
 
                         break;

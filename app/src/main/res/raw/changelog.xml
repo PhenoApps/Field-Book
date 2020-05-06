@@ -1,6 +1,17 @@
 <changelog>
 
-    <release versionCode="430" versionName="v4.3" date="2020-04-20">
+    <release
+        date="2020-05-06"
+        versionCode="431"
+        versionName="v4.3.1">
+        <bugfix>Export dialog now displays correctly</bugfix>
+        <bugfix>Fix for BrAPI export</bugfix>
+    </release>
+
+    <release
+        date="2020-04-20"
+        versionCode="430"
+        versionName="v4.3">
         <new>Search widget in Settings</new>
         <new>Added link to translate app in About section</new>
         <new>Quick GoTo allows full keyboard input</new>
@@ -13,13 +24,19 @@
         <bugfix>Fixed tutorial order</bugfix>
     </release>
 
-    <release versionCode="421" versionName="v4.2.1" date="2020-03-10">
+    <release
+        date="2020-03-10"
+        versionCode="421"
+        versionName="v4.2.1">
         <info>Updated Chinese translation</info>
         <info>Updated Italian translation</info>
         <bugfix>Fix for missing sample files and crash</bugfix>
     </release>
 
-    <release versionCode="420" versionName="v4.2" date="2020-03-06">
+    <release
+        date="2020-03-06"
+        versionCode="420"
+        versionName="v4.2">
         <info>Upgraded to Java 8</info>
         <new>New tutorial</new>
         <new>Additional import sources</new>
@@ -32,15 +49,24 @@
         <bugfix>Fix for return key setting</bugfix>
     </release>
 
-    <release versionCode="414" versionName="v4.1.4" date="2020-02-28">
+    <release
+        date="2020-02-28"
+        versionCode="414"
+        versionName="v4.1.4">
         <bugfix>Fix for data save delay</bugfix>
     </release>
 
-    <release versionCode="413" versionName="v4.1.3" date="2020-02-21">
+    <release
+        date="2020-02-21"
+        versionCode="413"
+        versionName="v4.1.3">
         <bugfix>Fix for local storage crash</bugfix>
     </release>
 
-    <release versionCode="412" versionName="v4.1.2" date="2020-02-20">
+    <release
+        date="2020-02-20"
+        versionCode="412"
+        versionName="v4.1.2">
         <new>Advanced settings redone</new>
         <new>Improved workflow</new>
         <new>Firebase crashlytics</new>
@@ -50,17 +76,26 @@
         <bugfix>Lots of bug fixes</bugfix>
     </release>
 
-    <release versionCode="403" versionName="v4.0.3" date="2017-10-19">
+    <release
+        date="2017-10-19"
+        versionCode="403"
+        versionName="v4.0.3">
         <bugfix>Miscellaneous bugfixes</bugfix>
     </release>
 
-    <release versionCode="401" versionName="v4.0.1" date="2017-08-30">
+    <release
+        date="2017-08-30"
+        versionCode="401"
+        versionName="v4.0.1">
         <new>Updated field management</new>
         <new>New main screen layout</new>
         <bugfix>Lots of bug fixes</bugfix>
     </release>
 
-    <release versionCode="331" versionName="v3.3.1" date="2017-03-07">
+    <release
+        date="2017-03-07"
+        versionCode="331"
+        versionName="v3.3.1">
         <info>Photo names include rep and trait name</info>
         <info>Updated trait layouts</info>
         <info>Changed numeric clear to backspace</info>
@@ -70,7 +105,10 @@
         <bugfix>Miscellaneous fixes and performance enhancements</bugfix>
     </release>
 
-    <release versionCode="330" versionName="v3.3" date="2017-02-19">
+    <release
+        date="2017-02-19"
+        versionCode="330"
+        versionName="v3.3">
         <info>Replaced lots of words with icons</info>
         <info>Changed 'Rust rating' trait to 'Disease rating'</info>
         <info>Changed disease rating buttons from R/MS/MR/S to R/M/S</info>
@@ -81,7 +119,10 @@
         <bugfix>Fixed an issue with spaces in column names and search</bugfix>
     </release>
 
-    <release versionCode="320" versionName="v3.2" date="2016-04-04">
+    <release
+        date="2016-04-04"
+        versionCode="320"
+        versionName="v3.2">
         <info>Updated dialog and button design</info>
         <info>Updated internal database</info>
         <new>Bengali translation</new>
@@ -90,12 +131,18 @@
         <bugfix>Fixed bug with rearranging traits</bugfix>
     </release>
 
-    <release versionCode="311" versionName="v3.1.1" date="2015-12-12">
+    <release
+        date="2015-12-12"
+        versionCode="311"
+        versionName="v3.1.1">
         <bugfix>Fixed a bug with the new multicat trait</bugfix>
         <bugfix>Fixed the trait creation layout</bugfix>
     </release>
 
-    <release versionCode="310" versionName="v3.1" date="2015-12-08">
+    <release
+        date="2015-12-08"
+        versionCode="310"
+        versionName="v3.1">
         <info>Field name is listed in the navigation drawer on the main screen</info>
         <info>Updated dialogs with titles</info>
         <info>Location exports as null if not set</info>
@@ -105,7 +152,10 @@
         <bugfix>Fixed a bug related to audio and rust traits</bugfix>
     </release>
 
-    <release versionCode="300" versionName="v3.0" date="2015-09-14">
+    <release
+        date="2015-09-14"
+        versionCode="300"
+        versionName="v3.0">
         <info>Renamed Setup to Profile</info>
         <new>Updated user interface</new>
         <new>Support for small screens</new>
@@ -114,7 +164,10 @@
         <bugfix>Fixed a bug with the cursor in text traits</bugfix>
     </release>
 
-    <release versionCode="241" versionName="v2.4.1" date="2015-06-04">
+    <release
+        date="2015-06-04"
+        versionCode="241"
+        versionName="v2.4.1">
         <info>Reorganized export layout</info>
         <info>Changed the default name for exported files</info>
         <info>Updated strings for clarity</info>
@@ -125,17 +178,23 @@
         <bugfix>Bug fixes and improvements</bugfix>
     </release>
 
-    <release versionCode="235" versionName="v2.3.5" date="2015-05-28">
+    <release
+        date="2015-05-28"
+        versionCode="235"
+        versionName="v2.3.5">
         <info>Updated tutorial</info>
         <info>Changed timestamp format</info>
-        <new>Rust Rating trait with customizable severity scale </new>
+        <new>Rust Rating trait with customizable severity scale</new>
         <new>Counter trait</new>
         <new>Option to disable automatic file sharing</new>
         <new>Option to disable plot navigation if no data collected with sound notification</new>
         <new>Saves most recent plot</new>
     </release>
 
-    <release versionCode="234" versionName="v2.3.4" date="2015-04-22">
+    <release
+        date="2015-04-22"
+        versionCode="234"
+        versionName="v2.3.4">
         <info>Long press InfoBar text for a toast containing the same text</info>
         <info>Quick GoTo is disabled by default (toggled in Settings)</info>
         <info>Only first photo name is exported in table mode</info>
@@ -146,7 +205,10 @@
         <bugfix>Fixed some issues with search layout</bugfix>
     </release>
 
-    <release versionCode="230" versionName="v2.3.0" date="2015-02-28">
+    <release
+        date="2015-02-28"
+        versionCode="230"
+        versionName="v2.3.0">
         <info>Audio trait updates and fixes</info>
         <info>Table export speed drastically improved</info>
         <new>Updated Import field layout</new>
@@ -156,7 +218,10 @@
         <new>Toggle all trait visibility at once</new>
     </release>
 
-    <release versionCode="220" versionName="v2.2" date="2014-09-10">
+    <release
+        date="2014-09-10"
+        versionCode="220"
+        versionName="v2.2">
         <info>Visibility of traits is now changed in the Traits screen instead of Setup</info>
         <info>XLS support readded</info>
         <info>Clear categorical traits by reclicking the current choice</info>
@@ -167,7 +232,10 @@
         <bugfix>Traits can now be made in other languages</bugfix>
     </release>
 
-    <release versionCode="212" versionName="v2.1.2" date="2014-09-03">
+    <release
+        date="2014-09-03"
+        versionCode="212"
+        versionName="v2.1.2">
         <info>Renamed "Qualitative" trait format "Categorical"</info>
         <info>Removed support for Android 3.0</info>
         <info>Removed ActionBarSherlock library</info>
@@ -175,18 +243,26 @@
         <bugfix>Fixed issue with field file selection</bugfix>
     </release>
 
-    <release versionCode="210" versionName="v2.1.0" date="2014-08-18">
+    <release
+        date="2014-08-18"
+        versionCode="210"
+        versionName="v2.1.0">
         <info>Changed tutorial setup</info>
         <info>Language dialog updated</info>
         <new>Support for folders in the Fields dialog</new>
-        <new>Amharic, Arabic, Brazilian Portuguese, Chinese, French, Hindi, Japanese, Oromo, and Russian translation</new>
+        <new>Amharic, Arabic, Brazilian Portuguese, Chinese, French, Hindi, Japanese, Oromo, and
+            Russian translation
+        </new>
         <bugfix>Minimum in numeric traits is enforced</bugfix>
         <bugfix>All text in text traits is deletable with the keyboard</bugfix>
         <bugfix>Cursor now appears at end of text in text traits</bugfix>
         <bugfix>Files now visible via computer after export</bugfix>
     </release>
 
-    <release versionCode="201" versionName="v2.0.1" date="2014-05-18">
+    <release
+        date="2014-05-18"
+        versionCode="201"
+        versionName="v2.0.1">
         <info>Initial release</info>
         <new>Audio trait</new>
         <new>Import/Export trait lists</new>
