@@ -87,7 +87,7 @@ public class DataHelper {
             this.insertTraits = db.compileStatement(INSERTTRAITS);
             this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
 
-            timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ",
+            timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSXXX",
                     Locale.getDefault());
 
 
@@ -437,7 +437,7 @@ public class DataHelper {
                 "FROM " +
                 "user_traits " +
                 "JOIN " +
-                "range ON user_traits.rid = range.plot " +
+                "range ON user_traits.rid = range.observationUnitDbId " +
                 "JOIN " +
                 "traits ON user_traits.parent = traits.trait " +
                 "JOIN " +
@@ -506,7 +506,7 @@ public class DataHelper {
                 "FROM " +
                 "user_traits " +
                 "JOIN " +
-                "range ON user_traits.rid = range.plot " +
+                "range ON user_traits.rid = range.observationUnitDbId " +
                 "JOIN " +
                 "traits ON user_traits.parent = traits.trait " +
                 "JOIN " +
