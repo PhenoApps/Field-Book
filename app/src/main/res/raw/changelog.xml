@@ -1,11 +1,12 @@
 <changelog>
 
     <release
-        date="2020-05-06"
+        date="2020-05-21"
         versionCode="431"
         versionName="v4.3.1">
         <bugfix>Export dialog now displays correctly</bugfix>
         <bugfix>Fix for BrAPI export</bugfix>
+        <bugfix>Timestamp bugfix</bugfix>
     </release>
 
     <release

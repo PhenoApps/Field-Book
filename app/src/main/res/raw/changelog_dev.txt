@@ -1,3 +1,8 @@
+39/4.3.1
+Fix for incorrect timestamps
+Export dialog fix
+Fix for brapi export
+
 38/4.3
 Fixed tutorial order
 Cleaned up official changelog
