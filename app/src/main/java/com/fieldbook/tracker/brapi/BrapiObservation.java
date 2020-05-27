@@ -46,7 +46,7 @@ public class BrapiObservation {
         OffsetDateTime converted = null;
         try {
             //TODO: locale
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ");
             converted = OffsetDateTime.parse(time, formatter);
         } catch (DateTimeParseException e) {
             e.printStackTrace();
@@ -107,7 +107,7 @@ public class BrapiObservation {
         return result;
     }
 
-    String getUnitDbId() {
+    public String getUnitDbId() {
         return unitDbId;
     }
 
@@ -115,7 +115,7 @@ public class BrapiObservation {
         this.unitDbId = unitDbId;
     }
 
-    String getVariableDbId() {
+    public String getVariableDbId() {
         return variableDbId;
     }
 
@@ -123,7 +123,7 @@ public class BrapiObservation {
         this.variableDbId = variableDbId;
     }
 
-    String getVariableName() {
+    public String getVariableName() {
         return variableName;
     }
 
@@ -131,7 +131,7 @@ public class BrapiObservation {
         this.variableName = variableName;
     }
 
-    String getFieldBookDbId() {
+    public String getFieldBookDbId() {
         return fieldbookDbId;
     }
 

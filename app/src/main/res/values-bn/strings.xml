@@ -28,7 +28,6 @@
     <string name="trait_error_disease_severity">প্রকোপতা সংরক্ষিত রয়েছে</string>
     <string name="trait_delete_warning_photo">আপনি কি নিশ্চিত ছবিটি মুছে ফেলতে চান ?</string>
     <!-- Settings -->
-    <string name="settings_title">বিন্যস্ত করা</string>
     <string name="settings_fields">ক্ষেত্রসমূহ</string>
     <string name="settings_traits">বৈশিষ্ট্য</string>
     <string name="settings_profile">বৃত্তান্ত</string>
@@ -112,30 +111,6 @@
     <!-- Tutorial -->
     <string name="tutorial_dialog_title">টিউটোরিয়াল</string>
     <string name="tutorial_dialog_description">আপনি কি টিউটোরিয়াল সক্ষম করতে চান? এই সাজানোকে অতিরিক্তমাত্রায় সাজানোতে পরিবর্তন করা যায়</string>
-    <string name="tutorial_previous">পূর্ববর্তী</string>
-    <string name="tutorial_next">পরবর্তী</string>
-    <string name="tutorial_main_1">স্ক্রিনের উপরের তথ্যবার প্রত্যেকটি এন্ট্রির জন্য অতিরিক্ত উপাত্ত প্রদর্শন করে । এগুলো নিচের মেনু ব্যাবহার করে পরিবর্তন করা যায়</string>
-    <string name="tutorial_main_2">বড় কালো তীর চিহ্ন এন্ট্রির মধ্যে পরিবর্তন ঘটায়। ছোট সবুজ তীর চিহ্ন বৈশিষ্ট্যের মধ্যে পরিবর্তন ঘটায়</string>
-    <string name="tutorial_main_3">যখন বর্তমান বৈশিষ্ট্যে চাপ দেয়া হয় তখন সক্রিয় বৈশিষ্ট্যসমূহের তালিকা প্রদর্শিত হয়</string>
-    <string name="tutorial_main_4">ফোল্ডার আইকন তার ভিতরে নথির তালিকা প্রদর্শন করে</string>
-    <string name="tutorial_main_5">অনুসন্ধান আইকন ডাটাবেজ খুঁজে দিতে সহায়াতা করে</string>
-    <string name="tutorial_main_6">ডকুমেন্ট আইকন প্রদত্ত এন্ট্রির সকল উপাত্তের সারসংক্ষেপ প্রদর্শন করে</string>
-    <string name="tutorial_main_7">নিচে বামের নেভিগেশন ড্রয়ারে অন্যান্য সকল অপশন আছে</string>
-    <string name="tutorial_settings_1">ক্ষেত্র পাঠাতে এবং বাবস্থাপনা করতে, ক্ষেত্র নির্বাচন করুন।</string>
-    <string name="tutorial_settings_2">বৈশিষ্ট্য যোগ করন, উঠানো, অথবা বাবস্থা করার জন্য বৈশিষ্ট্যটি নির্বাচন করুন</string>
-    <string name="tutorial_settings_3">বাক্তি বা স্থান সেট করার জন্য প্রোফাইল নির্বাচন করুন</string>
-    <string name="tutorial_settings_4">উপাত্ত এক্সপোর্ট করার জন্য এক্সপোর্ট নির্বাচন করুন। দুটি ফরম্যাটে উপাত্ত এক্সপোর্ট করা যায় ঃ ডাটাবেজ অথবা ছক । মূল এক্সপোর্টেট নথি থেকে কলামকে রাখাও যায় আবার বাদও দেয়া যায়</string>
-    <string name="tutorial_settings_5">এডভান্সড সেটিং এ কিভাবে উপাত্ত সংগ্রহ করা হয় তার কিছু অপশনাল সেটিং থাকে</string>
-    <string name="tutorial_settings_6">উপাত্ত উঠানো হয়ে গেলে উপরের বাম কোনার ব্যাক বোতাম আপনাকে মেইন স্ক্রিনে নিয়ে যাবে</string>
-    <string name="tutorial_traits_1">বৈশিষ্ট্য যোগ করুন মেনুটি নতুন বৈশিষ্ট্য তৈরি করে। একই সময়ে কীবোর্ড এবং টিউটোরিয়ালের ব্যাবহার সম্ভব নয়। বিভিন্ন বৈশিষ্ট্যের ফরম্যাটে বিভিন্ন লেআউট থাকে।</string>
-    <string name="tutorial_traits_2">বৈশিষ্ট্যের নথি পাঠানোর জন্য টুলবারের ইম্পরটটি পছন্দ করুন।</string>
-    <string name="tutorial_traits_3">বৈশিষ্ট্য সৃষ্টির অতিরিক্ত তথ্যের জন্য অ্যাপ ম্যানুয়ালটি দেখুন।</string>
-    <string name="tutorial_traits_4">মেইন সংগ্রহকারী স্ক্রিনে কোন বৈশিষ্ট্য দেখতে চেকবক্স ব্যাবহার করুন। যে সকল বৈশিষ্ট্যের উপাত্ত সংগ্রহ করতে না চান তাদেরকে আনচেক করুন।</string>
-    <string name="tutorial_traits_5">সেটিং স্ক্রিনে ফেরত যাওয়ার জন্য উপরের বাম কোনার ব্যাক বোতাম চাপুন।</string>
-    <string name="tutorial_fields_1">টুলবারে ক্ষেত্র সংযোজন কোন ক্ষেত্র নথিকে পাঠাতে অনুমতি দেয়।</string>
-    <string name="tutorial_fields_2">নথিতে অবশ্যই তিনটি কলাম থাকবেঃ একটি একক পরিচায়ক, একটি প্রাইমারি অর্ডার, এবং একটি সেকেন্ডারি অর্ডার। ক্ষেত্রের ভিতরে যাতায়াতের জন্য প্রাইমারি ও সেকেন্ডারি অর্ডার ব্যাবহার করা হয়।</string>
-    <string name="tutorial_fields_3">বাদামী রেডিও বোতাম বিশিষ্ট ক্ষেত্রটি হচ্ছে বর্তমানে সক্রিয় ক্ষেত্র।</string>
-    <string name="tutorial_fields_4">কোন ক্ষেত্র মুছতে চাইলে ক্ষেত্রের নামের বামের মেনুটি খুলুন এবং মুছে ফেলা নির্বাচন করুন।</string>
     <!-- About dialog -->
 
     <string name="about_title">সম্বন্ধে</string>
@@ -185,7 +160,6 @@
     <string name="database_reset_warning1">পুনস্থাপনের সময় সমস্ত উপাত্ত মুছে যাবে। আপনি কি ডাটাবেজ পুনস্থাপন করতে চান?</string>
     <string name="database_reset_warning2">কোন ডাটাবেজ পুনস্থাপন করলে তা পুনরায় ফিরে পাওয়া যায় না। ডাটাবেজ পরিষ্কারের পর অ্যাপ বন্ধ হবে। আপনি কি প্রকৃতপক্ষেই নিশ্চিত যে আপনি অগ্রসর হতে চান?</string>
     <!-- Import dialog -->
-    <string name="import_dialog_title">ক্ষেত্র উঠান</string>
     <string name="import_dialog_unique">একক পরিচায়ক</string>
     <string name="import_dialog_primary">প্রাথমিক অর্ডার</string>
     <string name="import_dialog_secondary">সেকেন্ডারি অর্ডার</string>
@@ -217,7 +191,6 @@
     <!-- Field management strings -->
     <string name="fields_delete_study">ক্ষেত্র মুছে ফেলুন</string>
     <string name="fields_delete_study_confirmation">আপনি কি নিশ্চিত যে আপনি ক্ষেত্রটি মুছে ফেলতে চান? এটি ক্ষেত্রের সাথে সম্পৃক্ত সমস্ত উপাত্তও মুছে দিবে।</string>
-    <string name="fields_study_exists_title">ক্ষেত্র বিদ্যমান</string>
     <string name="fields_study_exists_message">এ নামের ক্ষেত্র ইতিমধ্যেই বিদ্যমান। আপনি কি বিদ্যমান ক্ষেত্রের উপরে লিখতে চান?</string>
     <string name="fields_date_imported">উত্তোলনের তারিখ</string>
     <string name="fields_date_edited">পরিমার্জনের তারিখ</string>

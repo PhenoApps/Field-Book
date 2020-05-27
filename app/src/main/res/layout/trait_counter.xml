@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.fieldbook.tracker.traitLayouts.CounterTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.fieldbook.tracker.traits.CounterTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/counterLayout"
@@ -29,26 +29,24 @@
             app:layout_constraintBottom_toTopOf="@+id/addBtn"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.462" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/minusBtn"
             android:layout_width="75dp"
             android:layout_height="75dp"
-            android:layout_marginRight="20dp"
             android:background="@drawable/custom_round_button"
             android:gravity="center|center_vertical"
             android:text="-1"
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold"
+            android:layout_marginRight="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/addBtn"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.25"
             tools:ignore="HardcodedText" />
 
         <Button
@@ -65,26 +63,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/minusBtn"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.209"
             tools:ignore="HardcodedText" />
 
-        <Button
-            android:id="@+id/barcodeForCounter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="158dp"
-            android:layout_marginLeft="158dp"
-            android:layout_marginTop="44dp"
-            android:layout_marginEnd="165dp"
-            android:layout_marginRight="165dp"
-            android:layout_marginBottom="135dp"
-            android:text="@string/barcodefieldtitle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addBtn"
-            app:layout_constraintVertical_bias="0.0" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-</com.fieldbook.tracker.traitLayouts.CounterTraitLayout>
+</com.fieldbook.tracker.traits.CounterTraitLayout>

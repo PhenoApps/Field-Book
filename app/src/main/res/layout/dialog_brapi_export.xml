@@ -466,7 +466,6 @@
         android:layout_height="100dp"
         android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
-        android:background="@color/whiteBackground"
         android:orientation="vertical"
         android:visibility="gone">
 

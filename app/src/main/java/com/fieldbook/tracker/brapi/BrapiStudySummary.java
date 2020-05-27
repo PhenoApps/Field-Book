@@ -5,7 +5,7 @@ public class BrapiStudySummary {
     private String studyName;
     private String studyDbId;
 
-    String getStudyName() {
+    public String getStudyName() {
         return studyName;
     }
 

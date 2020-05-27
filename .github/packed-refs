@@ -1,0 +1,23 @@
+# pack-refs with: peeled fully-peeled sorted 
+c31637122e0a152d501b02d019e0298179602529 refs/remotes/origin/PhenoApps_Hack_2019
+8b45935a0ac535d8e26c386dbfc3ac58337de2ca refs/remotes/origin/brapi_export
+21371362ef4aa78851708dff5937186f56cc271c refs/remotes/origin/brapi_fieldbook_integration
+11dd220395bcef18ffe7516c792446cd50318fda refs/remotes/origin/develop
+57114212a3c653aa3dfc7464ffdc5f77ebfda2dc refs/remotes/origin/master
+a72c5275505d19b278b8c95fc57b0c600ff59373 refs/tags/v2.0.1
+29592dcc729d7e5f8eef16f4a9afa98a34f4ed3e refs/tags/v2.1.0
+56acc45904d029aa072871e4a0144e5cbaacb4a9 refs/tags/v2.1.2
+ae34c1862b245f195d3b9d21be74130607c68619 refs/tags/v2.2
+ed9225d8f0ac82b8e6f320012a996c9bca651210 refs/tags/v2.3
+a1071c6e8ff7133647681b529f31054b108eff5c refs/tags/v2.3.4
+ddf1ac94888ec34295c07db90040c90314b58be1 refs/tags/v2.3.5
+b9d77b390bd2e21f1d070de71fcd7cff32083563 refs/tags/v2.4.0
+d96541b040112a5e90afa0031902866b03364002 refs/tags/v2.4.1
+d7d93cf411d952bd0e5da8c12f8b7b08d2ee4754 refs/tags/v3.0.0
+50c164c2a86281d5dd023bfde275870d83b7cc06 refs/tags/v3.1.0
+d826fdb465cdb2d3e989a4c0a79fecee92c71943 refs/tags/v3.1.1
+f7d6585bdb39f83a1b8660120600e1b806193878 refs/tags/v3.2.0
+9574dd2e0e07934c4f256ed6fda71497b16ca495 refs/tags/v3.3.0
+e6a188b2f54c67805c201dae2a6318f3b98041e4 refs/tags/v3.3.1
+ad52d19b7d726c09042f70770d76277b1a0d60ed refs/tags/v4.0.1
+c091e2e803ea60d2520830423885947e360241e3 refs/tags/v4.0.3

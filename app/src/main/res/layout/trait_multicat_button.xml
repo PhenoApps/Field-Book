@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:focusable="false"
+    android:focusableInTouchMode="false"
+    android:id="@+id/multicatButton"
+    android:gravity="center"
+    android:singleLine="true"
+    android:text="@string/traits_format_multicategorical"
+    android:textColor="#000000"
+    android:textSize="@dimen/text_size_large"
+    android:textStyle="bold" />

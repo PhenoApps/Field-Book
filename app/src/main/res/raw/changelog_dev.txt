@@ -1,0 +1,218 @@
+38/4.3
+Fixed tutorial order
+Cleaned up official changelog
+Added search widget to settings
+Fix for multicat layout not updating
+Added translation link
+Directory/sample file bug fix
+Substantial refactoring
+Fix for database import
+Quick GoTo uses full keyboard
+Quick GoTo/MoveToSearch fixes for plot
+
+37/4.2
+Added setting to hide icons on collect data screen
+Added new changelog
+Added new about dialog
+Added libraries used in app
+Added new tutorial
+Added additional import sources
+Added setting to specify default export
+Fixed bug with return key setting
+Upgraded to Java 8
+
+36/4.1.4
+Fix for data save delay
+
+35/4.1.3
+Fix for local import bug
+
+34/4.1.2
+Improved workflow
+Updated permission management
+Advanced settings overhauled
+Brapi integration
+Lots of bug fixes
+
+33/4.0.3
+Fixed a bug when switching fields
+
+32/4.0.2
+Fixed a bug with database import
+
+31/4.0.1
+New field management
+New main screen layout
+Lots of bug fixes
+
+30/3.3.1
+Added a location trait
+Added a button for missing values
+Added a citation dialog
+Added a dialog when importing trait lists and current list hasn't been exported
+Added ability to download files from Dropbox
+Photo names include rep and trait name
+Replaced lots of words with icons
+Updated trait button appearance
+Changed 'Rust rating' trait to 'Disease rating'
+Changed disease rating buttons from R/MS/MR/S to R/M/S
+Changed numeric clear to backspace (long press to clear)
+Fixed a bug where default trait value wasn't saved
+Fixed a bug with spaces in column names
+Fixed an issue where changing trait visibility wouldn't be saved
+Fixed an issue with spaces in column names ands search
+Fixed a bug with editing traits in non-English languages
+Fixed a bug that automatically disabled file sharing
+Fixed a bug with audio format interaction to NA
+Fixed an interaction between language changes and main screen
+
+29/3.2.5
+Fixed a visual bug with search
+Fixed a bug causing crashes when both plot arrows pressed simultaneously
+Fixed a bug causing repeated scrolling when no buttons pressed
+
+28/3.2.4
+Fixed a bug that restricted some trait names
+
+27/3.2.3
+Fixed a crash when exporting data
+
+26/3.2.2
+Fixed a crash when looking at plot summary
+
+25/3.2.1
+Fixed a crash when exporting traits
+
+24/3.2.0
+Fixed several bugs causing crashes
+Fixed a bug with numeric traits
+Fixed bug with rearranging traits
+Updated dialog design
+Updated button design
+Updated internal database
+Added Bengali language option
+
+23/3.1.1
+Fixed a bug with the new multicat trait
+Fixed the trait creation layout
+
+22/3.1.0
+New multicategorical trait format
+Added option to overwrite preivously exported files
+Field name is listed in the navigation drawer on the main screen
+Location exports as null if not set
+Updated dialogs with titles
+Fixed a bug related to audio and rust traits
+Database is automatically backed up to database folder
+
+21/3.0.0
+Updated user interface
+Added support for phones
+Reorder traits with drag and drop
+Fixed a bug with the cursor in text traits
+Added no date button
+Renamed Setup to Profile
+Updated Field Book manual
+
+20/2.4.5
+Fixed a bug causing crashes on startup
+
+19/2.4.0
+Reorganized export layout
+New Advanced Setting to show DataGrid (beta) on the main screen
+New Advanced Setting to open directly to camera to scan barcodes
+Plot scrolling speed accelerates the longer the arrow is pressed
+New Advanced Setting to disable left, right, or both entry arrows if no data has been collected
+Field Book checks for updates
+Spaces in imported column names replaced with underscores
+Changed default name for exported files
+Map temporarily removed
+More errors written to error logs
+Updated strings for clarity
+Bug fixes and improvements
+
+18/2.3.5
+New Rust Rating trait with customizable severity scale (severity.txt in traits folder)
+New Counter trait
+New Advanced Setting to disable the automatic file sharing
+New Advanced Setting to disable plot navigation if no data collected with sound notification
+Saves and moves to the last plot that the user was collecting data on
+Updated tutorial
+Changed timestamp format
+
+17/2.3.0
+New Photo trait
+New Import layout
+Import columns remembered between files
+InfoBars can be changed from main screen
+Table export speed significantly improved
+Import and export the internal database
+Continuous plot scrolling improved
+QuickGoTo now disabled by default (toggled in Advanced Settings)
+Toggle all trait visibility at once
+Audio trait updates and fixes
+Updated summary dialog
+Fixed bugs with Location and Search
+
+16/2.2.0
+New Advanced Settings option to make sound when primary organizer changes
+New Advanced Settings option to go to specific unique ID (for barcodes)
+New Advanced Settings option to go to next plot without data
+Visibility of traits is now changed in the Traits screen instead of Setup
+New file chooser added
+Support for XLS readded
+Clear categorical traits by reclicking the current choice
+Miscellaneous interface improvements
+Long press ActionBar icons to get labels
+Changelog can be accessed from the About dialog
+Traits can now be made in other languages (Bug)
+App doesn't move to first plot when screen is turned off (Bug)
+
+15/2.1.2
+Fixed issue with field folders
+Fixed issue with field file selection
+
+14/2.1.1
+Renamed "Qualitative" trait format "Categorical"
+Removed support for Android 3.0
+Removed ActionBarSherlock library
+
+13/2.1.0
+Added this changelog
+Changed tutorial setup
+Language dialog updated
+Exported files are shared to other installed apps
+App does not move to first plot when external hardware added
+Items are disabled if not available
+Replace text on ActionBar with appropriate icons
+Removed XLS support due to performance issues
+Added support for folders in the Fields dialog
+Added support for Amharic, Arabic, Brazilian Portuguese, Chinese, French, Hindi, Japanese, Oromo, and Russian
+Bugfix: minimum in numeric traits is enforced
+Bugfix: all text in text traits is deletable with the keyboard
+Bugfix: cursor now appears at end of text in text traits
+Bugfix: files are now visible via computer after export
+
+12/2.0.0
+Updated user interface
+Create traits from within the app
+Export and load trait lists
+Added an audio trait format
+Lots of bug fixes
+Added support for Spanish and German
+Map feature added to visualize and analyze plots (beta)
+
+5/1.6.0
+Added support for multiple instances of the same trait format
+
+4/1.5.0
+Added text input trait format
+Added table export option
+Lots of bug fixes
+
+2/1.1.0
+Added location recording and exporting via device GPS. Accessible via settings. Tablet GPS has a high resolution and should only be used for field location.
+“Quit” option now resets Person and Location fields.
+
+1/1.0.0
+Initial release

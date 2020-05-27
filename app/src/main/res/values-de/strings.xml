@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">Fieldbuch</string>
-    <string name="settings_title">Einstellungen</string>
     <string name="main_toolbar_search">Suchen</string>
     <string name="main_toolbar_resources">Resourcen</string>
     <string name="traits_format_audio">Audio</string>
@@ -54,7 +53,6 @@
     <string name="import_dialog_unique">eindeutiges Zuordnungsmerkmal</string>
     <string name="import_dialog_primary">Erste Ordung</string>
     <string name="import_dialog_secondary">Zweite Ordnung</string>
-    <string name="import_dialog_title">Feldinformationen importieren</string>
     <string name="import_dialog_importing">Bitte warten...</string>
     <string name="import_error_general">Fehler beim Importieren</string>
     <string name="import_error_unique">Eindeutiges Zuordnungsmerkmal kommt mehr als nur einmal vor</string>
@@ -90,26 +88,10 @@
     <string name="preferences_behavior_cycle_traits">Durch drücken des Pfeils vorwärts, gelangt man vom letzten Merkmal zum ersten Merkmal der nächsten Einheit (z.B. nächsten Versuchsparzelle)</string>
     <string name="preferences_general_use_day_number">Verwende den aktuellen Tag im Jahr anstelle des Datums (z.B. 40 anstelle von 9. Februar)</string>
     <string name="import_error_columns">Der Name der Spalte enthält unerlaubte Zeichen</string>
-    <string name="tutorial_previous">Vorangehend</string>
-    <string name="tutorial_next">Nächste(r)</string>
     <string name="trait_layout_data_stored">Daten wurden gespeichert</string>
     <string name="traits_create_optional">Optional</string>
     <string name="export_progress">Exportieren...</string>
     <string name="tutorial_dialog_title">Tutorial</string>
-    <string name="tutorial_main_1">The InfoBars oben im Bildschirm enthalten weitere Information für jeden Eintrag (z.B. Pedigree Information). Welche Information in den 3 Infobars angezeigt werden soll kann unter Einstellung bestimmt werden.</string>
-    <string name="tutorial_main_2">Die grossen schwarzen Pfeile werden gebraucht um von einer Versuchsparzelle zur nächsten zu gelangen. Die kleinen blauen Pfeile dienen zur Navigation zwischen verschiedenen Merkmale.</string>
-    <string name="tutorial_main_3">Eine Liste aller ausgewählten Merkmale erscheint wenn man auf das angezeigte Merkmal drückt.</string>
-    <string name="tutorial_main_4">Die zwei Textboxen in der Mitte des Bildschirmes (erste und zweite Ordnung) können benutzt werden um zu einer spezifischen Versuchsparzelle zu navigieren. Sollte die Versuchsparzelle mehr als einmal im Experiment enthalten sein, navigiert die Applikation zum ersten Vorkommen.</string>
-    <string name="tutorial_main_5">Suchen erlaubt die Durchsuchung der Datenbank.</string>
-    <string name="tutorial_settings_1">Um eine CSV oder XLS Datei zu importieren, wählen Sie Felder.</string>
-    <string name="tutorial_settings_2">Nachdem eine Datei für den Import gewählt wurde sind die Spalten der Datei links ersichtlich. Der Datentyp kann rechts konfiguriert werden. Dateien müssen mindestens drei Spalten enthalten: eindeutiges Zuordnungsmerkmal, erste Ordnung und sekundäre Ordnung.</string>
-    <string name="tutorial_settings_3">Um neue Merkmale hinzuzufügen, drücken Sie Merkmale.</string>
-    <string name="tutorial_settings_4">Bevor Sie mit der Datensammlung beginne, wählen Sie Einstellung.</string>
-    <string name="tutorial_settings_5">Unter Einstellungen: Person ist der Name der Person die die Daten sammelt, Ort sind die genauen Koordinaten des Feldes, unter Merkmale kann man die Eigenschaften eines Merkmales beschreiben und auswählen. Die InfoBars werden benutzt um weitere Information bezüglich Feld, Pedigree (Stammbaum) etc. anzuzeigen.</string>
-    <string name="tutorial_settings_6">Durch drücken des Rückwärtspfeiles in der oberen linken Ecke gelangt man zum Hauptbildschirm (sofern Daten importiert wurden).</string>
-    <string name="tutorial_traits_1">Neue Merkmale können kreiert werden indem man Merkmal Hinzufügen im Menü anwählt.</string>
-    <string name="tutorial_traits_2">Um Dateien mit Merkmalen zu importieren, drücken Sie Menu und wählen Sie Import</string>
-    <string name="tutorial_traits_3">Konsultieren Sie die Applikationsanleitungen um mehr über die Erstellung von Merkmalen in der Applikation zu erfahren</string>
     <string name="warning_field_before_traits">Eine Felddatei muss importiert werden bevor Merkmal erstellt werden können.</string>
     <string name="warning_field_missing">Es wurde keine Felddatei importiert. Bitte importieren Sie zuerst die Datei mit allen Informationen bezüglich des Feldes bevor Sie mit der Datenerfassung beginnen.</string>
     <string name="warning_traits_missing">Es existieren keine Merkmale. Bitte erstellen Sie Merkmale bevor Sie mit der Datenerfassung beginnen.</string>

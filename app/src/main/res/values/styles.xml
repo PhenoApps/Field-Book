@@ -5,7 +5,6 @@
         <item name="colorPrimary">@color/main_primary</item>
         <item name="colorPrimaryDark">@color/main_primaryDark</item>
         <item name="colorAccent">@color/main_colorAccent</item>
-
         <item name="buttonStyle">@style/ButtonStyle</item>
     </style>
 
@@ -13,9 +12,21 @@
         <item name="colorPrimary">@color/main_primary</item>
         <item name="colorPrimaryDark">@color/main_primaryDark</item>
         <item name="colorAccent">@color/main_colorAccent</item>
-
         <item name="buttonStyle">@style/ButtonStyle</item>
         <item name="toolbarStyle">@style/AppToolbar</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    </style>
+
+    <style name="AppTheme.MaterialAboutActivity" parent="Theme.Mal.Light">
+        <item name="colorPrimary">@color/main_primary</item>
+        <item name="colorPrimaryDark">@color/main_primaryDark</item>
+        <item name="colorAccent">@color/main_colorAccent</item>
+    </style>
+
+    <style name="AppTheme.MaterialAboutActivity.Fragment" parent="Theme.Mal.Light">
+        <item name="colorPrimary">@color/main_primary</item>
+        <item name="colorPrimaryDark">@color/main_primaryDark</item>
+        <item name="colorAccent">@color/main_colorAccent</item>
     </style>
 
     <style name="AppDialog" parent="Theme.AppCompat.Light.Dialog">
@@ -50,6 +61,10 @@
         <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
         <item name="android:background">@android:color/white</item>
         <item name="android:windowTitleStyle">@style/MyTitleTextStyle</item>
+
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowSoftInputMode">stateUnchanged</item>
     </style>
 
     <style name="MyTitleTextStyle">
@@ -66,17 +81,6 @@
 
     <style name="ButtonStyle" parent="Widget.AppCompat.Button">
         <item name="android:textAllCaps">false</item>
-    </style>
-
-    <style name="ChangelogTitles" parent="Theme.AppCompat.Light.Dialog">
-        <item name="android:textSize">@dimen/text_size_medium</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/main_colorAccent</item>
-    </style>
-
-    <style name="ChangelogContent" parent="Theme.AppCompat.Light.Dialog">
-        <item name="android:textSize">@dimen/text_size_small</item>
-        <item name="android:textColor">#000000</item>
     </style>
 
     <style name="AppToolbar" parent="@style/Widget.AppCompat.Toolbar">

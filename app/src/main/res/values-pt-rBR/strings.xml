@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">Caderno de campo</string>
-    <string name="settings_title">Configurações</string>
     <string name="main_toolbar_search">Buscar</string>
     <string name="main_toolbar_resources">Recursos</string>
     <string name="traits_format_audio">Áudio</string>
@@ -54,7 +53,6 @@
     <string name="import_dialog_unique">Identificador único</string>
     <string name="import_dialog_primary">Ordem primária</string>
     <string name="import_dialog_secondary">ordem secundária</string>
-    <string name="import_dialog_title">Importar campo</string>
     <string name="import_dialog_importing">Por favor aguarde...</string>
     <string name="import_error_general">Erro na importação</string>
     <string name="import_error_unique">Identificador único contém duplicatas</string>
@@ -90,26 +88,10 @@
     <string name="preferences_behavior_cycle_traits">Avançando a partir do último caractere avança para primeiro caractere da próxima entrada</string>
     <string name="preferences_general_use_day_number">Use dia numérico do ano, em vez de data</string>
     <string name="import_error_columns">Os nomes das colunas contêm símbolos ilegais</string>
-    <string name="tutorial_previous">Anterior</string>
-    <string name="tutorial_next">Próximo</string>
     <string name="trait_layout_data_stored">Os dados foram salvos</string>
     <string name="traits_create_optional">Opcional</string>
     <string name="export_progress">Exportando...</string>
     <string name="tutorial_dialog_title">Tutorial</string>
-    <string name="tutorial_main_1">As barras de informações (Infobarras) no topo da tela mostra dados extras para cada entrada. Estes podem ser alterados no menu de instalação.</string>
-    <string name="tutorial_main_2">As setas pretas grandes movem-se entre as entradas. As setas azuis pequenas movem-se entre os caracteres.</string>
-    <string name="tutorial_main_3">Uma lista de caracteres habilitados é exibido quando o caractere ativo é pressionado.</string>
-    <string name="tutorial_main_4">As áreas primárias e secundárias da ordem do texto pode ser utilizadas para mover-se para a primeira ocorrência de um valor específico.</string>
-    <string name="tutorial_main_5">Busca no topo da tela permite consultar o banco de dados.</string>
-    <string name="tutorial_settings_1">Para importar um arquivo CSV ou XLS, selecione Campo.</string>
-    <string name="tutorial_settings_2">Depois de selecionar um arquivo, as colunas do arquivo são listadas à esquerda e seu tipo de dados pode ser configurado no lado direito. Os arquivos devem conter três colunas: um identificador único, uma ordem primária e uma ordem secundária.</string>
-    <string name="tutorial_settings_3">Para adicionar ou importar novos caracteres, clique em caracteres</string>
-    <string name="tutorial_settings_4">Para se preparar para a coleta de dados, selecione configuração.</string>
-    <string name="tutorial_settings_5">Na tela de configuração: Usuário que é o nome da pessoa que a coleta de dados, Local recolhe as coordenadas de campo, Caracteres permite o ajuste das caracteres ativos e InfoBars exibe informações do genótipo/entrada na tela principal.</string>
-    <string name="tutorial_settings_6">Uma vez que os dados são importados, o botão voltar no canto superior esquerdo é usado para voltar à tela principal.</string>
-    <string name="tutorial_traits_1">Adicionar caractere no menu cria um novo caractere. Não é possível utilizar o teclado e tutorial ao mesmo tempo. Diferentes formatos de caracteres estão disponíveis para coleta de dados.</string>
-    <string name="tutorial_traits_2">Para importar caracteres de um arquivos, pressione o botão do menu e escolha Importar.</string>
-    <string name="tutorial_traits_3">Consulte o manual do aplicativo para obter informações adicionais sobre a criação de caracteres.</string>
     <string name="warning_field_before_traits">Um campo deve ser importado antes que um caractere possa ser criado.</string>
     <string name="warning_field_missing">Nenhum campo está atualmente carregado. Por favor, coloque um campo antes de coletar dados.</string>
     <string name="warning_traits_missing">Não existem caracteres. Por favor, crie caracteres antes de coletar dados.</string>

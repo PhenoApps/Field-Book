@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">سجل الحقل</string>
-    <string name="settings_title">إعدادات</string>
     <string name="main_toolbar_search">بحث</string>
     <string name="main_toolbar_resources">مصادر</string>
     <string name="traits_format_audio">الصوت</string>
@@ -54,7 +53,6 @@
     <string name="import_dialog_unique">معرف فريد</string>
     <string name="import_dialog_primary">ترتيب رئيسي</string>
     <string name="import_dialog_secondary">ترتيب ثانوي</string>
-    <string name="import_dialog_title">استيراد حقل</string>
     <string name="import_dialog_importing">الرجاء الانتظار...</string>
     <string name="import_error_general">خطأ بالاستيراد</string>
     <string name="import_error_unique">المعرف الفريد يتضمن تكرارات</string>
@@ -90,26 +88,10 @@
     <string name="preferences_behavior_cycle_traits">تحرك متقدما من آخر سمة للمدخل السابق إلى السمة الأولى في المدخل التالي</string>
     <string name="preferences_general_use_day_number">استخدم رقم اليوم بالسنة عوض التاريخ</string>
     <string name="import_error_columns">أسماء الأعمدة تتضمن محارف غير مسموحة</string>
-    <string name="tutorial_previous">السابق</string>
-    <string name="tutorial_next">التالي</string>
     <string name="trait_layout_data_stored">تم حفظ البيانات</string>
     <string name="traits_create_optional">اختياري</string>
     <string name="export_progress">تصدير...</string>
     <string name="tutorial_dialog_title">دليل تعليمي</string>
-    <string name="tutorial_main_1">أعمدة المعلومات في أعلى الشاشة تظهر بيانات إضافية لكل مدخل. يمكن تغييرها من قائمة الإعداد.</string>
-    <string name="tutorial_main_2">الأسهم الكبيرة السوداء تتنقل ما بين المدخلات، أما الأسهم الصغيرة الزرقاء فتتنقل ما بين السمات.</string>
-    <string name="tutorial_main_3">لائحة من السمات المفعلة تظهر حين يتم النقر على السمة الحالية.</string>
-    <string name="tutorial_main_4">إن المساحات النصية للترتيب الرئيسي والثانوي يمكن استخدامها للانتقال إلى مكان الظهور الأول للقيمة المحددة.</string>
-    <string name="tutorial_main_5">البحث في أعلى الشاشة يسمح باستعلام قاعدة البيانات</string>
-    <string name="tutorial_settings_1">لتصدير ملف CSV أو XLS، اختر الحقول</string>
-    <string name="tutorial_settings_2">بعد اختيار الملف، يتم عرض حقول الملف على اليسار ويمكن تحديد أنواع البيانات على اليمين. يجب أن تتضمن الملفات ثلاثة حقول: معرف فريد، ترتيب رئيسي، وترتيب ثانوي</string>
-    <string name="tutorial_settings_3">لإضافة أو استيراد سمات جديدة، إضغط سمات.</string>
-    <string name="tutorial_settings_4">للتحضير لجمع البيانات، اختر إعداد.</string>
-    <string name="tutorial_settings_5">في شاشة الإعداد: الشخص هو اسم الشخص الذي يقوم بجمع البيانات، والموقع يقوم بجمع إحداثيات الحقل، والسمات تسمح بضبط السمات الفعالة، أما أعمدة المعلومات فتظهر معلومات المدخل ضمن السياق على الشاشة الرئيسية.</string>
-    <string name="tutorial_settings_6">حين يتم استيراد البيانات، يمكن استخدام زر العودة في الزاوية العليا اليسرى للانتقال إلى الشاشة الرئيسية</string>
-    <string name="tutorial_traits_1">خيار أضف سمة ضمن القائمة ينشيء سمة جديدة. ليس من الممكن استخدام لوحة المفاتيح والدليل التعليمي في ذات الوقت. هنالك تنسيقات مختلفة للسمات متاحة لجمع البيانات.</string>
-    <string name="tutorial_traits_2">لاستيراد ملفات السمات، إضغط على زر القائمة واختر استيراد.</string>
-    <string name="tutorial_traits_3">راجع دليل استخدام التطبيق للمزيد من المعلومات حول إنشاء السمات.</string>
     <string name="warning_field_before_traits">يجب أن يتم استيراد الحقل قبل أن تستطيع إنشاء السمات.</string>
     <string name="warning_field_missing">لم يتم تحميل أي حقل حاليا، الرجاء تحميل حقل قبل جمع البيانات</string>
     <string name="warning_traits_missing">لا توجد سمات، الرجاء أنشئ سمات قبل جمع البيانات.</string>

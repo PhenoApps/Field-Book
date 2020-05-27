@@ -4,9 +4,11 @@ buildscript {
         jcenter()
         google()
     }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.3'
 
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.6.1'
+        classpath 'com.google.gms:google-services:4.3.3'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.0.0-beta02'
     }
 }
 
@@ -15,5 +17,6 @@ allprojects {
         jcenter()
         google()
         maven { url "https://dl.bintray.com/pheno-apps/pheno-apps-java-client-library" }
+        maven { url "https://jitpack.io" }
     }
 }

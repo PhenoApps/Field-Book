@@ -1,37 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_tb_help"
-        android:key="Tips"
-        android:summary="@string/preferences_appearance_tutorial_description"
-        android:title="@string/tutorial_dialog_title" />
 
-    <Preference
-        android:icon="@drawable/ic_nav_drawer_translate"
-        android:key="language"
-        android:summary="@string/preferences_appearance_language_description"
-        android:title="@string/preferences_appearance_language">
+    <PreferenceCategory
+        android:key="category_appearance_system"
+        android:title="@string/preferences_appearance_system_category_title"
+        app:iconSpaceReserved="false">
 
-        <intent
-            android:action="android.intent.action.MAIN"
-            android:targetClass="com.android.settings.LanguageSettings"
-            android:targetPackage="com.android.settings" />
-    </Preference>
+        <Preference
+            android:icon="@drawable/ic_nav_drawer_translate"
+            android:key="language"
+            android:summary="@string/preferences_appearance_language_description"
+            android:title="@string/preferences_appearance_language">
 
-    <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
-        android:icon="@drawable/ic_adv_infobar_count"
-        android:key="INFOBAR_NUMBER"
-        android:summary="@string/preferences_appearance_infobar_number_description"
-        android:title="@string/preferences_appearance_infobar_number"
-        app:nppc_maxValue="20"
-        app:nppc_minValue="1" />
+            <intent
+                android:action="android.intent.action.MAIN"
+                android:targetClass="com.android.settings.LanguageSettings"
+                android:targetPackage="com.android.settings" />
+        </Preference>
 
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_adv_quick_goto"
-        android:key="QuickGoTo"
-        android:summary="@string/preferences_appearance_quickgoto_description"
-        android:title="@string/preferences_appearance_quickgoto" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tb_help"
+            android:key="Tips"
+            android:summary="@string/preferences_appearance_tutorial_description"
+            android:title="@string/tutorial_dialog_title"
+            app:allowDividerBelow="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="category_appearance_collect"
+        app:allowDividerAbove="true"
+        android:title="@string/preferences_appearance_collection_category_title"
+        app:iconSpaceReserved="false">
+
+        <MultiSelectListPreference
+            android:defaultValue="@array/pref_toolbar_customize_default"
+            android:dialogTitle="@string/preferences_appearance_toolbar_customize"
+            android:entries="@array/pref_toolbar_customize_title"
+            android:entryValues="@array/pref_toolbar_customize_values"
+            android:icon="@drawable/ic_pref_appearance_toolbar"
+            android:key="TOOLBAR_CUSTOMIZE"
+            android:summary="@string/preferences_appearance_toolbar_customize_description"
+            android:title="@string/preferences_appearance_toolbar_customize" />
+
+        <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
+            android:icon="@drawable/ic_adv_infobar_count"
+            android:key="INFOBAR_NUMBER"
+            android:summary="@string/preferences_appearance_infobar_number_description"
+            android:title="@string/preferences_appearance_infobar_number"
+            app:nppc_maxValue="20"
+            app:nppc_minValue="1" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_adv_quick_goto"
+            android:key="QuickGoTo"
+            android:summary="@string/preferences_appearance_quickgoto_description"
+            android:title="@string/preferences_appearance_quickgoto" />
+    </PreferenceCategory>
 </PreferenceScreen>

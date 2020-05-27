@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="field_book">"Carnet d'essai"</string>
-    <string name="settings_title">Paramètres</string>
     <string name="main_toolbar_search">Rechercher</string>
     <string name="main_toolbar_resources">Resources</string>
     <string name="traits_format_audio">Audio</string>
@@ -54,7 +53,6 @@
     <string name="import_dialog_unique">identifiant unique</string>
     <string name="import_dialog_primary">premier ordre</string>
     <string name="import_dialog_secondary">deuxième ordre</string>
-    <string name="import_dialog_title">"importer l'essai"</string>
     <string name="import_dialog_importing">veuillez patienter</string>
     <string name="import_error_general">"erreur d'importation"</string>
     <string name="import_error_unique">"l'identifiant unique contient des doublons"</string>
@@ -90,26 +88,10 @@
     <string name="preferences_behavior_cycle_traits">"passer au premier caractère de l'entrée suivante"</string>
     <string name="preferences_general_use_day_number">"remplacer la date par le numéro du jour de l'année"</string>
     <string name="import_error_columns">les noms de colonnes contiennent des caractères spéciaux</string>
-    <string name="tutorial_previous">précédent</string>
-    <string name="tutorial_next">suivant</string>
     <string name="trait_layout_data_stored">les données ont été sauvegardées</string>
     <string name="traits_create_optional">optionnel</string>
     <string name="export_progress">export en cours</string>
     <string name="tutorial_dialog_title">tutoriel</string>
-    <string name="tutorial_main_1">"Les InfoBars au sommet de l'écran présentent des informations supplémentaires pour chaque entrée. Elles peuvent être modifiées dans le menu Configuration."</string>
-    <string name="tutorial_main_2">Les grandes flèches noires bougent entre les entrées. Les petites flèches bleues bougent entre les caractères.</string>
-    <string name="tutorial_main_3">la liste des caractères disponibles apparaît lorsque vous cliquez sur le caractère actif.</string>
-    <string name="tutorial_main_4">"Les champs de texte de premier et de second ordre peuvent être utilisés pour trouver la première occurrence d'une valeur donnée."</string>
-    <string name="tutorial_main_5">"Recherche au sommet de l'écran lance des requêtes dans la base de données."</string>
-    <string name="tutorial_settings_1">Pour importer un fichier CSV ou XLS, sélectionner Essais.</string>
-    <string name="tutorial_settings_2">Après avoir sélectionner un fichier, les colonnes du fichier sont listées sur la gauche et le type de données peut être configuré sur la droite. Les fichiers doivent contenir trois colonnes: un identifiant unique, un premier ordre et un second ordre.</string>
-    <string name="tutorial_settings_3">Pour ajouter ou importer de nouveaux caractères, cliquez sur Caractères.</string>
-    <string name="tutorial_settings_4">Pour préparer la collecte de données, définir Configuration.</string>
-    <string name="tutorial_settings_5">"Sur l'écran de Configuration: Personne est le nom de la personne qui collecte les données, Localisation renseigne les coordonnées de l'essai, Caractères d'activer/désactiver des caractères, et InfoBars affiche les informations sur les entrées sur l'écran principal."</string>
-    <string name="tutorial_settings_6">"Une fois que les données sont importées, le bouton de retour dans l'angle supérieur gauche permet de revenir vers l'écran principal."</string>
-    <string name="tutorial_traits_1">"Ajouter Caractère dans le menu créé un nouveau caractère. Il n'est pas possible d'utiliser le clavier et le tutoriel en même temps. Différents formats de caractère sont disponibles pour la collecte des données."</string>
-    <string name="tutorial_traits_2">Pour importer des fichiers de caractère, cliquez sur le bouton menu et choisir Importer.</string>
-    <string name="tutorial_traits_3">Consulter le manuel pour des informations supplémentaires sur la création de caractères.</string>
     <string name="warning_field_before_traits">un essai doit être importé avant de définir les caractères.</string>
     <string name="warning_field_missing">"Aucun essai n'a été chargé. Veuillez charger un essai avant de collecter les données."</string>
     <string name="warning_traits_missing">"Aucun caractère n'a été défini. Veuillez définir les caractères avant de collecter les données."</string>

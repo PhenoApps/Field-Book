@@ -1,0 +1,24 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/m-inamori/Field-Book
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "PhenoApps_Hack_2019"]
+	remote = origin
+	merge = refs/heads/PhenoApps_Hack_2019
+[branch "inamori-branch"]
+	remote = origin
+	merge = refs/heads/inamori-branch
+[remote "root_branch"]
+	url = https://github.com/PhenoApps/Field-Book.git
+	fetch = +refs/heads/*:refs/remotes/root_branch/*
+[remote "fork_master"]
+	url = https://github.com/PhenoApps/Field-Book
+	fetch = +refs/heads/*:refs/remotes/fork_master/*
+[branch "develop"]
+	remote = fork_master
+	merge = refs/heads/develop
