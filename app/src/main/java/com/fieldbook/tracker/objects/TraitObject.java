@@ -68,13 +68,13 @@ public class TraitObject {
         this.details = details;
     }
 
-	public Boolean usesBarcode() {
-		return with_barcode;
-	}
+    public Boolean usesBarcode() {
+        return with_barcode;
+    }
 
-	public void setBarcode(Boolean b) {
-		with_barcode = b;
-	}
+    public void setBarcode(Boolean b) {
+        with_barcode = b;
+    }
 
     public String getCategories() {
         return categories;
@@ -139,7 +139,7 @@ public class TraitObject {
         if (minimum.length() > 0) {     // minimum exists
             final double v = Double.parseDouble(s);
             final double lowerValue = Double.parseDouble(minimum);
-                return v < lowerValue;
+            return v < lowerValue;
         } else {
             return false;
         }
@@ -160,21 +160,21 @@ public class TraitObject {
     }
     
     public boolean isValidFormat(final String s) {
-		if (isNumerical()) {
-			try {
-				final double v = Double.parseDouble(s);
-				return true;
-			}
-			catch(NumberFormatException e) {
-				return false;
-			}
-		}
-		else {
-			return true;
-		}
-	}
+        if (isNumerical()) {
+            try {
+                final double v = Double.parseDouble(s);
+                return true;
+            }
+            catch(NumberFormatException e) {
+                return false;
+            }
+        }
+        else {
+            return true;
+        }
+    }
     
     public boolean isNumerical() {
-		return format.equals("numeric") || format.equals("percent");
-	}
+        return format.equals("numeric") || format.equals("percent");
+    }
 }

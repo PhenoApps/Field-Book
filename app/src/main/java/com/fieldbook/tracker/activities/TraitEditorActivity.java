@@ -217,7 +217,6 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     // Helper function to load data
     public static void loadData() {
-Log.d("TraitEditorActivity", "loadData");
         try {
 
             HashMap visibility = ConfigActivity.dt.getTraitVisibility();
@@ -1111,11 +1110,11 @@ Log.d("TraitEditorActivity", "loadData");
                             t.setVisible(false);
                         }
                         if (data.length == 9) {		// old trait data
-							t.setBarcode(false);
-						}
-						else {
-							t.setBarcode(data[9].toLowerCase().equals("true"));
-						}
+                            t.setBarcode(false);
+                        }
+                        else {
+                            t.setBarcode(data[9].toLowerCase().equals("true"));
+                        }
                         ConfigActivity.dt.insertTraits(t);
                     }
                 }

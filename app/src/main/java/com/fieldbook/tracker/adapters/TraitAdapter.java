@@ -17,7 +17,6 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.util.Log;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.database.DataHelper;

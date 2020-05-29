@@ -156,7 +156,6 @@ public class ConfigActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-Log.d("ConfigActivity", "onCreate");
         dt = new DataHelper(this);
 
         ep = getSharedPreferences("Settings", 0);
@@ -309,6 +308,9 @@ Log.d("ConfigActivity", "onCreate");
                                 break;
                             case "brapi":
                                 exportBrAPI();
+                                break;
+                            default:
+                                showExportDialog();
                                 break;
                         }
 

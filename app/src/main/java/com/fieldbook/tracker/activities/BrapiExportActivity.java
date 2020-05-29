@@ -523,7 +523,7 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private UploadError processResponse(List<NewObservationDbIdsObservations> observationDbIds, List<Observation> observationsNeedingSync) {
         UploadError retVal = UploadError.NONE;
-        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ",
+        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSXXX",
                 Locale.getDefault());
         String syncTime = timeStamp.format(Calendar.getInstance().getTime());
 

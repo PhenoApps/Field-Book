@@ -465,7 +465,6 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         if (!haveData) {
-Log.d("CollectActivity", "moveToSearch");
             Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
         }
     }
@@ -923,6 +922,7 @@ Log.d("CollectActivity", "moveToSearch");
 
                     String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
                     Intent open = new Intent(Intent.ACTION_VIEW);
+                    open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     open.setDataAndType(FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", mChosenFile), mime);
 
                     startActivity(open);
@@ -946,7 +946,6 @@ Log.d("CollectActivity", "moveToSearch");
         }
 
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-Log.d("CollectActivity", "onActivityResult");
 
         if (result == null) {
             super.onActivityResult(requestCode, resultCode, data);
@@ -964,20 +963,10 @@ Log.d("CollectActivity", "onActivityResult");
                 etCurVal.setText(value);
             }
             else {
-				String message = String.format("%s is invalid data.", value);
+				        String message = String.format("%s is invalid data.", value);
                 Utils.makeToast(getApplicationContext(), message);
             }
         }
-        /*
-        if (result != null) {
-            inputPlotId = result.getContents();
-            rangeBox.setAllRangeID();
-            int[] rangeID = rangeBox.getRangeID();
-            moveToSearch("id", rangeID, null, null, inputPlotId);
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-        */
     }
 
     @Override
@@ -1199,11 +1188,11 @@ Log.d("CollectActivity", "onActivityResult");
         }
         
         BaseTraitLayout getTraitLayout(TraitObject trait) {
-			if (trait.usesBarcode())
-				return traitLayouts.getTraitLayout("with_barcode");
-			else
-				return traitLayouts.getTraitLayout(trait.getFormat());
-		}
+            if (trait.usesBarcode())
+                return traitLayouts.getTraitLayout("with_barcode");
+          else
+            return traitLayouts.getTraitLayout(trait.getFormat());
+        }
 
         public Map getNewTraits() {
             return newTraits;

@@ -84,15 +84,15 @@ public class DataHelper {
             db = openHelper.getWritableDatabase();
             
             if(!hasColumn("withBarcode", "traits")) {
-				// add withBarcode column into traits table
-				db.execSQL("ALTER TABLE traits ADD COLUMN withBarcode BOOLEAN");
-			}
+                // add withBarcode column into traits table
+                db.execSQL("ALTER TABLE traits ADD COLUMN withBarcode BOOLEAN");
+            }
             ep = context.getSharedPreferences("Settings", 0);
 
             this.insertTraits = db.compileStatement(INSERTTRAITS);
             this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
 
-            timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ",
+            timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSXXX",
                     Locale.getDefault());
 
 
@@ -442,7 +442,7 @@ public class DataHelper {
                 "FROM " +
                 "user_traits " +
                 "JOIN " +
-                "range ON user_traits.rid = range.plot " +
+                "range ON user_traits.rid = range.observationUnitDbId " +
                 "JOIN " +
                 "traits ON user_traits.parent = traits.trait " +
                 "JOIN " +
@@ -511,7 +511,7 @@ public class DataHelper {
                 "FROM " +
                 "user_traits " +
                 "JOIN " +
-                "range ON user_traits.rid = range.plot " +
+                "range ON user_traits.rid = range.observationUnitDbId " +
                 "JOIN " +
                 "traits ON user_traits.parent = traits.trait " +
                 "JOIN " +
@@ -644,14 +644,10 @@ public class DataHelper {
     public void open() {
         try {
             db = openHelper.getWritableDatabase();
-            
-Log.d("DataHelper", "open");
             if(!hasColumn("withBarcode", "traits")) {
-Log.d("DataHelper", "open");
-				// add withBarcode column into traits table
-				db.execSQL("ALTER TABLE traits ADD COLUMN withBarcode BOOLEAN");
-Log.d("DataHelper", String.valueOf(hasColumn("withBarcode", "traits")));
-			}
+                // add withBarcode column into traits table
+                db.execSQL("ALTER TABLE traits ADD COLUMN withBarcode BOOLEAN");
+            }
 
             this.insertTraits = db.compileStatement(INSERTTRAITS);
             this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
@@ -977,16 +973,16 @@ Log.d("DataHelper", String.valueOf(hasColumn("withBarcode", "traits")));
 
     }
 
-	/**
-	* Get array of column names for query
-	*/
-	public String[] GetColumnNames() {
-    	return new String[] {
-			"id", "trait", "format", "defaultValue", "minimum", "maximum",
-			"details", "withBarcode", "categories", "isVisible",
-			"realPosition", "external_db_id"
-		};
-	}
+    /**
+    * Get array of column names for query
+    */
+    public String[] GetColumnNames() {
+       return new String[] {
+           "id", "trait", "format", "defaultValue", "minimum", "maximum",
+           "details", "withBarcode", "categories", "isVisible",
+           "realPosition", "external_db_id"
+       };
+    }
 
     /**
      * V2 - Get all traits in the system, in order, as TraitObjects
@@ -1001,18 +997,18 @@ Log.d("DataHelper", String.valueOf(hasColumn("withBarcode", "traits")));
 
         if (cursor.moveToFirst()) {
             do {
-		        TraitObject o = new TraitObject();
+                TraitObject o = new TraitObject();
 
-		        o.setId(cursor.getString(0));
-		        o.setTrait(cursor.getString(1));
-		        o.setFormat(cursor.getString(2));
-		        o.setDefaultValue(cursor.getString(3));
-		        o.setMinimum(cursor.getString(4));
-		        o.setMaximum(cursor.getString(5));
-		        o.setDetails(cursor.getString(6));
-				o.setBarcode(cursor.getInt(7) > 0);
-		        o.setCategories(cursor.getString(8));
-		        o.setRealPosition(cursor.getString(10));
+                o.setId(cursor.getString(0));
+                o.setTrait(cursor.getString(1));
+            o.setFormat(cursor.getString(2));
+            o.setDefaultValue(cursor.getString(3));
+            o.setMinimum(cursor.getString(4));
+            o.setMaximum(cursor.getString(5));
+            o.setDetails(cursor.getString(6));
+            o.setBarcode(cursor.getInt(7) > 0);
+            o.setCategories(cursor.getString(8));
+            o.setRealPosition(cursor.getString(10));
 
                 list.add(o);
 
@@ -1065,7 +1061,7 @@ Log.d("DataHelper", String.valueOf(hasColumn("withBarcode", "traits")));
         data.setCategories("");
 
         Cursor cursor = db.query(TRAITS, GetColumnNames(),
-        		"trait like ? and isVisible like ?",
+                "trait like ? and isVisible like ?",
                 new String[]{trait, "true"}, null, null, null
         );
 
@@ -1077,7 +1073,7 @@ Log.d("DataHelper", String.valueOf(hasColumn("withBarcode", "traits")));
             data.setMinimum(cursor.getString(4));
             data.setMaximum(cursor.getString(5));
             data.setDetails(cursor.getString(6));
-			data.setBarcode(cursor.getInt(7) > 0);
+            data.setBarcode(cursor.getInt(7) > 0);
             data.setCategories(cursor.getString(8));
             data.setExternalDbId(cursor.getString(11));
         }
@@ -1097,19 +1093,19 @@ Log.d("DataHelper", String.valueOf(hasColumn("withBarcode", "traits")));
         if (cursor.moveToFirst()) {
             do {
                 if(cursor.getString(1).equals(column_name)) {
-			        if (!cursor.isClosed()) {
-			            cursor.close();
-			        }
-			        return true;
-				}
+                    if (!cursor.isClosed()) {
+			                  cursor.close();
+                    }
+                    return true;
+                }
             } while (cursor.moveToNext());
         }
 
         if (!cursor.isClosed()) {
             cursor.close();
         }
-		return false;
-	}
+        return false;
+    }
 
     /**
      * Returns saved data based on plot_id
@@ -2100,7 +2096,6 @@ Log.d("DataHelper", String.valueOf(hasColumn("withBarcode", "traits")));
         OpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
             ep2 = context.getSharedPreferences("Settings", 0);
-Log.d("OpenHelper", DATABASE_NAME);
         }
 
         @Override
