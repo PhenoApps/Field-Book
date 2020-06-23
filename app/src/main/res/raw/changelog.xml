@@ -1,6 +1,14 @@
 <changelog>
 
     <release
+        date="2020-06-22"
+        versionCode="433"
+        versionName="v4.3.3">
+        <bugfix>Fix for Galaxy S6 devices</bugfix>
+        <bugfix>Timestamp fix that was causing data to not be stored</bugfix>
+    </release>
+
+    <release
         date="2020-05-21"
         versionCode="431"
         versionName="v4.3.1">

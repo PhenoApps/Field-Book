@@ -137,7 +137,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        ConfigActivity.dt.close();
+        //ConfigActivity.dt.close();
         super.onDestroy();
     }
 
@@ -156,7 +156,9 @@ public class ConfigActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         dt = new DataHelper(this);
+        dt.open();
 
         ep = getSharedPreferences("Settings", 0);
 

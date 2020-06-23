@@ -1,3 +1,7 @@
+40/3.4.3
+Fixed bug with database closing when it wasn't supposed to
+Re-fixed timezone bug
+
 39/4.3.1
 Fix for incorrect timestamps
 Export dialog fix
