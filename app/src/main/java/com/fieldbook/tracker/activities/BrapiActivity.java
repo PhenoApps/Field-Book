@@ -1,11 +1,8 @@
 package com.fieldbook.tracker.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.arch.core.util.Function;
-
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,13 +11,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.arch.core.util.Function;
+
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiLoadDialog;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Utils;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,13 @@ public class BrapiActivity extends AppCompatActivity {
 
     private BrAPIService brAPIService;
     private BrapiStudySummary selectedStudy;
+
+    // Filter by
+    private String programDbId;
+    private String trialDbId;
+    private static final int FILTER_BY_PROGRAM_REQUEST_CODE = 1;
+    private static final int FILTER_BY_TRIAL_REQUEST_CODE = 2;
+    public static final String PROGRAM_DB_ID_INTENT_PARAM = "programDbId";
 
     @Override
     public void onDestroy() {
@@ -68,10 +76,16 @@ public class BrapiActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_fields_brapi, menu);
+        return true;
+    }
+
     private void loadToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(null);
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -84,7 +98,7 @@ public class BrapiActivity extends AppCompatActivity {
         listStudies.setVisibility(View.GONE);
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
-        brAPIService.getStudies(BrAPIService.getBrapiToken(this), new Function<List<BrapiStudySummary>, Void>() {
+        brAPIService.getStudies(BrAPIService.getBrapiToken(this), this.programDbId, this.trialDbId, new Function<List<BrapiStudySummary>, Void>() {
             @Override
             public Void apply(final List<BrapiStudySummary> studies) {
 
@@ -160,10 +174,39 @@ public class BrapiActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+            case R.id.filter_by_program:
+                Intent filterByProgramIntent = new Intent(this, BrapiProgramActivity.class);
+                startActivityForResult(filterByProgramIntent, FILTER_BY_PROGRAM_REQUEST_CODE);
+                break;
+            case R.id.filter_by_trial:
+                Intent filterByTrialIntent = new Intent(this, BrapiTrialActivity.class);
+                filterByTrialIntent.putExtra(PROGRAM_DB_ID_INTENT_PARAM, programDbId);
+                startActivityForResult(filterByTrialIntent, FILTER_BY_TRIAL_REQUEST_CODE);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == FILTER_BY_PROGRAM_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                programDbId = data.getDataString();
+                // reset previous filter
+                trialDbId = null;
+                loadStudiesList();
+            }
+        } else if (requestCode == FILTER_BY_TRIAL_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                trialDbId = data.getDataString();
+                loadStudiesList();
+            }
+        }
+    }
 }

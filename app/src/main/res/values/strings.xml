@@ -454,6 +454,12 @@
     <string name="brapi_ontology_error">Error loadings traits from BrAPI.</string>
     <string name="brapi_save_field_error">Error Saving Field</string>
     <string name="brapi_field_not_selected">Selected Field Must Be Imported From BrAPI.</string>
+    <string name="brapi_fields_filter_by_program">Filter by program</string>
+    <string name="brapi_fields_filter_by_trial">Filter by trial</string>
+    <string name="brapi_programs_load">Load programs</string>
+    <string name="brapi_programs_select">Select program</string>
+    <string name="brapi_trials_load">Load trials</string>
+    <string name="brapi_trials_select">Select trial</string>
     <string name="brapi_save_trait">Save Traits</string>
     <string name="brapi_must_configure_url">Must configure a valid BrAPI URL in settings before proceeding</string>
     <string name="brapi_export_failed">BrAPI Export Failed</string>
