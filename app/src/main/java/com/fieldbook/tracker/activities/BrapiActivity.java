@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
@@ -83,8 +82,6 @@ public class BrapiActivity extends AppCompatActivity {
     }
 
     private void loadToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(null);
             getSupportActionBar().getThemedContext();

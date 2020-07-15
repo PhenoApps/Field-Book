@@ -7,16 +7,6 @@
     android:background="#FFFFFF"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/main_primary"
-        android:fitsSystemWindows="true"
-        android:minHeight="?attr/actionBarSize"
-        app:popupTheme="@style/AppToolbar"
-        app:theme="@style/AppToolbar" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
