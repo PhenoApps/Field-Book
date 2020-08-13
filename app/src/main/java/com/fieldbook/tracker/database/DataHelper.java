@@ -87,7 +87,7 @@ public class DataHelper {
             this.insertTraits = db.compileStatement(INSERTTRAITS);
             this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
 
-            timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ",
+            timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
                     Locale.getDefault());
 
 
@@ -637,6 +637,7 @@ public class DataHelper {
      * Helper function to open the database
      */
     public void open() {
+
         try {
             db = openHelper.getWritableDatabase();
 

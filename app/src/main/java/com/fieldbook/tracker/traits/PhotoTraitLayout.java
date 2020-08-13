@@ -210,6 +210,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
             File f = new File(path);
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_VIEW);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.setDataAndType(FileProvider.getUriForFile(getContext(),
                     getContext().getApplicationContext().getPackageName() + ".fileprovider", f), "image/*");
             getContext().startActivity(intent);

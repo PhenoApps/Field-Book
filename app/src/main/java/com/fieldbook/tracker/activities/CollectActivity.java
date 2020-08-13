@@ -907,6 +907,7 @@ public class CollectActivity extends AppCompatActivity {
 
                     String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
                     Intent open = new Intent(Intent.ACTION_VIEW);
+                    open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     open.setDataAndType(FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", mChosenFile), mime);
 
                     startActivity(open);
