@@ -15,7 +15,11 @@ out/
 
 # Gradle files
 .gradle/
+gradle/
 build/
+gradlew
+gradlew.bat
+*.hprof
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -46,3 +50,8 @@ proguard/
 
 # Git orig files
 *.orig
+
+# Unnecessary Github files
+.github/*
+!.github/ISSUE_TEMPLATE/
+!.github/PULL_REQUEST_TEMPLATE.md
