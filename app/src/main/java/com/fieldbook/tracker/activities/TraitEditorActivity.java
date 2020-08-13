@@ -1109,6 +1109,12 @@ public class TraitEditorActivity extends AppCompatActivity {
                         } else {
                             t.setVisible(false);
                         }
+                        if (data.length == 9) {		// old trait data
+                            t.setBarcode(false);
+                        }
+                        else {
+                            t.setBarcode(data[9].toLowerCase().equals("true"));
+                        }
                         ConfigActivity.dt.insertTraits(t);
                     }
                 }

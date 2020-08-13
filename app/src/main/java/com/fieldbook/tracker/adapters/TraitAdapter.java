@@ -86,9 +86,10 @@ public class TraitAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        holder.id = getItem(position).getId();
-        holder.realPosition = getItem(position).getRealPosition();
-        holder.name.setText(getItem(position).getTrait());
+        TraitObject traitObject = getItem(position);
+        holder.id = traitObject.getId();
+        holder.realPosition = traitObject.getRealPosition();
+        holder.name.setText(traitObject.getTrait());
 
         switch (getItem(position).getFormat()) {
             case "numeric":

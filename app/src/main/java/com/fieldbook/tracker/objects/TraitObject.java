@@ -12,6 +12,7 @@ public class TraitObject {
     private String minimum;
     private String maximum;
     private String details;
+    private Boolean with_barcode;
     private String categories;
     private String realPosition;
     private String id;
@@ -67,6 +68,14 @@ public class TraitObject {
         this.details = details;
     }
 
+    public Boolean usesBarcode() {
+        return with_barcode;
+    }
+
+    public void setBarcode(Boolean b) {
+        with_barcode = b;
+    }
+
     public String getCategories() {
         return categories;
     }
@@ -119,7 +128,7 @@ public class TraitObject {
         // this code is not perfect.
         // I think that it is necessary to check
         // the minimum and the maximum values
-        return !isUnder(s) && !isOver(s);
+        return isValidFormat(s) && !isUnder(s) && !isOver(s);
     }
 
     public boolean isUnder(final String s) {
@@ -128,13 +137,9 @@ public class TraitObject {
 
         Log.d("FB",s);
         if (minimum.length() > 0) {     // minimum exists
-            try {
-                final double v = Double.parseDouble(s);
-                final double lowerValue = Double.parseDouble(minimum);
-                return v < lowerValue;
-            } catch (NumberFormatException e) {
-                return true;
-            }
+            final double v = Double.parseDouble(s);
+            final double lowerValue = Double.parseDouble(minimum);
+            return v < lowerValue;
         } else {
             return false;
         }
@@ -146,15 +151,30 @@ public class TraitObject {
 
         Log.d("FB",s);
         if (maximum.length() > 0) {     // maximum exists
-            try {
-                final double v = Double.parseDouble(s);
-                final double upperValue = Double.parseDouble(maximum);
-                return v > upperValue;
-            } catch (NumberFormatException e) {
-                return true;
-            }
+            final double v = Double.parseDouble(s);
+            final double upperValue = Double.parseDouble(maximum);
+            return v > upperValue;
         } else {
             return false;
         }
+    }
+    
+    public boolean isValidFormat(final String s) {
+        if (isNumerical()) {
+            try {
+                final double v = Double.parseDouble(s);
+                return true;
+            }
+            catch(NumberFormatException e) {
+                return false;
+            }
+        }
+        else {
+            return true;
+        }
+    }
+    
+    public boolean isNumerical() {
+        return format.equals("numeric") || format.equals("percent");
     }
 }

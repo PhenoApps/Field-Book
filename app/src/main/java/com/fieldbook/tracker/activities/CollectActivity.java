@@ -114,6 +114,19 @@ public class CollectActivity extends AppCompatActivity {
      * Trait-related elements
      */
     private EditText etCurVal;
+
+	/**
+	 * we have to distinguish from where we are using barcode
+	 */
+    protected enum BarcodeTarget {
+        PlotID, Value
+    };
+    private BarcodeTarget barcodeTarget;
+    public void setBarcodeTargetValue() { barcodeTarget = BarcodeTarget.Value; }
+    public void setBarcodeTargetPlotID() { barcodeTarget = BarcodeTarget.PlotID; }
+    private boolean isBarcodeTargetValue() { return barcodeTarget == BarcodeTarget.Value; }
+    private boolean isBarcodeTargetPlotID() { return barcodeTarget == BarcodeTarget.PlotID; }
+    
     public final Handler myGuiHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -724,6 +737,7 @@ public class CollectActivity extends AppCompatActivity {
                 moveToPlotID();
                 break;
             case R.id.barcodeScan:
+                setBarcodeTargetPlotID();
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.main_barcode_text))
                         .setBeepEnabled(true)
@@ -792,6 +806,7 @@ public class CollectActivity extends AppCompatActivity {
         builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                setBarcodeTargetPlotID();
                 IntentIntegrator integrator = new IntentIntegrator(thisActivity);
                 integrator.initiateScan();
             }
@@ -931,13 +946,26 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
+
+        if (result == null) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+        else if (isBarcodeTargetPlotID()) {
             inputPlotId = result.getContents();
             rangeBox.setAllRangeID();
             int[] rangeID = rangeBox.getRangeID();
             moveToSearch("id", rangeID, null, null, inputPlotId);
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
+        }
+        else if (isBarcodeTargetValue()) {
+            final TraitObject trait = traitBox.getCurrentTrait();
+            final String value = result.getContents();
+            if (trait.isValidValue(value)) {
+                etCurVal.setText(value);
+            }
+            else {
+				        String message = String.format("%s is invalid data.", value);
+                Utils.makeToast(getApplicationContext(), message);
+            }
         }
     }
 
@@ -1139,8 +1167,7 @@ public class CollectActivity extends AppCompatActivity {
                     traitLayouts.hideLayouts();
 
                     //Get current layout object and make it visible
-                    BaseTraitLayout currentTraitLayout =
-                            traitLayouts.getTraitLayout(currentTrait.getFormat());
+                    BaseTraitLayout currentTraitLayout = getTraitLayout(currentTrait);
                     currentTraitLayout.setVisibility(View.VISIBLE);
 
                     //Call specific load layout code for the current trait layout
@@ -1158,6 +1185,13 @@ public class CollectActivity extends AppCompatActivity {
             });
 
             traitBox.setSelection(traitPosition);
+        }
+        
+        BaseTraitLayout getTraitLayout(TraitObject trait) {
+            if (trait.usesBarcode())
+                return traitLayouts.getTraitLayout("with_barcode");
+          else
+            return traitLayouts.getTraitLayout(trait.getFormat());
         }
 
         public Map getNewTraits() {

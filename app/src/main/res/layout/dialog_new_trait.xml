@@ -221,6 +221,38 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/barcodebox"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp">
+
+                <ToggleButton
+                    android:id="@+id/check_barcode"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapWords"
+                    android:paddingRight="10dp"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical"
+                    android:paddingRight="10dp"
+                    android:text="@string/trait_input_with_barcode"
+                    android:textColor="#000000"
+                    android:textSize="@dimen/text_size_small"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/categorybox"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

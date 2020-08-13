@@ -783,6 +783,7 @@ public class BrAPIService {
             // Set some config variables in fieldbook
             trait.setVisible(true);
             trait.setRealPosition("");
+            trait.setBarcode(false);
 
             traits.add(trait);
         }

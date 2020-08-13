@@ -105,6 +105,7 @@
     <string name="traits_create_true">真</string>
     <string name="traits_create_false">偽</string>
     <string name="traits_create_categories_text">項目の区切りは「/」を使用</string>
+    <string name="trait_input_with_barcode">バーコードで入力</string>
     <string name="traits_create_warning_name_blank">形質名は空欄不可</string>
     <string name="traits_create_warning_duplicate">形質は既に存在</string>
     <string name="traits_create_warning_numeric_required">初期値、最小値、最大値は数値で入力</string>

@@ -59,8 +59,8 @@ public class DataHelper {
     private static final String PLOT_VALUES = "plot_values";
     private static final String INSERTTRAITS = "insert into "
             + TRAITS
-            + "(external_db_id, trait_data_source, trait, format, defaultValue, minimum, maximum, details, categories, "
-            + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?,?,?)";
+            + "(external_db_id, trait_data_source, trait, format, defaultValue, minimum, maximum, details, withBarcode, categories, "
+            + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?,?,?,?)";
     private static final String INSERTUSERTRAITS = "insert into " + USER_TRAITS
             + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id, observation_db_id, last_synced_time) values (?,?,?,?,?,?,?,?,?,?,?,?)";
     public static SQLiteDatabase db;
@@ -82,6 +82,11 @@ public class DataHelper {
             this.context = context;
             openHelper = new OpenHelper(this.context);
             db = openHelper.getWritableDatabase();
+            
+            if(!hasColumn("withBarcode", "traits")) {
+                // add withBarcode column into traits table
+                db.execSQL("ALTER TABLE traits ADD COLUMN withBarcode BOOLEAN");
+            }
             ep = context.getSharedPreferences("Settings", 0);
 
             this.insertTraits = db.compileStatement(INSERTTRAITS);
@@ -640,6 +645,10 @@ public class DataHelper {
 
         try {
             db = openHelper.getWritableDatabase();
+            if(!hasColumn("withBarcode", "traits")) {
+                // add withBarcode column into traits table
+                db.execSQL("ALTER TABLE traits ADD COLUMN withBarcode BOOLEAN");
+            }
 
             this.insertTraits = db.compileStatement(INSERTTRAITS);
             this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
@@ -966,14 +975,24 @@ public class DataHelper {
     }
 
     /**
+    * Get array of column names for query
+    */
+    public String[] GetColumnNames() {
+       return new String[] {
+           "id", "trait", "format", "defaultValue", "minimum", "maximum",
+           "details", "withBarcode", "categories", "isVisible",
+           "realPosition", "external_db_id"
+       };
+    }
+
+    /**
      * V2 - Get all traits in the system, in order, as TraitObjects
      */
     public ArrayList<TraitObject> getAllTraitObjects() {
 
         ArrayList<TraitObject> list = new ArrayList<>();
 
-        Cursor cursor = db.query(TRAITS, new String[]{"id", "trait", "format", "defaultValue",
-                        "minimum", "maximum", "details", "categories", "isVisible", "realPosition"},
+        Cursor cursor = db.query(TRAITS, GetColumnNames(),
                 null, null, null, null, "realPosition"
         );
 
@@ -983,13 +1002,14 @@ public class DataHelper {
 
                 o.setId(cursor.getString(0));
                 o.setTrait(cursor.getString(1));
-                o.setFormat(cursor.getString(2));
-                o.setDefaultValue(cursor.getString(3));
-                o.setMinimum(cursor.getString(4));
-                o.setMaximum(cursor.getString(5));
-                o.setDetails(cursor.getString(6));
-                o.setCategories(cursor.getString(7));
-                o.setRealPosition(cursor.getString(9));
+            o.setFormat(cursor.getString(2));
+            o.setDefaultValue(cursor.getString(3));
+            o.setMinimum(cursor.getString(4));
+            o.setMaximum(cursor.getString(5));
+            o.setDetails(cursor.getString(6));
+            o.setBarcode(cursor.getInt(7) > 0);
+            o.setCategories(cursor.getString(8));
+            o.setRealPosition(cursor.getString(10));
 
                 list.add(o);
 
@@ -1038,23 +1058,25 @@ public class DataHelper {
         data.setMinimum("");
         data.setMaximum("");
         data.setDetails("");
+        data.setBarcode(false);
         data.setCategories("");
 
-        Cursor cursor = db.query(TRAITS, new String[]{"trait", "format", "defaultValue", "minimum",
-                        "maximum", "details", "categories", "id", "external_db_id"}, "trait like ? and isVisible like ?",
+        Cursor cursor = db.query(TRAITS, GetColumnNames(),
+                "trait like ? and isVisible like ?",
                 new String[]{trait, "true"}, null, null, null
         );
 
         if (cursor.moveToFirst()) {
-            data.setTrait(cursor.getString(0));
-            data.setFormat(cursor.getString(1));
-            data.setDefaultValue(cursor.getString(2));
-            data.setMinimum(cursor.getString(3));
-            data.setMaximum(cursor.getString(4));
-            data.setDetails(cursor.getString(5));
-            data.setCategories(cursor.getString(6));
-            data.setId(cursor.getString(7));
-            data.setExternalDbId(cursor.getString(8));
+            data.setId(cursor.getString(0));
+            data.setTrait(cursor.getString(1));
+            data.setFormat(cursor.getString(2));
+            data.setDefaultValue(cursor.getString(3));
+            data.setMinimum(cursor.getString(4));
+            data.setMaximum(cursor.getString(5));
+            data.setDetails(cursor.getString(6));
+            data.setBarcode(cursor.getInt(7) > 0);
+            data.setCategories(cursor.getString(8));
+            data.setExternalDbId(cursor.getString(11));
         }
 
         if (!cursor.isClosed()) {
@@ -1062,6 +1084,28 @@ public class DataHelper {
         }
 
         return data;
+    }
+    
+    // Dose the table have the column?
+    public boolean hasColumn(String column_name, String table_name) {
+        // enumerate field name
+        Cursor cursor = db.rawQuery("PRAGMA table_info('traits')", null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                if(cursor.getString(1).equals(column_name)) {
+                    if (!cursor.isClosed()) {
+			                  cursor.close();
+                    }
+                    return true;
+                }
+            } while (cursor.moveToNext());
+        }
+
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+        return false;
     }
 
     /**
@@ -1589,9 +1633,10 @@ public class DataHelper {
             this.insertTraits = this.bindValue(insertTraits, 6, t.getMinimum());
             this.insertTraits = this.bindValue(insertTraits, 7, t.getMaximum());
             this.insertTraits = this.bindValue(insertTraits, 8, t.getDetails());
-            this.insertTraits = this.bindValue(insertTraits, 9, t.getCategories());
-            this.insertTraits = this.bindValue(insertTraits, 10, String.valueOf(t.getVisible()));
-            this.insertTraits = this.bindValue(insertTraits, 11, t.getRealPosition());
+            this.insertTraits = this.bindValue(insertTraits, 9, t.usesBarcode());
+            this.insertTraits = this.bindValue(insertTraits, 10, t.getCategories());
+            this.insertTraits = this.bindValue(insertTraits, 11, String.valueOf(t.getVisible()));
+            this.insertTraits = this.bindValue(insertTraits, 12, t.getRealPosition());
 
             return this.insertTraits.executeInsert();
         } catch (Exception e) {
@@ -1629,7 +1674,7 @@ public class DataHelper {
      * V2 - Edit existing trait
      */
     public long editTraits(String id, String trait, String format, String defaultValue,
-                           String minimum, String maximum, String details, String categories) {
+                           String minimum, String maximum, String details, boolean withBarcode, String categories) {
         try {
             ContentValues c = new ContentValues();
             c.put("trait", trait);
@@ -1638,6 +1683,7 @@ public class DataHelper {
             c.put("minimum", minimum);
             c.put("maximum", maximum);
             c.put("details", details);
+            c.put("withBarcode", withBarcode);
             c.put("categories", categories);
 
             return db.update(TRAITS, c, "id = ?", new String[]{id});
@@ -2060,7 +2106,7 @@ public class DataHelper {
                     + "(id INTEGER PRIMARY KEY, range TEXT, plot TEXT, entry TEXT, plot_id TEXT, pedigree TEXT)");
             db.execSQL("CREATE TABLE "
                     + TRAITS
-                    + "(id INTEGER PRIMARY KEY, external_db_id TEXT, trait_data_source TEXT, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)");
+                    + "(id INTEGER PRIMARY KEY, external_db_id TEXT, trait_data_source TEXT, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, withBarcode BOOLEAN, categories TEXT, isVisible TEXT, realPosition int)");
             db.execSQL("CREATE TABLE "
                     + USER_TRAITS
                     + "(id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT, observation_db_id TEXT, last_synced_time TEXT)");

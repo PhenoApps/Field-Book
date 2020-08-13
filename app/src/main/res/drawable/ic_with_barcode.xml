@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <path
+        android:fillColor="#ffffff"
+        android:strokeWidth="1"
+        android:pathData="M0 0L0 17L64 17L64 0L0 0z" />
+    <path
+        android:fillColor="#000000"
+        android:strokeWidth="1"
+        android:pathData="M0 17L0 48L64 48L64 17L0 17z" />
+    <path
+        android:fillColor="#ffffff"
+        android:strokeWidth="1"
+        android:pathData="M1 18L1 47L63 47L63 18L1 18z" />
+    <path
+        android:fillColor="#000000"
+        android:strokeWidth="1"
+        android:pathData="M2 19L2 46C4.54081 39.945 4.54081 25.0551 2 19M4 19L4 46L6 46L6 19L4 19M7 19L7 46C9.54081 39.945 9.54081 25.0551 7 19M9 19L9 46L11 46L11 19L9 19M13 19L13 46C15.5408 39.945 15.5408 25.0551 13 19M15 19L15 46C17.5408 39.945 17.5408 25.0551 15 19M17 19L17 46L19 46L19 19L17 19M20 19L20 46C22.5408 39.945 22.5408 25.0551 20 19M22 19L22 46C24.5408 39.945 24.5408 25.0551 22 19M24 19L24 46L26 46L26 19L24 19M28 19L28 46L30 46L30 19L28 19M32 19L32 46C34.5408 39.945 34.5408 25.055 32 19M34 19L34 46C36.5408 39.945 36.5408 25.055 34 19M36 19L36 46L38 46L38 19L36 19M39 19L39 46C41.5408 39.945 41.5408 25.055 39 19M41 19L41 46L43 46L43 19L41 19M45 19L45 46C47.5408 39.945 47.5408 25.055 45 19M47 19L47 46C49.5408 39.945 49.5408 25.055 47 19M49 19L49 46L51 46L51 19L49 19M52 19L52 46C54.5408 39.945 54.5408 25.055 52 19M54 19L54 46C56.5408 39.945 56.5408 25.055 54 19M56 19L56 46L58 46L58 19L56 19M60 19L60 46L62 46L62 19L60 19z" />
+    <path
+        android:fillColor="#ffffff"
+        android:strokeWidth="1"
+        android:pathData="M0 48L0 64L64 64L64 48L0 48z" />
+</vector>

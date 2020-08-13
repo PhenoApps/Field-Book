@@ -52,10 +52,12 @@ public class NewTraitDialog extends DialogFragment {
     private EditText categories;
     private TextView defTv;
     private ToggleButton bool;
+    private ToggleButton checkBarcode;
     private LinearLayout defBox;
     private LinearLayout minBox;
     private LinearLayout maxBox;
     private LinearLayout categoryBox;
+    private LinearLayout barcodeBox;
 
     private TraitFormat traitFormat;
 
@@ -110,11 +112,13 @@ public class NewTraitDialog extends DialogFragment {
         minimum = layout.findViewById(R.id.minimum);
         maximum = layout.findViewById(R.id.maximum);
         details = layout.findViewById(R.id.details);
+        checkBarcode = layout.findViewById(R.id.check_barcode);
         categories = layout.findViewById(R.id.categories);
 
         defBox = layout.findViewById(R.id.defbox);
         minBox = layout.findViewById(R.id.minbox);
         maxBox = layout.findViewById(R.id.maxbox);
+        barcodeBox = layout.findViewById(R.id.barcodebox);
         categoryBox = layout.findViewById(R.id.categorybox);
 
         bool = layout.findViewById(R.id.boolBtn);
@@ -190,6 +194,7 @@ public class NewTraitDialog extends DialogFragment {
                     details.setText("");
                     categories.setText("");
                     bool.setChecked(false);
+                    checkBarcode.setChecked(false);
                     currentPosition = position;
                     format.setSelection(currentPosition);
                     prepareFields(currentPosition);
@@ -292,6 +297,7 @@ public class NewTraitDialog extends DialogFragment {
         minimum.setText("");
         maximum.setText("");
         details.setText("");
+        checkBarcode.setChecked(false);
         categories.setText("");
 
         edit = false;
@@ -314,6 +320,7 @@ public class NewTraitDialog extends DialogFragment {
         t.setMinimum(minimum.getText().toString());
         t.setMaximum(maximum.getText().toString());
         t.setDetails(details.getText().toString());
+        t.setBarcode(checkBarcode.isChecked());
         t.setCategories(categories.getText().toString());
         t.setVisible(true);
         t.setRealPosition(String.valueOf(pos));
@@ -331,6 +338,7 @@ public class NewTraitDialog extends DialogFragment {
                 minimum.getText().toString(),
                 maximum.getText().toString(),
                 details.getText().toString(),
+                checkBarcode.isChecked(),
                 categories.getText().toString());
     }
 
@@ -346,6 +354,7 @@ public class NewTraitDialog extends DialogFragment {
         minimum.setText(traitObject.getMinimum());
         maximum.setText(traitObject.getMaximum());
         details.setText(traitObject.getDetails());
+        checkBarcode.setChecked(traitObject.usesBarcode());
         categories.setText(traitObject.getCategories());
     }
 
@@ -363,6 +372,7 @@ public class NewTraitDialog extends DialogFragment {
         maxBox.setVisibility(viewVisibility(traitFormat.maximumBox().getParameterVisibility()));
         bool.setVisibility(viewVisibility(traitFormat.isBooleanVisible()));
         categoryBox.setVisibility(viewVisibility(traitFormat.categoriesBox().getParameterVisibility()));
+        barcodeBox.setVisibility(viewVisibility(traitFormat.isBarcodeBoxVisible()));
 
         minimum.setText(traitFormat.minimumBox().getParameterDefaultValue());
         maximum.setText(traitFormat.maximumBox().getParameterDefaultValue());
@@ -386,7 +396,7 @@ public class NewTraitDialog extends DialogFragment {
         // not use a magic number
         final int booleanIndex = traitFormats.findIndexByEnglishString("Boolean");
         if (o != null) {
-            final String defString = bool.isChecked() ? "true" : "false";
+            final String defString = bool.isChecked() ? "TRUE" : "FALSE";
 
             if (!trait.getText().toString().equals(o.getTrait()))
                 return true;
@@ -402,6 +412,7 @@ public class NewTraitDialog extends DialogFragment {
             return (!minimum.getText().toString().equals(o.getMinimum())) ||
                     (!maximum.getText().toString().equals(o.getMaximum())) ||
                     (!details.getText().toString().equals(o.getDetails())) ||
+                    (checkBarcode.isChecked() != o.usesBarcode()) ||
                     (!categories.getText().toString().equals(o.getCategories()));
 
         } else {
@@ -532,6 +543,8 @@ public class NewTraitDialog extends DialogFragment {
         abstract public boolean isDefBoxVisible();
 
         abstract public boolean isBooleanVisible();
+        
+        abstract public boolean isBarcodeBoxVisible();
 
 
         // whether is the input type each item of this dialog number
@@ -588,6 +601,10 @@ public class NewTraitDialog extends DialogFragment {
             return false;
         }
 
+        public boolean isBarcodeBoxVisible() {
+            return false;
+        }
+
         public boolean isNumericInputType() {
             return false;
         }
@@ -604,6 +621,10 @@ public class NewTraitDialog extends DialogFragment {
 
         public boolean isBooleanVisible() {
             return false;
+        }
+
+        public boolean isBarcodeBoxVisible() {
+            return true;
         }
 
         public boolean isNumericInputType() {
@@ -686,6 +707,10 @@ public class NewTraitDialog extends DialogFragment {
         }
 
         public boolean isBooleanVisible() {
+            return false;
+        }
+
+        public boolean isBarcodeBoxVisible() {
             return false;
         }
 
@@ -861,6 +886,10 @@ public class NewTraitDialog extends DialogFragment {
             return true;
         }
 
+        public boolean isBarcodeBoxVisible() {
+            return false;
+        }
+
         public boolean isNumericInputType() {
             return false;
         }
@@ -896,6 +925,10 @@ public class NewTraitDialog extends DialogFragment {
 
         public boolean isBooleanVisible() {
             return false;
+        }
+
+        public boolean isBarcodeBoxVisible() {
+            return true;
         }
 
         public boolean isNumericInputType() {
