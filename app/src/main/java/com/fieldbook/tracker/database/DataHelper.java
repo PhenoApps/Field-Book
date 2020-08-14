@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 8;
+    public static final int DATABASE_VERSION = 9;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -82,11 +82,6 @@ public class DataHelper {
             this.context = context;
             openHelper = new OpenHelper(this.context);
             db = openHelper.getWritableDatabase();
-            
-            if(!hasColumn("withBarcode", "traits")) {
-                // add withBarcode column into traits table
-                db.execSQL("ALTER TABLE traits ADD COLUMN withBarcode BOOLEAN");
-            }
             ep = context.getSharedPreferences("Settings", 0);
 
             this.insertTraits = db.compileStatement(INSERTTRAITS);
@@ -645,11 +640,6 @@ public class DataHelper {
 
         try {
             db = openHelper.getWritableDatabase();
-            if(!hasColumn("withBarcode", "traits")) {
-                // add withBarcode column into traits table
-                db.execSQL("ALTER TABLE traits ADD COLUMN withBarcode BOOLEAN");
-            }
-
             this.insertTraits = db.compileStatement(INSERTTRAITS);
             this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
         } catch (Exception e) {
@@ -1084,28 +1074,6 @@ public class DataHelper {
         }
 
         return data;
-    }
-    
-    // Dose the table have the column?
-    public boolean hasColumn(String column_name, String table_name) {
-        // enumerate field name
-        Cursor cursor = db.rawQuery("PRAGMA table_info('traits')", null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                if(cursor.getString(1).equals(column_name)) {
-                    if (!cursor.isClosed()) {
-			                  cursor.close();
-                    }
-                    return true;
-                }
-            } while (cursor.moveToNext());
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-        return false;
     }
 
     /**
@@ -1954,6 +1922,8 @@ public class DataHelper {
             copyFile(newSp, oldSp);
         } catch (IOException e) {
             Log.d("Database",e.toString());
+        } finally {
+            open();
         }
     }
 
@@ -2241,6 +2211,11 @@ public class DataHelper {
                 db.execSQL("ALTER TABLE user_traits ADD COLUMN observation_db_id TEXT");
                 db.execSQL("ALTER TABLE user_traits ADD COLUMN last_synced_time TEXT");
 
+            }
+
+            if (oldVersion <= 9 & newVersion >= 9) {
+                // add withBarcode column into traits table
+                db.execSQL("ALTER TABLE traits ADD COLUMN withBarcode BOOLEAN");
             }
         }
     }
