@@ -46,7 +46,7 @@ public class TraitWithBarcodeLayout extends BaseTraitLayout {
         // Get Barcode
         getBarcode.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-				((CollectActivity)thisActivity).setBarcodeTargetValue();
+				((CollectActivity)thisActivity).setBarcodeTarget(CollectActivity.BarcodeTarget.Value);
                 IntentIntegrator integrator = new IntentIntegrator(thisActivity);
                 integrator.initiateScan();
             }

@@ -967,7 +967,7 @@ public class DataHelper {
     /**
     * Get array of column names for query
     */
-    public String[] GetColumnNames() {
+    public String[] getTraitColumnNames() {
        return new String[] {
            "id", "trait", "format", "defaultValue", "minimum", "maximum",
            "details", "withBarcode", "categories", "isVisible",
@@ -982,7 +982,7 @@ public class DataHelper {
 
         ArrayList<TraitObject> list = new ArrayList<>();
 
-        Cursor cursor = db.query(TRAITS, GetColumnNames(),
+        Cursor cursor = db.query(TRAITS, getTraitColumnNames(),
                 null, null, null, null, "realPosition"
         );
 
@@ -1051,7 +1051,7 @@ public class DataHelper {
         data.setBarcode(false);
         data.setCategories("");
 
-        Cursor cursor = db.query(TRAITS, GetColumnNames(),
+        Cursor cursor = db.query(TRAITS, getTraitColumnNames(),
                 "trait like ? and isVisible like ?",
                 new String[]{trait, "true"}, null, null, null
         );
