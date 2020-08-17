@@ -28,9 +28,11 @@ package com.fieldbook.tracker.brapi;
         import io.swagger.client.ApiException;
         import io.swagger.client.api.ImagesApi;
         import io.swagger.client.api.ObservationsApi;
+        import io.swagger.client.api.ProgramsApi;
         import io.swagger.client.api.StudiesApi;
         import io.swagger.client.api.PhenotypesApi;
         import io.swagger.client.api.ObservationVariablesApi;
+        import io.swagger.client.api.TrialsApi;
         import io.swagger.client.model.Image;
         import io.swagger.client.model.ImageResponse;
         import io.swagger.client.model.Metadata;
@@ -45,12 +47,16 @@ package com.fieldbook.tracker.brapi;
         import io.swagger.client.model.PhenotypesRequest;
         import io.swagger.client.model.PhenotypesRequestData;
         import io.swagger.client.model.PhenotypesRequestObservation;
+        import io.swagger.client.model.Program;
+        import io.swagger.client.model.ProgramsResponse;
         import io.swagger.client.model.StudiesResponse;
         import io.swagger.client.model.NewObservationDbIdsResponse;
         import io.swagger.client.model.Study;
         import io.swagger.client.model.StudyObservationVariablesResponse;
         import io.swagger.client.model.StudyResponse;
         import io.swagger.client.model.StudySummary;
+        import io.swagger.client.model.TrialSummary;
+        import io.swagger.client.model.TrialsResponse;
 
         import java.util.HashMap;
         import java.util.Set;
@@ -63,6 +69,8 @@ public class BrAPIService {
     private DataHelper dataHelper;
     private ImagesApi imagesApi;
     private StudiesApi studiesApi;
+    private ProgramsApi programsApi;
+    private TrialsApi trialsApi;
     private PhenotypesApi phenotypesApi;
     private ObservationsApi observationsApi;
     private ObservationVariablesApi traitsApi;
@@ -79,6 +87,8 @@ public class BrAPIService {
 
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
+        this.programsApi = new ProgramsApi(apiClient);
+        this.trialsApi = new TrialsApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
@@ -325,7 +335,82 @@ public class BrAPIService {
 
     }
 
-    public void getStudies(final String brapiToken, final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction) {
+    public void getPrograms(final String brapiToken, final Function<List<BrapiProgram>, Void> function, final Function<String, Void> failFunction) {
+       try {
+           BrapiApiCallBack<ProgramsResponse> callback = new BrapiApiCallBack<ProgramsResponse>() {
+               @Override
+               public void onSuccess(ProgramsResponse programsResponse, int i, Map<String, List<String>> map) {
+                   List<Program> programList = programsResponse.getResult().getData();
+                   function.apply(mapPrograms(programList));
+               }
+
+               @Override
+               public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                   failFunction.apply("Error when loading programs");
+               }
+           };
+           programsApi.programsGetAsync(null, null, null,
+                   0, 1000, brapiToken, callback);
+       } catch (ApiException e) {
+           e.printStackTrace();
+       }
+    }
+
+    private List<BrapiProgram> mapPrograms(List<Program> programList) {
+        List<BrapiProgram> brapiPrograms = new ArrayList<>();
+        if (programList != null) {
+            for (Program program : programList) {
+                BrapiProgram brapiProgram = new BrapiProgram();
+                String name = program.getName();
+                String programName = program.getProgramName();
+                if (programName != null && !programName.isEmpty()) {
+                    brapiProgram.setProgramName(programName);
+                } else {
+                    brapiProgram.setProgramName(name);
+                }
+                brapiProgram.setProgramDbId(program.getProgramDbId());
+                brapiPrograms.add(brapiProgram);
+            }
+        }
+        return brapiPrograms;
+    }
+
+    public void getTrials(final String brapiToken, String programDbId, final Function<List<BrapiTrial>, Void> function, final Function<String, Void> failFunction) {
+        try {
+            BrapiApiCallBack<TrialsResponse> callback = new BrapiApiCallBack<TrialsResponse>() {
+                @Override
+                public void onSuccess(TrialsResponse trialsResponse, int i, Map<String, List<String>> map) {
+                    List<TrialSummary> trialList = trialsResponse.getResult().getData();
+                    function.apply(mapTrials(trialList));
+                }
+
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    failFunction.apply("Error when loading trials");
+                }
+            };
+            trialsApi.trialsGetAsync(null, programDbId, null, null, null, null,
+                    0, 1000, brapiToken, callback);
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<BrapiTrial> mapTrials(List<TrialSummary> trialList) {
+        List<BrapiTrial> brapiTrials = new ArrayList<>();
+        if (trialList != null) {
+            for (TrialSummary trial : trialList) {
+                BrapiTrial brapiTrial = new BrapiTrial();
+                String name = trial.getTrialName();
+                brapiTrial.setTrialName(name);
+                brapiTrial.setTrialDbId(trial.getTrialDbId());
+                brapiTrials.add(brapiTrial);
+            }
+        }
+        return brapiTrials;
+    }
+
+    public void getStudies(final String brapiToken, String programDbId, String trialDbId, final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudiesResponse> callback = new BrapiApiCallBack<StudiesResponse>() {
@@ -351,8 +436,8 @@ public class BrAPIService {
             };
 
             studiesApi.studiesGetAsync(
-                    null, null, null, null,
-                    null, null, null, null, null,
+                    null, null, null, programDbId,
+                    null, null, trialDbId, null, null,
                     null, null, null, null,
                     0, 1000, brapiToken, callback);
 
