@@ -438,6 +438,7 @@
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>
     <string name="brapi_auth_deny">BrAPI Authorization Denied</string>
     <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
+    <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary for the specified system.</string>
     <string name="brapi_btn_auth_summary">Brapi is currently authorized with %1$s</string>
     <string name="brapi_base_url_default">https://test-server.brapi.org</string>
     <string name="brapi_load_data_button">Load Fields</string>
@@ -448,6 +449,8 @@
     <string name="brapi_study_location">Location</string>
     <string name="brapi_study_num_plots"> Plots</string>
     <string name="brapi_study_num_traits"> Traits</string>
+    <string name="brapi_not_found">ERROR: Target system does not support this operation via BrAPI.</string>
+    <string name="brapi_studies_error">Error when loading studies.</string>
     <string name="brapi_study_detail_error">Error when loading study details for study. Study not saved.</string>
     <string name="brapi_plot_detail_error">Error when loading plots for study. Study not saved.</string>
     <string name="brapi_study_traits_error">Error when loading traits for study. Study not saved.</string>

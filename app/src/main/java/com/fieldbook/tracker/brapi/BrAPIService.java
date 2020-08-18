@@ -410,7 +410,7 @@ public class BrAPIService {
         return brapiTrials;
     }
 
-    public void getStudies(final String brapiToken, String programDbId, String trialDbId, final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction) {
+    public void getStudies(final String brapiToken, String programDbId, String trialDbId, final Function<List<BrapiStudySummary>, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudiesResponse> callback = new BrapiApiCallBack<StudiesResponse>() {
@@ -430,7 +430,7 @@ public class BrAPIService {
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
 
                     // Close our current study and report failure
-                    failFunction.apply("Error when loading studies.");
+                    failFunction.apply(error);
 
                 }
             };

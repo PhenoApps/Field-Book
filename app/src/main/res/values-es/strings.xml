@@ -380,6 +380,7 @@
     <string name="brapi_auth_success">Autorización por BrAPI exitosa</string>
     <string name="brapi_auth_deny">Autorización BrAPI denegada</string>
     <string name="brapi_auth_error_starting">Error al iniciar la autenticación BrAPI</string>
+    <string name="brapi_auth_permission_deny">ERROR: no tiene los permisos necesarios para el sistema especificado.</string>
     <string name="brapi_btn_auth_summary">Brapi está actualmente autorizado con %1$s</string>
     <string name="brapi_base_url_default">https://test-server.brapi.org</string>
     <string name="brapi_load_data_button">Cargar Campos</string>
@@ -390,6 +391,8 @@
     <string name="brapi_study_location">Ubicación</string>
     <string name="brapi_study_num_plots">Parcela</string>
     <string name="brapi_study_num_traits">Variables</string>
+    <string name="brapi_not_found">ERROR: El sistema de destino no admite esta operación vía BrAPI.</string>
+    <string name="brapi_studies_error">Error al cargar los estudios.</string>
     <string name="brapi_study_detail_error">Error al cargar los detalles del estudio. Estudio no guardado.</string>
     <string name="brapi_plot_detail_error">Error al cargar las parcelas del estudio. Estudio no guardado.</string>
     <string name="brapi_study_traits_error">Error al cargar las variables del estudio. Estudio no guardado.</string>
