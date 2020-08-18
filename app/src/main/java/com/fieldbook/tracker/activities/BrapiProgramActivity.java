@@ -125,16 +125,20 @@ public class BrapiProgramActivity extends AppCompatActivity {
     }
 
     public void buttonClicked(View view) {
-       switch (view.getId()) {
-           case R.id.loadPrograms:
-               loadPrograms();
-               break;
-           case R.id.selectProgram:
-               Intent intent = new Intent();
-               intent.setData(Uri.parse(this.brapiProgram.getProgramDbId()));
-               setResult(RESULT_OK, intent);
-               finish();
-               break;
-       }
+        switch (view.getId()) {
+            case R.id.loadPrograms:
+                loadPrograms();
+                break;
+            case R.id.selectProgram:
+                if (this.brapiProgram != null) {
+                    Intent intent = new Intent();
+                    intent.setData(Uri.parse(this.brapiProgram.getProgramDbId()));
+                    setResult(RESULT_OK, intent);
+                    finish();
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_program, Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
     }
 }
