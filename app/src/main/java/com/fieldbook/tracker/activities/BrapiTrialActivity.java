@@ -127,16 +127,20 @@ public class BrapiTrialActivity extends AppCompatActivity {
     }
 
     public void buttonClicked(View view) {
-       switch (view.getId()) {
-           case R.id.loadTrials:
-               loadTrials();
-               break;
-           case R.id.selectTrial:
-               Intent intent = new Intent();
-               intent.setData(Uri.parse(this.brapiTrial.getTrialDbId()));
-               setResult(RESULT_OK, intent);
-               finish();
-               break;
-       }
+        switch (view.getId()) {
+            case R.id.loadTrials:
+                loadTrials();
+                break;
+            case R.id.selectTrial:
+                if (this.brapiTrial != null) {
+                    Intent intent = new Intent();
+                    intent.setData(Uri.parse(this.brapiTrial.getTrialDbId()));
+                    setResult(RESULT_OK, intent);
+                    finish();
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_trial, Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
     }
 }

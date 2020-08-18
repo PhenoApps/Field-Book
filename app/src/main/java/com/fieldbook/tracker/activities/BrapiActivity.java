@@ -164,9 +164,13 @@ public class BrapiActivity extends AppCompatActivity {
     }
 
     private void saveStudy() {
-        BrapiLoadDialog bld = new BrapiLoadDialog(this);
-        bld.setSelectedStudy(this.selectedStudy);
-        bld.show();
+        if(this.selectedStudy != null) {
+            BrapiLoadDialog bld = new BrapiLoadDialog(this);
+            bld.setSelectedStudy(this.selectedStudy);
+            bld.show();
+        }else{
+            Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_study, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
