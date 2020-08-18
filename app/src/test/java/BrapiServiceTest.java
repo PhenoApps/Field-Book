@@ -40,6 +40,8 @@ public class BrapiServiceTest {
     List<NewObservationDbIdsObservations> putObservationsResponse;
     Image postImageMetaDataResponse;
     Bitmap missingImage;
+    private String programDbId = "1";
+    private String trialDbId = "1";
 
 
     @Before
@@ -59,7 +61,7 @@ public class BrapiServiceTest {
         final CountDownLatch signal = new CountDownLatch(1);
 
         // Call our get studies endpoint with the same parsing that our classes use.
-        this.brAPIService.getStudies(brapiToken, new Function<List<BrapiStudySummary>, Void>() {
+        this.brAPIService.getStudies(brapiToken, this.programDbId, this.trialDbId, new Function<List<BrapiStudySummary>, Void>() {
             @Override
             public Void apply(List<BrapiStudySummary> input) {
                 // Check that there is atleast one study returned.
