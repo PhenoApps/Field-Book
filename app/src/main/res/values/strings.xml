@@ -438,7 +438,7 @@
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>
     <string name="brapi_auth_deny">BrAPI Authorization Denied</string>
     <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
-    <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary for the specified system.</string>
+    <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
     <string name="brapi_btn_auth_summary">Brapi is currently authorized with %1$s</string>
     <string name="brapi_base_url_default">https://test-server.brapi.org</string>
     <string name="brapi_load_data_button">Load Fields</string>
@@ -461,8 +461,10 @@
     <string name="brapi_fields_filter_by_trial">Filter by trial</string>
     <string name="brapi_programs_load">Load programs</string>
     <string name="brapi_programs_select">Select program</string>
+    <string name="brapi_programs_error">Error when loading programs.</string>
     <string name="brapi_trials_load">Load trials</string>
     <string name="brapi_trials_select">Select trial</string>
+    <string name="brapi_trials_error">Error when loading trials.</string>
     <string name="brapi_save_trait">Save Traits</string>
     <string name="brapi_must_configure_url">Must configure a valid BrAPI URL in settings before proceeding</string>
     <string name="brapi_warning_select_program">Please select a program</string>

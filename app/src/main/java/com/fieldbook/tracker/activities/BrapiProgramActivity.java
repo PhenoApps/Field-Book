@@ -26,6 +26,8 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.swagger.client.ApiException;
+
 public class BrapiProgramActivity extends AppCompatActivity {
     private BrAPIService brAPIService;
     private BrapiProgram brapiProgram;
@@ -99,15 +101,19 @@ public class BrapiProgramActivity extends AppCompatActivity {
                 });
                 return null;
             }
-        }, new Function<String, Void>() {
+        }, new Function<ApiException, Void>() {
             @Override
-            public Void apply(String input) {
+            public Void apply(ApiException error) {
                 (BrapiProgramActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
+                        if(BrAPIService.isConnectionError(error.getCode())){
+                            BrAPIService.handleConnectionError(BrapiProgramActivity.this, error.getCode());
+                        }else {
+                            Toast.makeText(getApplicationContext(), getString(R.string.brapi_programs_error), Toast.LENGTH_LONG).show();
+                        }
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        Toast.makeText(getApplicationContext(), input, Toast.LENGTH_LONG).show();
                     }
                 });
                 return null;

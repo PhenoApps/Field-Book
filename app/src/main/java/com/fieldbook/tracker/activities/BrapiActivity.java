@@ -133,9 +133,12 @@ public class BrapiActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
-                        String message = getMessageForErrorCode(error.getCode());
+                        if(BrAPIService.isConnectionError(error.getCode())){
+                            BrAPIService.handleConnectionError(BrapiActivity.this, error.getCode());
+                        }else {
+                            Toast.makeText(getApplicationContext(), getString(R.string.brapi_studies_error), Toast.LENGTH_LONG).show();
+                        }
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -143,30 +146,6 @@ public class BrapiActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    private String getMessageForErrorCode(int code) {
-        ApiError apiError = ApiError.processErrorCode(code);
-
-        if (apiError == null) {
-            return getString(R.string.brapi_studies_error);
-        }
-
-        switch (apiError) {
-            case UNAUTHORIZED:
-                // Start the login process
-                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(BrapiActivity.this, null);
-                brapiAuth.show();
-                return getString(R.string.brapi_auth_deny);
-            case FORBIDDEN:
-                return getString(R.string.brapi_auth_permission_deny);
-            case NOT_FOUND:
-                return getString(R.string.brapi_not_found);
-            case BAD_REQUEST:
-                return getString(R.string.brapi_studies_error);
-            default:
-                return null;
-        }
     }
 
     private ArrayAdapter buildStudiesArrayAdapter(List<BrapiStudySummary> studies) {

@@ -197,44 +197,23 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         }, new Function<ApiException, Void>() {
             @Override
-            public Void apply(final ApiException input) {
+            public Void apply(final ApiException error) {
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        // Display error message but don't finish the activity.
-                        String message = getMessageForErrorCode(input.getCode());
+                        // Show error message. We don't finish the activity intentionally.
+                        if(BrAPIService.isConnectionError(error.getCode())){
+                            BrAPIService.handleConnectionError(BrapiTraitActivity.this, error.getCode());
+                        }else {
+                            Toast.makeText(getApplicationContext(), getString(R.string.brapi_ontology_error), Toast.LENGTH_LONG).show();
+                        }
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                     }
                 });
 
                 return null;
             }
         });
-    }
-
-    private String getMessageForErrorCode(int code) {
-        ApiError apiError = ApiError.processErrorCode(code);
-
-        if (apiError == null) {
-            return getString(R.string.brapi_ontology_error);
-        }
-
-        switch (apiError) {
-            case UNAUTHORIZED:
-                // Start the login process
-                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(BrapiTraitActivity.this, null);
-                brapiAuth.show();
-                return getString(R.string.brapi_auth_deny);
-            case FORBIDDEN:
-                return getString(R.string.brapi_auth_permission_deny);
-            case NOT_FOUND:
-                return getString(R.string.brapi_not_found);
-            case BAD_REQUEST:
-                return getString(R.string.brapi_ontology_error);
-            default:
-                return null;
-        }
     }
 
     // Transforms the trait data to display it on the screen.
