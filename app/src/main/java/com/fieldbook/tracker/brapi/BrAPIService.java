@@ -8,6 +8,7 @@ package com.fieldbook.tracker.brapi;
         import android.net.Uri;
         import android.util.Log;
         import android.util.Patterns;
+        import android.widget.Toast;
 
         import androidx.arch.core.util.Function;
 
@@ -230,6 +231,33 @@ public class BrAPIService {
         return "Bearer " + preferences.getString(GeneralKeys.BRAPI_TOKEN, "");
     }
 
+    public static boolean isConnectionError(int code) {
+        return code == 401 || code == 403 || code == 404;
+    }
+
+    public static void handleConnectionError(Context context, int code) {
+        ApiError apiError = ApiError.processErrorCode(code);
+        String toastMsg = "";
+
+        switch (apiError) {
+            case UNAUTHORIZED:
+                // Start the login process
+                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(context, null);
+                brapiAuth.show();
+                toastMsg = context.getString(R.string.brapi_auth_deny);
+                break;
+            case FORBIDDEN:
+                toastMsg = context.getString(R.string.brapi_auth_permission_deny);
+                break;
+            case NOT_FOUND:
+                toastMsg = context.getString(R.string.brapi_not_found);
+                break;
+            default:
+                toastMsg = "";
+        }
+        Toast.makeText(context.getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
+    }
+
     public void postImageMetaData(com.fieldbook.tracker.brapi.Image image, String brapiToken,
                                   final Function<Image, Void> function,
                                   final Function<Integer, Void> failFunction) {
@@ -335,7 +363,7 @@ public class BrAPIService {
 
     }
 
-    public void getPrograms(final String brapiToken, final Function<List<BrapiProgram>, Void> function, final Function<String, Void> failFunction) {
+    public void getPrograms(final String brapiToken, final Function<List<BrapiProgram>, Void> function, final Function<ApiException, Void> failFunction) {
        try {
            BrapiApiCallBack<ProgramsResponse> callback = new BrapiApiCallBack<ProgramsResponse>() {
                @Override
@@ -346,7 +374,7 @@ public class BrAPIService {
 
                @Override
                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                   failFunction.apply("Error when loading programs");
+                   failFunction.apply(error);
                }
            };
            programsApi.programsGetAsync(null, null, null,
@@ -375,7 +403,7 @@ public class BrAPIService {
         return brapiPrograms;
     }
 
-    public void getTrials(final String brapiToken, String programDbId, final Function<List<BrapiTrial>, Void> function, final Function<String, Void> failFunction) {
+    public void getTrials(final String brapiToken, String programDbId, final Function<List<BrapiTrial>, Void> function, final Function<ApiException, Void> failFunction) {
         try {
             BrapiApiCallBack<TrialsResponse> callback = new BrapiApiCallBack<TrialsResponse>() {
                 @Override
@@ -386,7 +414,7 @@ public class BrAPIService {
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                    failFunction.apply("Error when loading trials");
+                    failFunction.apply(error);
                 }
             };
             trialsApi.trialsGetAsync(null, programDbId, null, null, null, null,
@@ -410,7 +438,7 @@ public class BrAPIService {
         return brapiTrials;
     }
 
-    public void getStudies(final String brapiToken, String programDbId, String trialDbId, final Function<List<BrapiStudySummary>, Void> function, final Function<String, Void> failFunction) {
+    public void getStudies(final String brapiToken, String programDbId, String trialDbId, final Function<List<BrapiStudySummary>, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
             BrapiApiCallBack<StudiesResponse> callback = new BrapiApiCallBack<StudiesResponse>() {
@@ -430,7 +458,7 @@ public class BrAPIService {
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
 
                     // Close our current study and report failure
-                    failFunction.apply("Error when loading studies.");
+                    failFunction.apply(error);
 
                 }
             };

@@ -16,7 +16,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiLoadDialog;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
 import com.fieldbook.tracker.database.DataHelper;
@@ -24,6 +26,8 @@ import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.swagger.client.ApiException;
 
 /**
  * API test Screen
@@ -119,18 +123,22 @@ public class BrapiActivity extends AppCompatActivity {
 
                 return null;
             }
-        }, new Function<String, Void>() {
+        }, new Function<ApiException, Void>() {
 
 
             @Override
-            public Void apply(final String input) {
+            public Void apply(final ApiException error) {
 
                 (BrapiActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
+                        if(BrAPIService.isConnectionError(error.getCode())){
+                            BrAPIService.handleConnectionError(BrapiActivity.this, error.getCode());
+                        }else {
+                            Toast.makeText(getApplicationContext(), getString(R.string.brapi_studies_error), Toast.LENGTH_LONG).show();
+                        }
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        Toast.makeText(getApplicationContext(), input, Toast.LENGTH_LONG).show();
                     }
                 });
 
