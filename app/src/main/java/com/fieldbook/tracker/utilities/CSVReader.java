@@ -22,6 +22,9 @@ public class CSVReader {
     private int skipLines;
     private boolean linesSkiped;
 
+    private boolean firstLineRead = false;
+    private static final String UTF8_BOM = "\uFEFF";
+
     public CSVReader(Reader reader) {
         this(reader, DEFAULT_SEPARATOR, DEFAULT_QUOTE_CHARACTER,
                 DEFAULT_SKIP_LINES);
@@ -38,6 +41,16 @@ public class CSVReader {
 
         String nextLine = getNextLine();
 
+        if (!firstLineRead) {
+
+            firstLineRead = true;
+
+            if (nextLine != null && nextLine.startsWith(UTF8_BOM)) {
+
+                nextLine = nextLine.substring(1);
+
+            }
+        }
         return parseLine(nextLine);
     }
 
