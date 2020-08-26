@@ -20,7 +20,8 @@
             android:layout_margin="15dip"
             android:adjustViewBounds="false"
             android:background="@drawable/label_simple"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:contentDescription="@string/trait_labelprint_preview_description" />
 
         <ImageButton
             android:id="@+id/printLabelButton"
@@ -32,7 +33,8 @@
             android:gravity="center"
             android:padding="10dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_trait_labelprint" />
+            android:src="@drawable/ic_trait_labelprint"
+            android:contentDescription="@string/trait_labelprint_print_button_description" />
     </LinearLayout>
 
     <LinearLayout
@@ -42,7 +44,7 @@
 
         <TextView
             android:id="@+id/labelsizetext"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/trait_layout_print_label_size_title"
@@ -67,7 +69,7 @@
 
         <TextView
             android:id="@+id/textfieldtitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/trait_layout_print_text_field_title"
@@ -93,7 +95,7 @@
 
         <TextView
             android:id="@+id/textfieldtitle2"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/trait_layout_print_text_field_title_2"
@@ -119,7 +121,7 @@
 
         <TextView
             android:id="@+id/textfieldtitle3"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/trait_layout_print_text_field_title_3"
@@ -145,7 +147,7 @@
 
         <TextView
             android:id="@+id/textfieldtitle4"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/trait_layout_print_text_field_title_4"
@@ -170,7 +172,7 @@
 
         <TextView
             android:id="@+id/barcodefieldtitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/trait_layout_print_barcode_field_title"
@@ -196,7 +198,7 @@
 
         <TextView
             android:id="@+id/labelcopiestext"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/trait_layout_print_label_copies_title"
@@ -218,9 +220,19 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="3dp"
         android:paddingTop="10dp"
-        android:paddingBottom="10dp">
+        android:paddingBottom="10dp"
+        android:paddingStart="3dp"
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:paddingEnd="3dp">
+
+        <ImageButton
+            android:id="@+id/zebraButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/zebra_icon"
+            android:contentDescription="@string/trait_labelprint_zebraconnect_button_description" />
 
         <TextView
             android:id="@+id/printStatusTitle"
