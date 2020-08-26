@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class LabelPrintTraitLayout extends BaseTraitLayout {
 
@@ -138,6 +137,31 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
              */
             zebraButton.setOnClickListener((OnClickListener) v -> {
 
+                //get and handle selected items from dropdowns
+                String size = labelsize.getSelectedItem().toString();
+                String text1 = getValueFromSpinner(textfield1, options);
+                String text2 = getValueFromSpinner(textfield2, options);
+                String text3 = getValueFromSpinner(textfield3, options);
+                String text4 = getValueFromSpinner(textfield4, options);
+                String barcode = getValueFromSpinner(barcodefield, options);
+
+                int copiespos = labelcopies.getSelectedItemPosition();
+                String copies = labelcopies.getSelectedItem().toString();
+
+                // Save selected options for next time
+                SharedPreferences.Editor ed = getPrefs().edit();
+                ed.putString("SIZE", size);
+                ed.putString("TEXT", textfield1.getSelectedItem().toString());
+                ed.putString("TEXT2", textfield2.getSelectedItem().toString());
+                ed.putString("TEXT3", textfield3.getSelectedItem().toString());
+                ed.putString("TEXT4", textfield4.getSelectedItem().toString());
+                ed.putString("BARCODE", barcodefield.getSelectedItem().toString());
+                ed.putString("COPIES", copies);
+                ed.apply();
+
+                int length = barcode.length();
+                int barcode_size = 6;
+
                 try {
 
                     Intent zebraConnectIntent = getContext().getPackageManager().getLaunchIntentForPackage("com.zebra.printconnect");
@@ -146,7 +170,17 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
                 } catch (NullPointerException e) {
 
-                    Log.d("FieldBookError", Objects.requireNonNull(e.getLocalizedMessage()));
+                    String message = e.getLocalizedMessage();
+
+                    if (message != null) {
+
+                        Log.d("FieldBookError", message);
+
+                    } else {
+
+                        Log.d("FieldBookError", "Null pointer during Zebra Connect Intent.");
+
+                    }
 
                     e.printStackTrace();
 
@@ -210,13 +244,31 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         } catch(ArrayIndexOutOfBoundsException aobe) {
 
-            Log.d("FieldBookError", Objects.requireNonNull(aobe.getLocalizedMessage()));
+            String message = aobe.getLocalizedMessage();
+
+            if (message != null) {
+
+                Log.d("FieldBookError", message);
+
+            } else {
+
+                Log.d("FieldBookError", "Spinner adapter error in print label trait.");
+            }
 
             aobe.printStackTrace();
 
         } catch (NullPointerException e) {
 
-            Log.d("FieldBookError", Objects.requireNonNull(e.getLocalizedMessage()));
+            String message = e.getLocalizedMessage();
+
+            if (message != null) {
+
+                Log.d("FieldBookError", message);
+
+            } else {
+
+                Log.d("FieldBookError", "Null pointer exception occurred when loading spinner data.");
+            }
 
             e.printStackTrace();
 
@@ -247,7 +299,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                         if (printerStatusMap != null) {
 
                             final String successMessage = printerStatusMap.get("friendlyName") + " is connected.";
-                            
+
                             Log.d(CollectActivity.TAG, successMessage);
 
                             ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(successMessage));
@@ -257,8 +309,17 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                     } else {
                         // Handle unsuccessful printer status retrieval
                         final String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
-                        Log.e(CollectActivity.TAG, Objects.requireNonNull(errorMessage));
-                        ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(errorMessage));
+
+                        if (errorMessage != null) {
+
+                            Log.e(CollectActivity.TAG, errorMessage);
+
+                            ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(errorMessage));
+
+                        } else {
+
+                            Log.d("FieldBookError", "Error during print label trait connecting to ZebraConnect.");
+                        }
                     }
 
                 }
@@ -466,6 +527,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
             int pos = spinner.getSelectedItemPosition();
             value = ConfigActivity.dt.getDropDownRange(options[pos], getCRange().plot_id)[0];
         }
+
         return value;
     }
 }
