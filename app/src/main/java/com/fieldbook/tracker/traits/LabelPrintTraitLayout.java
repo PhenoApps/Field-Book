@@ -323,18 +323,28 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 String text4 = getValueFromSpinner(textfield4, options);
                 String barcode = getValueFromSpinner(barcodefield, options);
 
-                int copiespos = labelcopies.getSelectedItemPosition();
-                String copies = labelcopies.getSelectedItem().toString();
-
                 // Save selected options for next time
                 SharedPreferences.Editor ed = getPrefs().edit();
                 ed.putString("SIZE", size);
-                ed.putString("TEXT", textfield1.getSelectedItem().toString());
-                ed.putString("TEXT2", textfield2.getSelectedItem().toString());
-                ed.putString("TEXT3", textfield3.getSelectedItem().toString());
-                ed.putString("TEXT4", textfield4.getSelectedItem().toString());
-                ed.putString("BARCODE", barcodefield.getSelectedItem().toString());
-                ed.putString("COPIES", copies);
+
+                if (textfield1 != null) {
+                    ed.putString("TEXT", textfield1.getSelectedItem().toString());
+                }
+                if (textfield2 != null && textfield2.getSelectedItem() != null) {
+                    ed.putString("TEXT2", textfield2.getSelectedItem().toString());
+                }
+                if (textfield3 != null && textfield3.getSelectedItem() != null) {
+                    ed.putString("TEXT3", textfield3.getSelectedItem().toString());
+                }
+                if (textfield4 != null && textfield4.getSelectedItem() != null) {
+                    ed.putString("TEXT4", textfield4.getSelectedItem().toString());
+                }
+                if (barcodefield != null && barcodefield.getSelectedItem() != null) {
+                    ed.putString("BARCODE", barcodefield.getSelectedItem().toString());
+                }
+                if (labelcopies != null && labelcopies.getSelectedItem() != null) {
+                    ed.putString("COPIES", labelcopies.getSelectedItem().toString());
+                }
                 ed.apply();
 
                 int length = barcode.length();
@@ -394,47 +404,53 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 }
                 //Log.d(((MainActivity) getContext()).TAG, labelData);
 
-                StringBuilder passthroughData = new StringBuilder();
-                for (int j = 0; j <= copiespos; j++) {
-                    passthroughData.append(labelData);
-                }
+                if (labelcopies != null) {
 
-                byte[] passthroughBytes = null;
+                    int copiespos = labelcopies.getSelectedItemPosition();
 
-                try {
-
-                    passthroughBytes = passthroughData.toString().getBytes("UTF-8");
-
-                } catch (UnsupportedEncodingException e) {
-
-                    e.printStackTrace();
-
-                }
-
-                Intent printIntent = new Intent();
-                printIntent.setComponent(new ComponentName("com.zebra.printconnect", "com.zebra.printconnect.print.PassthroughService"));
-                printIntent.putExtra("com.zebra.printconnect.PrintService.PASSTHROUGH_DATA", passthroughBytes);
-
-                ResultReceiver buildIPCSafeReceiver = new ResultReceiver(null) {
-                    @Override
-                    protected void onReceiveResult(int resultCode, Bundle resultData) {
-                        if (resultCode == 0) {
-                            // Handle successful print
-                            ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(R.string.trait_printlabel_after_print_message));
-                        } else {
-                            // Error message (null on successful print)
-                            // Handle unsuccessful print
-                            String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
-                            //Log.e(((MainActivity) getContext()).TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
-                            ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(R.string.trait_printlabel_after_print_error));
-                        }
+                    StringBuilder passthroughData = new StringBuilder();
+                    for (int j = 0; j <= copiespos; j++) {
+                        passthroughData.append(labelData);
                     }
-                };
 
-                printIntent.setExtrasClassLoader(getContext().getClassLoader());
-                printIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver));
-                getContext().startService(printIntent);
+                    byte[] passthroughBytes = null;
+
+                    try {
+
+                        passthroughBytes = passthroughData.toString().getBytes("UTF-8");
+
+                    } catch (UnsupportedEncodingException e) {
+
+                        e.printStackTrace();
+
+                    }
+
+                    Intent printIntent = new Intent();
+                    printIntent.setComponent(new ComponentName("com.zebra.printconnect", "com.zebra.printconnect.print.PassthroughService"));
+                    printIntent.putExtra("com.zebra.printconnect.PrintService.PASSTHROUGH_DATA", passthroughBytes);
+
+                    ResultReceiver buildIPCSafeReceiver = new ResultReceiver(null) {
+                        @Override
+                        protected void onReceiveResult(int resultCode, Bundle resultData) {
+                            if (resultCode == 0) {
+                                // Handle successful print
+                                ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(R.string.trait_printlabel_after_print_message));
+                            } else {
+                                // Error message (null on successful print)
+                                // Handle unsuccessful print
+                                String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
+                                //Log.e(((MainActivity) getContext()).TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
+                                ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(R.string.trait_printlabel_after_print_error));
+                            }
+                        }
+                    };
+
+                    printIntent.setExtrasClassLoader(getContext().getClassLoader());
+                    printIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver));
+                    getContext().startService(printIntent);
+                }
             });
+
 
         } catch (PackageManager.NameNotFoundException e) {
             //Log.d(((MainActivity) getContext()).TAG, "Print Connect package not found");
@@ -491,16 +507,22 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     public String getValueFromSpinner(Spinner spinner, String[] options) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Calendar calendar = Calendar.getInstance();
-        String value;
-        if (spinner.getSelectedItem().toString().equals("date")) {
-            value = dateFormat.format(calendar.getTime());
-        } else if (spinner.getSelectedItem().toString().equals("trial_name")) {
-            value = getPrefs().getString("FieldFile", "");
-        } else if (spinner.getSelectedItem().toString().equals("blank")) {
-            value = "";
-        } else {
-            int pos = spinner.getSelectedItemPosition();
-            value = ConfigActivity.dt.getDropDownRange(options[pos], getCRange().plot_id)[0];
+
+        String value = null;
+
+        String item = (String) spinner.getSelectedItem();
+
+        if (item != null) {
+            if (item.equals("date")) {
+                value = dateFormat.format(calendar.getTime());
+            } else if (item.equals("trial_name")) {
+                value = getPrefs().getString("FieldFile", "");
+            } else if (item.equals("blank")) {
+                value = "";
+            } else {
+                int pos = spinner.getSelectedItemPosition();
+                value = ConfigActivity.dt.getDropDownRange(options[pos], getCRange().plot_id)[0];
+            }
         }
          /*
         Bug fix for v4.3.3. At times, this data might be null. If its null then replace with an empty string.
