@@ -527,7 +527,12 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
             int pos = spinner.getSelectedItemPosition();
             value = ConfigActivity.dt.getDropDownRange(options[pos], getCRange().plot_id)[0];
         }
-
+         /*
+        Bug fix for v4.3.3. At times, this data might be null. If its null then replace with an empty string.
+        Guessing it was from ConfigActivity.dt.getDropDownRange
+        TODO: add messages that detect for empty strings and notify the user chaneylc 8/26/2020
+         */
+        if (value == null) return "";
         return value;
     }
 }
