@@ -77,7 +77,12 @@ public class BrAPIService {
     private ObservationVariablesApi traitsApi;
     private String brapiBaseURL;
 
-    public BrAPIService(String brapiBaseURL, DataHelper dataHelper) {
+    private int pagination;
+
+    public BrAPIService(String brapiBaseURL, DataHelper dataHelper, int pagination) {
+
+        this.pagination = pagination;
+
         this.dataHelper = dataHelper;
         this.brapiBaseURL = brapiBaseURL;
 
@@ -378,7 +383,7 @@ public class BrAPIService {
                }
            };
            programsApi.programsGetAsync(null, null, null,
-                   0, 1000, brapiToken, callback);
+                   0, this.pagination, brapiToken, callback);
        } catch (ApiException e) {
            e.printStackTrace();
        }
@@ -418,7 +423,7 @@ public class BrAPIService {
                 }
             };
             trialsApi.trialsGetAsync(null, programDbId, null, null, null, null,
-                    0, 1000, brapiToken, callback);
+                    0, this.pagination, brapiToken, callback);
         } catch (ApiException e) {
             e.printStackTrace();
         }
@@ -467,7 +472,7 @@ public class BrAPIService {
                     null, null, null, programDbId,
                     null, null, trialDbId, null, null,
                     null, null, null, null,
-                    0, 1000, brapiToken, callback);
+                    0, this.pagination, brapiToken, callback);
 
         } catch (ApiException e) {
             e.printStackTrace();
@@ -546,7 +551,7 @@ public class BrAPIService {
             };
 
             studiesApi.studiesStudyDbIdObservationunitsGetAsync(
-                    studyDbId, "plot", 0, 1000,
+                    studyDbId, "plot", 0, this.pagination,
                     brapiToken, callback);
 
         } catch (ApiException e) {

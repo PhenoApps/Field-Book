@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -22,6 +23,7 @@ import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
@@ -72,7 +74,38 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 loadToolbar();
                 // Get the setting information for our brapi integration
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
-                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this));
+
+                String pagination = this.getSharedPreferences("Settings", 0)
+                        .getString(GeneralKeys.BRAPI_PAGINATION, "1000");
+
+                int pages = 1000;
+
+                try {
+
+                    if (pagination != null) {
+
+                        pages = Integer.parseInt(pagination);
+
+                    }
+
+                } catch (NumberFormatException nfe) {
+
+                    String message = nfe.getLocalizedMessage();
+
+                    if (message != null) {
+
+                        Log.d("FieldBookError", nfe.getLocalizedMessage());
+
+                    } else {
+
+                        Log.d("FieldBookError", "Pagination Preference number format error.");
+
+                    }
+
+                    nfe.printStackTrace();
+                }
+
+                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this), pages);
 
                 // Make a clean list to track our selected traits
                 selectedTraits = new ArrayList<>();

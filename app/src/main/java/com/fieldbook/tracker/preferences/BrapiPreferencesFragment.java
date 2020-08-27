@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
@@ -23,6 +24,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private Preference brapiAuthButton;
     private Preference brapiLogoutButton;
     private Preference brapiURLPreference;
+    private EditTextPreference brapiPaginationPreference;
+
     private BrapiControllerResponse brapiControllerResponse;
 
     @Override
@@ -41,6 +44,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiLogoutButton = findPreference("revokeBrapiAuth");
         brapiURLPreference = findPreference("BRAPI_BASE_URL");
         brapiURLPreference.setOnPreferenceChangeListener(this);
+        brapiPaginationPreference = findPreference("paginationBrapi");
 
         setButtonView();
     }

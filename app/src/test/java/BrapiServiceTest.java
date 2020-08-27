@@ -47,7 +47,7 @@ public class BrapiServiceTest {
     @Before
     public void setUp() throws Exception {
         // Instantiate our brapi service class
-        this.brAPIService = new BrAPIService(brapiBaseUrl, null);
+        this.brAPIService = new BrAPIService(brapiBaseUrl, null, 0);
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap missingImage = Bitmap.createBitmap(100, 100, conf);
     }

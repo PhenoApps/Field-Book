@@ -45,6 +45,8 @@ public class GeneralKeys {
     //BrAPI
     public static final String BRAPI_BASE_URL               = "BRAPI_BASE_URL";
     public static final String BRAPI_TOKEN                  = "BRAPI_TOKEN";
+    public static final String BRAPI_PAGINATION             = "BRAPI_PAGINATION";
+
     // @formatter:on
 
     private GeneralKeys() {

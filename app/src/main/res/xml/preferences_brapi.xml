@@ -20,5 +20,12 @@
             android:icon="@drawable/ic_exit_to_app"
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />
+
+        <EditTextPreference
+            android:icon="@drawable/ic_buffer"
+            android:key="BRAPI_PAGINATION"
+            android:defaultValue="1000"
+            android:title="@string/brapi_pagination"/>
+
     </PreferenceCategory>
 </PreferenceScreen>

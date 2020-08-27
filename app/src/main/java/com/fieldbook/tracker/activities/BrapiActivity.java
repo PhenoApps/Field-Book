@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiLoadDialog;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
@@ -62,7 +64,38 @@ public class BrapiActivity extends AppCompatActivity {
             if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi);
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
-                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiActivity.this));
+
+                String pagination = BrapiActivity.this.getSharedPreferences("Settings", 0)
+                        .getString(GeneralKeys.BRAPI_PAGINATION, "1000");
+
+                int pages = 1000;
+
+                try {
+
+                    if (pagination != null) {
+
+                        pages = Integer.parseInt(pagination);
+
+                    }
+
+                } catch (NumberFormatException nfe) {
+
+                    String message = nfe.getLocalizedMessage();
+
+                    if (message != null) {
+
+                        Log.d("FieldBookError", nfe.getLocalizedMessage());
+
+                    } else {
+
+                        Log.d("FieldBookError", "Pagination Preference number format error.");
+
+                    }
+
+                    nfe.printStackTrace();
+                }
+
+                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiActivity.this), pages);
 
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
                 baseURLText.setText(brapiBaseURL);
