@@ -95,6 +95,8 @@ public class CollectActivity extends AppCompatActivity {
     private static String displayColor = "#d50000";
     ImageButton deleteValue;
     ImageButton missingValue;
+    ImageButton barcodeInput;
+
     /**
      * Trait layouts
      */
@@ -328,6 +330,18 @@ public class CollectActivity extends AppCompatActivity {
                 TraitObject currentTrait = traitBox.getCurrentTrait();
                 updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
                 setNaText();
+            }
+        });
+
+        barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
+        barcodeInput.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new IntentIntegrator(thisActivity)
+                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setBeepEnabled(true)
+                        .setRequestCode(99)
+                        .initiateScan();
             }
         });
 
@@ -727,6 +741,7 @@ public class CollectActivity extends AppCompatActivity {
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.main_barcode_text))
                         .setBeepEnabled(true)
+                        .setRequestCode(98)
                         .initiateScan();
                 break;
             case R.id.summary:
@@ -896,6 +911,7 @@ public class CollectActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        IntentResult result = IntentIntegrator.parseActivityResult(resultCode, data);
 
         switch (requestCode) {
             case 1:
@@ -921,6 +937,23 @@ public class CollectActivity extends AppCompatActivity {
                     moveToSearch("id", rangeID, null, null, inputPlotId);
                 }
                 break;
+            case 98:
+                inputPlotId = result.getContents();
+                rangeBox.setAllRangeID();
+                int[] rangeID = rangeBox.getRangeID();
+                moveToSearch("id", rangeID, null, null, inputPlotId);
+                break;
+            case 99:
+                if(resultCode == RESULT_OK) {
+                    // store barcode value as data
+                    String scannedBarcode = result.getContents();
+                    TraitObject currentTrait = traitBox.getCurrentTrait();
+                    updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), scannedBarcode);
+                    BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+                    currentTraitLayout.loadLayout();
+                    validateData();
+                }
+                break;
             case 252:
                 if (resultCode == RESULT_OK) {
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
@@ -928,16 +961,6 @@ public class CollectActivity extends AppCompatActivity {
                             traitBox.getNewTraits());
                 }
                 break;
-        }
-
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            inputPlotId = result.getContents();
-            rangeBox.setAllRangeID();
-            int[] rangeID = rangeBox.getRangeID();
-            moveToSearch("id", rangeID, null, null, inputPlotId);
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
