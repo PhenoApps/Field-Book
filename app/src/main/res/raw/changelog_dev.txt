@@ -1,4 +1,12 @@
-40/3.4.3
+41/4.4.4
+Fixed bug with searching not saving data to the correct plot
+Fixed bug with label print trait
+Added HTTP error handling for Brapi
+Filter brapi studies by program and trial
+Barcode data input on collect activity
+CSVReader updates for BOM encoding
+
+40/4.4.3
 Fixed bug with database closing when it wasn't supposed to
 Re-fixed timezone bug
 

@@ -1,6 +1,18 @@
 <changelog>
 
     <release
+        date="2020-09-01"
+        versionCode="440"
+        versionName="v4.4">
+        <new>Collect data using barcodes</new>
+        <new>Filter BrAPI studies by program and trial</new>
+        <new>BrAPI HTTP error handling improvements</new>
+        <bugfix>Fix for Zebra Label Print trait not functioning correctly</bugfix>
+        <bugfix>Fix bug with searching that resulted in data not being saved</bugfix>
+        <bugfix>Fix for issues when importing UTF-8-BOM files</bugfix>
+    </release>
+
+    <release
         date="2020-06-22"
         versionCode="433"
         versionName="v4.3.3">

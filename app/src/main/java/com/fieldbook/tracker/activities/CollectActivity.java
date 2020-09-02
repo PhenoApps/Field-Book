@@ -386,7 +386,7 @@ public class CollectActivity extends AppCompatActivity {
         // Reset dropdowns
 
         if (!dt.isTableEmpty(DataHelper.RANGE)) {
-            final String plotID = rangeBox.getPlotID();
+            String plotID = rangeBox.getPlotID();
             infoBarAdapter.configureDropdownArray(plotID);
         }
 
@@ -411,17 +411,14 @@ public class CollectActivity extends AppCompatActivity {
             return;
         }
 
-        boolean haveData = false;
-
         // search moveto
         if (type.equals("search")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.range.equals(range) & cRange.plot.equals(plot)) {
+                if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
                     moveToResultCore(j);
-                    haveData = true;
+                    return;
                 }
             }
         }
@@ -430,11 +427,10 @@ public class CollectActivity extends AppCompatActivity {
         if (type.equals("plot")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.plot.equals(data)) {
+                if (rangeBox.getCRange().plot.equals(data)) {
                     moveToResultCore(j);
-                    haveData = true;
+                    return;
                 }
             }
         }
@@ -443,11 +439,10 @@ public class CollectActivity extends AppCompatActivity {
         if (type.equals("range")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.range.equals(data)) {
+                if (rangeBox.getCRange().range.equals(data)) {
                     moveToResultCore(j);
-                    haveData = true;
+                    return;
                 }
             }
         }
@@ -456,18 +451,15 @@ public class CollectActivity extends AppCompatActivity {
         if (type.equals("id")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.plot_id.equals(data)) {
+                if (rangeBox.getCRange().plot_id.equals(data)) {
                     moveToResultCore(j);
                     return;
                 }
             }
         }
 
-        if (!haveData) {
-            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
-        }
+        Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
     }
 
     private void moveToResultCore(int j) {
@@ -475,6 +467,7 @@ public class CollectActivity extends AppCompatActivity {
 
         // Reload traits based on selected plot
         rangeBox.display();
+
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         initWidgets(false);
@@ -554,7 +547,7 @@ public class CollectActivity extends AppCompatActivity {
 
         } else if (searchReload) {
             searchReload = false;
-            rangeBox.resetPaging();
+            //rangeBox.resetPaging();
             int[] rangeID = rangeBox.getRangeID();
 
             if (rangeID != null) {
@@ -573,7 +566,6 @@ public class CollectActivity extends AppCompatActivity {
             return;
         }
 
-        Log.w(parent, value);
         traitBox.update(parent, value);
 
         Observation observation = dt.getObservation(rangeBox.getPlotID(), parent);
@@ -634,8 +626,6 @@ public class CollectActivity extends AppCompatActivity {
             systemMenu.findItem(R.id.lockData).setVisible(entries.contains("lockData"));
         }
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -948,8 +938,11 @@ public class CollectActivity extends AppCompatActivity {
                     // store barcode value as data
                     String scannedBarcode = result.getContents();
                     TraitObject currentTrait = traitBox.getCurrentTrait();
-                    updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), scannedBarcode);
                     BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+                    currentTraitLayout.loadLayout();
+
+
+                    updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), scannedBarcode);
                     currentTraitLayout.loadLayout();
                     validateData();
                 }
