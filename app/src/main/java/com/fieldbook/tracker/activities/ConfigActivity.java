@@ -75,7 +75,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -137,7 +139,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        ConfigActivity.dt.close();
+        //ConfigActivity.dt.close();
         super.onDestroy();
     }
 
@@ -156,7 +158,9 @@ public class ConfigActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         dt = new DataHelper(this);
+        dt.open();
 
         ep = getSharedPreferences("Settings", 0);
 
@@ -170,6 +174,16 @@ public class ConfigActivity extends AppCompatActivity {
         if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
             ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
             showChangelog(true, false);
+        }
+
+        if (!ep.contains("FirstRun")) {
+            // do things on the first run
+            Set<String> entries = ep.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<String>());
+            entries.add("search");
+            entries.add("resources");
+            entries.add("summary");
+            entries.add("lockData");
+            ep.edit().putBoolean("FirstRun",false).apply();
         }
 
         checkIntent();

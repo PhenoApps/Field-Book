@@ -95,6 +95,8 @@ public class CollectActivity extends AppCompatActivity {
     private static String displayColor = "#d50000";
     ImageButton deleteValue;
     ImageButton missingValue;
+    ImageButton barcodeInput;
+
     /**
      * Trait layouts
      */
@@ -331,6 +333,18 @@ public class CollectActivity extends AppCompatActivity {
             }
         });
 
+        barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
+        barcodeInput.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new IntentIntegrator(thisActivity)
+                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setBeepEnabled(true)
+                        .setRequestCode(99)
+                        .initiateScan();
+            }
+        });
+
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
         deleteValue.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -372,7 +386,7 @@ public class CollectActivity extends AppCompatActivity {
         // Reset dropdowns
 
         if (!dt.isTableEmpty(DataHelper.RANGE)) {
-            final String plotID = rangeBox.getPlotID();
+            String plotID = rangeBox.getPlotID();
             infoBarAdapter.configureDropdownArray(plotID);
         }
 
@@ -397,17 +411,14 @@ public class CollectActivity extends AppCompatActivity {
             return;
         }
 
-        boolean haveData = false;
-
         // search moveto
         if (type.equals("search")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.range.equals(range) & cRange.plot.equals(plot)) {
+                if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
                     moveToResultCore(j);
-                    haveData = true;
+                    return;
                 }
             }
         }
@@ -416,11 +427,10 @@ public class CollectActivity extends AppCompatActivity {
         if (type.equals("plot")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.plot.equals(data)) {
+                if (rangeBox.getCRange().plot.equals(data)) {
                     moveToResultCore(j);
-                    haveData = true;
+                    return;
                 }
             }
         }
@@ -429,11 +439,10 @@ public class CollectActivity extends AppCompatActivity {
         if (type.equals("range")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.range.equals(data)) {
+                if (rangeBox.getCRange().range.equals(data)) {
                     moveToResultCore(j);
-                    haveData = true;
+                    return;
                 }
             }
         }
@@ -442,18 +451,15 @@ public class CollectActivity extends AppCompatActivity {
         if (type.equals("id")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.plot_id.equals(data)) {
+                if (rangeBox.getCRange().plot_id.equals(data)) {
                     moveToResultCore(j);
                     return;
                 }
             }
         }
 
-        if (!haveData) {
-            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
-        }
+        Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
     }
 
     private void moveToResultCore(int j) {
@@ -461,6 +467,7 @@ public class CollectActivity extends AppCompatActivity {
 
         // Reload traits based on selected plot
         rangeBox.display();
+
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         initWidgets(false);
@@ -540,7 +547,7 @@ public class CollectActivity extends AppCompatActivity {
 
         } else if (searchReload) {
             searchReload = false;
-            rangeBox.resetPaging();
+            //rangeBox.resetPaging();
             int[] rangeID = rangeBox.getRangeID();
 
             if (rangeID != null) {
@@ -559,7 +566,6 @@ public class CollectActivity extends AppCompatActivity {
             return;
         }
 
-        Log.w(parent, value);
         traitBox.update(parent, value);
 
         Observation observation = dt.getObservation(rangeBox.getPlotID(), parent);
@@ -620,8 +626,6 @@ public class CollectActivity extends AppCompatActivity {
             systemMenu.findItem(R.id.lockData).setVisible(entries.contains("lockData"));
         }
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -727,6 +731,7 @@ public class CollectActivity extends AppCompatActivity {
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.main_barcode_text))
                         .setBeepEnabled(true)
+                        .setRequestCode(98)
                         .initiateScan();
                 break;
             case R.id.summary:
@@ -896,6 +901,7 @@ public class CollectActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        IntentResult result = IntentIntegrator.parseActivityResult(resultCode, data);
 
         switch (requestCode) {
             case 1:
@@ -907,6 +913,7 @@ public class CollectActivity extends AppCompatActivity {
 
                     String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
                     Intent open = new Intent(Intent.ACTION_VIEW);
+                    open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     open.setDataAndType(FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", mChosenFile), mime);
 
                     startActivity(open);
@@ -920,6 +927,26 @@ public class CollectActivity extends AppCompatActivity {
                     moveToSearch("id", rangeID, null, null, inputPlotId);
                 }
                 break;
+            case 98:
+                inputPlotId = result.getContents();
+                rangeBox.setAllRangeID();
+                int[] rangeID = rangeBox.getRangeID();
+                moveToSearch("id", rangeID, null, null, inputPlotId);
+                break;
+            case 99:
+                if(resultCode == RESULT_OK) {
+                    // store barcode value as data
+                    String scannedBarcode = result.getContents();
+                    TraitObject currentTrait = traitBox.getCurrentTrait();
+                    BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+                    currentTraitLayout.loadLayout();
+
+
+                    updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), scannedBarcode);
+                    currentTraitLayout.loadLayout();
+                    validateData();
+                }
+                break;
             case 252:
                 if (resultCode == RESULT_OK) {
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
@@ -927,16 +954,6 @@ public class CollectActivity extends AppCompatActivity {
                             traitBox.getNewTraits());
                 }
                 break;
-        }
-
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            inputPlotId = result.getContents();
-            rangeBox.setAllRangeID();
-            int[] rangeID = rangeBox.getRangeID();
-            moveToSearch("id", rangeID, null, null, inputPlotId);
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 

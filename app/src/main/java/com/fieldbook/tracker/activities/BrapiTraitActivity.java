@@ -16,7 +16,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
@@ -195,13 +197,17 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         }, new Function<ApiException, Void>() {
             @Override
-            public Void apply(final ApiException input) {
+            public Void apply(final ApiException error) {
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        // Display error message but don't finish the activity.
+                        // Show error message. We don't finish the activity intentionally.
+                        if(BrAPIService.isConnectionError(error.getCode())){
+                            BrAPIService.handleConnectionError(BrapiTraitActivity.this, error.getCode());
+                        }else {
+                            Toast.makeText(getApplicationContext(), getString(R.string.brapi_ontology_error), Toast.LENGTH_LONG).show();
+                        }
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        Toast.makeText(getApplicationContext(), R.string.brapi_ontology_error, Toast.LENGTH_LONG).show();
                     }
                 });
 
