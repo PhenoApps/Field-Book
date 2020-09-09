@@ -901,7 +901,6 @@ public class CollectActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        IntentResult result = IntentIntegrator.parseActivityResult(resultCode, data);
 
         switch (requestCode) {
             case 1:
@@ -928,15 +927,19 @@ public class CollectActivity extends AppCompatActivity {
                 }
                 break;
             case 98:
-                inputPlotId = result.getContents();
-                rangeBox.setAllRangeID();
-                int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, inputPlotId);
+                if(resultCode == RESULT_OK) {
+                    IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    inputPlotId = plotSearchResult.getContents();
+                    rangeBox.setAllRangeID();
+                    int[] rangeID = rangeBox.getRangeID();
+                    moveToSearch("id", rangeID, null, null, inputPlotId);
+                }
                 break;
             case 99:
                 if(resultCode == RESULT_OK) {
                     // store barcode value as data
-                    String scannedBarcode = result.getContents();
+                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    String scannedBarcode = plotDataResult.getContents();
                     TraitObject currentTrait = traitBox.getCurrentTrait();
                     BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
                     currentTraitLayout.loadLayout();

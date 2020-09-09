@@ -1,4 +1,10 @@
 <changelog>
+    <release
+        date="2020-09-04"
+        versionCode="441"
+        versionName="v4.4.1">
+        <bugfix>Fix for issue when taking photos</bugfix>
+    </release>
 
     <release
         date="2020-09-01"
