@@ -3,6 +3,7 @@
         date="2020-10-01"
         versionCode="442"
         versionName="v4.4.2">
+        <new>Export options automatically set to last configuration</new>
         <bugfix>Fixed bug when saving person or location from Settings</bugfix>
         <bugfix>Fixed bug that hid files with uppercase extensions</bugfix>
     </release>

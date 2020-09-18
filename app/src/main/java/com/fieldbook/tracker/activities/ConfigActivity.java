@@ -40,11 +40,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
@@ -695,33 +695,23 @@ public class ConfigActivity extends AppCompatActivity {
     private void showSaveDialog() {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_export, null);
+
         exportFile = layout.findViewById(R.id.fileName);
         checkDB = layout.findViewById(R.id.formatDB);
         checkExcel = layout.findViewById(R.id.formatExcel);
-        CheckBox checkOverwrite = layout.findViewById(R.id.overwrite);
         allColumns = layout.findViewById(R.id.allColumns);
         onlyUnique = layout.findViewById(R.id.onlyUnique);
         allTraits = layout.findViewById(R.id.allTraits);
         activeTraits = layout.findViewById(R.id.activeTraits);
+        CheckBox checkOverwrite = layout.findViewById(R.id.overwrite);
 
-        if (ep.getBoolean("Overwrite", false)) {
-            checkOverwrite.setChecked(true);
-        }
-
-        checkOverwrite.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    Editor ed = ep.edit();
-                    ed.putBoolean("Overwrite", true);
-                    ed.apply();
-                } else {
-                    Editor ed = ep.edit();
-                    ed.putBoolean("Overwrite", false);
-                    ed.apply();
-                }
-            }
-        });
+        checkOverwrite.setChecked(ep.getBoolean("Overwrite", false));
+        checkDB.setChecked(ep.getBoolean("EXPORT_FORMAT_DATABASE", false));
+        checkExcel.setChecked(ep.getBoolean("EXPORT_FORMAT_TABLE", false));
+        onlyUnique.setChecked(ep.getBoolean("EXPORT_COLUMNS_UNIQUE",false));
+        allColumns.setChecked(ep.getBoolean("EXPORT_COLUMNS_ALL",false));
+        allTraits.setChecked(ep.getBoolean("EXPORT_TRAITS_ALL",false));
+        activeTraits.setChecked(ep.getBoolean("EXPORT_TRAITS_ACTIVE",false));
 
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
@@ -763,7 +753,6 @@ public class ConfigActivity extends AppCompatActivity {
         Button positiveButton = saveDialog.getButton(AlertDialog.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-
                 if (!checkDB.isChecked() & !checkExcel.isChecked()) {
                     Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_format));
                     return;
@@ -778,6 +767,16 @@ public class ConfigActivity extends AppCompatActivity {
                     Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_trait));
                     return;
                 }
+
+                Editor ed = ep.edit();
+                ed.putBoolean("EXPORT_COLUMNS_UNIQUE", onlyUnique.isChecked());
+                ed.putBoolean("EXPORT_COLUMNS_ALL", allColumns.isChecked());
+                ed.putBoolean("EXPORT_TRAITS_ALL", allTraits.isChecked());
+                ed.putBoolean("EXPORT_TRAITS_ACTIVE", activeTraits.isChecked());
+                ed.putBoolean("EXPORT_FORMAT_TABLE", checkExcel.isChecked());
+                ed.putBoolean("EXPORT_FORMAT_DATABASE", checkDB.isChecked());
+                ed.putBoolean("Overwrite", checkOverwrite.isChecked());
+                ed.apply();
 
                 File file = new File(Constants.FIELDEXPORTPATH);
                 if (!file.exists()) {
