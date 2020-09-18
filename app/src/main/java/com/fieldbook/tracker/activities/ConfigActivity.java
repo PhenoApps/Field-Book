@@ -902,8 +902,10 @@ public class ConfigActivity extends AppCompatActivity {
 
                 e.apply();
 
-                if (profileDialog.isShowing()) {
-                    updateSetupList();
+                if (profileDialog != null) {
+                    if (profileDialog.isShowing()) {
+                        updateSetupList();
+                    }
                 }
             }
         });
@@ -962,9 +964,13 @@ public class ConfigActivity extends AppCompatActivity {
                 }
 
                 e.apply();
-                if (profileDialog.isShowing()) {
-                    updateSetupList();
+
+                if (profileDialog != null) {
+                    if (profileDialog.isShowing()) {
+                        updateSetupList();
+                    }
                 }
+
                 locationDialog.dismiss();
             }
         });

@@ -1,5 +1,12 @@
 <changelog>
     <release
+        date="2020-10-01"
+        versionCode="442"
+        versionName="v4.4.2">
+        <bugfix>Fixed bug when saving person or location from Settings</bugfix>
+    </release>
+
+    <release
         date="2020-09-04"
         versionCode="441"
         versionName="v4.4.1">
