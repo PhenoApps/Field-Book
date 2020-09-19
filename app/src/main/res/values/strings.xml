@@ -198,6 +198,10 @@
     <string name="preferences_sounds">Sounds</string>
     <string name="preferences_sound_primary_order_sound">Primary order sound</string>
     <string name="preferences_sound_primary_order_sound_description">Notification sound when the primary order changes</string>
+    <string name="preferences_sound_cycle_traits_title">Cycle traits sound</string>
+    <string name="preferences_sound_cycle_traits_description">Notification sound when traits are completely cycled through</string>
+    <string name="preferences_sound_entry_title">Entry navigation sound</string>
+    <string name="preferences_sound_entry_description">Notification sound when moving between entries</string>
 
     <string name="preferences_general_title">General</string>
     <string name="preferences_general_use_day_number">Use day of year</string>

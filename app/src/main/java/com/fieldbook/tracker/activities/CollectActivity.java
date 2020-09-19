@@ -1307,8 +1307,13 @@ public class CollectActivity extends AppCompatActivity {
                 if (pos < 0) {
                     pos = traitType.getCount() - 1;
 
-                    if (parent.is_cycling_traits_advances())
+                    if (parent.is_cycling_traits_advances()) {
                         rangeBox.clickLeft();
+                    }
+
+                    if(ep.getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND,false)) {
+                        playSound("cycle");
+                    }
                 }
             } else if (direction.equals("right")) {
                 pos = traitType.getSelectedItemPosition() + 1;
@@ -1316,8 +1321,13 @@ public class CollectActivity extends AppCompatActivity {
                 if (pos > traitType.getCount() - 1) {
                     pos = 0;
 
-                    if (parent.is_cycling_traits_advances())
+                    if (parent.is_cycling_traits_advances()) {
                         rangeBox.clickRight();
+                    }
+
+                    if(ep.getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND,false)) {
+                        playSound("cycle");
+                    }
                 }
             }
 
@@ -1598,19 +1608,7 @@ public class CollectActivity extends AppCompatActivity {
                 if (ep.getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
                     if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                         lastRange = cRange.range;
-
-                        try {
-                            int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                            MediaPlayer chimePlayer = MediaPlayer.create(CollectActivity.this, resID);
-                            chimePlayer.start();
-
-                            chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                public void onCompletion(MediaPlayer mp) {
-                                    mp.release();
-                                }
-                            });
-                        } catch (Exception ignore) {
-                        }
+                        playSound("plonk");
                     }
                 }
 
@@ -1728,6 +1726,11 @@ public class CollectActivity extends AppCompatActivity {
                 return;
             }
 
+            if (ep.getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
+                    && !parent.getTraitBox().existsTrait()) {
+                playSound("advance");
+            }
+
             if (ep.getBoolean(GeneralKeys.DISABLE_ENTRY_ARROW_LEFT, false)
                     && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
@@ -1745,6 +1748,11 @@ public class CollectActivity extends AppCompatActivity {
 
             if (!validateData()) {
                 return;
+            }
+
+            if (ep.getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
+                    && !parent.getTraitBox().existsTrait()) {
+                playSound("advance");
             }
 
             if (ep.getBoolean(GeneralKeys.DISABLE_ENTRY_ARROW_RIGHT, false)

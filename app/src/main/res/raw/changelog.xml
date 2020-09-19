@@ -1,8 +1,10 @@
 <changelog>
     <release
         date="2020-10-01"
-        versionCode="442"
-        versionName="v4.4.2">
+        versionCode="450"
+        versionName="v4.5">
+        <new>Added sound preference for advancing plots</new>
+        <new>Added sound preference for cycling traits</new>
         <new>Export options automatically set to last configuration</new>
         <new>Profile moved completely to Settings</new>
         <new>Added community BrAPI servers</new>

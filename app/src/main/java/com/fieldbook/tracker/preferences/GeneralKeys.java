@@ -18,6 +18,8 @@ public class GeneralKeys {
     // Behavior
     public static final String RETURN_CHARACTER             = "RETURN_CHARACTER";
     public static final String VOLUME_NAVIGATION            = "VOLUME_NAVIGATION";
+    public static final String CYCLING_TRAITS_ADVANCES      = "CycleTraits";
+
     // General
     public static final String TUTORIAL_MODE                = "Tips";
     public static final String NEXT_ENTRY_NO_DATA           = "NextEmptyPlot";
@@ -27,7 +29,6 @@ public class GeneralKeys {
     public static final String DATAGRID_SETTING             = "DataGrid";
     public static final String DISABLE_ENTRY_ARROW_LEFT     = "DisableEntryNavLeft";
     public static final String DISABLE_ENTRY_ARROW_RIGHT    = "DisableEntryNavRight";
-    public static final String CYCLING_TRAITS_ADVANCES      = "CycleTraits";
     public static final String HIDE_ENTRIES_WITH_DATA       = "IgnoreExisting";
     public static final String USE_DAY_OF_YEAR              = "UseDay";
     public static final String DISABLE_SHARE                = "DisableShare";
@@ -40,7 +41,8 @@ public class GeneralKeys {
 
     // Sounds
     public static final String PRIMARY_SOUND                = "RangeSound";
-    public static final String TRAIT_SOUND                  = "TRAIT_SOUND";
+    public static final String CYCLE_TRAITS_SOUND           = "CYCLE_TRAITS_SOUND";
+    public static final String ENTRY_NAVIGATION_SOUND       = "ENTRY_NAVIGATION_SOUND";
 
     //BrAPI
     public static final String BRAPI_BASE_URL               = "BRAPI_BASE_URL";
