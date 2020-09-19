@@ -39,12 +39,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
@@ -57,7 +55,6 @@ import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
-import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -72,7 +69,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -91,21 +87,14 @@ public class ConfigActivity extends AppCompatActivity {
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
     private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 9980;
     private final int PERMISSIONS_REQUEST_DATABASE_EXPORT = 9970;
-    private final int PERMISSIONS_REQUEST_LOCATION = 9960;
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
     private final int PERMISSIONS_REQUEST_MAKE_DIRS = 9930;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     private SharedPreferences ep;
-    private AlertDialog personDialog;
-    private AlertDialog locationDialog;
     private AlertDialog saveDialog;
-    private AlertDialog profileDialog;
     private AlertDialog dbSaveDialog;
     private String mChosenFile = "";
-    private ListView profileList;
-    private double lat;
-    private double lng;
     private EditText exportFile;
     private String exportFileString = "";
     private String fFile;
@@ -271,9 +260,9 @@ public class ConfigActivity extends AppCompatActivity {
         settingsList = findViewById(R.id.myList);
 
         String[] configList = new String[]{getString(R.string.settings_fields),
-                getString(R.string.settings_traits), getString(R.string.settings_collect), getString(R.string.settings_profile), getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)};
+                getString(R.string.settings_traits), getString(R.string.settings_collect),  getString(R.string.settings_export), getString(R.string.settings_advanced), getString(R.string.about_title)};
 
-        Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.ic_nav_drawer_person, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
+        Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
 
         settingsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
@@ -300,9 +289,6 @@ public class ConfigActivity extends AppCompatActivity {
                         collectDataFilePermission();
                         break;
                     case 3:
-                        showProfileDialog();
-                        break;
-                    case 4:
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
                             Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
                             return;
@@ -329,12 +315,12 @@ public class ConfigActivity extends AppCompatActivity {
                         }
 
                         break;
-                    case 5:
+                    case 4:
                         intent.setClassName(ConfigActivity.this,
                                 PreferencesActivity.class.getName());
                         startActivity(intent);
                         break;
-                    case 6:
+                    case 5:
                         intent.setClassName(ConfigActivity.this,
                                 AboutActivity.class.getName());
                         startActivity(intent);
@@ -509,31 +495,6 @@ public class ConfigActivity extends AppCompatActivity {
         DialogUtils.styleDialogs(alert);
     }
 
-    // Only used for truncating lat long values
-    public String truncateDecimalString(String v) {
-        int count = 0;
-
-        boolean found = false;
-
-        StringBuilder truncated = new StringBuilder();
-
-        for (int i = 0; i < v.length(); i++) {
-            if (found) {
-                count += 1;
-
-                if (count == 5)
-                    break;
-            }
-
-            if (v.charAt(i) == '.') {
-                found = true;
-            }
-
-            truncated.append(v.charAt(i));
-        }
-
-        return truncated.toString();
-    }
 
     /**
      * Scan file to update file list and share exported file
@@ -561,44 +522,6 @@ public class ConfigActivity extends AppCompatActivity {
         System.arraycopy(a2, 0, n, a1.length, a2.length);
 
         return n;
-    }
-
-    private String[] prepareSetup() {
-        String tagName = "";
-        String tagLocation = "";
-
-        if (ep.getString("FirstName", "").length() > 0 | ep.getString("LastName", "").length() > 0) {
-            tagName += getString(R.string.profile_person) + ": " + ep.getString("FirstName", "")
-                    + " " + ep.getString("LastName", "");
-        } else {
-            tagName += getString(R.string.profile_person) + ": " + getString(R.string.profile_missing);
-        }
-
-        if (ep.getString("Location", "").length() > 0) {
-            tagLocation += getString(R.string.profile_location) + ": " + ep.getString("Location", "");
-        } else {
-            tagLocation += getString(R.string.profile_location) + ": " + getString(R.string.profile_missing);
-        }
-
-        return new String[]{tagName, tagLocation};
-    }
-
-    private void updateSetupList() {
-        ArrayAdapter<String> ga = (ArrayAdapter) profileList.getAdapter();
-
-        if (ga != null) {
-            ga.clear();
-        }
-
-        String[] arrayData = prepareSetup();
-
-        if (arrayData != null) {
-            for (String string : arrayData) {
-                ga.insert(string, ga.getCount());
-            }
-        }
-
-        ga.notifyDataSetChanged();
     }
 
     private void showExportDialog() {
@@ -821,232 +744,6 @@ public class ConfigActivity extends AppCompatActivity {
         });
     }
 
-    private void showProfileDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
-
-        profileList = layout.findViewById(R.id.myList);
-
-        String[] array = prepareSetup();
-        ArrayList<String> lst = new ArrayList<>(Arrays.asList(array));
-
-        profileList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                switch (which) {
-                    case 0:
-                        showPersonDialog();
-                        break;
-
-                    case 1:
-                        locationDialogPermission();
-                        break;
-                }
-            }
-        });
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, lst);
-        profileList.setAdapter(adapter);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.settings_profile)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setPositiveButton(getString(R.string.dialog_close), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        builder.setNeutralButton(getString(R.string.profile_reset), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                showClearSettingsDialog();
-            }
-        });
-
-        profileDialog = builder.create();
-        profileDialog.show();
-        DialogUtils.styleDialogs(profileDialog);
-
-        android.view.WindowManager.LayoutParams params = profileDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        profileDialog.getWindow().setAttributes(params);
-    }
-
-    private void showPersonDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_person, null);
-        final EditText firstName = layout.findViewById(R.id.firstName);
-        final EditText lastName = layout.findViewById(R.id.lastName);
-
-        firstName.setText(ep.getString("FirstName", ""));
-        lastName.setText(ep.getString("LastName", ""));
-
-        firstName.setSelectAllOnFocus(true);
-        lastName.setSelectAllOnFocus(true);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.profile_person_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Editor e = ep.edit();
-
-                e.putString("FirstName", firstName.getText().toString());
-                e.putString("LastName", lastName.getText().toString());
-
-                e.apply();
-
-                if (profileDialog != null) {
-                    if (profileDialog.isShowing()) {
-                        updateSetupList();
-                    }
-                }
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
-
-        personDialog = builder.create();
-        personDialog.show();
-        DialogUtils.styleDialogs(personDialog);
-
-        android.view.WindowManager.LayoutParams langParams = personDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.MATCH_PARENT;
-        personDialog.getWindow().setAttributes(langParams);
-    }
-
-    private void showLocationDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_location, null);
-
-        GPSTracker gps = new GPSTracker(this);
-        if (gps.canGetLocation()) { //GPS enabled
-            lat = gps.getLatitude(); // returns latitude
-            lng = gps.getLongitude(); // returns longitude
-        } else {
-            Intent intent = new Intent(
-                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivity(intent);
-        }
-
-        final EditText longitude = layout.findViewById(R.id.longitude);
-        final EditText latitude = layout.findViewById(R.id.latitude);
-
-        longitude.setText(ep.getString("Longitude", ""));
-        latitude.setText(ep.getString("Latitude", ""));
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-
-        builder.setTitle(R.string.profile_location_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Editor e = ep.edit();
-                if (latitude.getText().toString().length() > 0 && longitude.getText().toString().length() > 0) {
-                    e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
-                    e.putString("Latitude", latitude.getText().toString());
-                    e.putString("Longitude", longitude.getText().toString());
-                } else {
-                    e.putString("Location", "null");
-                }
-
-                e.apply();
-
-                if (profileDialog != null) {
-                    if (profileDialog.isShowing()) {
-                        updateSetupList();
-                    }
-                }
-
-                locationDialog.dismiss();
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
-
-        builder.setNeutralButton(getString(R.string.profile_location_get), null);
-
-        locationDialog = builder.create();
-        locationDialog.show();
-        DialogUtils.styleDialogs(locationDialog);
-
-        android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
-        langParams.width = LayoutParams.MATCH_PARENT;
-        locationDialog.getWindow().setAttributes(langParams);
-
-        // Override neutral button so it doesnt automatically dismiss location dialog
-        Button neutralButton = locationDialog.getButton(AlertDialog.BUTTON_NEUTRAL);
-        neutralButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                latitude.setText(truncateDecimalString(String.valueOf(lat)));
-                longitude.setText(truncateDecimalString(String.valueOf(lng)));
-            }
-        });
-    }
-
-    private void showClearSettingsDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
-        builder.setTitle(getString(R.string.profile_reset));
-        builder.setMessage(getString(R.string.dialog_confirm));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                profileDialog.dismiss();
-                dialog.dismiss();
-
-                Editor ed = ep.edit();
-                ed.putString("FirstName", "");
-                ed.putString("LastName", "");
-                ed.putString("Location", "");
-                ed.putString("Latitude", "");
-                ed.putString("Longitude", "");
-                ed.apply();
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-        DialogUtils.styleDialogs(alert);
-    }
-
-    //todo use annotations correctly
-    @AfterPermissionGranted(PERMISSIONS_REQUEST_LOCATION)
-    private void locationDialogPermission() {
-        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
-        if (EasyPermissions.hasPermissions(this, perms)) {
-            showLocationDialog();
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_location),
-                    PERMISSIONS_REQUEST_LOCATION, perms);
-        }
-    }
-
     @AfterPermissionGranted(PERMISSIONS_REQUEST_EXPORT_DATA)
     private void exportPermission() {
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
@@ -1251,14 +948,6 @@ public class ConfigActivity extends AppCompatActivity {
             if (dialog.equals("database-delete")) {
                 showDatabaseResetDialog1();
             }
-
-            if (dialog.equals("person")) {
-                showPersonDialog();
-            }
-
-            if (dialog.equals("location")) {
-                showLocationDialog();
-            }
         }
     }
 
@@ -1307,9 +996,8 @@ public class ConfigActivity extends AppCompatActivity {
                         .targets(settingsTapTargetRect(settingsListItemLocation(0), getString(R.string.tutorial_settings_fields_title), getString(R.string.tutorial_settings_fields_description)),
                                 settingsTapTargetRect(settingsListItemLocation(1), getString(R.string.tutorial_settings_traits_title), getString(R.string.tutorial_settings_traits_description)),
                                 settingsTapTargetRect(settingsListItemLocation(2), getString(R.string.tutorial_settings_collect_title), getString(R.string.tutorial_settings_collect_description)),
-                                settingsTapTargetRect(settingsListItemLocation(3), getString(R.string.tutorial_settings_profile_title), getString(R.string.tutorial_settings_profile_description)),
-                                settingsTapTargetRect(settingsListItemLocation(4), getString(R.string.tutorial_settings_export_title), getString(R.string.tutorial_settings_export_description)),
-                                settingsTapTargetRect(settingsListItemLocation(5), getString(R.string.tutorial_settings_settings_title), getString(R.string.tutorial_settings_settings_description))
+                                settingsTapTargetRect(settingsListItemLocation(3), getString(R.string.tutorial_settings_export_title), getString(R.string.tutorial_settings_export_description)),
+                                settingsTapTargetRect(settingsListItemLocation(4), getString(R.string.tutorial_settings_settings_title), getString(R.string.tutorial_settings_settings_description))
                         )
                         .listener(new TapTargetSequence.Listener() {
                             // This listener will tell us when interesting(tm) events happen in regards to the sequence

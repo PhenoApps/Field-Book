@@ -6,7 +6,7 @@
         android:key="searchPreference" />
 
     <Preference
-        android:icon="@drawable/ic_nav_drawer_person"
+        android:icon="@drawable/ic_pref_profile_person"
         android:key="pref_key_profile_settings"
         android:title="@string/settings_profile"
         app:fragment="com.fieldbook.tracker.preferences.ProfilePreferencesFragment" />
