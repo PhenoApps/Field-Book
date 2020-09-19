@@ -19,7 +19,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.Settings;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -85,8 +84,6 @@ public class ConfigActivity extends AppCompatActivity {
 
     public static DataHelper dt;
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
-    private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 9980;
-    private final int PERMISSIONS_REQUEST_DATABASE_EXPORT = 9970;
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
     private final int PERMISSIONS_REQUEST_MAKE_DIRS = 9930;
     Handler mHandler = new Handler();
@@ -110,16 +107,13 @@ public class ConfigActivity extends AppCompatActivity {
     private ArrayList<String> exportTrait;
     private Menu systemMenu;
     ListView settingsList;
+
     private Runnable exportData = new Runnable() {
         public void run() {
             new ExportDataTask().execute(0);
         }
     };
-    private Runnable exportDB = new Runnable() {
-        public void run() {
-            new ExportDBTask().execute(0);
-        }
-    };
+
     private Runnable importDB = new Runnable() {
         public void run() {
             new ImportDBTask().execute(0);
@@ -174,8 +168,6 @@ public class ConfigActivity extends AppCompatActivity {
             entries.add("lockData");
             ep.edit().putBoolean("FirstRun",false).apply();
         }
-
-        checkIntent();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
@@ -755,30 +747,6 @@ public class ConfigActivity extends AppCompatActivity {
         }
     }
 
-    @AfterPermissionGranted(PERMISSIONS_REQUEST_DATABASE_IMPORT)
-    public void importDatabaseFilePermission() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(this, perms)) {
-            showDatabaseImportDialog();
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
-                    PERMISSIONS_REQUEST_DATABASE_IMPORT, perms);
-        }
-    }
-
-    @AfterPermissionGranted(PERMISSIONS_REQUEST_DATABASE_EXPORT)
-    public void exportDatabaseFilePermission() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(this, perms)) {
-            showDatabaseExportDialog();
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_export),
-                    PERMISSIONS_REQUEST_DATABASE_EXPORT, perms);
-        }
-    }
-
     @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)
     public void collectDataFilePermission() {
         String[] perms = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
@@ -803,151 +771,6 @@ public class ConfigActivity extends AppCompatActivity {
             // Do not have permissions, request them now
             EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_file_creation),
                     PERMISSIONS_REQUEST_MAKE_DIRS, perms);
-        }
-    }
-
-    private void showDatabaseImportDialog() {
-        Intent intent = new Intent();
-
-        intent.setClassName(ConfigActivity.this,
-                FileExploreActivity.class.getName());
-        intent.putExtra("path", Constants.BACKUPPATH);
-        intent.putExtra("include", new String[]{"db"});
-        intent.putExtra("title", getString(R.string.database_import));
-        startActivityForResult(intent, 2);
-    }
-
-    private void showDatabaseExportDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_save_database, null);
-
-        exportFile = layout.findViewById(R.id.fileName);
-        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
-        String autoFillName = timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + DataHelper.DATABASE_VERSION;
-        exportFile.setText(autoFillName);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.database_dialog_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dbSaveDialog.dismiss();
-                exportFileString = exportFile.getText().toString();
-                mHandler.post(exportDB);
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        dbSaveDialog = builder.create();
-        dbSaveDialog.show();
-        DialogUtils.styleDialogs(dbSaveDialog);
-
-        android.view.WindowManager.LayoutParams params = dbSaveDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        dbSaveDialog.getWindow().setAttributes(params);
-    }
-
-    // First confirmation
-    private void showDatabaseResetDialog1() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
-
-        builder.setTitle(getString(R.string.dialog_warning));
-        builder.setMessage(getString(R.string.database_reset_warning1));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                showDatabaseResetDialog2();
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-        DialogUtils.styleDialogs(alert);
-    }
-
-    // Second confirmation
-    private void showDatabaseResetDialog2() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ConfigActivity.this, R.style.AppAlertDialog);
-
-        builder.setTitle(getString(R.string.dialog_warning));
-        builder.setMessage(getString(R.string.database_reset_warning2));
-
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                // Delete database
-                dt.deleteDatabase();
-
-                // Clear all existing settings
-                Editor ed = ep.edit();
-                ed.clear();
-                ed.apply();
-
-                dialog.dismiss();
-                Utils.makeToast(getApplicationContext(),getString(R.string.database_reset_message));
-
-                try {
-                    ConfigActivity.this.finish();
-                } catch (Exception e) {
-                    Log.e("Field Book", "" + e.getMessage());
-                }
-
-                try {
-                    CollectActivity.thisActivity.finish();
-                } catch (Exception e) {
-                    Log.e("Field Book", "" + e.getMessage());
-                }
-            }
-
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-        DialogUtils.styleDialogs(alert);
-    }
-
-    private void checkIntent() {
-        Bundle extras = getIntent().getExtras();
-        String dialog = "";
-
-        if (extras != null) {
-            dialog = extras.getString("dialog");
-        }
-
-        if (dialog != null) {
-            if (dialog.equals("database-export")) {
-                showDatabaseExportDialog();
-            }
-
-            if (dialog.equals("database-import")) {
-                showDatabaseImportDialog();
-            }
-
-            if (dialog.equals("database-delete")) {
-                showDatabaseResetDialog1();
-            }
         }
     }
 
@@ -1188,57 +1011,6 @@ public class ConfigActivity extends AppCompatActivity {
             if (tooManyTraits) {
                 //TODO add to strings
                 Utils.makeToast(getApplicationContext(),"Unfortunately, an SQLite limitation only allows 64 traits to be exported from Field Book at a time. Select fewer traits to export.");
-            }
-        }
-    }
-
-    private class ExportDBTask extends AsyncTask<Integer, Integer, Integer> {
-        boolean fail;
-        ProgressDialog dialog;
-        String error;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            fail = false;
-
-            dialog = new ProgressDialog(ConfigActivity.this);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html
-                    .fromHtml(getString(R.string.export_progress)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            try {
-                dt.exportDatabase(exportFileString);
-            } catch (Exception e) {
-                e.printStackTrace();
-                error = "" + e.getMessage();
-                fail = true;
-            }
-
-            File exportedDb = new File(Constants.BACKUPPATH + "/" + exportFileString + ".db");
-            File exportedSp = new File(Constants.BACKUPPATH + "/" + exportFileString + ".db_sharedpref.xml");
-
-            Utils.scanFile(ConfigActivity.this, exportedDb);
-            Utils.scanFile(ConfigActivity.this, exportedSp);
-
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-
-            if (fail) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_general));
-            } else {
-                Utils.makeToast(getApplicationContext(),getString(R.string.export_complete));
             }
         }
     }
