@@ -185,6 +185,12 @@
     <string name="preferences_behavior_disable_entry_arrow_right">Right</string>
     <string name="preferences_behavior_disable_entry_arrow_both">Both</string>
 
+    <string name="preferences_brapi_core_title">Configuration</string>
+    <string name="preferences_brapi_servers_title">Community Servers</string>
+    <string name="preferences_brapi_server_cassavabase">CassavaBase</string>
+    <string name="preferences_brapi_server_test">Default Test Server</string>
+    <string name="preferences_brapi_server_add">Submit a server</string>
+
     <string name="preferences_naming">Naming</string>
     <string name="preferences_naming_photo">Photo name format</string>
     <string name="preferences_naming_export">Export name format</string>
@@ -430,9 +436,8 @@
     <string name="preferences_brapi" translatable="false">BrAPI</string>
     <string name="brapi_base_url">BrAPI Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
-    <string name="brapi_title">BrAPI Configuration</string>
     <string name="brapi_save_authorize">Save and Authorize</string>
-    <string name="brapi_authorize">Authorize BrAPI</string>
+    <string name="brapi_authorize">Authorize</string>
     <string name="brapi_reauthorize">Reauthorize BrAPI</string>
     <string name="brapi_revoke_auth">Log Out</string>
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>
@@ -499,7 +504,7 @@
         Traits and fields imported via BrAPI will be able to export their observations via the BrAPI export.
         Traits and fields created manually or imported via CSV will need to be exported via CSV format.
     </string>
-    <string name="brapi_info_title">BrAPI Syncing Info</string>
+    <string name="brapi_info_title">Breeding API</string>
     <string name="brapi_auth_btn">Log In to Site</string>
     <string name="trait_labelprint_preview_description">Label preview.</string>
     <string name="trait_labelprint_zebraconnect_button_description">Button which navigates to Zebra Connect app.</string>

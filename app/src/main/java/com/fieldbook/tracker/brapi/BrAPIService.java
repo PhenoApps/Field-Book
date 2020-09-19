@@ -204,7 +204,7 @@ public class BrAPIService {
 
             return (hostURL.equals(dataSource));
         } catch (MalformedURLException e) {
-            Log.e("error", e.toString());
+            Log.e("error-cmbu", e.toString());
             return false;
         }
 
@@ -216,7 +216,7 @@ public class BrAPIService {
             URL externalUrl = new URL(brapiURL);
             return externalUrl.getHost();
         } catch (MalformedURLException e) {
-            Log.e("error", e.toString());
+            Log.e("error-ghu", e.toString());
             return null;
         }
     }
@@ -676,7 +676,7 @@ public class BrAPIService {
                     null, callback);
 
         } catch (ApiException e) {
-            Log.e("error", e.toString());
+            Log.e("error-go", e.toString());
             failFunction.apply(e);
         }
     }

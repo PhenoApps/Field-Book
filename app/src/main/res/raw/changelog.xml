@@ -5,6 +5,8 @@
         versionName="v4.4.2">
         <new>Export options automatically set to last configuration</new>
         <new>Profile moved completely to Settings</new>
+        <new>Added community BrAPI servers</new>
+        <bugfix>Fixed how Database settings work</bugfix>
         <bugfix>Fixed bug when saving person or location from Settings</bugfix>
         <bugfix>Fixed bug that hid files with uppercase extensions</bugfix>
     </release>

@@ -77,7 +77,6 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
         // Set our button visibility and text
         //todo null object reference
         //preferencesFragmentBrapi.setButtonView();
-
         processMessage(brapiControllerResponse);
     }
 
