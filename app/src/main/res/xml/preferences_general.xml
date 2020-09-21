@@ -4,8 +4,14 @@
 
     <PreferenceCategory
         android:key="transfer_defaults"
-        android:title="@string/preferences_source_default_category_title"
+        android:title="@string/preferences_general_system_title"
         app:iconSpaceReserved="false">
+
+        <Preference
+            android:icon="@drawable/ic_pref_general_root_directory"
+            android:key="DEFAULT_STORAGE_LOCATION_PREFERENCE"
+            android:summary="@string/preferences_general_files_base_directory_description"
+            android:title="@string/preferences_general_files_base_directory_title" />
 
         <ListPreference
             android:defaultValue="1"
@@ -54,38 +60,9 @@
 
     <CheckBoxPreference
         android:defaultValue="false"
-        android:icon="@drawable/ic_adv_disable_file_sharing"
-        android:key="DisableShare"
-        android:summary="@string/preferences_general_share_disable_description"
-        android:title="@string/preferences_general_share_disable" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
         android:icon="@drawable/ic_adv_unique"
         android:key="JumpToPlot"
         android:summary="@string/preferences_general_feature_barcode_text_description"
         android:title="@string/preferences_general_feature_barcode_text" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_adv_use_day"
-        android:key="UseDay"
-        android:summary="@string/preferences_general_use_day_number_description"
-        android:title="@string/preferences_general_use_day_number" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_adv_hide_entries"
-        android:key="IgnoreExisting"
-        android:summary="@string/preferences_general_skip_entries_with_data_description"
-        android:title="@string/preferences_general_skip_entries_with_data" />
-
-
-    <!--
-    <PreferenceCategory
-        android:title="@string/preferences_files_naming"
-        android:key="pref_key_files_settings">
-    </PreferenceCategory>
-    -->
 
 </PreferenceScreen>

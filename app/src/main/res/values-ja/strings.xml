@@ -188,7 +188,7 @@
     <string name="preferences_general_feature_barcode_text_description">ユニークIDを入力するダイアログを開き、特定のエントリーに移動</string>
     <string name="preferences_general_feature_datagrid">データグリッド</string>
     <string name="preferences_general_feature_datagrid_description">形質の収集データをスプレッドシートにより表示</string>
-    <string name="preferences_source_default_category_title">デフォルトのデータ</string>
+    <string name="preferences_general_system_title">デフォルトのデータ</string>
     <string name="preferences_source_default_import">デフォルトのインポートソース</string>
     <string name="preferences_source_default_export">デフォルトのエクスポートソース</string>
     <string name="preferences_appearance_system_category_title">アプリケーション</string>
@@ -372,7 +372,6 @@
     <!-- Brapi strings -->
     <string name="brapi_base_url">BrAPIの基本URL</string>
     <string name="brapi_base_url_desc">BrAPIサーバー接続のための基本URL</string>
-    <string name="brapi_title">BrAPI設定</string>
     <string name="brapi_save_authorize">保存と認証</string>
     <string name="brapi_authorize">BrAPI認証</string>
     <string name="brapi_reauthorize">BrAPI再認証</string>

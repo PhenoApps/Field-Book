@@ -478,8 +478,8 @@ public class CollectActivity extends AppCompatActivity {
         // Backup database
         try {
             dt.exportDatabase("backup");
-            File exportedDb = new File(Constants.BACKUPPATH + "/" + "backup.db");
-            File exportedSp = new File(Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
+            File exportedDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db");
+            File exportedSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
             Utils.scanFile(CollectActivity.this, exportedDb);
             Utils.scanFile(CollectActivity.this, exportedSp);
         } catch (Exception e) {
@@ -716,7 +716,7 @@ public class CollectActivity extends AppCompatActivity {
             case R.id.resources:
                 intent.setClassName(CollectActivity.this,
                         FileExploreActivity.class.getName());
-                intent.putExtra("path", Constants.RESOURCEPATH);
+                intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY,Constants.MPATH) + Constants.RESOURCEPATH);
                 intent.putExtra("exclude", new String[]{"fieldbook"});
                 intent.putExtra("title", getString(R.string.main_toolbar_resources));
                 startActivityForResult(intent, 1);

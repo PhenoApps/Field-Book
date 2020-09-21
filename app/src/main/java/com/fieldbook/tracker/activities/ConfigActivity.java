@@ -152,7 +152,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         // request permissions
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
-        createDirs();
 
         if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
             ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
@@ -166,6 +165,12 @@ public class ConfigActivity extends AppCompatActivity {
             entries.add("resources");
             entries.add("summary");
             entries.add("lockData");
+
+            Utils.createDirs(this, Constants.MPATH);
+            SharedPreferences.Editor ed = ep.edit();
+            ed.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY,Constants.MPATH);
+            ed.apply();
+
             ep.edit().putBoolean("FirstRun",false).apply();
         }
     }
@@ -180,57 +185,6 @@ public class ConfigActivity extends AppCompatActivity {
                 .withOkButtonLabel("OK") // provide a custom ok button text if desired, default one is "OK"
                 .withSorter(new ImportanceChangelogSorter())
                 .buildAndShowDialog(this, false); // second parameter defines, if the dialog has a dark or light theme
-    }
-
-    private void createDirs() {
-        createDir(Constants.MPATH.getAbsolutePath());
-        createDir(Constants.RESOURCEPATH);
-        createDir(Constants.PLOTDATAPATH);
-        createDir(Constants.TRAITPATH);
-        createDir(Constants.FIELDIMPORTPATH);
-        createDir(Constants.FIELDEXPORTPATH);
-        createDir(Constants.BACKUPPATH);
-        createDir(Constants.UPDATEPATH);
-        createDir(Constants.ARCHIVEPATH);
-
-        updateAssets();
-        scanSampleFiles();
-    }
-
-    // Helper function to create a single directory
-    private void createDir(String path) {
-        File dir = new File(path);
-        File blankFile = new File(path + "/.fieldbook");
-
-        if (!dir.exists()) {
-            dir.mkdirs();
-
-            try {
-                blankFile.getParentFile().mkdirs();
-                blankFile.createNewFile();
-                Utils.scanFile(ConfigActivity.this, blankFile);
-            } catch (IOException e) {
-                Log.d("CreateDir", e.toString());
-            }
-        }
-    }
-
-    private void scanSampleFiles() {
-        String[] fileList = {Constants.TRAITPATH + "/trait_sample.trt", Constants.FIELDIMPORTPATH + "/field_sample.csv", Constants.FIELDIMPORTPATH + "/field_sample2.csv", Constants.FIELDIMPORTPATH + "/field_sample3.csv", Constants.TRAITPATH + "/severity.txt"};
-
-        for (String aFileList : fileList) {
-            File temp = new File(aFileList);
-            if (temp.exists()) {
-                Utils.scanFile(ConfigActivity.this, temp);
-            }
-        }
-    }
-
-    private void updateAssets() {
-        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "field_import");
-        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "resources");
-        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "trait");
-        dt.copyFileOrDir(Constants.MPATH.getAbsolutePath(), "database");
     }
 
     private void initToolbar() {
@@ -336,7 +290,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     private String getOverwriteFile(String filename) {
         String[] fileArray;
-        File dir = new File(Constants.FIELDEXPORTPATH);
+        File dir = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH);
         File[] files = dir.listFiles();
         fileArray = new String[files.length];
         for (int i = 0; i < files.length; ++i) {
@@ -347,8 +301,8 @@ public class ConfigActivity extends AppCompatActivity {
             for (String aFileArray : fileArray) {
                 if (checkDbBool) {
                     if (aFileArray.contains(fFile) && aFileArray.contains("database")) {
-                        File oldFile = new File(Constants.FIELDEXPORTPATH, aFileArray);
-                        File newFile = new File(Constants.ARCHIVEPATH, aFileArray);
+                        File oldFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH, aFileArray);
+                        File newFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.ARCHIVEPATH, aFileArray);
                         oldFile.renameTo(newFile);
                         Utils.scanFile(ConfigActivity.this, oldFile);
                         Utils.scanFile(ConfigActivity.this, newFile);
@@ -357,8 +311,8 @@ public class ConfigActivity extends AppCompatActivity {
 
                 if (checkExcelBool) {
                     if (aFileArray.contains(fFile) && aFileArray.contains("table")) {
-                        File oldFile = new File(Constants.FIELDEXPORTPATH, aFileArray);
-                        File newFile = new File(Constants.ARCHIVEPATH, aFileArray);
+                        File oldFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH, aFileArray);
+                        File newFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.ARCHIVEPATH, aFileArray);
                         oldFile.renameTo(newFile);
                         Utils.scanFile(ConfigActivity.this, oldFile);
                         Utils.scanFile(ConfigActivity.this, newFile);
@@ -693,9 +647,9 @@ public class ConfigActivity extends AppCompatActivity {
                 ed.putBoolean("Overwrite", checkOverwrite.isChecked());
                 ed.apply();
 
-                File file = new File(Constants.FIELDEXPORTPATH);
+                File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH);
                 if (!file.exists()) {
-                    createDir(Constants.FIELDEXPORTPATH);
+                    Utils.createDir(getBaseContext(), ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH);
                 }
 
                 newRange = new ArrayList<>();
@@ -766,7 +720,7 @@ public class ConfigActivity extends AppCompatActivity {
     public void makeDirsPermission() {
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(this, perms)) {
-            createDirs();
+            Utils.createDirs(this, null);
         } else {
             // Do not have permissions, request them now
             EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_file_creation),
@@ -865,7 +819,7 @@ public class ConfigActivity extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 String state = Environment.getExternalStorageState();
                 if (Environment.MEDIA_MOUNTED.equals(state)) {
-                    createDirs();
+                    Utils.createDirs(this, null);
                 }
             }
         }
@@ -942,7 +896,7 @@ public class ConfigActivity extends AppCompatActivity {
             if (checkDbBool) {
                 if (exportData.getCount() > 0) {
                     try {
-                        File file = new File(Constants.FIELDEXPORTPATH,
+                        File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH,
                                 exportFileString + "_database.csv");
 
                         if (file.exists()) {
@@ -964,7 +918,7 @@ public class ConfigActivity extends AppCompatActivity {
             if (checkExcelBool) {
                 if (exportData.getCount() > 0) {
                     try {
-                        File file = new File(Constants.FIELDEXPORTPATH,
+                        File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH,
                                 exportFileString + "_table.csv");
 
                         if (file.exists()) {

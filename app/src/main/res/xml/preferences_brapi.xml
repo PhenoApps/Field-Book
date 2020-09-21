@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
         android:key="brapi_category"
-        android:title="@string/preferences_brapi_core_title">
+        android:title="@string/preferences_brapi_core_title"
+        app:iconSpaceReserved="false">
 
         <EditTextPreference
             android:defaultValue="@string/brapi_base_url_default"
@@ -27,7 +29,8 @@
 
     <PreferenceCategory
         android:key="brapi_server_list"
-        android:title="@string/preferences_brapi_servers_title">
+        android:title="@string/preferences_brapi_servers_title"
+        app:iconSpaceReserved="false">
 
         <Preference
             android:icon="@drawable/ic_pref_brapi_server"

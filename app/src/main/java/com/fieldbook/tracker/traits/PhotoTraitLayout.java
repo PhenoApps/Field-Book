@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -27,12 +28,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.adapters.GalleryImageAdapter;
 import com.fieldbook.tracker.utilities.DialogUtils;
@@ -105,7 +108,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
         photoLocation = new ArrayList<>();
         drawables = new ArrayList<>();
 
-        File img = new File(Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/" + "/photos/");
+        File img = new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/" + "/photos/");
         if (img.listFiles() != null) {
 
             //TODO causes crash
@@ -219,7 +222,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
     }
 
     public void makeImage(TraitObject currentTrait, Map newTraits) {
-        File file = new File(Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/",
+        File file = new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/",
                 mCurrentPhotoPath);
 
         Utils.scanFile(getContext(), file.getAbsoluteFile());
@@ -342,17 +345,17 @@ public class PhotoTraitLayout extends BaseTraitLayout {
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
-        File dir = new File(Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/");
+        File dir = new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/");
 
         dir.mkdirs();
 
         String generatedName = getCRange().plot_id + "_" + getCurrentTrait().getTrait() + "_" + getRep() + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
         mCurrentPhotoPath = generatedName;
 
-        Log.w("File", Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/" + generatedName);
+        Log.w("File", getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/" + generatedName);
 
         // Save photo capture with timestamp as filename
-        File file = new File(Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/",
+        File file = new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/",
                 generatedName);
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -396,7 +399,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
             if (dialog.isShowing())
                 dialog.dismiss();
 
-            File img = new File(Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/" + "/photos/");
+            File img = new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/" + "/photos/");
             if (img.listFiles() != null) {
 
                 photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);

@@ -1,13 +1,17 @@
 package com.fieldbook.tracker.traits;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.preference.PreferenceManager;
+
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -99,7 +103,7 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
         Scanner inFile1 = null;
 
         try {
-            inFile1 = new Scanner(new File(Constants.TRAITPATH + "/severity.txt"));
+            inFile1 = new Scanner(new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH + "/severity.txt"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

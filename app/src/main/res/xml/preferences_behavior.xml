@@ -38,4 +38,25 @@
         android:summary="@string/preferences_general_entry_right_disable_description"
         android:title="@string/preferences_general_entry_right_disable" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_disable_file_sharing"
+        android:key="DisableShare"
+        android:summary="@string/preferences_general_share_disable_description"
+        android:title="@string/preferences_general_share_disable" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_use_day"
+        android:key="UseDay"
+        android:summary="@string/preferences_general_use_day_number_description"
+        android:title="@string/preferences_general_use_day_number" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_adv_hide_entries"
+        android:key="IgnoreExisting"
+        android:summary="@string/preferences_general_skip_entries_with_data_description"
+        android:title="@string/preferences_general_skip_entries_with_data" />
+
 </PreferenceScreen>

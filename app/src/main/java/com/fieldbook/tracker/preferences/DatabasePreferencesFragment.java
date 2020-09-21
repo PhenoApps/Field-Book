@@ -98,7 +98,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
         intent.setClassName(getActivity(),
                 FileExploreActivity.class.getName());
-        intent.putExtra("path", Constants.BACKUPPATH);
+        intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH);
         intent.putExtra("include", new String[]{"db"});
         intent.putExtra("title", getString(R.string.database_import));
         startActivityForResult(intent, 2);
@@ -225,8 +225,8 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
                 fail = true;
             }
 
-            File exportedDb = new File(Constants.BACKUPPATH + "/" + exportFileString + ".db");
-            File exportedSp = new File(Constants.BACKUPPATH + "/" + exportFileString + ".db_sharedpref.xml");
+            File exportedDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + exportFileString + ".db");
+            File exportedSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + exportFileString + ".db_sharedpref.xml");
 
             Utils.scanFile(getContext(), exportedDb);
             Utils.scanFile(getContext(), exportedSp);

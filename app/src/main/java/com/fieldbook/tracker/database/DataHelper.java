@@ -17,6 +17,7 @@ import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.Image;
 import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
@@ -1895,12 +1896,12 @@ public class DataHelper {
 
         close();
 
-        Log.w("File to copy", Constants.BACKUPPATH + "/" + filename);
+        Log.w("File to copy", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + filename);
 
-        File newDb = new File(Constants.BACKUPPATH + "/" + filename);
+        File newDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + filename);
         File oldDb = new File(internalDbPath);
 
-        File newSp = new File(Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
+        File newSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
         File oldSp = new File(internalSpPath);
 
         try {
@@ -1920,10 +1921,10 @@ public class DataHelper {
         close();
 
         try {
-            File newDb = new File(Constants.BACKUPPATH + "/" + filename + ".db");
+            File newDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + filename + ".db");
             File oldDb = new File(internalDbPath);
 
-            File newSp = new File(Constants.BACKUPPATH + "/" + filename + ".db_sharedpref.xml");
+            File newSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + filename + ".db_sharedpref.xml");
             File oldSp = new File(internalSpPath);
 
             copyFile(oldDb, newDb);

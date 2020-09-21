@@ -223,9 +223,16 @@
     <string name="preferences_general_feature_datagrid">Datagrid</string>
     <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
 
-    <string name="preferences_source_default_category_title">Default data</string>
+    <string name="preferences_general_system_title">System Defaults</string>
+    <string name="preferences_general_files_base_directory_title">Root Directory</string>
+    <string name="preferences_general_files_base_directory_description">Choose the root directory for Field Book</string>
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
+
+    <string name="preferences_general_files_delimiter_title">Delimiter</string>
+    <string name="preferences_general_files_delimiter_description">Change the default file delimiter</string>
+    <string name="preferences_general_photo_naming_title">Photo Naming</string>
+    <string name="preferences_general_photo_naming_description">Change how photos are named</string>
 
     <string name="preferences_appearance_system_category_title">Application</string>
     <string name="preferences_appearance_collection_category_title">Collect Screen</string>
