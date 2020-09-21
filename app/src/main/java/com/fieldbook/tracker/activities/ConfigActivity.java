@@ -160,18 +160,20 @@ public class ConfigActivity extends AppCompatActivity {
 
         if (!ep.contains("FirstRun")) {
             // do things on the first run
+            Utils.createDirs(this, Constants.MPATH);
+
+            SharedPreferences.Editor ed = ep.edit();
+
             Set<String> entries = ep.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<String>());
             entries.add("search");
             entries.add("resources");
             entries.add("summary");
             entries.add("lockData");
 
-            Utils.createDirs(this, Constants.MPATH);
-            SharedPreferences.Editor ed = ep.edit();
+            ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE,entries);
             ed.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY,Constants.MPATH);
+            ed.putBoolean("FirstRun",false);
             ed.apply();
-
-            ep.edit().putBoolean("FirstRun",false).apply();
         }
     }
 
