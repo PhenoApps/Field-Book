@@ -92,7 +92,7 @@ public class CollectActivity extends AppCompatActivity {
     public static boolean partialReload;
     public static Activity thisActivity;
     public static String TAG = "Field Book";
-    private static String displayColor = "#d50000";
+
     ImageButton deleteValue;
     ImageButton missingValue;
     ImageButton barcodeInput;
@@ -478,8 +478,8 @@ public class CollectActivity extends AppCompatActivity {
         // Backup database
         try {
             dt.exportDatabase("backup");
-            File exportedDb = new File(Constants.BACKUPPATH + "/" + "backup.db");
-            File exportedSp = new File(Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
+            File exportedDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db");
+            File exportedSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
             Utils.scanFile(CollectActivity.this, exportedDb);
             Utils.scanFile(CollectActivity.this, exportedSp);
         } catch (Exception e) {
@@ -716,7 +716,7 @@ public class CollectActivity extends AppCompatActivity {
             case R.id.resources:
                 intent.setClassName(CollectActivity.this,
                         FileExploreActivity.class.getName());
-                intent.putExtra("path", Constants.RESOURCEPATH);
+                intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY,Constants.MPATH) + Constants.RESOURCEPATH);
                 intent.putExtra("exclude", new String[]{"fieldbook"});
                 intent.putExtra("title", getString(R.string.main_toolbar_resources));
                 startActivityForResult(intent, 1);
@@ -901,7 +901,6 @@ public class CollectActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        IntentResult result = IntentIntegrator.parseActivityResult(resultCode, data);
 
         switch (requestCode) {
             case 1:
@@ -928,15 +927,19 @@ public class CollectActivity extends AppCompatActivity {
                 }
                 break;
             case 98:
-                inputPlotId = result.getContents();
-                rangeBox.setAllRangeID();
-                int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, inputPlotId);
+                if(resultCode == RESULT_OK) {
+                    IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    inputPlotId = plotSearchResult.getContents();
+                    rangeBox.setAllRangeID();
+                    int[] rangeID = rangeBox.getRangeID();
+                    moveToSearch("id", rangeID, null, null, inputPlotId);
+                }
                 break;
             case 99:
                 if(resultCode == RESULT_OK) {
                     // store barcode value as data
-                    String scannedBarcode = result.getContents();
+                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    String scannedBarcode = plotDataResult.getContents();
                     TraitObject currentTrait = traitBox.getCurrentTrait();
                     BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
                     currentTraitLayout.loadLayout();
@@ -1012,10 +1015,6 @@ public class CollectActivity extends AppCompatActivity {
 
     public TextWatcher getCvText() {
         return cvText;
-    }
-
-    public String getDisplayColor() {
-        return displayColor;
     }
 
     public ImageButton getDeleteValue() {
@@ -1304,8 +1303,13 @@ public class CollectActivity extends AppCompatActivity {
                 if (pos < 0) {
                     pos = traitType.getCount() - 1;
 
-                    if (parent.is_cycling_traits_advances())
+                    if (parent.is_cycling_traits_advances()) {
                         rangeBox.clickLeft();
+                    }
+
+                    if(ep.getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND,false)) {
+                        playSound("cycle");
+                    }
                 }
             } else if (direction.equals("right")) {
                 pos = traitType.getSelectedItemPosition() + 1;
@@ -1313,8 +1317,13 @@ public class CollectActivity extends AppCompatActivity {
                 if (pos > traitType.getCount() - 1) {
                     pos = 0;
 
-                    if (parent.is_cycling_traits_advances())
+                    if (parent.is_cycling_traits_advances()) {
                         rangeBox.clickRight();
+                    }
+
+                    if(ep.getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND,false)) {
+                        playSound("cycle");
+                    }
                 }
             }
 
@@ -1595,19 +1604,7 @@ public class CollectActivity extends AppCompatActivity {
                 if (ep.getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
                     if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                         lastRange = cRange.range;
-
-                        try {
-                            int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                            MediaPlayer chimePlayer = MediaPlayer.create(CollectActivity.this, resID);
-                            chimePlayer.start();
-
-                            chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                public void onCompletion(MediaPlayer mp) {
-                                    mp.release();
-                                }
-                            });
-                        } catch (Exception ignore) {
-                        }
+                        playSound("plonk");
                     }
                 }
 
@@ -1725,8 +1722,14 @@ public class CollectActivity extends AppCompatActivity {
                 return;
             }
 
-            if (ep.getBoolean(GeneralKeys.DISABLE_ENTRY_ARROW_LEFT, false)
+            if (ep.getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
                     && !parent.getTraitBox().existsTrait()) {
+                playSound("advance");
+            }
+
+            String entryArrow = ep.getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0");
+
+            if ((entryArrow.equals("1")||entryArrow.equals("3")) && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
             } else {
                 if (rangeID != null && rangeID.length > 0) {
@@ -1744,8 +1747,14 @@ public class CollectActivity extends AppCompatActivity {
                 return;
             }
 
-            if (ep.getBoolean(GeneralKeys.DISABLE_ENTRY_ARROW_RIGHT, false)
+            if (ep.getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
                     && !parent.getTraitBox().existsTrait()) {
+                playSound("advance");
+            }
+
+            String entryArrow = ep.getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0");
+
+            if ((entryArrow.equals("2")||entryArrow.equals("3")) && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
             } else {
                 if (rangeID != null && rangeID.length > 0) {

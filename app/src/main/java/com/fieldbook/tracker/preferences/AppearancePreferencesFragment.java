@@ -65,4 +65,10 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat impl
 
         return false;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
+    }
 }

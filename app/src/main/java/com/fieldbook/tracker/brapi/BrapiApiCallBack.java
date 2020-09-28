@@ -12,7 +12,7 @@ public abstract class BrapiApiCallBack<T> implements ApiCallback<T> {
 
     @Override
     public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-        Log.e("error", error.toString());
+        Log.e("error-of", error.toString());
     }
 
     @Override

@@ -188,7 +188,7 @@
     <string name="preferences_general_feature_barcode_text_description">Abre el diálogo para ingresar un identificador único y pasar a una entrada específica</string>
     <string name="preferences_general_feature_datagrid">Cuadrícula de datos</string>
     <string name="preferences_general_feature_datagrid_description">Muestra datos capturados en una tabla con parcelas y variables</string>
-    <string name="preferences_source_default_category_title">Dato predeterminado</string>
+    <string name="preferences_general_system_title">Dato predeterminado</string>
     <string name="preferences_source_default_import">Origen de importación predeterminado</string>
     <string name="preferences_source_default_export">Origen de exportación predeterminado</string>
     <string name="preferences_appearance_system_category_title">Aplicación</string>
@@ -372,7 +372,6 @@
     <!-- Brapi strings -->
     <string name="brapi_base_url">URL base de BrAPI</string>
     <string name="brapi_base_url_desc">La URL base para el servidor conectado por BrAPI</string>
-    <string name="brapi_title">Configuración BrAPI</string>
     <string name="brapi_save_authorize">Salvar y Autorizar</string>
     <string name="brapi_authorize">Autorizar BrAPI</string>
     <string name="brapi_reauthorize">Reautorizar BrAPI</string>

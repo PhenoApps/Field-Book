@@ -76,7 +76,7 @@ public class AboutActivity extends MaterialAboutActivity {
         authorCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(getString(R.string.about_developer_trife))
                 .subText(getString(R.string.about_developer_trife_location))
-                .icon(R.drawable.ic_nav_drawer_person)
+                .icon(R.drawable.ic_pref_profile_person)
                 .build());
 
         authorCardBuilder.addItem(ConvenienceBuilder.createEmailItem(c,

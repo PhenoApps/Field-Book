@@ -2,6 +2,7 @@ package com.fieldbook.tracker.traits;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -11,9 +12,12 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.preference.PreferenceManager;
+
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -226,7 +230,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         // For audio trait type
         private void setRecordingLocation(String recordingName) {
-            String dirPath = Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/audio/";
+            String dirPath = getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/audio/";
             File dir = new File(dirPath);
             dir.mkdirs();
             recordingLocation = new File(dirPath, recordingName + ".mp4");

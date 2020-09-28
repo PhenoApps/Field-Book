@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:key="brapi_category">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:key="brapi_category"
+        android:title="@string/preferences_brapi_core_title"
+        app:iconSpaceReserved="false">
+
         <EditTextPreference
             android:defaultValue="@string/brapi_base_url_default"
             android:dialogMessage="@string/brapi_base_url_desc"
@@ -20,5 +25,39 @@
             android:icon="@drawable/ic_exit_to_app"
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="brapi_server_list"
+        android:title="@string/preferences_brapi_servers_title"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:icon="@drawable/ic_trait_barcode"
+            android:key="brapi_server_barcode"
+            android:title="@string/preferences_brapi_server_barcode">
+        </Preference>
+
+        <Preference
+            android:icon="@drawable/ic_pref_brapi_server"
+            android:key="brapi_server_cassavabase"
+            android:title="@string/preferences_brapi_server_cassavabase">
+        </Preference>
+
+        <Preference
+            android:icon="@drawable/ic_pref_brapi_server"
+            android:key="brapi_server_default"
+            android:title="@string/preferences_brapi_server_test">
+        </Preference>
+
+        <Preference
+            android:icon="@drawable/ic_pref_brapi_server_add"
+            android:key="brapi_server_add"
+            android:title="@string/preferences_brapi_server_add">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://github.com/PhenoApps/Field-Book/issues/new?assignees=&amp;labels=enhancement%2C+feature+request&amp;template=feature_request.md&amp;title=%5BREQUEST%5D"/>
+        </Preference>
     </PreferenceCategory>
 </PreferenceScreen>
