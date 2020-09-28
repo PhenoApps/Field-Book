@@ -197,6 +197,8 @@
 
     <string name="preferences_brapi_core_title">Configuration</string>
     <string name="preferences_brapi_servers_title">Community Servers</string>
+    <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
+    <string name="preferences_brapi_server_barcode_prompt">Scan a server URL</string>
     <string name="preferences_brapi_server_cassavabase">CassavaBase</string>
     <string name="preferences_brapi_server_test">Default Test Server</string>
     <string name="preferences_brapi_server_add">Submit a server</string>

@@ -1,10 +1,14 @@
 package com.fieldbook.tracker.preferences;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
+import androidx.core.content.FileProvider;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
@@ -13,6 +17,13 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.traits.BaseTraitLayout;
+import com.fieldbook.tracker.traits.PhotoTraitLayout;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
+import java.io.File;
 
 public class BrapiPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
@@ -23,9 +34,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private Preference brapiAuthButton;
     private Preference brapiLogoutButton;
     private Preference brapiURLPreference;
+    private Preference brapiServerBarcode;
     private Preference brapiServerCassavabase;
     private Preference brapiServerDefaultTest;
     private BrapiControllerResponse brapiControllerResponse;
+    private String barcodeResult;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -41,13 +54,30 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiPrefCategory = prefMgr.findPreference("brapi_category");
         brapiAuthButton = findPreference("authorizeBrapi");
         brapiLogoutButton = findPreference("revokeBrapiAuth");
+
         brapiURLPreference = findPreference("BRAPI_BASE_URL");
         brapiURLPreference.setOnPreferenceChangeListener(this);
+
+        brapiServerBarcode = findPreference("brapi_server_barcode");
         brapiServerCassavabase = findPreference("brapi_server_cassavabase");
         brapiServerDefaultTest = findPreference("brapi_server_default");
 
         setBaseURLSummary();
         setButtonView();
+
+        brapiServerBarcode.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+
+                new IntentIntegrator(getActivity())
+                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setBeepEnabled(true)
+                        .setRequestCode(101)
+                        .initiateScan();
+
+                return true;
+            }
+        });
 
         brapiServerCassavabase.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -206,6 +236,23 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         } else {
             brapiPrefCategory.removePreference(brapiAuthButton);
             brapiPrefCategory.removePreference(brapiLogoutButton);
+        }
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case 101:
+                Log.d("Field Book","test");
+
+                IntentResult urlDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                barcodeResult = urlDataResult.getContents();
+
+                SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
+                editor.putString(GeneralKeys.BRAPI_BASE_URL, barcodeResult);
+                editor.apply();
+
+                brapiAuth();
+                break;
         }
     }
 }

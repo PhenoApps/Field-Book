@@ -33,6 +33,12 @@
         app:iconSpaceReserved="false">
 
         <Preference
+            android:icon="@drawable/ic_trait_barcode"
+            android:key="brapi_server_barcode"
+            android:title="@string/preferences_brapi_server_barcode">
+        </Preference>
+
+        <Preference
             android:icon="@drawable/ic_pref_brapi_server"
             android:key="brapi_server_cassavabase"
             android:title="@string/preferences_brapi_server_cassavabase">
