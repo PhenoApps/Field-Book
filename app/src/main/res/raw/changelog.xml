@@ -16,6 +16,7 @@
         <bugfix>Fixed how Database settings work</bugfix>
         <bugfix>Fixed bug when saving person or location from Settings</bugfix>
         <bugfix>Fixed bug that hid files with uppercase extensions</bugfix>
+        <bugfix>Fixed bug allowed users to view Collect screen without traits</bugfix>
     </release>
 
     <release

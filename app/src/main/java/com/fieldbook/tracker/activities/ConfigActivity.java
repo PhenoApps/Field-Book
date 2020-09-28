@@ -232,6 +232,9 @@ public class ConfigActivity extends AppCompatActivity {
                         if (!ep.getBoolean("ImportFieldFinished", false)) {
                             Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
                             return;
+                        } else if (dt.getTraitColumnsAsString() == null) {
+                            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing));
+                            return;
                         }
 
                         collectDataFilePermission();
