@@ -12,6 +12,7 @@
         <new>Profile moved completely to Settings</new>
         <new>Added community BrAPI servers and scan by barcode option</new>
         <info>Moved several settings to different categories</info>
+        <info>Changed how the disable entry arrows setting is assigned</info>
         <bugfix>Fixed how Database settings work</bugfix>
         <bugfix>Fixed bug when saving person or location from Settings</bugfix>
         <bugfix>Fixed bug that hid files with uppercase extensions</bugfix>

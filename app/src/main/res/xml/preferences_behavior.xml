@@ -24,19 +24,14 @@
         android:summary="%s"
         android:title="@string/preferences_behavior_return_character" />
 
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_action_ic_adv_disable_left"
-        android:key="DisableEntryNavLeft"
-        android:summary="@string/preferences_general_entry_left_disable_description"
-        android:title="@string/preferences_general_entry_left_disable" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:icon="@drawable/ic_action_ic_adv_disable_right"
-        android:key="DisableEntryNavRight"
-        android:summary="@string/preferences_general_entry_right_disable_description"
-        android:title="@string/preferences_general_entry_right_disable" />
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/disable_entry_arrows"
+        android:entryValues="@array/disable_entry_arrows_values"
+        android:icon="@drawable/ic_pref_behavior_disable_arrows"
+        android:key="DISABLE_ENTRY_ARROW_NO_DATA"
+        android:summary="%s"
+        android:title="@string/preferences_behavior_disable_entry_arrow" />
 
     <CheckBoxPreference
         android:defaultValue="false"

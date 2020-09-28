@@ -190,10 +190,11 @@
     <string name="preferences_behavior_cycle_traits_description">After going through all traits, Field Book goes to the next entry</string>
     <string name="preferences_behavior_import_source">Choose your default import source</string>
     <string name="preferences_behavior_export_source">Choose your export import source</string>
-    <string name="preferences_behavior_disable_entry_arrow">Disable entry arrow</string>
+    <string name="preferences_behavior_disable_entry_arrow">Disable entry navigation if no data</string>
     <string name="preferences_behavior_disable_entry_arrow_left">Left</string>
     <string name="preferences_behavior_disable_entry_arrow_right">Right</string>
     <string name="preferences_behavior_disable_entry_arrow_both">Both</string>
+    <string name="preferences_behavior_disable_entry_arrow_neither">Neither</string>
 
     <string name="preferences_brapi_core_title">Configuration</string>
     <string name="preferences_brapi_servers_title">Community Servers</string>
@@ -222,10 +223,6 @@
     <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the current trait</string>
     <string name="preferences_general_share_disable">Disable file sharing</string>
     <string name="preferences_general_share_disable_description">When files are exported, the share dialog will not be displayed</string>
-    <string name="preferences_general_entry_left_disable">Disable left entry arrow</string>
-    <string name="preferences_general_entry_left_disable_description">If no data has been collected, left entry arrow disabled</string>
-    <string name="preferences_general_entry_right_disable">Disable right entry arrow</string>
-    <string name="preferences_general_entry_right_disable_description">If no data has been collected, right entry arrow disabled</string>
     <string name="preferences_general_barcode_camera">Move to entry via barcode</string>
     <string name="preferences_general_barcode_camera_description">Scan barcode and move to the specific entry</string>
     <string name="preferences_general_feature_next_missing">Next entry with no data</string>

@@ -1727,8 +1727,9 @@ public class CollectActivity extends AppCompatActivity {
                 playSound("advance");
             }
 
-            if (ep.getBoolean(GeneralKeys.DISABLE_ENTRY_ARROW_LEFT, false)
-                    && !parent.getTraitBox().existsTrait()) {
+            String entryArrow = ep.getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0");
+
+            if ((entryArrow.equals("1")||entryArrow.equals("3")) && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
             } else {
                 if (rangeID != null && rangeID.length > 0) {
@@ -1751,8 +1752,9 @@ public class CollectActivity extends AppCompatActivity {
                 playSound("advance");
             }
 
-            if (ep.getBoolean(GeneralKeys.DISABLE_ENTRY_ARROW_RIGHT, false)
-                    && !parent.getTraitBox().existsTrait()) {
+            String entryArrow = ep.getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0");
+
+            if ((entryArrow.equals("2")||entryArrow.equals("3")) && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
             } else {
                 if (rangeID != null && rangeID.length > 0) {
