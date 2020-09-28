@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!--
+        <PreferenceCategory
+            android:key="category_system_theme"
+            android:title="@string/preferences_theme_system_title"
+            app:iconSpaceReserved="false">
+
+            <Preference
+                android:icon="@drawable/ic_pref_theme_palette"
+                android:key="APPLICATION_THEME"
+                android:summary="@string/preferences_theme_app_color_description"
+                android:title="@string/preferences_theme_app_color_title" />
+    -->
+        <com.skydoves.colorpickerpreference.ColorPickerPreference
+            android:icon="@drawable/ic_pref_theme_saved_data_color"
+            android:key="SAVED_DATA_COLOR"
+            android:summary="@string/preferences_theme_data_saved_description"
+            android:title="@string/preferences_theme_data_saved_title"
+            app:preference_attachAlphaSlideBar="false"
+            app:preference_attachBrightnessSlideBar="true"
+            app:preference_dialog_title="@string/preferences_theme_data_saved_title"
+            app:preference_dialog_negative="@string/dialog_cancel"
+            app:preference_dialog_positive="@string/dialog_save"
+            app:preference_selector="@drawable/wheel" />
+
+        <Preference
+            android:icon="@drawable/ic_pref_theme_restore_default"
+            android:key="RESTORE_DEFAULT_THEME"
+            android:summary="@string/preferences_theme_reset_description"
+            android:title="@string/preferences_theme_reset_title" />
+
+</PreferenceScreen>

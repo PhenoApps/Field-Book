@@ -6,9 +6,14 @@ import java.util.HashMap;
 
 public class GeneralKeys {
     // @formatter:off
+
+    // Appearance
     public static final String TOOLBAR_CUSTOMIZE                    = "TOOLBAR_CUSTOMIZE";
     public static final String LANGUAGE                             = "language";
     public static final String INFOBAR_NUMBER                       = "INFOBAR_NUMBER";
+    public static final String APPLICATION_THEME                    = "APPLICATION_THEME";
+    public static final String SAVED_DATA_COLOR                     = "SAVED_DATA_COLOR";
+    public static final String RESTORE_DEFAULT_THEME                = "RESTORE_DEFAULT_THEME";
 
     // Profile
     public static final String PROFILE_NAME_FIRST                   = "FirstName";
@@ -19,6 +24,7 @@ public class GeneralKeys {
     public static final String RETURN_CHARACTER                     = "RETURN_CHARACTER";
     public static final String VOLUME_NAVIGATION                    = "VOLUME_NAVIGATION";
     public static final String CYCLING_TRAITS_ADVANCES              = "CycleTraits";
+
 
     // General
     public static final String TUTORIAL_MODE                        = "Tips";

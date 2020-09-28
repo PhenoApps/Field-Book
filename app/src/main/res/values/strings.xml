@@ -160,6 +160,16 @@
     <string name="preferences_appearance_language">Language</string>
     <string name="preferences_appearance_language_description">Language set by system</string>
     <string name="preferences_appearance_theme_title">Theme</string>
+    <string name="preferences_appearance_theme_summary">Modify specific colors or the entire theme of Field Book</string>
+
+    <string name="preferences_theme_title">Theme</string>
+    <string name="preferences_theme_system_title">System</string>
+    <string name="preferences_theme_app_color_title">Application Theme</string>
+    <string name="preferences_theme_app_color_description">Change the default system colors of the app</string>
+    <string name="preferences_theme_data_saved_title">Saved data color</string>
+    <string name="preferences_theme_data_saved_description">Change how saved data is displayed</string>
+    <string name="preferences_theme_reset_title">Restore default theme</string>
+    <string name="preferences_theme_reset_description">Reset all settings to the system default values</string>
 
     <string name="preferences_appearance_toolbar_customize">Customize toolbar icons</string>
     <string name="preferences_appearance_toolbar_customize_description">Modify default icons on the collect screen</string>

@@ -93,7 +93,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                 dialog.dismiss();
 
                 SharedPreferences ep = getContext().getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
-                SharedPreferences.Editor editor = ep.edit();
 
                 SharedPreferences.Editor ed = ep.edit();
                 ed.putString("FirstName", "");

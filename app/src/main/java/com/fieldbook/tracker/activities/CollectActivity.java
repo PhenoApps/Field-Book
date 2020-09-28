@@ -92,7 +92,7 @@ public class CollectActivity extends AppCompatActivity {
     public static boolean partialReload;
     public static Activity thisActivity;
     public static String TAG = "Field Book";
-    private static String displayColor = "#d50000";
+
     ImageButton deleteValue;
     ImageButton missingValue;
     ImageButton barcodeInput;
@@ -1015,10 +1015,6 @@ public class CollectActivity extends AppCompatActivity {
 
     public TextWatcher getCvText() {
         return cvText;
-    }
-
-    public String getDisplayColor() {
-        return displayColor;
     }
 
     public ImageButton getDeleteValue() {

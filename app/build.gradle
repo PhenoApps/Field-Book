@@ -76,6 +76,7 @@ dependencies {
     implementation "com.mikepenz:aboutlibraries:6.2.3"
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.0'
     implementation 'com.github.ByteHamster:SearchPreference:v2.0.0'
+    implementation "com.github.skydoves:colorpickerpreference:2.0.4"
 
     testImplementation 'androidx.test:core:1.2.0'
     testImplementation 'org.robolectric:robolectric:4.3.1'

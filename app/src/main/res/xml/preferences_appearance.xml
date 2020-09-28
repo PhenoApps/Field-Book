@@ -8,6 +8,13 @@
         app:iconSpaceReserved="false">
 
         <Preference
+            android:icon="@drawable/ic_pref_appearance_theme"
+            android:key="APPLICATION_THEME"
+            android:summary="@string/preferences_appearance_theme_summary"
+            android:title="@string/preferences_appearance_theme_title"
+            app:fragment="com.fieldbook.tracker.preferences.ThemePreferencesFragment" />
+
+        <Preference
             android:icon="@drawable/ic_nav_drawer_translate"
             android:key="language"
             android:summary="@string/preferences_appearance_language_description"
@@ -30,8 +37,8 @@
 
     <PreferenceCategory
         android:key="category_appearance_collect"
-        app:allowDividerAbove="true"
         android:title="@string/preferences_appearance_collection_category_title"
+        app:allowDividerAbove="true"
         app:iconSpaceReserved="false">
 
         <MultiSelectListPreference

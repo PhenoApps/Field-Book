@@ -31,6 +31,7 @@ public class PreferencesFragment extends BasePreferenceFragment {
 
         config.index(R.xml.preferences);
         config.index(R.xml.preferences_appearance);
+        config.index(R.xml.preferences_theme);
         config.index(R.xml.preferences_behavior);
         config.index(R.xml.preferences_brapi);
         config.index(R.xml.preferences_database);
@@ -38,7 +39,7 @@ public class PreferencesFragment extends BasePreferenceFragment {
         config.index(R.xml.preferences_profile);
         config.index(R.xml.preferences_sounds);
 
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle("Settings");
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
     }
 
     void onSearchResultClicked(SearchPreferenceResult result) {
@@ -60,10 +61,9 @@ public class PreferencesFragment extends BasePreferenceFragment {
         PreferencesFragment.this.context = context;
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle("Settings");
+        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
     }
 }

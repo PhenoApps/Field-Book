@@ -4,8 +4,9 @@
         versionCode="450"
         versionName="v4.5">
         <new>Added setting to choose custom storage directory (Android 5.0+ only)</new>
-        <new>Added sound preference for advancing plots</new>
-        <new>Added sound preference for cycling traits</new>
+        <new>Added sound setting for advancing plots</new>
+        <new>Added sound setting for cycling traits</new>
+        <new>Added theme setting to change saved data color</new>
         <new>Categorical trait layout now matches multicat allowing for unlimited categories</new>
         <new>Export options default to last configuration</new>
         <new>Profile moved completely to Settings</new>
