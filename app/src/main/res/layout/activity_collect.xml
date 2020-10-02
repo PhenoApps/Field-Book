@@ -38,6 +38,20 @@
             android:weightSum="1">
 
             <ImageButton
+                android:id="@+id/barcodeInput"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                android:layout_gravity="center"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="0.4"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center"
+                android:src="@drawable/main_ic_input_barcode"
+                android:textColor="#FFFFFF" />
+
+            <ImageButton
                 android:id="@+id/missingValue"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

@@ -188,7 +188,7 @@
     <string name="preferences_general_feature_barcode_text_description">打开对话框输入唯一的ID，跳转过去</string>
     <string name="preferences_general_feature_datagrid">数据表格</string>
     <string name="preferences_general_feature_datagrid_description">显示包含小区和性状的电子表来展示收集到的数据</string>
-    <string name="preferences_source_default_category_title">默认数据</string>
+    <string name="preferences_general_system_title">默认数据</string>
     <string name="preferences_source_default_import">默认导入源</string>
     <string name="preferences_source_default_export">默认导出源</string>
     <string name="preferences_appearance_system_category_title">应用</string>
@@ -371,7 +371,6 @@
     <!-- Brapi strings -->
     <string name="brapi_base_url">BrAPI基础网址</string>
     <string name="brapi_base_url_desc">连接到BrAPI服务器的基础网址</string>
-    <string name="brapi_title">BrAPI配置</string>
     <string name="brapi_save_authorize">保存和授权</string>
     <string name="brapi_authorize">授权BrAPI</string>
     <string name="brapi_reauthorize">再授权BrAPI</string>

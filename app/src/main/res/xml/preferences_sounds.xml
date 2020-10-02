@@ -3,9 +3,23 @@
 
     <CheckBoxPreference
         android:defaultValue="false"
-        android:icon="@drawable/ic_adv_primary_order_sound"
+        android:icon="@drawable/ic_pref_sounds_primary"
         android:key="RangeSound"
         android:summary="@string/preferences_sound_primary_order_sound_description"
         android:title="@string/preferences_sound_primary_order_sound" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_pref_sounds_advance"
+        android:key="ENTRY_NAVIGATION_SOUND"
+        android:title="@string/preferences_sound_entry_title"
+        android:summary="@string/preferences_sound_entry_description" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_pref_sounds_cycle"
+        android:key="CYCLE_TRAITS_SOUND"
+        android:title="@string/preferences_sound_cycle_traits_title"
+        android:summary="@string/preferences_sound_cycle_traits_description" />
 
 </PreferenceScreen>

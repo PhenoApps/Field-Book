@@ -92,9 +92,11 @@ public class CollectActivity extends AppCompatActivity {
     public static boolean partialReload;
     public static Activity thisActivity;
     public static String TAG = "Field Book";
-    private static String displayColor = "#d50000";
+
     ImageButton deleteValue;
     ImageButton missingValue;
+    ImageButton barcodeInput;
+
     /**
      * Trait layouts
      */
@@ -331,6 +333,18 @@ public class CollectActivity extends AppCompatActivity {
             }
         });
 
+        barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
+        barcodeInput.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new IntentIntegrator(thisActivity)
+                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setBeepEnabled(true)
+                        .setRequestCode(99)
+                        .initiateScan();
+            }
+        });
+
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
         deleteValue.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -372,7 +386,7 @@ public class CollectActivity extends AppCompatActivity {
         // Reset dropdowns
 
         if (!dt.isTableEmpty(DataHelper.RANGE)) {
-            final String plotID = rangeBox.getPlotID();
+            String plotID = rangeBox.getPlotID();
             infoBarAdapter.configureDropdownArray(plotID);
         }
 
@@ -397,17 +411,14 @@ public class CollectActivity extends AppCompatActivity {
             return;
         }
 
-        boolean haveData = false;
-
         // search moveto
         if (type.equals("search")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.range.equals(range) & cRange.plot.equals(plot)) {
+                if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
                     moveToResultCore(j);
-                    haveData = true;
+                    return;
                 }
             }
         }
@@ -416,11 +427,10 @@ public class CollectActivity extends AppCompatActivity {
         if (type.equals("plot")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.plot.equals(data)) {
+                if (rangeBox.getCRange().plot.equals(data)) {
                     moveToResultCore(j);
-                    haveData = true;
+                    return;
                 }
             }
         }
@@ -429,11 +439,10 @@ public class CollectActivity extends AppCompatActivity {
         if (type.equals("range")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.range.equals(data)) {
+                if (rangeBox.getCRange().range.equals(data)) {
                     moveToResultCore(j);
-                    haveData = true;
+                    return;
                 }
             }
         }
@@ -442,18 +451,15 @@ public class CollectActivity extends AppCompatActivity {
         if (type.equals("id")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
-                RangeObject cRange = rangeBox.getCRange();
 
-                if (cRange.plot_id.equals(data)) {
+                if (rangeBox.getCRange().plot_id.equals(data)) {
                     moveToResultCore(j);
                     return;
                 }
             }
         }
 
-        if (!haveData) {
-            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
-        }
+        Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
     }
 
     private void moveToResultCore(int j) {
@@ -461,6 +467,7 @@ public class CollectActivity extends AppCompatActivity {
 
         // Reload traits based on selected plot
         rangeBox.display();
+
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         initWidgets(false);
@@ -471,8 +478,8 @@ public class CollectActivity extends AppCompatActivity {
         // Backup database
         try {
             dt.exportDatabase("backup");
-            File exportedDb = new File(Constants.BACKUPPATH + "/" + "backup.db");
-            File exportedSp = new File(Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
+            File exportedDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db");
+            File exportedSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
             Utils.scanFile(CollectActivity.this, exportedDb);
             Utils.scanFile(CollectActivity.this, exportedSp);
         } catch (Exception e) {
@@ -540,7 +547,7 @@ public class CollectActivity extends AppCompatActivity {
 
         } else if (searchReload) {
             searchReload = false;
-            rangeBox.resetPaging();
+            //rangeBox.resetPaging();
             int[] rangeID = rangeBox.getRangeID();
 
             if (rangeID != null) {
@@ -559,7 +566,6 @@ public class CollectActivity extends AppCompatActivity {
             return;
         }
 
-        Log.w(parent, value);
         traitBox.update(parent, value);
 
         Observation observation = dt.getObservation(rangeBox.getPlotID(), parent);
@@ -620,8 +626,6 @@ public class CollectActivity extends AppCompatActivity {
             systemMenu.findItem(R.id.lockData).setVisible(entries.contains("lockData"));
         }
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -712,7 +716,7 @@ public class CollectActivity extends AppCompatActivity {
             case R.id.resources:
                 intent.setClassName(CollectActivity.this,
                         FileExploreActivity.class.getName());
-                intent.putExtra("path", Constants.RESOURCEPATH);
+                intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY,Constants.MPATH) + Constants.RESOURCEPATH);
                 intent.putExtra("exclude", new String[]{"fieldbook"});
                 intent.putExtra("title", getString(R.string.main_toolbar_resources));
                 startActivityForResult(intent, 1);
@@ -727,6 +731,7 @@ public class CollectActivity extends AppCompatActivity {
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.main_barcode_text))
                         .setBeepEnabled(true)
+                        .setRequestCode(98)
                         .initiateScan();
                 break;
             case R.id.summary:
@@ -921,6 +926,30 @@ public class CollectActivity extends AppCompatActivity {
                     moveToSearch("id", rangeID, null, null, inputPlotId);
                 }
                 break;
+            case 98:
+                if(resultCode == RESULT_OK) {
+                    IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    inputPlotId = plotSearchResult.getContents();
+                    rangeBox.setAllRangeID();
+                    int[] rangeID = rangeBox.getRangeID();
+                    moveToSearch("id", rangeID, null, null, inputPlotId);
+                }
+                break;
+            case 99:
+                if(resultCode == RESULT_OK) {
+                    // store barcode value as data
+                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    String scannedBarcode = plotDataResult.getContents();
+                    TraitObject currentTrait = traitBox.getCurrentTrait();
+                    BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+                    currentTraitLayout.loadLayout();
+
+
+                    updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), scannedBarcode);
+                    currentTraitLayout.loadLayout();
+                    validateData();
+                }
+                break;
             case 252:
                 if (resultCode == RESULT_OK) {
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
@@ -928,16 +957,6 @@ public class CollectActivity extends AppCompatActivity {
                             traitBox.getNewTraits());
                 }
                 break;
-        }
-
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            inputPlotId = result.getContents();
-            rangeBox.setAllRangeID();
-            int[] rangeID = rangeBox.getRangeID();
-            moveToSearch("id", rangeID, null, null, inputPlotId);
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -996,10 +1015,6 @@ public class CollectActivity extends AppCompatActivity {
 
     public TextWatcher getCvText() {
         return cvText;
-    }
-
-    public String getDisplayColor() {
-        return displayColor;
     }
 
     public ImageButton getDeleteValue() {
@@ -1288,8 +1303,13 @@ public class CollectActivity extends AppCompatActivity {
                 if (pos < 0) {
                     pos = traitType.getCount() - 1;
 
-                    if (parent.is_cycling_traits_advances())
+                    if (parent.is_cycling_traits_advances()) {
                         rangeBox.clickLeft();
+                    }
+
+                    if(ep.getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND,false)) {
+                        playSound("cycle");
+                    }
                 }
             } else if (direction.equals("right")) {
                 pos = traitType.getSelectedItemPosition() + 1;
@@ -1297,8 +1317,13 @@ public class CollectActivity extends AppCompatActivity {
                 if (pos > traitType.getCount() - 1) {
                     pos = 0;
 
-                    if (parent.is_cycling_traits_advances())
+                    if (parent.is_cycling_traits_advances()) {
                         rangeBox.clickRight();
+                    }
+
+                    if(ep.getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND,false)) {
+                        playSound("cycle");
+                    }
                 }
             }
 
@@ -1579,19 +1604,7 @@ public class CollectActivity extends AppCompatActivity {
                 if (ep.getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
                     if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
                         lastRange = cRange.range;
-
-                        try {
-                            int resID = getResources().getIdentifier("plonk", "raw", getPackageName());
-                            MediaPlayer chimePlayer = MediaPlayer.create(CollectActivity.this, resID);
-                            chimePlayer.start();
-
-                            chimePlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                public void onCompletion(MediaPlayer mp) {
-                                    mp.release();
-                                }
-                            });
-                        } catch (Exception ignore) {
-                        }
+                        playSound("plonk");
                     }
                 }
 
@@ -1709,8 +1722,14 @@ public class CollectActivity extends AppCompatActivity {
                 return;
             }
 
-            if (ep.getBoolean(GeneralKeys.DISABLE_ENTRY_ARROW_LEFT, false)
+            if (ep.getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
                     && !parent.getTraitBox().existsTrait()) {
+                playSound("advance");
+            }
+
+            String entryArrow = ep.getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0");
+
+            if ((entryArrow.equals("1")||entryArrow.equals("3")) && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
             } else {
                 if (rangeID != null && rangeID.length > 0) {
@@ -1728,8 +1747,14 @@ public class CollectActivity extends AppCompatActivity {
                 return;
             }
 
-            if (ep.getBoolean(GeneralKeys.DISABLE_ENTRY_ARROW_RIGHT, false)
+            if (ep.getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
                     && !parent.getTraitBox().existsTrait()) {
+                playSound("advance");
+            }
+
+            String entryArrow = ep.getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0");
+
+            if ((entryArrow.equals("2")||entryArrow.equals("3")) && !parent.getTraitBox().existsTrait()) {
                 playSound("error");
             } else {
                 if (rangeID != null && rangeID.length > 0) {

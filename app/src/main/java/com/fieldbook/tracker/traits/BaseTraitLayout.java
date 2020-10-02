@@ -2,8 +2,10 @@ package com.fieldbook.tracker.traits;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -66,7 +68,9 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public String getDisplayColor() {
-        return ((CollectActivity) getContext()).getDisplayColor();
+        String hexColor = String.format("#%06X", (0xFFFFFF & getPrefs().getInt("SAVED_DATA_COLOR", Color.parseColor("#d50000"))));
+
+        return hexColor;
     }
 
     public void updateTrait(String parent, String trait, String value) {

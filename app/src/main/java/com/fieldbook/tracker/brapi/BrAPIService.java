@@ -209,7 +209,7 @@ public class BrAPIService {
 
             return (hostURL.equals(dataSource));
         } catch (MalformedURLException e) {
-            Log.e("error", e.toString());
+            Log.e("error-cmbu", e.toString());
             return false;
         }
 
@@ -221,7 +221,7 @@ public class BrAPIService {
             URL externalUrl = new URL(brapiURL);
             return externalUrl.getHost();
         } catch (MalformedURLException e) {
-            Log.e("error", e.toString());
+            Log.e("error-ghu", e.toString());
             return null;
         }
     }
@@ -610,7 +610,7 @@ public class BrAPIService {
                     addAttributeDataItem(dataRow, unit.getPlantNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId());
                 else if (attribute.equalsIgnoreCase("Germplasm"))
                     addAttributeDataItem(dataRow, unit.getGermplasmName(), unit.getGermplasmDbId());
-                else if (checkField(unit.getPedigree()) && attribute.equalsIgnoreCase("Pedigree"))
+                else if (attribute.equalsIgnoreCase("Pedigree"))
                     addAttributeDataItem(dataRow, unit.getPedigree());
 
             }
@@ -629,6 +629,9 @@ public class BrAPIService {
         String goodValue = getPrioritizedValue(values);
         if (goodValue != null) {
             dataRow.add(goodValue);
+        }else{
+            //No Value Found, but the data row must maintain the same length
+            dataRow.add("");
         }
     }
 
@@ -681,7 +684,7 @@ public class BrAPIService {
                     null, callback);
 
         } catch (ApiException e) {
-            Log.e("error", e.toString());
+            Log.e("error-go", e.toString());
             failFunction.apply(e);
         }
     }

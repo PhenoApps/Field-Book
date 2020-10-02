@@ -313,7 +313,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 } else if (brapiControllerResponse.message == BrAPIService.notUniqueIdMessage) {
                     Toast.makeText(context, R.string.import_error_unique, Toast.LENGTH_LONG).show();
                 } else {
-                    Log.e("error", brapiControllerResponse.message);
+                    Log.e("error-ope", brapiControllerResponse.message);
                     Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
                 }
             }
@@ -321,7 +321,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             // This is an unhandled failed that we should not run into unless there is
             // an error in the saveStudyDetails code outside of that handling.
             if (fail) {
-                Log.e("error", brapiControllerResponse.message);
+                Log.e("error-opef", brapiControllerResponse.message);
                 Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
             }
 

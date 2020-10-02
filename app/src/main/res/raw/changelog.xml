@@ -1,4 +1,42 @@
 <changelog>
+    <release
+        date="2020-10-01"
+        versionCode="450"
+        versionName="v4.5">
+        <new>Added setting to choose custom storage directory (Android 5.0+ only)</new>
+        <new>Added sound setting for advancing plots</new>
+        <new>Added sound setting for cycling traits</new>
+        <new>Added theme setting to change saved data color</new>
+        <new>Categorical trait layout now matches multicat allowing for unlimited categories</new>
+        <new>Export options default to last configuration</new>
+        <new>Profile moved completely to Settings</new>
+        <new>Added community BrAPI servers and scan by barcode option</new>
+        <info>Moved several settings to different categories</info>
+        <info>Changed how the disable entry arrows setting is assigned</info>
+        <bugfix>Fixed how Database settings work</bugfix>
+        <bugfix>Fixed bug when saving person or location from Settings</bugfix>
+        <bugfix>Fixed bug that hid files with uppercase extensions</bugfix>
+        <bugfix>Fixed bug allowed users to view Collect screen without traits</bugfix>
+    </release>
+
+    <release
+        date="2020-09-04"
+        versionCode="441"
+        versionName="v4.4.1">
+        <bugfix>Fix for issue when taking photos</bugfix>
+    </release>
+
+    <release
+        date="2020-09-01"
+        versionCode="440"
+        versionName="v4.4">
+        <new>Collect data using barcodes</new>
+        <new>Filter BrAPI studies by program and trial</new>
+        <new>BrAPI HTTP error handling improvements</new>
+        <bugfix>Fix for Zebra Label Print trait not functioning correctly</bugfix>
+        <bugfix>Fix bug with searching that resulted in data not being saved</bugfix>
+        <bugfix>Fix for issues when importing UTF-8-BOM files</bugfix>
+    </release>
 
     <release
         date="2020-06-22"

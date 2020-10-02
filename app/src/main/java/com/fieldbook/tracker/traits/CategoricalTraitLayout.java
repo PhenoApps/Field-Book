@@ -2,22 +2,35 @@ package com.fieldbook.tracker.traits;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.fieldbook.tracker.activities.ConfigActivity;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.activities.CollectActivity;
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayoutManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 public class CategoricalTraitLayout extends BaseTraitLayout {
 
-    private List<Button> buttonArray;
+    //todo this can eventually be merged with multicattraitlayout when we can support a switch in traits on how many categories to allow user to select
+
+    //private StaggeredGridView gridMultiCat;
+    private RecyclerView gridMultiCat;
 
     public CategoricalTraitLayout(Context context) {
         super(context);
@@ -29,10 +42,6 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     public CategoricalTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
-
-    public List<Button> getButtonArray() {
-        return buttonArray;
     }
 
     @Override
@@ -48,111 +57,232 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         return trait.equals("categorical") || trait.equals("qualitative");
     }
 
+    @Override
     public void init() {
-        buttonArray = new ArrayList<>();
-        buttonArray.add((Button) findViewById(R.id.q1));
-        buttonArray.add((Button) findViewById(R.id.q2));
-        buttonArray.add((Button) findViewById(R.id.q3));
-        buttonArray.add((Button) findViewById(R.id.q4));
-        buttonArray.add((Button) findViewById(R.id.q5));
-        buttonArray.add((Button) findViewById(R.id.q6));
-        buttonArray.add((Button) findViewById(R.id.q7));
-        buttonArray.add((Button) findViewById(R.id.q8));
-        buttonArray.add((Button) findViewById(R.id.q9));
-        buttonArray.add((Button) findViewById(R.id.q10));
-        buttonArray.add((Button) findViewById(R.id.q11));
-        buttonArray.add((Button) findViewById(R.id.q12));
-
-        // Clear all other color except this button's
-        for (final Button btn : buttonArray) {
-            // Functions to clear all other color except this button's
-            btn.setOnClickListener(new OnClickListener() {
-                public void onClick(View arg0) {
-                    if (checkButton(btn, getNewTraits(), getCurrentTrait())) {
-                        return;
-                    }
-                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), btn.getText().toString());
-                    setCategoricalButtons(btn);
-                }
-
-            });
-        }
-    }
-
-    public void setCategoricalButtons(Button choice) {
-        for (Button button : buttonArray) {
-            if (button == choice) {
-                button.setTextColor(Color.parseColor(getDisplayColor()));
-                button.setBackgroundColor(getResources().getColor(R.color.button_pressed));
-            } else {
-                button.setTextColor(Color.BLACK);
-                button.setBackgroundColor(getResources().getColor(R.color.button_normal));
-            }
-        }
-    }
-
-    private Boolean checkButton(Button button, Map newTraits, TraitObject currentTrait) {
-        String curCat = "";
-        if (newTraits.containsKey(currentTrait.getTrait())) {
-            curCat = newTraits.get(currentTrait.getTrait()).toString();
-        }
-        if (button.getText().toString().equals(curCat)) {
-            newTraits.remove(currentTrait.getTrait());
-            ConfigActivity.dt.deleteTrait(getCRange().plot_id, currentTrait.getTrait());
-            setCategoricalButtons(null);
-            return true;
-        }
-        return false;
+        gridMultiCat = findViewById(R.id.catGrid);
     }
 
     @Override
     public void loadLayout() {
+        final String trait = getCurrentTrait().getTrait();
+        getEtCurVal().setHint("");
+        getEtCurVal().setVisibility(EditText.VISIBLE);
 
-        getEtCurVal().setVisibility(EditText.GONE);
-        getEtCurVal().setEnabled(false);
-
-        String lastQualitative = "";
-
-        if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            lastQualitative = getNewTraits().get(getCurrentTrait().getTrait())
-                    .toString();
+        if (!getNewTraits().containsKey(trait)) {
+            getEtCurVal().setText("");
+            getEtCurVal().setTextColor(Color.BLACK);
+        } else {
+            getEtCurVal().setText(getNewTraits().get(trait).toString());
+            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
         }
 
-        String[] cat = getCurrentTrait().getCategories().split("/");
+        final String[] cat = getCurrentTrait().getCategories().split("/");
 
-        // Hide unused buttons
-        for (int i = cat.length; i < 12; i++) {
-            buttonArray.get(i).setVisibility(Button.GONE);
+        FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
+        layoutManager.setFlexWrap(FlexWrap.WRAP);
+        layoutManager.setFlexDirection(FlexDirection.ROW);
+        layoutManager.setAlignItems(AlignItems.STRETCH);
+        gridMultiCat.setLayoutManager(layoutManager);
+
+        if (!((CollectActivity) getContext()).isDataLocked()) {
+
+            gridMultiCat.setAdapter(new CategoricalTraitAdapter(getContext()) {
+
+                @Override
+                public void onBindViewHolder(CategoricalTraitViewHolder holder, int position) {
+                    holder.bindTo();
+                    holder.mButton.setText(cat[position]);
+                    holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
+                    if (hasCategory(cat[position], getEtCurVal().getText().toString()))
+                        pressOnButton(holder.mButton);
+                }
+
+                @Override
+                public int getItemCount() {
+                    return cat.length;
+                }
+            });
         }
 
-        // Reset button visibility for items in the last row
-        if (12 - cat.length > 0) {
-            for (int i = 11; i >= cat.length; i--) {
-                buttonArray.get(i).setVisibility(Button.INVISIBLE);
+        gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                gridMultiCat.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                View lastChild = gridMultiCat.getChildAt(gridMultiCat.getChildCount() - 1);
+                gridMultiCat.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, lastChild.getBottom()));
+            }
+        });
+    }
+
+    private OnClickListener createClickListener(final Button button, int position) {
+        return new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String normalizedCategory = normalizeCategory();
+                getEtCurVal().setText(normalizedCategory);
+                final String category = button.getText().toString();
+
+                if (hasCategory(category, normalizedCategory)) {
+                    pressOffButton(button);
+                    removeCategory(category);
+                } else {
+                    pressOnButton(button);
+                    addCategory(category);
+                }
+
+                String[] catList = getCategoryList();
+
+                List<String> list = new ArrayList<String>(Arrays.asList(catList));
+                list.remove(category);
+                catList = list.toArray(new String[0]);
+
+                for(String cat : catList) {
+                    removeCategory(cat);
+                }
+
+                updateTrait(getCurrentTrait().getTrait(),
+                        getCurrentTrait().getFormat(),
+                        getEtCurVal().getText().toString());
+
+                loadLayout(); //todo this is not the best way to do this
+            }
+        };
+    }
+
+    private boolean existsCategory(final String category) {
+        final String[] cats = getCurrentTrait().getCategories().split("/");
+        for (String cat : cats) {
+            if (cat.equals(category))
+                return true;
+        }
+        return false;
+    }
+
+    // if there are wrong categories, remove them
+    // I want to remove them when moveing the page,
+    // but it is not so easy
+    private String normalizeCategory() {
+        final String[] categories = getCategoryList();
+        ArrayList<String> normalizedCategoryList = new ArrayList<>();
+        HashSet<String> appeared = new HashSet<>();
+        for (String category : categories) {
+            if (!appeared.contains(category) && existsCategory(category)) {
+                normalizedCategoryList.add(category);
+                appeared.add(category);
             }
         }
 
-        // Set the color and visibility for the right buttons
-        for (int i = 0; i < cat.length; i++) {
-            if (cat[i].equals(lastQualitative)) {
-                buttonArray.get(i).setVisibility(Button.VISIBLE);
-                buttonArray.get(i).setText(cat[i]);
-                buttonArray.get(i).setTextColor(Color.parseColor(getDisplayColor()));
-                buttonArray.get(i).setBackgroundColor(getResources().getColor(R.color.button_pressed));
-            } else {
-                //TODO debug number of buttons, maybe add validation when creating categorical trait
-                buttonArray.get(i).setVisibility(Button.VISIBLE);
-                buttonArray.get(i).setText(cat[i]);
-                buttonArray.get(i).setTextColor(Color.BLACK);
-                buttonArray.get(i).setBackgroundColor(getResources().getColor(R.color.button_normal));
+        if (normalizedCategoryList.isEmpty())
+            return "";
+        String normalizedCategory = normalizedCategoryList.get(0);
+        for (int i = 1; i < normalizedCategoryList.size(); ++i) {
+            normalizedCategory += ":";
+            normalizedCategory += normalizedCategoryList.get(i);
+        }
+        return normalizedCategory;
+    }
+
+    private boolean hasCategory(final String category, final String categories) {
+        final String[] categoryArray = categories.split(":");
+        for (final String cat : categoryArray) {
+            if (cat.equals(category))
+                return true;
+        }
+        return false;
+    }
+
+    public String[] getCategoryList() {
+        return getEtCurVal().getText().toString().split(":");
+    }
+
+    private void pressOnButton(Button button) {
+        button.setTextColor(Color.parseColor(getDisplayColor()));
+        button.getBackground().setColorFilter(button.getContext().getResources().getColor(R.color.button_pressed), PorterDuff.Mode.MULTIPLY);
+    }
+
+    private void pressOffButton(Button button) {
+        button.setTextColor(Color.BLACK);
+        button.getBackground().setColorFilter(button.getContext().getResources().getColor(R.color.button_normal), PorterDuff.Mode.MULTIPLY);
+    }
+
+    private void addCategory(final String category) {
+        final String currentValue = getEtCurVal().getText().toString();
+        getEtCurVal().setText(category);
+    }
+
+    private void removeCategory(final String category) {
+        final String[] categories = getCategoryList();
+        ArrayList<String> newCategories = new ArrayList<>();
+        for (final String cat : categories) {
+            if (!cat.equals(category))
+                newCategories.add(cat);
+        }
+
+        if (newCategories.isEmpty()) {
+            getEtCurVal().setText("");
+        } else {
+            // String#join does not work
+            String newValue = newCategories.get(0);
+            for (int i = 1; i < newCategories.size(); ++i) {
+                newValue += ":";
+                newValue += newCategories.get(i);
             }
+            getEtCurVal().setText(newValue);
         }
     }
 
     @Override
     public void deleteTraitListener() {
-        getNewTraits().remove(getCurrentTrait().getTrait());
-        ConfigActivity.dt.deleteTrait(getCRange().plot_id, getCurrentTrait().getTrait());
-        setCategoricalButtons(null);
+        ((CollectActivity) getContext()).removeTrait();
+        loadLayout();
+    }
+}
+
+class CategoricalTraitAdapter extends RecyclerView.Adapter<CategoricalTraitViewHolder> {
+
+    private Context mContext;
+
+    CategoricalTraitAdapter(Context context) {
+        mContext = context;
+    }
+
+    @Override
+    public CategoricalTraitViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.trait_multicat_button, parent, false);
+        return new CategoricalTraitViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(CategoricalTraitViewHolder holder, int position) {
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return 0;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+}
+
+class CategoricalTraitViewHolder extends RecyclerView.ViewHolder {
+
+    Button mButton;
+
+    CategoricalTraitViewHolder(View itemView) {
+        super(itemView);
+        mButton = (Button) itemView.findViewById(R.id.multicatButton);
+    }
+
+    void bindTo() {
+        ViewGroup.LayoutParams lp = mButton.getLayoutParams();
+        if (lp instanceof FlexboxLayoutManager.LayoutParams) {
+            FlexboxLayoutManager.LayoutParams flexboxLp = (FlexboxLayoutManager.LayoutParams) lp;
+            flexboxLp.setFlexGrow(1.0f);
+        }
     }
 }

@@ -160,6 +160,16 @@
     <string name="preferences_appearance_language">Language</string>
     <string name="preferences_appearance_language_description">Language set by system</string>
     <string name="preferences_appearance_theme_title">Theme</string>
+    <string name="preferences_appearance_theme_summary">Modify specific colors or the entire theme of Field Book</string>
+
+    <string name="preferences_theme_title">Theme</string>
+    <string name="preferences_theme_system_title">System</string>
+    <string name="preferences_theme_app_color_title">Application Theme</string>
+    <string name="preferences_theme_app_color_description">Change the default system colors of the app</string>
+    <string name="preferences_theme_data_saved_title">Saved data color</string>
+    <string name="preferences_theme_data_saved_description">Change how saved data is displayed</string>
+    <string name="preferences_theme_reset_title">Restore default theme</string>
+    <string name="preferences_theme_reset_description">Reset all settings to the system default values</string>
 
     <string name="preferences_appearance_toolbar_customize">Customize toolbar icons</string>
     <string name="preferences_appearance_toolbar_customize_description">Modify default icons on the collect screen</string>
@@ -180,10 +190,19 @@
     <string name="preferences_behavior_cycle_traits_description">After going through all traits, Field Book goes to the next entry</string>
     <string name="preferences_behavior_import_source">Choose your default import source</string>
     <string name="preferences_behavior_export_source">Choose your export import source</string>
-    <string name="preferences_behavior_disable_entry_arrow">Disable entry arrow</string>
+    <string name="preferences_behavior_disable_entry_arrow">Disable entry navigation if no data</string>
     <string name="preferences_behavior_disable_entry_arrow_left">Left</string>
     <string name="preferences_behavior_disable_entry_arrow_right">Right</string>
     <string name="preferences_behavior_disable_entry_arrow_both">Both</string>
+    <string name="preferences_behavior_disable_entry_arrow_neither">Neither</string>
+
+    <string name="preferences_brapi_core_title">Configuration</string>
+    <string name="preferences_brapi_servers_title">Community Servers</string>
+    <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
+    <string name="preferences_brapi_server_barcode_prompt">Scan a server URL</string>
+    <string name="preferences_brapi_server_cassavabase">CassavaBase</string>
+    <string name="preferences_brapi_server_test">Default Test Server</string>
+    <string name="preferences_brapi_server_add">Submit a server</string>
 
     <string name="preferences_naming">Naming</string>
     <string name="preferences_naming_photo">Photo name format</string>
@@ -192,6 +211,10 @@
     <string name="preferences_sounds">Sounds</string>
     <string name="preferences_sound_primary_order_sound">Primary order sound</string>
     <string name="preferences_sound_primary_order_sound_description">Notification sound when the primary order changes</string>
+    <string name="preferences_sound_cycle_traits_title">Cycle traits sound</string>
+    <string name="preferences_sound_cycle_traits_description">Notification sound when traits are completely cycled through</string>
+    <string name="preferences_sound_entry_title">Entry navigation sound</string>
+    <string name="preferences_sound_entry_description">Notification sound when moving between entries</string>
 
     <string name="preferences_general_title">General</string>
     <string name="preferences_general_use_day_number">Use day of year</string>
@@ -200,10 +223,6 @@
     <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the current trait</string>
     <string name="preferences_general_share_disable">Disable file sharing</string>
     <string name="preferences_general_share_disable_description">When files are exported, the share dialog will not be displayed</string>
-    <string name="preferences_general_entry_left_disable">Disable left entry arrow</string>
-    <string name="preferences_general_entry_left_disable_description">If no data has been collected, left entry arrow disabled</string>
-    <string name="preferences_general_entry_right_disable">Disable right entry arrow</string>
-    <string name="preferences_general_entry_right_disable_description">If no data has been collected, right entry arrow disabled</string>
     <string name="preferences_general_barcode_camera">Move to entry via barcode</string>
     <string name="preferences_general_barcode_camera_description">Scan barcode and move to the specific entry</string>
     <string name="preferences_general_feature_next_missing">Next entry with no data</string>
@@ -213,9 +232,16 @@
     <string name="preferences_general_feature_datagrid">Datagrid</string>
     <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
 
-    <string name="preferences_source_default_category_title">Default data</string>
+    <string name="preferences_general_system_title">System Defaults</string>
+    <string name="preferences_general_files_base_directory_title">Root Directory</string>
+    <string name="preferences_general_files_base_directory_description">Choose the root directory for Field Book</string>
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
+
+    <string name="preferences_general_files_delimiter_title">Delimiter</string>
+    <string name="preferences_general_files_delimiter_description">Change the default file delimiter</string>
+    <string name="preferences_general_photo_naming_title">Photo Naming</string>
+    <string name="preferences_general_photo_naming_description">Change how photos are named</string>
 
     <string name="preferences_appearance_system_category_title">Application</string>
     <string name="preferences_appearance_collection_category_title">Collect Screen</string>
@@ -330,7 +356,7 @@
     <!-- Profile dialog -->
     <string name="profile_person">Person</string>
     <string name="profile_location">Location</string>
-    <string name="profile_reset">Clear</string>
+    <string name="profile_reset">Reset Profile</string>
 
     <string name="profile_person_title">Set person</string>
     <string name="profile_name_first">First name</string>
@@ -430,9 +456,8 @@
     <string name="preferences_brapi" translatable="false">BrAPI</string>
     <string name="brapi_base_url">BrAPI Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
-    <string name="brapi_title">BrAPI Configuration</string>
     <string name="brapi_save_authorize">Save and Authorize</string>
-    <string name="brapi_authorize">Authorize BrAPI</string>
+    <string name="brapi_authorize">Authorize</string>
     <string name="brapi_reauthorize">Reauthorize BrAPI</string>
     <string name="brapi_revoke_auth">Log Out</string>
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>
@@ -499,7 +524,13 @@
         Traits and fields imported via BrAPI will be able to export their observations via the BrAPI export.
         Traits and fields created manually or imported via CSV will need to be exported via CSV format.
     </string>
-    <string name="brapi_info_title">BrAPI Syncing Info</string>
+    <string name="brapi_info_title">Breeding API</string>
     <string name="brapi_auth_btn">Log In to Site</string>
     <string name="brapi_pagination">BrAPI Pagination</string>
+
+    <string name="trait_labelprint_preview_description">Label preview.</string>
+    <string name="trait_labelprint_zebraconnect_button_description">Button which navigates to Zebra Connect app.</string>
+    <string name="trait_labelprint_print_button_description">Button which prints labels configured in this dialog.</string>
+    <string name="trait_printlabel_after_print_message">Label printed!</string>
+    <string name="trait_printlabel_after_print_error">Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.</string>
 </resources>

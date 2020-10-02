@@ -659,9 +659,8 @@ public class TraitEditorActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 switch (which) {
                     case 0:
-                        intent.setClassName(thisActivity,
-                                FileExploreActivity.class.getName());
-                        intent.putExtra("path", Constants.TRAITPATH);
+                        intent.setClassName(thisActivity, FileExploreActivity.class.getName());
+                        intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH);
                         intent.putExtra("include", new String[]{"trt"});
                         intent.putExtra("title", getString(R.string.traits_dialog_import));
                         startActivityForResult(intent, 1);
@@ -705,9 +704,9 @@ public class TraitEditorActivity extends AppCompatActivity {
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
 
-                File file = new File(Constants.TRAITPATH);
+                File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH);
                 if (!file.exists()) {
-                    createDir(Constants.FIELDEXPORTPATH);
+                    Utils.createDir(getBaseContext(),ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH);
                 }
 
                 showExportDialog();
@@ -727,22 +726,6 @@ public class TraitEditorActivity extends AppCompatActivity {
         AlertDialog alert = builder.create();
         alert.show();
         DialogUtils.styleDialogs(alert);
-    }
-
-    private void createDir(String path) {
-        File dir = new File(path);
-        File blankFile = new File(path + "/.fieldbook");
-
-        if (!dir.exists()) {
-            dir.mkdirs();
-
-            try {
-                blankFile.getParentFile().mkdirs();
-                blankFile.createNewFile();
-                Utils.scanFile(TraitEditorActivity.this, blankFile);
-            } catch (IOException ignore) {
-            }
-        }
     }
 
     private void sortDialog() {
@@ -924,7 +907,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             OutputStream out = null;
             try {
                 in = getContentResolver().openInputStream(content_describer);
-                out = new FileOutputStream(new File(Constants.FIELDIMPORTPATH + "/" + getFileName(content_describer)));
+                out = new FileOutputStream(new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDIMPORTPATH + "/" + getFileName(content_describer)));
                 byte[] buffer = new byte[1024];
                 int len;
                 while ((len = in.read(buffer)) != -1) {
@@ -951,7 +934,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 }
             }
 
-            final String chosenFile = Constants.TRAITPATH + "/" + getFileName(content_describer);
+            final String chosenFile = ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH + "/" + getFileName(content_describer);
 
             String extension = "";
             int i = chosenFile.lastIndexOf('.');
@@ -993,10 +976,10 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     // Helper function export data as CSV
     private void exportTable(String exportName) {
-        File backup = new File(Constants.TRAITPATH);
+        File backup = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH);
         backup.mkdirs();
 
-        File file = new File(Constants.TRAITPATH + "/" + exportName);
+        File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH + "/" + exportName);
 
         try {
             FileWriter fw = new FileWriter(file);
