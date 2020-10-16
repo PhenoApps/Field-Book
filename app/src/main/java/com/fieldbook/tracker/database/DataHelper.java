@@ -17,6 +17,7 @@ import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.Image;
 import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
@@ -43,6 +44,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.fieldbook.tracker.database.DataHelper2Kt.createTables;
 
 /**
  * All database related functions are here
@@ -92,6 +95,8 @@ public class DataHelper {
 
 
             missingPhoto = BitmapFactory.decodeResource(context.getResources(), R.drawable.trait_photo_missing);
+
+            createTables(getAllTraitObjects());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -147,6 +152,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * Helper function to change visibility of a trait. Used in the ratings
      * screen
@@ -558,6 +564,7 @@ public class DataHelper {
         return images;
     }
 
+    //MIGRATED
     /**
      * Sync with observationdbids BrAPI
      */
@@ -597,6 +604,7 @@ public class DataHelper {
         db.endTransaction();
     }
 
+    //MIGRATED
     public void updateImage(Image image, Boolean writeLastSyncedTime) {
         db.beginTransaction();
         String sql;
@@ -648,6 +656,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * V2 - Convert array to String
      */
@@ -667,6 +676,7 @@ public class DataHelper {
         return value;
     }
 
+    //MIGRATED
     /**
      * Retrieves the columns needed for export using a join statement
      */
@@ -701,6 +711,7 @@ public class DataHelper {
         return value;
     }
 
+    //MIGRATED
     /**
      * Convert EAV database to relational
      * TODO add where statement for repeated values
@@ -729,6 +740,7 @@ public class DataHelper {
         return db.rawQuery(query, null);
     }
 
+    //MIGRATED
     /**
      * Used by the application to return all traits which are visible
      */
@@ -758,6 +770,7 @@ public class DataHelper {
         return data;
     }
 
+    //MIGRATED
     /**
      * Used by application to loops through formats which are visible
      */
@@ -787,6 +800,7 @@ public class DataHelper {
         return data;
     }
 
+    //MIGRATED
     /**
      * Returns all traits regardless of visibility. Used by the ratings screen
      */
@@ -816,6 +830,7 @@ public class DataHelper {
         return data;
     }
 
+    //MIGRATED
     /**
      * Get data from specific column of trait table to reorder
      */
@@ -845,6 +860,7 @@ public class DataHelper {
         return data;
     }
 
+    //MIGRATED
     /**
      * Write new realPosition
      */
@@ -854,6 +870,7 @@ public class DataHelper {
         db.update(TRAITS, cv, column + "= ?", new String[]{id});
     }
 
+    //MIGRATED
     /**
      * V2 - Returns all traits column titles as a string array
      */
@@ -890,6 +907,7 @@ public class DataHelper {
         return data;
     }
 
+    //MIGRATED
     /**
      * V2 - Returns all traits column titles as a cursor
      */
@@ -900,6 +918,7 @@ public class DataHelper {
         return cursor;
     }
 
+    //MIGRATED
     /**
      * V4 - Get all traits in the system, in order, as TraitObjects
      */
@@ -936,6 +955,7 @@ public class DataHelper {
         return list;
     }
 
+    //MIGRATED
     public FieldObject getFieldObject(Integer exp_id) {
 
         Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
@@ -965,6 +985,7 @@ public class DataHelper {
 
     }
 
+    //MIGRATED
     /**
      * V2 - Get all traits in the system, in order, as TraitObjects
      */
@@ -989,6 +1010,10 @@ public class DataHelper {
                 o.setMaximum(cursor.getString(5));
                 o.setDetails(cursor.getString(6));
                 o.setCategories(cursor.getString(7));
+
+                //TODO Trevor, any reason visible wasn't populated here?
+                o.setVisible(!cursor.getString(8).equals("false"));
+
                 o.setRealPosition(cursor.getString(9));
 
                 list.add(o);
@@ -1003,6 +1028,7 @@ public class DataHelper {
         return list;
     }
 
+    //MIGRATED
     /**
      * Returns all traits regardless of visibility, but as a hashmap
      */
@@ -1026,10 +1052,12 @@ public class DataHelper {
         return data;
     }
 
+    //MIGRATED
     /**
      * Returns a particular trait as an object
      */
     public TraitObject getDetail(String trait) {
+
         TraitObject data = new TraitObject();
 
         data.setTrait("");
@@ -1064,6 +1092,7 @@ public class DataHelper {
         return data;
     }
 
+    //MIGRATED
     /**
      * Returns saved data based on plot_id
      * v1.6 - Amended to consider both trait and format
@@ -1089,6 +1118,25 @@ public class DataHelper {
         return data;
     }
 
+    public String[] getAllPlotIds() {
+
+        List<String> plotIds = new ArrayList<String>();
+
+        Cursor cursor = db.query(PLOTS, new String[] {"plot_id"}, null, null, null, null, null);
+
+        if (cursor.moveToFirst()) {
+
+            do {
+
+                plotIds.add(cursor.getString(0));
+
+            } while(cursor.moveToNext());
+
+        }
+
+        return plotIds.toArray(new String[] {});
+    }
+    //MIGRATED
     /**
      * Get observation data that needs to be saved on edits
      */
@@ -1114,6 +1162,7 @@ public class DataHelper {
         return o;
     }
 
+    //MIGRATED
     public Observation getObservationByValue(String plotId, String parent, String value) {
 
         Observation o = new Observation();
@@ -1136,6 +1185,7 @@ public class DataHelper {
         return o;
     }
 
+    //MIGRATED
     /**
      * Check if a trait exists within the database
      * v1.6 - Amended to consider both trait and format
@@ -1164,6 +1214,7 @@ public class DataHelper {
         return haveData;
     }
 
+    //MIGRATED
     /**
      * Returns the primary key for all ranges
      */
@@ -1233,6 +1284,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * Returns range data based on the primary key for range Used when moving
      * between ranges on screen
@@ -1272,6 +1324,44 @@ public class DataHelper {
         return data;
     }
 
+    public RangeObject getRangeByIdAndPlot(int id, String pid) {
+        RangeObject data = new RangeObject();
+        Cursor cursor;
+
+        data.plot = "";
+        data.plot_id = "";
+        data.range = "";
+
+        try {
+            String query = ep.getString("ImportFirstName", "");
+            String query1 = ep.getString("ImportSecondName", "");
+            String query2 = ep.getString("ImportUniqueName", "");
+            cursor = db.query(RANGE, new String[]{TICK + ep.getString("ImportFirstName", "") + TICK,
+                            TICK + ep.getString("ImportSecondName", "") + TICK,
+                            TICK + ep.getString("ImportUniqueName", "") + TICK, "id"}, "id = ? and plot_id = ?",
+                    new String[]{String.valueOf(id), pid}, null, null, null
+            );
+
+            if (cursor.moveToFirst()) {
+                //data.entry = cursor.getString(0);
+                data.range = cursor.getString(0);
+                data.plot = cursor.getString(1);
+                data.plot_id = cursor.getString(2);
+
+            }
+
+            if (!cursor.isClosed()) {
+                cursor.close();
+            }
+        } catch (SQLiteException e) {
+            switchField(-1);
+            return null;
+        }
+
+        return data;
+    }
+
+    //MIGRATED not used
     /**
      * Returns the range for items that match the specified id
      */
@@ -1297,6 +1387,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * Helper function
      * v2.5
@@ -1311,6 +1402,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED -NOT USED
     public void updateTraitByValue(String rid, String parent, String value, String newValue) {
 
         ContentValues values = new ContentValues();
@@ -1324,10 +1416,10 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * Returns list of files associated with a specific plot
      */
-
     public ArrayList<String> getPlotPhotos(String plot, String trait) {
         try {
             //Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"}, "rid like ? and trait like ?", new String[]{plot, trait},
@@ -1358,6 +1450,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * Returns saved data based on trait, range and plot Meant for the on screen
      * drop downs
@@ -1396,6 +1489,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * Returns the column names for the range table
      */
@@ -1428,6 +1522,7 @@ public class DataHelper {
         return data;
     }
 
+    //MIGRATED -NOT USED
     /**
      * Returns the plot for items that match the specified id
      */
@@ -1453,6 +1548,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * Helper function
      * v1.6 - Amended to consider trait
@@ -1466,6 +1562,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * Helper function
      * v2 - Delete trait
@@ -1497,6 +1594,7 @@ public class DataHelper {
         db.execSQL("DROP TABLE IF EXISTS " + RANGE);
     }
 
+    //MIGRATED -NOT USED
     /**
      * Creates the range table based on column names
      */
@@ -1514,6 +1612,7 @@ public class DataHelper {
         db.execSQL(sql);
     }
 
+    //MIGRATED
     /**
      * V2 - Returns titles of all trait columns as a comma delimited string
      */
@@ -1537,6 +1636,7 @@ public class DataHelper {
 
     }
 
+    //MIGRATED
     /**
      * Returns the column names for the range table
      */
@@ -1567,6 +1667,7 @@ public class DataHelper {
         return data;
     }
 
+    //MIGRATED
     /**
      * Inserting traits data. The last field isVisible determines if the trait
      * is visible when using the app
@@ -1610,6 +1711,7 @@ public class DataHelper {
         return statement;
     }
 
+    //MIGRATED
     /**
      * V2 - Update the ordering of traits
      */
@@ -1625,6 +1727,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * V2 - Edit existing trait
      */
@@ -1647,6 +1750,7 @@ public class DataHelper {
         }
     }
 
+    //MIGRATED
     /**
      * V2 - Check if trait exists (non case sensitive)
      */
@@ -1665,6 +1769,7 @@ public class DataHelper {
         return exist;
     }
 
+    //MIGRATED
     public boolean checkUnique(HashMap<String, String> values) {
         Cursor cursor = db.rawQuery("SELECT unique_id from " + PLOTS, null);
 
@@ -1681,8 +1786,10 @@ public class DataHelper {
         return true;
     }
 
+    //MIGRATED
     public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int exp_id) {
-        ConfigActivity.dt.open();
+
+        //TODO: check commenting this out doesn't break: ConfigActivity.dt.open();
         Cursor cursor = db.rawQuery("SELECT * from " + EXP_INDEX, null);
         cursor.moveToFirst();
 
@@ -1728,6 +1835,7 @@ public class DataHelper {
         cursor.close();
     }
 
+    //MIGRATED TODO: make study_db_id fk/pk for all tables on studies
     public void deleteField(int exp_id) {
         db.execSQL("DELETE FROM " + EXP_INDEX + " WHERE exp_id = " + exp_id);
         db.execSQL("DELETE FROM " + PLOTS + " WHERE exp_id = " + exp_id);
@@ -1736,8 +1844,16 @@ public class DataHelper {
         db.execSQL("DELETE FROM " + USER_TRAITS + " WHERE exp_id = " + exp_id);
     }
 
+    //MIGRATED
     public void switchField(int exp_id) {
+
+        DataHelper2Kt.switchField(exp_id);
+
         Cursor cursor;
+
+        //Log.d("Time2", String.valueOf(new DataHelper2Kt().switchField(exp_id)));
+
+//        long start = System.currentTimeMillis();
 
         // get array of plot attributes
         if (exp_id == -1) {
@@ -1775,10 +1891,14 @@ public class DataHelper {
         dropRange();
         db.execSQL(query);
 
+//        Log.d("Time1", String.valueOf(System.currentTimeMillis()-start));
+        Log.d("Time1", query);
+
         //String index = "CREATE INDEX range_unique_index ON " + RANGE + "(" + ep.getString("ImportUniqueName",null) + ")";
         //db.execSQL(index);
     }
 
+    //MIGRATED
     public int checkFieldName(String name) {
         Cursor c = db.rawQuery("SELECT exp_id FROM " + EXP_INDEX + " WHERE exp_name=?", new String[]{name});
 
@@ -1789,6 +1909,7 @@ public class DataHelper {
         return -1;
     }
 
+    //MIGRATED
     public int createField(FieldObject e, List<String> columns) {
         // String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns){
 
@@ -1829,7 +1950,11 @@ public class DataHelper {
         return (int) exp_id;
     }
 
+    //MIGRATED
     public void createFieldData(int exp_id, List<String> columns, List<String> data) {
+
+       // StudyModel.Companion.createFieldData(exp_id, columns, data);
+
         // get unique_id, primary_id, secondary_id names from exp_id
         Cursor cursor = db.rawQuery("SELECT exp_id.unique_id, exp_id.primary_id, exp_id.secondary_id from exp_id where exp_id.exp_id = " + exp_id, null);
         cursor.moveToFirst();
