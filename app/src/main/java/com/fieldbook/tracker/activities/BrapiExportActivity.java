@@ -109,7 +109,7 @@ public class BrapiExportActivity extends AppCompatActivity {
                     nfe.printStackTrace();
                 }
 
-                brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper, pages);
+                brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper);
 
                 putObservationsError = UploadError.NONE;
                 postImageMetaDataError = UploadError.NONE;

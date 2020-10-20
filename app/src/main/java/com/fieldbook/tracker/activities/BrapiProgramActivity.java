@@ -20,6 +20,7 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiPaginationManager;
 import com.fieldbook.tracker.brapi.BrapiProgram;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -33,6 +34,7 @@ import io.swagger.client.ApiException;
 public class BrapiProgramActivity extends AppCompatActivity {
     private BrAPIService brAPIService;
     private BrapiProgram brapiProgram;
+    private BrapiPaginationManager paginationManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,38 +44,8 @@ public class BrapiProgramActivity extends AppCompatActivity {
             if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi_programs);
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
-
-                String pagination = BrapiProgramActivity.this.getSharedPreferences("Settings", 0)
-                        .getString(GeneralKeys.BRAPI_PAGINATION, "1000");
-
-                int pages = 1000;
-
-                try {
-
-                    if (pagination != null) {
-
-                        pages = Integer.parseInt(pagination);
-
-                    }
-
-                } catch (NumberFormatException nfe) {
-
-                    String message = nfe.getLocalizedMessage();
-
-                    if (message != null) {
-
-                        Log.d("FieldBookError", nfe.getLocalizedMessage());
-
-                    } else {
-
-                        Log.d("FieldBookError", "Pagination Preference number format error.");
-
-                    }
-
-                    nfe.printStackTrace();
-                }
-
-                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiProgramActivity.this), pages);
+                paginationManager = new BrapiPaginationManager(this);
+                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiProgramActivity.this));
 
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
                 baseURLText.setText(brapiBaseURL);
@@ -113,8 +85,10 @@ public class BrapiProgramActivity extends AppCompatActivity {
         ListView programsView = findViewById(R.id.brapiPrograms);
         programsView.setVisibility(View.GONE);
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+        //init page numbers
+        paginationManager.refreshPageIndicator();
 
-        brAPIService.getPrograms(BrAPIService.getBrapiToken(this), new Function<List<BrapiProgram>, Void>() {
+        brAPIService.getPrograms(BrAPIService.getBrapiToken(this), paginationManager, new Function<List<BrapiProgram>, Void>() {
             @Override
             public Void apply(List<BrapiProgram> programs) {
                 (BrapiProgramActivity.this).runOnUiThread(new Runnable() {
@@ -166,6 +140,7 @@ public class BrapiProgramActivity extends AppCompatActivity {
     public void buttonClicked(View view) {
         switch (view.getId()) {
             case R.id.loadPrograms:
+                paginationManager.reset();
                 loadPrograms();
                 break;
             case R.id.selectProgram:
@@ -177,6 +152,12 @@ public class BrapiProgramActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_program, Toast.LENGTH_SHORT).show();
                 }
+                break;
+            case R.id.prev:
+            case R.id.next:
+                // Update current page (if allowed) and start brapi call.
+                paginationManager.setNewPage(view.getId());
+                loadPrograms();
                 break;
         }
     }

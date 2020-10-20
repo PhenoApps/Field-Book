@@ -57,39 +57,9 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         this.setCanceledOnTouchOutside(false);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_brapi_import);
+        String brapiBaseURL = BrAPIService.getBrapiUrl(this.context);
 
-        String brapiBaseURL = this.context.getSharedPreferences("Settings", 0)
-                .getString(GeneralKeys.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
-        String pagination = this.context.getSharedPreferences("Settings", 0)
-                .getString(GeneralKeys.BRAPI_PAGINATION, "1000");
-
-        int pages = 1000;
-
-        try {
-
-            if (pagination != null) {
-
-                pages = Integer.parseInt(pagination);
-
-            }
-
-        } catch (NumberFormatException nfe) {
-
-            String message = nfe.getLocalizedMessage();
-
-            if (message != null) {
-
-                Log.d("FieldBookError", nfe.getLocalizedMessage());
-
-            } else {
-
-                Log.d("FieldBookError", "Pagination Preference number format error.");
-
-            }
-
-            nfe.printStackTrace();
-        }
-        brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this.context), pages);
+        brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this.context));
         saveBtn = findViewById(R.id.brapi_save_btn);
         saveBtn.setOnClickListener(this);
         Button cancelBtn = findViewById(R.id.brapi_cancel_btn);
@@ -141,7 +111,6 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 return null;
             }
         });
-
 
         brAPIService.getPlotDetails(brapiToken, study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
