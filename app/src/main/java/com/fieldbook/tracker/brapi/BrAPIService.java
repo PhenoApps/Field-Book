@@ -533,7 +533,7 @@ public class BrAPIService {
     public void getPlotDetails(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
             final Integer[] recursiveCounter = {0};
-            final Integer pageSize = 1;
+            final Integer pageSize = 1000;
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setValues(new ArrayList<>());
 
@@ -670,12 +670,14 @@ public class BrAPIService {
     }
 
     private void updatePageInfo(BrapiPaginationManager paginationManager, Metadata metadata){
-        ((Activity) paginationManager.getContext()).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                paginationManager.updatePageInfo(metadata);
-            }
-        });
+        if(paginationManager.getContext() != null) { //null check for JUnits
+            ((Activity) paginationManager.getContext()).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    paginationManager.updatePageInfo(metadata);
+                }
+            });
+        }
     }
 
     public void getOntology(final String brapiToken, BrapiPaginationManager paginationManager, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
@@ -857,7 +859,7 @@ public class BrAPIService {
         try {
 
             final Integer[] recursiveCounter = {0};
-            final Integer pageSize = 1;
+            final Integer pageSize = 1000;
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setTraits(new ArrayList<>());
 

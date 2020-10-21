@@ -231,11 +231,13 @@ public class BrapiActivity extends AppCompatActivity {
                 programDbId = data.getDataString();
                 // reset previous filter
                 trialDbId = null;
+                paginationManager.reset();
                 loadStudiesList();
             }
         } else if (requestCode == FILTER_BY_TRIAL_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 trialDbId = data.getDataString();
+                paginationManager.reset();
                 loadStudiesList();
             }
         }

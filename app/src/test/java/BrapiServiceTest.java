@@ -1,9 +1,11 @@
 import android.graphics.Bitmap;
+import android.os.Build;
 
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiListResponse;
+import com.fieldbook.tracker.brapi.BrapiPaginationManager;
 import com.fieldbook.tracker.brapi.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
 import com.fieldbook.tracker.brapi.Observation;
@@ -13,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.threeten.bp.OffsetDateTime;
 
 
@@ -28,6 +31,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(sdk = {Build.VERSION_CODES.P})
 public class BrapiServiceTest {
 
     String brapiBaseUrl = "https://test-server.brapi.org/brapi/v1";
@@ -41,13 +45,13 @@ public class BrapiServiceTest {
     Image postImageMetaDataResponse;
     Bitmap missingImage;
     private String programDbId = "1";
-    private String trialDbId = "1";
+    private String trialDbId = "101";
 
 
     @Before
     public void setUp() throws Exception {
         // Instantiate our brapi service class
-        this.brAPIService = new BrAPIService(brapiBaseUrl, null, 0);
+        this.brAPIService = new BrAPIService(brapiBaseUrl, null);
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap missingImage = Bitmap.createBitmap(100, 100, conf);
     }
@@ -60,8 +64,9 @@ public class BrapiServiceTest {
         // Set up our signal to wait for the callback to be called.
         final CountDownLatch signal = new CountDownLatch(1);
 
+        BrapiPaginationManager pageMan = new BrapiPaginationManager(0, 1000);
         // Call our get studies endpoint with the same parsing that our classes use.
-        this.brAPIService.getStudies(brapiToken, this.programDbId, this.trialDbId, new Function<List<BrapiStudySummary>, Void>() {
+        this.brAPIService.getStudies(brapiToken, this.programDbId, this.trialDbId, pageMan, new Function<List<BrapiStudySummary>, Void>() {
             @Override
             public Void apply(List<BrapiStudySummary> input) {
                 // Check that there is atleast one study returned.
@@ -181,8 +186,10 @@ public class BrapiServiceTest {
         final CountDownLatch signal = new CountDownLatch(1);
         final String brapiToken = "Bearer YYYY";
 
+        BrapiPaginationManager pageMan = new BrapiPaginationManager(0, 1000);
+
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getOntology(brapiToken,null, null, new Function<BrapiListResponse<TraitObject>, Void>() {
+        this.brAPIService.getOntology(brapiToken, pageMan, new Function<BrapiListResponse<TraitObject>, Void>() {
             @Override
             public Void apply(BrapiListResponse<TraitObject> input) {
                 // Check that we are getting some results back

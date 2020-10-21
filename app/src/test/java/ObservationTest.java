@@ -79,7 +79,7 @@ public class ObservationTest {
     public void invalidStatus() {
         Observation o = new Observation();
         o.setDbId("1");
-        o.setLastSyncedTime("2019-10-15 12:14:59-0400");
+        o.setLastSyncedTime("2019-10-15 12:14:59.234-04:00");
         assertTrue("Invalid status dbId but no lastSynced time", o.getStatus() == BrapiObservation.Status.INVALID);
     }
 
@@ -94,8 +94,8 @@ public class ObservationTest {
     public void syncedStatus() {
         Observation o = new Observation();
         o.setDbId("1");
-        o.setTimestamp("2019-10-15 11:14:59-0400");
-        o.setLastSyncedTime("2019-10-15 12:14:59-0400");
+        o.setTimestamp("2019-10-15 11:14:59.234-04:00");
+        o.setLastSyncedTime("2019-10-15 12:14:59.234-04:00");
         assertTrue("Synced status", o.getStatus() == Observation.Status.SYNCED);
     }
 
@@ -103,8 +103,8 @@ public class ObservationTest {
     public void editedStatus() {
         Observation o = new Observation();
         o.setDbId("1");
-        o.setTimestamp("2019-10-15 12:14:59-0400");
-        o.setLastSyncedTime("2019-10-15 11:14:59-0400");
+        o.setTimestamp("2019-10-15 12:14:59.234-04:00");
+        o.setLastSyncedTime("2019-10-15 11:14:59.234-04:00");
         assertTrue("Edited status", o.getStatus() == Observation.Status.EDITED);
     }
 
