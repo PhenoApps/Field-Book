@@ -116,22 +116,18 @@ public class BrapiActivity extends AppCompatActivity {
                 (BrapiActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        // Cancel processing if the page that was processed is not the page
-                        // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
-                        if (initPage == paginationManager.getPage()) {
-                            BrapiActivity.this.selectedStudy = null;
+                        BrapiActivity.this.selectedStudy = null;
 
-                            listStudies.setAdapter(BrapiActivity.this.buildStudiesArrayAdapter(studies));
-                            listStudies.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                    selectedStudy = studies.get(position);
-                                }
-                            });
+                        listStudies.setAdapter(BrapiActivity.this.buildStudiesArrayAdapter(studies));
+                        listStudies.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                selectedStudy = studies.get(position);
+                            }
+                        });
 
-                            listStudies.setVisibility(View.VISIBLE);
-                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        }
+                        listStudies.setVisibility(View.VISIBLE);
+                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                     }
                 });
 

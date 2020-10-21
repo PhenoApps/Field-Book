@@ -411,13 +411,18 @@ public class BrAPIService {
     }
 
     public void getTrials(final String brapiToken, String programDbId,  BrapiPaginationManager paginationManager, final Function<List<BrapiTrial>, Void> function, final Function<ApiException, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
         try {
             BrapiApiCallBack<TrialsResponse> callback = new BrapiApiCallBack<TrialsResponse>() {
                 @Override
                 public void onSuccess(TrialsResponse trialsResponse, int i, Map<String, List<String>> map) {
-                    updatePageInfo(paginationManager, trialsResponse.getMetadata());
-                    List<TrialSummary> trialList = trialsResponse.getResult().getData();
-                    function.apply(mapTrials(trialList));
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage == paginationManager.getPage()) {
+                        updatePageInfo(paginationManager, trialsResponse.getMetadata());
+                        List<TrialSummary> trialList = trialsResponse.getResult().getData();
+                        function.apply(mapTrials(trialList));
+                    }
                 }
 
                 @Override
@@ -447,19 +452,24 @@ public class BrAPIService {
     }
 
     public void getStudies(final String brapiToken, String programDbId, String trialDbId, BrapiPaginationManager paginationManager, final Function<List<BrapiStudySummary>, Void> function, final Function<ApiException, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
         try {
 
             BrapiApiCallBack<StudiesResponse> callback = new BrapiApiCallBack<StudiesResponse>() {
                 @Override
                 public void onSuccess(StudiesResponse studiesResponse, int i, Map<String, List<String>> map) {
-                    updatePageInfo(paginationManager, studiesResponse.getMetadata());
-                    final List<BrapiStudySummary> studies = new ArrayList<>();
-                    final List<StudySummary> studySummaryList = studiesResponse.getResult().getData();
-                    for (StudySummary studySummary : studySummaryList) {
-                        studies.add(mapStudy(studySummary));
-                    }
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage == paginationManager.getPage()) {
+                        updatePageInfo(paginationManager, studiesResponse.getMetadata());
+                        final List<BrapiStudySummary> studies = new ArrayList<>();
+                        final List<StudySummary> studySummaryList = studiesResponse.getResult().getData();
+                        for (StudySummary studySummary : studySummaryList) {
+                            studies.add(mapStudy(studySummary));
+                        }
 
-                    function.apply(studies);
+                        function.apply(studies);
+                    }
 
                 }
 
@@ -681,27 +691,31 @@ public class BrAPIService {
     }
 
     public void getOntology(final String brapiToken, BrapiPaginationManager paginationManager, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
         try {
-
             BrapiApiCallBack<ObservationVariablesResponse> callback = new BrapiApiCallBack<ObservationVariablesResponse>() {
                 @Override
                 public void onSuccess(ObservationVariablesResponse response, int i, Map<String, List<String>> map) {
-                    updatePageInfo(paginationManager, response.getMetadata());
-                    // Result contains a list of observation variables
-                    List<ObservationVariable> brapiTraitList = response.getResult().getData();
-                    final Metadata metadata = response.getMetadata();
-                    final List<TraitObject> traitsList = mapTraits(brapiTraitList);
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage == paginationManager.getPage()) {
+                        updatePageInfo(paginationManager, response.getMetadata());
+                        // Result contains a list of observation variables
+                        List<ObservationVariable> brapiTraitList = response.getResult().getData();
+                        final Metadata metadata = response.getMetadata();
+                        final List<TraitObject> traitsList = mapTraits(brapiTraitList);
 
-                    // Check if our traits list was processed correctly. Right now, will be null if host not found.
-                    if (traitsList == null) {
-                        failFunction.apply(new ApiException("Could not assign host url to new data."));
+                        // Check if our traits list was processed correctly. Right now, will be null if host not found.
+                        if (traitsList == null) {
+                            failFunction.apply(new ApiException("Could not assign host url to new data."));
+                        }
+
+                        final BrapiListResponse<TraitObject> traitResponse = new BrapiListResponse<>();
+                        traitResponse.setData(traitsList);
+                        traitResponse.setMetadata(metadata);
+
+                        function.apply(traitResponse);
                     }
-
-                    final BrapiListResponse<TraitObject> traitResponse = new BrapiListResponse<>();
-                    traitResponse.setData(traitsList);
-                    traitResponse.setMetadata(metadata);
-
-                    function.apply(traitResponse);
 
                 }
 

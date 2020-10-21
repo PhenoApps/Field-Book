@@ -79,36 +79,6 @@ public class BrapiExportActivity extends AppCompatActivity {
 
                 this.dataHelper = new DataHelper(this);
 
-                String pagination = this.getSharedPreferences("Settings", 0)
-                        .getString(GeneralKeys.BRAPI_PAGINATION, "1000");
-
-                int pages = 1000;
-
-                try {
-
-                    if (pagination != null) {
-
-                        pages = Integer.parseInt(pagination);
-
-                    }
-
-                } catch (NumberFormatException nfe) {
-
-                    String message = nfe.getLocalizedMessage();
-
-                    if (message != null) {
-
-                        Log.d("FieldBookError", nfe.getLocalizedMessage());
-
-                    } else {
-
-                        Log.d("FieldBookError", "Pagination Preference number format error.");
-
-                    }
-
-                    nfe.printStackTrace();
-                }
-
                 brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper);
 
                 putObservationsError = UploadError.NONE;
