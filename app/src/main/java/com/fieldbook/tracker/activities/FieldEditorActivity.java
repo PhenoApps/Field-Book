@@ -668,9 +668,14 @@ public class FieldEditorActivity extends AppCompatActivity {
                 Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unique_characters_illegal));
             } else {
                 Editor ed = ep.edit();
-                ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
-                ed.putString("ImportFirstName", primary.getSelectedItem().toString());
-                ed.putString("ImportSecondName", secondary.getSelectedItem().toString());
+
+                String uniqueName = unique.getSelectedItem().toString();
+                String firstName = primary.getSelectedItem().toString();
+                String secondName = secondary.getSelectedItem().toString();
+
+                ed.putString("ImportUniqueName", uniqueName);
+                ed.putString("ImportFirstName", firstName);
+                ed.putString("ImportSecondName", secondName);
                 ed.putBoolean("ImportFieldFinished", true);
                 ed.apply();
 
