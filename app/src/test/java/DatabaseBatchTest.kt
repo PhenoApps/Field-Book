@@ -1,6 +1,5 @@
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.sqlite.SQLiteException
 import android.graphics.Bitmap
@@ -30,7 +29,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
-import kotlin.coroutines.CoroutineContext
 import kotlin.math.abs
 import kotlin.system.measureTimeMillis
 import kotlin.time.ExperimentalTime
@@ -59,7 +57,7 @@ import kotlin.time.measureTimedValue
 @ExperimentalTime
 open class DatabaseBatchTest {
 
-    private lateinit var mDataHelper: DataHelper
+    open lateinit var mDataHelper: DataHelper
 
     /**
      * These variables are initialized in the setup function.
@@ -70,9 +68,9 @@ open class DatabaseBatchTest {
      *
      * TODO: check if this is now redundant, might be better to query the study table each time we need these
      */
-    private lateinit var firstName: String
-    private lateinit var secondName: String
-    private lateinit var uniqueName: String
+    open lateinit var firstName: String
+    open lateinit var secondName: String
+    open lateinit var uniqueName: String
 
     @Test
     fun batchStart() {
@@ -101,13 +99,15 @@ open class DatabaseBatchTest {
     /**
      * Handles database loading, schema migration and test runs.
      */
-    private fun setupDatabase(path: String) {
+    open fun setupDatabase(path: String) {
 
         loadingSqlFile(path)
 
         mDataHelper = DataHelper(ApplicationProvider.getApplicationContext())
 
         mDataHelper.open()
+
+        createTables(mDataHelper.allTraitObjects)
 
         //at this point the new schema has been created through DataHelper
         //next we need to query the study table for unique/primary/secondary ids to build the other queries
@@ -129,6 +129,7 @@ open class DatabaseBatchTest {
             }.commit()
 
             mDataHelper.switchField(1)
+            switchField(1)
 
             //create views
             withDatabase { db ->
@@ -143,18 +144,20 @@ open class DatabaseBatchTest {
             /**
              * This is where the test functions are run, the result is also timed.
              */
-            println("Test runtime: ${measureTimeMillis { 
-                
-                checkRangeTests()
-                checkAllObservationTests()
-                
-                //the only observation unit test
-                checkCheckUnique()
-                
-                checkAllVariableTests()
-                checkAllStudyTests()
+            println("Test runtime: ${
+                measureTimeMillis {
 
-            }} ms")
+                    checkRangeTests()
+                    checkAllObservationTests()
+
+                    //the only observation unit test
+                    checkCheckUnique()
+
+                    checkAllVariableTests()
+                    checkAllStudyTests()
+
+                }
+            } ms")
 
             mDataHelper.close()
         }
@@ -428,6 +431,12 @@ open class DatabaseBatchTest {
 
     } ?: emptyArray()
 
+    fun getAllPlotIds(): Array<String> = withDatabase { db ->
+        db.query("plots", select = arrayOf("plot_id")).toTable()
+                .map { it["plot_id"].toString() }
+                .toTypedArray()
+    } ?: emptyArray()
+
     @Test
     fun checkGetDropDownRange() {
 
@@ -438,7 +447,7 @@ open class DatabaseBatchTest {
             val plotAttributes = getPlotAttributes(field.exp_id)
             val unitAttributes = ObservationUnitAttributeModel.getAllNames(field.exp_id)
 
-            val plots = mDataHelper.allPlotIds
+            val plots = getAllPlotIds()
             val units = ObservationUnitModel.getAll()
 
             check(plotAttributes.size == unitAttributes.size) {
@@ -505,6 +514,7 @@ open class DatabaseBatchTest {
         for (field in mDataHelper.allFieldObjects) {
 
             mDataHelper.switchField(field.exp_id)
+            switchField(field.exp_id)
 
             val fieldNames = StudyModel.getNames(field.exp_id)!!
 
@@ -559,6 +569,7 @@ open class DatabaseBatchTest {
         for (field in mDataHelper.allFieldObjects) {
 
             mDataHelper.switchField(field.exp_id)
+            switchField(field.exp_id)
 
             /**
              * In field book, convertDatabaseToTable is used twice.
@@ -679,6 +690,7 @@ open class DatabaseBatchTest {
 
 //            println("$firstName $secondName $uniqueName")
             mDataHelper.switchField(fieldObject.exp_id)
+            switchField(fieldObject.exp_id)
 
             println("Checking field: ${fieldObject.exp_id}")
 //            checkAllPlots()
@@ -738,55 +750,64 @@ open class DatabaseBatchTest {
     @Test
     fun checkGetFormat() {
 
-        val oldFormats by lazy { mDataHelper.format }
-        val newFormats by lazy { getFormat() }
+        val oldFormats = mDataHelper.format
 
-        //println("Checking old getFormat query time: ${measureTimedValue { oldFormats.size }}")
-        //println("Checking new getFormat query time: ${measureTimedValue { newFormats?.size }}")
+        if (oldFormats != null) {
+            val newFormats by lazy { getFormat() }
 
-        assert(oldFormats.size == newFormats?.size) {
-            "Queries must return the same sized result array."
-        }
+            //println("Checking old getFormat query time: ${measureTimedValue { oldFormats.size }}")
+            //println("Checking new getFormat query time: ${measureTimedValue { newFormats?.size }}")
 
-        oldFormats.forEachIndexed { index, format ->
-//            println("Checking $format == ${newFormats?.get(index)}")
-            val newFormat = newFormats?.get(index)
-            assert(format == newFormat) {
-                "Formats must be equal: $format / $newFormat"
+            assert(oldFormats.size == newFormats?.size) {
+                "Queries must return the same sized result array."
             }
+
+            oldFormats.forEachIndexed { index, format ->
+//            println("Checking $format == ${newFormats?.get(index)}")
+                val newFormat = newFormats?.get(index)
+                assert(format == newFormat) {
+                    "Formats must be equal: $format / $newFormat"
+                }
+            }
+        } else {
+            println("old backend returned null on getFormat")
         }
     }
 
     @Test
     fun checkGetVisibleTrait() {
 
-        val oldTraits by lazy { mDataHelper.visibleTrait }
-        val newTraits by lazy { getVisibleTrait() }
+        val oldTraits = mDataHelper.visibleTrait
 
-        //println("Checking old getVisibleTrait query time: ${measureTimedValue { oldTraits.size }}")
-        //println("Checking new getVisibleTrait query time: ${measureTimedValue { newTraits.size }}")
+        if (oldTraits != null) {
+            val newTraits by lazy { getVisibleTrait() }
 
-        //oldTraits.forEach { println(it) }
+            //println("Checking old getVisibleTrait query time: ${measureTimedValue { oldTraits.size }}")
+            //println("Checking new getVisibleTrait query time: ${measureTimedValue { newTraits.size }}")
 
-        //newTraits.forEach { println("new $it") }
+            //oldTraits.forEach { println(it) }
 
-        assert(oldTraits.size == newTraits.size) {
-            "Visible Trait/Variable table size mismatch. ${oldTraits.size} != ${newTraits.size}"
-        }
+            //newTraits.forEach { println("new $it") }
 
-        oldTraits.forEachIndexed { index, trait ->
+            assert(oldTraits.size == newTraits.size) {
+                "Visible Trait/Variable table size mismatch. ${oldTraits.size} != ${newTraits.size}"
+            }
 
-            val newTrait = newTraits[index].observation_variable_name
+            oldTraits.forEachIndexed { index, trait ->
+
+                val newTrait = newTraits[index].observation_variable_name
 
 //            println("Checking $trait == $newTrait...")
 
-            assert(trait == newTrait)
+                assert(trait == newTrait)
 
-            //print("verified")
+                //print("verified")
 
-            //println()
+                //println()
+            }
+        } else {
+            println("old backend returned null on getVisibleTrait")
         }
-
         //println("Ordering verified")
     }
 
@@ -817,7 +838,9 @@ open class DatabaseBatchTest {
 
             val variable = variables[index]
 
-            assert(trait.visible == variable.visible)
+            assert(trait.visible ?: true == variable.visible) {
+                "${trait.visible} != ${variable.visible}"
+            }
             assert(trait.defaultValue == variable.defaultValue)
             assert(trait.trait == variable.trait)
             assert(trait.format == variable.format)
@@ -932,7 +955,7 @@ open class DatabaseBatchTest {
         var oldSum = 0.0
         var newSum = 0.0
 
-        mDataHelper.allPlotIds.sliceArray(0..9).forEachIndexed { index, plotId ->
+        getAllPlotIds().sliceArray(0..9).forEachIndexed { index, plotId ->
 
             mDataHelper.allTraitObjects.forEachIndexed { index, traitObject ->
 
@@ -1017,7 +1040,7 @@ open class DatabaseBatchTest {
 
         insertRandomObservations()
 
-        val plots = mDataHelper.allPlotIds
+        val plots = getAllPlotIds()
         val traitObjects = mDataHelper.allTraitObjects
 
         var oldTimingSum = .0
@@ -1294,7 +1317,7 @@ open class DatabaseBatchTest {
     @Test
     fun checkGetUserDetail() {
 
-        mDataHelper.allPlotIds.forEach {
+        getAllPlotIds().forEach {
 
             val oldDetail by lazy {
                 mDataHelper.getUserDetail(it)
@@ -1321,34 +1344,40 @@ open class DatabaseBatchTest {
         var oldSum = 0.0
         var newSum = 0.0
 
-        val traits = mDataHelper.allTraits!!
-        val variables = ObservationVariableModel.getAllTraits()
+        val traits = mDataHelper.allTraits
 
-        check(traits.size == variables.size) {
-            "Trait/Variable table size mismatch ${traits.size} != ${variables.size}"
-        }
+        if (traits != null) {
 
-        for (i in 0..10) {
-            traits.forEachIndexed { index, trait ->
+            val variables = ObservationVariableModel.getAllTraits()
 
-                val detail by lazy {
-                    mDataHelper.getDetail(trait).trait
-                }
+            check(traits.size == variables.size) {
+                "Trait/Variable table size mismatch ${traits.size} != ${variables.size}"
+            }
 
-                val newDetail by lazy {
-                    ObservationVariableModel.getDetail(trait)?.trait
-                }
+            for (i in 0..10) {
+                traits.forEachIndexed { index, trait ->
 
-                oldSum += measureTimedValue { detail }.duration.inMilliseconds
-                newSum += measureTimedValue { newDetail }.duration.inMilliseconds
+                    val detail by lazy {
+                        mDataHelper.getDetail(trait).trait
+                    }
+
+                    val newDetail by lazy {
+                        ObservationVariableModel.getDetail(trait)?.trait
+                    }
+
+                    oldSum += measureTimedValue { detail }.duration.inMilliseconds
+                    newSum += measureTimedValue { newDetail }.duration.inMilliseconds
 
 //                println("Checking $trait == $newDetail...")
 
-                assert(newDetail != null)
+                    assert(newDetail != null)
 
-                newDetail?.let { assert(it == detail) }
+                    newDetail?.let { assert(it == detail) }
 
+                }
             }
+        } else {
+            println("old backend returned null on getDetail")
         }
 
 //        println("Old query average time: ${oldSum}")
@@ -1393,18 +1422,24 @@ open class DatabaseBatchTest {
 //        println(oldCols.joinToString {"$it" })
 //        println(newCols.joinToString { "$it" })
 
-        assert((oldCols.toSet() - newCols.toSet()).isEmpty())
+        if (oldCols != null) {
+            assert((oldCols.toSet() - newCols.toSet()).isEmpty())
+        } else {
+            println("old backend returned null on getTraitColumns")
+        }
     }
 
     @Test
     fun checkGetAllTraitsForExport() {
 
+        val rowIterations = 10
+
         val oldCursor by lazy {
             mDataHelper.allTraitsForExport
         }
 
-        val newCursor by lazy {
-            ObservationVariableModel.getAllTraitsForExport()
+        val other by lazy {
+            ObservationVariableModel.getAllTraitsForExport()!!
         }
 
 //        println(ObservationVariableAttributeModel.getAll()?.map {
@@ -1413,7 +1448,66 @@ open class DatabaseBatchTest {
 //
 //        println(oldCursor.columnNames.joinToString(","))
 //        println(newCursor?.columnNames!!.joinToString(","))
-        oldCursor.assertEqual(newCursor)
+        //oldCursor.assertEqual(newCursor)
+
+        with(oldCursor) {
+
+            val first = moveToFirst()
+            val otherFirst = other.moveToFirst()
+
+            assert(first == otherFirst)
+
+            if (!first) {
+                println("old backend returned empty cursor on getAllTraitsForExport")
+            }
+
+            var iterations = 0
+
+            if (first && otherFirst) {
+
+                do {
+
+//                println(columnNames.joinToString(","))
+//                println(other?.columnNames?.joinToString(","))
+//                assert((columnNames.toSet() - other.columnNames.toSet()).isEmpty()) {
+//                    "Column mismatch: ${columnNames.joinToString(",")} != ${other.columnNames.joinToString(",")}"
+//                }
+//
+//                assert((other.columnNames.toSet() - columnNames.toSet()).isEmpty()) {
+//                    "Column mismatch: ${columnNames.joinToString(",")} != ${other.columnNames.joinToString(",")}"
+//                }
+
+                    println("Expected number of column exported: ${columnNames.size}")
+
+                    columnNames.sliceArray(0 until 5).forEach { col ->
+
+                        val index = getColumnIndex(col)
+                        val newIndex = other.getColumnIndex(col)
+
+                        if (index > -1 && newIndex > -1) {
+
+                            val old = getStringOrNull(index)
+                            val new = other.getStringOrNull(newIndex)
+
+                            if (old?.isNotEmpty() == true && new?.isNotEmpty() == true
+                                    && col != "timeTaken") {
+//                        print("Checking $col $old == $new...")
+                                assert(old == new)
+//                        println("verified.")
+                            }
+                        }
+                    }
+
+                    iterations++
+
+                    println(iterations)
+
+                } while (moveToNext() && other.moveToNext() && ((rowIterations == -1) || iterations < rowIterations))
+
+            } else {
+                println("Cursor mismatch: ${this.columnNames.joinToString(",")} != ${other?.columnNames?.joinToString(",")}")
+            }
+        }
     }
 
     private fun Cursor.assertExists(other: Cursor?) {
@@ -1446,63 +1540,12 @@ open class DatabaseBatchTest {
     }
 
     /**
+     * TODO: Currently only used in getAllTraitsForExport
+     *
      * Walks through both cursors and checks for column equality.
-     * rowIterations: number of rows to check before exitting the assertion.
+     * rowIterations: number of rows to check before exiting the assertion. -1 by default checks all
      */
-    private fun Cursor.assertEqual(other: Cursor?, rowIterations: Int = -1) {
 
-        val first = moveToFirst()
-        val otherFirst = other?.moveToFirst()
-
-        assert(first == otherFirst)
-
-        var iterations = 0
-
-        if (first && otherFirst == true) {
-
-            do {
-
-//                println(columnNames.joinToString(","))
-//                println(other?.columnNames?.joinToString(","))
-//                assert((columnNames.toSet() - other.columnNames.toSet()).isEmpty()) {
-//                    "Column mismatch: ${columnNames.joinToString(",")} != ${other.columnNames.joinToString(",")}"
-//                }
-//
-//                assert((other.columnNames.toSet() - columnNames.toSet()).isEmpty()) {
-//                    "Column mismatch: ${columnNames.joinToString(",")} != ${other.columnNames.joinToString(",")}"
-//                }
-
-                println("Expected number of column exported: ${columnNames.size}")
-
-                columnNames.sliceArray(0 until 5).forEach { col ->
-
-                    val index = getColumnIndex(col)
-                    val newIndex = other.getColumnIndex(col)
-
-                    if (index > -1 && newIndex > -1) {
-
-                        val old = getStringOrNull(index)
-                        val new = other.getStringOrNull(newIndex)
-
-                        if (old?.isNotEmpty() == true && new?.isNotEmpty() == true
-                                && col != "timeTaken") {
-//                        print("Checking $col $old == $new...")
-                            assert(old == new)
-//                        println("verified.")
-                        }
-                    }
-                }
-
-                iterations++
-
-                println(iterations)
-
-            } while (moveToNext() && other.moveToNext() && ((rowIterations == -1) || iterations < rowIterations))
-
-        } else assert(false) {
-            "Cursor mismatch: ${this.columnNames.joinToString(",")} != ${other?.columnNames?.joinToString(",")}"
-        }
-    }
 
     /*
     Typically column is trait/isVisible/sort
@@ -1512,36 +1555,42 @@ open class DatabaseBatchTest {
 
         var iterations = 10
 
-        var oldSum = 0.0
-        var newSum = 0.0
+//        var oldSum = 0.0
+//        var newSum = 0.0
 
         for (i in 0..iterations) {
 
             listOf("trait", "isVisible", "realPosition").forEach {
 
-                val oldColumnData by lazy { mDataHelper.getTraitColumnData(it) }
-                val newColumnData by lazy {
-                    ObservationVariableModel.migratePattern[it]?.let { key ->
-                        ObservationVariableModel
-                                .getTraitColumnData(key)
-                    }
-                }
+                val oldColumnData = mDataHelper.getTraitColumnData(it)
 
-                oldSum += measureTimedValue { oldColumnData }.duration.inMilliseconds
-                newSum += measureTimedValue { newColumnData }.duration.inMilliseconds
+                if (oldColumnData != null) {
 
-                assert(newColumnData != null)
-
-                newColumnData?.let { data ->
-
-                    oldColumnData.forEachIndexed { index, col ->
-
-                        val newCol = data[index].toString()
-
-                        assert(newCol == col) {
-                            "$newCol != $col"
+                    val newColumnData by lazy {
+                        ObservationVariableModel.migratePattern[it]?.let { key ->
+                            ObservationVariableModel
+                                    .getTraitColumnData(key)
                         }
                     }
+
+//                oldSum += measureTimedValue { oldColumnData }.duration.inMilliseconds
+//                newSum += measureTimedValue { newColumnData }.duration.inMilliseconds
+
+                    assert(newColumnData != null)
+
+                    newColumnData?.let { data ->
+
+                        oldColumnData.forEachIndexed { index, col ->
+
+                            val newCol = data[index].toString()
+
+                            assert(newCol == col) {
+                                "$newCol != $col"
+                            }
+                        }
+                    }
+                } else {
+                    println("old backend returned null on getTraitColumnData")
                 }
             }
         }
@@ -1604,27 +1653,32 @@ open class DatabaseBatchTest {
     @Test
     fun checkGetTraitVisibility() {
 
-        val variables by lazy { getVisibleTrait() }
-        val traits by lazy { mDataHelper.visibleTrait }
+        val traits = mDataHelper.visibleTrait
+
+        if (traits != null) {
+
+            val variables by lazy { getVisibleTrait() }
 
 //        println("Checking old getTraitVisibilityQueryTime ${measureTimedValue { traits }}")
 //        println("Checking new getTraitVisibilityQueryTime ${measureTimedValue { variables }}")
 
-        check(variables.size == traits.size) {
-            "Trait/Variable table size mismatch. ${traits.size} != ${variables.size}"
-        }
+            check(variables.size == traits.size) {
+                "Trait/Variable table size mismatch. ${traits.size} != ${variables.size}"
+            }
 
-        variables.forEachIndexed { index, variable ->
+            variables.forEachIndexed { index, variable ->
 
-            val trait = traits[index]
+                val trait = traits[index]
 
 //            println("Checking $trait == ${variable.observation_variable_name}...")
 
-            assert(trait == variable.observation_variable_name)
+                assert(trait == variable.observation_variable_name)
 
 //            println("verified")
+            }
+        } else {
+            println("old backed returned null on getVisibleTrait")
         }
-
     }
 
     @Test
@@ -1633,45 +1687,50 @@ open class DatabaseBatchTest {
         val iterations = 10
 
         val traits = mDataHelper.visibleTrait
-        val variables = getVisibleTrait()
 
-        check(traits.size == variables.size) {
-            "Trait/Variable table size mismatch ${traits.size} != ${variables.size}"
-        }
+        if (traits != null) {
+            val variables = getVisibleTrait()
 
-        var oldTimeAvg = 0.0
-        var newTimeAvg = 0.0
+            check(traits.size == variables.size) {
+                "Trait/Variable table size mismatch ${traits.size} != ${variables.size}"
+            }
 
-        for (i in 0..iterations) {
+            var oldTimeAvg = 0.0
+            var newTimeAvg = 0.0
 
-            traits.forEach {
+            for (i in 0..iterations) {
 
-                val newDetails by lazy { ObservationVariableModel.getDetail(it) }
-                val oldDetails by lazy { mDataHelper.getDetail(it) }
+                traits.forEach {
 
-                oldTimeAvg += measureTimedValue { newDetails }.duration.inMilliseconds
-                newTimeAvg += measureTimedValue { oldDetails }.duration.inMilliseconds
+                    val newDetails by lazy { ObservationVariableModel.getDetail(it) }
+                    val oldDetails by lazy { mDataHelper.getDetail(it) }
 
-                newDetails?.let { variable ->
+                    oldTimeAvg += measureTimedValue { newDetails }.duration.inMilliseconds
+                    newTimeAvg += measureTimedValue { oldDetails }.duration.inMilliseconds
 
-                    assert(oldDetails.visible == variable.visible)
-                    assert(oldDetails.categories == variable.categories) {
-                        "Trait/Variable category mismatch: ${oldDetails.categories} != ${variable.categories}"
-                    }
-                    assert(oldDetails.details == variable.details) {
-                        "Trait/Variable details mismatch: ${oldDetails.details} != ${variable.details}"
-                    }
-                    assert(oldDetails.minimum == variable.minimum)
-                    assert(oldDetails.maximum == variable.maximum)
-                    assert(oldDetails.defaultValue == variable.defaultValue)
-                    assert(oldDetails.trait == variable.trait)
-                    assert(oldDetails.traitDataSource == variable.traitDataSource)
+                    newDetails?.let { variable ->
+
+                        assert(oldDetails.visible == variable.visible)
+                        assert(oldDetails.categories == variable.categories) {
+                            "Trait/Variable category mismatch: ${oldDetails.categories} != ${variable.categories}"
+                        }
+                        assert(oldDetails.details == variable.details) {
+                            "Trait/Variable details mismatch: ${oldDetails.details} != ${variable.details}"
+                        }
+                        assert(oldDetails.minimum == variable.minimum)
+                        assert(oldDetails.maximum == variable.maximum)
+                        assert(oldDetails.defaultValue == variable.defaultValue)
+                        assert(oldDetails.trait == variable.trait)
+                        assert(oldDetails.traitDataSource == variable.traitDataSource)
 //                assert(oldDetails.externalDbId == variable.externalDbId)
-                    assert(oldDetails.realPosition == variable.realPosition)
-                    assert(oldDetails.format == variable.format)
-                    assert(oldDetails.id == variable.id)
+                        assert(oldDetails.realPosition == variable.realPosition)
+                        assert(oldDetails.format == variable.format)
+                        assert(oldDetails.id == variable.id)
+                    }
                 }
             }
+        } else {
+            println("old backend returned null on getVisibleTrait")
         }
 
 //        println("Checking old getDetails average query time: ${oldTimeAvg / (iterations * traits.size)}}")
@@ -1684,16 +1743,20 @@ open class DatabaseBatchTest {
 
         val traits = mDataHelper.allTraits
 
-        val iterations = traits.size + 1 + 10
+        if (traits != null) {
+            val iterations = traits.size + 1 + 10
 
-        for (i in (traits.size+1)..iterations) {
+            for (i in (traits.size + 1)..iterations) {
 
-            with(randomTraitObject(i)) {
-                mDataHelper.insertTraits(this)
-                ObservationVariableModel.insertTraits(this)
+                with(randomTraitObject(i)) {
+                    mDataHelper.insertTraits(this)
+                    ObservationVariableModel.insertTraits(this)
+                }
+
+                checkGetAllTraitObjects()
             }
-
-            checkGetAllTraitObjects()
+        } else {
+            println("old backend returned null on getAllTraits")
         }
     }
 

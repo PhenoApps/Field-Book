@@ -143,7 +143,11 @@ data class ObservationVariableModel(val map: Row) {
             val newTraits = db.query(ObservationVariableModel.tableName).use {
 
                 val names = ObservationVariableAttributeModel.getAllNames()!!
-                (names + it.toTable().first().keys - setOf("id", "external_db_id", "trait_data_source")).toTypedArray()
+
+                val columns = names + it.toFirst().keys
+
+                if (columns.isEmpty()) columns.toTypedArray()
+                else (columns - setOf("id", "external_db_id", "trait_data_source")).toTypedArray()
             }
 
             val renaming = mapOf(

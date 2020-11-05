@@ -1,40 +1,15 @@
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
-import android.database.Cursor
-import android.database.sqlite.SQLiteException
-import android.graphics.Bitmap
 import android.os.Build
-import androidx.core.database.getStringOrNull
 import androidx.test.core.app.ApplicationProvider
-import com.fieldbook.tracker.brapi.Image
-import com.fieldbook.tracker.brapi.Observation
 import com.fieldbook.tracker.database.*
-import com.fieldbook.tracker.database.models.*
-import com.fieldbook.tracker.database.models.ObservationModel.Companion.getObservation
-import com.fieldbook.tracker.database.models.ObservationModel.Companion.getObservationByValue
-import com.fieldbook.tracker.database.models.ObservationModel.Companion.getPlotPhotos
-import com.fieldbook.tracker.database.models.StudyModel.Companion.checkFieldName
-import com.fieldbook.tracker.database.models.StudyModel.Companion.createField
-import com.fieldbook.tracker.objects.FieldObject
-import com.fieldbook.tracker.objects.TraitObject
-import org.junit.After
-import org.junit.Before
+import com.fieldbook.tracker.database.models.StudyModel
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.format.DateTimeFormatter
-import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.util.*
-import kotlin.coroutines.CoroutineContext
-import kotlin.math.abs
-import kotlin.system.measureTimeMillis
 import kotlin.time.ExperimentalTime
-import kotlin.time.measureTimedValue
 
 /**
  * This file is for single database testing. Batched testing can be found in DatabaseBatchTest.kt
@@ -48,7 +23,7 @@ import kotlin.time.measureTimedValue
 @ExperimentalTime
 class DatabaseTest: DatabaseBatchTest() {
 
-    private lateinit var mDataHelper: DataHelper
+    override lateinit var mDataHelper: DataHelper
 
     /**
      * These variables are initialized in the setup function.
@@ -59,22 +34,25 @@ class DatabaseTest: DatabaseBatchTest() {
      *
      * TODO: check if this is now redundant, might be better to query the study table each time we need these
      */
-    private lateinit var firstName: String
-    private lateinit var secondName: String
-    private lateinit var uniqueName: String
+    override lateinit var firstName: String
+    override lateinit var secondName: String
+    override lateinit var uniqueName: String
 
-    private val databasePath: String = "database/samples/backup.db"
+    private val databasePath: String = "database/sample.db"
 
     /**
      * Handles database loading, schema migration and test runs.
+     * TODO: parameter currently unimplemented, use the global variable
      */
-    private fun setupDatabase(path: String) {
+    override fun setupDatabase(path: String) {
 
-        loadingSqlFile(path)
+        loadingSqlFile()
 
         mDataHelper = DataHelper(ApplicationProvider.getApplicationContext())
 
         mDataHelper.open()
+
+        createTables(mDataHelper.allTraitObjects)
 
         //at this point the new schema has been created through DataHelper
         //next we need to query the study table for unique/primary/secondary ids to build the other queries
@@ -96,6 +74,7 @@ class DatabaseTest: DatabaseBatchTest() {
             }.commit()
 
             mDataHelper.switchField(1)
+            switchField(1)
 
             //create views
             withDatabase { db ->
@@ -110,12 +89,11 @@ class DatabaseTest: DatabaseBatchTest() {
     /**
      * Copies the sample.db in the assets folder to the app database file.
      */
-    private fun loadingSqlFile(path: String) {
+    private fun loadingSqlFile() {
 
         val context = ApplicationProvider.getApplicationContext<Context>()
 
-//        context.assets.open("database/sample.db").use { input ->
-        context.assets.open(path).use { input ->
+        context.assets.open(databasePath).use { input ->
 
             val size = input.available()
 
@@ -144,7 +122,7 @@ class DatabaseTest: DatabaseBatchTest() {
 
         if (::mDataHelper.isInitialized) {
 
-            checkAllStudyTests()
+            checkSwitchField()
 
         }
 
