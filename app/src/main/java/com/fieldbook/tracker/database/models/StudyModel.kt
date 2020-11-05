@@ -25,7 +25,7 @@ data class StudyModel(val map: Map<String, Any?>) {
         val study_sort_name: String? by map //selected column (plot prop or trait?) to sort field by when moving through entries
         val date_import: String? by map
         val date_export: String? by map
-        val study_source: StudySource? by map //denotes whether field was imported via brapi or locally
+        val study_source: String? by map //denotes whether field was imported via brapi or locally
         val additional_info: String? by map //catch all, dont need with attr/value tables, turn into a query when making BrapiStudyDetail
         val location_db_id: String? by map //brapId?
         val location_name: String? by map
@@ -42,15 +42,6 @@ data class StudyModel(val map: Map<String, Any?>) {
     companion object {
         const val PK: String = "internal_id_study"
         const val FK = "study_db_id"
-        enum class StudySource {
-            BRAPI, LOCAL;
-            override fun toString(): String {
-                return when (this) {
-                    BRAPI -> "BRAPI"
-                    else -> "LOCAL"
-                }
-            }
-        }
         val migrateFromTableName = "exp_id"
         val tableName = "studies"
         val migratePattern by lazy {
@@ -94,9 +85,26 @@ data class StudyModel(val map: Map<String, Any?>) {
                     PK to "INTEGER PRIMARY KEY AUTOINCREMENT")
         }
 
+        /**
+         * Function that queries the field/study table for the imported unique/primary/secondary names.
+         */
+        fun getNames(exp_id: Int): FieldPreferenceNames? = withDatabase { db ->
+
+            val fieldNames = db.query(StudyModel.tableName,
+                    select = arrayOf("study_primary_id_name", "study_secondary_id_name", "study_unique_id_name"),
+                    where = "$PK = ?",
+                    whereArgs = arrayOf(exp_id.toString()))
+                    .toFirst()
+
+            FieldPreferenceNames(
+                    unique = fieldNames["study_unique_id_name"].toString(),
+                    primary = fieldNames["study_primary_id_name"].toString(),
+                    secondary = fieldNames["study_secondary_id_name"].toString())
+
+        }
+
         fun getAllFieldObjects(): Array<StudyModel> = withDatabase { db ->
 
-            //TODO what about study_db_id?
             db.query(StudyModel.tableName,
                     orderBy = PK)
                     .toTable().map {
@@ -138,15 +146,19 @@ data class StudyModel(val map: Map<String, Any?>) {
             }
         }
 
+        /**
+         * This function uses a field object to create a exp/study row in the database.
+         * Columns are new observation unit attribute names that are inserted as well.
+         */
         fun createField(e: FieldObject, columns: List<String>): Int = transaction { db ->
 
             when (val sid = checkFieldName(e.exp_name)) {
 
                 -1 -> {
 
+                    //insert new study row into table
                     val rowid = db.insert(tableName, null, ContentValues().apply {
 
-                        put(PK, e.exp_id)
                         put("study_name", e.exp_name)
                         put("study_alias", e.exp_alias)
                         put("study_unique_id_name", e.unique_id)
@@ -157,9 +169,18 @@ data class StudyModel(val map: Map<String, Any?>) {
                         put("study_sort_name", e.exp_sort)
                         put("date_import", e.date_import)
                         put("study_source", e.exp_source)
-                    })
+                    }).toInt()
 
-                    rowid.toInt()
+                    //insert observation unit attributes using columns parameter
+                    columns.forEach {
+                        db.insert(ObservationUnitAttributeModel.tableName, null, contentValuesOf(
+                                "observation_unit_attribute_name" to it,
+                                FK to rowid
+                        ))
+                    }
+
+                    rowid
+
                 }
 
                 else -> sid
@@ -167,13 +188,22 @@ data class StudyModel(val map: Map<String, Any?>) {
 
         } ?: -1
 
-        fun createFieldData(unique: String, primary: String, secondary: String, exp_id: Int, columns: List<String>, data: List<String>) = transaction { db ->
+        data class FieldPreferenceNames(val unique: String, val primary: String, val secondary: String)
+
+        fun createFieldData(exp_id: Int, columns: List<String>, data: List<String>) = transaction { db ->
+
+            val names = getNames(exp_id)!!
+
+            //input data corresponds to original database column names
+            val uniqueIndex = columns.indexOf(names.unique)
+            val primaryIndex = columns.indexOf(names.primary)
+            val secondaryIndex = columns.indexOf(names.secondary)
 
             val rowid = db.insert(ObservationUnitModel.tableName, null, contentValuesOf(
                     FK to exp_id,
-                    "observation_unit_db_id" to data[columns.indexOf(unique)],
-                    "position_coordinate_x" to data[columns.indexOf(primary)],
-                    "position_coordinate_y" to data[columns.indexOf(secondary)]))
+                    "observation_unit_db_id" to data[uniqueIndex],
+                    "primary_id" to data[primaryIndex],
+                    "secondary_id" to data[secondaryIndex]))
 
             columns.forEachIndexed { index, it ->
 
@@ -182,7 +212,7 @@ data class StudyModel(val map: Map<String, Any?>) {
                 db.insert(ObservationUnitValueModel.tableName, null, contentValuesOf(
                         FK to rowid,
                         ObservationUnitAttributeModel.FK to attrId,
-                        "observation_units_value_name" to data[index]
+                        "observation_unit_attribute_value" to data[index]
                 ))
             }
         }
@@ -247,9 +277,10 @@ data class StudyModel(val map: Map<String, Any?>) {
 
         } ?: -1
 
-        private fun String?.toStudySource() = when {
-            "BRAPI" in (this?.toUpperCase(Locale.ROOT)) ?: "" -> StudyModel.Companion.StudySource.BRAPI
-            else -> StudyModel.Companion.StudySource.LOCAL
-        }
+        fun getCount(studyId: Int): Int = withDatabase { db ->
+
+            ObservationUnitModel.getAll(studyId).size
+
+        } ?: 0
     }
 }

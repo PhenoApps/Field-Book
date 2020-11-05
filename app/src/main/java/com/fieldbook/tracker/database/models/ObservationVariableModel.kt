@@ -82,21 +82,29 @@ data class ObservationVariableModel(val map: Row) {
          */
         fun getTraitExists(uniqueName: String, id: Int, parent: String, trait: String): Boolean = withDatabase { db ->
 
-            "value" in db.rawQuery("""
+            val query = """
                 SELECT id, value
                 FROM observations, ObservationUnitProperty
-                WHERE observations.observation_unit_db_id = ObservationUnitProperty.'$uniqueName' 
+                WHERE observations.observation_unit_id = ObservationUnitProperty.'$uniqueName' 
                     AND ObservationUnitProperty.id = ? 
                     AND observations.observation_variable_name LIKE ? 
                     AND observations.observation_variable_field_book_format LIKE ?
-                """.trimIndent(), arrayOf(id.toString(), parent, trait)).toFirst().keys
+                """.trimIndent()
+
+//            println("$id $parent $trait")
+//            println(query)
+
+            val columnNames = db.rawQuery(query, arrayOf(id.toString(), parent, trait)).toFirst().keys
+
+            "value" in columnNames
 
         } ?: false
 
         fun getAllTraits(): Array<String> = withDatabase { db ->
 
             db.query(ObservationVariableModel.tableName,
-                    arrayOf(ObservationVariableModel.PK, "observation_variable_name", "position")).use {
+                    arrayOf(ObservationVariableModel.PK, "observation_variable_name", "position"),
+                    orderBy = "position").use {
 
                 it.toTable().map { row ->
                     row["observation_variable_name"] as String
@@ -134,7 +142,7 @@ data class ObservationVariableModel(val map: Row) {
 
             val newTraits = db.query(ObservationVariableModel.tableName).use {
 
-                val names =  ObservationVariableAttributeModel.getAllNames()!!
+                val names = ObservationVariableAttributeModel.getAllNames()!!
                 (names + it.toTable().first().keys - setOf("id", "external_db_id", "trait_data_source")).toTypedArray()
             }
 
@@ -158,16 +166,25 @@ data class ObservationVariableModel(val map: Row) {
 
         fun getAllTraitsForExport(): Cursor? = withDatabase { db ->
 
+            val requiredFields = getTraitPropertyColumns()
             //trait,format,defaultValue,minimum,maximum,details,categories,isVisible,realPosition
-            MatrixCursor(getTraitPropertyColumns()).also { cursor ->
+            MatrixCursor(requiredFields).also { cursor ->
                 val traits = ObservationVariableModel.getAllTraitObjects()
                 traits.sortBy { it.id.toInt() }
                 traits.forEach { trait ->
-                    cursor.addRow(arrayOf(trait.trait, trait.format, trait.defaultValue,
-                            trait.minimum, trait.maximum, trait.details, trait.categories,
-                            trait.visible, trait.realPosition))
+                    cursor.addRow(requiredFields.map { when(it) {
+                        "trait" -> trait.trait
+                        "format" -> trait.format
+                        "defaultValue" -> trait.defaultValue
+                        "minimum" -> trait.minimum
+                        "maximum" -> trait.maximum
+                        "details" -> trait.details
+                        "categories" -> trait.categories
+                        "isVisible" -> trait.visible
+                        "realPosition" -> trait.realPosition
+                        else -> null!!
+                    } })
                 }
-
             }
         }
 
@@ -261,14 +278,14 @@ data class ObservationVariableModel(val map: Row) {
 
                             //println(it)
 
-                            println(ObservationVariableValueModel.getAll()?.map {
-                                "${it[ObservationVariableAttributeModel.FK]} -> ${it["observation_variable_attribute_value"]}"
-                            })
+//                            println(ObservationVariableValueModel.getAll()?.map {
+//                                "${it[ObservationVariableAttributeModel.FK]} -> ${it["observation_variable_attribute_value"]}"
+//                            })
 //                            println(ObservationVariableAttributeModel.getAll()?.map { it["observation_variable_attribute_name"] })
 
                             val attrName = ObservationVariableAttributeModel.getAttributeNameById(it[ObservationVariableAttributeModel.FK] as Int)
 
-                            println(attrName)
+//                            println(attrName)
 
                             when (attrName) {
                                 "validValuesMin" -> minimum = it["observation_variable_attribute_value"] as? String ?: ""
@@ -276,7 +293,7 @@ data class ObservationVariableModel(val map: Row) {
                                 "category" -> categories = it["observation_variable_attribute_value"] as? String ?: ""
                             }
 
-                            println(it["observation_variable_attribute_value"])
+//                            println(it["observation_variable_attribute_value"])
                         }
 
 //                        minimum = values!!["validValuesMin"] as? String ?: ""
@@ -406,7 +423,7 @@ data class ObservationVariableModel(val map: Row) {
 
         } ?: -1L
 
-        fun updateTraitVisibility(trait: String, visible: Boolean) = withDatabase { db ->
+        fun updateTraitVisibility(trait: String, visible: String) = withDatabase { db ->
 
             db.update(ObservationVariableModel.tableName,
                     ContentValues().apply { put("visible", visible) },

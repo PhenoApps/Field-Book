@@ -701,7 +701,7 @@ public class DataHelper {
 
         for (int i = 0; i < visibleTrait.length; i++) {
             //TODO replace apostrophes with ticks
-            value += "user_traits.parent like '" + visibleTrait[i] + "'";
+            value += "user_traits.parent like \"" + visibleTrait[i] + "\"";
             if (i != visibleTrait.length - 1) {
                 value += " or ";
             }
@@ -727,13 +727,13 @@ public class DataHelper {
         }
 
         for (int i = 0; i < traits.length; i++) {
-            traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
+            traitArgs[i] = "m" + i + ".userValue as \"" + traits[i] + "\"";
             joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + TICK + ep.getString("ImportUniqueName", "")
-                    + TICK + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
+                    + TICK + " = m" + i + ".rid AND m" + i + ".parent = \"" + traits[i] + "\" ";
         }
 
         query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
-                " FROM range range " + joinArgs + "GROUP BY range." + TICK + ep.getString("ImportUniqueName", "") + TICK + "ORDER BY range.id";
+                " FROM range range " + joinArgs + " GROUP BY range." + TICK + ep.getString("ImportUniqueName", "") + TICK + "ORDER BY range.id";
 
         Log.i("DH", query);
 
@@ -1769,6 +1769,10 @@ public class DataHelper {
         return exist;
     }
 
+    //TODO: replace this parameter with an array of strings.
+    /*
+    Queries for all plot/unit unique ids. Checks if the parameter keys are unique.
+     */
     //MIGRATED
     public boolean checkUnique(HashMap<String, String> values) {
         Cursor cursor = db.rawQuery("SELECT unique_id from " + PLOTS, null);
@@ -1849,6 +1853,8 @@ public class DataHelper {
 
         DataHelper2Kt.switchField(exp_id);
 
+        Long start = System.currentTimeMillis();
+
         Cursor cursor;
 
         //Log.d("Time2", String.valueOf(new DataHelper2Kt().switchField(exp_id)));
@@ -1868,6 +1874,7 @@ public class DataHelper {
 
         for (int i = 0; i < cursor.getCount(); i++) {
             plotAttr[i] = cursor.getString(0);
+//            System.out.println(plotAttr[i]);
             cursor.moveToNext();
         }
 
@@ -1877,7 +1884,9 @@ public class DataHelper {
         String args = "";
 
         for (String aPlotAttr : plotAttr) {
-            args = args + ", MAX(CASE WHEN plot_attributes.attribute_name = '" + aPlotAttr + "' THEN plot_values.attribute_value ELSE NULL END) AS \"" + aPlotAttr + "\"";
+            if (!aPlotAttr.isEmpty()) {
+                args = args + ", MAX(CASE WHEN plot_attributes.attribute_name = '" + aPlotAttr + "' THEN plot_values.attribute_value ELSE NULL END) AS \"" + aPlotAttr + "\"";
+            }
         }
 
         String query = "CREATE TABLE " + RANGE + " AS SELECT plots.plot_id as id" + args +
@@ -1891,8 +1900,13 @@ public class DataHelper {
         dropRange();
         db.execSQL(query);
 
+        System.out.println("Old switchField: " + String.valueOf((System.currentTimeMillis() - start)));
+//        System.out.println(query);
+
 //        Log.d("Time1", String.valueOf(System.currentTimeMillis()-start));
         Log.d("Time1", query);
+
+//        System.out.println(query);
 
         //String index = "CREATE INDEX range_unique_index ON " + RANGE + "(" + ep.getString("ImportUniqueName",null) + ")";
         //db.execSQL(index);
@@ -1964,6 +1978,10 @@ public class DataHelper {
         //plotIndices[0] = Arrays.asList(columns).indexOf(cursor.getString(0));
         //plotIndices[1] = Arrays.asList(columns).indexOf(cursor.getString(1));
         //plotIndices[2] = Arrays.asList(columns).indexOf(cursor.getString(2));
+
+        String x = cursor.getString(0);
+        String y = cursor.getString(1);
+        String z = cursor.getString(2);
 
         plotIndices[0] = columns.indexOf(cursor.getString(0));
         plotIndices[1] = columns.indexOf(cursor.getString(1));

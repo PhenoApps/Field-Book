@@ -14,7 +14,7 @@ import java.util.*
 
 data class ObservationModel(val map: Row) {
         val internal_id_observation: Int by map
-        val observation_unit_id: Int by map
+        val observation_unit_id: String by map
         val observation_variable_db_id: Int by map
         val observation_variable_field_book_format: String? by map
         val observation_variable_name: String? by map
@@ -23,7 +23,6 @@ data class ObservationModel(val map: Row) {
         val collector: String? by map
         val geo_coordinates: String? by map
         val study_db_id: String? by map
-        val observation_db_id: String? by map
         val last_synced_time: String by map
         val additional_info: String? by map
     companion object {
@@ -79,7 +78,6 @@ data class ObservationModel(val map: Row) {
                 "collector" to model.collector,
                 "geoCoordinates" to model.geo_coordinates,
                 "study_db_id" to model.study_db_id,
-                "observation_db_id" to model.observation_db_id,
                 "last_synced_time" to model.last_synced_time,
                 "additional_info" to model.additional_info,
                 ObservationUnitModel.FK to model.observation_unit_id,
@@ -101,32 +99,35 @@ data class ObservationModel(val map: Row) {
 
         } ?: arrayOf()
 
-        fun getUserDetail(plotId: String): Map<*, *> = withDatabase { db ->
+        fun getUserDetail(plotId: String): Map<String, String> = withDatabase { db ->
 
             mapOf(*db.query(ObservationModel.tableName,
-                    arrayOf("observation_variable_name",
-                            "observation_variable_field_book_format",
-                            "value",
-                            ObservationUnitModel.FK),
-                    where = "observation_variable_name LIKE ?",
-                    whereArgs = arrayOf(plotId))
-                    .toTable().map { it["observation_variable_name"] to it["value"] }
-                    .toTypedArray())
+                arrayOf("observation_variable_name",
+                        "observation_variable_field_book_format",
+                        "value",
+                        ObservationUnitModel.FK),
+                where = "${ObservationUnitModel.FK} LIKE ?",
+                whereArgs = arrayOf(plotId))
+                .toTable().map { it["observation_variable_name"].toString() to it["value"].toString() }
+                .toTypedArray())
 
-        } ?: emptyMap<String, String>()
+        } ?: emptyMap()
 
+        /*
+        plotId is actually uniqueName
+        parent is trait/variable name
+         */
         fun getObservation(plotId: String, parent: String): Observation? = withDatabase { db ->
 
             Observation().apply {
 
                 db.query(tableName,
-                        arrayOf(PK, "observation_db_id", "last_synced_time"),
+                        arrayOf(PK, ObservationUnitModel.FK, "last_synced_time"),
                         where = "observation_variable_name LIKE ? AND ${ObservationUnitModel.FK} LIKE ?",
                         whereArgs = arrayOf(parent, plotId)).toTable().forEach {
 
-                    dbId = it["observation_db_id"].toString()
-                    //obs.lastSyncedTime = it["last_synced_time"].toString()
-
+                    dbId = it[ObservationUnitModel.FK].toString()
+                    setLastSyncedTime(it["last_synced_time"].toString())
                 }
             }
         }
@@ -153,7 +154,7 @@ data class ObservationModel(val map: Row) {
         fun deleteTraitByValue(rid: String, parent: String, value: String) = withDatabase { db ->
 
             db.delete(ObservationModel.tableName,
-                    "observation_unit_db_id LIKE ? AND observation_variable_name LIKE ? AND value = ?",
+                    "${ObservationUnitModel.FK} LIKE ? AND observation_variable_name LIKE ? AND value = ?",
                     arrayOf(rid, parent, value))
         }
 
@@ -170,7 +171,7 @@ data class ObservationModel(val map: Row) {
                             put("observation_db_id", it.dbId)
                             put("last_synced_time", it.lastSyncedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.getDefault())))
                         },
-                        "WHERE id = ?", arrayOf(it.fieldBookDbId))
+                        "$PK = ?", arrayOf(it.fieldBookDbId))
 
             }
         }
@@ -192,5 +193,19 @@ data class ObservationModel(val map: Row) {
             }
 
         }
+
+        /**
+         * "rep" is a deprecated column that was used to save count of the number of observations
+         * taken on a unit/variable pair.
+         * This query replaces "rep" by finding the number of observations for a unit/variable
+         */
+        fun getRep(unit: ObservationUnitModel, variable: ObservationVariableModel): Int = withDatabase { db ->
+
+            db.query(ObservationModel.tableName,
+                    where = "${ObservationUnitModel.FK} = ? AND ${ObservationVariableModel.FK} = ?",
+                    whereArgs = arrayOf(unit.observation_unit_db_id, variable.internal_id_observation_variable.toString()))
+                    .toTable().size
+
+        } ?: 0
     }
 }

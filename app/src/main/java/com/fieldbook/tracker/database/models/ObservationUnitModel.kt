@@ -15,6 +15,8 @@ data class ObservationUnitModel(val map: Map<String, Any?>) {
         val internal_id_observation_unit: Int by map //comp. pk 1
         val study_db_id: Int by map  //fk to studies table
         val observation_unit_db_id: String by map //unique id
+        val primary_id: String by map
+        val secondary_id: String by map
         val geo_coordinates: String? by map //blob?
         val additionalInfo: String? by map //blob, can be replaced with value/attr query?
         val germplasmDbId: String? by map //brapId ?
@@ -34,6 +36,8 @@ data class ObservationUnitModel(val map: Map<String, Any?>) {
             mapOf(PK to "INTEGER PRIMARY KEY AUTOINCREMENT",
                     "study_db_id" to "INT REFERENCES ${StudyModel.tableName}(${StudyModel.PK}) ON DELETE CASCADE",
                     "observation_unit_db_id" to "TEXT",
+                    "primary_id" to "TEXT",
+                    "secondary_id" to "TEXT",
                     "geo_coordinates" to "TEXT",
                     "additional_info" to "TEXT",
                     "germplasm_db_id" to "TEXT",
@@ -49,9 +53,8 @@ data class ObservationUnitModel(val map: Map<String, Any?>) {
             mapOf("plot_id" to PK,
                     "exp_id" to "study_db_id",
                     "unique_id" to "observation_unit_db_id",
-                    //TODO Trevor, verify position_x/y are for primary./secondary
-                    "primary_id" to "position_coordinate_x",
-                    "secondary_id" to "position_coordinate_y",
+                    "primary_id" to "primary_id",
+                    "secondary_id" to "secondary_id",
                     "coordinates" to "geo_coordinates",)
         }
 
@@ -59,17 +62,21 @@ data class ObservationUnitModel(val map: Map<String, Any?>) {
             func(it)
         }
 
+        fun checkUnique(values: HashMap<String, String>): Boolean? = withDatabase { db ->
 
-        fun checkUnique(values: HashMap<String, String>): Boolean = withDatabase { db ->
+            var result = true
 
             db.query(tableName,
                     select = arrayOf("observation_unit_db_id")).toTable().forEach {
-                if (it["observation_unit_db_id"] in values.keys) return@withDatabase false
+                if (it["observation_unit_db_id"] in values.keys) {
+//                    println("${it["observation_unit_db_id"]} in ${values.keys}...${it["observation_unit_db_id"] in values.keys}")
+
+                    result = false
+                }
             }
 
-            true
-
-        } ?: false
+            result
+        }
 
         fun getAll(eid: Int): Array<ObservationUnitModel> = withDatabase { db ->
 

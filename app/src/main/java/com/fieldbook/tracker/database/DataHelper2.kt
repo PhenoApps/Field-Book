@@ -5,29 +5,25 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 import androidx.core.content.contentValuesOf
+import androidx.core.database.getBlobOrNull
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
-import com.fieldbook.tracker.brapi.BrAPIService
-import com.fieldbook.tracker.brapi.Image
-import com.fieldbook.tracker.brapi.Observation
 import com.fieldbook.tracker.database.DataHelper.TRAITS
 import com.fieldbook.tracker.database.models.*
-import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
-import io.swagger.client.model.ObservationUnit
-import io.swagger.client.model.ObservationVariable
-import org.threeten.bp.format.DateTimeFormatter
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.NoSuchElementException
-import kotlin.math.abs
-import kotlin.math.exp
+import kotlin.system.measureTimeMillis
 
 /**
-* All database related functions are here
+* This is a utility file for working with sqlite databases. The utility region features code to migrate
+ * an old schema to a new schema, along with various functions for querying the data.
+ *
+ * This file also contains queries related to dynamic tables created within Field Book.
+ *
+ * author: Chaney
 */
 
 typealias Row = Map<String, Any?>
@@ -37,7 +33,48 @@ typealias Table = MutableList<Row>
 /**
  * TODO: RDBMS Constraints, in general, for brapIds should we allow them to be null: no, they are 'blank'?
  * also, should we force them to be unique? We can automatically do the :no, they don't need to be unique
+ *      TODO: Remove cascade delete constraints, write manual cascade delete functions
  */
+//region Utility functions
+
+fun getTime(): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
+        Locale.getDefault()).format(Calendar.getInstance().time)
+
+//endregion
+inline fun <reified T> transaction(crossinline function: (SQLiteDatabase) -> T): T? = withDatabase { db ->
+
+    try {
+
+        db.beginTransaction()
+
+        val result = function(db)
+
+        db.setTransactionSuccessful()
+
+        return@withDatabase result
+
+    } catch (e: Exception) {
+
+        e.printStackTrace()
+
+    } finally {
+
+        db.endTransaction()
+
+    }
+
+    null
+
+}
+
+/**
+ * Simple wrapper function that has default arguments.
+ */
+fun SQLiteDatabase.query(table: String, select: Array<String>? = null, where: String? = null, whereArgs: Array<String>? = null, orderBy: String? = null): Cursor {
+
+    return this.query(table, select, where, whereArgs, null, null, orderBy)
+
+}
 
 /**
  * Function called to drop entire refactored database schema.
@@ -84,8 +121,6 @@ fun selectAll(name: String, pattern: Map<String, String>, function: (Table) -> U
  * 4. Populates table based on previous query by translating
  *      column headers using a migration pattern mapping.
  */
-
-//TODO reorganize try catches
 fun createTables(traits: ArrayList<TraitObject>) {
 
     if (deleteTables() == 1) {
@@ -137,7 +172,7 @@ fun createTables(traits: ArrayList<TraitObject>) {
                     attrIds[entry.key] = attrId.toString()
                 }
 
-                println("ids: $attrIds")
+//                println("ids: $attrIds")
 
                 //iterate over all traits, insert observation variable values using the above mapping
                 //old schema has extra columns in the trait table which are now bridged with attr/vals in the new schema
@@ -152,21 +187,17 @@ fun createTables(traits: ArrayList<TraitObject>) {
                         //TODO: commenting this out would create a sparse table from the unused attribute values
 //                        if (attrValue.value.isNotEmpty()) {
 
-                            val rowid = db.insert(ObservationVariableValueModel.tableName, null, contentValuesOf(
+                        val rowid = db.insert(ObservationVariableValueModel.tableName, null, contentValuesOf(
 
-                                    ObservationVariableModel.FK to trait.id,
-                                    ObservationVariableAttributeModel.FK to attrIds[attrValue.key],
-                                    "observation_variable_attribute_value" to attrValue.value,
-                            ))
+                                ObservationVariableModel.FK to trait.id,
+                                ObservationVariableAttributeModel.FK to attrIds[attrValue.key],
+                                "observation_variable_attribute_value" to attrValue.value,
+                        ))
 
-                            println("$rowid Inserting ${attrValue.key} = ${attrValue.value} at ${attrIds[attrValue.key]}")
+//                            println("$rowid Inserting ${attrValue.key} = ${attrValue.value} at ${attrIds[attrValue.key]}")
 //                        }
                     }
                 }
-
-//                db.query(ObservationVariableValueModel.tableName).toTable().forEach {
-//                    println(it)
-//                }
 
                 with(ObservationModel) {
                     migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
@@ -190,52 +221,13 @@ fun createTables(traits: ArrayList<TraitObject>) {
 }
 
 /**
- * Unit -> plot/unit internal id
- * variable name -> trait/variable readable name
- * variable -> trait/variable db id
- * format -> trait/variable observation_field_book_format
+ * Uses the createTables and selectAll functions to migrate a schema.
+ * db: the SQLite database to use.
+ * from: the table name to migrate from
+ * to: the table renaming
+ * columnDefs: map entries where keys are column names and values are column affinities
+ * pattern: map entries where keys are original column names and values are new schema names
  */
-fun randomObservation(unit: String, uniqueName: String, format: String, variableName: String, variable: String): ObservationModel = ObservationModel(mapOf(
-        "observation_variable_name" to variableName,
-        "observation_variable_field_book_format" to format,
-        "value" to UUID.randomUUID().toString(),
-        "observation_time_stamp" to "2019-10-15 12:14:590-0400",
-        "collector" to UUID.randomUUID().toString(),
-        "geo_coordinates" to UUID.randomUUID().toString(),
-        "observation_db_id" to uniqueName,
-        "last_synced_time" to "2019-10-15 12:14:590-0400",
-        "additional_info" to UUID.randomUUID().toString(),
-        StudyModel.FK to UUID.randomUUID().toString(),
-        ObservationUnitModel.FK to unit.toInt(),
-        ObservationVariableModel.FK to variable.toInt()))
-
-/**
- * Inserts ten random observations per plot/trait pairs.
- */
-private fun insertRandomObservations() {
-
-    ObservationUnitModel.getAll().sliceArray(0 until 10).forEachIndexed { index, unit ->
-
-        ObservationVariableModel.getAllTraitObjects().forEachIndexed { index, traitObject ->
-
-            for (i in 0..10) {
-
-                val obs = randomObservation(
-                        unit.internal_id_observation_unit.toString(),
-                        unit.observation_unit_db_id,
-                        traitObject.format,
-                        traitObject.trait,
-                        traitObject.id)
-
-                val newRowid = ObservationModel.insertObservation(obs)
-
-                println(newRowid)
-//                    println("Inserting $newRowid $rowid")
-            }
-        }
-    }
-}
-
 private fun migrateTo(db: SQLiteDatabase, from: String, to: String, columnDefs: Map<String, String>, pattern: Map<String, String>) {
 
     val table = createTableStatement(to, columnDefs)
@@ -259,13 +251,19 @@ private fun migrateTo(db: SQLiteDatabase, from: String, to: String, columnDefs: 
     }
 }
 
+/**
+ * Simple extension function to create a contentValue object from a table row.
+ */
 private fun Row.toContentValues(): ContentValues = contentValuesOf(
 
         *entries.map { it.key to it.value }.toTypedArray()
 
 )
 
-
+/**
+ * TODO: Write a column parsing function that is used within toFirst, toTable, and toMigrate
+ * Cursor extension function that retrieves the first row in the cursor.
+ */
 fun Cursor.toFirst(): Map<String, Any?> = if (moveToFirst()) {
 
     val row = mutableMapOf<String, Any?>()
@@ -274,10 +272,18 @@ fun Cursor.toFirst(): Map<String, Any?> = if (moveToFirst()) {
 
         columnNames.forEach {
             val index = getColumnIndexOrThrow(it)
-            val colVal = getString(index) ?: ""
-            row[it] = when (it) {
-                in IntegerColumns -> getInt(index)
-                else -> getStringOrNull(index)
+            if (index > -1) {
+                row[it] = when (getType(index)) {
+                    //null field type
+                    0 -> null
+                    //int field type
+                    1 -> getIntOrNull(index)
+                    //string field type
+                    //blob field type 3
+                    else -> {
+                        getStringOrNull(index) ?: getBlobOrNull(index).toString()
+                    }
+                }
             }
 
         }
@@ -286,12 +292,18 @@ fun Cursor.toFirst(): Map<String, Any?> = if (moveToFirst()) {
 
         e.printStackTrace()
 
+    } catch (ie: IndexOutOfBoundsException) {
+
+        ie.printStackTrace()
     }
 
     row
 
 } else emptyMap()
 
+/**
+ * Similar to toFirst, but returns a list of rows instead of the first one.
+ */
 fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 
     val table = mutableListOf<Map<String, Any?>>()
@@ -303,11 +315,41 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
             val row = mutableMapOf<String, Any?>().withDefault { String() }
 
             columnNames.forEach {
-                val index = getColumnIndexOrThrow(it)
+                val index = getColumnIndex(it)
+                if (index > -1) {
+//                    <li>{@link #FIELD_TYPE_NULL}</li>
+//                    *   <li>{@link #FIELD_TYPE_INTEGER}</li>
+//                    *   <li>{@link #FIELD_TYPE_FLOAT}</li>
+//                    *   <li>{@link #FIELD_TYPE_STRING}</li>
+//                    *   <li>{@link #FIELD_TYPE_BLOB}</li>
+//                    when (getType(index)) {
+//                        0 -> println("null field type")
+//                        1 -> println("int field type")
+//                        2 -> println("string field type")
+//                        3 -> println("blob field type")
+//                    }
+//                    println(getType(index))
 
-                row[it] = when (it) {
-                    in IntegerColumns -> getInt(index)
-                    else -> getStringOrNull(index)
+                    row[it] = when (getType(index)) {
+                        //null field type
+                        0 -> null
+                        //int field type
+                        1 -> getIntOrNull(index)
+                        //string field type
+                        //blob field type 3
+                        else -> {
+                            getStringOrNull(index) ?: getBlobOrNull(index).toString()
+                        }
+//                        in IntegerColumns -> getIntOrNull(index)
+//                        else -> {
+//                            try {
+//                                getStringOrNull(index)
+//                            } catch (ie: IndexOutOfBoundsException) {
+//                                ie.printStackTrace()
+//                                String()
+//                            }
+//                        }
+                    }
                 }
             }
 
@@ -315,6 +357,8 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 
         } while (moveToNext())
 
+    } catch (ie: IndexOutOfBoundsException) {
+        ie.printStackTrace()
     } catch (e: IllegalArgumentException) {
         e.printStackTrace()
     } catch (noElem: NoSuchElementException) {
@@ -324,13 +368,6 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
     table
 
 } else mutableListOf()
-
-internal val IntegerColumns = arrayOf(StudyModel.PK, StudyModel.FK,
-        ObservationUnitModel.PK, ObservationUnitAttributeModel.PK, ObservationUnitAttributeModel.FK,
-        ObservationModel.PK, ObservationModel.FK,
-        ObservationVariableAttributeModel.PK, ObservationVariableAttributeModel.FK,
-        ObservationVariableModel.PK, ObservationVariableModel.FK,
-        ObservationVariableValueModel.PK, ObservationVariableValueModel.FK, "position")
 
 /**
  * Extension function that converts a cursor into a map with new column names using the pattern parameter.
@@ -348,9 +385,10 @@ fun Cursor.toMigratedTable(pattern: Map<String, String>): MutableList<Map<String
             columnNames.forEach {
                 val index = getColumnIndexOrThrow(it)
                 pattern.getOrElse(it) { null }?.let { colName ->
-                    row[colName] = when (colName) {
-                        in IntegerColumns -> getInt(index)
-                        else -> getStringOrNull(index)
+                    row[colName] = when (getType(index)) {
+                        0 -> null
+                        1 -> getInt(index)
+                        else -> getStringOrNull(index) ?: getBlobOrNull(index)
                     }
                 }
             }
@@ -375,6 +413,12 @@ private fun dropViewStatement(name: String) = """
     DROP VIEW IF EXISTS $name
 """.trimIndent()
 
+/**
+ * Builds a create table statement based on given parameters:
+ * name: name of table to be created
+ * columnDefs: mapping between column name and affinity
+ * compositeKey: simply the primary key to this table, e.g [internal_study_db_id INT PRIMARY KEY AUTOGENERATE]
+ */
 private fun createTableStatement(name: String,
                                  columnDefs: Map<String, String>,
                                  compositeKey: String? = null,
@@ -386,6 +430,11 @@ private fun createTableStatement(name: String,
 });
 """.trimIndent()
 
+/**
+ * A wrapper function to catch all backend exceptions.
+ * This function should be used for all database calls.
+ * This way there is a single point of failure if we get mutex access errors.
+ */
 inline fun <reified T> withDatabase(crossinline function: (SQLiteDatabase) -> T): T? = try {
 
     DataHelper.db?.let { database ->
@@ -395,16 +444,13 @@ inline fun <reified T> withDatabase(crossinline function: (SQLiteDatabase) -> T)
     }
 
 } catch (npe: NullPointerException) {
-    npe.printStackTrace()
+    //npe.printStackTrace()
     null
 } catch (e: Exception) {
     e.printStackTrace()
     null
 }
 
-/**
- * Use these within transactions.
- */
 private val TRAITS = "traits"
 private val USER_TRAITS = "user_traits"
 private val USER_TRAITS_COLS = arrayOf("rid", "parent", "trait", "userValue", "timeTaken", "person", "location", "rep", "notes", "exp_id", "observation_db_id", "last_synced_time")
@@ -452,15 +498,6 @@ val sImageObservationView = """
 //    AND vars.observation_variable_field_book_format = 'photo'
 //""".trimIndent()
 
-val sUpdateTraitVisibility = """
-    UPDATE $TRAITS SET isVisible = ? WHERE trait like ?
-""".trimIndent()
-
-val sInsertUserTrait = """
-    INSERT INTO $USER_TRAITS ${USER_TRAITS_COLS.joinToString(",", "(", ")")}
-    VALUES ${(USER_TRAITS_COLS.indices).joinToString(",", "(", ")") { "?" }}"
-""".trimIndent()
-
 private val sTableNames = arrayOf(
         StudyModel.tableName,
         ObservationUnitModel.tableName,
@@ -471,17 +508,66 @@ private val sTableNames = arrayOf(
         ObservationUnitAttributeModel.tableName,
         ObservationUnitValueModel.tableName)
 
-//region Queries
+//endregion
 
-//test function
+//region Queries
+/**
+ * Unit -> plot/unit internal id
+ * variable name -> trait/variable readable name
+ * variable -> trait/variable db id
+ * format -> trait/variable observation_field_book_format
+ */
+fun randomObservation(unit: String, uniqueName: String, format: String, variableName: String, variable: String): ObservationModel = ObservationModel(mapOf(
+        "observation_variable_name" to variableName,
+        "observation_variable_field_book_format" to format,
+        "value" to UUID.randomUUID().toString(),
+        "observation_time_stamp" to "2019-10-15 12:14:590-0400",
+        "collector" to UUID.randomUUID().toString(),
+        "geo_coordinates" to UUID.randomUUID().toString(),
+        "observation_db_id" to uniqueName,
+        "last_synced_time" to "2019-10-15 12:14:590-0400",
+        "additional_info" to UUID.randomUUID().toString(),
+        StudyModel.FK to UUID.randomUUID().toString(),
+        ObservationUnitModel.FK to unit.toInt(),
+        ObservationVariableModel.FK to variable.toInt()))
+
+/**
+ * Inserts ten random observations per plot/trait pairs.
+ */
+private fun insertRandomObservations() {
+
+    ObservationUnitModel.getAll().sliceArray(0 until 10).forEachIndexed { index, unit ->
+
+        ObservationVariableModel.getAllTraitObjects().forEachIndexed { index, traitObject ->
+
+            for (i in 0..10) {
+
+                val obs = randomObservation(
+                        unit.internal_id_observation_unit.toString(),
+                        unit.observation_unit_db_id,
+                        traitObject.format,
+                        traitObject.trait,
+                        traitObject.id)
+
+                val newRowid = ObservationModel.insertObservation(obs)
+
+//                println(newRowid)
+//                    println("Inserting $newRowid $rowid")
+            }
+        }
+    }
+}
+
 internal fun selectAllRange(): Array<Map<String, Any?>>? = withDatabase { db ->
     db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
 }
 
 fun getAllRangeId(): Array<String> = withDatabase { db ->
-    db.query(sObservationUnitPropertyViewName,
+    val table = db.query(sObservationUnitPropertyViewName,
+            select = arrayOf("id"),
             orderBy = "id").toTable()
-            .map { it["id"] as String }
+
+    table.map { it["id"] as String }
             .toTypedArray()
 } ?: emptyArray()
 
@@ -492,7 +578,7 @@ fun getRangeByIdAndPlot(firstName: String,
                         id: Int, pid: String): RangeObject? = withDatabase { db ->
 
     with(db.query(sObservationUnitPropertyViewName,
-            select = arrayOf(firstName, secondName, uniqueName, "id"),
+            select = arrayOf(firstName, secondName, uniqueName, "id").map { "`$it`" }.toTypedArray(),
             where = "id = ? AND plot_id = ?",
             whereArgs = arrayOf(id.toString(), pid)
     ).toFirst()) {
@@ -519,8 +605,8 @@ fun getDropDownRange(uniqueName: String, trait: String, plotId: String): Array<S
     if (trait.isBlank()) emptyArray()
     else {
         db.query(sObservationUnitPropertyViewName,
-                select = arrayOf(trait),
-                where = "$uniqueName LIKE ?",
+                select = arrayOf("`$trait`"),
+                where = "`$uniqueName` LIKE ?",
                 whereArgs = arrayOf(plotId)).toTable().map {
             it[trait] as String
         }.toTypedArray()
@@ -528,20 +614,60 @@ fun getDropDownRange(uniqueName: String, trait: String, plotId: String): Array<S
 
 } ?: emptyArray()
 
-fun getRangeColumnNames(): Array<String> = withDatabase { db ->
+fun getRangeColumnNames(): Array<String?> = withDatabase { db ->
 
-    db.query(sObservationUnitPropertyViewName).columnNames
-            .filter { it != "id" }
-            .toTypedArray()
+    val cursor = db.rawQuery("SELECT * FROM $sObservationUnitPropertyViewName limit 1", null)
+    //Cursor cursor = db.rawQuery("SELECT * from range limit 1", null);
+    //Cursor cursor = db.rawQuery("SELECT * from range limit 1", null);
+    var data: Array<String?>? = null
+
+    if (cursor.moveToFirst()) {
+        val i = cursor.columnCount - 1
+        data = arrayOfNulls(i)
+        var k = 0
+        for (j in 0 until cursor.columnCount) {
+            if (cursor.getColumnName(j) != "id") {
+                data[k] = cursor.getColumnName(j).replace("//", "/")
+                k += 1
+            }
+        }
+    }
+
+    if (!cursor.isClosed) {
+        cursor.close()
+    }
+
+    data
 
 } ?: emptyArray()
 
-fun getRangeColumns(): Array<String> = withDatabase { db ->
+fun getRangeColumns(): Array<String?> = withDatabase { db ->
 
-    db.query(sObservationUnitPropertyViewName).toFirst().keys
-            .filter { it != "id" }.toTypedArray()
+    val cursor = db.rawQuery("SELECT * from ${sObservationUnitPropertyViewName} limit 1", null)
 
-} ?: emptyArray<String>()
+    var data: Array<String?>? = null
+
+    if (cursor.moveToFirst()) {
+        val i = cursor.columnCount - 1
+        data = arrayOfNulls(i)
+        var k = 0
+        for (j in 0 until cursor.columnCount) {
+            if (cursor.getColumnName(j) != "id") {
+                data[k] = cursor.getColumnName(j)
+                k += 1
+            }
+        }
+    }
+
+    if (!cursor.isClosed) {
+        cursor.close()
+    }
+
+    data
+//    db.query(sObservationUnitPropertyViewName).toFirst().keys
+//            .filter { it != "id" }.toTypedArray()
+
+} ?: emptyArray<String?>()
 
 fun getVisibleTrait(): Array<ObservationVariableModel> = withDatabase { db ->
 
@@ -560,10 +686,6 @@ fun getVisibleTrait(): Array<ObservationVariableModel> = withDatabase { db ->
 
 } ?: emptyArray()
 
-fun getExportDBData(fieldList: Array<String>, traits: Array<String>) {
-
-}
-
 fun getFormat(): Array<String> = withDatabase { db ->
 
     db.query(sVisibleObservationVariableViewName,
@@ -575,15 +697,7 @@ fun getFormat(): Array<String> = withDatabase { db ->
 
 } ?: emptyArray()
 
-//    private fun arrayToString(table: String, s: Array<String>): String? {
-//        var value = ""
-//        for (i in s.indices) {
-//            value += if (table.length > 0) table + "." + DataHelper.TICK + s[i] + DataHelper.TICK else s[i]
-//            if (i < s.size - 1) value += ","
-//        }
-//        return value
-//    }
-fun getExportDbData(uniqueName: String, fieldList: Array<String>, traits: Array<String>): Cursor? = withDatabase { db ->
+fun getExportDbData(uniqueName: String, fieldList: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
     val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
     val requiredFields = fieldList + traitRequiredFields
@@ -599,8 +713,8 @@ fun getExportDbData(uniqueName: String, fieldList: Array<String>, traits: Array<
         val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates")
         val outputFields = fieldList + varSelectFields + obsSelectFields
         val query = """
-        SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }}, 
-            ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }}, 
+        SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }} ${if (fieldList.isNotEmpty()) "," else " "} 
+            ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }} ${if (varSelectFields.isNotEmpty()) "," else " "}
             ${obsSelectFields.joinToString { "obs.`$it` AS `$it`" }}
         FROM ${ObservationModel.tableName} AS obs, 
              $sObservationUnitPropertyViewName AS props, 
@@ -609,105 +723,83 @@ fun getExportDbData(uniqueName: String, fieldList: Array<String>, traits: Array<
             AND obs.observation_variable_name = vars.observation_variable_name
             AND obs.observation_variable_field_book_format = vars.observation_variable_field_book_format
             AND obs.value IS NOT NULL 
-            AND vars.observation_variable_name IN ${traits.map { "'$it'" }.joinToString(",", "(", ")")}
+            AND vars.observation_variable_name IN ${traits.map { "\"${it.replace("'", "''")}\"" }.joinToString(",", "(", ")")}
         
     """.trimIndent()
 
-
-        //TODO: query returns an empty table
-
-
-
-        println(query)
+//        println(query)
         val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
 
         val table = db.rawQuery(query, null).toTable()
 
         table.forEach { row ->
-            cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map { when(it) {
-                "trait" -> row["observation_variable_name"]
-                "userValue" -> row["value"]
-                "timeTaken" -> row["observation_time_stamp"]
-                "person" -> row["collector"]
-                "location" -> row["geoCoordinates"]
-                else -> 1 //TODO: what do do with rep
-            } })
+            cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
+                when (it) {
+                    "trait" -> row["observation_variable_name"]
+                    "userValue" -> row["value"]
+                    "timeTaken" -> row["observation_time_stamp"]
+                    "person" -> row["collector"]
+                    "location" -> row["geoCoordinates"]
+                    else -> 2 //TODO: Trevor what do do with rep
+                }
+            })
         }
     }
 }
 
-fun convertDatabaseToTable(uniqueName: String, col: Array<String>, traits: Array<String>): Cursor? = withDatabase { db ->
+fun convertDatabaseToTable(uniqueName: String, col: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
-//    plot_id,row,column,plot,tray_row,tray_id,seed_id,seed_name,pedigree,plot_id,trait,userValue,timeTaken,person,location,rep
+    val query: String
+    val rangeArgs = arrayOfNulls<String>(col.size)
+    val traitArgs = arrayOfNulls<String>(traits.size)
+    var joinArgs = ""
 
-    val selectFields = col.map { "prop.'$it'" } + traits.mapIndexed { index, it -> "obs$index.value AS '$it'" }
+    for (i in col.indices) {
+        rangeArgs[i] = "prop.`${col[i]}`"
+    }
 
-    val query = """
-        SELECT ${selectFields.joinToString(",")}
-        FROM $sObservationUnitPropertyViewName AS prop
-            ${
-        traits.mapIndexed { index, it ->
-            "LEFT JOIN observations AS obs$index ON prop.'$uniqueName' = obs$index.${ObservationUnitModel.FK} " +
-                    "AND obs$index.observation_variable_name = '$it'"
-        }.joinToString("\n")}
-        GROUP BY prop.'$uniqueName'
-        ORDER BY prop.id
-    """.trimIndent()
+    for (i in traits.indices) {
+        traitArgs[i] = "m" + i + ".value AS '" + traits[i] + "'"
+        joinArgs = (joinArgs + "LEFT JOIN observations m" + i + " ON prop.`$uniqueName`"
+                + " = m" + i + ".observation_unit_id AND m" + i + ".observation_variable_name = '" + traits[i] + "' ")
+    }
+
+    query = "SELECT " + rangeArgs.joinToString(",") + " , " + traitArgs.joinToString(",") +
+            " FROM $sObservationUnitPropertyViewName AS prop " + joinArgs + " GROUP BY prop.`$uniqueName` ORDER BY prop.id"
 
     println(query)
 
-    val outputFields = col + traits
-    MatrixCursor(outputFields).also { cursor ->
-        db.rawQuery(query, null).toTable().forEach { row ->
-            cursor.addRow(outputFields.map { row[it] })
-        }
-    }
-
+    db.rawQuery(query, null)
 }
-
-//todo returns study model not field object
-//    fun getFieldObject(studyDbId: Int): StudyModel? = withDatabase { db ->
-//
-//        //Old version returns a count as well.
-//        //order by exp_id
-//        val model: StudyModel by db.query(StudyModel.tableName,
-//                StudyModel.columnDefs.keys.toTypedArray(),
-//                "study_db_id = ?", arrayOf("$studyDbId"))
-//                .toTable().first()
-//
-//        model
-//
-//    }
-
-//    fun getTraitExists(id: Int, parent: String, trait: String): Boolean = withDatabase { db ->
-//
-//
-//    }
 
 /**
  * Transpose obs. unit. attribute/values into a view based on the selected study.
  * On further testing, creating a view here is substantially faster but queries on the
  * view are ~4x the runtime as using a table.
  */
-//TODO: check where switchField is used
 fun switchField(exp_id: Int) = withDatabase { db ->
 
-    val headers: Array<Any?> = db.query(ObservationUnitAttributeModel.tableName,
+    val headers: Array<String> = db.query(ObservationUnitAttributeModel.tableName,
             arrayOf("observation_unit_attribute_name"),
             where = "${StudyModel.FK} = ?",
             whereArgs = arrayOf("$exp_id"))
             .toTable()
             .map { it["observation_unit_attribute_name"] }
-            .mapNotNull { it }
-            .distinct()
+            .mapNotNull { it.toString() }
+            .filter { it.isNotBlank() && it.isNotEmpty() }
             .toTypedArray()
 
     //create a select statement based on the saved plot attribute names
     val select = headers.map { col ->
 
-        "MAX(CASE WHEN attr.observation_unit_attribute_name = '$col' THEN vals.observation_unit_value_name ELSE NULL END) AS '$col'"
+        "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS `$col`"
 
     }
+
+    //combine the case statements with commas
+    val selectStatement = if (select.isNotEmpty()) {
+        ", " + select.joinToString(", ")
+    } else ""
 
     //delete the old table
     db.execSQL("DROP TABLE IF EXISTS $sObservationUnitPropertyViewName")
@@ -718,20 +810,20 @@ fun switchField(exp_id: Int) = withDatabase { db ->
      */
     val query = """
         CREATE TABLE IF NOT EXISTS $sObservationUnitPropertyViewName AS 
-        SELECT units.${ObservationUnitModel.PK} AS id, ${select.joinToString(", ")}
+        SELECT units.${ObservationUnitModel.PK} AS id $selectStatement
         FROM ${ObservationUnitModel.tableName} AS units
-        JOIN ${ObservationUnitValueModel.tableName} AS vals ON units.${ObservationUnitModel.PK} = vals.${ObservationUnitModel.FK}
-        JOIN ${ObservationUnitAttributeModel.tableName} AS attr on vals.${ObservationUnitAttributeModel.FK} = attr.${ObservationUnitAttributeModel.PK}
+        LEFT JOIN ${ObservationUnitValueModel.tableName} AS vals ON units.${ObservationUnitModel.PK} = vals.${ObservationUnitModel.FK}
+        LEFT JOIN ${ObservationUnitAttributeModel.tableName} AS attr on vals.${ObservationUnitAttributeModel.FK} = attr.${ObservationUnitAttributeModel.PK}
         WHERE units.${StudyModel.FK} = $exp_id
-        GROUP BY id""".trimMargin()
+        GROUP BY units.${ObservationUnitModel.PK}""".trimMargin()
 
+    println("$exp_id $query")
 
-    db.execSQL(query)
-
-
-
-//    println(query)
-
+    println("New switch field time: ${
+        measureTimeMillis {
+            db.execSQL(query)
+        }.toLong()
+    }")
 }
 
 //endregion
@@ -744,47 +836,9 @@ fun deleteField(exp_id: Int) = withDatabase { db ->
 //        "DELETE FROM $it WHERE internal_study_db_id = $exp_id"
 //    }
 
-    println(deleteQuery)
+//    println(deleteQuery)
 
     db.execSQL(deleteQuery)
-
-}
-
-fun getTime(): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
-        Locale.getDefault()).format(Calendar.getInstance().time)
-
-//endregion
-inline fun <reified T> transaction(crossinline function: (SQLiteDatabase) -> T): T? = withDatabase { db ->
-
-    try {
-
-        db.beginTransaction()
-
-        val result = function(db)
-
-        db.setTransactionSuccessful()
-
-        return@withDatabase result
-
-    } catch (e: Exception) {
-
-        e.printStackTrace()
-
-        db.endTransaction()
-
-    } finally {
-
-        db.endTransaction()
-
-    }
-
-    null
-
-}
-
-fun SQLiteDatabase.query(table: String, select: Array<String>? = null, where: String? = null, whereArgs: Array<String>? = null, orderBy: String? = null): Cursor {
-
-    return this.query(table, select, where, whereArgs, null, null, orderBy)
 
 }
 
