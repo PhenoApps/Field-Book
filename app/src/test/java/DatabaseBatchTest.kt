@@ -1,3 +1,4 @@
+
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.database.Cursor
@@ -9,14 +10,17 @@ import androidx.test.core.app.ApplicationProvider
 import com.fieldbook.tracker.brapi.Image
 import com.fieldbook.tracker.brapi.Observation
 import com.fieldbook.tracker.database.*
+import com.fieldbook.tracker.database.Migrator.Companion.sImageObservationView
+import com.fieldbook.tracker.database.Migrator.Companion.sImageObservationViewName
 import com.fieldbook.tracker.database.models.*
-import com.fieldbook.tracker.database.models.ObservationModel.Companion.getObservation
-import com.fieldbook.tracker.database.models.ObservationModel.Companion.getObservationByValue
-import com.fieldbook.tracker.database.models.ObservationModel.Companion.getPlotPhotos
-import com.fieldbook.tracker.database.models.StudyModel.Companion.checkFieldName
-import com.fieldbook.tracker.database.models.StudyModel.Companion.createField
+import com.fieldbook.tracker.database.Migrator.ObservationUnit
+import com.fieldbook.tracker.database.Migrator.ObservationVariable
+import com.fieldbook.tracker.database.Migrator.Study
+import com.fieldbook.tracker.database.dao.*
+
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
+
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -48,7 +52,6 @@ import kotlin.time.measureTimedValue
  * Furthermore, each test should examine the runtime for respective functions.
  *
  * TODO: use cascade deletes for Studies but backup db.
- * TODO: Merge with develop and create pull request
  *
  * author: Chaney
  */
@@ -107,11 +110,9 @@ open class DatabaseBatchTest {
 
         mDataHelper.open()
 
-        createTables(mDataHelper.allTraitObjects)
-
         //at this point the new schema has been created through DataHelper
         //next we need to query the study table for unique/primary/secondary ids to build the other queries
-        val study = withDatabase { db -> db.query(StudyModel.tableName).toFirst() } ?: emptyMap()
+        val study = withDatabase { db -> db.query(Study.tableName).toFirst() } ?: emptyMap()
 
         if (study.isNotEmpty()) {
 
@@ -129,7 +130,7 @@ open class DatabaseBatchTest {
             }.commit()
 
             mDataHelper.switchField(1)
-            switchField(1)
+            StudyDao.switchField(1)
 
             //create views
             withDatabase { db ->
@@ -317,7 +318,7 @@ open class DatabaseBatchTest {
     fun checkGetTraitExists() {
 
         val traits = mDataHelper.allTraitObjects
-        val variables = ObservationVariableModel.getAllTraitObjects()
+        val variables = ObservationVariableDao.getAllTraitObjects()
 
         check(traits.size == variables.size) {
             "Old and new database trait row count does not match."
@@ -331,7 +332,7 @@ open class DatabaseBatchTest {
             //trait -> observation variable format
             val oldExists = mDataHelper.getTraitExists(trait.id.toInt(), trait.trait, trait.format)
 
-            val newExists = ObservationVariableModel.getTraitExists(uniqueName, trait.id.toInt(), trait.trait, trait.format)
+            val newExists = ObservationVariableDao.getTraitExists(uniqueName, trait.id.toInt(), trait.trait, trait.format)
 
             assert(oldExists == newExists) {
                 "$oldExists != $newExists"
@@ -351,7 +352,7 @@ open class DatabaseBatchTest {
 
         if (oldRangeId != null) {
 
-            val newRangeId = getAllRangeId()
+            val newRangeId = ObservationUnitPropertyDao.getAllRangeId()
 
             assert(oldRangeId!!.size == newRangeId.size) {
                 "Range table sizes mismatch. ${oldRangeId.size} != ${newRangeId.size}"
@@ -442,13 +443,13 @@ open class DatabaseBatchTest {
 
         for (field in mDataHelper.allFieldObjects) {
 
-            val fieldNames = StudyModel.getNames(field.exp_id)
+            val fieldNames = StudyDao.getNames(field.exp_id)
 
             val plotAttributes = getPlotAttributes(field.exp_id)
-            val unitAttributes = ObservationUnitAttributeModel.getAllNames(field.exp_id)
+            val unitAttributes = ObservationUnitAttributeDao.getAllNames(field.exp_id)
 
             val plots = getAllPlotIds()
-            val units = ObservationUnitModel.getAll()
+            val units = ObservationUnitDao.getAll()
 
             check(plotAttributes.size == unitAttributes.size) {
                 "PlotAttribute/UnitAttribute table size mismatch: ${plotAttributes.size} != ${unitAttributes.size}"
@@ -474,7 +475,7 @@ open class DatabaseBatchTest {
 
                     //trait is actually plot attribute names
                     mDataHelper.getDropDownRange(trait, unit.observation_unit_db_id)?.let { it ->
-                        val newValues = getDropDownRange(fieldNames!!.unique, unitAttribute, unit.observation_unit_db_id)
+                        val newValues = ObservationUnitPropertyDao.getDropDownRange(fieldNames!!.unique, unitAttribute, unit.observation_unit_db_id)
 
                         //print("Checking ${oldValues.joinToString(",")} == ${newValues.joinToString(",")}...")
                         it.forEachIndexed { index, value ->
@@ -495,13 +496,13 @@ open class DatabaseBatchTest {
         //println(mDataHelper.rangeColumnNames.joinToString(","))
         //println(getRangeColumnNames().joinToString(","))
 
-        val newNames = getRangeColumnNames()
+        val newNames = ObservationUnitPropertyDao.getRangeColumnNames()
         mDataHelper.rangeColumnNames.forEachIndexed { index, column ->
             //old query doesn't return id
 //            println(mDataHelper.rangeColumnNames.joinToString(","))
 //            println(getRangeColumnNames().joinToString(","))
             assert(column in newNames) {
-                "Range/UnitProperty column name mismatch: $column != ${getRangeColumnNames()[index]}"
+                "Range/UnitProperty column name mismatch: $column != ${ObservationUnitPropertyDao.getRangeColumnNames()[index]}"
             }
         }
     }
@@ -514,20 +515,20 @@ open class DatabaseBatchTest {
         for (field in mDataHelper.allFieldObjects) {
 
             mDataHelper.switchField(field.exp_id)
-            switchField(field.exp_id)
+            StudyDao.switchField(field.exp_id)
 
-            val fieldNames = StudyModel.getNames(field.exp_id)!!
+            val fieldNames = StudyDao.getNames(field.exp_id)!!
 
             checkGetRangeColumns()
             val fieldList = mDataHelper.rangeColumns //getRangeColumns()
-            val newRangeCols = getRangeColumns()
+            val newRangeCols = ObservationUnitPropertyDao.getRangeColumns()
 
-            val traits = ObservationVariableModel.getAllTraits()
+            val traits = ObservationVariableDao.getAllTraits()
 
 //            println(fieldList.joinToString(","))
 
             val newCursor = try {
-                getExportDbData(fieldNames.unique, fieldList, traits)
+                ObservationUnitPropertyDao.getExportDbData(fieldNames.unique, fieldList, traits)
             } catch (e: Exception) {
                 e.printStackTrace()
                 null
@@ -564,19 +565,19 @@ open class DatabaseBatchTest {
     @Test
     fun checkConvertDatabaseToTable() {
 
-        check(mDataHelper.allFieldObjects.size == StudyModel.getAllFieldObjects().size)
+        check(mDataHelper.allFieldObjects.size == StudyDao.getAllFieldObjects().size)
 
         for (field in mDataHelper.allFieldObjects) {
 
             mDataHelper.switchField(field.exp_id)
-            switchField(field.exp_id)
+            StudyDao.switchField(field.exp_id)
 
             /**
              * In field book, convertDatabaseToTable is used twice.
              * Once where the first parameter only contains the user unique id string e.g "plot_id"
              * Secondly where getRangeColumns() is used to populate the first parameter.
              */
-            val cols = getRangeColumns()
+            val cols = ObservationUnitPropertyDao.getRangeColumns()
 
             val oldCols = mDataHelper.rangeColumns
 
@@ -588,7 +589,7 @@ open class DatabaseBatchTest {
                 check(trait == cols[index])
             }
 
-            var traits = ObservationVariableModel.getAllTraits().filter { "notes" !in it.toLowerCase() && "location" !in it.toLowerCase() }.toTypedArray()
+            var traits = ObservationVariableDao.getAllTraits().filter { "notes" !in it.toLowerCase() && "location" !in it.toLowerCase() }.toTypedArray()
             val oldTraits = mDataHelper.allTraits.filter { "notes" !in it.toLowerCase() && "location" !in it.toLowerCase() }.toTypedArray()
 
             check(traits.size == oldTraits.size)
@@ -609,7 +610,7 @@ open class DatabaseBatchTest {
             }
 
             if (cursor != null) {
-                val newCursor: Cursor? = convertDatabaseToTable(field.unique_id, cols, traits)
+                val newCursor: Cursor? = ObservationUnitPropertyDao.convertDatabaseToTable(field.unique_id, cols, traits)
 //                println("${field.exp_id} new convertDatabaseToTable: ${measureTimedValue {
 //                    newCursor = convertDatabaseToTable(field.unique_id, cols, traits)
 //                }.duration.inSeconds} seconds")
@@ -667,7 +668,7 @@ open class DatabaseBatchTest {
     fun checkSwitchField() {
 
         val fields = mDataHelper.allFieldObjects
-        val studies = StudyModel.getAllFieldObjects()
+        val studies = StudyDao.getAllFieldObjects()
 
         check(fields.size == studies.size)
 
@@ -690,7 +691,7 @@ open class DatabaseBatchTest {
 
 //            println("$firstName $secondName $uniqueName")
             mDataHelper.switchField(fieldObject.exp_id)
-            switchField(fieldObject.exp_id)
+            StudyDao.switchField(fieldObject.exp_id)
 
             println("Checking field: ${fieldObject.exp_id}")
 //            checkAllPlots()
@@ -710,7 +711,7 @@ open class DatabaseBatchTest {
     fun deleteField() {
 
         val oldFields = mDataHelper.allFieldObjects
-        val newStudies = StudyModel.getAllFieldObjects()
+        val newStudies = StudyDao.getAllFieldObjects()
 
         checkCreateFieldObjects()
 
@@ -727,7 +728,7 @@ open class DatabaseBatchTest {
                 //println("Delete old: ${fieldObject.exp_id} new: ${study.internal_id_study}")
 
                 mDataHelper.deleteField(fieldObject.exp_id)
-                deleteField(study.internal_id_study)!!
+                StudyDao.deleteField(study.internal_id_study)!!
 
                 checkGetAllFieldObjects()
 
@@ -753,7 +754,7 @@ open class DatabaseBatchTest {
         val oldFormats = mDataHelper.format
 
         if (oldFormats != null) {
-            val newFormats by lazy { getFormat() }
+            val newFormats by lazy { VisibleObservationVariableDao.getFormat() }
 
             //println("Checking old getFormat query time: ${measureTimedValue { oldFormats.size }}")
             //println("Checking new getFormat query time: ${measureTimedValue { newFormats?.size }}")
@@ -780,7 +781,7 @@ open class DatabaseBatchTest {
         val oldTraits = mDataHelper.visibleTrait
 
         if (oldTraits != null) {
-            val newTraits by lazy { getVisibleTrait() }
+            val newTraits by lazy { VisibleObservationVariableDao.getVisibleTrait() }
 
             //println("Checking old getVisibleTrait query time: ${measureTimedValue { oldTraits.size }}")
             //println("Checking new getVisibleTrait query time: ${measureTimedValue { newTraits.size }}")
@@ -819,7 +820,7 @@ open class DatabaseBatchTest {
         }
 
         val variables by lazy {
-            ObservationVariableModel.getAllTraitObjects()
+            ObservationVariableDao.getAllTraitObjects()
         }
 
 //        println("Checking original query getAllTraits ${
@@ -870,7 +871,7 @@ open class DatabaseBatchTest {
                         exp_source = "?"
                     }
                     val rowid = mDataHelper.createField(firstField, listOf("A"))
-                    StudyModel.createField(FieldObject().apply {
+                    StudyDao.createField(FieldObject().apply {
                         exp_id = rowid
                         exp_name = name
                         unique_id = "plot"
@@ -894,7 +895,7 @@ open class DatabaseBatchTest {
 
 //        println(oldCols.joinToString(","))
 
-        val newCols by lazy { getRangeColumns() }
+        val newCols by lazy { ObservationUnitPropertyDao.getRangeColumns() }
 
 //        println("Checking old range column query time: ${measureTimedValue { oldCols.size }}")
 //        println("Checking new range column query time: ${measureTimedValue { newCols.size }}")
@@ -961,7 +962,7 @@ open class DatabaseBatchTest {
 
                 val photos by lazy { mDataHelper.getPlotPhotos(plotId, traitObject.trait) }
 
-                val newPhotos by lazy { getPlotPhotos(plotId, traitObject.trait) }
+                val newPhotos by lazy { ObservationDao.getPlotPhotos(plotId, traitObject.trait) }
 
                 oldSum += measureTimedValue { photos }.duration.inMilliseconds
                 newSum += measureTimedValue { newPhotos }.duration.inMilliseconds
@@ -996,7 +997,7 @@ open class DatabaseBatchTest {
      */
     private fun insertRandomObservations() {
 
-        ObservationUnitModel.getAll().sliceArray(0 until 10).forEachIndexed { index, unit ->
+        ObservationUnitDao.getAll().sliceArray(0 until 10).forEachIndexed { index, unit ->
 
              mDataHelper.allTraitObjects.forEachIndexed { index, traitObject ->
 
@@ -1010,7 +1011,7 @@ open class DatabaseBatchTest {
                             traitObject.id)
 
                     //println("${obs.observation_unit_id} and ${obs.value}")
-                    val newRowid = ObservationModel.insertObservation(obs)
+                    val newRowid = ObservationDao.insertObservation(obs)
                     val rowid = mDataHelper.insertUserTraits(
                             unit.observation_unit_db_id,
                             traitObject.trait,
@@ -1046,7 +1047,7 @@ open class DatabaseBatchTest {
         var oldTimingSum = .0
         var newTimingSum = .0
 
-        ObservationUnitModel.getAll().sliceArray(0 until 10).forEachIndexed { index, unit ->
+        ObservationUnitDao.getAll().sliceArray(0 until 10).forEachIndexed { index, unit ->
 
             traitObjects.forEachIndexed { traitIndex, trait ->
 
@@ -1058,7 +1059,7 @@ open class DatabaseBatchTest {
                         unit.observation_unit_db_id,
                         trait.trait) }
 
-                val newObs by lazy { getObservation(
+                val newObs by lazy { ObservationDao.getObservation(
                         unit.observation_unit_db_id,
                         trait.trait) }
 
@@ -1088,7 +1089,7 @@ open class DatabaseBatchTest {
 
         mDataHelper.allTraitObjects.forEachIndexed { index, traitObject ->
 
-            ObservationUnitModel.getAll().sliceArray(0 until 5).forEachIndexed { index, unit ->
+            ObservationUnitDao.getAll().sliceArray(0 until 5).forEachIndexed { index, unit ->
 
                 for (i in 0..5) {
 
@@ -1099,7 +1100,7 @@ open class DatabaseBatchTest {
                             traitObject.trait,
                             traitObject.id)
 
-                    val rowid = ObservationModel.insertObservation(obs)
+                    val rowid = ObservationDao.insertObservation(obs)
                     val oldRowid = mDataHelper.insertUserTraits(
                             unit.internal_id_observation_unit.toString(),
                             traitObject.trait,
@@ -1125,12 +1126,12 @@ open class DatabaseBatchTest {
 
         mDataHelper.allTraitObjects.forEachIndexed { index, traitObject ->
 
-            ObservationUnitModel.getAll().sliceArray(0 until 5).forEachIndexed { index, unit ->
+            ObservationUnitDao.getAll().sliceArray(0 until 5).forEachIndexed { index, unit ->
 
                 idMap.forEach { (obsValue, obsId) ->
 
                     var oldId = mDataHelper.getObservationByValue(unit.observation_unit_db_id, traitObject.trait, obsValue).dbId
-                    var newId = getObservationByValue(unit.observation_unit_db_id, traitObject.trait, obsValue)!!.dbId
+                    var newId = ObservationDao.getObservationByValue(unit.observation_unit_db_id, traitObject.trait, obsValue)!!.dbId
 
                     if (oldId == "null") oldId = null
                     if (newId == "null") newId = null
@@ -1151,7 +1152,7 @@ open class DatabaseBatchTest {
     fun checkDeleteTrait() {
 
         val traits = mDataHelper.allTraitObjects
-        val variables = ObservationVariableModel.getAllTraitObjects()
+        val variables = ObservationVariableDao.getAllTraitObjects()
 
         check(traits.size == variables.size)
 
@@ -1159,7 +1160,7 @@ open class DatabaseBatchTest {
 
             mDataHelper.deleteTrait(trait.id)
 
-            ObservationVariableModel.deleteTrait(trait.id)
+            ObservationVariableDao.deleteTrait(trait.id)
 
             checkGetAllTraits()
         }
@@ -1184,10 +1185,10 @@ open class DatabaseBatchTest {
 
         insertRandomObservations()
 
-        ObservationModel.getAll()?.sliceArray(0 until 5)?.asSequence()?.forEach {
+        ObservationDao.getAll()?.sliceArray(0 until 5)?.asSequence()?.forEach {
 
             //ensure that we have equal number of observation/user_traits in each db
-            val size = ObservationModel.getAll()?.size ?: 0
+            val size = ObservationDao.getAll()?.size ?: 0
             val size2 = getAllUserValues()?.size ?: 0
 
             check(size == size2) {
@@ -1195,7 +1196,7 @@ open class DatabaseBatchTest {
             }
 
             //delete the same trait by its value
-            val result = ObservationModel.deleteTraitByValue(it.observation_unit_id,
+            val result = ObservationDao.deleteTraitByValue(it.observation_unit_id,
                     it.observation_variable_name!!,
                     it.value!!)
 
@@ -1215,8 +1216,8 @@ open class DatabaseBatchTest {
 //                }
 
                 //ensure that an observation was deleted
-                assert(size >= ObservationModel.getAll()?.size ?: 0) {
-                    "$size <= ${ObservationModel.getAll()?.size ?: 0}"
+                assert(size >= ObservationDao.getAll()?.size ?: 0) {
+                    "$size <= ${ObservationDao.getAll()?.size ?: 0}"
                 }
 
                 assert(size2 >= getAllUserValues()?.size ?: -1) {
@@ -1224,8 +1225,8 @@ open class DatabaseBatchTest {
                 }
 
                 //finally ensure that the observation sizes match
-                check((ObservationModel.getAll()?.size ?: 0) == (getAllUserValues()?.size ?: 0)) {
-                    "${ObservationModel.getAll()?.size ?: 0} != ${getAllUserValues()?.size ?: 0}"
+                check((ObservationDao.getAll()?.size ?: 0) == (getAllUserValues()?.size ?: 0)) {
+                    "${ObservationDao.getAll()?.size ?: 0} != ${getAllUserValues()?.size ?: 0}"
                 }
 
                 checkGetObservation()
@@ -1241,7 +1242,7 @@ open class DatabaseBatchTest {
         val obs = ArrayList<Observation>()
 
         //loop through all pairs, only add observation if id and lastSyncedTime are not null.
-        ObservationUnitModel.getAll().sliceArray(0 until 10).forEachIndexed { index, unit ->
+        ObservationUnitDao.getAll().sliceArray(0 until 10).forEachIndexed { index, unit ->
 
             mDataHelper.allTraitObjects.forEach { trait ->
 
@@ -1268,7 +1269,7 @@ open class DatabaseBatchTest {
 
         mDataHelper.updateObservations(obs)
 
-        ObservationModel.updateObservations(obs)
+        ObservationDao.updateObservations(obs)
 
         checkGetObservation()
 
@@ -1312,7 +1313,7 @@ open class DatabaseBatchTest {
 
     //endregion
 
-    //region ObservationVariableModel tests
+    //region ObservationVariableDao tests
 
     @Test
     fun checkGetUserDetail() {
@@ -1324,7 +1325,7 @@ open class DatabaseBatchTest {
             }
 
             val newDetail by lazy {
-                ObservationModel.getUserDetail(it)
+                ObservationDao.getUserDetail(it)
             }
 
 //            println("old getUserDetail $it ${measureTimedValue { oldDetail }}")
@@ -1348,7 +1349,7 @@ open class DatabaseBatchTest {
 
         if (traits != null) {
 
-            val variables = ObservationVariableModel.getAllTraits()
+            val variables = ObservationVariableDao.getAllTraits()
 
             check(traits.size == variables.size) {
                 "Trait/Variable table size mismatch ${traits.size} != ${variables.size}"
@@ -1362,7 +1363,7 @@ open class DatabaseBatchTest {
                     }
 
                     val newDetail by lazy {
-                        ObservationVariableModel.getDetail(trait)?.trait
+                        VisibleObservationVariableDao.getDetail(trait)?.trait
                     }
 
                     oldSum += measureTimedValue { detail }.duration.inMilliseconds
@@ -1397,7 +1398,7 @@ open class DatabaseBatchTest {
             }
 
             val newResult by lazy {
-                ObservationVariableModel.hasTrait(traitObject.trait)
+                ObservationVariableDao.hasTrait(traitObject.trait)
             }
 
 //            println("${measureTimedValue { oldResult }}")
@@ -1416,7 +1417,7 @@ open class DatabaseBatchTest {
         }
 
         val newCols by lazy {
-            ObservationVariableModel.getTraitPropertyColumns()
+            ObservationVariableDao.getTraitPropertyColumns()
         }
 
 //        println(oldCols.joinToString {"$it" })
@@ -1439,7 +1440,7 @@ open class DatabaseBatchTest {
         }
 
         val other by lazy {
-            ObservationVariableModel.getAllTraitsForExport()!!
+            ObservationVariableDao.getAllTraitsForExport()!!
         }
 
 //        println(ObservationVariableAttributeModel.getAll()?.map {
@@ -1567,8 +1568,8 @@ open class DatabaseBatchTest {
                 if (oldColumnData != null) {
 
                     val newColumnData by lazy {
-                        ObservationVariableModel.migratePattern[it]?.let { key ->
-                            ObservationVariableModel
+                        ObservationVariable.migratePattern[it]?.let { key ->
+                            ObservationVariableDao
                                     .getTraitColumnData(key)
                         }
                     }
@@ -1604,7 +1605,7 @@ open class DatabaseBatchTest {
     fun checkGetAllTraitObjects() {
 
         val traits by lazy { mDataHelper.allTraitObjects }
-        val variables by lazy { ObservationVariableModel.getAllTraitObjects() }
+        val variables by lazy { ObservationVariableDao.getAllTraitObjects() }
 
 //        println("Old getAllTraitObjects query time: ${measureTimedValue { traits }}")
 //        println("New getAllTraitObjects query time: ${measureTimedValue { variables }}")
@@ -1657,7 +1658,7 @@ open class DatabaseBatchTest {
 
         if (traits != null) {
 
-            val variables by lazy { getVisibleTrait() }
+            val variables by lazy { VisibleObservationVariableDao.getVisibleTrait() }
 
 //        println("Checking old getTraitVisibilityQueryTime ${measureTimedValue { traits }}")
 //        println("Checking new getTraitVisibilityQueryTime ${measureTimedValue { variables }}")
@@ -1689,7 +1690,7 @@ open class DatabaseBatchTest {
         val traits = mDataHelper.visibleTrait
 
         if (traits != null) {
-            val variables = getVisibleTrait()
+            val variables = VisibleObservationVariableDao.getVisibleTrait()
 
             check(traits.size == variables.size) {
                 "Trait/Variable table size mismatch ${traits.size} != ${variables.size}"
@@ -1702,7 +1703,7 @@ open class DatabaseBatchTest {
 
                 traits.forEach {
 
-                    val newDetails by lazy { ObservationVariableModel.getDetail(it) }
+                    val newDetails by lazy { VisibleObservationVariableDao.getDetail(it) }
                     val oldDetails by lazy { mDataHelper.getDetail(it) }
 
                     oldTimeAvg += measureTimedValue { newDetails }.duration.inMilliseconds
@@ -1750,7 +1751,7 @@ open class DatabaseBatchTest {
 
                 with(randomTraitObject(i)) {
                     mDataHelper.insertTraits(this)
-                    ObservationVariableModel.insertTraits(this)
+                    ObservationVariableDao.insertTraits(this)
                 }
 
                 checkGetAllTraitObjects()
@@ -1775,9 +1776,9 @@ open class DatabaseBatchTest {
             "geo_coordinates" to UUID.randomUUID().toString(),
             "last_synced_time" to brapiFormatter.format(OffsetDateTime.now()), //"2019-10-15 12:14:59.040+0000",
             "additional_info" to UUID.randomUUID().toString(),
-            StudyModel.FK to UUID.randomUUID().toString(),
-            ObservationUnitModel.FK to uniqueName,
-            ObservationVariableModel.FK to variable.toInt()))
+            Study.FK to UUID.randomUUID().toString(),
+            ObservationUnit.FK to uniqueName,
+            ObservationVariable.FK to variable.toInt()))
 
     var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ")
     var brapiFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ");
@@ -1799,7 +1800,7 @@ open class DatabaseBatchTest {
     fun checkUpdateTraitPosition() {
 
         val traits = mDataHelper.allTraitObjects
-        val variables = ObservationVariableModel.getAllTraitObjects()
+        val variables = ObservationVariableDao.getAllTraitObjects()
 
         //randomly shuffle and update positions
         val positions = traits.map { it.realPosition }.shuffled()
@@ -1810,7 +1811,7 @@ open class DatabaseBatchTest {
 
             mDataHelper.updateTraitPosition(trait.id, positions[index])
 
-            ObservationVariableModel.updateTraitPosition(variable.id, positions[index])
+            ObservationVariableDao.updateTraitPosition(variable.id, positions[index])
 
         }
 
@@ -1822,7 +1823,7 @@ open class DatabaseBatchTest {
     fun checkEditTraits() {
 
         val traits = mDataHelper.allTraitObjects
-        val variables = ObservationVariableModel.getAllTraitObjects()
+        val variables = ObservationVariableDao.getAllTraitObjects()
 
         check(traits.size == variables.size)
 
@@ -1849,7 +1850,7 @@ open class DatabaseBatchTest {
             mDataHelper.editTraits(trait.id, trait.trait, trait.format, default,
                     min, max, trait.details, categories)
 
-            ObservationVariableModel.editTraits(variable.id, variable.trait, variable.format, default,
+            ObservationVariableDao.editTraits(variable.id, variable.trait, variable.format, default,
                     min, max, trait.details, categories)
 
         }
@@ -1862,7 +1863,7 @@ open class DatabaseBatchTest {
 
         val traits = mDataHelper.allTraitObjects
 
-        val variables = ObservationVariableModel.getAllTraitObjects()
+        val variables = ObservationVariableDao.getAllTraitObjects()
 
         check(traits.size == variables.size)
 
@@ -1877,11 +1878,11 @@ open class DatabaseBatchTest {
             //in original db, if the visible column is null, this means true
             val toggle = !(traitObject?.visible ?: true)
             mDataHelper.updateTraitVisibility(traitObject.trait, toggle)
-            ObservationVariableModel.updateTraitVisibility(variable.trait, toggle.toString())
+            ObservationVariableDao.updateTraitVisibility(variable.trait, toggle.toString())
         }
 
         //requery the traits which now have updated visibility
-        val updatedTraits = ObservationVariableModel.getAllTraitObjects()
+        val updatedTraits = ObservationVariableDao.getAllTraitObjects()
         val updated = mDataHelper.allTraitObjects
 
         //check that old traits have been toggled
@@ -1906,7 +1907,7 @@ open class DatabaseBatchTest {
     fun checkWriteNewPosition() {
 
         val traits = mDataHelper.allTraitObjects
-        val variables = ObservationVariableModel.getAllTraitObjects()
+        val variables = ObservationVariableDao.getAllTraitObjects()
 
         //randomly shuffle and update positions
         val positions = traits.map { it.realPosition }.shuffled()
@@ -1923,17 +1924,17 @@ open class DatabaseBatchTest {
 
                         mDataHelper.writeNewPosition(column, trait.id, positions[index])
 
-                        ObservationVariableModel.writeNewPosition("observation_variable_name", variable.id, positions[index])
+                        ObservationVariableDao.writeNewPosition("observation_variable_name", variable.id, positions[index])
                     }
                     "format" -> {
                         mDataHelper.writeNewPosition(column, trait.id, positions[index])
 
-                        ObservationVariableModel.writeNewPosition("observation_variable_field_book_format", variable.id, positions[index])
+                        ObservationVariableDao.writeNewPosition("observation_variable_field_book_format", variable.id, positions[index])
                     }
                     "isVisible" -> {
                         mDataHelper.writeNewPosition(column, trait.id, positions[index])
 
-                        ObservationVariableModel.writeNewPosition("visible", variable.id, positions[index])
+                        ObservationVariableDao.writeNewPosition("visible", variable.id, positions[index])
                     }
                 }
             }
@@ -1950,12 +1951,12 @@ open class DatabaseBatchTest {
 
         val uniqueIdMaps = arrayOf(
                 mutableMapOf("1" to ""), mutableMapOf("2" to ""),
-                mutableMapOf(*ObservationUnitModel.getAll().map { it.observation_unit_db_id to "" }.toTypedArray())
+                mutableMapOf(*ObservationUnitDao.getAll().map { it.observation_unit_db_id to "" }.toTypedArray())
         )
 
         for (idMap in uniqueIdMaps) {
 
-            val newCheck = ObservationUnitModel.checkUnique(HashMap(idMap))
+            val newCheck = ObservationUnitDao.checkUnique(HashMap(idMap))
             val oldCheck = mDataHelper.checkUnique(HashMap(idMap))
             val result = newCheck == oldCheck
 
@@ -1968,7 +1969,7 @@ open class DatabaseBatchTest {
 
     //endregion
 
-    //region StudyModel Tests
+    //region StudyDao Tests
 
     @Test
     fun checkGetFieldObject() {
@@ -1978,7 +1979,7 @@ open class DatabaseBatchTest {
         mDataHelper.allFieldObjects.forEach { field ->
 
             checkFieldEquality(mDataHelper.getFieldObject(field.exp_id),
-                    StudyModel.getFieldObject(field.exp_id))
+                    StudyDao.getFieldObject(field.exp_id))
         }
     }
 
@@ -2009,7 +2010,7 @@ open class DatabaseBatchTest {
 //        println("Checking ${mDataHelper.allFieldObjects.size} field to study migrations")
 
         val fields = mDataHelper.allFieldObjects
-        val studies = StudyModel.getAllFieldObjects()
+        val studies = StudyDao.getAllFieldObjects()
 
         check(studies.size == fields.size) {
             "Study/Field table size mismatch. ${studies.size} != ${fields.size}"
@@ -2042,13 +2043,13 @@ open class DatabaseBatchTest {
                     "exp_source and study_source mismatch: $exp_source != ${study.study_source.toString()}"
                 }
 
-                val unitCount = StudyModel.getCount(study.internal_id_study)
+                val unitCount = StudyDao.getCount(study.internal_id_study)
 
                 assert(count?.toInt() ?: 0 == unitCount) {
                     "Exp_id plot / Study unit count mismatch: $count != $unitCount"
                 }
 
-                //val editDate = StudyModel.getEditDate(study.internal_id_study)
+                //val editDate = StudyDao.getEditDate(study.internal_id_study)
 
                 //assert(date_edit == editDate)
                 
@@ -2070,7 +2071,7 @@ open class DatabaseBatchTest {
     fun checkAllPlots() {
 
         val plots = getAllPlots()
-        val units = ObservationUnitModel.getAll()
+        val units = ObservationUnitDao.getAll()
 
         check(plots.size == units.size) {
             "Plot/Unit table size mismatch: ${plots.size} != ${units.size}"
@@ -2119,7 +2120,7 @@ open class DatabaseBatchTest {
                 val alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray().map { it.toString() }
                 val columns = listOf("plot_id", "row", "col") + alphabet
                 mDataHelper.createField(this, columns)
-                createField(this, columns)
+                StudyDao.createField(this, columns)
             }
         }
 
@@ -2137,7 +2138,7 @@ open class DatabaseBatchTest {
     fun checkCreateFieldData() {
 
         val fields = mDataHelper.allFieldObjects
-        val studies = StudyModel.getAllFieldObjects()
+        val studies = StudyDao.getAllFieldObjects()
 
         check(fields.size == studies.size) {
             "Study/Field tables size mismatch ${studies.size} and ${fields.size}"
@@ -2152,13 +2153,13 @@ open class DatabaseBatchTest {
             val columns = (0 until 5).map { UUID.randomUUID().toString() } + arrayOf(field.unique_id, field.primary_id, field.secondary_id)
 
             //in original usage, createField is always used before createFieldData
-            val eid = StudyModel.createField(field, columns)
+            val eid = StudyDao.createField(field, columns)
             val oldEid = mDataHelper.createField(field, columns)
 
             assert(eid == oldEid)
 
             //get number of units before inserting new field data, should be 0
-            val oldNumberOfUnits = ObservationUnitModel.getAll(eid).size
+            val oldNumberOfUnits = ObservationUnitDao.getAll(eid).size
 
             for (i in 0..1) {
 
@@ -2171,13 +2172,13 @@ open class DatabaseBatchTest {
                 }
 
                 try {
-                    StudyModel.createFieldData(eid, columns, data)
+                    StudyDao.createFieldData(eid, columns, data)
                 } catch (ae: ArrayIndexOutOfBoundsException) {
                     ae.printStackTrace()
                 }
             }
 
-            assert(oldNumberOfUnits < ObservationUnitModel.getAll(eid).size)
+            assert(oldNumberOfUnits < ObservationUnitDao.getAll(eid).size)
 
         }
 
@@ -2190,7 +2191,7 @@ open class DatabaseBatchTest {
     fun checkUpdateStudyTable() {
 
         val fields = mDataHelper.allFieldObjects
-        val studies = StudyModel.getAllFieldObjects()
+        val studies = StudyDao.getAllFieldObjects()
 
         check(fields.size == studies.size) {
             "Study/Field tables size mismatch ${studies.size} and ${fields.size}"
@@ -2207,7 +2208,7 @@ open class DatabaseBatchTest {
                     //TODO Trevor causes NPE
                     mDataHelper.updateExpTable(this[0], this[1], this[2], fieldObject.exp_id)
 
-                    StudyModel.updateStudyTable(this[0], this[1], this[2], fieldObject.exp_id)
+                    StudyDao.updateStudyTable(this[0], this[1], this[2], fieldObject.exp_id)
 
                     checkGetFieldObject()
                 }
@@ -2227,7 +2228,7 @@ open class DatabaseBatchTest {
     fun checkCheckFieldName() {
 
         val fields = mDataHelper.allFieldObjects
-        val studies = StudyModel.getAllFieldObjects()
+        val studies = StudyDao.getAllFieldObjects()
 
         check(fields.size == studies.size) {
             "Study/Field tables size mismatch ${studies.size} and ${fields.size}"
@@ -2237,7 +2238,7 @@ open class DatabaseBatchTest {
 
             val study = studies[index]
 
-            assert(mDataHelper.checkFieldName(fieldObject.exp_name) == study.study_name?.let { checkFieldName(it) })
+            assert(mDataHelper.checkFieldName(fieldObject.exp_name) == study.study_name?.let { StudyDao.checkFieldName(it) })
 
         }
     }

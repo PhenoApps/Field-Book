@@ -3,7 +3,9 @@ import android.content.Context.MODE_PRIVATE
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.fieldbook.tracker.database.*
-import com.fieldbook.tracker.database.models.StudyModel
+import com.fieldbook.tracker.database.Migrator.Companion.sImageObservationView
+import com.fieldbook.tracker.database.Migrator.Companion.sImageObservationViewName
+import com.fieldbook.tracker.database.dao.StudyDao
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -52,38 +54,6 @@ class DatabaseTest: DatabaseBatchTest() {
 
         mDataHelper.open()
 
-        createTables(mDataHelper.allTraitObjects)
-
-        //at this point the new schema has been created through DataHelper
-        //next we need to query the study table for unique/primary/secondary ids to build the other queries
-        val study = withDatabase { db -> db.query(StudyModel.tableName).toFirst() } ?: emptyMap()
-
-        if (study.isNotEmpty()) {
-
-            firstName = study["study_primary_id_name"].toString()
-            secondName = study["study_secondary_id_name"].toString()
-            uniqueName = study["study_unique_id_name"].toString()
-
-            val ep = ApplicationProvider.getApplicationContext<Context>()
-                    .getSharedPreferences("Settings", MODE_PRIVATE)
-
-            ep.edit().apply {
-                putString("ImportFirstName", firstName)
-                putString("ImportSecondName", secondName)
-                putString("ImportUniqueName", uniqueName)
-            }.commit()
-
-            mDataHelper.switchField(1)
-            switchField(1)
-
-            //create views
-            withDatabase { db ->
-
-                db.execSQL("DROP VIEW IF EXISTS $sImageObservationViewName")
-
-                db.execSQL(sImageObservationView)
-            }
-        }
     }
 
     /**

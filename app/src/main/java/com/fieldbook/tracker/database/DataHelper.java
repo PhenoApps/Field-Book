@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
 public class DataHelper {
     public static final String RANGE = "range";
     public static final String TRAITS = "traits";
-    public static final int DATABASE_VERSION = 8;
+    public static final int DATABASE_VERSION = 9;
     private static final String DATABASE_NAME = "fieldbook.db";
     private static final String USER_TRAITS = "user_traits";
     private static final String EXP_INDEX = "exp_id";
@@ -1683,7 +1683,7 @@ public class DataHelper {
     }
 
     public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int exp_id) {
-        //TODO: check commenting this out doesn't break anything: ConfigActivity.dt.open();
+        ConfigActivity.dt.open();
         Cursor cursor = db.rawQuery("SELECT * from " + EXP_INDEX, null);
         cursor.moveToFirst();
 
@@ -2048,7 +2048,6 @@ public class DataHelper {
      */
     private static class OpenHelper extends SQLiteOpenHelper {
         SharedPreferences ep2;
-
         OpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
             ep2 = context.getSharedPreferences("Settings", 0);
@@ -2056,6 +2055,7 @@ public class DataHelper {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
+
             db.execSQL("CREATE TABLE "
                     + RANGE
                     + "(id INTEGER PRIMARY KEY, range TEXT, plot TEXT, entry TEXT, plot_id TEXT, pedigree TEXT)");
@@ -2087,6 +2087,44 @@ public class DataHelper {
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
             }
+        }
+
+        /**
+         * Copy of getAllTraitObjects in DataHelper to migrate to version 9.
+         */
+        public ArrayList<TraitObject> getAllTraitObjects(SQLiteDatabase db) {
+
+            ArrayList<TraitObject> list = new ArrayList<>();
+
+            Cursor cursor = db.query(TRAITS, new String[]{"id", "trait", "format", "defaultValue",
+                            "minimum", "maximum", "details", "categories", "isVisible", "realPosition"},
+                    null, null, null, null, "realPosition"
+            );
+
+            if (cursor.moveToFirst()) {
+                do {
+                    TraitObject o = new TraitObject();
+
+                    o.setId(cursor.getString(0));
+                    o.setTrait(cursor.getString(1));
+                    o.setFormat(cursor.getString(2));
+                    o.setDefaultValue(cursor.getString(3));
+                    o.setMinimum(cursor.getString(4));
+                    o.setMaximum(cursor.getString(5));
+                    o.setDetails(cursor.getString(6));
+                    o.setCategories(cursor.getString(7));
+                    o.setRealPosition(cursor.getString(9));
+
+                    list.add(o);
+
+                } while (cursor.moveToNext());
+            }
+
+            if (!cursor.isClosed()) {
+                cursor.close();
+            }
+
+            return list;
         }
 
         @Override
@@ -2186,7 +2224,7 @@ public class DataHelper {
                 }
             }
 
-            if (oldVersion <= 8 & newVersion >= 8) {
+            if (oldVersion <= 7 & newVersion >= 8) {
 
                 // add columns to tables for brapi integration
 
@@ -2195,6 +2233,12 @@ public class DataHelper {
                 db.execSQL("ALTER TABLE exp_id ADD COLUMN exp_source VARCHAR");
                 db.execSQL("ALTER TABLE user_traits ADD COLUMN observation_db_id TEXT");
                 db.execSQL("ALTER TABLE user_traits ADD COLUMN last_synced_time TEXT");
+
+            }
+
+            if (oldVersion <= 9 & newVersion >= 9) {
+
+                Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
             }
         }
