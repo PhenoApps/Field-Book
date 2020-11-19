@@ -16,6 +16,16 @@ class ObservationVariableDao {
 
     companion object {
 
+        fun getTraitId(name: String): Int = withDatabase { db ->
+
+            db.query(ObservationVariable.tableName,
+                select = arrayOf(ObservationVariable.PK),
+                where = "observation_variable_name = ?",
+                whereArgs = arrayOf(name))
+                    .toFirst()[ObservationVariable.PK].toString().toInt()
+
+        } ?: -1
+
         fun hasTrait(name: String): Boolean = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
@@ -61,13 +71,13 @@ class ObservationVariableDao {
 
         } ?: arrayOf()
 
-        fun getTraitColumnData(column: String): Array<Any> = withDatabase { db ->
+        fun getTraitColumnData(column: String): Array<String> = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
                     arrayOf(column)).use {
 
                 it.toTable().mapNotNull { row ->
-                    row[column]
+                    row[column].toString()
                 }.toTypedArray()
             }
 
@@ -140,9 +150,9 @@ class ObservationVariableDao {
             }
         }
 
-        fun getAllTraitObjects(): Array<TraitObject> = withDatabase { db ->
+        fun getAllTraitObjects(): ArrayList<TraitObject> = withDatabase { db ->
 
-            db.query(ObservationVariable.tableName, orderBy = "position").toTable().map {
+            ArrayList(db.query(ObservationVariable.tableName, orderBy = "position").toTable().map {
 
                 TraitObject().apply {
 
@@ -174,19 +184,19 @@ class ObservationVariableDao {
                         }
                     }
                 }
-            }.toTypedArray()
+            })
 
-        } ?: arrayOf()
+        } ?: ArrayList()
 
-        fun getTraitVisibility(): Map<String, String> = withDatabase { db ->
+        fun getTraitVisibility(): HashMap<String, String> = withDatabase { db ->
 
-            db.query(ObservationVariable.tableName,
+            hashMapOf(*db.query(ObservationVariable.tableName,
                     select = arrayOf("observation_variable_name", "visible"))
-                    .toTable().asSequence().flatMap { it.asSequence() }
-                    .groupBy({ it.key }, { it.value })
-                    .mapValues { it.value.first() as String }
+                    .toTable().map {
+                        it["observation_variable_name"].toString() to it["visible"].toString()
+                    }.toTypedArray())
 
-        } ?: emptyMap()
+        } ?: hashMapOf()
 
         //TODO missing obs. vars. for min/max/categories
         fun insertTraits(t: TraitObject) = withDatabase { db ->

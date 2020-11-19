@@ -857,7 +857,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                ConfigActivity.dt.deleteTable(DataHelper.TRAITS);
+                ConfigActivity.dt.deleteTraitsTable();
                 loadData();
                 dialog.dismiss();
             }
@@ -1070,7 +1070,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 data = columns;
 
                 if (ConfigActivity.dt.isTableExists(DataHelper.TRAITS)) {
-                    ConfigActivity.dt.deleteTable(DataHelper.TRAITS);
+                    ConfigActivity.dt.deleteTraitsTable();
                 }
 
                 while (data != null) {

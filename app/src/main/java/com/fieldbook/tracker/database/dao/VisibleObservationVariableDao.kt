@@ -15,7 +15,17 @@ class VisibleObservationVariableDao {
 
     companion object {
 
-        fun getVisibleTrait(): Array<ObservationVariableModel> = withDatabase { db ->
+        fun getVisibleTrait(): Array<String> = withDatabase { db ->
+
+            db.query(sVisibleObservationVariableViewName,
+                    select = arrayOf("observation_variable_name"),
+                    orderBy = "position").toTable().map { it ->
+                it["observation_variable_name"].toString()
+            }.toTypedArray()
+
+        } ?: emptyArray<String>()
+
+        fun getVisibleTraitObjects(): Array<ObservationVariableModel> = withDatabase { db ->
 
             val rows = db.query(sVisibleObservationVariableViewName,
                     orderBy = "position").toTable()

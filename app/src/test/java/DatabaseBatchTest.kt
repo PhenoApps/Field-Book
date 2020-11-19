@@ -364,7 +364,7 @@ open class DatabaseBatchTest {
 
                 //print("$range == $newRange...")
 
-                assert(range.toString() == newRange) {
+                assert(range == newRange as Int) {
                     "$range != $newRange"
                 }
 
@@ -479,7 +479,7 @@ open class DatabaseBatchTest {
 
                         //print("Checking ${oldValues.joinToString(",")} == ${newValues.joinToString(",")}...")
                         it.forEachIndexed { index, value ->
-                            assert(value == newValues[index])
+                            assert(value == newValues!![index])
                         }
                     }
 
@@ -676,9 +676,9 @@ open class DatabaseBatchTest {
 
             val study = studies[index]
 
-            firstName = study.study_primary_id_name!!
-            secondName = study.study_secondary_id_name!!
-            uniqueName = study.study_unique_id_name!!
+            firstName = study.primary_id!!
+            secondName = study.secondary_id!!
+            uniqueName = study.unique_id!!
 
             val ep = ApplicationProvider.getApplicationContext<Context>()
                     .getSharedPreferences("Settings", MODE_PRIVATE)
@@ -728,7 +728,7 @@ open class DatabaseBatchTest {
                 //println("Delete old: ${fieldObject.exp_id} new: ${study.internal_id_study}")
 
                 mDataHelper.deleteField(fieldObject.exp_id)
-                StudyDao.deleteField(study.internal_id_study)!!
+                StudyDao.deleteField(study.exp_id)!!
 
                 checkGetAllFieldObjects()
 
@@ -796,7 +796,7 @@ open class DatabaseBatchTest {
 
             oldTraits.forEachIndexed { index, trait ->
 
-                val newTrait = newTraits[index].observation_variable_name
+                val newTrait = newTraits[index]
 
 //            println("Checking $trait == $newTrait...")
 
@@ -1673,7 +1673,7 @@ open class DatabaseBatchTest {
 
 //            println("Checking $trait == ${variable.observation_variable_name}...")
 
-                assert(trait == variable.observation_variable_name)
+                assert(trait == variable)
 
 //            println("verified")
             }
@@ -2022,28 +2022,28 @@ open class DatabaseBatchTest {
 
             with(field) {
 
-                assert(exp_id == study.internal_id_study) {
-                    "Study ID mismatch: $exp_id != ${study.internal_id_study}"
+                assert(exp_id == study.exp_id) {
+                    "Study ID mismatch: $exp_id != ${study.exp_id}"
                 }
 
-                assert(exp_name == study.study_name)
+                assert(exp_name == study.exp_name)
 
-                assert(unique_id == study.study_unique_id_name)
+                assert(unique_id == study.unique_id)
 
-                assert(primary_id == study.study_primary_id_name)
+                assert(primary_id == study.primary_id)
 
-                assert(secondary_id == study.study_secondary_id_name)
+                assert(secondary_id == study.secondary_id)
 //
                 //insert tests will have slightly different import times between dbs
 //                assert(date_import == study.date_import)
 
                 assert(date_export == study.date_export)
 
-                assert((exp_source == null && study.study_source == null) || exp_source == study.study_source.toString()) {
-                    "exp_source and study_source mismatch: $exp_source != ${study.study_source.toString()}"
+                assert((exp_source == null && study.exp_source == null) || exp_source == study.exp_source.toString()) {
+                    "exp_source and study_source mismatch: $exp_source != ${study.exp_source.toString()}"
                 }
 
-                val unitCount = StudyDao.getCount(study.internal_id_study)
+                val unitCount = StudyDao.getCount(study.exp_id)
 
                 assert(count?.toInt() ?: 0 == unitCount) {
                     "Exp_id plot / Study unit count mismatch: $count != $unitCount"
@@ -2238,7 +2238,7 @@ open class DatabaseBatchTest {
 
             val study = studies[index]
 
-            assert(mDataHelper.checkFieldName(fieldObject.exp_name) == study.study_name?.let { StudyDao.checkFieldName(it) })
+            assert(mDataHelper.checkFieldName(fieldObject.exp_name) == study.exp_name?.let { StudyDao.checkFieldName(it) })
 
         }
     }

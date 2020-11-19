@@ -55,7 +55,9 @@ class Migrator {
          */
         fun createTables(db: SQLiteDatabase, traits: ArrayList<TraitObject>) {
 
-            if (deleteTables() == 1) {
+            deleteTables()
+
+            //if (deleteTables() == 1) {
 
                 try {
 
@@ -146,7 +148,7 @@ class Migrator {
                     db.endTransaction()
 
                 }
-            }
+            //}
         }
 
         /**
@@ -529,7 +531,7 @@ class Migrator {
             const val tableName = "observation_variable_values"
             val columnDefs by lazy {
                 mapOf(PK to "INTEGER PRIMARY KEY AUTOINCREMENT",
-                        ObservationVariable.FK to "INT REFERENCES ${ObservationVariableAttribute.tableName}(${ObservationVariableAttribute.PK}) ON DELETE CASCADE",
+                        ObservationVariableAttribute.FK to "INT REFERENCES ${ObservationVariableAttribute.tableName}(${ObservationVariableAttribute.PK}) ON DELETE CASCADE",
                         "observation_variable_attribute_value" to "TEXT",
                         ObservationVariable.FK to "INT REFERENCES ${ObservationVariable.tableName}(${ObservationVariable.PK}) ON DELETE CASCADE",
                 )}
@@ -554,7 +556,8 @@ class Migrator {
                         "exp_sort" to "study_sort_name",
                         "date_import" to "date_import",
                         "date_export" to "date_export",
-                        "exp_source" to "study_source",)
+                        "exp_source" to "study_source",
+                        "count" to "count",)
             }
             val columnDefs by lazy {
                 mapOf("study_db_id" to "Text",
@@ -580,6 +583,7 @@ class Migrator {
                         "study_type" to "Text",
                         "trial_db_id" to "Text",
                         "trial_name" to "Text",
+                        "count" to "Int",
                         PK to "INTEGER PRIMARY KEY AUTOINCREMENT")
             }
         }

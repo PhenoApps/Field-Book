@@ -18,12 +18,12 @@ class ObservationUnitPropertyDao {
             db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
         }
 
-        fun getAllRangeId(): Array<String> = withDatabase { db ->
+        fun getAllRangeId(): Array<Integer> = withDatabase { db ->
             val table = db.query(sObservationUnitPropertyViewName,
                     select = arrayOf("id"),
                     orderBy = "id").toTable()
 
-            table.map { it["id"] as String }
+            table.map { (it["id"] as java.lang.Integer) }
                     .toTypedArray()
         } ?: emptyArray()
 
@@ -47,28 +47,36 @@ class ObservationUnitPropertyDao {
 
         }
 
-        fun getRangeFromId(firstName: String, uniqueName: String, plot_id: String): String = withDatabase { db ->
+        fun getRangeFromId(firstName: String, secondName: String, uniqueName: String, id: Int): RangeObject = withDatabase { db ->
+//            data.range = cursor.getString(0);
+//                data.plot = cursor.getString(1);
+//                data.plot_id = cursor.getString(2);
+            RangeObject().apply {
 
-            (db.query(sObservationUnitPropertyViewName,
-                    select = arrayOf(firstName),
-                    where = "$uniqueName LIKE ?",
-                    whereArgs = arrayOf(plot_id)).toFirst()[firstName] as? String) ?: ""
+                val model = db.query(sObservationUnitPropertyViewName,
+                    select = arrayOf(firstName, secondName, uniqueName, "id"),
+                    where = "id = ?",
+                    whereArgs = arrayOf(id.toString())).toFirst()
 
-        } ?: String()
+                range = model[firstName].toString()
 
-        fun getDropDownRange(uniqueName: String, trait: String, plotId: String): Array<String> = withDatabase { db ->
+                plot = model[secondName].toString()
 
-            if (trait.isBlank()) emptyArray()
-            else {
-                db.query(sObservationUnitPropertyViewName,
-                        select = arrayOf("`$trait`"),
-                        where = "`$uniqueName` LIKE ?",
-                        whereArgs = arrayOf(plotId)).toTable().map {
-                    it[trait] as String
-                }.toTypedArray()
+                plot_id = model[uniqueName].toString()
             }
 
-        } ?: emptyArray()
+        } ?: RangeObject()
+
+        fun getDropDownRange(uniqueName: String, trait: String, plotId: String): Array<String>? = withDatabase { db ->
+
+            db.query(sObservationUnitPropertyViewName,
+                    select = arrayOf("`$trait`"),
+                    where = "`$uniqueName` LIKE ?",
+                    whereArgs = arrayOf(plotId)).toTable().map {
+                it[trait].toString()
+            }.toTypedArray()
+
+        }
 
         fun getRangeColumnNames(): Array<String?> = withDatabase { db ->
 

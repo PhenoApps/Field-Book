@@ -385,7 +385,7 @@ public class CollectActivity extends AppCompatActivity {
     private void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
-        if (!dt.isTableEmpty(DataHelper.RANGE)) {
+        if (!dt.isRangeTableEmpty()) {
             String plotID = rangeBox.getPlotID();
             infoBarAdapter.configureDropdownArray(plotID);
         }

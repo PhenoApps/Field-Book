@@ -32,4 +32,5 @@ data class StudyModel(val map: Row) {
         val trial_db_id: String? by map //brapId?
         val trial_name: String? by map
         val internal_id_study: Int by map //pk
+        val count: Int by map
 }

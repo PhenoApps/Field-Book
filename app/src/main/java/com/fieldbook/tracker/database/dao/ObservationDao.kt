@@ -13,6 +13,8 @@ import com.fieldbook.tracker.brapi.Observation as BrapiObservation
 import com.fieldbook.tracker.database.Migrator.Observation
 import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
+import org.threeten.bp.OffsetDateTime
+import kotlin.math.exp
 
 class ObservationDao {
 
@@ -26,6 +28,32 @@ class ObservationDao {
                 .toTypedArray()
 
         } ?: emptyArray()
+
+        /**
+         * In this case parent is the variable name and trait is the format
+         */
+        fun insertUserTraits(rid: String, parent: String, trait: String,
+                             userValue: String, person: String, location: String,
+                             notes: String, exp_id: String, observationDbId: String?,
+                             lastSyncedTime: OffsetDateTime?): Long = withDatabase { db ->
+
+            val interalTraitId = ObservationVariableDao.getTraitId(parent);
+
+            db.insert(Observation.tableName, null, contentValuesOf(
+                    "observation_variable_name" to parent,
+                    "observation_variable_field_book_format" to trait,
+                    "value" to userValue,
+                   // "observation_time_stamp" to model.observation_time_stamp,
+                    "collector" to person,
+                    "geoCoordinates" to location,
+                    "study_db_id" to exp_id,
+                    "last_synced_time" to lastSyncedTime,
+                   // "additional_info" to model.additional_info,
+                    ObservationUnit.FK to rid,
+                    ObservationVariable.FK to interalTraitId
+            ))
+
+        } ?: -1L
 
         fun insertObservation(model: ObservationModel): Int = withDatabase { db ->
 
@@ -58,9 +86,9 @@ class ObservationDao {
 
         } ?: arrayOf()
 
-        fun getUserDetail(plotId: String): Map<String, String> = withDatabase { db ->
+        fun getUserDetail(plotId: String): HashMap<String, String> = withDatabase { db ->
 
-            mapOf(*db.query(Observation.tableName,
+            hashMapOf(*db.query(Observation.tableName,
                 arrayOf("observation_variable_name",
                         "observation_variable_field_book_format",
                         "value",
@@ -70,7 +98,7 @@ class ObservationDao {
                 .toTable().map { it["observation_variable_name"].toString() to it["value"].toString() }
                 .toTypedArray())
 
-        } ?: emptyMap()
+        } ?: hashMapOf()
 
         /*
         plotId is actually uniqueName

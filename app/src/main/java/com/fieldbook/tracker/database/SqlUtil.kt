@@ -112,6 +112,9 @@ fun Cursor.toFirst(): Map<String, Any?> = if (moveToFirst()) {
     } catch (ie: IndexOutOfBoundsException) {
 
         ie.printStackTrace()
+    } finally {
+
+        close()
     }
 
     row

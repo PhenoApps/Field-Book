@@ -104,7 +104,7 @@ class StudyDao {
 
         }
 
-        fun getAllFieldObjects(): Array<StudyModel> = withDatabase { db ->
+        fun getAllStudyModels(): Array<StudyModel> = withDatabase { db ->
 
             db.query(Study.tableName,
                     orderBy = Study.PK)
@@ -113,6 +113,30 @@ class StudyDao {
                     }.toTypedArray()
 
         } ?: arrayOf()
+
+        fun getAllFieldObjects(): ArrayList<FieldObject> = withDatabase { db ->
+
+            val studies = ArrayList<FieldObject>()
+
+            db.query(Study.tableName).toTable().forEach { model ->
+
+                studies.add(FieldObject().also {
+                    it.exp_id = model[Study.PK] as Int
+                    it.exp_name = model["study_name"].toString()
+                    it.unique_id = model["study_unique_id_name"].toString()
+                    it.primary_id = model["study_primary_id_name"].toString()
+                    it.secondary_id = model["study_secondary_id_name"].toString()
+                    it.date_import = model["date_import"].toString()
+                    it.date_export = model["date_export"].toString()
+                    it.exp_source = model["study_source"].toString()
+                    it.count = model["count"].toString()
+                })
+
+            }
+
+            studies
+
+        } ?: ArrayList()
 
         //TODO query missing count/date_edit
         fun getFieldObject(exp_id: Int): FieldObject? = withDatabase { db ->
@@ -141,6 +165,7 @@ class StudyDao {
                         it.date_import = cursor.getString(cursor.getColumnIndexOrThrow("date_import"))
                         it.date_export = cursor.getString(cursor.getColumnIndexOrThrow("date_export"))
                         it.exp_source = cursor.getString(cursor.getColumnIndexOrThrow("study_source"))
+                        it.count = cursor.count.toString()
                     }
 
                 } else null
@@ -213,7 +238,7 @@ class StudyDao {
                 db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
                         Study.FK to rowid,
                         ObservationUnitAttribute.FK to attrId,
-                        "observation_unit_attribute_value" to data[index]
+                        "observation_unit_value_name" to data[index]
                 ))
             }
         }
@@ -221,7 +246,9 @@ class StudyDao {
         private fun updateImportDate(db: SQLiteDatabase, exp_id: Int) = transaction { db ->
 
             db.update(Study.tableName, ContentValues().apply {
-                //put("count", db.query(ObservationUnitModel.tableName).count)
+                put("count", db.query(ObservationUnit.tableName,
+                        where = "${Study.FK} = ?",
+                        whereArgs = arrayOf(exp_id.toString())).count)
                 put("date_import", getTime())
             }, "${Study.PK} = ?", arrayOf("$exp_id"))
         }

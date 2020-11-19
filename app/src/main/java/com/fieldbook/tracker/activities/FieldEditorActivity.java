@@ -138,6 +138,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         if (ConfigActivity.dt == null) {    // when resuming
             ConfigActivity.dt = new DataHelper(this);
         }
+        ConfigActivity.dt.open();
         ConfigActivity.dt.updateExpTable(false, true, false, 0);
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
