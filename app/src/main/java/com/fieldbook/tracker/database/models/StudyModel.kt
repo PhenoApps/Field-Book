@@ -18,6 +18,7 @@ data class StudyModel(val map: Row) {
         val common_crop_name: String? by map
         val study_sort_name: String? by map //selected column (plot prop or trait?) to sort field by when moving through entries
         val date_import: String? by map
+        val date_edit: String? by map
         val date_export: String? by map
         val study_source: String? by map //denotes whether field was imported via brapi or locally
         val additional_info: String? by map //catch all, dont need with attr/value tables, turn into a query when making BrapiStudyDetail

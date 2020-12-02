@@ -3,6 +3,7 @@ package com.fieldbook.tracker.database.dao
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import androidx.core.content.contentValuesOf
+import androidx.core.database.getStringOrNull
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
 import com.fieldbook.tracker.objects.FieldObject
@@ -13,6 +14,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.models.StudyModel
 import kotlin.system.measureTimeMillis
+import kotlin.time.milliseconds
 
 class StudyDao {
 
@@ -47,21 +49,19 @@ class StudyDao {
                 ", " + select.joinToString(", ")
             } else ""
 
-            //delete the old table
-            db.execSQL("DROP TABLE IF EXISTS $sObservationUnitPropertyViewName")
-
             /**
              * Creating a view here is faster, but
              * using a table gives better performance for getRangeByIdAndPlot query
              */
             val query = """
-        CREATE TABLE IF NOT EXISTS $sObservationUnitPropertyViewName AS 
-        SELECT units.${ObservationUnit.PK} AS id $selectStatement
-        FROM ${ObservationUnit.tableName} AS units
-        LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.${ObservationUnit.PK} = vals.${ObservationUnit.FK}
-        LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr on vals.${ObservationUnitAttribute.FK} = attr.${ObservationUnitAttribute.PK}
-        WHERE units.${Study.FK} = $exp_id
-        GROUP BY units.${ObservationUnit.PK}""".trimMargin()
+                CREATE TABLE IF NOT EXISTS $sObservationUnitPropertyViewName AS 
+                SELECT units.${ObservationUnit.PK} AS id $selectStatement
+                FROM ${ObservationUnit.tableName} AS units
+                LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.${ObservationUnit.PK} = vals.${ObservationUnit.FK}
+                LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr on vals.${ObservationUnitAttribute.FK} = attr.${ObservationUnitAttribute.PK}
+                WHERE units.${Study.FK} = $exp_id
+                GROUP BY units.${ObservationUnit.PK}
+            """.trimMargin()
 
             println("$exp_id $query")
 
@@ -74,15 +74,7 @@ class StudyDao {
 
         fun deleteField(exp_id: Int) = withDatabase { db ->
 
-            val deleteQuery = "DELETE FROM ${Study.tableName} WHERE ${Study.PK} = $exp_id"
-
-//    val deleteQuery = sTableNames.joinToString(";") {
-//        "DELETE FROM $it WHERE internal_study_db_id = $exp_id"
-//    }
-
-//    println(deleteQuery)
-
-            db.execSQL(deleteQuery)
+            db.delete(Study.tableName, "${Study.PK} = ?", arrayOf(exp_id.toString()))
 
         }
 
@@ -127,7 +119,14 @@ class StudyDao {
                     it.primary_id = model["study_primary_id_name"].toString()
                     it.secondary_id = model["study_secondary_id_name"].toString()
                     it.date_import = model["date_import"].toString()
-                    it.date_export = model["date_export"].toString()
+                    it.date_edit = when (val date = model["date_edit"].toString()) {
+                        null, "null" -> ""
+                        else -> date
+                    }
+                    it.date_export = when (val date = model["date_export"].toString()) {
+                        null, "null" -> ""
+                        else -> date
+                    }
                     it.exp_source = model["study_source"].toString()
                     it.count = model["count"].toString()
                 })
@@ -148,6 +147,7 @@ class StudyDao {
                             "study_primary_id_name",
                             "study_secondary_id_name",
                             "date_import",
+                            "date_edit",
                             "date_export",
                             "study_source"),
                     where = "${Study.PK} = ?",
@@ -162,8 +162,9 @@ class StudyDao {
                         it.unique_id = cursor.getString(cursor.getColumnIndexOrThrow("study_unique_id_name"))
                         it.primary_id = cursor.getString(cursor.getColumnIndexOrThrow("study_primary_id_name"))
                         it.secondary_id = cursor.getString(cursor.getColumnIndexOrThrow("study_secondary_id_name"))
-                        it.date_import = cursor.getString(cursor.getColumnIndexOrThrow("date_import"))
-                        it.date_export = cursor.getString(cursor.getColumnIndexOrThrow("date_export"))
+                        it.date_import = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("date_import")) ?: ""
+                        it.date_edit = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("date_edit")) ?: ""
+                        it.date_export = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("date_export")) ?: ""
                         it.exp_source = cursor.getString(cursor.getColumnIndexOrThrow("study_source"))
                         it.count = cursor.count.toString()
                     }
@@ -176,11 +177,13 @@ class StudyDao {
          * This function uses a field object to create a exp/study row in the database.
          * Columns are new observation unit attribute names that are inserted as well.
          */
-        fun createField(e: FieldObject, columns: List<String>): Int = transaction { db ->
+        fun createField(e: FieldObject, columns: List<String>): Int = withDatabase { db ->
 
             when (val sid = checkFieldName(e.exp_name)) {
 
                 -1 -> {
+
+                    db.beginTransaction()
 
                     //insert new study row into table
                     val rowid = db.insert(Study.tableName, null, ContentValues().apply {
@@ -194,15 +197,27 @@ class StudyDao {
                         put("common_crop_name", e.exp_species)
                         put("study_sort_name", e.exp_sort)
                         put("date_import", e.date_import)
+                        put("date_export", e.date_export)
+                        put("date_edit", e.date_edit)
                         put("study_source", e.exp_source)
                     }).toInt()
 
-                    //insert observation unit attributes using columns parameter
-                    columns.forEach {
-                        db.insert(ObservationUnitAttribute.tableName, null, contentValuesOf(
-                                "observation_unit_attribute_name" to it,
-                                Study.FK to rowid
-                        ))
+                    try {
+                        //insert observation unit attributes using columns parameter
+                        columns.forEach {
+                            db.insert(ObservationUnitAttribute.tableName, null, contentValuesOf(
+                                    "observation_unit_attribute_name" to it,
+                                    Study.FK to rowid
+                            ))
+                        }
+
+                        db.setTransactionSuccessful()
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    } finally {
+
+                        db.endTransaction()
                     }
 
                     rowid
@@ -216,10 +231,11 @@ class StudyDao {
 
         data class FieldPreferenceNames(val unique: String, val primary: String, val secondary: String)
 
-        fun createFieldData(exp_id: Int, columns: List<String>, data: List<String>) = transaction { db ->
+        fun createFieldData(exp_id: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
 
             val names = getNames(exp_id)!!
 
+            //TODO: indexOf can return -1 which leads to array out of bounds exception
             //input data corresponds to original database column names
             val uniqueIndex = columns.indexOf(names.unique)
             val primaryIndex = columns.indexOf(names.primary)
@@ -231,41 +247,56 @@ class StudyDao {
                     "primary_id" to data[primaryIndex],
                     "secondary_id" to data[secondaryIndex]))
 
-            columns.forEachIndexed { index, it ->
+            db.beginTransaction()
 
-                val attrId = ObservationUnitAttributeDao.getIdByName(it)
+            try {
+                columns.forEachIndexed { index, it ->
 
-                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                        Study.FK to rowid,
-                        ObservationUnitAttribute.FK to attrId,
-                        "observation_unit_value_name" to data[index]
-                ))
+                    val attrId = ObservationUnitAttributeDao.getIdByName(it)
+
+                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                            Study.FK to exp_id,
+                            ObservationUnit.FK to rowid,
+                            ObservationUnitAttribute.FK to attrId,
+                            "observation_unit_value_name" to data[index]
+                    ))
+                }
+
+                db.setTransactionSuccessful()
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+            } finally {
+
+                db.endTransaction()
             }
         }
 
-        private fun updateImportDate(db: SQLiteDatabase, exp_id: Int) = transaction { db ->
+        private fun updateImportDate(db: SQLiteDatabase, exp_id: Int) {
 
             db.update(Study.tableName, ContentValues().apply {
                 put("count", db.query(ObservationUnit.tableName,
                         where = "${Study.FK} = ?",
-                        whereArgs = arrayOf(exp_id.toString())).count)
+                        whereArgs = arrayOf("$exp_id")).count)
                 put("date_import", getTime())
             }, "${Study.PK} = ?", arrayOf("$exp_id"))
         }
 
-        //TODO Trevor date_edit is not a column in study table
         private fun modifyDate(db: SQLiteDatabase, exp_id: Int) {
 
-            db.query(Study.tableName).toTable().forEach {
+            db.query(Study.tableName).toTable().forEach { study ->
+
+                val studyKey = study[Study.PK]
 
                 with(db.query(Observation.tableName, arrayOf("observation_time_stamp"),
                         where = "${Study.FK} = ?",
-                        whereArgs = arrayOf("$exp_id"),
+                        whereArgs = arrayOf("$studyKey"),
                         orderBy = "datetime(substr(observation_time_stamp, 1, 19)) DESC").toFirst()) {
 
-//                    db.update(StudyModel.tableName, ContentValues().apply {
-//                        put("date_edit", this@with["observation_time_stamp"].toString())
-//                    }, "$PK = ?", arrayOf("$exp_id"))
+                    db.update(Study.tableName, ContentValues().apply {
+                        put("date_edit", this@with["observation_time_stamp"].toString())
+                    }, "${Study.PK} = ?", arrayOf("$studyKey"))
                 }
             }
         }
@@ -280,6 +311,7 @@ class StudyDao {
         /**
          * Updates the date_import field and count column of the study table.
          * imp: boolean flag to get import date of observation units and count
+         *
          */
         fun updateStudyTable(updateImportDate: Boolean = false,
                              modifyDate: Boolean = false,

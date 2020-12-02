@@ -16,33 +16,88 @@ import java.util.*
  * These classes should never be initialized and are just used in createTables to migrate the database version.
  *
  *
- * TODO: replace on delete cascades with manual delete function (that is only used if preference is set)
  */
 class Migrator {
 
     companion object {
 
+        const val sVisibleObservationVariableViewName = "VisibleObservationVariable"
+        val sVisibleObservationVariableView = """
+            CREATE VIEW IF NOT EXISTS $sVisibleObservationVariableViewName 
+            AS SELECT ${ObservationVariable.PK}, observation_variable_name, observation_variable_field_book_format, observation_variable_details, default_value, position
+            FROM ${ObservationVariable.tableName} WHERE visible LIKE "true" ORDER BY position
+        """.trimIndent()
+
+        const val sObservationUnitPropertyViewName = "ObservationUnitProperty"
+
+        //view for getUserTraitObservations call which uses joins
+        //looks like this query just finds all observations that are not pictures
+        //view for all remote/local observations that are not photos format
+        const val sNonImageObservationsViewName = "NonImageObservations"
+        const val sNonImageObservationsView = """
+            CREATE VIEW IF NOT EXISTS $sNonImageObservationsViewName
+            AS SELECT obs.${Observation.PK} AS id, 
+                obs.value AS value, 
+                s.${Study.PK} AS study_db_id,
+                vars.trait_data_source
+            FROM ${Observation.tableName} AS obs, ${Study.tableName} AS s
+            JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK}
+            JOIN ${Study.tableName} ON obs.${Study.FK} = ${Study.tableName}.${Study.PK}
+            WHERE vars.observation_variable_field_book_format <> 'photo'
+        """
+
+        //a view for handling local image observations
+        const val sLocalImageObservationsViewName = "LocalImageObservations"
+        const val sLocalImageObservationsView = """
+            CREATE VIEW IF NOT EXISTS $sLocalImageObservationsViewName     
+            AS SELECT obs.${Observation.PK} AS id, 
+                obs.value AS value, 
+                study.${Study.PK} AS ${Study.FK}
+            FROM ${Observation.tableName} AS obs
+            JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
+            JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK} 
+            WHERE (vars.trait_data_source = 'local' OR vars.trait_data_source IS NULL) 
+                AND vars.observation_variable_field_book_format = 'photo'
+        """
+
+        const val sRemoteImageObservationsViewName = "RemoteImageObservationsView"
+        const val sRemoteImageObservationsView = """
+            CREATE VIEW IF NOT EXISTS $sRemoteImageObservationsViewName     
+            AS SELECT obs.${Observation.PK} AS id, 
+                        obs.value AS value, 
+                        study.${Study.PK} AS ${Study.FK},
+                        vars.trait_data_source AS trait_data_source,
+                        vars.observation_variable_field_book_format
+            FROM ${Observation.tableName} AS obs
+            JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
+            JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK} 
+            WHERE study.study_source IS NOT NULL
+                AND vars.trait_data_source <> 'local' 
+                AND vars.trait_data_source IS NOT NULL
+                AND vars.observation_variable_field_book_format = 'photo'
+        """
+
+        private val sTableNames = arrayOf(
+                Study.tableName,
+                ObservationUnit.tableName,
+                ObservationVariable.tableName,
+                Observation.tableName,
+                ObservationVariableAttribute.tableName,
+                ObservationVariableValue.tableName,
+                ObservationUnitAttribute.tableName,
+                ObservationUnitValue.tableName)
+
+        private val sViewNames = arrayOf(
+                sVisibleObservationVariableViewName,
+                sNonImageObservationsViewName,
+                sLocalImageObservationsViewName,
+                sRemoteImageObservationsViewName,
+                sObservationUnitPropertyViewName)
+
         fun migrateSchema(db: SQLiteDatabase, traits: ArrayList<TraitObject>) {
 
             createTables(db, traits)
 
-            //at this point the new schema has been created through DataHelper
-            //next we need to query the study table for unique/primary/secondary ids to build the other queries
-            val study = db.query(Study.tableName).toFirst()
-
-            if (study.isNotEmpty()) {
-
-//                helper.switchField(1)
-//                StudyDao.switchField(1)
-
-                //create views
-                withDatabase { db ->
-
-                    db.execSQL("DROP VIEW IF EXISTS $sImageObservationViewName")
-
-                    db.execSQL(sImageObservationView)
-                }
-            }
         }
 
         /**
@@ -55,100 +110,109 @@ class Migrator {
          */
         fun createTables(db: SQLiteDatabase, traits: ArrayList<TraitObject>) {
 
-            deleteTables()
+            try {
 
-            //if (deleteTables() == 1) {
+                db.beginTransaction()
 
-                try {
+                deleteTables()
 
-                    db.beginTransaction()
+                //maybe replace this wall of with statements with kotlin.reflect nested class iteration
+                with(Study) {
+                    migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
+                }
 
-                    with(Study) {
-                        migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
-                    }
+                with(ObservationUnit) {
+                    migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
+                }
 
-                    with(ObservationUnit) {
-                        migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
-                    }
+                with(ObservationUnitAttribute) {
+                    migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
+                }
 
-                    with(ObservationUnitAttribute) {
-                        migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
-                    }
+                with(ObservationUnitValue) {
+                    migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
+                }
 
-                    with(ObservationUnitValue) {
-                        migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
-                    }
+                with(ObservationVariable) {
+                    migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
+                }
 
-                    with(ObservationVariable) {
-                        migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
-                    }
+                with(ObservationVariableAttribute) {
+                    db.execSQL(createTableStatement(tableName, columnDefs))
+                }
 
-                    with(ObservationVariableAttribute) {
-                        db.execSQL(createTableStatement(tableName, columnDefs))
-                    }
+                with(ObservationVariableValue) {
+                    db.execSQL(createTableStatement(tableName, columnDefs))
+                }
 
-                    with(ObservationVariableValue) {
-                        db.execSQL(createTableStatement(tableName, columnDefs))
-                    }
+                //insert all default columns as observation variable attribute rows
+                val attrIds = mutableMapOf<String, String>()
 
-                    //insert all default columns as observation variable attribute rows
-                    val attrIds = mutableMapOf<String, String>()
+                ObservationVariableAttribute.defaultColumnDefs.asSequence().forEach { entry ->
 
-                    ObservationVariableAttribute.defaultColumnDefs.asSequence().forEach { entry ->
+                    val attrId = db.insert(ObservationVariableAttribute.tableName, null, contentValuesOf(
+                            "observation_variable_attribute_name" to entry.key,
+                    ))
 
-                        val attrId = db.insert(ObservationVariableAttribute.tableName, null, contentValuesOf(
-                                "observation_variable_attribute_name" to entry.key,
-                        ))
-
-                        //associate default column names with rowids of the attribute inserted
-                        attrIds[entry.key] = attrId.toString()
-                    }
+                    //associate default column names with rowids of the attribute inserted
+                    attrIds[entry.key] = attrId.toString()
+                }
 
 //                println("ids: $attrIds")
 
-                    //iterate over all traits, insert observation variable values using the above mapping
-                    //old schema has extra columns in the trait table which are now bridged with attr/vals in the new schema
-                    traits.forEachIndexed { index, trait ->
-                        //iterate trhough mapping of the old columns that are now attr/vals
-                        mapOf(
-                                "validValuesMin" to trait.minimum as String,
-                                "validValuesMax" to trait.maximum as String,
-                                "category" to trait.categories as String,
-                        ).asSequence().forEach { attrValue ->
+                //iterate over all traits, insert observation variable values using the above mapping
+                //old schema has extra columns in the trait table which are now bridged with attr/vals in the new schema
+                traits.forEachIndexed { index, trait ->
+                    //iterate trhough mapping of the old columns that are now attr/vals
+                    mapOf(
+                            "validValuesMin" to trait.minimum as String,
+                            "validValuesMax" to trait.maximum as String,
+                            "category" to trait.categories as String,
+                    ).asSequence().forEach { attrValue ->
 
-                            //TODO: commenting this out would create a sparse table from the unused attribute values
+                        //TODO: commenting this out would create a sparse table from the unused attribute values
 //                        if (attrValue.value.isNotEmpty()) {
 
-                            val rowid = db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
+                        val rowid = db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
 
-                                    ObservationVariable.FK to trait.id,
-                                    ObservationVariableAttribute.FK to attrIds[attrValue.key],
-                                    "observation_variable_attribute_value" to attrValue.value,
-                            ))
+                                ObservationVariable.FK to trait.id,
+                                ObservationVariableAttribute.FK to attrIds[attrValue.key],
+                                "observation_variable_attribute_value" to attrValue.value,
+                        ))
 
 //                            println("$rowid Inserting ${attrValue.key} = ${attrValue.value} at ${attrIds[attrValue.key]}")
 //                        }
-                        }
                     }
-
-                    with(Observation) {
-                        migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
-                    }
-
-                    db.execSQL(sVisibleObservationVariableView)
-
-                    db.setTransactionSuccessful()
-
-                } catch (e: Exception) {
-
-                    e.printStackTrace()
-
-                } finally {
-
-                    db.endTransaction()
-
                 }
-            //}
+
+                with(Observation) {
+                    migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
+                }
+
+                db.execSQL(sVisibleObservationVariableView)
+
+                db.execSQL(sLocalImageObservationsView)
+
+                db.execSQL(sNonImageObservationsView)
+
+                db.execSQL(sRemoteImageObservationsView)
+
+                //all views but ObservationUnitProperty are created
+
+                db.setTransactionSuccessful() //commits the transaction
+
+            } catch (e: Exception) {
+
+                //an error caught during a transaction will rollback
+                    // before setTransactionSuccesful is called
+
+                e.printStackTrace()
+
+            } finally {
+
+                db.endTransaction()
+
+            }
         }
 
         /**
@@ -161,12 +225,12 @@ class Migrator {
                                          columnDefs: Map<String, String>,
                                          compositeKey: String? = null,
                                          selectStatement: String? = null) = """
-    CREATE TABLE IF NOT EXISTS $name ${
-            columnDefs
-                    .map { col -> "${col.key} ${col.value}" }
-                    .joinToString(",", "(", compositeKey ?: "")
-        });
-""".trimIndent()
+            CREATE TABLE IF NOT EXISTS $name ${
+                    columnDefs
+                            .map { col -> "${col.key} ${col.value}" }
+                            .joinToString(",", "(", compositeKey ?: "")
+                });
+            """.trimIndent()
 
 
         /**
@@ -217,18 +281,15 @@ class Migrator {
 
             val table = createTableStatement(to, columnDefs)
 
-//    println(table)
-
             db.execSQL(table)
 
             selectAll(db, from, pattern) { models ->
 
                 models.forEach {
-//            println(it)
                     try {
                         db.insertWithOnConflict(to, null, it.toContentValues(), SQLiteDatabase.CONFLICT_IGNORE)
                     } catch (constraint: SQLiteConstraintException) {
-                        //constraint.printStackTrace()
+                        constraint.printStackTrace()
                     } catch (exp: Exception) {
                         exp.printStackTrace()
                     }
@@ -248,24 +309,28 @@ class Migrator {
 
             }
 
-            dropViewStatement(sVisibleObservationVariableViewName)
-            dropViewStatement(sObservationUnitPropertyViewName)
+            sViewNames.forEach {
+
+                dropViewStatement(it)
+
+            }
 
             1
 
         } catch (e: Exception) {
+
             e.printStackTrace()
 
             -1
         }
 
         private fun dropTableStatement(name: String) = """
-    DROP TABLE IF EXISTS $name
-""".trimIndent()
+            DROP TABLE IF EXISTS $name
+        """.trimIndent()
 
         private fun dropViewStatement(name: String) = """
-    DROP VIEW IF EXISTS $name
-""".trimIndent()
+            DROP VIEW IF EXISTS $name
+        """.trimIndent()
 
         /**
          * Used to select all rows from previous database schema.
@@ -283,62 +348,6 @@ class Migrator {
 
         }
 
-        private const val TRAITS = "traits"
-        private const val USER_TRAITS = "user_traits"
-        private val USER_TRAITS_COLS = arrayOf("rid", "parent", "trait", "userValue", "timeTaken", "person", "location", "rep", "notes", "exp_id", "observation_db_id", "last_synced_time")
-
-        const val sVisibleObservationVariableViewName = "VisibleObservationVariable"
-        val sVisibleObservationVariableView = """
-    CREATE VIEW IF NOT EXISTS $sVisibleObservationVariableViewName 
-    AS SELECT ${ObservationVariable.PK}, observation_variable_name, observation_variable_field_book_format, observation_variable_details, default_value, position
-    FROM ${ObservationVariable.tableName} WHERE visible LIKE "true" ORDER BY position
-""".trimIndent()
-
-        const val sObservationUnitPropertyViewName = "ObservationUnitProperty"
-        const val sImageObservationViewName = "ImageObservation"
-        val sImageObservationView = """
-    CREATE VIEW IF NOT EXISTS $sImageObservationViewName     
-    AS SELECT props.id, unit.observation_unit_db_id,
-    study.study_alias,
-    obs.${Observation.PK}, obs.observation_time_stamp, obs.value, obs.observation_db_id, obs.last_synced_time, obs.collector,
-    vars.external_db_id, vars.observation_variable_name, vars.observation_variable_details
-    FROM ${Observation.tableName} AS obs
-    JOIN ${ObservationUnit.tableName} AS unit ON obs.${ObservationUnit.FK} = unit.${ObservationUnit.PK}
-    JOIN $sObservationUnitPropertyViewName AS props ON obs.${ObservationUnit.FK} = unit.${ObservationUnit.PK}
-    JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
-    JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK} 
-    WHERE vars.observation_variable_field_book_format = 'photo'
-""".trimIndent()
-
-//private fun createImageObservationView(hostUrl: String): String = """
-//    CREATE VIEW IF NOT EXISTS $sImageObservationViewName
-//    AS SELECT props.id, unit.observation_unit_name,
-//    vars.external_db_id, vars.trait,
-//    obs.time_taken, obs.value,
-//    exp_id.exp_alias,
-//    user_traits.id, user_traits.observation_db_id, user_traits.last_synced_time, user_traits.person,
-//    traits.details
-//    FROM ${ObservationModel.tableName} AS obs
-//    JOIN ${ObservationUnitModel.tableName} AS unit ON obs.${ObservationUnitModel.FK} = unit.${ObservationUnitModel.PK}
-//    JOIN $sObservationUnitPropertyViewName AS props ON obs.${ObservationUnitModel.FK} = unit.${ObservationUnitModel.PK}
-//    JOIN ${ObservationVariableModel.tableName} AS vars ON obs.${ObservationVariableModel.FK} = vars.${ObservationVariableModel.PK}
-//    JOIN ${StudyModel.tableName} AS study ON obs.${StudyModel.FK} = study.${StudyModel.PK}
-//    WHERE study.study_source IS NOT NULL
-//    AND vars.trait_data_source = $hostUrl
-//    AND obs.value <> ''
-//    AND vars.trait_data_source IS NOT NULL
-//    AND vars.observation_variable_field_book_format = 'photo'
-//""".trimIndent()
-
-        private val sTableNames = arrayOf(
-                Study.tableName,
-                ObservationUnit.tableName,
-                ObservationVariable.tableName,
-                Observation.tableName,
-                ObservationVariableAttribute.tableName,
-                ObservationVariableValue.tableName,
-                ObservationUnitAttribute.tableName,
-                ObservationUnitValue.tableName)
     }
 
     class ObservationUnit private constructor() {
@@ -385,9 +394,9 @@ class Migrator {
             const val tableName = "observations"
             val columnDefs by lazy {
                 mapOf(PK to "INTEGER PRIMARY KEY AUTOINCREMENT",
-                        ObservationUnit.FK to "TEXT REFERENCES ${ObservationUnit.tableName}(${ObservationUnit.PK})",
-                        Study.FK to "INT REFERENCES ${Study.tableName}(${Study.PK}) ON DELETE CASCADE",
-                        ObservationVariable.FK to "INT REFERENCES ${ObservationVariable.tableName}(${ObservationVariable.PK})",
+                        ObservationUnit.FK to "TEXT",
+                        Study.FK to "INT REFERENCES ${Study.tableName}(${Study.PK}) ON DELETE SET NULL",
+                        ObservationVariable.FK to "INT",
                         "observation_variable_name" to "TEXT",
                         "observation_variable_field_book_format" to "TEXT",
                         "value" to "TEXT",
@@ -396,7 +405,9 @@ class Migrator {
                         "geoCoordinates" to "TEXT",
                         "observation_db_id" to "TEXT",
                         "last_synced_time" to "TEXT",
-                        "additional_info" to "TEXT")
+                        "additional_info" to "TEXT",
+                        "rep" to "TEXT",
+                        "notes" to "TEXT")
             }
             val migratePattern by lazy {
                 mapOf("id" to PK,
@@ -409,7 +420,9 @@ class Migrator {
                         "person" to "collector",
                         "location" to "geoCoordinates",
                         "observation_db_id" to "observation_db_id",
-                        "last_synced_time" to "last_synced_time")
+                        "last_synced_time" to "last_synced_time",
+                        "rep" to "rep",
+                        "notes" to "notes")
             }
         }
     }
@@ -443,9 +456,9 @@ class Migrator {
             const val tableName = "observation_units_values"
             val columnDefs by lazy {
                 mapOf(PK to "INTEGER PRIMARY KEY AUTOINCREMENT",
-                        "observation_unit_attribute_db_id" to "INT REFERENCES ${ObservationUnitAttribute.tableName}(${ObservationUnitAttribute.PK}) ON DELETE CASCADE",
+                        "observation_unit_attribute_db_id" to "INT REFERENCES ${ObservationUnitAttribute.tableName}(${ObservationUnitAttribute.PK})",
                         "observation_unit_value_name" to "TEXT",
-                        ObservationUnit.FK to "INT REFERENCES ${ObservationUnit.tableName}(${ObservationUnit.PK}) ON DELETE CASCADE",
+                        ObservationUnit.FK to "INT REFERENCES ${ObservationUnit.tableName}(${ObservationUnit.PK})",
                         Study.FK to "INT REFERENCES ${Study.tableName}(${Study.PK}) ON DELETE CASCADE")
             }
             val migratePattern by lazy {
@@ -531,9 +544,9 @@ class Migrator {
             const val tableName = "observation_variable_values"
             val columnDefs by lazy {
                 mapOf(PK to "INTEGER PRIMARY KEY AUTOINCREMENT",
-                        ObservationVariableAttribute.FK to "INT REFERENCES ${ObservationVariableAttribute.tableName}(${ObservationVariableAttribute.PK}) ON DELETE CASCADE",
+                        ObservationVariableAttribute.FK to "INT REFERENCES ${ObservationVariableAttribute.tableName}(${ObservationVariableAttribute.PK})",
                         "observation_variable_attribute_value" to "TEXT",
-                        ObservationVariable.FK to "INT REFERENCES ${ObservationVariable.tableName}(${ObservationVariable.PK}) ON DELETE CASCADE",
+                        ObservationVariable.FK to "INT REFERENCES ${ObservationVariable.tableName}(${ObservationVariable.PK})",
                 )}
         }
     }
@@ -555,6 +568,7 @@ class Migrator {
                         "exp_species" to "common_crop_name",
                         "exp_sort" to "study_sort_name",
                         "date_import" to "date_import",
+                        "date_edit" to "date_edit",
                         "date_export" to "date_export",
                         "exp_source" to "study_source",
                         "count" to "count",)
@@ -570,6 +584,7 @@ class Migrator {
                         "common_crop_name" to "Text",
                         "study_sort_name" to "Text",
                         "date_import" to "Text",
+                        "date_edit" to "Text",
                         "date_export" to "Text",
                         "study_source" to "Text",
                         "additional_info" to "Text",

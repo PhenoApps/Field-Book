@@ -24,7 +24,8 @@ class ObservationUnitDao {
             }
 
             result
-        }
+
+        } ?: false
 
         fun getAll(eid: Int): Array<ObservationUnitModel> = withDatabase { db ->
 

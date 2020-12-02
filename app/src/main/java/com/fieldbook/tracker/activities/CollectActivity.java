@@ -577,6 +577,7 @@ public class CollectActivity extends AppCompatActivity {
         dt.deleteTrait(rangeBox.getPlotID(), parent);
 
         String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
                 ep.getString("Location", ""), "", exp_id, observationDbId,
@@ -1180,6 +1181,7 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         void setNewTraits(final String plotID) {
+
             newTraits = (HashMap) dt.getUserDetail(plotID).clone();
         }
 

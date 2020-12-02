@@ -7,6 +7,7 @@ import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
+import org.threeten.bp.format.DateTimeFormatter
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -183,6 +184,8 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
         e.printStackTrace()
     } catch (noElem: NoSuchElementException) {
         noElem.printStackTrace()
+    } finally {
+        close()
     }
 
     table
@@ -203,12 +206,13 @@ inline fun <reified T> withDatabase(crossinline function: (SQLiteDatabase) -> T)
     }
 
 } catch (npe: NullPointerException) {
-    //npe.printStackTrace()
+    npe.printStackTrace()
     null
 } catch (e: Exception) {
     e.printStackTrace()
     null
 }
 
+var internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ")
 
 

@@ -91,6 +91,7 @@ public class DataHelper {
             this.context = context;
             openHelper = new OpenHelper(this.context);
             db = openHelper.getWritableDatabase();
+
             ep = context.getSharedPreferences("Settings", 0);
 
             this.insertTraits = db.compileStatement(INSERTTRAITS);
@@ -177,7 +178,6 @@ public class DataHelper {
      */
     public long insertUserTraits(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id, String observationDbId, OffsetDateTime lastSyncedTime) {
 
-        //TODO add rep
         return ObservationDao.Companion.insertUserTraits(rid, parent, trait, userValue, person, location, notes, exp_id, observationDbId, lastSyncedTime);
 
 //        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
@@ -216,217 +216,238 @@ public class DataHelper {
      * Get rep of current plot/trait combination
      */
     public int getRep(String plot, String trait) {
-        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{plot, trait});
-        return cursor.getCount() + 1;
+
+        return ObservationDao.Companion.getRep(plot, trait) + 1;
+
+//        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{plot, trait});
+//        return cursor.getCount() + 1;
     }
 
     public int getMaxPositionFromTraits() {
 
-        int largest = 0;
+        return ObservationVariableDao.Companion.getMaxPosition();
 
-        Cursor cursor = db.rawQuery("select max(realPosition) from " + TRAITS, null);
-
-        if (cursor.moveToFirst()) {
-            largest = cursor.getInt(0);
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return largest;
+//        int largest = 0;
+//
+//        Cursor cursor = db.rawQuery("select max(realPosition) from " + TRAITS, null);
+//
+//        if (cursor.moveToFirst()) {
+//            largest = cursor.getInt(0);
+//        }
+//
+//        if (!cursor.isClosed()) {
+//            cursor.close();
+//        }
+//
+//        return largest;
     }
 
     public Boolean isBrapiSynced(String rid, String parent) {
 
-        Boolean synced = false;
-        Observation o = new Observation();
+        return ObservationDao.Companion.isBrapiSynced(rid, parent);
 
-        Cursor cursor = db.rawQuery("SELECT observation_db_id, last_synced_time, timeTaken from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
-
-        if (cursor.moveToFirst()) {
-            o.setDbId(cursor.getString(0));
-            o.setLastSyncedTime(cursor.getString(1));
-            o.setTimestamp(cursor.getString(2));
-
-            if (o.getStatus() == Observation.Status.SYNCED || o.getStatus() == Observation.Status.EDITED) {
-                synced = true;
-            }
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return synced;
+//        Boolean synced = false;
+//        Observation o = new Observation();
+//
+//        Cursor cursor = db.rawQuery("SELECT observation_db_id, last_synced_time, timeTaken from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
+//
+//        if (cursor.moveToFirst()) {
+//            o.setDbId(cursor.getString(0));
+//            o.setLastSyncedTime(cursor.getString(1));
+//            o.setTimestamp(cursor.getString(2));
+//
+//            if (o.getStatus() == Observation.Status.SYNCED || o.getStatus() == Observation.Status.EDITED) {
+//                synced = true;
+//            }
+//        }
+//
+//        if (!cursor.isClosed()) {
+//            cursor.close();
+//        }
+//
+//        return synced;
     }
 
     /**
      * Get user created trait observations for currently selected study
      */
     public List<Observation> getUserTraitObservations() {
-        List<Observation> observations = new ArrayList<>();
 
-        // get currently selected study
         String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
-        String query = "SELECT " +
-                "user_traits.id, " +
-                "user_traits.userValue " +
-                "FROM " +
-                "user_traits " +
-                "JOIN " +
-                "traits ON user_traits.parent = traits.trait " +
-                "WHERE " +
-                "(traits.trait_data_source = 'local' OR traits.trait_data_source IS NULL)" +
-                "AND " +
-                "traits.format <> 'photo' " +
-                "AND " +
-                "user_traits.exp_id = " + exp_id + ";";
+        return ObservationDao.Companion.getUserTraitObservations(exp_id);
 
-        Cursor cursor = db.rawQuery(query, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Observation o = new Observation();
-                o.setFieldbookDbId(cursor.getString(0));
-                o.setValue(cursor.getString(1));
-                observations.add(o);
-
-            } while (cursor.moveToNext());
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return observations;
+//        List<Observation> observations = new ArrayList<>();
+//
+//        // get currently selected study
+//        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+//
+//        String query = "SELECT " +
+//                "user_traits.id, " +
+//                "user_traits.userValue " +
+//                "FROM " +
+//                "user_traits " +
+//                "JOIN " +
+//                "traits ON user_traits.parent = traits.trait " +
+//                "WHERE " +
+//                "(traits.trait_data_source = 'local' OR traits.trait_data_source IS NULL)" +
+//                "AND " +
+//                "traits.format <> 'photo' " +
+//                "AND " +
+//                "user_traits.exp_id = " + exp_id + ";";
+//
+//        Cursor cursor = db.rawQuery(query, null);
+//
+//        if (cursor.moveToFirst()) {
+//            do {
+//                Observation o = new Observation();
+//                o.setFieldbookDbId(cursor.getString(0));
+//                o.setValue(cursor.getString(1));
+//                observations.add(o);
+//
+//            } while (cursor.moveToNext());
+//        }
+//
+//        if (!cursor.isClosed()) {
+//            cursor.close();
+//        }
+//
+//        return observations;
     }
 
     /**
      * Get user created trait observations for currently selected study
      */
     public List<Image> getUserTraitImageObservations() {
-        List<Image> images = new ArrayList<>();
 
-        // get currently selected study
         String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
-        String query = "SELECT " +
-                "user_traits.id, " +
-                "user_traits.userValue " +
-                "FROM " +
-                "user_traits " +
-                "JOIN " +
-                "traits ON user_traits.parent = traits.trait " +
-                "WHERE " +
-                "(traits.trait_data_source = 'local' OR traits.trait_data_source IS NULL)" +
-                "AND " +
-                "traits.format = 'photo' " +
-                "AND " +
-                "user_traits.exp_id = " + exp_id + ";";
+        return ObservationDao.Companion.getUserTraitImageObservations(exp_id, missingPhoto);
 
-        Cursor cursor = db.rawQuery(query, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Image image = new Image(cursor.getString(1), missingPhoto);
-                image.setFieldbookDbId(cursor.getString(0));
-                images.add(image);
-
-            } while (cursor.moveToNext());
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return images;
+//        List<Image> images = new ArrayList<>();
+//
+//        // get currently selected study
+//        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+//
+//        String query = "SELECT " +
+//                "user_traits.id, " +
+//                "user_traits.userValue " +
+//                "FROM " +
+//                "user_traits " +
+//                "JOIN " +
+//                "traits ON user_traits.parent = traits.trait " +
+//                "WHERE " +
+//                "(traits.trait_data_source = 'local' OR traits.trait_data_source IS NULL)" +
+//                "AND " +
+//                "traits.format = 'photo' " +
+//                "AND " +
+//                "user_traits.exp_id = " + exp_id + ";";
+//
+//        Cursor cursor = db.rawQuery(query, null);
+//
+//        if (cursor.moveToFirst()) {
+//            do {
+//                Image image = new Image(cursor.getString(1), missingPhoto);
+//                image.setFieldbookDbId(cursor.getString(0));
+//                images.add(image);
+//
+//            } while (cursor.moveToNext());
+//        }
+//
+//        if (!cursor.isClosed()) {
+//            cursor.close();
+//        }
+//
+//        return images;
     }
 
     public List<Observation> getWrongSourceObservations(String hostUrl) {
 
-        List<Observation> observations = new ArrayList<>();
+        return ObservationDao.Companion.getWrongSourceObservations(hostUrl);
 
-        String query = String.format("SELECT " +
-                "user_traits.id, " +
-                "user_traits.userValue " +
-                "FROM " +
-                "user_traits " +
-                "JOIN " +
-                "traits ON user_traits.parent = traits.trait " +
-                "JOIN " +
-                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
-                "WHERE " +
-                "exp_id.exp_source IS NOT NULL " +
-                "AND " +
-                "traits.trait_data_source <> '%s' " +
-                "AND " +
-                "traits.trait_data_source <> 'local' " +
-                "AND " +
-                "traits.trait_data_source IS NOT NULL " +
-                "AND " +
-                "traits.format <> 'photo'", hostUrl);
-
-        Cursor cursor = db.rawQuery(query, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Observation o = new Observation();
-                o.setFieldbookDbId(cursor.getString(0));
-                o.setValue(cursor.getString(1));
-                observations.add(o);
-
-            } while (cursor.moveToNext());
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return observations;
+//        List<Observation> observations = new ArrayList<>();
+//
+//        String query = String.format("SELECT " +
+//                "user_traits.id, " +
+//                "user_traits.userValue " +
+//                "FROM " +
+//                "user_traits " +
+//                "JOIN " +
+//                "traits ON user_traits.parent = traits.trait " +
+//                "JOIN " +
+//                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+//                "WHERE " +
+//                "exp_id.exp_source IS NOT NULL " +
+//                "AND " +
+//                "traits.trait_data_source <> '%s' " +
+//                "AND " +
+//                "traits.trait_data_source <> 'local' " +
+//                "AND " +
+//                "traits.trait_data_source IS NOT NULL " +
+//                "AND " +
+//                "traits.format <> 'photo'", hostUrl);
+//
+//        Cursor cursor = db.rawQuery(query, null);
+//
+//        if (cursor.moveToFirst()) {
+//            do {
+//                Observation o = new Observation();
+//                o.setFieldbookDbId(cursor.getString(0));
+//                o.setValue(cursor.getString(1));
+//                observations.add(o);
+//
+//            } while (cursor.moveToNext());
+//        }
+//
+//        if (!cursor.isClosed()) {
+//            cursor.close();
+//        }
+//
+//        return observations;
     }
 
     public List<Image> getWrongSourceImageObservations(String hostUrl) {
 
-        List<Image> images = new ArrayList<>();
+        return ObservationDao.Companion.getWrongSourceImageObservations(hostUrl, missingPhoto);
 
-        String query = String.format("SELECT " +
-                "user_traits.id, " +
-                "user_traits.userValue " +
-                "FROM " +
-                "user_traits " +
-                "JOIN " +
-                "traits ON user_traits.parent = traits.trait " +
-                "JOIN " +
-                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
-                "WHERE " +
-                "exp_id.exp_source IS NOT NULL " +
-                "AND " +
-                "traits.trait_data_source <> '%s' " +
-                "AND " +
-                "traits.trait_data_source <> 'local' " +
-                "AND " +
-                "traits.trait_data_source IS NOT NULL " +
-                "AND " +
-                "traits.format = 'photo'", hostUrl);
-
-        Cursor cursor = db.rawQuery(query, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Image image = new Image(cursor.getString(1), missingPhoto);
-                image.setFieldbookDbId(cursor.getString(0));
-                images.add(image);
-
-            } while (cursor.moveToNext());
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return images;
+//        List<Image> images = new ArrayList<>();
+//
+//        String query = String.format("SELECT " +
+//                "user_traits.id, " +
+//                "user_traits.userValue " +
+//                "FROM " +
+//                "user_traits " +
+//                "JOIN " +
+//                "traits ON user_traits.parent = traits.trait " +
+//                "JOIN " +
+//                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+//                "WHERE " +
+//                "exp_id.exp_source IS NOT NULL " +
+//                "AND " +
+//                "traits.trait_data_source <> '%s' " +
+//                "AND " +
+//                "traits.trait_data_source <> 'local' " +
+//                "AND " +
+//                "traits.trait_data_source IS NOT NULL " +
+//                "AND " +
+//                "traits.format = 'photo'", hostUrl);
+//
+//        Cursor cursor = db.rawQuery(query, null);
+//
+//        if (cursor.moveToFirst()) {
+//            do {
+//                Image image = new Image(cursor.getString(1), missingPhoto);
+//                image.setFieldbookDbId(cursor.getString(0));
+//                images.add(image);
+//
+//            } while (cursor.moveToNext());
+//        }
+//
+//        if (!cursor.isClosed()) {
+//            cursor.close();
+//        }
+//
+//        return images;
     }
 
     /**
@@ -434,67 +455,72 @@ public class DataHelper {
      */
     public List<Observation> getObservations(String hostUrl) {
 
-        List<Observation> observations = new ArrayList<Observation>();
+        String uniqueName = ep.getString("ImportUniqueName", "");
+        String primaryName = ep.getString("ImportFirstName", "");
 
-        // Get only the data that belongs to the system we are importing to.
-        String query = "SELECT " +
-                "range.observationUnitDbId, " +
-                "range.observationUnitName, " +
-                "traits.external_db_id, " +
-                "user_traits.timeTaken, " +
-                "user_traits.userValue, " +
-                "traits.trait, " +
-                "exp_id.exp_alias, " +
-                "user_traits.id, " +
-                "user_traits.observation_db_id, " +
-                "user_traits.last_synced_time, " +
-                "user_traits.person " +
-                "FROM " +
-                "user_traits " +
-                "JOIN " +
-                "range ON user_traits.rid = range.observationUnitDbId " +
-                "JOIN " +
-                "traits ON user_traits.parent = traits.trait " +
-                "JOIN " +
-                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
-                "WHERE " +
-                "exp_id.exp_source IS NOT NULL " +
-                "AND " +
-                String.format("traits.trait_data_source = '%s' ", hostUrl) +
-                "AND " +
-                "user_traits.userValue <> '' " +
-                "AND " +
-                "traits.trait_data_source IS NOT NULL " +
-                "AND " +
-                "traits.format <> 'photo'";
+        return ObservationDao.Companion.getObservations(uniqueName, primaryName, hostUrl);
 
-        Cursor cursor = db.rawQuery(query, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Observation o = new Observation();
-
-                o.setUnitDbId(cursor.getString(0));
-                o.setVariableDbId(cursor.getString(2));
-                o.setTimestamp(cursor.getString(3));
-                o.setValue(cursor.getString(4));
-                o.setVariableName(cursor.getString(5));
-                o.setStudyId(cursor.getString(6));
-                o.setFieldbookDbId(cursor.getString(7));
-                o.setDbId(cursor.getString(8));
-                o.setLastSyncedTime(cursor.getString(9));
-                o.setCollector(cursor.getString(10));
-
-                observations.add(o);
-
-            } while (cursor.moveToNext());
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return observations;
+//        List<Observation> observations = new ArrayList<Observation>();
+//
+//        // Get only the data that belongs to the system we are importing to.
+//        String query = "SELECT " +
+//                "range.observationUnitDbId, " +
+//                "range.observationUnitName, " +
+//                "traits.external_db_id, " +
+//                "user_traits.timeTaken, " +
+//                "user_traits.userValue, " +
+//                "traits.trait, " +
+//                "exp_id.exp_alias, " +
+//                "user_traits.id, " +
+//                "user_traits.observation_db_id, " +
+//                "user_traits.last_synced_time, " +
+//                "user_traits.person " +
+//                "FROM " +
+//                "user_traits " +
+//                "JOIN " +
+//                "range ON user_traits.rid = range.observationUnitDbId " +
+//                "JOIN " +
+//                "traits ON user_traits.parent = traits.trait " +
+//                "JOIN " +
+//                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+//                "WHERE " +
+//                "exp_id.exp_source IS NOT NULL " +
+//                "AND " +
+//                String.format("traits.trait_data_source = '%s' ", hostUrl) +
+//                "AND " +
+//                "user_traits.userValue <> '' " +
+//                "AND " +
+//                "traits.trait_data_source IS NOT NULL " +
+//                "AND " +
+//                "traits.format <> 'photo'";
+//
+//        Cursor cursor = db.rawQuery(query, null);
+//
+//        if (cursor.moveToFirst()) {
+//            do {
+//                Observation o = new Observation();
+//
+//                o.setUnitDbId(cursor.getString(0));
+//                o.setVariableDbId(cursor.getString(2));
+//                o.setTimestamp(cursor.getString(3));
+//                o.setValue(cursor.getString(4));
+//                o.setVariableName(cursor.getString(5));
+//                o.setStudyId(cursor.getString(6));
+//                o.setFieldbookDbId(cursor.getString(7));
+//                o.setDbId(cursor.getString(8));
+//                o.setLastSyncedTime(cursor.getString(9));
+//                o.setCollector(cursor.getString(10));
+//
+//                observations.add(o);
+//
+//            } while (cursor.moveToNext());
+//        }
+//
+//        if (!cursor.isClosed()) {
+//            cursor.close();
+//        }
+//
+//        return observations;
     }
 
     /**
@@ -502,96 +528,104 @@ public class DataHelper {
      */
     public List<Image> getImageObservations(String hostUrl) {
 
-        List<Image> images = new ArrayList<Image>();
+        String uniqueName = ep.getString("ImportUniqueName", "");
+        String primaryName = ep.getString("ImportFirstName", "");
 
-        // Get only the data that belongs to the system we are importing to.
-        String query = "SELECT " +
-                "range.observationUnitDbId, " +
-                "range.observationUnitName, " +
-                "traits.external_db_id, " +
-                "user_traits.timeTaken, " +
-                "user_traits.userValue, " +
-                "traits.trait, " +
-                "exp_id.exp_alias, " +
-                "user_traits.id, " +
-                "user_traits.observation_db_id, " +
-                "user_traits.last_synced_time, " +
-                "user_traits.person, " +
-                "traits.details " +
-                "FROM " +
-                "user_traits " +
-                "JOIN " +
-                "range ON user_traits.rid = range.observationUnitDbId " +
-                "JOIN " +
-                "traits ON user_traits.parent = traits.trait " +
-                "JOIN " +
-                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
-                "WHERE " +
-                "exp_id.exp_source IS NOT NULL " +
-                "AND " +
-                String.format("traits.trait_data_source = '%s' ", hostUrl) +
-                "AND " +
-                "user_traits.userValue <> '' " +
-                "AND " +
-                "traits.trait_data_source IS NOT NULL " +
-                "AND " +
-                "traits.format = 'photo'";
+        return ObservationDao.Companion.getHostImageObservations(uniqueName, primaryName, hostUrl, missingPhoto);
 
-        Cursor cursor = db.rawQuery(query, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                // Instantiate our image with our file path. Which is stored in the userValue.
-                Image image = new Image(cursor.getString(4), missingPhoto);
-
-                // Assign the rest of our values
-                image.setUnitDbId(cursor.getString(0));
-
-                List<String> descriptiveOntologyTerms = new ArrayList<>();
-                descriptiveOntologyTerms.add(cursor.getString(2));
-                image.setDescriptiveOntologyTerms(descriptiveOntologyTerms);
-
-                // Set image decription the same as our trait description.
-                image.setDescription(cursor.getString(11));
-
-
-                image.setTimestamp(cursor.getString(3));
-                image.setFieldbookDbId(cursor.getString(7));
-                image.setDbId(cursor.getString(8));
-                image.setLastSyncedTime(cursor.getString(9));
-
-
-                images.add(image);
-
-            } while (cursor.moveToNext());
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return images;
+//        List<Image> images = new ArrayList<Image>();
+//
+//        // Get only the data that belongs to the system we are importing to.
+//        String query = "SELECT " +
+//                "range.observationUnitDbId, " +
+//                "range.observationUnitName, " +
+//                "traits.external_db_id, " +
+//                "user_traits.timeTaken, " +
+//                "user_traits.userValue, " +
+//                "traits.trait, " +
+//                "exp_id.exp_alias, " +
+//                "user_traits.id, " +
+//                "user_traits.observation_db_id, " +
+//                "user_traits.last_synced_time, " +
+//                "user_traits.person, " +
+//                "traits.details " +
+//                "FROM " +
+//                "user_traits " +
+//                "JOIN " +
+//                "range ON user_traits.rid = range.observationUnitDbId " +
+//                "JOIN " +
+//                "traits ON user_traits.parent = traits.trait " +
+//                "JOIN " +
+//                "exp_id ON user_traits.exp_id = exp_id.exp_id " +
+//                "WHERE " +
+//                "exp_id.exp_source IS NOT NULL " +
+//                "AND " +
+//                String.format("traits.trait_data_source = '%s' ", hostUrl) +
+//                "AND " +
+//                "user_traits.userValue <> '' " +
+//                "AND " +
+//                "traits.trait_data_source IS NOT NULL " +
+//                "AND " +
+//                "traits.format = 'photo'";
+//
+//        Cursor cursor = db.rawQuery(query, null);
+//
+//        if (cursor.moveToFirst()) {
+//            do {
+//                // Instantiate our image with our file path. Which is stored in the userValue.
+//                Image image = new Image(cursor.getString(4), missingPhoto);
+//
+//                // Assign the rest of our values
+//                image.setUnitDbId(cursor.getString(0));
+//
+//                List<String> descriptiveOntologyTerms = new ArrayList<>();
+//                descriptiveOntologyTerms.add(cursor.getString(2));
+//                image.setDescriptiveOntologyTerms(descriptiveOntologyTerms);
+//
+//                // Set image decription the same as our trait description.
+//                image.setDescription(cursor.getString(11));
+//
+//
+//                image.setTimestamp(cursor.getString(3));
+//                image.setFieldbookDbId(cursor.getString(7));
+//                image.setDbId(cursor.getString(8));
+//                image.setLastSyncedTime(cursor.getString(9));
+//
+//
+//                images.add(image);
+//
+//            } while (cursor.moveToNext());
+//        }
+//
+//        if (!cursor.isClosed()) {
+//            cursor.close();
+//        }
+//
+//        return images;
     }
 
     /**
      * Sync with observationdbids BrAPI
      */
     public void updateObservations(List<Observation> observations) {
-        ArrayList<String> ids = new ArrayList<String>();
 
-        db.beginTransaction();
-        String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
-        SQLiteStatement update = db.compileStatement(sql);
+        ObservationDao.Companion.updateObservations(observations);
 
-        for (Observation observation : observations) {
-            update.bindString(1, observation.getDbId());
-            update.bindString(2, observation.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.getDefault())));
-            update.bindString(3, observation.getFieldbookDbId());
-            update.execute();
-        }
-
-        db.setTransactionSuccessful();
-        db.endTransaction();
+//        ArrayList<String> ids = new ArrayList<String>();
+//
+//        db.beginTransaction();
+//        String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
+//        SQLiteStatement update = db.compileStatement(sql);
+//
+//        for (Observation observation : observations) {
+//            update.bindString(1, observation.getDbId());
+//            update.bindString(2, observation.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.getDefault())));
+//            update.bindString(3, observation.getFieldbookDbId());
+//            update.execute();
+//        }
+//
+//        db.setTransactionSuccessful();
+//        db.endTransaction();
     }
 
     public void updateImages(List<Image> images) {
@@ -613,28 +647,31 @@ public class DataHelper {
     }
 
     public void updateImage(Image image, Boolean writeLastSyncedTime) {
-        db.beginTransaction();
-        String sql;
-        if (writeLastSyncedTime) {
-            sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
-        } else {
-            sql = "UPDATE user_traits SET observation_db_id = ? WHERE id = ?";
-        }
 
-        SQLiteStatement update = db.compileStatement(sql);
+        ObservationDao.Companion.updateImage(image, writeLastSyncedTime);
 
-        update.bindString(1, image.getDbId());
-        if (writeLastSyncedTime) {
-            update.bindString(2, image.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
-            update.bindString(3, image.getFieldbookDbId());
-        } else {
-            update.bindString(2, image.getFieldbookDbId());
-        }
-
-        update.execute();
-
-        db.setTransactionSuccessful();
-        db.endTransaction();
+//        db.beginTransaction();
+//        String sql;
+//        if (writeLastSyncedTime) {
+//            sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
+//        } else {
+//            sql = "UPDATE user_traits SET observation_db_id = ? WHERE id = ?";
+//        }
+//
+//        SQLiteStatement update = db.compileStatement(sql);
+//
+//        update.bindString(1, image.getDbId());
+//        if (writeLastSyncedTime) {
+//            update.bindString(2, image.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+//            update.bindString(3, image.getFieldbookDbId());
+//        } else {
+//            update.bindString(2, image.getFieldbookDbId());
+//        }
+//
+//        update.execute();
+//
+//        db.setTransactionSuccessful();
+//        db.endTransaction();
     }
 
     /**
@@ -724,27 +761,30 @@ public class DataHelper {
      * TODO add where statement for repeated values
      */
     public Cursor convertDatabaseToTable(String[] col, String[] traits) {
-        String query;
-        String[] rangeArgs = new String[col.length];
-        String[] traitArgs = new String[traits.length];
-        String joinArgs = "";
 
-        for (int i = 0; i < col.length; i++) {
-            rangeArgs[i] = "range." + TICK + col[i] + TICK;
-        }
+        return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(ep.getString("ImportUniqueName", ""), col, traits);
 
-        for (int i = 0; i < traits.length; i++) {
-            traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
-            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + TICK + ep.getString("ImportUniqueName", "")
-                    + TICK + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
-        }
-
-        query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
-                " FROM range range " + joinArgs + "GROUP BY range." + TICK + ep.getString("ImportUniqueName", "") + TICK + "ORDER BY range.id";
-
-        Log.i("DH", query);
-
-        return db.rawQuery(query, null);
+//        String query;
+//        String[] rangeArgs = new String[col.length];
+//        String[] traitArgs = new String[traits.length];
+//        String joinArgs = "";
+//
+//        for (int i = 0; i < col.length; i++) {
+//            rangeArgs[i] = "range." + TICK + col[i] + TICK;
+//        }
+//
+//        for (int i = 0; i < traits.length; i++) {
+//            traitArgs[i] = "m" + i + ".userValue as '" + traits[i] + "'";
+//            joinArgs = joinArgs + "LEFT JOIN user_traits m" + i + " ON range." + TICK + ep.getString("ImportUniqueName", "")
+//                    + TICK + " = m" + i + ".rid AND m" + i + ".parent = '" + traits[i] + "' ";
+//        }
+//
+//        query = "SELECT " + convertToCommaDelimited(rangeArgs) + " , " + convertToCommaDelimited(traitArgs) +
+//                " FROM range range " + joinArgs + "GROUP BY range." + TICK + ep.getString("ImportUniqueName", "") + TICK + "ORDER BY range.id";
+//
+//        Log.i("DH", query);
+//
+//        return db.rawQuery(query, null);
     }
 
     /**
@@ -1120,7 +1160,9 @@ public class DataHelper {
      */
     public HashMap getUserDetail(String plotId) {
 
-        return ObservationDao.Companion.getUserDetail(plotId);
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+
+        return ObservationDao.Companion.getUserDetail(exp_id, plotId);
 
 //        HashMap data = new HashMap();
 //
@@ -1147,46 +1189,48 @@ public class DataHelper {
      */
     public Observation getObservation(String plotId, String parent) {
 
-        Observation o = new Observation();
+        Observation o = ObservationDao.Companion.getObservation(plotId, parent);
 
-        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ?", new String[]{plotId, parent},
-                null, null, null
-        );
+        //        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ?", new String[]{plotId, parent},
+//                null, null, null
+//        );
 
-        if (cursor.moveToFirst()) {
-            do {
-                o.setDbId(cursor.getString(0));
-                o.setLastSyncedTime(cursor.getString(1));
-            } while (cursor.moveToNext());
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
+//        if (cursor.moveToFirst()) {
+//            do {
+//                o.setDbId(cursor.getString(0));
+//                o.setLastSyncedTime(cursor.getString(1));
+//            } while (cursor.moveToNext());
+//        }
+//
+//        if (!cursor.isClosed()) {
+//            cursor.close();
+//        }
 
         return o;
     }
 
     public Observation getObservationByValue(String plotId, String parent, String value) {
 
-        Observation o = new Observation();
+        return ObservationDao.Companion.getObservationByValue(plotId, parent, value);
 
-        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ? and userValue like ?", new String[]{plotId, parent, value},
-                null, null, null
-        );
-
-        if (cursor.moveToFirst()) {
-            do {
-                o.setDbId(cursor.getString(0));
-                o.setLastSyncedTime(cursor.getString(1));
-            } while (cursor.moveToNext());
-        }
-
-        if (!cursor.isClosed()) {
-            cursor.close();
-        }
-
-        return o;
+//        Observation o = new Observation();
+//
+//        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ? and userValue like ?", new String[]{plotId, parent, value},
+//                null, null, null
+//        );
+//
+//        if (cursor.moveToFirst()) {
+//            do {
+//                o.setDbId(cursor.getString(0));
+//                o.setLastSyncedTime(cursor.getString(1));
+//            } while (cursor.moveToNext());
+//        }
+//
+//        if (!cursor.isClosed()) {
+//            cursor.close();
+//        }
+//
+//        return o;
     }
 
     /**
@@ -1224,6 +1268,17 @@ public class DataHelper {
      * Returns the primary key for all ranges
      */
     public int[] getAllRangeID() {
+
+        if (!isTableExists("ObservationUnitProperty")) {
+
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+
+            if (!fields.isEmpty()) {
+
+                StudyDao.Companion.switchField(fields.get(0).getExp_id());
+
+            }
+        }
 
         Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId();
 
@@ -1265,6 +1320,8 @@ public class DataHelper {
     /**
      * V2 - Execute a custom sql query, returning the result as SearchData objects
      * Used for user search function
+     *
+     * TODO: When is this used and what queries are sent to this ?
      */
     public SearchData[] getRangeBySql(String sql) {
 
@@ -1407,33 +1464,36 @@ public class DataHelper {
      */
 
     public ArrayList<String> getPlotPhotos(String plot, String trait) {
-        try {
-            //Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"}, "rid like ? and trait like ?", new String[]{plot, trait},
-            //       null, null, null);
 
-            Cursor cursor = db.rawQuery(
-                    "select userValue FROM user_traits where user_traits.rid = ? and user_traits.parent like ?",
-                    new String[]{plot, trait}
-            );
+        return ObservationDao.Companion.getPlotPhotos(plot, trait);
 
-            ArrayList<String> photoList = new ArrayList<>();
-            Log.d("Field", Integer.toString(cursor.getCount()));
-
-            if (cursor.moveToFirst()) {
-                do {
-                    photoList.add(cursor.getString(0));
-                }
-                while (cursor.moveToNext());
-            }
-
-            if (!cursor.isClosed()) {
-                cursor.close();
-            }
-
-            return photoList;
-        } catch (Exception e) {
-            return null;
-        }
+//        try {
+//            //Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"}, "rid like ? and trait like ?", new String[]{plot, trait},
+//            //       null, null, null);
+//
+//            Cursor cursor = db.rawQuery(
+//                    "select userValue FROM user_traits where user_traits.rid = ? and user_traits.parent like ?",
+//                    new String[]{plot, trait}
+//            );
+//
+//            ArrayList<String> photoList = new ArrayList<>();
+//            Log.d("Field", Integer.toString(cursor.getCount()));
+//
+//            if (cursor.moveToFirst()) {
+//                do {
+//                    photoList.add(cursor.getString(0));
+//                }
+//                while (cursor.moveToNext());
+//            }
+//
+//            if (!cursor.isClosed()) {
+//                cursor.close();
+//            }
+//
+//            return photoList;
+//        } catch (Exception e) {
+//            return null;
+//        }
     }
 
     /**
@@ -1857,13 +1917,13 @@ public class DataHelper {
 
     public void deleteField(int exp_id) {
 
-        //TODO
+        //TODO add optional cascade delete
         StudyDao.Companion.deleteField(exp_id);
-        db.execSQL("DELETE FROM studies WHERE internal_id_study = " + exp_id);
-        db.execSQL("DELETE FROM observation_units WHERE study_db_id = " + exp_id);
-        db.execSQL("DELETE FROM observation_units_attributes WHERE study_db_id = " + exp_id);
-        db.execSQL("DELETE FROM  observation_units_values WHERE study_db_id = " + exp_id);
-        db.execSQL("DELETE FROM observations WHERE study_db_id = " + exp_id);
+//        db.execSQL("DELETE FROM studies WHERE internal_id_study = " + exp_id);
+//        db.execSQL("DELETE FROM observation_units WHERE study_db_id = " + exp_id);
+//        db.execSQL("DELETE FROM observation_units_attributes WHERE study_db_id = " + exp_id);
+//        db.execSQL("DELETE FROM observation_units_values WHERE study_db_id = " + exp_id);
+//        db.execSQL("DELETE FROM observations WHERE study_db_id = " + exp_id);
 
 //        db.execSQL("DELETE FROM " + EXP_INDEX + " WHERE exp_id = " + exp_id);
 //        db.execSQL("DELETE FROM " + PLOTS + " WHERE exp_id = " + exp_id);
@@ -1873,6 +1933,15 @@ public class DataHelper {
     }
 
     public void switchField(int exp_id) {
+
+        //TODO lastplot is effectively erased when fields are switched, change this to persist and save each field's last plot.
+        //potentially use preference map or db column
+
+        ep.edit().remove("lastplot").apply();
+        //ep.edit().putString("lastplot", null).apply();
+
+        //delete the old table
+        db.execSQL("DROP TABLE IF EXISTS ObservationUnitProperty");
 
         StudyDao.Companion.switchField(exp_id);
 
@@ -2193,6 +2262,7 @@ public class DataHelper {
         return empty;
     }
 
+    //TODO replace with ObservationUnitPropertyDao call
     //copy of the above function, its only called once
     public boolean isRangeTableEmpty() {
         boolean empty = true;
@@ -2224,7 +2294,18 @@ public class DataHelper {
         }
 
         @Override
+        public void onOpen(SQLiteDatabase db) {
+
+            //enables foreign keys for cascade deletes
+            db.rawQuery("PRAGMA foreign_keys=ON;", null).close();
+
+        }
+
+        @Override
         public void onCreate(SQLiteDatabase db) {
+
+            //enables foreign keys for cascade deletes
+            db.rawQuery("PRAGMA foreign_keys=ON;", null).close();
 
             db.execSQL("CREATE TABLE "
                     + RANGE

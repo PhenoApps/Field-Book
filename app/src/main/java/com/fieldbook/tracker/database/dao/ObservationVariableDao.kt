@@ -4,11 +4,8 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
 import androidx.core.content.contentValuesOf
+import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.*
-import com.fieldbook.tracker.database.query
-import com.fieldbook.tracker.database.toFirst
-import com.fieldbook.tracker.database.toTable
-import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.TraitObject
 
 
@@ -16,12 +13,19 @@ class ObservationVariableDao {
 
     companion object {
 
+        fun getMaxPosition(): Int = withDatabase { db ->
+
+            db.query(ObservationVariable.tableName,
+                    select = arrayOf("MAX(position) as result")).toFirst()["result"].toString().toInt()
+
+        } ?: 0
+
         fun getTraitId(name: String): Int = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
-                select = arrayOf(ObservationVariable.PK),
-                where = "observation_variable_name = ?",
-                whereArgs = arrayOf(name))
+                    select = arrayOf(ObservationVariable.PK),
+                    where = "observation_variable_name = ?",
+                    whereArgs = arrayOf(name))
                     .toFirst()[ObservationVariable.PK].toString().toInt()
 
         } ?: -1
@@ -134,18 +138,20 @@ class ObservationVariableDao {
                 val traits = getAllTraitObjects()
                 traits.sortBy { it.id.toInt() }
                 traits.forEach { trait ->
-                    cursor.addRow(requiredFields.map { when(it) {
-                        "trait" -> trait.trait
-                        "format" -> trait.format
-                        "defaultValue" -> trait.defaultValue
-                        "minimum" -> trait.minimum
-                        "maximum" -> trait.maximum
-                        "details" -> trait.details
-                        "categories" -> trait.categories
-                        "isVisible" -> trait.visible
-                        "realPosition" -> trait.realPosition
-                        else -> null!!
-                    } })
+                    cursor.addRow(requiredFields.map {
+                        when (it) {
+                            "trait" -> trait.trait
+                            "format" -> trait.format
+                            "defaultValue" -> trait.defaultValue
+                            "minimum" -> trait.minimum
+                            "maximum" -> trait.maximum
+                            "details" -> trait.details
+                            "categories" -> trait.categories
+                            "isVisible" -> trait.visible
+                            "realPosition" -> trait.realPosition
+                            else -> null!!
+                        }
+                    })
                 }
             }
         }
@@ -177,9 +183,12 @@ class ObservationVariableDao {
                             val attrName = ObservationVariableAttributeDao.getAttributeNameById(value[ObservationVariableAttribute.FK] as Int)
 
                             when (attrName) {
-                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String ?: ""
-                                "category" -> categories = value["observation_variable_attribute_value"] as? String ?: ""
+                                "validValuesMin" -> minimum = value["observation_variable_attribute_value"] as? String
+                                        ?: ""
+                                "validValuesMax" -> maximum = value["observation_variable_attribute_value"] as? String
+                                        ?: ""
+                                "category" -> categories = value["observation_variable_attribute_value"] as? String
+                                        ?: ""
                             }
                         }
                     }
@@ -240,9 +249,9 @@ class ObservationVariableDao {
 
                 //iterate trhough mapping of the old columns that are now attr/vals
                 mapOf(
-                    "validValuesMin" to t.minimum as String,
-                    "validValuesMax" to t.maximum as String,
-                    "category" to t.categories as String,
+                        "validValuesMin" to t.minimum as String,
+                        "validValuesMax" to t.maximum as String,
+                        "category" to t.categories as String,
                 ).asSequence().forEach { attrValue ->
 
                     //TODO: commenting this out would create a sparse table from the unused attribute values

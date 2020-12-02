@@ -65,7 +65,11 @@ class ObservationUnitPropertyDao {
                 plot_id = model[uniqueName].toString()
             }
 
-        } ?: RangeObject()
+        } ?: RangeObject().apply {
+            range = ""
+            plot = ""
+            plot_id = ""
+        }
 
         fun getDropDownRange(uniqueName: String, trait: String, plotId: String): Array<String>? = withDatabase { db ->
 

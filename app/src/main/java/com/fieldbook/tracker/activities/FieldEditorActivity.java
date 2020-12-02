@@ -94,6 +94,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     // Helper function to load data
     public static void loadData() {
         try {
+            ConfigActivity.dt.open();
             mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
             fieldList.setAdapter(mAdapter);
         } catch (Exception e) {
@@ -678,10 +679,14 @@ public class FieldEditorActivity extends AppCompatActivity {
                 ed.putString("ImportFirstName", firstName);
                 ed.putString("ImportSecondName", secondName);
                 ed.putBoolean("ImportFieldFinished", true);
+                ed.putInt("SelectedFieldExpId", exp_id);
+
                 ed.apply();
 
                 CollectActivity.reloadData = true;
                 loadData();
+
+                ConfigActivity.dt.open();
                 ConfigActivity.dt.switchField(exp_id);
             }
         }

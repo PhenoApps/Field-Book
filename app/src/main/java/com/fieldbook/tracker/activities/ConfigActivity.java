@@ -230,10 +230,11 @@ public class ConfigActivity extends AppCompatActivity {
 
                         break;
                     case 2:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
+                        String traits = dt.getTraitColumnsAsString();
+                        if (!ep.getBoolean("ImportFieldFinished", false) || ep.getInt("SelectedFieldExpId", -1) == -1) {
                             Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
                             return;
-                        } else if (dt.getTraitColumnsAsString() == null) {
+                        } else if (traits == null || traits.isEmpty()) {
                             Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing));
                             return;
                         }
