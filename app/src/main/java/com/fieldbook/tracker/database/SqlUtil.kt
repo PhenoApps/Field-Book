@@ -86,37 +86,25 @@ fun Cursor.toFirst(): Map<String, Any?> = if (moveToFirst()) {
 
     val row = mutableMapOf<String, Any?>()
 
-    try {
-
-        columnNames.forEach {
-            val index = getColumnIndexOrThrow(it)
-            if (index > -1) {
-                row[it] = when (getType(index)) {
-                    //null field type
-                    0 -> null
-                    //int field type
-                    1 -> getIntOrNull(index)
-                    //string field type
-                    //blob field type 3
-                    else -> {
-                        getStringOrNull(index) ?: getBlobOrNull(index).toString()
-                    }
+    columnNames.forEach {
+        val index = getColumnIndexOrThrow(it)
+        if (index > -1) {
+            row[it] = when (getType(index)) {
+                //null field type
+                0 -> null
+                //int field type
+                1 -> getIntOrNull(index)
+                //string field type
+                //blob field type 3
+                else -> {
+                    getStringOrNull(index) ?: getBlobOrNull(index).toString()
                 }
             }
-
         }
 
-    } catch (e: IllegalArgumentException) {
-
-        e.printStackTrace()
-
-    } catch (ie: IndexOutOfBoundsException) {
-
-        ie.printStackTrace()
-    } finally {
-
-        close()
     }
+
+    close()
 
     row
 
@@ -129,15 +117,13 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 
     val table = mutableListOf<Map<String, Any?>>()
 
-    try {
+    do {
 
-        do {
+        val row = mutableMapOf<String, Any?>().withDefault { String() }
 
-            val row = mutableMapOf<String, Any?>().withDefault { String() }
-
-            columnNames.forEach {
-                val index = getColumnIndex(it)
-                if (index > -1) {
+        columnNames.forEach {
+            val index = getColumnIndex(it)
+            if (index > -1) {
 //                    <li>{@link #FIELD_TYPE_NULL}</li>
 //                    *   <li>{@link #FIELD_TYPE_INTEGER}</li>
 //                    *   <li>{@link #FIELD_TYPE_FLOAT}</li>
@@ -151,16 +137,16 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 //                    }
 //                    println(getType(index))
 
-                    row[it] = when (getType(index)) {
-                        //null field type
-                        0 -> null
-                        //int field type
-                        1 -> getIntOrNull(index)
-                        //string field type
-                        //blob field type 3
-                        else -> {
-                            getStringOrNull(index) ?: getBlobOrNull(index).toString()
-                        }
+                row[it] = when (getType(index)) {
+                    //null field type
+                    0 -> null
+                    //int field type
+                    1 -> getIntOrNull(index)
+                    //string field type
+                    //blob field type 3
+                    else -> {
+                        getStringOrNull(index) ?: getBlobOrNull(index).toString()
+                    }
 //                        in IntegerColumns -> getIntOrNull(index)
 //                        else -> {
 //                            try {
@@ -170,23 +156,15 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 //                                String()
 //                            }
 //                        }
-                    }
                 }
             }
+        }
 
-            table.add(row)
+        table.add(row)
 
-        } while (moveToNext())
+    } while (moveToNext())
 
-    } catch (ie: IndexOutOfBoundsException) {
-        ie.printStackTrace()
-    } catch (e: IllegalArgumentException) {
-        e.printStackTrace()
-    } catch (noElem: NoSuchElementException) {
-        noElem.printStackTrace()
-    } finally {
-        close()
-    }
+    close()
 
     table
 
@@ -210,6 +188,21 @@ inline fun <reified T> withDatabase(crossinline function: (SQLiteDatabase) -> T)
     null
 } catch (e: Exception) {
     e.printStackTrace()
+    null
+} catch (e: IllegalArgumentException) {
+    e.printStackTrace()
+    null
+} catch (ie: IndexOutOfBoundsException) {
+    ie.printStackTrace()
+    null
+} catch (ie: IndexOutOfBoundsException) {
+    ie.printStackTrace()
+    null
+} catch (e: IllegalArgumentException) {
+    e.printStackTrace()
+    null
+} catch (noElem: NoSuchElementException) {
+    noElem.printStackTrace()
     null
 }
 

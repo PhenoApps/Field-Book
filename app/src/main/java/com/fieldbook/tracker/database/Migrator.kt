@@ -173,7 +173,7 @@ class Migrator {
                         //TODO: commenting this out would create a sparse table from the unused attribute values
 //                        if (attrValue.value.isNotEmpty()) {
 
-                        val rowid = db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
+                        db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
 
                                 ObservationVariable.FK to trait.id,
                                 ObservationVariableAttribute.FK to attrIds[attrValue.key],
@@ -204,7 +204,7 @@ class Migrator {
             } catch (e: Exception) {
 
                 //an error caught during a transaction will rollback
-                    // before setTransactionSuccesful is called
+                    // before setTransactionSuccessful is called
 
                 e.printStackTrace()
 
@@ -223,8 +223,7 @@ class Migrator {
          */
         private fun createTableStatement(name: String,
                                          columnDefs: Map<String, String>,
-                                         compositeKey: String? = null,
-                                         selectStatement: String? = null) = """
+                                         compositeKey: String? = null) = """
             CREATE TABLE IF NOT EXISTS $name ${
                     columnDefs
                             .map { col -> "${col.key} ${col.value}" }
@@ -285,14 +284,30 @@ class Migrator {
 
             selectAll(db, from, pattern) { models ->
 
-                models.forEach {
-                    try {
+                try {
+
+                    db.beginTransaction()
+
+                    models.forEach {
+
                         db.insertWithOnConflict(to, null, it.toContentValues(), SQLiteDatabase.CONFLICT_IGNORE)
-                    } catch (constraint: SQLiteConstraintException) {
-                        constraint.printStackTrace()
-                    } catch (exp: Exception) {
-                        exp.printStackTrace()
+
                     }
+
+                    db.setTransactionSuccessful()
+
+                } catch (constraint: SQLiteConstraintException) {
+
+                    constraint.printStackTrace()
+
+                } catch (exp: Exception) {
+
+                    exp.printStackTrace()
+
+                } finally {
+
+                    db.endTransaction()
+
                 }
             }
         }

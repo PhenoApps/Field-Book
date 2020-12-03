@@ -455,10 +455,7 @@ public class DataHelper {
      */
     public List<Observation> getObservations(String hostUrl) {
 
-        String uniqueName = ep.getString("ImportUniqueName", "");
-        String primaryName = ep.getString("ImportFirstName", "");
-
-        return ObservationDao.Companion.getObservations(uniqueName, primaryName, hostUrl);
+        return ObservationDao.Companion.getObservations(hostUrl);
 
 //        List<Observation> observations = new ArrayList<Observation>();
 //
@@ -528,10 +525,7 @@ public class DataHelper {
      */
     public List<Image> getImageObservations(String hostUrl) {
 
-        String uniqueName = ep.getString("ImportUniqueName", "");
-        String primaryName = ep.getString("ImportFirstName", "");
-
-        return ObservationDao.Companion.getHostImageObservations(uniqueName, primaryName, hostUrl, missingPhoto);
+        return ObservationDao.Companion.getHostImageObservations(hostUrl, missingPhoto);
 
 //        List<Image> images = new ArrayList<Image>();
 //
@@ -1867,6 +1861,7 @@ public class DataHelper {
 
     public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int exp_id) {
 
+        ConfigActivity.dt.open();
         StudyDao.Companion.updateStudyTable(imp, ed, ex, exp_id);
 
 //        ConfigActivity.dt.open();

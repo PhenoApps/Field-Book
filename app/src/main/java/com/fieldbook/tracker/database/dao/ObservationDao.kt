@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.database.dao
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.graphics.Bitmap
 import androidx.core.content.contentValuesOf
@@ -20,7 +21,7 @@ class ObservationDao {
 
     companion object {
 
-        fun getAll(): Array<ObservationModel>? = withDatabase { db ->
+        fun getAll(): Array<ObservationModel> = withDatabase { db ->
 
             db.query(Observation.tableName)
                 .toTable()
@@ -29,14 +30,13 @@ class ObservationDao {
 
         } ?: emptyArray()
 
-        fun getHostImageObservations(uniqueName: String, primaryName: String, hostUrl: String, missingPhoto: Bitmap): List<Image> = withDatabase { db ->
-
-            //TODO how can we assume that the props columns are actually here? I suggest these be preferences.
-            //Maybe  this was a bug and they should have been parameters?
+        //false warning, cursor is closed in toTable
+        @SuppressLint("Recycle")
+        fun getHostImageObservations(hostUrl: String, missingPhoto: Bitmap): List<Image> = withDatabase { db ->
 
             db.rawQuery("""
-                SELECT props.$uniqueName AS uniqueName,
-                       props.$primaryName AS firstName,
+                SELECT props.observationUnitDbId AS uniqueName,
+                       props.observationUnitName AS firstName,
                 obs.${Observation.PK} AS id, 
                 obs.value AS value, 
                 obs.observation_time_stamp,
@@ -53,7 +53,7 @@ class ObservationDao {
                 vars.observation_variable_details
                 
             FROM ${Observation.tableName} AS obs
-            JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.$uniqueName
+            JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.observationUnitDbId
             JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
             JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
            
@@ -66,7 +66,7 @@ class ObservationDao {
         """.trimIndent(), arrayOf(hostUrl)).toTable()
                     .map { row -> Image(row["value"].toString(), missingPhoto).apply {
                         unitDbId = row["uniqueName"].toString()
-                        setDescriptiveOntologyTerms(listOf(row["primaryName"].toString()))
+                        setDescriptiveOntologyTerms(listOf(row["firstName"].toString()))
                         setDescription(row["observation_variable_details"].toString())
                         setTimestamp(row["observation_time_stamp"].toString())
                         fieldBookDbId = row["id"].toString()
@@ -76,21 +76,24 @@ class ObservationDao {
 
         } ?: emptyList()
 
-        fun getObservations(uniqueName: String, primaryName: String, hostUrl: String): List<com.fieldbook.tracker.brapi.Observation> = withDatabase { db ->
-
-            //TODO how can we assume that the props columns are actually here? I suggest these be preferences.
-            //Maybe  this was a bug and they should have been parameters?
+        /**
+         * TODO: this can be replaced with a view
+         * important note:  observationUnitDbId and observationUnitName are unit attributes that
+         * are required to have for brapi fields; otherwise, this query will fail.
+         */
+        @SuppressLint("Recycle")
+        fun getObservations(hostUrl: String): List<com.fieldbook.tracker.brapi.Observation> = withDatabase { db ->
 
             db.rawQuery("""
-                SELECT props.$uniqueName AS uniqueName,
-                       props.$primaryName AS firstName,
-                obs.${Observation.PK} AS id, 
-                obs.value AS value, 
-                obs.observation_time_stamp,
-                obs.observation_unit_id,
-                obs.observation_db_id,
-                obs.last_synced_time,
-                obs.collector,
+                SELECT props.observationUnitDbId AS uniqueName,
+                    props.observationUnitName AS firstName,
+                    obs.${Observation.PK} AS id, 
+                    obs.value AS value, 
+                    obs.observation_time_stamp,
+                    obs.observation_unit_id,
+                    obs.observation_db_id,
+                    obs.last_synced_time,
+                    obs.collector,
                 
                 study.${Study.PK} AS ${Study.FK},
                 study.study_alias,
@@ -100,7 +103,7 @@ class ObservationDao {
                 vars.observation_variable_details
                 
             FROM ${Observation.tableName} AS obs
-            JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.$uniqueName
+            JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.observationUnitDbId
             JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
             JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
            
@@ -150,7 +153,7 @@ class ObservationDao {
 
         } ?: emptyList()
 
-        fun getUserTraitImageObservations(expId: String, missingPhoto: Bitmap): List<Image>? = withDatabase { db ->
+        fun getUserTraitImageObservations(expId: String, missingPhoto: Bitmap): List<Image> = withDatabase { db ->
 
             db.query(sLocalImageObservationsViewName, where = "${Study.FK} = ?", whereArgs = arrayOf(expId)).toTable()
                     .map { row -> Image(row["value"].toString(), missingPhoto).apply {
@@ -159,7 +162,7 @@ class ObservationDao {
 
         } ?: emptyList()
 
-        fun getUserTraitObservations(expId: String): List<com.fieldbook.tracker.brapi.Observation>? = withDatabase { db ->
+        fun getUserTraitObservations(expId: String): List<com.fieldbook.tracker.brapi.Observation> = withDatabase { db ->
 
             db.query(sNonImageObservationsViewName,
                     where = "${Study.FK} = ? AND (trait_data_source = 'local' OR trait_data_source IS NULL)", whereArgs = arrayOf(expId)).toTable()
@@ -192,10 +195,9 @@ class ObservationDao {
                              notes: String, exp_id: String, observationDbId: String?,
                              lastSyncedTime: OffsetDateTime?): Long = withDatabase { db ->
 
+            val rep = getRep(rid, parent) + 1
 
-            val rep = ObservationDao.getRep(rid, parent) + 1
-
-            val internalTraitId = ObservationVariableDao.getTraitId(parent);
+            val internalTraitId = ObservationVariableDao.getTraitId(parent)
 
             db.insert(Observation.tableName, null, contentValuesOf(
                     "observation_variable_name" to parent,
@@ -253,7 +255,7 @@ class ObservationDao {
                             "observation_variable_field_book_format",
                             "value",
                             ObservationUnit.FK),
-                    where = "${ObservationUnit.FK} LIKE ? AND ${Migrator.Study.FK} LIKE ?",
+                    where = "${ObservationUnit.FK} LIKE ? AND ${Study.FK} LIKE ?",
                     whereArgs = arrayOf(plotId, expId))
                     .toTable().map { it["observation_variable_name"].toString() to it["value"].toString() }
                     .toTypedArray())
@@ -374,7 +376,7 @@ class ObservationDao {
                 "observation_db_id" to uniqueName,
                 "last_synced_time" to "2019-10-15 12:14:590-0400",
                 "additional_info" to UUID.randomUUID().toString(),
-                Migrator.Study.FK to UUID.randomUUID().toString(),
+                Study.FK to UUID.randomUUID().toString(),
                 ObservationUnit.FK to unit.toInt(),
                 ObservationVariable.FK to variable.toInt()))
 
@@ -383,9 +385,9 @@ class ObservationDao {
          */
         private fun insertRandomObservations() {
 
-            ObservationUnitDao.getAll().sliceArray(0 until 10).forEachIndexed { index, unit ->
+            ObservationUnitDao.getAll().sliceArray(0 until 10).forEach { unit ->
 
-                ObservationVariableDao.getAllTraitObjects().forEachIndexed { index, traitObject ->
+                ObservationVariableDao.getAllTraitObjects().forEach { traitObject ->
 
                     for (i in 0..10) {
 
@@ -396,7 +398,7 @@ class ObservationDao {
                                 traitObject.trait,
                                 traitObject.id)
 
-                        val newRowid = insertObservation(obs)
+                        insertObservation(obs)
 
 //                println(newRowid)
 //                    println("Inserting $newRowid $rowid")
