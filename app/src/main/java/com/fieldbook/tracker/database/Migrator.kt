@@ -201,6 +201,10 @@ class Migrator {
 
                 db.setTransactionSuccessful() //commits the transaction
 
+            } catch (constraint: SQLiteConstraintException) {
+
+                constraint.printStackTrace()
+
             } catch (e: Exception) {
 
                 //an error caught during a transaction will rollback
@@ -284,29 +288,9 @@ class Migrator {
 
             selectAll(db, from, pattern) { models ->
 
-                try {
+                models.forEach {
 
-                    db.beginTransaction()
-
-                    models.forEach {
-
-                        db.insertWithOnConflict(to, null, it.toContentValues(), SQLiteDatabase.CONFLICT_IGNORE)
-
-                    }
-
-                    db.setTransactionSuccessful()
-
-                } catch (constraint: SQLiteConstraintException) {
-
-                    constraint.printStackTrace()
-
-                } catch (exp: Exception) {
-
-                    exp.printStackTrace()
-
-                } finally {
-
-                    db.endTransaction()
+                    db.insertWithOnConflict(to, null, it.toContentValues(), SQLiteDatabase.CONFLICT_IGNORE)
 
                 }
             }

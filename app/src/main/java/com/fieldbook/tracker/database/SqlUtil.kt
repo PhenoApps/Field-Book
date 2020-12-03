@@ -34,31 +34,6 @@ fun getTime(): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
         Locale.getDefault()).format(Calendar.getInstance().time)
 
 //endregion
-inline fun <reified T> transaction(crossinline function: (SQLiteDatabase) -> T): T? = withDatabase { db ->
-
-    try {
-
-        db.beginTransaction()
-
-        val result = function(db)
-
-        db.setTransactionSuccessful()
-
-        return@withDatabase result
-
-    } catch (e: Exception) {
-
-        e.printStackTrace()
-
-    } finally {
-
-        db.endTransaction()
-
-    }
-
-    null
-
-}
 
 /**
  * Simple wrapper function that has default arguments.
