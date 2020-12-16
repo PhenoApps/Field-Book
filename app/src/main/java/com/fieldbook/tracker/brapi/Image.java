@@ -99,7 +99,10 @@ public class Image extends BrapiObservation {
     }
 
     String getCopyright() {
-        return String.valueOf(timestamp.getYear());
+        if(timestamp != null) {
+            return String.valueOf(timestamp.getYear());
+        }
+        return null;
     }
 
     Map<String, String> getAdditionalInfo() {

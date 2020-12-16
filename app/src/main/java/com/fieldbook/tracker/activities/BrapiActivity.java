@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,8 +21,10 @@ import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiLoadDialog;
+import com.fieldbook.tracker.brapi.BrapiPaginationManager;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
@@ -40,6 +43,7 @@ public class BrapiActivity extends AppCompatActivity {
     // Filter by
     private String programDbId;
     private String trialDbId;
+    private BrapiPaginationManager paginationManager;
     private static final int FILTER_BY_PROGRAM_REQUEST_CODE = 1;
     private static final int FILTER_BY_TRIAL_REQUEST_CODE = 2;
     public static final String PROGRAM_DB_ID_INTENT_PARAM = "programDbId";
@@ -62,6 +66,8 @@ public class BrapiActivity extends AppCompatActivity {
             if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi);
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
+                paginationManager = new BrapiPaginationManager(this);
+
                 brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiActivity.this));
 
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
@@ -99,7 +105,11 @@ public class BrapiActivity extends AppCompatActivity {
         listStudies.setVisibility(View.GONE);
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
-        brAPIService.getStudies(BrAPIService.getBrapiToken(this), this.programDbId, this.trialDbId, new Function<List<BrapiStudySummary>, Void>() {
+        //init page numbers
+        paginationManager.refreshPageIndicator();
+        Integer initPage = paginationManager.getPage();
+
+        brAPIService.getStudies(BrAPIService.getBrapiToken(this), this.programDbId, this.trialDbId, paginationManager, new Function<List<BrapiStudySummary>, Void>() {
             @Override
             public Void apply(final List<BrapiStudySummary> studies) {
 
@@ -163,10 +173,18 @@ public class BrapiActivity extends AppCompatActivity {
     public void buttonClicked(View view) {
         switch (view.getId()) {
             case R.id.loadStudies:
+                // Start from beginning
+                paginationManager.reset();
                 loadStudiesList();
                 break;
             case R.id.save:
                 saveStudy();
+                break;
+            case R.id.prev:
+            case R.id.next:
+                // Update current page (if allowed) and start brapi call.
+                paginationManager.setNewPage(view.getId());
+                loadStudiesList();
                 break;
         }
     }
@@ -209,11 +227,13 @@ public class BrapiActivity extends AppCompatActivity {
                 programDbId = data.getDataString();
                 // reset previous filter
                 trialDbId = null;
+                paginationManager.reset();
                 loadStudiesList();
             }
         } else if (requestCode == FILTER_BY_TRIAL_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 trialDbId = data.getDataString();
+                paginationManager.reset();
                 loadStudiesList();
             }
         }

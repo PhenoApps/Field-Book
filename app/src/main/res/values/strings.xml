@@ -526,6 +526,8 @@
     </string>
     <string name="brapi_info_title">Breeding API</string>
     <string name="brapi_auth_btn">Log In to Site</string>
+    <string name="brapi_pagination">Set Page Size</string>
+
     <string name="trait_labelprint_preview_description">Label preview.</string>
     <string name="trait_labelprint_zebraconnect_button_description">Button which navigates to Zebra Connect app.</string>
     <string name="trait_labelprint_print_button_description">Button which prints labels configured in this dialog.</string>

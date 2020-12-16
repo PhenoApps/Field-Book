@@ -5,10 +5,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
-import androidx.core.content.FileProvider;
+import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
@@ -17,13 +16,8 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
-import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.traits.BaseTraitLayout;
-import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-
-import java.io.File;
 
 public class BrapiPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
@@ -34,6 +28,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private Preference brapiAuthButton;
     private Preference brapiLogoutButton;
     private Preference brapiURLPreference;
+    private EditTextPreference brapiPaginationPreference;
     private Preference brapiServerBarcode;
     private Preference brapiServerCassavabase;
     private Preference brapiServerDefaultTest;
@@ -57,6 +52,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         brapiURLPreference = findPreference("BRAPI_BASE_URL");
         brapiURLPreference.setOnPreferenceChangeListener(this);
+        brapiPaginationPreference = findPreference("paginationBrapi");
 
         brapiServerBarcode = findPreference("brapi_server_barcode");
         brapiServerCassavabase = findPreference("brapi_server_cassavabase");
