@@ -13,6 +13,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.models.StudyModel
+import kotlin.math.exp
 import kotlin.system.measureTimeMillis
 import kotlin.time.milliseconds
 
@@ -27,15 +28,7 @@ class StudyDao {
          */
         fun switchField(exp_id: Int) = withDatabase { db ->
 
-            val headers: Array<String> = db.query(ObservationUnitAttribute.tableName,
-                    arrayOf("observation_unit_attribute_name"),
-                    where = "${Study.FK} = ?",
-                    whereArgs = arrayOf("$exp_id"))
-                    .toTable()
-                    .map { it["observation_unit_attribute_name"] }
-                    .mapNotNull { it.toString() }
-                    .filter { it.isNotBlank() && it.isNotEmpty() }
-                    .toTypedArray()
+            val headers = ObservationUnitAttributeDao.getAllNames(exp_id)
 
             //create a select statement based on the saved plot attribute names
             val select = headers.map { col ->
@@ -63,13 +56,15 @@ class StudyDao {
                 GROUP BY units.${ObservationUnit.PK}
             """.trimMargin()
 
-            println("$exp_id $query")
+            db.execSQL(query)
 
-            println("New switch field time: ${
-                measureTimeMillis {
-                    db.execSQL(query)
-                }.toLong()
-            }")
+//            println("$exp_id $query")
+//
+//            println("New switch field time: ${
+//                measureTimeMillis {
+//                    db.execSQL(query)
+//                }.toLong()
+//            }")
         }
 
         fun deleteField(exp_id: Int) = withDatabase { db ->
@@ -96,15 +91,35 @@ class StudyDao {
 
         }
 
-        fun getAllStudyModels(): Array<StudyModel> = withDatabase { db ->
+//        fun getAllStudyModels(): Array<StudyModel> = withDatabase { db ->
+//
+//            db.query(Study.tableName,
+//                    orderBy = Study.PK)
+//                    .toTable().map {
+//                        StudyModel(it)
+//                    }.toTypedArray()
+//
+//        } ?: arrayOf()
 
-            db.query(Study.tableName,
-                    orderBy = Study.PK)
-                    .toTable().map {
-                        StudyModel(it)
-                    }.toTypedArray()
+        private fun Map<String, Any?>.toFieldObject() = FieldObject().also {
 
-        } ?: arrayOf()
+            it.exp_id = this[Study.PK] as Int
+            it.exp_name = this["study_name"].toString()
+            it.unique_id = this["study_unique_id_name"].toString()
+            it.primary_id = this["study_primary_id_name"].toString()
+            it.secondary_id = this["study_secondary_id_name"].toString()
+            it.date_import = this["date_import"].toString()
+            it.date_edit = when (val date = this["date_edit"]?.toString()) {
+                null, "null" -> ""
+                else -> date
+            }
+            it.date_export = when (val date = this["date_export"]?.toString()) {
+                null, "null" -> ""
+                else -> date
+            }
+            it.exp_source = this["study_source"].toString()
+            it.count = this["count"].toString()
+        }
 
         fun getAllFieldObjects(): ArrayList<FieldObject> = withDatabase { db ->
 
@@ -112,24 +127,7 @@ class StudyDao {
 
             db.query(Study.tableName).toTable().forEach { model ->
 
-                studies.add(FieldObject().also {
-                    it.exp_id = model[Study.PK] as Int
-                    it.exp_name = model["study_name"].toString()
-                    it.unique_id = model["study_unique_id_name"].toString()
-                    it.primary_id = model["study_primary_id_name"].toString()
-                    it.secondary_id = model["study_secondary_id_name"].toString()
-                    it.date_import = model["date_import"].toString()
-                    it.date_edit = when (val date = model["date_edit"].toString()) {
-                        null, "null" -> ""
-                        else -> date
-                    }
-                    it.date_export = when (val date = model["date_export"].toString()) {
-                        null, "null" -> ""
-                        else -> date
-                    }
-                    it.exp_source = model["study_source"].toString()
-                    it.count = model["count"].toString()
-                })
+                studies.add(model.toFieldObject())
 
             }
 
@@ -152,32 +150,14 @@ class StudyDao {
                             "study_source"),
                     where = "${Study.PK} = ?",
                     whereArgs = arrayOf(exp_id.toString()),
-                    orderBy = Study.PK).use { cursor ->
-
-                if (cursor.moveToFirst()) {
-
-                    FieldObject().also {
-                        it.exp_id = cursor.getInt(cursor.getColumnIndexOrThrow(Study.PK))
-                        it.exp_name = cursor.getString(cursor.getColumnIndexOrThrow("study_name"))
-                        it.unique_id = cursor.getString(cursor.getColumnIndexOrThrow("study_unique_id_name"))
-                        it.primary_id = cursor.getString(cursor.getColumnIndexOrThrow("study_primary_id_name"))
-                        it.secondary_id = cursor.getString(cursor.getColumnIndexOrThrow("study_secondary_id_name"))
-                        it.date_import = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("date_import")) ?: ""
-                        it.date_edit = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("date_edit")) ?: ""
-                        it.date_export = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("date_export")) ?: ""
-                        it.exp_source = cursor.getString(cursor.getColumnIndexOrThrow("study_source"))
-                        it.count = cursor.count.toString()
-                    }
-
-                } else null
-            }
+                    orderBy = Study.PK).toFirst().toFieldObject()
         }
 
         /**
          * This function uses a field object to create a exp/study row in the database.
          * Columns are new observation unit attribute names that are inserted as well.
          */
-        fun createField(e: FieldObject, columns: List<String>): Int = withDatabase { db ->
+        fun createField(e: FieldObject, timestamp: String, columns: List<String>): Int = withDatabase { db ->
 
             when (val sid = checkFieldName(e.exp_name)) {
 
@@ -196,10 +176,11 @@ class StudyDao {
                         put("experimental_design", e.exp_layout)
                         put("common_crop_name", e.exp_species)
                         put("study_sort_name", e.exp_sort)
-                        put("date_import", e.date_import)
+                        put("date_import", timestamp)
                         put("date_export", e.date_export)
                         put("date_edit", e.date_edit)
                         put("study_source", e.exp_source)
+                        put("count", e.count)
                     }).toInt()
 
                     try {
@@ -276,14 +257,12 @@ class StudyDao {
         private fun updateImportDate(db: SQLiteDatabase, exp_id: Int) {
 
             db.update(Study.tableName, ContentValues().apply {
-                put("count", db.query(ObservationUnit.tableName,
-                        where = "${Study.FK} = ?",
-                        whereArgs = arrayOf("$exp_id")).count)
+                put("count", getCount(exp_id))
                 put("date_import", getTime())
             }, "${Study.PK} = ?", arrayOf("$exp_id"))
         }
 
-        private fun modifyDate(db: SQLiteDatabase, exp_id: Int) {
+        private fun modifyDate(db: SQLiteDatabase) {
 
             db.query(Study.tableName).toTable().forEach { study ->
 
@@ -319,7 +298,7 @@ class StudyDao {
 
             if (updateImportDate) updateImportDate(db, exp_id)
 
-            if (modifyDate) modifyDate(db, exp_id)
+            if (modifyDate) modifyDate(db)
 
             if (updateExportDate) updateExportDate(db, exp_id)
         }

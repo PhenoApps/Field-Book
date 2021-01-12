@@ -8,7 +8,7 @@ import com.fieldbook.tracker.database.Row
 data class ObservationUnitModel(val map: Row) {
 
         val internal_id_observation_unit: Int by map //comp. pk 1
-        val study_db_id: Int by map  //fk to studies table
+        val study_id: Int by map  //fk to studies table
         val observation_unit_db_id: String by map //unique id
         val primary_id: String by map
         val secondary_id: String by map

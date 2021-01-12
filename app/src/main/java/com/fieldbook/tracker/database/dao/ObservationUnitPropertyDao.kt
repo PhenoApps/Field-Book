@@ -14,9 +14,9 @@ class ObservationUnitPropertyDao {
 
     companion object {
 
-        internal fun selectAllRange(): Array<Map<String, Any?>>? = withDatabase { db ->
-            db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
-        }
+//        internal fun selectAllRange(): Array<Map<String, Any?>>? = withDatabase { db ->
+//            db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
+//        }
 
         fun getAllRangeId(): Array<Integer> = withDatabase { db ->
             val table = db.query(sObservationUnitPropertyViewName,
@@ -28,24 +28,24 @@ class ObservationUnitPropertyDao {
         } ?: emptyArray()
 
         //TODO original code uses switchField if object is null
-        fun getRangeByIdAndPlot(firstName: String,
-                                secondName: String,
-                                uniqueName: String,
-                                id: Int, pid: String): RangeObject? = withDatabase { db ->
-
-            with(db.query(sObservationUnitPropertyViewName,
-                    select = arrayOf(firstName, secondName, uniqueName, "id").map { "`$it`" }.toTypedArray(),
-                    where = "id = ? AND plot_id = ?",
-                    whereArgs = arrayOf(id.toString(), pid)
-            ).toFirst()) {
-                RangeObject().apply {
-                    range = this@with[firstName] as? String ?: ""
-                    plot = this@with[secondName] as? String ?: ""
-                    plot_id = this@with[uniqueName] as? String ?: ""
-                }
-            }
-
-        }
+//        fun getRangeByIdAndPlot(firstName: String,
+//                                secondName: String,
+//                                uniqueName: String,
+//                                id: Int, pid: String): RangeObject? = withDatabase { db ->
+//
+//            with(db.query(sObservationUnitPropertyViewName,
+//                    select = arrayOf(firstName, secondName, uniqueName, "id").map { "`$it`" }.toTypedArray(),
+//                    where = "id = ? AND plot_id = ?",
+//                    whereArgs = arrayOf(id.toString(), pid)
+//            ).toFirst()) {
+//                RangeObject().apply {
+//                    range = this@with[firstName] as? String ?: ""
+//                    plot = this@with[secondName] as? String ?: ""
+//                    plot_id = this@with[uniqueName] as? String ?: ""
+//                }
+//            }
+//
+//        }
 
         fun getRangeFromId(firstName: String, secondName: String, uniqueName: String, id: Int): RangeObject = withDatabase { db ->
 //            data.range = cursor.getString(0);

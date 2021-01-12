@@ -25,22 +25,22 @@ class VisibleObservationVariableDao {
 
         } ?: emptyArray<String>()
 
-        fun getVisibleTraitObjects(): Array<ObservationVariableModel> = withDatabase { db ->
-
-            val rows = db.query(sVisibleObservationVariableViewName,
-                    orderBy = "position").toTable()
-
-            val variables: Array<ObservationVariableModel?> = arrayOfNulls(rows.size)
-
-            rows.forEachIndexed { index, map ->
-
-                variables[index] = ObservationVariableModel(map)
-
-            }
-
-            variables.mapNotNull { it }.toTypedArray()
-
-        } ?: emptyArray()
+//        fun getVisibleTraitObjects(): Array<ObservationVariableModel> = withDatabase { db ->
+//
+//            val rows = db.query(sVisibleObservationVariableViewName,
+//                    orderBy = "position").toTable()
+//
+//            val variables: Array<ObservationVariableModel?> = arrayOfNulls(rows.size)
+//
+//            rows.forEachIndexed { index, map ->
+//
+//                variables[index] = ObservationVariableModel(map)
+//
+//            }
+//
+//            variables.mapNotNull { it }.toTypedArray()
+//
+//        } ?: emptyArray()
 
         fun getFormat(): Array<String> = withDatabase { db ->
 
@@ -53,16 +53,16 @@ class VisibleObservationVariableDao {
 
         } ?: emptyArray()
 
-        //todo switched name to 'getDetails'
-        fun getDetails(trait: String): Array<ObservationVariableModel> = withDatabase { db ->
-
-            arrayOf(*db.query(sVisibleObservationVariableViewName,
-                    where = "observation_variable_name LIKE $trait")
-                    .toTable().map {
-                        ObservationVariableModel(it)
-                    }.toTypedArray())
-
-        } ?: arrayOf()
+//        //todo switched name to 'getDetails'
+//        fun getDetails(trait: String): Array<ObservationVariableModel> = withDatabase { db ->
+//
+//            arrayOf(*db.query(sVisibleObservationVariableViewName,
+//                    where = "observation_variable_name LIKE $trait")
+//                    .toTable().map {
+//                        ObservationVariableModel(it)
+//                    }.toTypedArray())
+//
+//        } ?: arrayOf()
 
         fun getDetail(trait: String): TraitObject? = withDatabase { db ->
 

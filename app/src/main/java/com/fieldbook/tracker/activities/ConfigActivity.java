@@ -230,25 +230,14 @@ public class ConfigActivity extends AppCompatActivity {
 
                         break;
                     case 2:
-                        String traits = dt.getTraitColumnsAsString();
-                        if (!ep.getBoolean("ImportFieldFinished", false) || ep.getInt("SelectedFieldExpId", -1) == -1) {
-                            Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
-                            return;
-                        } else if (traits == null || traits.isEmpty()) {
-                            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing));
-                            return;
-                        }
+
+                        if (checkTraitsExist() < 0) return;
 
                         collectDataFilePermission();
                         break;
                     case 3:
-                        if (!ep.getBoolean("ImportFieldFinished", false)) {
-                            Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
-                            return;
-                        } else if (dt.getTraitColumnsAsString() == null) {
-                            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing));
-                            return;
-                        }
+
+                        if (checkTraitsExist() < 0) return;
 
                         String exporter = ep.getString("EXPORT_SOURCE_DEFAULT", "ask");
 
@@ -293,6 +282,25 @@ public class ConfigActivity extends AppCompatActivity {
             showTipsDialog();
             loadSampleDataDialog();
         }
+    }
+
+    /**
+     * Checks if the return value of getTraitColumnsAsString is null or empty.
+     * @return -1 when the conditions fail, otherwise it returns 1
+     */
+    private int checkTraitsExist() {
+
+        String traits = dt.getTraitColumnsAsString();
+
+        if (!ep.getBoolean("ImportFieldFinished", false) || ep.getInt("SelectedFieldExpId", -1) == -1) {
+            Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
+            return -1;
+        } else if (traits == null || traits.isEmpty()) {
+            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing));
+            return -1;
+        }
+
+        return 1;
     }
 
     private String getOverwriteFile(String filename) {

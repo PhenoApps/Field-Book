@@ -12,5 +12,5 @@ data class ObservationUnitValueModel(val map: Row) {
         val observation_unit_attribute_db_id: Int by map    //foreign key to unit attribute
         val observation_unit_attribute_value: String? by map //says Name in excel, but should this be value?, string value saved for this attribute
         val observation_unit_id: Int by map //comp. pk 2
-        val study_db_id: Int by map //comp. pk 3
+        val study_id: Int by map //comp. pk 3
 }

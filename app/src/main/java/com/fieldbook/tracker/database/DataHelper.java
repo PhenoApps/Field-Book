@@ -21,6 +21,7 @@ import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.database.dao.ObservationVariableValueDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationUnitPropertyModel;
@@ -1183,7 +1184,7 @@ public class DataHelper {
      */
     public Observation getObservation(String plotId, String parent) {
 
-        Observation o = ObservationDao.Companion.getObservation(plotId, parent);
+        return ObservationDao.Companion.getObservation(plotId, parent);
 
         //        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ?", new String[]{plotId, parent},
 //                null, null, null
@@ -1200,7 +1201,6 @@ public class DataHelper {
 //            cursor.close();
 //        }
 
-        return o;
     }
 
     public Observation getObservationByValue(String plotId, String parent, String value) {
@@ -1263,16 +1263,16 @@ public class DataHelper {
      */
     public int[] getAllRangeID() {
 
-        if (!isTableExists("ObservationUnitProperty")) {
-
-            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
-
-            if (!fields.isEmpty()) {
-
-                StudyDao.Companion.switchField(fields.get(0).getExp_id());
-
-            }
-        }
+//        if (!isTableExists("ObservationUnitProperty")) {
+//
+//            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+//
+//            if (!fields.isEmpty()) {
+//
+//                StudyDao.Companion.switchField(fields.get(0).getExp_id());
+//
+//            }
+//        }
 
         Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId();
 
@@ -1534,7 +1534,7 @@ public class DataHelper {
      * Returns the column names for the range table
      */
     public String[] getRangeColumnNames() {
-        if (db == null || !db.isOpen()) db = openHelper.getWritableDatabase();
+//        if (db == null || !db.isOpen()) db = openHelper.getWritableDatabase();
 
         return ObservationUnitPropertyDao.Companion.getRangeColumnNames();
 
@@ -1640,7 +1640,7 @@ public class DataHelper {
     public void deleteTraitsTable() {
 
         try {
-            db.delete(Migrator.ObservationVariable.tableName, null, null);
+            ObservationVariableDao.Companion.deleteTraits();
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -1998,7 +1998,7 @@ public class DataHelper {
     public int createField(FieldObject e, List<String> columns) {
         // String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns){
 
-        return StudyDao.Companion.createField(e, columns);
+        return StudyDao.Companion.createField(e, timeStamp.format(Calendar.getInstance().getTime()), columns);
 
 //        long exp_id = checkFieldName(e.getExp_name());
 //        if (exp_id != -1) {
@@ -2123,7 +2123,7 @@ public class DataHelper {
 
         open();
 
-        Migrator.Companion.migrateSchema(db, getAllTraitObjects());
+        Migrator.Companion.migrateSchema(db);
 
         close();
     }
@@ -2334,7 +2334,7 @@ public class DataHelper {
                 Log.e(TAG, e.getMessage());
             }
 
-            Migrator.Companion.createTables(db, getAllTraitObjects(db));
+            Migrator.Companion.createTables(db);
         }
 
         /**
@@ -2486,7 +2486,7 @@ public class DataHelper {
 
             if (oldVersion <= 9 & newVersion >= 9) {
 
-                Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
+                Migrator.Companion.migrateSchema(db);
 
             }
         }

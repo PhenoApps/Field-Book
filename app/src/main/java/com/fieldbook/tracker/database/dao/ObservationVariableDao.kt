@@ -130,11 +130,11 @@ class ObservationVariableDao {
 
         } ?: arrayOf()
 
-        fun getAllTraitsForExport(): Cursor? = withDatabase { db ->
+        fun getAllTraitsForExport(): Cursor {
 
             val requiredFields = getTraitPropertyColumns()
             //trait,format,defaultValue,minimum,maximum,details,categories,isVisible,realPosition
-            MatrixCursor(requiredFields).also { cursor ->
+            return MatrixCursor(requiredFields).also { cursor ->
                 val traits = getAllTraitObjects()
                 traits.sortBy { it.id.toInt() }
                 traits.forEach { trait ->
@@ -213,27 +213,6 @@ class ObservationVariableDao {
             if (hasTrait(t.trait)) -1
             else {
 
-                //iterate trhough mapping of the old columns that are now attr/vals
-//                    mapOf(
-//                        "validValuesMin" to trait.minimum as String,
-//                        "validValuesMax" to trait.maximum as String,
-//                        "category" to trait.categories as String,
-//                    ).asSequence().forEach { attrValue ->
-//
-//                        //TODO: commenting this out would create a sparse table from the unused attribute values
-////                        if (attrValue.value.isNotEmpty()) {
-//
-//                            val rowid = db.insert(ObservationVariableValueModel.tableName, null, contentValuesOf(
-//
-//                                    ObservationVariableModel.FK to trait.id,
-//                                    ObservationVariableAttributeModel.FK to attrIds[attrValue.key],
-//                                    "observation_variable_attribute_value" to attrValue.value,
-//                            ))
-//
-//                            println("$rowid Inserting ${attrValue.key} = ${attrValue.value} at ${attrIds[attrValue.key]}")
-////                        }
-//                    }
-
                 val varRowId = db.insert(ObservationVariable.tableName, null,
                         ContentValues().apply {
 //                            put(PK, t.id)
@@ -247,27 +226,7 @@ class ObservationVariableDao {
                             put("position", t.realPosition)
                         })
 
-                //iterate trhough mapping of the old columns that are now attr/vals
-                mapOf(
-                        "validValuesMin" to t.minimum as String,
-                        "validValuesMax" to t.maximum as String,
-                        "category" to t.categories as String,
-                ).asSequence().forEach { attrValue ->
-
-                    //TODO: commenting this out would create a sparse table from the unused attribute values
-//                    if (attrValue.value.isNotEmpty()) {
-
-                        val attrId = ObservationVariableAttributeDao.getAttributeIdByName(attrValue.key)
-
-                        val rowid = db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
-
-                                ObservationVariable.FK to varRowId,
-                                ObservationVariableAttribute.FK to attrId,
-                                "observation_variable_attribute_value" to attrValue.value
-
-                        ))
-//                    }
-                }
+                ObservationVariableValueDao.insert(t.minimum as String, t.maximum as String, t.categories as String, varRowId.toString())
 
                 varRowId
 
@@ -278,6 +237,10 @@ class ObservationVariableDao {
         fun deleteTrait(id: String) = withDatabase { db ->
             db.delete(ObservationVariable.tableName,
                     "${ObservationVariable.PK} = ?", arrayOf(id))
+        }
+
+        fun deleteTraits() = withDatabase { db ->
+            db.delete(ObservationVariable.tableName, null, null)
         }
 
         fun updateTraitPosition(id: String, realPosition: String) = withDatabase { db ->
@@ -303,21 +266,13 @@ class ObservationVariableDao {
 
                 when(it) {
                     "validValuesMin" -> {
-                        db.update(ObservationVariableValue.tableName, ContentValues().apply {
-                            put("observation_variable_attribute_value", minimum)
-
-                        }, "${ObservationVariable.FK} = ? AND ${ObservationVariableAttribute.FK} = ?", arrayOf(id, attrId.toString()))
+                        ObservationVariableValueDao.update(id, attrId.toString(), minimum)
                     }
                     "validValuesMax" -> {
-                        db.update(ObservationVariableValue.tableName, ContentValues().apply {
-                            put("observation_variable_attribute_value", maximum)
-
-                        }, "${ObservationVariable.FK} = ? AND ${ObservationVariableAttribute.FK} = ?", arrayOf(id, attrId.toString()))
+                        ObservationVariableValueDao.update(id, attrId.toString(), maximum)
                     }
                     "category" -> {
-                        db.update(ObservationVariableValue.tableName, ContentValues().apply {
-                            put("observation_variable_attribute_value", categories)
-                        }, "${ObservationVariable.FK} = ? AND ${ObservationVariableAttribute.FK} = ?", arrayOf(id, attrId.toString()))
+                        ObservationVariableValueDao.update(id, attrId.toString(), categories)
                     }
                 }
             }
@@ -343,7 +298,7 @@ class ObservationVariableDao {
 
         }
 
-        fun getTraitColumnsAsString() = getAllTraits().joinToString(",")
+//        fun getTraitColumnsAsString() = getAllTraits().joinToString(",")
 
     }
 }

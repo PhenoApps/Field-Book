@@ -8,5 +8,5 @@ import com.fieldbook.tracker.database.Row
 class ObservationUnitAttributeModel(val map: Row) {
         val internal_id_observation_unit_attribute: Int by map
         val observation_unit_attribute_name: String? by map
-        val study_db_id: Int by map //fk to study table
+        val study_id: Int by map //fk to study table
 }

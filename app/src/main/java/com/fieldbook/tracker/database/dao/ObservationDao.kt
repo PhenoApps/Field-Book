@@ -14,21 +14,20 @@ import com.fieldbook.tracker.database.models.ObservationModel
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import java.util.*
-import kotlin.math.exp
 import com.fieldbook.tracker.brapi.Observation as BrapiObservation
 
 class ObservationDao {
 
     companion object {
 
-        fun getAll(): Array<ObservationModel> = withDatabase { db ->
-
-            db.query(Observation.tableName)
-                .toTable()
-                .map { ObservationModel(it) }
-                .toTypedArray()
-
-        } ?: emptyArray()
+//        fun getAll(): Array<ObservationModel> = withDatabase { db ->
+//
+//            db.query(Observation.tableName)
+//                .toTable()
+//                .map { ObservationModel(it) }
+//                .toTypedArray()
+//
+//        } ?: emptyArray()
 
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
@@ -226,9 +225,9 @@ class ObservationDao {
                     "observation_time_stamp" to model.observation_time_stamp,
                     "collector" to model.collector,
                     "geoCoordinates" to model.geo_coordinates,
-                    "study_db_id" to model.study_db_id,
                     "last_synced_time" to model.last_synced_time,
                     "additional_info" to model.additional_info,
+                    Study.FK to model.study_id,
                     ObservationUnit.FK to model.observation_unit_id,
                     ObservationVariable.FK to model.observation_variable_db_id
             )).toInt()
@@ -366,45 +365,45 @@ class ObservationDao {
          * variable -> trait/variable db id
          * format -> trait/variable observation_field_book_format
          */
-        fun randomObservation(unit: String, uniqueName: String, format: String, variableName: String, variable: String): ObservationModel = ObservationModel(mapOf(
-                "observation_variable_name" to variableName,
-                "observation_variable_field_book_format" to format,
-                "value" to UUID.randomUUID().toString(),
-                "observation_time_stamp" to "2019-10-15 12:14:590-0400",
-                "collector" to UUID.randomUUID().toString(),
-                "geo_coordinates" to UUID.randomUUID().toString(),
-                "observation_db_id" to uniqueName,
-                "last_synced_time" to "2019-10-15 12:14:590-0400",
-                "additional_info" to UUID.randomUUID().toString(),
-                Study.FK to UUID.randomUUID().toString(),
-                ObservationUnit.FK to unit.toInt(),
-                ObservationVariable.FK to variable.toInt()))
+//        fun randomObservation(unit: String, uniqueName: String, format: String, variableName: String, variable: String): ObservationModel = ObservationModel(mapOf(
+//                "observation_variable_name" to variableName,
+//                "observation_variable_field_book_format" to format,
+//                "value" to UUID.randomUUID().toString(),
+//                "observation_time_stamp" to "2019-10-15 12:14:590-0400",
+//                "collector" to UUID.randomUUID().toString(),
+//                "geo_coordinates" to UUID.randomUUID().toString(),
+//                "observation_db_id" to uniqueName,
+//                "last_synced_time" to "2019-10-15 12:14:590-0400",
+//                "additional_info" to UUID.randomUUID().toString(),
+//                Study.FK to UUID.randomUUID().toString(),
+//                ObservationUnit.FK to unit.toInt(),
+//                ObservationVariable.FK to variable.toInt()))
 
         /**
          * Inserts ten random observations per plot/trait pairs.
          */
-        private fun insertRandomObservations() {
-
-            ObservationUnitDao.getAll().sliceArray(0 until 10).forEach { unit ->
-
-                ObservationVariableDao.getAllTraitObjects().forEach { traitObject ->
-
-                    for (i in 0..10) {
-
-                        val obs = randomObservation(
-                                unit.internal_id_observation_unit.toString(),
-                                unit.observation_unit_db_id,
-                                traitObject.format,
-                                traitObject.trait,
-                                traitObject.id)
-
-                        insertObservation(obs)
-
-//                println(newRowid)
-//                    println("Inserting $newRowid $rowid")
-                    }
-                }
-            }
-        }
+//        private fun insertRandomObservations() {
+//
+//            ObservationUnitDao.getAll().sliceArray(0 until 10).forEach { unit ->
+//
+//                ObservationVariableDao.getAllTraitObjects().forEach { traitObject ->
+//
+//                    for (i in 0..10) {
+//
+//                        val obs = randomObservation(
+//                                unit.internal_id_observation_unit.toString(),
+//                                unit.observation_unit_db_id,
+//                                traitObject.format,
+//                                traitObject.trait,
+//                                traitObject.id)
+//
+//                        insertObservation(obs)
+//
+////                println(newRowid)
+////                    println("Inserting $newRowid $rowid")
+//                    }
+//                }
+//            }
+//        }
     }
 }

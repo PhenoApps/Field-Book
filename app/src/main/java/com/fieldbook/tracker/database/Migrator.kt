@@ -6,10 +6,13 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
+import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.objects.TraitObject
 import java.util.*
 
 /**
+ * this class only handles the upgrade from DBv8 to DBv9
+ *
  * Migration helper class that contains all schema refactoring patterns, table names, and private/foreign key references.
  *
  * Each model class has a respective class here that contains a Schema static object.
@@ -94,9 +97,9 @@ class Migrator {
                 sRemoteImageObservationsViewName,
                 sObservationUnitPropertyViewName)
 
-        fun migrateSchema(db: SQLiteDatabase, traits: ArrayList<TraitObject>) {
+        fun migrateSchema(db: SQLiteDatabase) {
 
-            createTables(db, traits)
+            createTables(db)
 
         }
 
@@ -108,7 +111,7 @@ class Migrator {
          * 4. Populates table based on previous query by translating
          *      column headers using a migration pattern mapping.
          */
-        fun createTables(db: SQLiteDatabase, traits: ArrayList<TraitObject>) {
+        fun createTables(db: SQLiteDatabase) {
 
             try {
 
@@ -145,6 +148,10 @@ class Migrator {
                     db.execSQL(createTableStatement(tableName, columnDefs))
                 }
 
+                with(Observation) {
+                    migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
+                }
+
                 //insert all default columns as observation variable attribute rows
                 val attrIds = mutableMapOf<String, String>()
 
@@ -160,6 +167,7 @@ class Migrator {
 
 //                println("ids: $attrIds")
 
+                val traits = ObservationVariableDao.getAllTraitObjects()
                 //iterate over all traits, insert observation variable values using the above mapping
                 //old schema has extra columns in the trait table which are now bridged with attr/vals in the new schema
                 traits.forEachIndexed { index, trait ->
@@ -183,10 +191,6 @@ class Migrator {
 //                            println("$rowid Inserting ${attrValue.key} = ${attrValue.value} at ${attrIds[attrValue.key]}")
 //                        }
                     }
-                }
-
-                with(Observation) {
-                    migrateTo(db, migrateFromTableName, tableName, columnDefs, migratePattern)
                 }
 
                 db.execSQL(sVisibleObservationVariableView)
@@ -358,7 +362,7 @@ class Migrator {
             const val tableName = "observation_units"
             val columnDefs by lazy {
                 mapOf(PK to "INTEGER PRIMARY KEY AUTOINCREMENT",
-                        "study_db_id" to "INT REFERENCES ${Study.tableName}(${Study.PK}) ON DELETE CASCADE",
+                        Study.FK to "INT REFERENCES ${Study.tableName}(${Study.PK}) ON DELETE CASCADE",
                         "observation_unit_db_id" to "TEXT",
                         "primary_id" to "TEXT",
                         "secondary_id" to "TEXT",
@@ -375,7 +379,7 @@ class Migrator {
             }
             val migratePattern by lazy {
                 mapOf("plot_id" to PK,
-                        "exp_id" to "study_db_id",
+                        "exp_id" to Study.FK,
                         "unique_id" to "observation_unit_db_id",
                         "primary_id" to "primary_id",
                         "secondary_id" to "secondary_id",
@@ -545,7 +549,7 @@ class Migrator {
                 mapOf(PK to "INTEGER PRIMARY KEY AUTOINCREMENT",
                         ObservationVariableAttribute.FK to "INT REFERENCES ${ObservationVariableAttribute.tableName}(${ObservationVariableAttribute.PK})",
                         "observation_variable_attribute_value" to "TEXT",
-                        ObservationVariable.FK to "INT REFERENCES ${ObservationVariable.tableName}(${ObservationVariable.PK})",
+                        ObservationVariable.FK to "INT REFERENCES ${ObservationVariable.tableName}(${ObservationVariable.PK}) ON DELETE CASCADE",
                 )}
         }
     }
@@ -553,7 +557,7 @@ class Migrator {
     class Study private constructor() {
         companion object Schema {
             const val PK: String = "internal_id_study"
-            const val FK = "study_db_id"
+            const val FK = "study_id"
             const val migrateFromTableName = "exp_id"
             const val tableName = "studies"
             val migratePattern by lazy {

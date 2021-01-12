@@ -12,7 +12,7 @@ data class ObservationModel(val map: Row) {
         val observation_time_stamp: String? by map
         val collector: String? by map
         val geo_coordinates: String? by map
-        val study_db_id: String? by map
+        val study_id: String? by map
         val last_synced_time: String by map
         val additional_info: String? by map
 }
