@@ -984,7 +984,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         try {
             FileWriter fw = new FileWriter(file);
             CSVWriter csvWriter = new CSVWriter(fw, ConfigActivity.dt.getAllTraitsForExport());
-            csvWriter.writeTraitFile(ConfigActivity.dt.getTraitColumns());
+            csvWriter.writeTraitFile(ConfigActivity.dt.getAllTraitsForExport().getColumnNames());
 
             csvWriter.close();
         } catch (Exception ignore) {

@@ -3,11 +3,9 @@ package com.fieldbook.tracker.database.dao
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
-import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.objects.TraitObject
-
 
 class ObservationVariableDao {
 
@@ -104,7 +102,7 @@ class ObservationVariableDao {
 
             val newTraits = db.query(ObservationVariable.tableName).use {
 
-                val names = ObservationVariableAttributeDao.getAllNames()!!
+                val names = ObservationVariableAttributeDao.getAllNames()!!.distinct()
 
                 val columns = names + it.toFirst().keys
 
