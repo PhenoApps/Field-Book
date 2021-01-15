@@ -262,20 +262,26 @@ class StudyDao {
             }, "${Study.PK} = ?", arrayOf("$exp_id"))
         }
 
-        private fun modifyDate(db: SQLiteDatabase) {
+        private fun modifyDate(db: SQLiteDatabase, exp_id: Int) {
 
-            db.query(Study.tableName).toTable().forEach { study ->
+            db.query(Study.tableName,
+                where = "${Study.PK} = ?",
+                whereArgs = arrayOf(exp_id.toString())).toFirst().let { study ->
 
-                val studyKey = study[Study.PK]
+                if (study[Study.PK] == exp_id) {
 
-                with(db.query(Observation.tableName, arrayOf("observation_time_stamp"),
-                        where = "${Study.FK} = ?",
-                        whereArgs = arrayOf("$studyKey"),
-                        orderBy = "datetime(substr(observation_time_stamp, 1, 19)) DESC").toFirst()) {
+                    val studyKey = study[Study.PK]
 
-                    db.update(Study.tableName, ContentValues().apply {
-                        put("date_edit", this@with["observation_time_stamp"].toString())
-                    }, "${Study.PK} = ?", arrayOf("$studyKey"))
+                    with(db.query(Observation.tableName, arrayOf("observation_time_stamp"),
+                            where = "${Study.FK} = ?",
+                            whereArgs = arrayOf("$studyKey"),
+                            orderBy = "datetime(substr(observation_time_stamp, 1, 19)) DESC").toFirst()) {
+
+                        db.update(Study.tableName, ContentValues().apply {
+                            put("date_edit", this@with["observation_time_stamp"].toString())
+                        }, "${Study.PK} = ?", arrayOf("$studyKey"))
+                    }
+
                 }
             }
         }
@@ -298,7 +304,7 @@ class StudyDao {
 
             if (updateImportDate) updateImportDate(db, exp_id)
 
-            if (modifyDate) modifyDate(db)
+            if (modifyDate) modifyDate(db, exp_id)
 
             if (updateExportDate) updateExportDate(db, exp_id)
         }

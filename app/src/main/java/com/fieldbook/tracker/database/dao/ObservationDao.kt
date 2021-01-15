@@ -198,11 +198,13 @@ class ObservationDao {
 
             val internalTraitId = ObservationVariableDao.getTraitId(parent)
 
+            val timestamp = OffsetDateTime.now().format(internalTimeFormatter)
+
             db.insert(Observation.tableName, null, contentValuesOf(
                     "observation_variable_name" to parent,
                     "observation_variable_field_book_format" to trait,
                     "value" to userValue,
-                    "observation_time_stamp" to OffsetDateTime.now().format(internalTimeFormatter),
+                    "observation_time_stamp" to timestamp,
                     "collector" to person,
                     "geoCoordinates" to location,
                     "last_synced_time" to lastSyncedTime,
