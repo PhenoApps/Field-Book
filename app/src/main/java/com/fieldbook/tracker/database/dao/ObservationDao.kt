@@ -202,6 +202,7 @@ class ObservationDao {
 
             db.insert(Observation.tableName, null, contentValuesOf(
                     "observation_variable_name" to parent,
+                    "observation_db_id" to observationDbId,
                     "observation_variable_field_book_format" to trait,
                     "value" to userValue,
                     "observation_time_stamp" to timestamp,
@@ -295,10 +296,10 @@ class ObservationDao {
             }
         }
 
-        fun deleteTrait(rid: String, parent: String) = withDatabase { db ->
+        fun deleteTrait(id: String, rid: String, parent: String) = withDatabase { db ->
             db.delete(Observation.tableName,
-                    "${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ?",
-                    arrayOf(rid, parent))
+                    "${Study.FK} = ? AND ${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ?",
+                    arrayOf(id, rid, parent))
         }
 
         fun deleteTraitByValue(rid: String, parent: String, value: String) = withDatabase { db ->
@@ -328,23 +329,21 @@ class ObservationDao {
 
 
         //TODO
-        fun updateImage(image: Image, writeLastSyncedTime: Boolean) {
+        fun updateImage(image: Image, writeLastSyncedTime: Boolean) = withDatabase {
 
-            withDatabase {
+            it.update(Observation.tableName,
 
-                it.update(Observation.tableName,
-
-                        ContentValues().apply {
-                            put("observation_db_id", image.dbId)
-                            if (writeLastSyncedTime) {
-                                put("last_synced_time", image.lastSyncedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())))
-                            }
-                        },
-                        "_id = ?", arrayOf(image.fieldBookDbId))
-
-            }
+                    ContentValues().apply {
+                        put("observation_db_id", image.dbId)
+                        if (writeLastSyncedTime) {
+                            put("last_synced_time", image.lastSyncedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())))
+                        }
+                    },
+                    "_id = ?", arrayOf(image.fieldBookDbId))
 
         }
+
+
 
         /**
          * "rep" is a deprecated column that was used to save count of the number of observations

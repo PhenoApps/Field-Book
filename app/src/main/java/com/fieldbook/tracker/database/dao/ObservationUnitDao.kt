@@ -37,12 +37,12 @@ class ObservationUnitDao {
 
         } ?: emptyArray()
 
-        fun getAll(): Array<ObservationUnitModel> = withDatabase { db ->
-
-            arrayOf(*db.query(ObservationUnit.tableName).toTable()
-                    .map { ObservationUnitModel(it) }
-                    .toTypedArray())
-
-        } ?: emptyArray()
+//        fun getAll(): Array<ObservationUnitModel> = withDatabase { db ->
+//
+//            arrayOf(*db.query(ObservationUnit.tableName).toTable()
+//                    .map { ObservationUnitModel(it) }
+//                    .toTypedArray())
+//
+//        } ?: emptyArray()
     }
 }

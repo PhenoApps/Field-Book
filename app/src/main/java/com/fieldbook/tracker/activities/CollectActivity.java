@@ -572,11 +572,11 @@ public class CollectActivity extends AppCompatActivity {
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        dt.deleteTrait(rangeBox.getPlotID(), parent);
-
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        dt.deleteTrait(exp_id, rangeBox.getPlotID(), parent);
 
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
@@ -1253,7 +1253,10 @@ public class CollectActivity extends AppCompatActivity {
         public void remove(String traitName, String plotID) {
             if (newTraits.containsKey(traitName))
                 newTraits.remove(traitName);
-            dt.deleteTrait(plotID, traitName);
+
+            String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+
+            dt.deleteTrait(exp_id, plotID, traitName);
         }
 
         public void remove(TraitObject trait, String plotID) {

@@ -222,15 +222,16 @@ class StudyDao {
             val primaryIndex = columns.indexOf(names.primary)
             val secondaryIndex = columns.indexOf(names.secondary)
 
-            val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
-                    Study.FK to exp_id,
-                    "observation_unit_db_id" to data[uniqueIndex],
-                    "primary_id" to data[primaryIndex],
-                    "secondary_id" to data[secondaryIndex]))
-
             db.beginTransaction()
 
             try {
+
+                val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
+                        Study.FK to exp_id,
+                        "observation_unit_db_id" to data[uniqueIndex],
+                        "primary_id" to data[primaryIndex],
+                        "secondary_id" to data[secondaryIndex]))
+
                 columns.forEachIndexed { index, it ->
 
                     val attrId = ObservationUnitAttributeDao.getIdByName(it)

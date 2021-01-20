@@ -398,7 +398,7 @@ class Migrator {
             val columnDefs by lazy {
                 mapOf(PK to "INTEGER PRIMARY KEY AUTOINCREMENT",
                         ObservationUnit.FK to "TEXT",
-                        Study.FK to "INT REFERENCES ${Study.tableName}(${Study.PK}) ON DELETE SET NULL",
+                        Study.FK to "INT",
                         ObservationVariable.FK to "INT",
                         "observation_variable_name" to "TEXT",
                         "observation_variable_field_book_format" to "TEXT",

@@ -181,6 +181,6 @@ inline fun <reified T> withDatabase(crossinline function: (SQLiteDatabase) -> T)
     null
 }
 
-var internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ")
+var internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ")
 
 

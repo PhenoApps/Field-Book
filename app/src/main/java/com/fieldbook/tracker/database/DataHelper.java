@@ -1594,9 +1594,9 @@ public class DataHelper {
      * Helper function
      * v1.6 - Amended to consider trait
      */
-    public void deleteTrait(String rid, String parent) {
+    public void deleteTrait(String exp_id, String rid, String parent) {
 
-        ObservationDao.Companion.deleteTrait(rid, parent);
+        ObservationDao.Companion.deleteTrait(exp_id, rid, parent);
 
 //        try {
 //            db.delete(USER_TRAITS, "rid like ? and parent like ?",
