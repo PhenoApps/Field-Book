@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
+import android.provider.ContactsContract;
 import android.view.MenuItem;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
@@ -49,6 +50,20 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
         prefsFragment = new PreferencesFragment();
         getSupportFragmentManager().beginTransaction()
                 .replace(android.R.id.content, prefsFragment).commit();
+
+        //parse passed bundle and check if the person should be updated.
+        Bundle extras = getIntent().getExtras();
+        if (extras != null && extras.getBoolean("PersonUpdate", false)) {
+
+            //starts fragment with bundle that tells the fragment to open the person setting
+            Fragment profile = new ProfilePreferencesFragment();
+            Bundle personUpdate = new Bundle();
+            personUpdate.putBoolean("PersonUpdate", true);
+            profile.setArguments(personUpdate);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(android.R.id.content, profile).commit();
+
+        }
     }
 
     @Override

@@ -19,4 +19,11 @@
         android:summary=""
         android:title="@string/profile_reset" />
 
+    <CheckBoxPreference
+        android:icon="@drawable/ic_pref_profile_delete"
+        android:key="VerifyUserEvery24Hours"
+        android:defaultValue="true"
+        android:summary="@string/pref_profile_summary"
+        android:title="@string/pref_profile_title" />
+
 </PreferenceScreen>

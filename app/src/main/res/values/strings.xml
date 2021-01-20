@@ -533,4 +533,10 @@
     <string name="trait_labelprint_print_button_description">Button which prints labels configured in this dialog.</string>
     <string name="trait_printlabel_after_print_message">Label printed!</string>
     <string name="trait_printlabel_after_print_error">Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.</string>
+    <string name="activity_collect_dialog_ask_new_collector">Are you the same collector?</string>
+    <string name="activity_collect_dialog_cancel_button">No</string>
+    <string name="activity_collect_dialog_ok_button">Yes</string>
+    <string name="pref_profile_summary">Shows a dialog every 24 hours, verifying the person\'s name.</string>
+    <string name="pref_profile_title">Verify person every 24 hours.</string>
+    <string name="activity_collect_dialog_neutral_button">Yes, don\'t ask again.</string>
 </resources>
