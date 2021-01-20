@@ -595,13 +595,16 @@ public class CollectActivity extends AppCompatActivity {
 
         new AlertDialog.Builder(this)
                 .setTitle(R.string.activity_collect_dialog_ask_new_collector)
+                //yes button
                 .setPositiveButton(R.string.activity_collect_dialog_ok_button, (DialogInterface dialog, int which) -> {
                     dialog.dismiss();
                 })
+                //yes, don't ask again button
                 .setNeutralButton(R.string.activity_collect_dialog_neutral_button, (DialogInterface dialog, int which) -> {
                     dialog.dismiss();
                     ep.edit().putBoolean("VerifyUserEvery24Hours", false).apply();
                 })
+                //no (navigates to the person preference)
                 .setNegativeButton(R.string.activity_collect_dialog_cancel_button, (DialogInterface dialog, int which) -> {
                     dialog.dismiss();
                     Intent preferenceIntent = new Intent();

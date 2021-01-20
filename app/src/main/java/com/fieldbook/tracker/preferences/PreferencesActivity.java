@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
-import android.provider.ContactsContract;
 import android.view.MenuItem;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
