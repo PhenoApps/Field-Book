@@ -95,7 +95,7 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
                 try {
                     String[] traitTextArray = dataHelper.getDropDownRange(prefixTraits[pos], plotId);
 
-                    if (traitTextArray == null) {
+                    if (traitTextArray == null || traitTextArray.length == 0) {
                         text.setText(context.getString(R.string.main_infobar_data_missing));
                     } else {
                         text.setText(traitTextArray[0]);
