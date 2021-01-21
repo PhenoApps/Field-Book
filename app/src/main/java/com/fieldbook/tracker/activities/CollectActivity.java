@@ -51,6 +51,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.Observation;
@@ -486,6 +487,8 @@ public class CollectActivity extends AppCompatActivity {
             Log.e(TAG, e.getMessage());
         }
 
+        updateLastOpenedTime();
+
         super.onPause();
     }
 
@@ -554,6 +557,72 @@ public class CollectActivity extends AppCompatActivity {
                 moveToSearch("search", rangeID, searchRange, searchPlot, null);
             }
         }
+
+        checkLastOpened();
+    }
+
+    /**
+     * Simple function that checks if the collect activity was opened >24hrs ago.
+     * If the condition is met, it asks the user to reenter the collector id.
+     */
+    private void checkLastOpened() {
+
+        long lastOpen = ep.getLong("LastTimeAppOpened", 0L);
+        long systemTime = System.nanoTime();
+
+        long nanosInOneDay = (long) 1e9*3600*24;
+
+        if (lastOpen != 0L && systemTime - lastOpen > nanosInOneDay) {
+
+            boolean verify = ep.getBoolean("VerifyUserEvery24Hours", true);
+
+            if (verify) {
+
+                if(ep.getString("FirstName","").length() > 0 || ep.getString("LastName","").length() > 0) {
+                    //person presumably has been set
+                    showAskCollectorDialog(getString(R.string.activity_collect_dialog_verify_collector) + " " + ep.getString("FirstName","") + " " + ep.getString("LastName","") + "?",
+                            getString(R.string.activity_collect_dialog_verify_yes_button),
+                            getString(R.string.activity_collect_dialog_neutral_button),
+                            getString(R.string.activity_collect_dialog_verify_no_button));
+                } else {
+                    //person presumably hasn't been set
+                    showAskCollectorDialog(getString(R.string.activity_collect_dialog_new_collector),
+                            getString(R.string.activity_collect_dialog_verify_no_button),
+                            getString(R.string.activity_collect_dialog_neutral_button),
+                            getString(R.string.activity_collect_dialog_verify_yes_button));
+                }
+            }
+        }
+
+        updateLastOpenedTime();
+    }
+
+    private void updateLastOpenedTime() {
+        ep.edit().putLong("LastTimeAppOpened", System.nanoTime()).apply();
+    }
+
+    private void showAskCollectorDialog(String message, String positive, String neutral, String negative) {
+        new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setTitle(message)
+                //yes button
+                .setPositiveButton(positive, (DialogInterface dialog, int which) -> {
+                    dialog.dismiss();
+                })
+                //yes, don't ask again button
+                .setNeutralButton(neutral, (DialogInterface dialog, int which) -> {
+                    dialog.dismiss();
+                    ep.edit().putBoolean("VerifyUserEvery24Hours", false).apply();
+                })
+                //no (navigates to the person preference)
+                .setNegativeButton(negative, (DialogInterface dialog, int which) -> {
+                    dialog.dismiss();
+                    Intent preferenceIntent = new Intent();
+                    preferenceIntent.setClassName(CollectActivity.this,
+                            PreferencesActivity.class.getName());
+                    preferenceIntent.putExtra("PersonUpdate", true);
+                    startActivity(preferenceIntent);
+                })
+                .show();
     }
 
     /**
