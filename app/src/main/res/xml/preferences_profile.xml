@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <Preference
         android:icon="@drawable/ic_pref_profile_person"
@@ -19,11 +20,17 @@
         android:summary=""
         android:title="@string/profile_reset" />
 
-    <CheckBoxPreference
-        android:icon="@drawable/ic_pref_profile_delete"
-        android:key="VerifyUserEvery24Hours"
-        android:defaultValue="true"
-        android:summary="@string/pref_profile_summary"
-        android:title="@string/pref_profile_title" />
+    <PreferenceCategory
+        android:key="transfer_defaults"
+        android:title="@string/preferences_profile_settings"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_pref_profile_verify"
+            android:key="VerifyUserEvery24Hours"
+            android:title="@string/pref_profile_title" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

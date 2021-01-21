@@ -578,7 +578,19 @@ public class CollectActivity extends AppCompatActivity {
 
             if (verify) {
 
-                showAskCollectorDialog();
+                if(ep.getString("FirstName","").length() > 0 || ep.getString("LastName","").length() > 0) {
+                    //person presumably has been set
+                    showAskCollectorDialog(getString(R.string.activity_collect_dialog_verify_collector) + " " + ep.getString("FirstName","") + " " + ep.getString("LastName","") + "?",
+                            getString(R.string.activity_collect_dialog_verify_yes_button),
+                            getString(R.string.activity_collect_dialog_neutral_button),
+                            getString(R.string.activity_collect_dialog_verify_no_button));
+                } else {
+                    //person presumably hasn't been set
+                    showAskCollectorDialog(getString(R.string.activity_collect_dialog_new_collector),
+                            getString(R.string.activity_collect_dialog_verify_no_button),
+                            getString(R.string.activity_collect_dialog_neutral_button),
+                            getString(R.string.activity_collect_dialog_verify_yes_button));
+                }
             }
         }
 
@@ -586,26 +598,23 @@ public class CollectActivity extends AppCompatActivity {
     }
 
     private void updateLastOpenedTime() {
-
         ep.edit().putLong("LastTimeAppOpened", System.nanoTime()).apply();
-
     }
 
-    private void showAskCollectorDialog() {
-
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.activity_collect_dialog_ask_new_collector)
+    private void showAskCollectorDialog(String message, String positive, String neutral, String negative) {
+        new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setTitle(message)
                 //yes button
-                .setPositiveButton(R.string.activity_collect_dialog_ok_button, (DialogInterface dialog, int which) -> {
+                .setPositiveButton(positive, (DialogInterface dialog, int which) -> {
                     dialog.dismiss();
                 })
                 //yes, don't ask again button
-                .setNeutralButton(R.string.activity_collect_dialog_neutral_button, (DialogInterface dialog, int which) -> {
+                .setNeutralButton(neutral, (DialogInterface dialog, int which) -> {
                     dialog.dismiss();
                     ep.edit().putBoolean("VerifyUserEvery24Hours", false).apply();
                 })
                 //no (navigates to the person preference)
-                .setNegativeButton(R.string.activity_collect_dialog_cancel_button, (DialogInterface dialog, int which) -> {
+                .setNegativeButton(negative, (DialogInterface dialog, int which) -> {
                     dialog.dismiss();
                     Intent preferenceIntent = new Intent();
                     preferenceIntent.setClassName(CollectActivity.this,
