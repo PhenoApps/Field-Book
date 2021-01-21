@@ -1,16 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.fieldbook.tracker.traits.BooleanTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.fieldbook.tracker.traits.BooleanTraitLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/booleanLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:visibility="gone">
 
-    <ImageView
-        android:id="@+id/eImg"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal"
-        android:scaleType="fitCenter"
-        android:src="@drawable/trait_boolean_true" />
+        android:layout_marginTop="16dp">
+
+        <ImageView
+            android:id="@+id/offImage"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_alpha_x_circle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/traitBooleanSeekBar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <!-- padding should be half the size of the thumb -->
+        <SeekBar
+            android:layout_width="128dp"
+            android:layout_height="0dp"
+            android:paddingStart="21dp"
+            android:paddingEnd="21dp"
+            android:min="0"
+            android:max="1"
+            android:progressDrawable="@drawable/three_state_seek_bar_progress"
+            android:thumb="@drawable/three_state_seek_bar_thumb"
+            android:id="@+id/traitBooleanSeekBar"
+            app:layout_constraintStart_toEndOf="@id/offImage"
+            app:layout_constraintEnd_toStartOf="@id/onImage"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <ImageView
+            android:id="@+id/onImage"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="32dp"
+            android:src="@drawable/ic_checkbox_marked_circle"
+            app:layout_constraintStart_toEndOf="@id/traitBooleanSeekBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </com.fieldbook.tracker.traits.BooleanTraitLayout>

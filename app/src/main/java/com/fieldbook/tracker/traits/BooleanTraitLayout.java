@@ -5,11 +5,19 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+
 import com.fieldbook.tracker.R;
 
-public class BooleanTraitLayout extends BaseTraitLayout {
+public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSeekBarChangeListener {
 
-    private ImageView eImg;
+    private SeekBar threeStateSeekBar;
+
+    private static class ThreeState {
+        static int OFF = 0;
+        //static int NEUTRAL = 1;
+        static int ON = 1;
+    }
 
     public BooleanTraitLayout(Context context) {
         super(context);
@@ -23,13 +31,9 @@ public class BooleanTraitLayout extends BaseTraitLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public ImageView getEImg() {
-        return eImg;
-    }
 
     @Override
-    public void setNaTraitsText() {
-    }
+    public void setNaTraitsText() { }
 
     @Override
     public String type() {
@@ -39,24 +43,26 @@ public class BooleanTraitLayout extends BaseTraitLayout {
     @Override
     public void init() {
 
-        eImg = findViewById(R.id.eImg);
+        threeStateSeekBar = findViewById(R.id.traitBooleanSeekBar);
 
-        // Boolean
-        eImg.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                String val = getNewTraits().get(getCurrentTrait().getTrait()).toString();
+        threeStateSeekBar.setOnSeekBarChangeListener(this);
 
-                if (val.equalsIgnoreCase("false")) {
-                    val = "true";
-                    eImg.setImageResource(R.drawable.trait_boolean_true);
-                } else {
-                    val = "false";
-                    eImg.setImageResource(R.drawable.trait_boolean_false);
-                }
+        ImageView onImageView = findViewById(R.id.onImage);
 
-                updateTrait(getCurrentTrait().getTrait(), "boolean", val);
-            }
+        ImageView offImageView = findViewById(R.id.offImage);
+
+        onImageView.setOnClickListener((View v) -> {
+
+            threeStateSeekBar.setProgress(ThreeState.ON);
+
         });
+
+        offImageView.setOnClickListener((View v) -> {
+
+            threeStateSeekBar.setProgress(ThreeState.OFF);
+
+        });
+
     }
 
     @Override
@@ -65,35 +71,67 @@ public class BooleanTraitLayout extends BaseTraitLayout {
         getEtCurVal().setVisibility(EditText.GONE);
         getEtCurVal().setEnabled(false);
 
+        //if the trait has a default value and this unit has not been observed,
+        // set the seek bar to the default value's state
         if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            if (getCurrentTrait().getDefaultValue().trim().equalsIgnoreCase("true")) {
-                updateTrait(getCurrentTrait().getTrait(), "boolean", "true");
-                eImg.setImageResource(R.drawable.trait_boolean_true);
-            } else {
-                updateTrait(getCurrentTrait().getTrait(), "boolean", "false");
-                eImg.setImageResource(R.drawable.trait_boolean_false);
-            }
-        } else {
+
+            String defaultValue = getCurrentTrait().getDefaultValue().trim();
+
+            updateSeekBarState(defaultValue);
+
+        } else { //otherwise update the seekbar to the database's current value
+
             String bval = getNewTraits().get(getCurrentTrait().getTrait()).toString();
 
-            if (bval.equalsIgnoreCase("false")) {
-                eImg.setImageResource(R.drawable.trait_boolean_false);
-            } else {
-                eImg.setImageResource(R.drawable.trait_boolean_true);
-            }
+            updateSeekBarState(bval);
 
         }
-
     }
 
     @Override
     public void deleteTraitListener() {
-        if (getCurrentTrait().getDefaultValue().trim().toLowerCase().equals("true")) {
-            updateTrait(getCurrentTrait().getTrait(), "boolean", "true");
-            eImg.setImageResource(R.drawable.trait_boolean_true);
-        } else {
-            updateTrait(getCurrentTrait().getTrait(), "boolean", "false");
-            eImg.setImageResource(R.drawable.trait_boolean_false);
-        }
+
+        String defaultValue = getCurrentTrait().getDefaultValue().trim();
+
+        updateSeekBarState(defaultValue);
+
+    }
+
+    private void updateSeekBarState(String state) {
+
+        if (state.equalsIgnoreCase("true")) {
+
+            threeStateSeekBar.setProgress(ThreeState.ON);
+
+        } else if (state.equalsIgnoreCase("false")) {
+
+            threeStateSeekBar.setProgress(ThreeState.OFF);
+
+        } //else threeStateSeekBar.setProgress(ThreeState.NEUTRAL);
+
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+        //every time the progress changes, update the database
+        int state = threeStateSeekBar.getProgress();
+
+        String newVal = "true";
+
+        if (state == ThreeState.OFF) newVal = "false";
+        //else if (state == ThreeState.NEUTRAL) newVal = "unset";
+
+        updateTrait(getCurrentTrait().getTrait(), "boolean", newVal);
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        //not implemented
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        //not implemented
     }
 }
