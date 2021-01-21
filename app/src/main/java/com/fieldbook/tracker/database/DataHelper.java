@@ -1263,16 +1263,16 @@ public class DataHelper {
      */
     public int[] getAllRangeID() {
 
-//        if (!isTableExists("ObservationUnitProperty")) {
-//
-//            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
-//
-//            if (!fields.isEmpty()) {
-//
-//                StudyDao.Companion.switchField(fields.get(0).getExp_id());
-//
-//            }
-//        }
+        if (!isTableExists("ObservationUnitProperty")) {
+
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+
+            if (!fields.isEmpty()) {
+
+                StudyDao.Companion.switchField(fields.get(0).getExp_id());
+
+            }
+        }
 
         Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId();
 
