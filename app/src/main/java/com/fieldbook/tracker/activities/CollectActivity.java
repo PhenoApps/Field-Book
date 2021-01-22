@@ -1119,6 +1119,19 @@ public class CollectActivity extends AppCompatActivity {
         return ep.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
     }
 
+    public void insertPrintObservation() {
+
+        TraitObject trait = getCurrentTrait();
+
+        String studyId = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+
+        dt.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), "",
+                ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
+                ep.getString("Location", ""), "", studyId, "",
+                null);
+
+    }
+
     ///// class TraitBox /////
     // traitLeft, traitType, and traitRight
     private class TraitBox {
