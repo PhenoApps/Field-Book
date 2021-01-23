@@ -2,13 +2,13 @@ package com.fieldbook.tracker.brapi;
 
 import android.util.Log;
 
+import org.brapi.client.v2.ApiCallback;
+import org.brapi.client.v2.model.exceptions.ApiException;
+
 import java.util.List;
 import java.util.Map;
 
-import io.swagger.client.ApiCallback;
-import io.swagger.client.ApiException;
-
-public abstract class BrapiApiCallBack<T> implements ApiCallback<T> {
+public abstract class BrapiV2ApiCallBack<T> implements ApiCallback<T> {
 
     @Override
     public void onFailure(ApiException error, int i, Map<String, List<String>> map) {

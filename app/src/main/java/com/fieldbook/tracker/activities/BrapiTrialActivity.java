@@ -19,6 +19,7 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.BrapiTrial;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.utilities.Utils;
@@ -39,9 +40,9 @@ public class BrapiTrialActivity extends AppCompatActivity {
         if (Utils.isConnected(this)) {
             if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi_trials);
-                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
-                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiTrialActivity.this));
+                brAPIService = BrAPIServiceFactory.getBrAPIService(BrapiTrialActivity.this);
 
+                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
                 baseURLText.setText(brapiBaseURL);
 

@@ -17,6 +17,7 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.brapi.Observation;
@@ -73,10 +74,8 @@ public class BrapiExportActivity extends AppCompatActivity {
                 requestWindowFeature(Window.FEATURE_NO_TITLE);
                 setContentView(R.layout.dialog_brapi_export);
 
-                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
-
                 this.dataHelper = new DataHelper(this);
-                brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper);
+                brAPIService = BrAPIServiceFactory.getBrAPIService(this);
 
                 putObservationsError = UploadError.NONE;
                 postImageMetaDataError = UploadError.NONE;
@@ -632,7 +631,7 @@ public class BrapiExportActivity extends AppCompatActivity {
         numSyncedImages = 0;
         numIncompleteImages = 0;
 
-        String hostURL = BrAPIService.getHostUrl(BrAPIService.getBrapiUrl(this));
+        String hostURL = brAPIService.getHostUrl(BrAPIService.getBrapiUrl(this));
         List<Observation> observations = dataHelper.getObservations(hostURL);
         observationsNeedingSync.clear();
         List<Observation> userCreatedTraitObservations = dataHelper.getUserTraitObservations();
