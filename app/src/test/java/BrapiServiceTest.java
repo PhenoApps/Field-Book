@@ -4,6 +4,7 @@ import android.os.Build;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrAPIServiceV1;
 import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.brapi.BrapiPaginationManager;
 import com.fieldbook.tracker.brapi.BrapiStudyDetails;
@@ -51,7 +52,7 @@ public class BrapiServiceTest {
     @Before
     public void setUp() throws Exception {
         // Instantiate our brapi service class
-        this.brAPIService = new BrAPIService(brapiBaseUrl, null);
+        this.brAPIService = new BrAPIServiceV1(brapiBaseUrl, null);
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap missingImage = Bitmap.createBitmap(100, 100, conf);
     }

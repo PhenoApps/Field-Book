@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.brapi.BrapiPaginationManager;
@@ -57,20 +58,20 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         // Load the traits from breedbase if user is connected to the internet
         if (Utils.isConnected(this)) {
-            if (brAPIService.hasValidBaseUrl(this)) {
+            if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_traits_brapi);
                 paginationManager = new BrapiPaginationManager(this);
 
                 loadToolbar();
                 // Get the setting information for our brapi integration
-                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
 
-                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this));
+                brAPIService = BrAPIServiceFactory.getBrAPIService(this);
 
                 // Make a clean list to track our selected traits
                 selectedTraits = new ArrayList<>();
 
                 // Set the url on our interface
+                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 TextView baseURLText = findViewById(R.id.brapiBaseUrl);
                 baseURLText.setText(brapiBaseURL);
 

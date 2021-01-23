@@ -19,6 +19,7 @@ import androidx.arch.core.util.Function;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiLoadDialog;
 import com.fieldbook.tracker.brapi.BrapiPaginationManager;
@@ -65,11 +66,11 @@ public class BrapiActivity extends AppCompatActivity {
         if (Utils.isConnected(this)) {
             if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi);
-                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 paginationManager = new BrapiPaginationManager(this);
 
-                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiActivity.this));
+                brAPIService = BrAPIServiceFactory.getBrAPIService(BrapiActivity.this);
 
+                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
                 baseURLText.setText(brapiBaseURL);
 

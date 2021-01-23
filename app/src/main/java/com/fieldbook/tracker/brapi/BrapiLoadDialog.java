@@ -57,9 +57,8 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         this.setCanceledOnTouchOutside(false);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_brapi_import);
-        String brapiBaseURL = BrAPIService.getBrapiUrl(this.context);
 
-        brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this.context));
+        brAPIService = BrAPIServiceFactory.getBrAPIService(this.context);
         saveBtn = findViewById(R.id.brapi_save_btn);
         saveBtn.setOnClickListener(this);
         Button cancelBtn = findViewById(R.id.brapi_cancel_btn);
