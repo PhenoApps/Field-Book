@@ -7,34 +7,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.BrAPIService;
 import com.fieldbook.tracker.brapi.BrAPIServiceFactory;
-import com.fieldbook.tracker.brapi.BrapiAuthDialog;
-import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.brapi.BrapiPaginationManager;
-import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fieldbook.tracker.objects.TraitObject;
-
-import io.swagger.client.ApiException;
-import io.swagger.client.model.Metadata;
 
 public class BrapiTraitActivity extends AppCompatActivity {
 
@@ -114,16 +104,13 @@ public class BrapiTraitActivity extends AppCompatActivity {
         paginationManager.refreshPageIndicator();
 
         // Call our API to get the data
-        brAPIService.getOntology(BrAPIService.getBrapiToken(this), paginationManager, new Function<BrapiListResponse<TraitObject>, Void>() {
+        brAPIService.getOntology(paginationManager, new Function<List<TraitObject>, Void>() {
             @Override
-            public Void apply(final BrapiListResponse<TraitObject> input) {
+            public Void apply(final List<TraitObject> traits) {
 
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
-                            final List<TraitObject> traits = input.getData();
-
                             // Build our array adapter
                             traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
 
@@ -173,15 +160,15 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 return null;
             }
 
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(final ApiException error) {
+            public Void apply(final Integer code) {
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
-                        if(BrAPIService.isConnectionError(error.getCode())){
-                            BrAPIService.handleConnectionError(BrapiTraitActivity.this, error.getCode());
+                        if(BrAPIService.isConnectionError(code)){
+                            BrAPIService.handleConnectionError(BrapiTraitActivity.this, code);
                         }else {
                             Toast.makeText(getApplicationContext(), getString(R.string.brapi_ontology_error), Toast.LENGTH_LONG).show();
                         }
@@ -200,8 +187,10 @@ public class BrapiTraitActivity extends AppCompatActivity {
         ArrayList<String> itemDataList = new ArrayList<>();
 
         for (TraitObject trait : traits) {
-
-            itemDataList.add(trait.getTrait());
+            if(trait.getTrait() != null)
+                itemDataList.add(trait.getTrait());
+            else
+                itemDataList.add(trait.getId());
         }
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, itemDataList);

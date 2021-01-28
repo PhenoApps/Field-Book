@@ -559,7 +559,7 @@ public class ConfigActivity extends AppCompatActivity {
         // Check that the field data source is the same as the current target
         if (!BrAPIService.checkMatchBrapiUrl(ConfigActivity.this, activeField.getExp_source())) {
 
-            String hostURL = BrAPIService.getHostUrl(BrAPIService.getBrapiUrl(ConfigActivity.this));
+            String hostURL = BrAPIService.getHostUrl(ConfigActivity.this);
             String badSourceMsg = getResources().getString(R.string.brapi_field_non_matching_sources, activeField.getExp_source(), hostURL);
             Toast.makeText(ConfigActivity.this, badSourceMsg, Toast.LENGTH_LONG).show();
             return;

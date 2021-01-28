@@ -12,55 +12,14 @@ package com.fieldbook.tracker.brapi;
 
         import androidx.arch.core.util.Function;
 
-        import com.fieldbook.tracker.database.DataHelper;
         import com.fieldbook.tracker.R;
-        import com.fieldbook.tracker.objects.FieldObject;
         import com.fieldbook.tracker.preferences.GeneralKeys;
         import com.fieldbook.tracker.objects.TraitObject;
         import com.fieldbook.tracker.utilities.Constants;
 
         import java.net.MalformedURLException;
         import java.net.URL;
-        import java.util.ArrayList;
         import java.util.List;
-        import java.util.Map;
-
-        import io.swagger.client.ApiClient;
-        import io.swagger.client.ApiException;
-        import io.swagger.client.api.ImagesApi;
-        import io.swagger.client.api.ObservationsApi;
-        import io.swagger.client.api.ProgramsApi;
-        import io.swagger.client.api.StudiesApi;
-        import io.swagger.client.api.PhenotypesApi;
-        import io.swagger.client.api.ObservationVariablesApi;
-        import io.swagger.client.api.TrialsApi;
-        import io.swagger.client.model.Image;
-        import io.swagger.client.model.ImageResponse;
-        import io.swagger.client.model.Metadata;
-        import io.swagger.client.model.NewImageRequest;
-        import io.swagger.client.model.NewObservationDbIdsObservations;
-        import io.swagger.client.model.NewObservationsRequest;
-        import io.swagger.client.model.NewObservationsRequestObservations;
-        import io.swagger.client.model.ObservationUnit;
-        import io.swagger.client.model.ObservationUnitsResponse1;
-        import io.swagger.client.model.ObservationVariable;
-        import io.swagger.client.model.ObservationVariablesResponse;
-        import io.swagger.client.model.PhenotypesRequest;
-        import io.swagger.client.model.PhenotypesRequestData;
-        import io.swagger.client.model.PhenotypesRequestObservation;
-        import io.swagger.client.model.Program;
-        import io.swagger.client.model.ProgramsResponse;
-        import io.swagger.client.model.StudiesResponse;
-        import io.swagger.client.model.NewObservationDbIdsResponse;
-        import io.swagger.client.model.Study;
-        import io.swagger.client.model.StudyObservationVariablesResponse;
-        import io.swagger.client.model.StudyResponse;
-        import io.swagger.client.model.StudySummary;
-        import io.swagger.client.model.TrialSummary;
-        import io.swagger.client.model.TrialsResponse;
-
-        import java.util.HashMap;
-        import java.util.Set;
 
 public interface BrAPIService {
 
@@ -183,16 +142,27 @@ public interface BrAPIService {
 
     }
 
-    public String getHostUrl(String brapiURL);
+    public static String getHostUrl(Context context) {
+        try {
+            String brapiURL = getBrapiUrl(context);
+            URL externalUrl = new URL(brapiURL);
+            return externalUrl.getHost();
+        } catch (MalformedURLException e) {
+            Log.e("error-ghu", e.toString());
+            return null;
+        }
+    }
 
     public static String getBrapiUrl(Context context) {
         SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
-        return preferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
-    }
-
-    public static String getBrapiToken(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
-        return "Bearer " + preferences.getString(GeneralKeys.BRAPI_TOKEN, "");
+        String baseURL = preferences.getString(GeneralKeys.BRAPI_BASE_URL, "");
+        String version = preferences.getString(GeneralKeys.BRAPI_VERSION, "");
+        String path;
+        if(version.equals("V2"))
+            path = Constants.BRAPI_PATH_V2;
+        else
+            path = Constants.BRAPI_PATH_V1;
+        return baseURL + path;
     }
 
     public static boolean isConnectionError(int code) {
@@ -222,36 +192,34 @@ public interface BrAPIService {
         Toast.makeText(context.getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
     }
 
-    public void postImageMetaData(com.fieldbook.tracker.brapi.Image image, String brapiToken,
-                                  final Function<Image, Void> function,
-                                  final Function<Integer, Void> failFunction);
+    public void postImageMetaData(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
 
-    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction);
+    public void putImageContent(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
 
-    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken, final Function<Image, Void> function, final Function<Integer, Void> failFunction);
+    public void putImage(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getPrograms(final String brapiToken, final Function<List<BrapiProgram>, Void> function, final Function<ApiException, Void> failFunction);
+    public void getPrograms(final BrapiPaginationManager paginationManager, final Function<List<BrapiProgram>, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getTrials(final String brapiToken, String programDbId, final Function<List<BrapiTrial>, Void> function, final Function<ApiException, Void> failFunction);
+    public void getTrials(String programDbId, BrapiPaginationManager paginationManager,  final Function<List<BrapiTrial>, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getStudies(final String brapiToken, String programDbId, String trialDbId, final Function<List<BrapiStudySummary>, Void> function, final Function<ApiException, Void> failFunction);
+    public void getStudies(String programDbId, String trialDbId, BrapiPaginationManager paginationManager, final Function<List<BrapiStudyDetails>, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getStudyDetails(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction);
+    public void getStudyDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getPlotDetails(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction);
+    public void getPlotDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getOntology(final String brapiToken, Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction);
+    public void getOntology(BrapiPaginationManager paginationManager, final Function<List<TraitObject>, Void> function, final Function<Integer, Void> failFunction);
 
-    public void postPhenotypes(List<Observation> observations, String brapiToken,
-                               final Function<List<NewObservationDbIdsObservations>, Void> function,
+    public void postPhenotypes(List<Observation> observations,
+                               final Function<List<Observation>, Void> function,
                                final Function<Integer, Void> failFunction);
 
     // will only ever have one study in current architecture
-    public void putObservations(List<Observation> observations, String brapiToken,
-                                final Function<List<NewObservationDbIdsObservations>, Void> function,
+    public void putObservations(List<Observation> observations,
+                                final Function<List<Observation>, Void> function,
                                 final Function<Integer, Void> failFunction);
 
-    public void getTraits(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction);
+    public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
     public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails);
 }

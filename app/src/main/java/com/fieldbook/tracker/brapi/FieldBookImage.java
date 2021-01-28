@@ -12,13 +12,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
 import io.swagger.client.model.GeoJSON;
 
-public class Image extends BrapiObservation {
+public class FieldBookImage extends BrapiObservation {
 
     private File file;
     private int width;
@@ -35,7 +36,11 @@ public class Image extends BrapiObservation {
     private List<String> descriptiveOntologyTerms;
     private String description;
 
-    public Image(String filePath, Bitmap missingPhoto) {
+    public FieldBookImage() {
+
+    }
+
+    public FieldBookImage(String filePath, Bitmap missingPhoto) {
 
         this.file = new File(filePath);
         this.fileSize = file.length();
@@ -46,7 +51,7 @@ public class Image extends BrapiObservation {
         this.additionalInfo = new HashMap<>();
     }
 
-    public Image(io.swagger.client.model.Image response) {
+    public FieldBookImage(io.swagger.client.model.Image response) {
         this.setDbId(response.getImageDbId());
         this.setUnitDbId(response.getObservationUnitDbId());
         this.fileName = response.getImageFileName();
@@ -56,7 +61,7 @@ public class Image extends BrapiObservation {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Image that = (Image) o;
+        FieldBookImage that = (FieldBookImage) o;
         return objectsEquals(unitDbId, that.getUnitDbId()) &&
                 objectsEquals(fileName, that.getFileName());
     }
@@ -86,6 +91,46 @@ public class Image extends BrapiObservation {
         return fileName;
     }
 
+    public void setFile(File file) {
+        this.file = file;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public void setFileSize(long fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public void setMissing(Bitmap missing) {
+        this.missing = missing;
+    }
+
+    public void setLocation(GeoJSON location) {
+        this.location = location;
+    }
+
+    public void setBytes(byte[] bytes) {
+        this.bytes = bytes;
+    }
+
     public String getImageName() {
         return imageName;
     }
@@ -98,15 +143,19 @@ public class Image extends BrapiObservation {
         return file;
     }
 
-    String getCopyright() {
+    public String getCopyright() {
         if(timestamp != null) {
             return String.valueOf(timestamp.getYear());
         }
         return null;
     }
 
-    Map<String, String> getAdditionalInfo() {
+    public Map<String, String> getAdditionalInfo() {
         return additionalInfo;
+    }
+
+    public void setAdditionalInfo(Map<String, String> additionalInfo) {
+        this.additionalInfo = additionalInfo;
     }
 
     byte[] getImageData() {

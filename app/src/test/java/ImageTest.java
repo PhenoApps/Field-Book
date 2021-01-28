@@ -1,7 +1,7 @@
 import android.graphics.Bitmap;
 import android.os.Build;
 
-import com.fieldbook.tracker.brapi.Image;
+import com.fieldbook.tracker.brapi.FieldBookImage;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,13 +16,13 @@ import static org.junit.Assert.assertTrue;
 public class ImageTest {
 
     private String filePath = "/path/to/file/file.jpg";
-    private Image image;
+    private FieldBookImage image;
 
     @Before
     public void setUp() throws Exception {
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap bmp = Bitmap.createBitmap(100, 100, conf);
-        image = new Image(filePath, bmp);
+        image = new FieldBookImage(filePath, bmp);
         image.loadImage();
     }
 

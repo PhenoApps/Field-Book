@@ -10,9 +10,14 @@ public class BrAPIServiceFactory {
 
     public static final BrAPIService getBrAPIService(Context context){
 
-        String brapiBaseURL = context.getSharedPreferences("Settings", 0)
-                .getString(GeneralKeys.BRAPI_BASE_URL, "") + Constants.BRAPI_PATH;
-        BrAPIService brAPIService = new BrAPIServiceV1(brapiBaseURL, new DataHelper(context));
+        String version = context.getSharedPreferences("Settings", 0)
+                .getString(GeneralKeys.BRAPI_VERSION, "V1");
+        BrAPIService brAPIService;
+        if(version.equals("V2"))
+            brAPIService = new BrAPIServiceV2(context);
+        else
+            brAPIService = new BrAPIServiceV1(context);
+
         return brAPIService;
     }
 }

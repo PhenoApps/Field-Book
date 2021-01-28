@@ -54,7 +54,7 @@ public class BrapiPaginationManager {
 
     public Integer getDefaultPageSize(){
         String pageSizeStr = context.getSharedPreferences("Settings", 0)
-                .getString(GeneralKeys.BRAPI_PAGINATION, "1000");
+                .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000");
 
         Integer pageSize = 1000;
 
@@ -83,8 +83,8 @@ public class BrapiPaginationManager {
         return pageSize;
     }
 
-    public void updatePageInfo(Metadata metadata) {
-        totalPages = metadata.getPagination().getTotalPages();
+    public void updatePageInfo(Integer totalPages) {
+        this.totalPages = totalPages;
         refreshPageIndicator();
     }
 

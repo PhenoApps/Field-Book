@@ -26,11 +26,20 @@
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />
 
+        <ListPreference
+            android:defaultValue="@string/preferences_brapi_version_v1"
+            android:entries="@array/pref_brapi_version"
+            android:entryValues="@array/pref_brapi_version"
+            android:icon="@drawable/ic_pref_brapi_version"
+            android:key="BRAPI_VERSION"
+            android:summary="%s"
+            android:title="@string/preferences_brapi_version" />
+
         <EditTextPreference
             android:icon="@drawable/ic_buffer"
-            android:key="BRAPI_PAGINATION"
-            android:defaultValue="1000"
-            android:title="@string/brapi_pagination"/>
+            android:key="BRAPI_PAGE_SIZE"
+            android:defaultValue="10"
+            android:title="@string/prefrences_brapi_page_size"/>
 
     </PreferenceCategory>
 

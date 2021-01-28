@@ -1,5 +1,10 @@
 package com.fieldbook.tracker.brapi;
 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import org.threeten.bp.DateTimeUtils;
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 import org.threeten.bp.format.DateTimeParseException;
@@ -33,6 +38,7 @@ public class BrapiObservation {
     public OffsetDateTime getTimestamp() {
         return timestamp;
     }
+
 
     public void setTimestamp(OffsetDateTime timestamp) {
         this.timestamp = timestamp;

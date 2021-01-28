@@ -82,6 +82,12 @@ dependencies {
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.0'
     implementation 'com.github.ByteHamster:SearchPreference:v2.0.0'
     implementation "com.github.skydoves:colorpickerpreference:2.0.4"
+
+
+
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.10.1"
+    implementation "javax.validation:validation-api:2.0.1.Final"
+    implementation "com.github.filosganga:geogson-core:1.2.21"
     implementation files('C:\\Users\\ps664\\Documents\\BrAPI\\brapi-java-client-2\\brapi\\brapi-java-model\\target\\brapi-java-model-2.0-SNAPSHOT.jar')
     implementation files('C:\\Users\\ps664\\Documents\\BrAPI\\brapi-java-client-2\\brapi\\brapi-java-client\\target\\brapi-java-client-2.0-SNAPSHOT.jar')
 

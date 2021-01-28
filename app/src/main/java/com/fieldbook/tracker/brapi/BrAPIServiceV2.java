@@ -1,5 +1,8 @@
 package com.fieldbook.tracker.brapi;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import androidx.arch.core.util.Function;
@@ -7,104 +10,121 @@ import androidx.arch.core.util.Function;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import org.brapi.client.v2.BrAPIClient;
 import org.brapi.client.v2.model.exceptions.ApiException;
 import org.brapi.client.v2.model.queryParams.core.ProgramQueryParams;
+import org.brapi.client.v2.model.queryParams.core.StudyQueryParams;
+import org.brapi.client.v2.model.queryParams.core.TrialQueryParams;
+import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams;
+import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams;
 import org.brapi.client.v2.modules.core.ProgramsApi;
 import org.brapi.client.v2.modules.core.StudiesApi;
 import org.brapi.client.v2.modules.core.TrialsApi;
 import org.brapi.client.v2.modules.phenotype.ImagesApi;
+import org.brapi.client.v2.modules.phenotype.ObservationUnitsApi;
 import org.brapi.client.v2.modules.phenotype.ObservationVariablesApi;
 import org.brapi.client.v2.modules.phenotype.ObservationsApi;
+import org.brapi.v2.model.BrAPIMetadata;
+import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
+import org.brapi.v2.model.core.BrAPIStudy;
+import org.brapi.v2.model.core.BrAPITrial;
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse;
-import org.brapi.v2.model.core.response.BrAPIProgramSingleResponse;
+import org.brapi.v2.model.core.response.BrAPIStudyListResponse;
+import org.brapi.v2.model.core.response.BrAPIStudySingleResponse;
+import org.brapi.v2.model.core.response.BrAPITrialListResponse;
 import org.brapi.v2.model.pheno.BrAPIImage;
+import org.brapi.v2.model.pheno.BrAPIObservation;
+import org.brapi.v2.model.pheno.BrAPIObservationUnit;
+import org.brapi.v2.model.pheno.BrAPIObservationUnitLevelRelationship;
+import org.brapi.v2.model.pheno.BrAPIObservationUnitPosition;
+import org.brapi.v2.model.pheno.BrAPIObservationVariable;
+import org.brapi.v2.model.pheno.BrAPIPositionCoordinateTypeEnum;
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.brapi.v2.model.pheno.response.BrAPIImageListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIImageSingleResponse;
+import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
+import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
+import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 
 public class BrAPIServiceV2 implements BrAPIService{
 
-    public static String exportTarget = "export";
-    static String notUniqueFieldMessage = "not_unique";
-    static String notUniqueIdMessage = "not_unique_id";
-    private DataHelper dataHelper;
-    private ImagesApi imagesApi;
-    private StudiesApi studiesApi;
-    private ProgramsApi programsApi;
-    private TrialsApi trialsApi;
-    private ObservationsApi observationsApi;
-    private ObservationVariablesApi traitsApi;
-    private String brapiBaseURL;
+    private final Context context;
+    private final ImagesApi imagesApi;
+    private final StudiesApi studiesApi;
+    private final ProgramsApi programsApi;
+    private final TrialsApi trialsApi;
+    private final ObservationsApi observationsApi;
+    private final ObservationUnitsApi observationUnitsApi;
+    private final ObservationVariablesApi traitsApi;
 
-    public BrAPIServiceV2(String brapiBaseURL, DataHelper dataHelper) {
-        this.dataHelper = dataHelper;
-        this.brapiBaseURL = brapiBaseURL;
-
-        BrAPIClient apiClient = new BrAPIClient(brapiBaseURL);
-
+    public BrAPIServiceV2(Context context) {
+        this.context = context;
         // Make timeout longer. Set it to 60 seconds for now
-        apiClient.setReadTimeout(60000);
-
+        BrAPIClient apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), 60000);
+        try {
+             apiClient.authenticate(t -> context.getSharedPreferences("Settings", 0)
+                        .getString(GeneralKeys.BRAPI_TOKEN, null));
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
         this.programsApi = new ProgramsApi(apiClient);
         this.trialsApi = new TrialsApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
+        this.observationUnitsApi = new ObservationUnitsApi(apiClient);
     }
 
-    public String getHostUrl(String brapiURL) {
-
-        try {
-            URL externalUrl = new URL(brapiURL);
-            return externalUrl.getHost();
-        } catch (MalformedURLException e) {
-            Log.e("error-ghu", e.toString());
-            return null;
+    private void updatePageInfo(BrapiPaginationManager paginationManager, BrAPIMetadata metadata){
+        if(paginationManager.getContext() != null) { //null check for JUnits
+            ((Activity) paginationManager.getContext())
+                    .runOnUiThread(() -> paginationManager.updatePageInfo(metadata.getPagination().getTotalPages()));
         }
     }
 
-    public void postImageMetaData(com.fieldbook.tracker.brapi.Image image, String brapiToken,
-                                  final Function<BrAPIImage, Object> function,
+    public void postImageMetaData(FieldBookImage image,
+                                  final Function<FieldBookImage, Void> function,
                                   final Function<Integer, Void> failFunction) {
-
         try {
             BrapiV2ApiCallBack<BrAPIImageListResponse> callback = new BrapiV2ApiCallBack<BrAPIImageListResponse>() {
                 @Override
                 public void onSuccess(BrAPIImageListResponse imageResponse, int i, Map<String, List<String>> map) {
-                    final BrAPIImage response = imageResponse.getResult();
-                    function.apply(response);
+                    final BrAPIImage response = imageResponse.getResult().getData().get(0);
+                    function.apply(mapToImage(response));
                 }
 
                 @Override
-                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
-                    final ApiException error = e;
-                    Integer code = new Integer(error.getCode());
-                    failFunction.apply(code);
+                public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
+                    failFunction.apply(error.getCode());
                 }
             };
 
             BrAPIImage request = mapImage(image);
-            imagesApi.getApiClient().authenticate(token -> brapiToken);
-            imagesApi.imagesPostAsync(request, callback);
+            imagesApi.imagesPostAsync(Arrays.asList(request), callback);
 
         } catch (ApiException e) {
+            failFunction.apply(e.getCode());
             e.printStackTrace();
         }
 
     }
 
-    private BrAPIImage mapImage(com.fieldbook.tracker.brapi.Image image) {
+    private BrAPIImage mapImage(FieldBookImage image) {
         BrAPIImage request = new BrAPIImage();
         request.setAdditionalInfo(image.getAdditionalInfo());
         request.setCopyright(image.getCopyright());
@@ -113,100 +133,116 @@ public class BrAPIServiceV2 implements BrAPIService{
         request.setImageFileName(image.getFileName());
         request.setImageFileSize((int) image.getFileSize());
         request.setImageHeight(image.getHeight());
-        request.setImageLocation(image.getLocation());
         request.setImageName(image.getImageName());
-        request.setImageTimeStamp(image.getTimestamp());
         request.setImageWidth(image.getWidth());
         request.setMimeType(image.getMimeType());
         request.setObservationUnitDbId(image.getUnitDbId());
+        // TODO fix these
+        //request.setImageLocation(image.getLocation());
+        request.setImageTimeStamp(TimeAdapter.convertFrom(image.getTimestamp()));
         return request;
     }
 
-    public void putImageContent(com.fieldbook.tracker.brapi.Image image, String brapiToken,
-                                final Function<BrAPIImage, Void> function,
+    private FieldBookImage mapToImage(BrAPIImage image) {
+        FieldBookImage request = new FieldBookImage();
+        request.setAdditionalInfo(image.getAdditionalInfo());
+        request.setDescription(image.getDescription());
+        request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
+        request.setFileName(image.getImageFileName());
+        request.setFileSize((int) image.getImageFileSize());
+        request.setHeight(image.getImageHeight());
+        request.setImageName(image.getImageName());
+        request.setWidth(image.getImageWidth());
+        request.setMimeType(image.getMimeType());
+        request.setUnitDbId(image.getObservationUnitDbId());
+        // TODO fix these
+        //request.setLocation(image.getImageLocation());
+        request.setTimestamp(TimeAdapter.convertFrom(image.getImageTimeStamp()));
+        return request;
+    }
+
+    public void putImageContent(FieldBookImage image,
+                                final Function<FieldBookImage, Void> function,
                                 final Function<Integer, Void> failFunction) {
         try {
 
             BrapiV2ApiCallBack<BrAPIImageSingleResponse> callback = new BrapiV2ApiCallBack<BrAPIImageSingleResponse>() {
                 @Override
                 public void onSuccess(BrAPIImageSingleResponse imageResponse, int i, Map<String, List<String>> map) {
-
                     final BrAPIImage response = imageResponse.getResult();
-                    function.apply(response);
-
+                    function.apply(mapToImage(response));
                 }
 
                 @Override
-                public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
-                    final ApiException error = e;
-                    Integer code = new Integer(error.getCode());
-                    failFunction.apply(code);
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    failFunction.apply(error.getCode());
                 }
             };
 
-            imagesApi.getApiClient().authenticate(token -> brapiToken);
             imagesApi.imagesImageDbIdImagecontentPutAsync(image.getDbId(), image.getImageData(), callback);
 
         } catch (ApiException e) {
+            failFunction.apply(e.getCode());
             e.printStackTrace();
         }
 
     }
 
-    public void putImage(com.fieldbook.tracker.brapi.Image image, String brapiToken,
-                         final Function<BrAPIImage, Void> function,
+    public void putImage(FieldBookImage image,
+                         final Function<FieldBookImage, Void> function,
                          final Function<Integer, Void> failFunction) {
         try {
 
             BrapiV2ApiCallBack<BrAPIImageSingleResponse> callback = new BrapiV2ApiCallBack<BrAPIImageSingleResponse>() {
                 @Override
                 public void onSuccess(BrAPIImageSingleResponse imageResponse, int i, Map<String, List<String>> map) {
-
-                    //function.apply(imageResponse.getresult());
-                    function.apply(imageResponse.getResult());
-
+                    final BrAPIImage response = imageResponse.getResult();
+                    function.apply(mapToImage(response));
                 }
 
                 @Override
-                public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
-                    // report failure
-                    final ApiException error = e;
-                    Integer code = new Integer(error.getCode());
-                    failFunction.apply(code);
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    failFunction.apply(error.getCode());
                 }
             };
 
             BrAPIImage request = mapImage(image);
-            imagesApi.getApiClient().authenticate(token -> brapiToken);
             imagesApi.imagesImageDbIdPutAsync(image.getDbId(), request, callback);
 
         } catch (ApiException e) {
+            failFunction.apply(e.getCode());
             e.printStackTrace();
         }
 
     }
 
-    public void getPrograms(final String brapiToken,
+    public void getPrograms(final BrapiPaginationManager paginationManager,
                             final Function<List<BrapiProgram>, Void> function,
-                            final Function<ApiException, Void> failFunction) {
-       try {
+                            final Function<Integer, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
+        try {
            BrapiV2ApiCallBack<BrAPIProgramListResponse> callback = new BrapiV2ApiCallBack<BrAPIProgramListResponse>() {
                @Override
                public void onSuccess(BrAPIProgramListResponse programsResponse, int i, Map<String, List<String>> map) {
-                   List<BrAPIProgram> programList = programsResponse.getResult().getData();
-                   function.apply(mapPrograms(programList));
+                   // Cancel processing if the page that was processed is not the page
+                   // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                   if (initPage.equals(paginationManager.getPage())) {
+                       updatePageInfo(paginationManager, programsResponse.getMetadata());
+                       List<BrAPIProgram> programList = programsResponse.getResult().getData();
+                       function.apply(mapPrograms(programList));
+                   }
                }
 
                @Override
                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                   failFunction.apply(error);
+                   failFunction.apply(error.getCode());
                }
            };
            ProgramQueryParams queryParams = new ProgramQueryParams();
-           queryParams.page(0).pageSize(1000);
-           programsApi.getApiClient().authenticate(token -> brapiToken);
+           queryParams.page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
            programsApi.programsGetAsync(queryParams, callback);
        } catch (ApiException e) {
+           failFunction.apply(e.getCode());
            e.printStackTrace();
        }
     }
@@ -216,13 +252,7 @@ public class BrAPIServiceV2 implements BrAPIService{
         if (programList != null) {
             for (BrAPIProgram program : programList) {
                 BrapiProgram brapiProgram = new BrapiProgram();
-                String name = program.getProgramName();
-                String programName = program.getProgramName();
-                if (programName != null && !programName.isEmpty()) {
-                    brapiProgram.setProgramName(programName);
-                } else {
-                    brapiProgram.setProgramName(name);
-                }
+                brapiProgram.setProgramName(program.getProgramName());
                 brapiProgram.setProgramDbId(program.getProgramDbId());
                 brapiPrograms.add(brapiProgram);
             }
@@ -230,31 +260,41 @@ public class BrAPIServiceV2 implements BrAPIService{
         return brapiPrograms;
     }
 
-    public void getTrials(final String brapiToken, String programDbId, final Function<List<BrapiTrial>, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getTrials(String programDbId, BrapiPaginationManager paginationManager,
+                          final Function<List<BrapiTrial>, Void> function,
+                          final Function<Integer, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
         try {
-            BrapiV2ApiCallBack<TrialsResponse> callback = new BrapiV2ApiCallBack<TrialsResponse>() {
+            BrapiV2ApiCallBack<BrAPITrialListResponse> callback = new BrapiV2ApiCallBack<BrAPITrialListResponse>() {
                 @Override
-                public void onSuccess(TrialsResponse trialsResponse, int i, Map<String, List<String>> map) {
-                    List<TrialSummary> trialList = trialsResponse.getResult().getData();
-                    function.apply(mapTrials(trialList));
+                public void onSuccess(BrAPITrialListResponse trialsResponse, int i, Map<String, List<String>> map) {
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage.equals(paginationManager.getPage())) {
+                        updatePageInfo(paginationManager, trialsResponse.getMetadata());
+                        List<BrAPITrial> trialList = trialsResponse.getResult().getData();
+                        function.apply(mapTrials(trialList));
+                    }
                 }
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                    failFunction.apply(error);
+                    failFunction.apply(error.getCode());
                 }
             };
-            trialsApi.trialsGetAsync(null, programDbId, null, null, null, null,
-                    0, 1000, brapiToken, callback);
+            TrialQueryParams queryParams = new TrialQueryParams();
+            queryParams.programDbId(programDbId).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
+            trialsApi.trialsGetAsync(queryParams, callback);
         } catch (ApiException e) {
+            failFunction.apply(e.getCode());
             e.printStackTrace();
         }
     }
 
-    private List<BrapiTrial> mapTrials(List<TrialSummary> trialList) {
+    private List<BrapiTrial> mapTrials(List<BrAPITrial> trialList) {
         List<BrapiTrial> brapiTrials = new ArrayList<>();
         if (trialList != null) {
-            for (TrialSummary trial : trialList) {
+            for (BrAPITrial trial : trialList) {
                 BrapiTrial brapiTrial = new BrapiTrial();
                 String name = trial.getTrialName();
                 brapiTrial.setTrialName(name);
@@ -265,56 +305,54 @@ public class BrAPIServiceV2 implements BrAPIService{
         return brapiTrials;
     }
 
-    public void getStudies(final String brapiToken, String programDbId, String trialDbId, final Function<List<BrapiStudySummary>, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getStudies(String programDbId, String trialDbId, BrapiPaginationManager paginationManager,
+                           final Function<List<BrapiStudyDetails>, Void> function,
+                           final Function<Integer, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
         try {
 
-            BrapiV2ApiCallBack<StudiesResponse> callback = new BrapiV2ApiCallBack<StudiesResponse>() {
+            BrapiV2ApiCallBack<BrAPIStudyListResponse> callback = new BrapiV2ApiCallBack<BrAPIStudyListResponse>() {
                 @Override
-                public void onSuccess(StudiesResponse studiesResponse, int i, Map<String, List<String>> map) {
-                    final List<BrapiStudySummary> studies = new ArrayList<>();
-                    final List<StudySummary> studySummaryList = studiesResponse.getResult().getData();
-                    for (StudySummary studySummary : studySummaryList) {
-                        studies.add(mapStudy(studySummary));
+                public void onSuccess(BrAPIStudyListResponse studiesResponse, int i, Map<String, List<String>> map) {
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage.equals(paginationManager.getPage())) {
+                        updatePageInfo(paginationManager, studiesResponse.getMetadata());
+                        final List<BrapiStudyDetails> studies = new ArrayList<>();
+                        final List<BrAPIStudy> studySummaryList = studiesResponse.getResult().getData();
+                        for (BrAPIStudy studySummary : studySummaryList) {
+                            studies.add(mapStudy(studySummary));
+                        }
+
+                        function.apply(studies);
                     }
-
-                    function.apply(studies);
-
                 }
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-
-                    // Close our current study and report failure
-                    failFunction.apply(error);
-
+                    failFunction.apply(error.getCode());
                 }
             };
 
-            studiesApi.studiesGetAsync(
-                    null, null, null, programDbId,
-                    null, null, trialDbId, null, null,
-                    null, null, null, null,
-                    0, 1000, brapiToken, callback);
+            StudyQueryParams queryParams = new StudyQueryParams();
+            queryParams.active("true").programDbId(programDbId).trialDbId(trialDbId).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
+            studiesApi.studiesGetAsync(queryParams, callback);
 
         } catch (ApiException e) {
+            failFunction.apply(e.getCode());
             e.printStackTrace();
         }
 
     }
 
-    private BrapiStudySummary mapStudy(StudySummary studySummary) {
-        BrapiStudySummary study = new BrapiStudySummary();
-        study.setStudyDbId(studySummary.getStudyDbId());
-        study.setStudyName(studySummary.getStudyName());
-        return study;
-    }
-
-    public void getStudyDetails(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getStudyDetails(final String studyDbId,
+                                final Function<BrapiStudyDetails, Void> function,
+                                final Function<Integer, Void> failFunction) {
         try {
 
-            BrapiV2ApiCallBack<StudyResponse> callback = new BrapiV2ApiCallBack<StudyResponse>() {
+            BrapiV2ApiCallBack<BrAPIStudySingleResponse> callback = new BrapiV2ApiCallBack<BrAPIStudySingleResponse>() {
                 @Override
-                public void onSuccess(StudyResponse studyResponse, int i, Map<String, List<String>> map) {
+                public void onSuccess(BrAPIStudySingleResponse studyResponse, int i, Map<String, List<String>> map) {
 
                     final BrapiStudyDetails study = mapStudy(studyResponse.getResult());
                     function.apply(study);
@@ -323,309 +361,298 @@ public class BrAPIServiceV2 implements BrAPIService{
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                    // Close our current study and report failure
-                    failFunction.apply(error);
-
+                    failFunction.apply(error.getCode());
                 }
             };
 
-            studiesApi.studiesStudyDbIdGetAsync(
-                    studyDbId, brapiToken, callback);
+            studiesApi.studiesStudyDbIdGetAsync(studyDbId, callback);
 
         } catch (ApiException e) {
-            failFunction.apply(e);
+            failFunction.apply(e.getCode());
             e.printStackTrace();
         }
     }
 
-    private BrapiStudyDetails mapStudy(Study study) {
+    private BrapiStudyDetails mapStudy(BrAPIStudy study) {
         BrapiStudyDetails studyDetails = new BrapiStudyDetails();
         studyDetails.setStudyDbId(study.getStudyDbId());
         studyDetails.setStudyName(study.getStudyName());
         studyDetails.setCommonCropName(study.getCommonCropName());
         studyDetails.setStudyDescription(study.getStudyDescription());
-        studyDetails.setStudyLocation(study.getLocation().getLocationName());
+        studyDetails.setStudyLocation(study.getLocationName());
         return studyDetails;
     }
 
-    public void getPlotDetails(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getPlotDetails(final String studyDbId,
+                               final Function<BrapiStudyDetails, Void> function,
+                               final Function<Integer, Void> failFunction) {
         try {
+            final Integer[] recursiveCounter = {0};
+            final Integer pageSize = 1000;
+            final BrapiStudyDetails study = new BrapiStudyDetails();
+            study.setAttributes(new ArrayList<>());
+            study.setValues(new ArrayList<>());
 
-            BrapiV2ApiCallBack<ObservationUnitsResponse1> callback = new BrapiV2ApiCallBack<ObservationUnitsResponse1>() {
+            BrapiV2ApiCallBack<BrAPIObservationUnitListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationUnitListResponse>() {
                 @Override
-                public void onSuccess(ObservationUnitsResponse1 response, int i, Map<String, List<String>> map) {
-                    final BrapiStudyDetails study = new BrapiStudyDetails();
-                    study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
-                    study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
-                    study.setValues(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
+                public void onSuccess(BrAPIObservationUnitListResponse response, int i, Map<String, List<String>> map) {
+                    int page = response.getMetadata().getPagination().getCurrentPage();
+                    if(page == 0){
+                        //one time code
+                        study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
+                    }
 
-                    function.apply(study);
+                    //every time
+                    mapAttributeValues(study, response.getResult().getData());
 
+                    recursiveCounter[0] = recursiveCounter[0] + 1;
+
+                    // Stop after 50 iterations (for safety)
+                    // Stop if the current page is the last page according to the server
+                    // Stop if there are no more contents
+                    if((recursiveCounter[0] > 50)
+                            || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
+                            || (response.getResult().getData().size() == 0)){
+                        // Stop recursive loop
+                        function.apply(study);
+                    }else {
+                        try {
+                            ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
+                            queryParams.studyDbId(studyDbId).observationUnitLevelName("plot").page(recursiveCounter[0]).pageSize(pageSize);
+                            observationUnitsApi.observationunitsGetAsync(queryParams, this);
+                        } catch (ApiException e) {
+                            failFunction.apply(e.getCode());
+                            e.printStackTrace();
+                        }
+                    }
                 }
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                    // Close our current study and report failure
-                    failFunction.apply(error);
-
+                    failFunction.apply(error.getCode());
                 }
 
             };
 
-            studiesApi.studiesStudyDbIdObservationunitsGetAsync(
-                    studyDbId, "plot", 0, 1000,
-                    brapiToken, callback);
+            ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
+            queryParams.studyDbId(studyDbId).observationUnitLevelName("plot").page(0).pageSize(pageSize);
+            observationUnitsApi.observationunitsGetAsync(queryParams, callback);
 
         } catch (ApiException e) {
-            failFunction.apply(e);
+            failFunction.apply(e.getCode());
             e.printStackTrace();
         }
     }
 
-    private List<String> mapAttributes(ObservationUnit unit) {
-        List<String> attributes = new ArrayList<>();
-        if (checkField(unit.getX(), unit.getPositionCoordinateX()))
-            attributes.add("Row");
-        if (checkField(unit.getY(), unit.getPositionCoordinateY()))
-            attributes.add("Column");
-        if (checkField(unit.getBlockNumber()))
-            attributes.add("Block");
-        if (checkField(unit.getReplicate()))
-            attributes.add("Replicate");
-        if (checkField(unit.getEntryNumber(), unit.getEntryType()))
-            attributes.add("Entry");
-        if (checkField(unit.getPlotNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId()))
-            attributes.add("Plot");
-        if (checkField(unit.getPlantNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId()))
-            attributes.add("Plant");
-        if (checkField(unit.getGermplasmName(), unit.getGermplasmDbId()))
-            attributes.add("Germplasm");
-        if (checkField(unit.getPedigree()))
-            attributes.add("Pedigree");
-
-        // We always add the observationUnitDbId and observationName
-        attributes.add("observationUnitDbId");
-        attributes.add("observationUnitName");
-
-        return attributes;
-
-    }
-
-    private List<List<String>> mapAttributeValues(List<String> attributes, List<ObservationUnit> data) {
+    private void mapAttributeValues(BrapiStudyDetails study, List<BrAPIObservationUnit> data) {
+        List<String> attributes = study.getAttributes();
         List<List<String>> attributesTable = new ArrayList<>();
-        for (ObservationUnit unit : data) {
-            List<String> dataRow = new ArrayList<>();
-            for (String attribute : attributes) {
-                if (attribute.equalsIgnoreCase("Row"))
-                    addAttributeDataItem(dataRow, unit.getX(), unit.getPositionCoordinateX());
-                else if (attribute.equalsIgnoreCase("Column"))
-                    addAttributeDataItem(dataRow, unit.getY(), unit.getPositionCoordinateY());
-                else if (attribute.equalsIgnoreCase("Block"))
-                    addAttributeDataItem(dataRow, unit.getBlockNumber());
-                else if (attribute.equalsIgnoreCase("Replicate"))
-                    addAttributeDataItem(dataRow, unit.getReplicate());
-                else if (attribute.equalsIgnoreCase("Entry"))
-                    addAttributeDataItem(dataRow, unit.getEntryNumber(), unit.getEntryType());
-                else if (attribute.equalsIgnoreCase("Plot"))
-                    addAttributeDataItem(dataRow, unit.getPlotNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId());
-                else if (attribute.equalsIgnoreCase("Plant"))
-                    addAttributeDataItem(dataRow, unit.getPlantNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId());
-                else if (attribute.equalsIgnoreCase("Germplasm"))
-                    addAttributeDataItem(dataRow, unit.getGermplasmName(), unit.getGermplasmDbId());
-                else if (checkField(unit.getPedigree()) && attribute.equalsIgnoreCase("Pedigree"))
-                    addAttributeDataItem(dataRow, unit.getPedigree());
 
+        for (BrAPIObservationUnit unit : data) {
+            Map<String, String> attributesMap = new HashMap<>();
+
+            BrAPIObservationUnitPosition pos = unit.getObservationUnitPosition();
+            List<BrAPIObservationUnitLevelRelationship> levels = pos.getObservationLevelRelationships();
+            levels.add(pos.getObservationLevel());
+            for(BrAPIObservationUnitLevelRelationship level: levels){
+                String attributeName = level.getLevelName().getBrapiValue();
+                attributeName = attributeName.substring(0,1).toUpperCase() + attributeName.substring(1).toLowerCase();
+                attributesMap.put(attributeName, level.getLevelCode());
             }
 
-            // ObservationUnitDbId and observationUnitName will always go in the attributes
-            addAttributeDataItem(dataRow, unit.getObservationUnitDbId());
-            addAttributeDataItem(dataRow, unit.getObservationUnitName());
+            if (pos.getPositionCoordinateX() != null){
+                String rowColStr = getRowColStr(pos.getPositionCoordinateXType());
+                if(rowColStr == null){
+                    rowColStr = "Row";
+                }
+                attributesMap.put(rowColStr, pos.getPositionCoordinateX());
+            }
 
+            if (pos.getPositionCoordinateY() != null){
+                String rowColStr = getRowColStr(pos.getPositionCoordinateYType());
+                if(rowColStr == null){
+                    rowColStr = "Column";
+                }
+                attributesMap.put(rowColStr, pos.getPositionCoordinateY());
+            }
+
+            if (pos.getEntryType().getBrapiValue() != null)
+                attributesMap.put("EntryType", pos.getEntryType().getBrapiValue());
+            if (unit.getGermplasmName() != null)
+                attributesMap.put("Germplasm", unit.getGermplasmName());
+            if (unit.getObservationUnitDbId() != null)
+                attributesMap.put("ObservationUnitDbId", unit.getObservationUnitDbId());
+            if (unit.getObservationUnitName() != null)
+                attributesMap.put("ObservationUnitName", unit.getObservationUnitName());
+
+            List<String> dataRow = new ArrayList<>();
+            if(attributes.isEmpty()){
+                attributes.addAll(attributesMap.keySet());
+                study.setAttributes(attributes);
+                dataRow.addAll(attributesMap.values());
+            }else{
+                for(String attr: attributes){
+                    if(attributesMap.containsKey(attr)){
+                        dataRow.add(attributesMap.get(attr));
+                    }else{
+                        dataRow.add("");
+                    }
+                }
+            }
             attributesTable.add(dataRow);
         }
 
-        return attributesTable;
+        study.getValues().addAll(attributesTable);
     }
 
-    private void addAttributeDataItem(List<String> dataRow, String... values) {
-        String goodValue = getPrioritizedValue(values);
-        if (goodValue != null) {
-            dataRow.add(goodValue);
+    private String getRowColStr(BrAPIPositionCoordinateTypeEnum type) {
+        if(null != type){
+            switch (type) {
+                case PLANTED_INDIVIDUAL:
+                case GRID_COL:
+                case MEASURED_COL:
+                case LATITUDE:
+                    return "Column";
+                case PLANTED_ROW:
+                case GRID_ROW:
+                case MEASURED_ROW:
+                case LONGITUDE:
+                    return "Row";
+            }
         }
+        return null;
     }
 
-    private boolean checkField(String... values) {
-        return getPrioritizedValue(values) != null;
-    }
-
-    public void getOntology(final String brapiToken, Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getOntology(final BrapiPaginationManager paginationManager,
+                            final Function<List<TraitObject>, Void> function,
+                            final Function<Integer, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
         try {
 
-            BrapiV2ApiCallBack<ObservationVariablesResponse> callback = new BrapiV2ApiCallBack<ObservationVariablesResponse>() {
+            BrapiV2ApiCallBack<BrAPIObservationVariableListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationVariableListResponse>() {
                 @Override
-                public void onSuccess(ObservationVariablesResponse response, int i, Map<String, List<String>> map) {
+                public void onSuccess(BrAPIObservationVariableListResponse response, int i, Map<String, List<String>> map) {
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage.equals(paginationManager.getPage())) {
+                        updatePageInfo(paginationManager, response.getMetadata());
+                        // Result contains a list of observation variables
+                        List<BrAPIObservationVariable> brapiTraitList = response.getResult().getData();
+                        final List<TraitObject> traitsList = mapTraits(brapiTraitList);
 
-                    // Result contains a list of observation variables
-                    List<ObservationVariable> brapiTraitList = response.getResult().getData();
-                    final Metadata metadata = response.getMetadata();
-                    final List<TraitObject> traitsList = mapTraits(brapiTraitList);
-
-                    // Check if our traits list was processed correctly. Right now, will be null if host not found.
-                    if (traitsList == null) {
-                        failFunction.apply(new ApiException("Could not assign host url to new data."));
+                        function.apply(traitsList);
                     }
-
-                    final BrapiListResponse<TraitObject> traitResponse = new BrapiListResponse<>();
-                    traitResponse.setData(traitsList);
-                    traitResponse.setMetadata(metadata);
-
-                    function.apply(traitResponse);
-
                 }
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-                    // Close our current study and report failure
-                    failFunction.apply(error);
+                    failFunction.apply(error.getCode());
                 }
 
             };
 
-            // Set defaults for page and pageSize if not specified.
-            if (page == null) {
-                page = 0;
-            }
-            if (pageSize == null) {
-                pageSize = 50;
-            }
-
-            traitsApi.variablesGetAsync(page, pageSize, brapiToken, null,
-                    null, callback);
+            VariableQueryParams queryParams = new VariableQueryParams();
+            queryParams.page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
+            traitsApi.variablesGetAsync(queryParams, callback);
 
         } catch (ApiException e) {
+            failFunction.apply(e.getCode());
             Log.e("error-go", e.toString());
-            failFunction.apply(e);
         }
     }
 
-    public void postPhenotypes(List<Observation> observations, String brapiToken,
-                               final Function<List<NewObservationDbIdsObservations>, Void> function,
+
+    private Observation mapToObservation(BrAPIObservation obs){
+        Observation newObservation = new Observation();
+        newObservation.setDbId(obs.getObservationDbId());
+        newObservation.setUnitDbId(obs.getObservationUnitDbId());
+        newObservation.setVariableDbId(obs.getObservationVariableDbId());
+        return newObservation;
+    }
+
+    public void postPhenotypes(List<Observation> observations,
+                               final Function<List<Observation>, Void> function,
                                final Function<Integer, Void> failFunction) {
-
         try {
-
-            BrapiV2ApiCallBack<NewObservationDbIdsResponse> callback = new BrapiV2ApiCallBack<NewObservationDbIdsResponse>() {
+            BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
-                public void onSuccess(NewObservationDbIdsResponse phenotypesResponse, int i, Map<String, List<String>> map) {
+                public void onSuccess(BrAPIObservationListResponse phenotypesResponse, int i, Map<String, List<String>> map) {
+                    List<Observation> newObservations = new ArrayList<>();
+                    for(BrAPIObservation obs: phenotypesResponse.getResult().getData()){
+                        newObservations.add(mapToObservation(obs));
+                    }
 
-                    final List<NewObservationDbIdsObservations> observationDbIds = phenotypesResponse.getResult().getObservations();
-                    function.apply(observationDbIds);
-
+                    function.apply(newObservations);
                 }
 
                 @Override
-                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
-
-                    final ApiException error = e;
-                    Integer code = new Integer(error.getCode());
-                    failFunction.apply(code);
-
+                public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
+                    failFunction.apply(error.getCode());
                 }
             };
 
-            PhenotypesRequest request = new PhenotypesRequest();
+            List<BrAPIObservation> request = new ArrayList<>();
 
-            // TODO: group by study and observationunit db ids
             for (Observation observation : observations) {
-                PhenotypesRequestObservation request_observation = new PhenotypesRequestObservation();
-                request_observation.setCollector(observation.getCollector().trim());
-                request_observation.setObservationDbId(""); // new entry only for post
-                request_observation.setObservationTimeStamp(observation.getTimestamp());
-                request_observation.setObservationVariableDbId(observation.getVariableDbId());
-                request_observation.setObservationVariableName(observation.getVariableName());
-                request_observation.season("Spring 2018"); // workaround for test server
-                request_observation.setValue(observation.getValue());
+                BrAPIObservation newObservation = new BrAPIObservation();
+                newObservation.setCollector(observation.getCollector().trim());
+                newObservation.setObservationTimeStamp(TimeAdapter.convertFrom(observation.getTimestamp()));
+                newObservation.setObservationUnitDbId(observation.getUnitDbId());
+                newObservation.setStudyDbId(observation.getStudyId());
+                newObservation.setObservationVariableDbId(observation.getVariableDbId());
+                newObservation.setObservationVariableName(observation.getVariableName());
+                newObservation.setValue(observation.getValue());
 
-                PhenotypesRequestData request_data = new PhenotypesRequestData();
-                request_data.addObservationsItem(request_observation);
-                request_data.setObservationUnitDbId(observation.getUnitDbId());
-                request_data.setStudyDbId(observation.getStudyId());
-
-                request.addDataItem(request_data);
+                request.add(newObservation);
             }
 
-            phenotypesApi.phenotypesPostAsync(request, null, brapiToken, callback);
+            observationsApi.observationsPostAsync(request, callback);
 
         } catch (ApiException e) {
+            failFunction.apply(e.getCode());
             e.printStackTrace();
         }
     }
 
-    // will only ever have one study in current architecture
-    public void putObservations(List<Observation> observations, String brapiToken,
-                                final Function<List<NewObservationDbIdsObservations>, Void> function,
+    public void putObservations(List<Observation> observations,
+                                final Function<List<Observation>, Void> function,
                                 final Function<Integer, Void> failFunction) {
-
-        // group observations by studyid
-        HashMap<String, List<Observation>> studyObservations = new HashMap<>();
-        for (Observation observation : observations) {
-            List<Observation> observationList = studyObservations.get(observation.getStudyId());
-            if (observationList == null) {
-                observationList = new ArrayList<>();
-            }
-
-            observationList.add(observation);
-            studyObservations.put(observation.getStudyId(), observationList);
-        }
-
         try {
 
-            BrapiV2ApiCallBack<NewObservationDbIdsResponse> callback = new BrapiV2ApiCallBack<NewObservationDbIdsResponse>() {
+            BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
-                public void onSuccess(NewObservationDbIdsResponse observationsResponse, int i, Map<String, List<String>> map) {
-
-                    final List<NewObservationDbIdsObservations> observationDbIds = observationsResponse.getResult().getObservations();
-                    function.apply(observationDbIds);
-
+                public void onSuccess(BrAPIObservationListResponse observationsResponse, int i, Map<String, List<String>> map) {
+                    List<Observation> newObservations = new ArrayList<>();
+                    for(BrAPIObservation obs: observationsResponse.getResult().getData()){
+                        newObservations.add(mapToObservation(obs));
+                    }
+                    function.apply(newObservations);
                 }
 
                 @Override
-                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
-
-                    final ApiException error = e;
-                    Integer code = new Integer(error.getCode());
-                    failFunction.apply(code);
-
+                public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
+                    failFunction.apply(error.getCode());
                 }
             };
 
-            Set<String> studies = studyObservations.keySet();
+            Map<String, BrAPIObservation> request = new HashMap<>();
 
-            for (String study : studies) {
-                //get list of observations for study
-                List<Observation> studyObs = studyObservations.get(study);
+            for (Observation obs : observations) {
+                BrAPIObservation o = new BrAPIObservation();
+                o.setCollector(obs.getCollector().trim());
+                o.setObservationDbId(obs.getDbId());
+                o.setObservationTimeStamp(TimeAdapter.convertFrom(obs.getTimestamp()));
+                o.setObservationUnitDbId(obs.getUnitDbId());
+                o.setObservationVariableDbId(obs.getVariableDbId());
+                o.setValue(obs.getValue());
 
-                List<NewObservationsRequestObservations> request_observations = new ArrayList<>();
-
-                for (Observation obs : studyObs) {
-                    NewObservationsRequestObservations o = new NewObservationsRequestObservations();
-                    o.setCollector(obs.getCollector().trim());
-                    o.setObservationDbId(obs.getDbId());
-                    o.setObservationTimeStamp(obs.getTimestamp());
-                    o.setObservationUnitDbId(obs.getUnitDbId());
-                    o.setObservationVariableDbId(obs.getVariableDbId());
-                    o.setValue(obs.getValue());
-
-                    request_observations.add(o);
-                }
-
-                NewObservationsRequest request = new NewObservationsRequest();
-                request.setObservations(request_observations);
-
-                observationsApi.studiesStudyDbIdObservationsPutAsync(study, request, brapiToken, callback);
+                request.put(obs.getDbId(), o);
             }
 
+            observationsApi.observationsPutAsync(request, callback);
+
         } catch (ApiException e) {
+            failFunction.apply(e.getCode());
             e.printStackTrace();
         }
     }
@@ -641,53 +668,78 @@ public class BrAPIServiceV2 implements BrAPIService{
         return returnValue;
     }
 
-    public void getTraits(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getTraits(final String studyDbId,
+                          final Function<BrapiStudyDetails, Void> function,
+                          final Function<Integer, Void> failFunction) {
         try {
+            final Integer[] recursiveCounter = {0};
+            final Integer pageSize = 1000;
+            final BrapiStudyDetails study = new BrapiStudyDetails();
+            study.setTraits(new ArrayList<>());
 
-            BrapiV2ApiCallBack<StudyObservationVariablesResponse> callback = new BrapiV2ApiCallBack<StudyObservationVariablesResponse>() {
+            BrapiV2ApiCallBack<BrAPIObservationVariableListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationVariableListResponse>() {
                 @Override
-                public void onSuccess(StudyObservationVariablesResponse response, int i, Map<String, List<String>> map) {
-                    final BrapiStudyDetails study = new BrapiStudyDetails();
-                    study.setTraits(mapTraits(response.getResult().getData()));
+                public void onSuccess(BrAPIObservationVariableListResponse response, int i, Map<String, List<String>> map) {
+                    //every time
+                    study.getTraits().addAll(mapTraits(response.getResult().getData()));
+                    recursiveCounter[0] = recursiveCounter[0] + 1;
 
-                    function.apply(study);
+                    int page = response.getMetadata().getPagination().getCurrentPage();
 
+                    // Stop after 50 iterations (for safety)
+                    // Stop if the current page is the last page according to the server
+                    // Stop if there are no more contents
+                    if((recursiveCounter[0] > 50)
+                            || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
+                            || (response.getResult().getData().size() == 0)){
+                        // Stop recursive loop
+                        function.apply(study);
+                    }else {
+                        try {
+                            VariableQueryParams queryParams = new VariableQueryParams();
+                            queryParams.studyDbId(studyDbId).page(recursiveCounter[0]).pageSize(pageSize);
+                            traitsApi.variablesGetAsync(queryParams, this);
+                        } catch (ApiException e) {
+                            failFunction.apply(e.getCode());
+                            e.printStackTrace();
+                        }
+                    }
                 }
 
                 @Override
-                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
-
-                    failFunction.apply(e);
-
+                public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
+                    failFunction.apply(error.getCode());
                 }
             };
-            studiesApi.studiesStudyDbIdObservationvariablesGetAsync(
-                    studyDbId, 0, 200,
-                    brapiToken, callback);
+
+            VariableQueryParams queryParams = new VariableQueryParams();
+            queryParams.studyDbId(studyDbId).page(0).pageSize(pageSize);
+            traitsApi.variablesGetAsync(queryParams, callback);
+
         } catch (ApiException e) {
-            failFunction.apply(e);
+            failFunction.apply(e.getCode());
             e.printStackTrace();
         }
     }
 
-    private List<TraitObject> mapTraits(List<ObservationVariable> variables) {
+    private List<TraitObject> mapTraits(List<BrAPIObservationVariable> variables) {
         List<TraitObject> traits = new ArrayList<>();
-        for (ObservationVariable var : variables) {
+        for (BrAPIObservationVariable var : variables) {
             TraitObject trait = new TraitObject();
             trait.setDefaultValue(var.getDefaultValue());
 
             // Get the synonyms for easier reading. Set it as the trait name.
             String synonym = var.getSynonyms().size() > 0 ? var.getSynonyms().get(0) : null;
-            trait.setTrait(getPrioritizedValue(synonym, var.getName()));
+            trait.setTrait(getPrioritizedValue(synonym, var.getObservationVariableName()));
 
-            trait.setDetails(var.getTrait().getDescription());
+            trait.setDetails(var.getTrait().getTraitDescription());
             // Get database id of external system to sync to enabled pushing through brAPI
             trait.setExternalDbId(var.getObservationVariableDbId());
 
             // Need to set where we are getting the data from so we don't push to a different
             // external link than where the trait was retrieved from.
-            if (getHostUrl(this.brapiBaseURL) != null) {
-                trait.setTraitDataSource(getHostUrl(this.brapiBaseURL));
+            if (BrAPIService.getHostUrl(context) != null) {
+                trait.setTraitDataSource(BrAPIService.getHostUrl(context));
             } else {
                 // return null to indicate we couldn't process the traits
                 return null;
@@ -713,7 +765,7 @@ public class BrAPIServiceV2 implements BrAPIService{
                     trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
                 }
                 if (var.getScale().getDataType() != null) {
-                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getValue()));
+                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getBrapiValue()));
                 } else {
                     trait.setFormat("text");
                 }
@@ -729,10 +781,10 @@ public class BrAPIServiceV2 implements BrAPIService{
         return traits;
     }
 
-    private String buildCategoryList(List<String> categories) {
+    private String buildCategoryList(List<BrAPIScaleValidValuesCategories> categories) {
         StringBuilder sb = new StringBuilder();
         for (int j = 0; j < categories.size(); ++j) {
-            sb.append(categories.get(j));
+            sb.append(categories.get(j).getLabel());
             if (j != categories.size() - 1) {
                 sb.append("/");
             }
@@ -743,20 +795,16 @@ public class BrAPIServiceV2 implements BrAPIService{
     private String convertBrAPIDataType(String dataType) {
         //TODO: Check these out and make sure they match with fieldbook data types.
         switch (dataType) {
-            case "Code":
-                // Not the ideal solution for this conversion
-                return "text";
             case "Nominal":
+            case "Ordinal":
+                // All Field Book categories are ordered, so this works
                 return "categorical";
             case "Date":
                 return "date";
             case "Numerical":
-                return "numeric";
-            case "Ordinal":
-                // All Field Book categories are ordered, so this works
-                return "categorical";
             case "Duration":
                 return "numeric";
+            case "Code":
             case "Text":
             default:
                 return "text";
@@ -765,6 +813,7 @@ public class BrAPIServiceV2 implements BrAPIService{
 
     public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails) {
 
+        DataHelper dataHelper = new DataHelper(context);
         try {
             FieldObject field = new FieldObject();
             field.setExp_name(studyDetails.getStudyName());
@@ -773,14 +822,14 @@ public class BrAPIServiceV2 implements BrAPIService{
             field.setCount(studyDetails.getNumberOfPlots().toString());
 
             // Get our host url
-            if (getHostUrl(this.brapiBaseURL) != null) {
-                field.setExp_source(getHostUrl(this.brapiBaseURL));
+            if (BrAPIService.getHostUrl(context) != null) {
+                field.setExp_source(BrAPIService.getHostUrl(context));
             } else {
                 // Return an error notifying user we can't save this field
                 return new BrapiControllerResponse(false, "Host is null");
             }
 
-            field.setUnique_id("observationUnitDbId");
+            field.setUnique_id("ObservationUnitDbId");
             field.setPrimary_id("Row");
             field.setSecondary_id("Column");
             field.setExp_sort("Plot");

@@ -89,7 +89,7 @@ public class BrapiProgramActivity extends AppCompatActivity {
         //init page numbers
         paginationManager.refreshPageIndicator();
 
-        brAPIService.getPrograms(BrAPIService.getBrapiToken(this), paginationManager, new Function<List<BrapiProgram>, Void>() {
+        brAPIService.getPrograms(paginationManager, new Function<List<BrapiProgram>, Void>() {
             @Override
             public Void apply(List<BrapiProgram> programs) {
                 (BrapiProgramActivity.this).runOnUiThread(new Runnable() {
@@ -109,15 +109,15 @@ public class BrapiProgramActivity extends AppCompatActivity {
                 });
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(ApiException error) {
+            public Void apply(Integer code) {
                 (BrapiProgramActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
-                        if(BrAPIService.isConnectionError(error.getCode())){
-                            BrAPIService.handleConnectionError(BrapiProgramActivity.this, error.getCode());
+                        if(BrAPIService.isConnectionError(code)){
+                            BrAPIService.handleConnectionError(BrapiProgramActivity.this, code);
                         }else {
                             Toast.makeText(getApplicationContext(), getString(R.string.brapi_programs_error), Toast.LENGTH_LONG).show();
                         }
@@ -132,7 +132,10 @@ public class BrapiProgramActivity extends AppCompatActivity {
     private ListAdapter buildProgramsArrayAdapter(List<BrapiProgram> programs) {
         List<Object> itemDataList = new ArrayList<>();
         for (BrapiProgram program : programs) {
-            itemDataList.add(program.getProgramName());
+            if(program.getProgramName() != null)
+                itemDataList.add(program.getProgramName());
+            else
+                itemDataList.add(program.getProgramDbId());
         }
         ListAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
         return adapter;

@@ -9,6 +9,7 @@ import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.brapi.BrapiPaginationManager;
 import com.fieldbook.tracker.brapi.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
+import com.fieldbook.tracker.brapi.FieldBookImage;
 import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
 
@@ -322,7 +323,7 @@ public class BrapiServiceTest {
         final CountDownLatch signal = new CountDownLatch(1);
         final String brapiToken = "Bearer YYYY";
 
-        com.fieldbook.tracker.brapi.Image image = new com.fieldbook.tracker.brapi.Image("/path/test.jpg", missingImage);
+        FieldBookImage image = new FieldBookImage("/path/test.jpg", missingImage);
         image.setUnitDbId("1");
 
         // Call our get study details endpoint with the same parsing that our classes use.
