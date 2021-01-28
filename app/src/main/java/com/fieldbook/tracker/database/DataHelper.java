@@ -67,10 +67,12 @@ public class DataHelper {
     public static SQLiteDatabase db;
     private static String TAG = "Field Book";
     private static String TICK = "`";
+    private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
     private Context context;
     private SQLiteStatement insertTraits;
     private SQLiteStatement insertUserTraits;
     private SimpleDateFormat timeStamp;
+    private DateTimeFormatter timeFormat;
 
     private OpenHelper openHelper;
 
@@ -88,9 +90,10 @@ public class DataHelper {
             this.insertTraits = db.compileStatement(INSERTTRAITS);
             this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
 
-            timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
+            timeStamp = new SimpleDateFormat(TIME_FORMAT_PATTERN,
                     Locale.getDefault());
 
+            timeFormat = DateTimeFormatter.ofPattern(TIME_FORMAT_PATTERN, Locale.getDefault());
 
             missingPhoto = BitmapFactory.decodeResource(context.getResources(), R.drawable.trait_photo_missing);
 
@@ -186,7 +189,7 @@ public class DataHelper {
                 this.insertUserTraits.bindNull(11);
             }
             if (lastSyncedTime != null) {
-                this.insertUserTraits.bindString(12, lastSyncedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.getDefault())));
+                this.insertUserTraits.bindString(12, lastSyncedTime.format(timeFormat));
             } else {
                 this.insertUserTraits.bindNull(12);
             }
@@ -571,7 +574,7 @@ public class DataHelper {
 
         for (Observation observation : observations) {
             update.bindString(1, observation.getDbId());
-            update.bindString(2, observation.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.getDefault())));
+            update.bindString(2, observation.getLastSyncedTime().format(timeFormat));
             update.bindString(3, observation.getFieldbookDbId());
             update.execute();
         }
@@ -589,7 +592,7 @@ public class DataHelper {
 
         for (Image image : images) {
             update.bindString(1, image.getDbId());
-            update.bindString(2, image.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            update.bindString(2, image.getLastSyncedTime().format(timeFormat));
             update.bindString(3, image.getFieldbookDbId());
             update.execute();
         }
@@ -611,7 +614,7 @@ public class DataHelper {
 
         update.bindString(1, image.getDbId());
         if (writeLastSyncedTime) {
-            update.bindString(2, image.getLastSyncedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())));
+            update.bindString(2, image.getLastSyncedTime().format(timeFormat));
             update.bindString(3, image.getFieldbookDbId());
         } else {
             update.bindString(2, image.getFieldbookDbId());
