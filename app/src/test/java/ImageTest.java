@@ -1,7 +1,7 @@
 import android.graphics.Bitmap;
 import android.os.Build;
 
-import com.fieldbook.tracker.brapi.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.FieldBookImage;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.brapi.service;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,7 +21,7 @@ public class BrapiPaginationManager {
 
     private Button nextBtn;
     private Button prevBtn;
-    TextView pageIndicator;
+    private TextView pageIndicator;
     private Context context;
 
     public BrapiPaginationManager(Context context){

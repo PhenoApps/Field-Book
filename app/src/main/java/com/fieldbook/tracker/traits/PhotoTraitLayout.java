@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -28,12 +27,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
-import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Constants;

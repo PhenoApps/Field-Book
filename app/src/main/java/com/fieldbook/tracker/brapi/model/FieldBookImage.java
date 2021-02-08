@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.brapi.model;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -62,13 +61,13 @@ public class FieldBookImage extends BrapiObservation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FieldBookImage that = (FieldBookImage) o;
-        return objectsEquals(unitDbId, that.getUnitDbId()) &&
+        return objectsEquals(getUnitDbId(), that.getUnitDbId()) &&
                 objectsEquals(fileName, that.getFileName());
     }
 
     @Override
     public int hashCode() {
-        return objectsHash(unitDbId, fileName);//, timestamp);
+        return objectsHash(getUnitDbId(), fileName);//, timestamp);
     }
 
     public GeoJSON getLocation() {
@@ -83,7 +82,7 @@ public class FieldBookImage extends BrapiObservation {
         return height;
     }
 
-    long getFileSize() {
+    public long getFileSize() {
         return fileSize;
     }
 
@@ -144,8 +143,8 @@ public class FieldBookImage extends BrapiObservation {
     }
 
     public String getCopyright() {
-        if(timestamp != null) {
-            return String.valueOf(timestamp.getYear());
+        if(getTimestamp() != null) {
+            return String.valueOf(getTimestamp().getYear());
         }
         return null;
     }
@@ -158,11 +157,11 @@ public class FieldBookImage extends BrapiObservation {
         this.additionalInfo = additionalInfo;
     }
 
-    byte[] getImageData() {
+    public byte[] getImageData() {
         return bytes;
     }
 
-    List<String> getDescriptiveOntologyTerms() {
+    public List<String> getDescriptiveOntologyTerms() {
         return this.descriptiveOntologyTerms;
     }
 
@@ -170,7 +169,7 @@ public class FieldBookImage extends BrapiObservation {
         this.descriptiveOntologyTerms = descriptiveOntologyTerms;
     }
 
-    String getDescription() {
+    public String getDescription() {
         return this.description;
     }
 

@@ -3,7 +3,6 @@ package com.fieldbook.tracker.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,18 +18,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiPaginationManager;
-import com.fieldbook.tracker.brapi.BrAPIServiceFactory;
-import com.fieldbook.tracker.brapi.BrapiProgram;
-import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
+import com.fieldbook.tracker.brapi.model.BrapiProgram;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.swagger.client.ApiException;
 
 public class BrapiProgramActivity extends AppCompatActivity {
     private BrAPIService brAPIService;

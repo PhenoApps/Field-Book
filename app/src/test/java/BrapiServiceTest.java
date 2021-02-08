@@ -3,14 +3,14 @@ import android.os.Build;
 
 import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrAPIServiceV1;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceV1;
 import com.fieldbook.tracker.brapi.BrapiListResponse;
-import com.fieldbook.tracker.brapi.BrapiPaginationManager;
-import com.fieldbook.tracker.brapi.BrapiStudyDetails;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
-import com.fieldbook.tracker.brapi.FieldBookImage;
-import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
 
 import org.junit.Before;

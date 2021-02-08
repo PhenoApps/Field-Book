@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.brapi.model;
 
 import com.fieldbook.tracker.objects.TraitObject;
 
@@ -15,7 +15,7 @@ public class BrapiStudyDetails {
   private List<List<String>> values;
   private List<TraitObject> traits;
 
-  static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2) {
+  public static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2) {
     if (sd2.getStudyDbId() != null)
       sd1.setStudyDbId(sd2.getStudyDbId());
     if (sd2.getStudyName() != null)

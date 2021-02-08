@@ -14,8 +14,8 @@ import android.util.Log;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.FieldBookImage;
-import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;

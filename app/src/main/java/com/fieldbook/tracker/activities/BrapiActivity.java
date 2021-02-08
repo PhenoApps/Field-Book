@@ -2,7 +2,6 @@ package com.fieldbook.tracker.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,22 +16,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.ApiError;
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrAPIServiceFactory;
-import com.fieldbook.tracker.brapi.BrapiAuthDialog;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.BrapiLoadDialog;
-import com.fieldbook.tracker.brapi.BrapiPaginationManager;
-import com.fieldbook.tracker.brapi.BrapiStudyDetails;
-import com.fieldbook.tracker.brapi.BrapiStudySummary;
-import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.swagger.client.ApiException;
 
 /**
  * API test Screen

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.brapi.service;
 
         import android.app.Activity;
         import android.content.ActivityNotFoundException;
@@ -13,6 +13,14 @@ package com.fieldbook.tracker.brapi;
         import androidx.arch.core.util.Function;
 
         import com.fieldbook.tracker.R;
+        import com.fieldbook.tracker.brapi.ApiError;
+        import com.fieldbook.tracker.brapi.BrapiAuthDialog;
+        import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+        import com.fieldbook.tracker.brapi.model.BrapiProgram;
+        import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
+        import com.fieldbook.tracker.brapi.model.BrapiTrial;
+        import com.fieldbook.tracker.brapi.model.FieldBookImage;
+        import com.fieldbook.tracker.brapi.model.Observation;
         import com.fieldbook.tracker.preferences.GeneralKeys;
         import com.fieldbook.tracker.objects.TraitObject;
         import com.fieldbook.tracker.utilities.Constants;
@@ -24,8 +32,8 @@ package com.fieldbook.tracker.brapi;
 public interface BrAPIService {
 
     public static String exportTarget = "export";
-    static String notUniqueFieldMessage = "not_unique";
-    static String notUniqueIdMessage = "not_unique_id";
+    public static String notUniqueFieldMessage = "not_unique";
+    public static String notUniqueIdMessage = "not_unique_id";
 
     public static BrapiControllerResponse authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -200,7 +208,7 @@ public interface BrAPIService {
 
     public void getPrograms(final BrapiPaginationManager paginationManager, final Function<List<BrapiProgram>, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getTrials(String programDbId, BrapiPaginationManager paginationManager,  final Function<List<BrapiTrial>, Void> function, final Function<Integer, Void> failFunction);
+    public void getTrials(String programDbId, BrapiPaginationManager paginationManager, final Function<List<BrapiTrial>, Void> function, final Function<Integer, Void> failFunction);
 
     public void getStudies(String programDbId, String trialDbId, BrapiPaginationManager paginationManager, final Function<List<BrapiStudyDetails>, Void> function, final Function<Integer, Void> failFunction);
 

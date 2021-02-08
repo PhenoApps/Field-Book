@@ -1,14 +1,12 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.brapi.service;
 
 import android.content.Context;
 
-import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.Constants;
 
 public class BrAPIServiceFactory {
 
-    public static final BrAPIService getBrAPIService(Context context){
+    public static BrAPIService getBrAPIService(Context context){
 
         String version = context.getSharedPreferences("Settings", 0)
                 .getString(GeneralKeys.BRAPI_VERSION, "V1");

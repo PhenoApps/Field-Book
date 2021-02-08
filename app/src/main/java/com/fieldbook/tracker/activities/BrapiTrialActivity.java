@@ -18,16 +18,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiPaginationManager;
-import com.fieldbook.tracker.brapi.BrAPIServiceFactory;
-import com.fieldbook.tracker.brapi.BrapiTrial;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
+import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.swagger.client.ApiException;
 
 public class BrapiTrialActivity extends AppCompatActivity {
     private BrAPIService brAPIService;

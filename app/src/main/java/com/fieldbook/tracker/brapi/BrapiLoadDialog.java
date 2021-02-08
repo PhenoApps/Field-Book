@@ -18,12 +18,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.Constants;
-
-import io.swagger.client.ApiException;
 
 public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener {
 
