@@ -10,8 +10,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="64dp">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/offImage"
@@ -19,7 +18,7 @@
             android:layout_height="64dp"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_alpha_x_circle"
+            android:src="@drawable/trait_boolean_false"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/traitBooleanSeekBar"
             app:layout_constraintTop_toTopOf="parent"
@@ -47,7 +46,7 @@
             android:layout_height="64dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="32dp"
-            android:src="@drawable/ic_checkbox_marked_circle"
+            android:src="@drawable/trait_boolean_true"
             app:layout_constraintStart_toEndOf="@id/traitBooleanSeekBar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.EditText;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 
 public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSeekBarChangeListener {
 
@@ -44,57 +46,51 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     public void init() {
 
         threeStateSeekBar = findViewById(R.id.traitBooleanSeekBar);
-
         threeStateSeekBar.setOnSeekBarChangeListener(this);
 
         ImageView onImageView = findViewById(R.id.onImage);
-
         ImageView offImageView = findViewById(R.id.offImage);
 
         onImageView.setOnClickListener((View v) -> {
-
             threeStateSeekBar.setProgress(ThreeState.ON);
-
         });
 
         offImageView.setOnClickListener((View v) -> {
-
             threeStateSeekBar.setProgress(ThreeState.OFF);
-
         });
 
     }
 
     @Override
     public void loadLayout() {
-
-        getEtCurVal().setVisibility(EditText.GONE);
-        getEtCurVal().setEnabled(false);
+        getEtCurVal().setHint("");
+        getEtCurVal().setVisibility(EditText.VISIBLE);
 
         //if the trait has a default value and this unit has not been observed,
         // set the seek bar to the default value's state
         if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-
             String defaultValue = getCurrentTrait().getDefaultValue().trim();
-
             updateSeekBarState(defaultValue);
 
+            getEtCurVal().setText(defaultValue);
+            getEtCurVal().setTextColor(Color.BLACK);
+
+            //save default value
+            updateTrait(getCurrentTrait().getTrait(), "boolean", defaultValue);
         } else { //otherwise update the seekbar to the database's current value
+            getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
+            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
 
             String bval = getNewTraits().get(getCurrentTrait().getTrait()).toString();
-
             updateSeekBarState(bval);
-
         }
     }
 
     @Override
     public void deleteTraitListener() {
-
+        ((CollectActivity) getContext()).removeTrait();
         String defaultValue = getCurrentTrait().getDefaultValue().trim();
-
         updateSeekBarState(defaultValue);
-
     }
 
     private void updateSeekBarState(String state) {
@@ -117,12 +113,13 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
         //every time the progress changes, update the database
         int state = threeStateSeekBar.getProgress();
 
-        String newVal = "true";
+        String newVal = "TRUE";
 
-        if (state == ThreeState.OFF) newVal = "false";
+        if (state == ThreeState.OFF) newVal = "FALSE";
         //else if (state == ThreeState.NEUTRAL) newVal = "unset";
 
         updateTrait(getCurrentTrait().getTrait(), "boolean", newVal);
+        getEtCurVal().setText(newVal);
     }
 
     @Override
