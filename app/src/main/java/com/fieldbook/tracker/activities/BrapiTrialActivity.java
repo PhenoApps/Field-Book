@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,8 +20,10 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.BrapiPaginationManager;
 import com.fieldbook.tracker.brapi.BrapiTrial;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
@@ -31,6 +34,7 @@ import io.swagger.client.ApiException;
 public class BrapiTrialActivity extends AppCompatActivity {
     private BrAPIService brAPIService;
     private BrapiTrial brapiTrial;
+    private BrapiPaginationManager paginationManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,7 +43,9 @@ public class BrapiTrialActivity extends AppCompatActivity {
         if (Utils.isConnected(this)) {
             if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi_trials);
+                paginationManager = new BrapiPaginationManager(this);
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
+
                 brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiTrialActivity.this));
 
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
@@ -80,10 +86,12 @@ public class BrapiTrialActivity extends AppCompatActivity {
         ListView trialsView = findViewById(R.id.brapiTrials);
         trialsView.setVisibility(View.GONE);
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+        //init page numbers
+        paginationManager.refreshPageIndicator();
 
         String programDbId = getIntent().getStringExtra(BrapiActivity.PROGRAM_DB_ID_INTENT_PARAM);
 
-        brAPIService.getTrials(BrAPIService.getBrapiToken(this), programDbId, new Function<List<BrapiTrial>, Void>() {
+        brAPIService.getTrials(BrAPIService.getBrapiToken(this), programDbId, paginationManager, new Function<List<BrapiTrial>, Void>() {
             @Override
             public Void apply(List<BrapiTrial> trials) {
                 (BrapiTrialActivity.this).runOnUiThread(new Runnable() {
@@ -135,6 +143,7 @@ public class BrapiTrialActivity extends AppCompatActivity {
     public void buttonClicked(View view) {
         switch (view.getId()) {
             case R.id.loadTrials:
+                paginationManager.reset();
                 loadTrials();
                 break;
             case R.id.selectTrial:
@@ -146,6 +155,12 @@ public class BrapiTrialActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_trial, Toast.LENGTH_SHORT).show();
                 }
+                break;
+            case R.id.prev:
+            case R.id.next:
+                // Update current page (if allowed) and start brapi call.
+                paginationManager.setNewPage(view.getId());
+                loadTrials();
                 break;
         }
     }

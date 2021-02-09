@@ -51,6 +51,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.Observation;
@@ -385,7 +386,7 @@ public class CollectActivity extends AppCompatActivity {
     private void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
-        if (!dt.isTableEmpty(DataHelper.RANGE)) {
+        if (!dt.isRangeTableEmpty()) {
             String plotID = rangeBox.getPlotID();
             infoBarAdapter.configureDropdownArray(plotID);
         }
@@ -486,6 +487,8 @@ public class CollectActivity extends AppCompatActivity {
             Log.e(TAG, e.getMessage());
         }
 
+        updateLastOpenedTime();
+
         super.onPause();
     }
 
@@ -554,6 +557,72 @@ public class CollectActivity extends AppCompatActivity {
                 moveToSearch("search", rangeID, searchRange, searchPlot, null);
             }
         }
+
+        checkLastOpened();
+    }
+
+    /**
+     * Simple function that checks if the collect activity was opened >24hrs ago.
+     * If the condition is met, it asks the user to reenter the collector id.
+     */
+    private void checkLastOpened() {
+
+        long lastOpen = ep.getLong("LastTimeAppOpened", 0L);
+        long systemTime = System.nanoTime();
+
+        long nanosInOneDay = (long) 1e9*3600*24;
+
+        if (lastOpen != 0L && systemTime - lastOpen > nanosInOneDay) {
+
+            boolean verify = ep.getBoolean("VerifyUserEvery24Hours", true);
+
+            if (verify) {
+
+                if(ep.getString("FirstName","").length() > 0 || ep.getString("LastName","").length() > 0) {
+                    //person presumably has been set
+                    showAskCollectorDialog(getString(R.string.activity_collect_dialog_verify_collector) + " " + ep.getString("FirstName","") + " " + ep.getString("LastName","") + "?",
+                            getString(R.string.activity_collect_dialog_verify_yes_button),
+                            getString(R.string.activity_collect_dialog_neutral_button),
+                            getString(R.string.activity_collect_dialog_verify_no_button));
+                } else {
+                    //person presumably hasn't been set
+                    showAskCollectorDialog(getString(R.string.activity_collect_dialog_new_collector),
+                            getString(R.string.activity_collect_dialog_verify_no_button),
+                            getString(R.string.activity_collect_dialog_neutral_button),
+                            getString(R.string.activity_collect_dialog_verify_yes_button));
+                }
+            }
+        }
+
+        updateLastOpenedTime();
+    }
+
+    private void updateLastOpenedTime() {
+        ep.edit().putLong("LastTimeAppOpened", System.nanoTime()).apply();
+    }
+
+    private void showAskCollectorDialog(String message, String positive, String neutral, String negative) {
+        new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setTitle(message)
+                //yes button
+                .setPositiveButton(positive, (DialogInterface dialog, int which) -> {
+                    dialog.dismiss();
+                })
+                //yes, don't ask again button
+                .setNeutralButton(neutral, (DialogInterface dialog, int which) -> {
+                    dialog.dismiss();
+                    ep.edit().putBoolean("VerifyUserEvery24Hours", false).apply();
+                })
+                //no (navigates to the person preference)
+                .setNegativeButton(negative, (DialogInterface dialog, int which) -> {
+                    dialog.dismiss();
+                    Intent preferenceIntent = new Intent();
+                    preferenceIntent.setClassName(CollectActivity.this,
+                            PreferencesActivity.class.getName());
+                    preferenceIntent.putExtra("PersonUpdate", true);
+                    startActivity(preferenceIntent);
+                })
+                .show();
     }
 
     /**
@@ -572,11 +641,12 @@ public class CollectActivity extends AppCompatActivity {
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        dt.deleteTrait(rangeBox.getPlotID(), parent);
+        dt.deleteTrait(exp_id, rangeBox.getPlotID(), parent);
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
                 ep.getString("Location", ""), "", exp_id, observationDbId,
@@ -1180,6 +1250,7 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         void setNewTraits(final String plotID) {
+
             newTraits = (HashMap) dt.getUserDetail(plotID).clone();
         }
 
@@ -1251,7 +1322,10 @@ public class CollectActivity extends AppCompatActivity {
         public void remove(String traitName, String plotID) {
             if (newTraits.containsKey(traitName))
                 newTraits.remove(traitName);
-            dt.deleteTrait(plotID, traitName);
+
+            String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+
+            dt.deleteTrait(exp_id, plotID, traitName);
         }
 
         public void remove(TraitObject trait, String plotID) {

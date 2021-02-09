@@ -94,6 +94,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     // Helper function to load data
     public static void loadData() {
         try {
+            ConfigActivity.dt.open();
             mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
             fieldList.setAdapter(mAdapter);
         } catch (Exception e) {
@@ -138,7 +139,8 @@ public class FieldEditorActivity extends AppCompatActivity {
         if (ConfigActivity.dt == null) {    // when resuming
             ConfigActivity.dt = new DataHelper(this);
         }
-        ConfigActivity.dt.updateExpTable(false, true, false, 0);
+        ConfigActivity.dt.open();
+        ConfigActivity.dt.updateExpTable(false, true, false, ep.getInt("SelectedFieldExpId", 0));
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
@@ -668,14 +670,23 @@ public class FieldEditorActivity extends AppCompatActivity {
                 Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unique_characters_illegal));
             } else {
                 Editor ed = ep.edit();
-                ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
-                ed.putString("ImportFirstName", primary.getSelectedItem().toString());
-                ed.putString("ImportSecondName", secondary.getSelectedItem().toString());
+
+                String uniqueName = unique.getSelectedItem().toString();
+                String firstName = primary.getSelectedItem().toString();
+                String secondName = secondary.getSelectedItem().toString();
+
+                ed.putString("ImportUniqueName", uniqueName);
+                ed.putString("ImportFirstName", firstName);
+                ed.putString("ImportSecondName", secondName);
                 ed.putBoolean("ImportFieldFinished", true);
+                ed.putInt("SelectedFieldExpId", exp_id);
+
                 ed.apply();
 
                 CollectActivity.reloadData = true;
                 loadData();
+
+                ConfigActivity.dt.open();
                 ConfigActivity.dt.switchField(exp_id);
             }
         }

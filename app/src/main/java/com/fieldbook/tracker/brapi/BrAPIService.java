@@ -77,9 +77,8 @@ public class BrAPIService {
     private ObservationVariablesApi traitsApi;
     private String brapiBaseURL;
 
-    private final static int PAGE_SIZE = 5000;
-
     public BrAPIService(String brapiBaseURL, DataHelper dataHelper) {
+
         this.dataHelper = dataHelper;
         this.brapiBaseURL = brapiBaseURL;
 
@@ -365,13 +364,19 @@ public class BrAPIService {
 
     }
 
-    public void getPrograms(final String brapiToken, final Function<List<BrapiProgram>, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getPrograms(final String brapiToken,  BrapiPaginationManager paginationManager, final Function<List<BrapiProgram>, Void> function, final Function<ApiException, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
        try {
            BrapiApiCallBack<ProgramsResponse> callback = new BrapiApiCallBack<ProgramsResponse>() {
                @Override
                public void onSuccess(ProgramsResponse programsResponse, int i, Map<String, List<String>> map) {
-                   List<Program> programList = programsResponse.getResult().getData();
-                   function.apply(mapPrograms(programList));
+                   // Cancel processing if the page that was processed is not the page
+                   // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                   if (initPage == paginationManager.getPage()) {
+                       updatePageInfo(paginationManager, programsResponse.getMetadata());
+                       List<Program> programList = programsResponse.getResult().getData();
+                       function.apply(mapPrograms(programList));
+                   }
                }
 
                @Override
@@ -380,7 +385,7 @@ public class BrAPIService {
                }
            };
            programsApi.programsGetAsync(null, null, null,
-                   0, PAGE_SIZE, brapiToken, callback);
+                   paginationManager.getPage(), paginationManager.getPageSize(), brapiToken, callback);
        } catch (ApiException e) {
            e.printStackTrace();
        }
@@ -405,13 +410,19 @@ public class BrAPIService {
         return brapiPrograms;
     }
 
-    public void getTrials(final String brapiToken, String programDbId, final Function<List<BrapiTrial>, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getTrials(final String brapiToken, String programDbId,  BrapiPaginationManager paginationManager, final Function<List<BrapiTrial>, Void> function, final Function<ApiException, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
         try {
             BrapiApiCallBack<TrialsResponse> callback = new BrapiApiCallBack<TrialsResponse>() {
                 @Override
                 public void onSuccess(TrialsResponse trialsResponse, int i, Map<String, List<String>> map) {
-                    List<TrialSummary> trialList = trialsResponse.getResult().getData();
-                    function.apply(mapTrials(trialList));
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage == paginationManager.getPage()) {
+                        updatePageInfo(paginationManager, trialsResponse.getMetadata());
+                        List<TrialSummary> trialList = trialsResponse.getResult().getData();
+                        function.apply(mapTrials(trialList));
+                    }
                 }
 
                 @Override
@@ -420,7 +431,7 @@ public class BrAPIService {
                 }
             };
             trialsApi.trialsGetAsync(null, programDbId, null, null, null, null,
-                    0, PAGE_SIZE, brapiToken, callback);
+                    paginationManager.getPage(), paginationManager.getPageSize(), brapiToken, callback);
         } catch (ApiException e) {
             e.printStackTrace();
         }
@@ -440,19 +451,25 @@ public class BrAPIService {
         return brapiTrials;
     }
 
-    public void getStudies(final String brapiToken, String programDbId, String trialDbId, final Function<List<BrapiStudySummary>, Void> function, final Function<ApiException, Void> failFunction) {
+    public void getStudies(final String brapiToken, String programDbId, String trialDbId, BrapiPaginationManager paginationManager, final Function<List<BrapiStudySummary>, Void> function, final Function<ApiException, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
         try {
 
             BrapiApiCallBack<StudiesResponse> callback = new BrapiApiCallBack<StudiesResponse>() {
                 @Override
                 public void onSuccess(StudiesResponse studiesResponse, int i, Map<String, List<String>> map) {
-                    final List<BrapiStudySummary> studies = new ArrayList<>();
-                    final List<StudySummary> studySummaryList = studiesResponse.getResult().getData();
-                    for (StudySummary studySummary : studySummaryList) {
-                        studies.add(mapStudy(studySummary));
-                    }
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage == paginationManager.getPage()) {
+                        updatePageInfo(paginationManager, studiesResponse.getMetadata());
+                        final List<BrapiStudySummary> studies = new ArrayList<>();
+                        final List<StudySummary> studySummaryList = studiesResponse.getResult().getData();
+                        for (StudySummary studySummary : studySummaryList) {
+                            studies.add(mapStudy(studySummary));
+                        }
 
-                    function.apply(studies);
+                        function.apply(studies);
+                    }
 
                 }
 
@@ -469,7 +486,7 @@ public class BrAPIService {
                     null, null, null, programDbId,
                     null, null, trialDbId, null, null,
                     null, null, null, null,
-                    0, PAGE_SIZE, brapiToken, callback);
+                    paginationManager.getPage(), paginationManager.getPageSize(), brapiToken, callback);
 
         } catch (ApiException e) {
             e.printStackTrace();
@@ -525,30 +542,56 @@ public class BrAPIService {
 
     public void getPlotDetails(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
+            final Integer[] recursiveCounter = {0};
+            final Integer pageSize = 1000;
+            final BrapiStudyDetails study = new BrapiStudyDetails();
+            study.setValues(new ArrayList<>());
 
             BrapiApiCallBack<ObservationUnitsResponse1> callback = new BrapiApiCallBack<ObservationUnitsResponse1>() {
                 @Override
                 public void onSuccess(ObservationUnitsResponse1 response, int i, Map<String, List<String>> map) {
-                    final BrapiStudyDetails study = new BrapiStudyDetails();
-                    study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
-                    study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
-                    study.setValues(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
+                    int page = response.getMetadata().getPagination().getCurrentPage();
+                    if(page == 0){
+                        //one time code
+                        study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
+                        study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
+                    }
+                    //every time
+                    study.getValues().addAll(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
 
-                    function.apply(study);
+                    recursiveCounter[0] = recursiveCounter[0] + 1;
 
+                    // Stop after 50 iterations (for safety)
+                    // Stop if the current page is the last page according to the server
+                    // Stop if there are no more contents
+                    if((recursiveCounter[0] > 50)
+                            || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
+                            || (response.getResult().getData().size() == 0)){
+                        // Stop recursive loop
+                        function.apply(study);
+                    }else {
+                        try {
+                            studiesApi.studiesStudyDbIdObservationunitsGetAsync(
+                                    studyDbId, "plot", recursiveCounter[0], pageSize,
+                                    brapiToken, this);
+                        } catch (ApiException e) {
+                            failFunction.apply(e);
+                            e.printStackTrace();
+                        }
+                    }
                 }
 
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     // Close our current study and report failure
                     failFunction.apply(error);
-
                 }
 
             };
 
+
             studiesApi.studiesStudyDbIdObservationunitsGetAsync(
-                    studyDbId, "plot", 0, PAGE_SIZE,
+                    studyDbId, "plot", 0, pageSize,
                     brapiToken, callback);
 
         } catch (ApiException e) {
@@ -607,7 +650,7 @@ public class BrAPIService {
                     addAttributeDataItem(dataRow, unit.getPlantNumber(), unit.getObservationUnitName(), unit.getObservationUnitDbId());
                 else if (attribute.equalsIgnoreCase("Germplasm"))
                     addAttributeDataItem(dataRow, unit.getGermplasmName(), unit.getGermplasmDbId());
-                else if (checkField(unit.getPedigree()) && attribute.equalsIgnoreCase("Pedigree"))
+                else if (attribute.equalsIgnoreCase("Pedigree"))
                     addAttributeDataItem(dataRow, unit.getPedigree());
 
             }
@@ -626,6 +669,9 @@ public class BrAPIService {
         String goodValue = getPrioritizedValue(values);
         if (goodValue != null) {
             dataRow.add(goodValue);
+        }else{
+            //No Value Found, but the data row must maintain the same length
+            dataRow.add("");
         }
     }
 
@@ -633,28 +679,43 @@ public class BrAPIService {
         return getPrioritizedValue(values) != null;
     }
 
-    public void getOntology(final String brapiToken, Integer page, Integer pageSize, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
-        try {
+    private void updatePageInfo(BrapiPaginationManager paginationManager, Metadata metadata){
+        if(paginationManager.getContext() != null) { //null check for JUnits
+            ((Activity) paginationManager.getContext()).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    paginationManager.updatePageInfo(metadata);
+                }
+            });
+        }
+    }
 
+    public void getOntology(final String brapiToken, BrapiPaginationManager paginationManager, final Function<BrapiListResponse<TraitObject>, Void> function, final Function<ApiException, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
+        try {
             BrapiApiCallBack<ObservationVariablesResponse> callback = new BrapiApiCallBack<ObservationVariablesResponse>() {
                 @Override
                 public void onSuccess(ObservationVariablesResponse response, int i, Map<String, List<String>> map) {
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage == paginationManager.getPage()) {
+                        updatePageInfo(paginationManager, response.getMetadata());
+                        // Result contains a list of observation variables
+                        List<ObservationVariable> brapiTraitList = response.getResult().getData();
+                        final Metadata metadata = response.getMetadata();
+                        final List<TraitObject> traitsList = mapTraits(brapiTraitList);
 
-                    // Result contains a list of observation variables
-                    List<ObservationVariable> brapiTraitList = response.getResult().getData();
-                    final Metadata metadata = response.getMetadata();
-                    final List<TraitObject> traitsList = mapTraits(brapiTraitList);
+                        // Check if our traits list was processed correctly. Right now, will be null if host not found.
+                        if (traitsList == null) {
+                            failFunction.apply(new ApiException("Could not assign host url to new data."));
+                        }
 
-                    // Check if our traits list was processed correctly. Right now, will be null if host not found.
-                    if (traitsList == null) {
-                        failFunction.apply(new ApiException("Could not assign host url to new data."));
+                        final BrapiListResponse<TraitObject> traitResponse = new BrapiListResponse<>();
+                        traitResponse.setData(traitsList);
+                        traitResponse.setMetadata(metadata);
+
+                        function.apply(traitResponse);
                     }
-
-                    final BrapiListResponse<TraitObject> traitResponse = new BrapiListResponse<>();
-                    traitResponse.setData(traitsList);
-                    traitResponse.setMetadata(metadata);
-
-                    function.apply(traitResponse);
 
                 }
 
@@ -666,16 +727,8 @@ public class BrAPIService {
 
             };
 
-            // Set defaults for page and pageSize if not specified.
-            if (page == null) {
-                page = 0;
-            }
-            if (pageSize == null) {
-                pageSize = 50;
-            }
-
-            traitsApi.variablesGetAsync(page, pageSize, brapiToken, null,
-                    null, callback);
+            traitsApi.variablesGetAsync(paginationManager.getPage(), paginationManager.getPageSize(),
+                    brapiToken, null,null, callback);
 
         } catch (ApiException e) {
             Log.e("error-go", e.toString());
@@ -819,25 +872,47 @@ public class BrAPIService {
     public void getTraits(final String brapiToken, final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<ApiException, Void> failFunction) {
         try {
 
+            final Integer[] recursiveCounter = {0};
+            final Integer pageSize = 1000;
+            final BrapiStudyDetails study = new BrapiStudyDetails();
+            study.setTraits(new ArrayList<>());
+
             BrapiApiCallBack<StudyObservationVariablesResponse> callback = new BrapiApiCallBack<StudyObservationVariablesResponse>() {
                 @Override
                 public void onSuccess(StudyObservationVariablesResponse response, int i, Map<String, List<String>> map) {
-                    final BrapiStudyDetails study = new BrapiStudyDetails();
-                    study.setTraits(mapTraits(response.getResult().getData()));
+                    //every time
+                    study.getTraits().addAll(mapTraits(response.getResult().getData()));
 
-                    function.apply(study);
+                    recursiveCounter[0] = recursiveCounter[0] + 1;
+                    int page = response.getMetadata().getPagination().getCurrentPage();
 
+                    // Stop after 50 iterations (for safety)
+                    // Stop if the current page is the last page according to the server
+                    // Stop if there are no more contents
+                    if((recursiveCounter[0] > 50)
+                            || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
+                            || (response.getResult().getData().size() == 0)){
+                        // Stop recursive loop
+                        function.apply(study);
+                    }else {
+                        try {
+                            studiesApi.studiesStudyDbIdObservationvariablesGetAsync(
+                                    studyDbId, recursiveCounter[0], pageSize,
+                                    brapiToken, this);
+                        } catch (ApiException e) {
+                            failFunction.apply(e);
+                            e.printStackTrace();
+                        }
+                    }
                 }
 
                 @Override
                 public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
-
                     failFunction.apply(e);
-
                 }
             };
             studiesApi.studiesStudyDbIdObservationvariablesGetAsync(
-                    studyDbId, 0, 200,
+                    studyDbId, 0, pageSize,
                     brapiToken, callback);
         } catch (ApiException e) {
             failFunction.apply(e);

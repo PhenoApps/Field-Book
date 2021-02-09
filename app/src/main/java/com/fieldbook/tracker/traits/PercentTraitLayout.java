@@ -94,7 +94,11 @@ public class PercentTraitLayout extends BaseTraitLayout {
             }
 
             setCurrentValueText(loadValue, Color.BLACK);
-            seekBar.setMax(Integer.parseInt(getCurrentTrait().getMaximum()));
+            String max = getCurrentTrait().getMaximum();
+            //TODO: had to add this check, system was parsing empty string as max value which caused an error
+            if (!max.isEmpty()) {
+                seekBar.setMax(Integer.parseInt(max));
+            }
             seekBar.setOnSeekBarChangeListener(null);
             seekBar.setProgress(Integer.parseInt(getDefaultValue()));
             seekBar.setOnSeekBarChangeListener(seekListener);

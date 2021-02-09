@@ -857,7 +857,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                ConfigActivity.dt.deleteTable(DataHelper.TRAITS);
+                ConfigActivity.dt.deleteTraitsTable();
                 loadData();
                 dialog.dismiss();
             }
@@ -907,7 +907,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             OutputStream out = null;
             try {
                 in = getContentResolver().openInputStream(content_describer);
-                out = new FileOutputStream(new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDIMPORTPATH + "/" + getFileName(content_describer)));
+                out = new FileOutputStream(new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH + "/" + getFileName(content_describer)));
                 byte[] buffer = new byte[1024];
                 int len;
                 while ((len = in.read(buffer)) != -1) {
@@ -984,7 +984,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         try {
             FileWriter fw = new FileWriter(file);
             CSVWriter csvWriter = new CSVWriter(fw, ConfigActivity.dt.getAllTraitsForExport());
-            csvWriter.writeTraitFile(ConfigActivity.dt.getTraitColumns());
+            csvWriter.writeTraitFile(ConfigActivity.dt.getAllTraitsForExport().getColumnNames());
 
             csvWriter.close();
         } catch (Exception ignore) {
@@ -1070,7 +1070,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 data = columns;
 
                 if (ConfigActivity.dt.isTableExists(DataHelper.TRAITS)) {
-                    ConfigActivity.dt.deleteTable(DataHelper.TRAITS);
+                    ConfigActivity.dt.deleteTraitsTable();
                 }
 
                 while (data != null) {

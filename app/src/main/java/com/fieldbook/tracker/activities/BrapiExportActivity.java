@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -22,6 +23,7 @@ import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.brapi.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.text.SimpleDateFormat;
@@ -76,6 +78,7 @@ public class BrapiExportActivity extends AppCompatActivity {
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
 
                 this.dataHelper = new DataHelper(this);
+
                 brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper);
 
                 putObservationsError = UploadError.NONE;
