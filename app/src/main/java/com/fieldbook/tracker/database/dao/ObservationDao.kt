@@ -198,7 +198,11 @@ class ObservationDao {
 
             val internalTraitId = ObservationVariableDao.getTraitId(parent)
 
-            val timestamp = OffsetDateTime.now().format(internalTimeFormatter)
+            val timestamp = try {
+                OffsetDateTime.now().format(internalTimeFormatter)
+            } catch (e: Exception) { //ZoneRulesException
+                String()
+            }
 
             db.insert(Observation.tableName, null, contentValuesOf(
                     "observation_variable_name" to parent,
