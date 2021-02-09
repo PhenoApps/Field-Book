@@ -1119,13 +1119,18 @@ public class CollectActivity extends AppCompatActivity {
         return ep.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
     }
 
-    public void insertPrintObservation() {
+    /**
+     * Inserts a user observation whenever a label is printed.
+     * See ResultReceiver onReceiveResult in LabelPrintLayout
+     * @param size: The size of the label. e.g "2 x 4 detailed"
+     */
+    public void insertPrintObservation(String size) {
 
         TraitObject trait = getCurrentTrait();
 
         String studyId = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
-        dt.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), "",
+        dt.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
                 ep.getString("Location", ""), "", studyId, "",
                 null);

@@ -436,7 +436,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                                 // Handle successful print
                                 ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(R.string.trait_printlabel_after_print_message));
                                 // record each print event
-                                ((CollectActivity) getContext()).insertPrintObservation();
+                                ((CollectActivity) getContext()).insertPrintObservation(size);
                             } else {
                                 // Error message (null on successful print)
                                 // Handle unsuccessful print
