@@ -84,8 +84,8 @@ public class BrAPIService {
 
         ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
 
-        // Make timeout longer. Set it to 60 seconds for now
-        apiClient.setReadTimeout(60000);
+        // 2 minute timeout to accomodate longer response times
+        apiClient.setReadTimeout(2*60000);
 
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
@@ -945,6 +945,11 @@ public class BrAPIService {
 
             // Parse out the scale of the variable
             if (var.getScale() != null) {
+                if (var.getScale().getDataType() != null) {
+                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getValue()));
+                } else {
+                    trait.setFormat("text");
+                }
                 if (var.getScale().getValidValues() != null) {
 
                     if (var.getScale().getValidValues().getMin() != null) {
@@ -960,14 +965,13 @@ public class BrAPIService {
                         trait.setMaximum("");
                     }
 
-                    trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                    if (trait.getFormat().equals("categorical")) {
+                        String details = trait.getDetails() + "\nCategories: ";
+                        details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
+                        trait.setDetails(details);
+                        trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                    }
                 }
-                if (var.getScale().getDataType() != null) {
-                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getValue()));
-                } else {
-                    trait.setFormat("text");
-                }
-
             }
 
             // Set some config variables in fieldbook
@@ -979,10 +983,30 @@ public class BrAPIService {
         return traits;
     }
 
+    private String buildCategoryDescriptionString(List<String> categories) {
+        StringBuilder sb = new StringBuilder();
+        for (int j = 0; j < categories.size(); ++j) {
+            sb.append(categories.get(j).trim());
+            if (j != categories.size() - 1) {
+                sb.append("; ");
+            }
+        }
+        return sb.toString();
+    }
+
     private String buildCategoryList(List<String> categories) {
         StringBuilder sb = new StringBuilder();
         for (int j = 0; j < categories.size(); ++j) {
-            sb.append(categories.get(j));
+            String value;
+            // parse out only value of specified as according to BrAPI, value=meaning
+            String parts[] = categories.get(j).split("=");
+            if (parts.length > 1) {
+                value = parts[0].trim();
+            }
+            else {
+                value = categories.get(j).trim();
+            }
+            sb.append(value);
             if (j != categories.size() - 1) {
                 sb.append("/");
             }
