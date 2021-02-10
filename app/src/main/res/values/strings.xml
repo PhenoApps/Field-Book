@@ -201,6 +201,9 @@
     <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
     <string name="preferences_brapi_server_barcode_prompt">Scan a server URL</string>
     <string name="preferences_brapi_server_cassavabase">CassavaBase</string>
+    <string name="preferences_brapi_server_t3_wheat">T3 Wheat Sandbox</string>
+    <string name="preferences_brapi_server_t3_oat">T3 Oat Sandbox</string>
+    <string name="preferences_brapi_server_t3_barley">T3 Barley Sandbox</string>
     <string name="preferences_brapi_server_test">Default Test Server</string>
     <string name="preferences_brapi_server_add">Submit a server</string>
 
@@ -456,17 +459,17 @@
 
     <!-- Brapi strings -->
     <string name="preferences_brapi" translatable="false">BrAPI</string>
-    <string name="brapi_base_url">BrAPI Base URL</string>
+    <string name="brapi_base_url">Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
     <string name="brapi_save_authorize">Save and Authorize</string>
     <string name="brapi_authorize">Authorize</string>
-    <string name="brapi_reauthorize">Reauthorize BrAPI</string>
+    <string name="brapi_reauthorize">Reauthorize</string>
     <string name="brapi_revoke_auth">Log Out</string>
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>
     <string name="brapi_auth_deny">BrAPI Authorization Denied</string>
     <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
     <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
-    <string name="brapi_btn_auth_summary">Brapi is currently authorized with %1$s</string>
+    <string name="brapi_btn_auth_summary">Brapi is currently authorized with \n%1$s</string>
     <string name="brapi_base_url_default">https://test-server.brapi.org</string>
     <string name="brapi_load_data_button">Load Fields</string>
     <string name="brapi_load_traits_button">Load Traits</string>
@@ -528,7 +531,8 @@
     </string>
     <string name="brapi_info_title">Breeding API</string>
     <string name="brapi_auth_btn">Log In to Site</string>
-    <string name="brapi_pagination">Set Page Size</string>
+    <string name="brapi_pagination">Page Size</string>
+    <string name="brapi_timeout">Server Timeout</string>
 
     <string name="trait_labelprint_preview_description">Label preview.</string>
     <string name="trait_labelprint_zebraconnect_button_description">Button which navigates to Zebra Connect app.</string>

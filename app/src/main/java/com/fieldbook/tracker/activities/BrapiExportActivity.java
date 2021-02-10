@@ -79,7 +79,7 @@ public class BrapiExportActivity extends AppCompatActivity {
 
                 this.dataHelper = new DataHelper(this);
 
-                brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper);
+                brAPIService = new BrAPIService(brapiBaseURL, this.dataHelper, this);
 
                 putObservationsError = UploadError.NONE;
                 postImageMetaDataError = UploadError.NONE;

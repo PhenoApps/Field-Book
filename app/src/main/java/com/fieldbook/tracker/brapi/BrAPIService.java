@@ -1,66 +1,66 @@
 package com.fieldbook.tracker.brapi;
 
-        import android.app.Activity;
-        import android.content.ActivityNotFoundException;
-        import android.content.Context;
-        import android.content.Intent;
-        import android.content.SharedPreferences;
-        import android.net.Uri;
-        import android.util.Log;
-        import android.util.Patterns;
-        import android.widget.Toast;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.util.Log;
+import android.util.Patterns;
+import android.widget.Toast;
 
-        import androidx.arch.core.util.Function;
+import androidx.arch.core.util.Function;
 
-        import com.fieldbook.tracker.database.DataHelper;
-        import com.fieldbook.tracker.R;
-        import com.fieldbook.tracker.objects.FieldObject;
-        import com.fieldbook.tracker.preferences.GeneralKeys;
-        import com.fieldbook.tracker.objects.TraitObject;
-        import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.utilities.Constants;
 
-        import java.net.MalformedURLException;
-        import java.net.URL;
-        import java.util.ArrayList;
-        import java.util.List;
-        import java.util.Map;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-        import io.swagger.client.ApiClient;
-        import io.swagger.client.ApiException;
-        import io.swagger.client.api.ImagesApi;
-        import io.swagger.client.api.ObservationsApi;
-        import io.swagger.client.api.ProgramsApi;
-        import io.swagger.client.api.StudiesApi;
-        import io.swagger.client.api.PhenotypesApi;
-        import io.swagger.client.api.ObservationVariablesApi;
-        import io.swagger.client.api.TrialsApi;
-        import io.swagger.client.model.Image;
-        import io.swagger.client.model.ImageResponse;
-        import io.swagger.client.model.Metadata;
-        import io.swagger.client.model.NewImageRequest;
-        import io.swagger.client.model.NewObservationDbIdsObservations;
-        import io.swagger.client.model.NewObservationsRequest;
-        import io.swagger.client.model.NewObservationsRequestObservations;
-        import io.swagger.client.model.ObservationUnit;
-        import io.swagger.client.model.ObservationUnitsResponse1;
-        import io.swagger.client.model.ObservationVariable;
-        import io.swagger.client.model.ObservationVariablesResponse;
-        import io.swagger.client.model.PhenotypesRequest;
-        import io.swagger.client.model.PhenotypesRequestData;
-        import io.swagger.client.model.PhenotypesRequestObservation;
-        import io.swagger.client.model.Program;
-        import io.swagger.client.model.ProgramsResponse;
-        import io.swagger.client.model.StudiesResponse;
-        import io.swagger.client.model.NewObservationDbIdsResponse;
-        import io.swagger.client.model.Study;
-        import io.swagger.client.model.StudyObservationVariablesResponse;
-        import io.swagger.client.model.StudyResponse;
-        import io.swagger.client.model.StudySummary;
-        import io.swagger.client.model.TrialSummary;
-        import io.swagger.client.model.TrialsResponse;
+import io.swagger.client.ApiClient;
+import io.swagger.client.ApiException;
+import io.swagger.client.api.ImagesApi;
+import io.swagger.client.api.ObservationsApi;
+import io.swagger.client.api.ProgramsApi;
+import io.swagger.client.api.StudiesApi;
+import io.swagger.client.api.PhenotypesApi;
+import io.swagger.client.api.ObservationVariablesApi;
+import io.swagger.client.api.TrialsApi;
+import io.swagger.client.model.Image;
+import io.swagger.client.model.ImageResponse;
+import io.swagger.client.model.Metadata;
+import io.swagger.client.model.NewImageRequest;
+import io.swagger.client.model.NewObservationDbIdsObservations;
+import io.swagger.client.model.NewObservationsRequest;
+import io.swagger.client.model.NewObservationsRequestObservations;
+import io.swagger.client.model.ObservationUnit;
+import io.swagger.client.model.ObservationUnitsResponse1;
+import io.swagger.client.model.ObservationVariable;
+import io.swagger.client.model.ObservationVariablesResponse;
+import io.swagger.client.model.PhenotypesRequest;
+import io.swagger.client.model.PhenotypesRequestData;
+import io.swagger.client.model.PhenotypesRequestObservation;
+import io.swagger.client.model.Program;
+import io.swagger.client.model.ProgramsResponse;
+import io.swagger.client.model.StudiesResponse;
+import io.swagger.client.model.NewObservationDbIdsResponse;
+import io.swagger.client.model.Study;
+import io.swagger.client.model.StudyObservationVariablesResponse;
+import io.swagger.client.model.StudyResponse;
+import io.swagger.client.model.StudySummary;
+import io.swagger.client.model.TrialSummary;
+import io.swagger.client.model.TrialsResponse;
 
-        import java.util.HashMap;
-        import java.util.Set;
+import java.util.HashMap;
+import java.util.Set;
 
 public class BrAPIService {
 
@@ -77,15 +77,13 @@ public class BrAPIService {
     private ObservationVariablesApi traitsApi;
     private String brapiBaseURL;
 
-    public BrAPIService(String brapiBaseURL, DataHelper dataHelper) {
+    public BrAPIService(String brapiBaseURL, DataHelper dataHelper, Context context) {
 
         this.dataHelper = dataHelper;
         this.brapiBaseURL = brapiBaseURL;
 
         ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
-
-        // 2 minute timeout to accomodate longer response times
-        apiClient.setReadTimeout(2*60000);
+        apiClient.setReadTimeout(getTimeoutValue(context) * 1000);
 
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
@@ -94,6 +92,29 @@ public class BrAPIService {
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
+    }
+
+    private Integer getTimeoutValue(Context context) {
+        String timeoutString = context.getSharedPreferences("Settings", 0)
+                .getString(GeneralKeys.BRAPI_TIMEOUT, "120");
+
+        int timeout = 120;
+
+        try {
+            if (timeoutString != null) {
+                timeout = Integer.parseInt(timeoutString);
+            }
+        } catch (NumberFormatException nfe) {
+            String message = nfe.getLocalizedMessage();
+            if (message != null) {
+                Log.d("FieldBookError", nfe.getLocalizedMessage());
+            } else {
+                Log.d("FieldBookError", "Timeout Preference number format error.");
+            }
+            nfe.printStackTrace();
+        }
+
+        return timeout;
     }
 
     public static BrapiControllerResponse authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {

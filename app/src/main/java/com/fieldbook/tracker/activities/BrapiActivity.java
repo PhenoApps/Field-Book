@@ -68,7 +68,7 @@ public class BrapiActivity extends AppCompatActivity {
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 paginationManager = new BrapiPaginationManager(this);
 
-                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiActivity.this));
+                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiActivity.this), this);
 
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
                 baseURLText.setText(brapiBaseURL);
