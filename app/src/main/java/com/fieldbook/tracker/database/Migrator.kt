@@ -97,9 +97,9 @@ class Migrator {
                 sRemoteImageObservationsViewName,
                 sObservationUnitPropertyViewName)
 
-        fun migrateSchema(db: SQLiteDatabase) {
+        fun migrateSchema(db: SQLiteDatabase, traits: ArrayList<TraitObject>) {
 
-            createTables(db)
+            createTables(db, traits)
 
         }
 
@@ -111,7 +111,7 @@ class Migrator {
          * 4. Populates table based on previous query by translating
          *      column headers using a migration pattern mapping.
          */
-        fun createTables(db: SQLiteDatabase) {
+        fun createTables(db: SQLiteDatabase, traits: ArrayList<TraitObject>) {
 
             try {
 
@@ -167,7 +167,7 @@ class Migrator {
 
 //                println("ids: $attrIds")
 
-                val traits = ObservationVariableDao.getAllTraitObjects()
+                //val traits = ObservationVariableDao.getAllTraitObjects()
                 //iterate over all traits, insert observation variable values using the above mapping
                 //old schema has extra columns in the trait table which are now bridged with attr/vals in the new schema
                 traits.forEachIndexed { index, trait ->

@@ -1538,6 +1538,16 @@ public class DataHelper {
      */
     public String[] getRangeColumnNames() {
 //        if (db == null || !db.isOpen()) db = openHelper.getWritableDatabase();
+        if (!isTableExists("ObservationUnitProperty")) {
+
+            ArrayList<FieldObject> fields = StudyDao.Companion.getAllFieldObjects();
+
+            if (!fields.isEmpty()) {
+
+                StudyDao.Companion.switchField(fields.get(0).getExp_id());
+
+            }
+        }
 
         return ObservationUnitPropertyDao.Companion.getRangeColumnNames();
 
@@ -2126,7 +2136,7 @@ public class DataHelper {
 
         open();
 
-        Migrator.Companion.migrateSchema(db);
+        Migrator.Companion.migrateSchema(db, getAllTraitObjects());
 
         close();
     }
@@ -2337,7 +2347,7 @@ public class DataHelper {
                 Log.e(TAG, e.getMessage());
             }
 
-            Migrator.Companion.createTables(db);
+            Migrator.Companion.createTables(db, getAllTraitObjects(db));
         }
 
         /**
@@ -2489,7 +2499,7 @@ public class DataHelper {
 
             if (oldVersion <= 9 & newVersion >= 9) {
 
-                Migrator.Companion.migrateSchema(db);
+                Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
             }
         }
