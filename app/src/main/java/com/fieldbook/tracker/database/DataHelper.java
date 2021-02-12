@@ -2136,7 +2136,11 @@ public class DataHelper {
 
         open();
 
-        Migrator.Companion.migrateSchema(db, getAllTraitObjects());
+        if (!isTableExists("studies")) {
+
+            Migrator.Companion.migrateSchema(db, getAllTraitObjects());
+
+        }
 
         close();
     }
