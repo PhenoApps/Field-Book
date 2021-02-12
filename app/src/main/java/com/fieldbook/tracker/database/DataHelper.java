@@ -97,8 +97,8 @@ public class DataHelper {
 
             ep = context.getSharedPreferences("Settings", 0);
 
-            this.insertTraits = db.compileStatement(INSERTTRAITS);
-            this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
+            //this.insertTraits = db.compileStatement(INSERTTRAITS);
+            //this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
 
             timeStamp = new SimpleDateFormat(TIME_FORMAT_PATTERN,
                     Locale.getDefault());
@@ -2142,7 +2142,6 @@ public class DataHelper {
 
         }
 
-        close();
     }
 
     /**
