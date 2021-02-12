@@ -3,6 +3,7 @@ package com.fieldbook.tracker.database
 import android.database.Cursor
 import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
@@ -100,6 +101,34 @@ class Migrator {
         fun migrateSchema(db: SQLiteDatabase, traits: ArrayList<TraitObject>) {
 
             createTables(db, traits)
+
+            removeOldTables(db)
+        }
+
+        /**
+         * Function that iterates over all version 8 table names and drops them.
+         */
+        private fun removeOldTables(db: SQLiteDatabase) {
+
+            try {
+
+                db.beginTransaction()
+
+                for (table in arrayOf("exp_id", "plots", "range", "traits", "user_traits")) {
+
+                    db.execSQL("DROP TABLE IF EXISTS $table")
+                }
+
+                db.setTransactionSuccessful()
+
+            } catch (e: SQLiteException) {
+
+                e.printStackTrace()
+
+            } finally {
+
+                db.endTransaction()
+            }
 
         }
 
