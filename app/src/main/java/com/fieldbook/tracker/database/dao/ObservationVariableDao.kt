@@ -75,11 +75,17 @@ class ObservationVariableDao {
 
         fun getTraitColumnData(column: String): Array<String> = withDatabase { db ->
 
+            val queryColumn = when(column) {
+                "isVisible" -> "visible"
+                "format" -> "observation_variable_field_book_format"
+                else -> "observation_variable_name"
+            }
+
             db.query(ObservationVariable.tableName,
-                    arrayOf(column)).use {
+                    arrayOf(queryColumn)).use {
 
                 it.toTable().mapNotNull { row ->
-                    row[column].toString()
+                    row[queryColumn].toString()
                 }.toTypedArray()
             }
 
@@ -289,10 +295,14 @@ class ObservationVariableDao {
 
         fun writeNewPosition(column: String, id: String, position: String) = withDatabase { db ->
 
+            val queryColumn = when(column) {
+                "format" -> "observation_variable_field_book_format"
+                else -> "observation_variable_name"
+            }
             db.update(ObservationVariable.tableName,
                     ContentValues().apply {
                         put("position", position)
-                    }, "$column = ?", arrayOf(id))
+                    }, "$queryColumn = ?", arrayOf(id))
 
         }
 

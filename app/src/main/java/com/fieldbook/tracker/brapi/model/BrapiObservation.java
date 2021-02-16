@@ -46,10 +46,7 @@ public class BrapiObservation {
         OffsetDateTime converted = null;
         try {
             //TODO: locale
-            //TODO: changed the commented line, is the ZZZZZ a typo?
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ");
-
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
             converted = OffsetDateTime.parse(time, formatter);
         } catch (DateTimeParseException e) {
             e.printStackTrace();

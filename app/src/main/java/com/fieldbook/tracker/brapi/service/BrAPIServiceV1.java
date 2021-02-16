@@ -780,6 +780,11 @@ public class BrAPIServiceV1 implements BrAPIService {
 
             // Parse out the scale of the variable
             if (var.getScale() != null) {
+                if (var.getScale().getDataType() != null) {
+                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getValue()));
+                } else {
+                    trait.setFormat("text");
+                }
                 if (var.getScale().getValidValues() != null) {
 
                     if (var.getScale().getValidValues().getMin() != null) {
@@ -795,14 +800,13 @@ public class BrAPIServiceV1 implements BrAPIService {
                         trait.setMaximum("");
                     }
 
-                    trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                    if (trait.getFormat().equals("categorical")) {
+                        String details = trait.getDetails() + "\nCategories: ";
+                        details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
+                        trait.setDetails(details);
+                        trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                    }
                 }
-                if (var.getScale().getDataType() != null) {
-                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getValue()));
-                } else {
-                    trait.setFormat("text");
-                }
-
             }
 
             // Set some config variables in fieldbook
@@ -814,10 +818,30 @@ public class BrAPIServiceV1 implements BrAPIService {
         return traits;
     }
 
+    private String buildCategoryDescriptionString(List<String> categories) {
+        StringBuilder sb = new StringBuilder();
+        for (int j = 0; j < categories.size(); ++j) {
+            sb.append(categories.get(j).trim());
+            if (j != categories.size() - 1) {
+                sb.append("; ");
+            }
+        }
+        return sb.toString();
+    }
+
     private String buildCategoryList(List<String> categories) {
         StringBuilder sb = new StringBuilder();
         for (int j = 0; j < categories.size(); ++j) {
-            sb.append(categories.get(j));
+            String value;
+            // parse out only value of specified as according to BrAPI, value=meaning
+            String parts[] = categories.get(j).split("=");
+            if (parts.length > 1) {
+                value = parts[0].trim();
+            }
+            else {
+                value = categories.get(j).trim();
+            }
+            sb.append(value);
             if (j != categories.size() - 1) {
                 sb.append("/");
             }
