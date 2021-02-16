@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
@@ -15,17 +14,14 @@ import android.util.Log;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.Image;
-import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
-import com.fieldbook.tracker.database.dao.ObservationVariableValueDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
-import com.fieldbook.tracker.database.models.ObservationUnitPropertyModel;
-import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -48,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -322,7 +317,7 @@ public class DataHelper {
     /**
      * Get user created trait observations for currently selected study
      */
-    public List<Image> getUserTraitImageObservations() {
+    public List<FieldBookImage> getUserTraitImageObservations() {
 
         String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
@@ -410,7 +405,7 @@ public class DataHelper {
 //        return observations;
     }
 
-    public List<Image> getWrongSourceImageObservations(String hostUrl) {
+    public List<FieldBookImage> getWrongSourceImageObservations(String hostUrl) {
 
         return ObservationDao.Companion.getWrongSourceImageObservations(hostUrl, missingPhoto);
 
@@ -527,7 +522,7 @@ public class DataHelper {
     /**
      * Get the image observations for brapi export to external system
      */
-    public List<Image> getImageObservations(String hostUrl) {
+    public List<FieldBookImage> getImageObservations(String hostUrl) {
 
         return ObservationDao.Companion.getHostImageObservations(hostUrl, missingPhoto);
 
@@ -626,14 +621,14 @@ public class DataHelper {
 //        db.endTransaction();
     }
 
-    public void updateImages(List<Image> images) {
+    public void updateImages(List<FieldBookImage> images) {
         ArrayList<String> ids = new ArrayList<String>();
 
         db.beginTransaction();
         String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
         SQLiteStatement update = db.compileStatement(sql);
 
-        for (Image image : images) {
+        for (FieldBookImage image : images) {
             update.bindString(1, image.getDbId());
             update.bindString(2, image.getLastSyncedTime().format(timeFormat));
             update.bindString(3, image.getFieldbookDbId());
@@ -644,7 +639,7 @@ public class DataHelper {
         db.endTransaction();
     }
 
-    public void updateImage(Image image, Boolean writeLastSyncedTime) {
+    public void updateImage(FieldBookImage image, Boolean writeLastSyncedTime) {
 
         ObservationDao.Companion.updateImage(image, writeLastSyncedTime);
 

@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.graphics.Bitmap
 import androidx.core.content.contentValuesOf
-import com.fieldbook.tracker.brapi.Image
+import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sLocalImageObservationsViewName
@@ -14,7 +14,7 @@ import com.fieldbook.tracker.database.models.ObservationModel
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import java.util.*
-import com.fieldbook.tracker.brapi.Observation as BrapiObservation
+import com.fieldbook.tracker.brapi.model.Observation as BrapiObservation
 
 class ObservationDao {
 
@@ -31,7 +31,7 @@ class ObservationDao {
 
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
-        fun getHostImageObservations(hostUrl: String, missingPhoto: Bitmap): List<Image> = withDatabase { db ->
+        fun getHostImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.rawQuery("""
                 SELECT props.observationUnitDbId AS uniqueName,
@@ -63,7 +63,7 @@ class ObservationDao {
                 AND vars.observation_variable_field_book_format = 'photo'
                 
         """.trimIndent(), arrayOf(hostUrl)).toTable()
-                    .map { row -> Image(row["value"].toString(), missingPhoto).apply {
+                    .map { row -> FieldBookImage(row["value"].toString(), missingPhoto).apply {
                         unitDbId = row["uniqueName"].toString()
                         setDescriptiveOntologyTerms(listOf(row["firstName"].toString()))
                         setDescription(row["observation_variable_details"].toString())
@@ -81,7 +81,7 @@ class ObservationDao {
          * are required to have for brapi fields; otherwise, this query will fail.
          */
         @SuppressLint("Recycle")
-        fun getObservations(hostUrl: String): List<com.fieldbook.tracker.brapi.Observation> = withDatabase { db ->
+        fun getObservations(hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
 
             db.rawQuery("""
                 SELECT props.observationUnitDbId AS uniqueName,
@@ -113,7 +113,7 @@ class ObservationDao {
                 AND vars.observation_variable_field_book_format <> 'photo'
                 
         """.trimIndent(), arrayOf(hostUrl)).toTable()
-                    .map { row -> com.fieldbook.tracker.brapi.Observation().apply {
+                    .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
                         unitDbId = row["uniqueName"].toString()
                         variableDbId = row["external_db_id"].toString()
                         value = row["value"].toString()
@@ -128,10 +128,10 @@ class ObservationDao {
 
         } ?: emptyList()
 
-        fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<Image> = withDatabase { db ->
+        fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sRemoteImageObservationsViewName, where = "trait_data_source <> ?", whereArgs = arrayOf(hostUrl)).toTable()
-                    .map { row -> Image(row["value"].toString(), missingPhoto).apply {
+                    .map { row -> FieldBookImage(row["value"].toString(), missingPhoto).apply {
                         this.fieldBookDbId = row["id"].toString()
                     } }
 
@@ -140,32 +140,32 @@ class ObservationDao {
         /**
          * Original query joins observations that are remote but do not match the hostUrl and are not images.
          */
-        fun getWrongSourceObservations(hostUrl: String): List<com.fieldbook.tracker.brapi.Observation> = withDatabase { db ->
+        fun getWrongSourceObservations(hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
 
             db.query(sNonImageObservationsViewName,
                     where = "trait_data_source <> ? AND trait_data_source <> 'local' AND trait_data_source IS NOT NULL",
                     whereArgs = arrayOf(hostUrl)).toTable()
-                    .map { row -> com.fieldbook.tracker.brapi.Observation().apply {
+                    .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
                         this.fieldBookDbId = row["id"].toString()
                         this.value = row["value"].toString()
                     } }
 
         } ?: emptyList()
 
-        fun getUserTraitImageObservations(expId: String, missingPhoto: Bitmap): List<Image> = withDatabase { db ->
+        fun getUserTraitImageObservations(expId: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sLocalImageObservationsViewName, where = "${Study.FK} = ?", whereArgs = arrayOf(expId)).toTable()
-                    .map { row -> Image(row["value"].toString(), missingPhoto).apply {
+                    .map { row -> FieldBookImage(row["value"].toString(), missingPhoto).apply {
                         this.fieldBookDbId = row["id"].toString()
                     } }
 
         } ?: emptyList()
 
-        fun getUserTraitObservations(expId: String): List<com.fieldbook.tracker.brapi.Observation> = withDatabase { db ->
+        fun getUserTraitObservations(expId: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
 
             db.query(sNonImageObservationsViewName,
                     where = "${Study.FK} = ? AND (trait_data_source = 'local' OR trait_data_source IS NULL)", whereArgs = arrayOf(expId)).toTable()
-                    .map { row -> com.fieldbook.tracker.brapi.Observation().apply {
+                    .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
                         this.fieldBookDbId = row["id"].toString()
                         this.value = row["value"].toString()
                     } }
@@ -177,8 +177,8 @@ class ObservationDao {
             getObservation(rid, parent)?.let { observation ->
 
                 observation.status in arrayOf(
-                        com.fieldbook.tracker.brapi.BrapiObservation.Status.SYNCED,
-                        com.fieldbook.tracker.brapi.BrapiObservation.Status.EDITED)
+                        com.fieldbook.tracker.brapi.model.BrapiObservation.Status.SYNCED,
+                        com.fieldbook.tracker.brapi.model.BrapiObservation.Status.EDITED)
 
 
             }
@@ -333,7 +333,7 @@ class ObservationDao {
 
 
         //TODO
-        fun updateImage(image: Image, writeLastSyncedTime: Boolean) = withDatabase {
+        fun updateImage(image: FieldBookImage, writeLastSyncedTime: Boolean) = withDatabase {
 
             it.update(Observation.tableName,
 

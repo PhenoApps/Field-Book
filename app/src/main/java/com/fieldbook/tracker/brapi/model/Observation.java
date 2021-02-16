@@ -1,11 +1,10 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.brapi.model;
 
 import io.swagger.client.model.NewObservationDbIdsObservations;
 
 public class Observation extends BrapiObservation {
 
     private String collector;
-
     private String season;
     private String studyId;
     private String value;
@@ -24,13 +23,13 @@ public class Observation extends BrapiObservation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Observation that = (Observation) o;
-        return super.objectsEquals(unitDbId, that.getUnitDbId()) &&
-                objectsEquals(variableDbId, that.getVariableDbId());
+        return super.objectsEquals(getUnitDbId(), that.getUnitDbId()) &&
+                objectsEquals(getVariableDbId(), that.getVariableDbId());
     }
 
     @Override
     public int hashCode() {
-        return super.objectsHash(unitDbId, variableDbId);
+        return super.objectsHash(getUnitDbId(), getVariableDbId());
     }
 
     public String getSeason() {
@@ -41,7 +40,7 @@ public class Observation extends BrapiObservation {
         this.season = season;
     }
 
-    String getStudyId() {
+    public String getStudyId() {
         return studyId;
     }
 
@@ -57,7 +56,7 @@ public class Observation extends BrapiObservation {
         this.value = value;
     }
 
-    String getCollector() {
+    public String getCollector() {
         return collector;
     }
 

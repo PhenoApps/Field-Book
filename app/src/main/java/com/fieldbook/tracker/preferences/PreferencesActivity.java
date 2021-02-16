@@ -5,26 +5,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.view.MenuItem;
-import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
-import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.traits.BaseTraitLayout;
-import com.fieldbook.tracker.traits.PhotoTraitLayout;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
-
-import java.io.File;
 
 public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, SearchPreferenceResultListener {
 

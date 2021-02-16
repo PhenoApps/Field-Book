@@ -14,14 +14,14 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 public class BrapiPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
-    private static String BRAPI_BASE_URL = "BRAPI_BASE_URL";
+    private static final String BRAPI_BASE_URL = "BRAPI_BASE_URL";
     private Context context;
     private PreferenceManager prefMgr;
     private PreferenceCategory brapiPrefCategory;
@@ -52,7 +52,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         brapiURLPreference = findPreference("BRAPI_BASE_URL");
         brapiURLPreference.setOnPreferenceChangeListener(this);
-        brapiPaginationPreference = findPreference("paginationBrapi");
+        brapiPaginationPreference = findPreference("BRAPI_PAGE_SIZE");
 
         brapiServerBarcode = findPreference("brapi_server_barcode");
         brapiServerCassavabase = findPreference("brapi_server_cassavabase");

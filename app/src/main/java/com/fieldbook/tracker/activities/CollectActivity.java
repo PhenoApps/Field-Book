@@ -54,7 +54,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.TraitObject;

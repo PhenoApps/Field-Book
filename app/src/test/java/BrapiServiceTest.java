@@ -3,12 +3,14 @@ import android.os.Build;
 
 import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceV1;
 import com.fieldbook.tracker.brapi.BrapiListResponse;
-import com.fieldbook.tracker.brapi.BrapiPaginationManager;
-import com.fieldbook.tracker.brapi.BrapiStudyDetails;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.BrapiStudySummary;
-import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
 
 import org.junit.Before;
@@ -51,7 +53,7 @@ public class BrapiServiceTest {
     @Before
     public void setUp() throws Exception {
         // Instantiate our brapi service class
-        this.brAPIService = new BrAPIService(brapiBaseUrl, null);
+        this.brAPIService = new BrAPIServiceV1(brapiBaseUrl, null);
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap missingImage = Bitmap.createBitmap(100, 100, conf);
     }
@@ -321,7 +323,7 @@ public class BrapiServiceTest {
         final CountDownLatch signal = new CountDownLatch(1);
         final String brapiToken = "Bearer YYYY";
 
-        com.fieldbook.tracker.brapi.Image image = new com.fieldbook.tracker.brapi.Image("/path/test.jpg", missingImage);
+        FieldBookImage image = new FieldBookImage("/path/test.jpg", missingImage);
         image.setUnitDbId("1");
 
         // Call our get study details endpoint with the same parsing that our classes use.

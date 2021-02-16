@@ -18,17 +18,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.Constants;
-
-import io.swagger.client.ApiException;
 
 public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener {
 
     private Button saveBtn;
-    private BrapiStudySummary study;
+    private BrapiStudyDetails study;
     private BrapiStudyDetails studyDetails;
     private BrAPIService brAPIService;
     private Context context;
@@ -47,7 +45,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         this.context = context;
     }
 
-    public void setSelectedStudy(BrapiStudySummary selectedStudy) {
+    public void setSelectedStudy(BrapiStudyDetails selectedStudy) {
         this.study = selectedStudy;
     }
 
@@ -57,9 +55,8 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         this.setCanceledOnTouchOutside(false);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_brapi_import);
-        String brapiBaseURL = BrAPIService.getBrapiUrl(this.context);
 
-        brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this.context));
+        brAPIService = BrAPIServiceFactory.getBrAPIService(this.context);
         saveBtn = findViewById(R.id.brapi_save_btn);
         saveBtn.setOnClickListener(this);
         Button cancelBtn = findViewById(R.id.brapi_cancel_btn);
@@ -73,11 +70,8 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     }
 
     private void buildStudyDetails() {
-
-        final String brapiToken = BrAPIService.getBrapiToken(this.context);
-
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-        brAPIService.getStudyDetails(brapiToken, study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
+        brAPIService.getStudyDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
 
@@ -97,10 +91,10 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 });
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
 
             @Override
-            public Void apply(final ApiException error) {
+            public Void apply(final Integer code) {
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -112,7 +106,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             }
         });
 
-        brAPIService.getPlotDetails(brapiToken, study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
+        brAPIService.getPlotDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
 
@@ -133,10 +127,10 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 return null;
             }
 
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
 
             @Override
-            public Void apply(final ApiException error) {
+            public Void apply(final Integer code) {
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -149,7 +143,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         });
 
 
-        brAPIService.getTraits(brapiToken, study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
+        brAPIService.getTraits(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
 
@@ -169,10 +163,10 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 });
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
 
             @Override
-            public Void apply(final ApiException error) {
+            public Void apply(final Integer code) {
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

@@ -72,4 +72,9 @@
         <item>local</item>
         <item>brapi</item>
     </string-array>
+
+    <string-array name="pref_brapi_version">
+        <item>@string/preferences_brapi_version_v1</item>
+        <item>@string/preferences_brapi_version_v2</item>
+    </string-array>
 </resources>

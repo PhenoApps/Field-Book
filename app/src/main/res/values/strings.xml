@@ -203,6 +203,10 @@
     <string name="preferences_brapi_server_cassavabase">CassavaBase</string>
     <string name="preferences_brapi_server_test">Default Test Server</string>
     <string name="preferences_brapi_server_add">Submit a server</string>
+    <string name="preferences_brapi_version">BrAPI Version</string>
+    <string name="preferences_brapi_version_v1">V1</string>
+    <string name="preferences_brapi_version_v2">V2</string>
+    <string name="prefrences_brapi_page_size">Page Size</string>
 
     <string name="preferences_naming">Naming</string>
     <string name="preferences_naming_photo">Photo name format</string>
@@ -528,7 +532,6 @@
     </string>
     <string name="brapi_info_title">Breeding API</string>
     <string name="brapi_auth_btn">Log In to Site</string>
-    <string name="brapi_pagination">Set Page Size</string>
 
     <string name="trait_labelprint_preview_description">Label preview.</string>
     <string name="trait_labelprint_zebraconnect_button_description">Button which navigates to Zebra Connect app.</string>
