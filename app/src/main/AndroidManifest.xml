@@ -64,6 +64,12 @@
             android:launchMode="singleTop"
             android:theme="@style/ActivityDialog" />
         <activity
+            android:name=".activities.BrapiImportActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeAction" />
+        <activity
             android:name=".activities.BrapiActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"

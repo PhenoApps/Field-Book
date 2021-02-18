@@ -516,6 +516,7 @@
     <string name="brapi_error_saving_some_traits">Error saving some traits. Some traits were not saved</string>
     <string name="brapi_traits_saved_success">Selected traits saved successfully.</string>
     <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
+    <string name="no_studies_selected_warning">No studies selected.</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>
     <string name="page_one_of_one">Page 1 of 1</string>

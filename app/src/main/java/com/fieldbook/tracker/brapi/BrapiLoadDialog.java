@@ -267,7 +267,8 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 dialog.dismiss();
 
             // Finish our BrAPI import activity
-            ((Activity) context).finish();
+            //removed this statement for cases when multiple studies need to be imported at once
+            //((Activity) context).finish();
 
             // Display our message.
             if (!brapiControllerResponse.status) {

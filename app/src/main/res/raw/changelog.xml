@@ -7,6 +7,7 @@
         <new>Updated Boolean trait layout</new>
         <new>BrAPI page size setting</new>
         <new>Field Book requests person confirmation every 24hrs</new>
+        <new>BrAPI V2 Import Feature - filter by programs and trials</new>
         <info>Print a label adds an observation record</info>
         <bugfix>Trait files can be imported via cloud</bugfix>
         <bugfix>Fixed issue with categorical trait layout</bugfix>

@@ -84,7 +84,8 @@ public class BrapiPaginationManager {
     }
 
     public void updatePageInfo(Integer totalPages) {
-        this.totalPages = totalPages;
+        //BrAPI metadata was setting totalPages to 0. PageMan. default should be 1.
+        this.totalPages = Math.max(1, totalPages);
         refreshPageIndicator();
     }
 

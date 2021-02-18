@@ -212,11 +212,24 @@ public class FieldEditorActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 
+    /**
+     * Reads the brapi version user preference. Loads the new brapi import activity
+     * only if V2 is being used.
+     */
     public void loadBrAPI() {
         Intent intent = new Intent();
 
-        intent.setClassName(FieldEditorActivity.this,
-                BrapiActivity.class.getName());
+        String version = getSharedPreferences("Settings", 0)
+                .getString(GeneralKeys.BRAPI_VERSION, "V1");
+
+        if (version.equals("V1")) {
+            intent.setClassName(FieldEditorActivity.this,
+                    BrapiActivity.class.getName());
+        } else {
+            intent.setClassName(FieldEditorActivity.this,
+                    BrapiImportActivity.class.getName());
+        }
+
         startActivityForResult(intent, 1);
     }
 
