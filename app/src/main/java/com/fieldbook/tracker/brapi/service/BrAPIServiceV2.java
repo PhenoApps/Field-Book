@@ -36,6 +36,7 @@ import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
 import org.brapi.v2.model.core.BrAPITrial;
+import org.brapi.v2.model.core.request.BrAPITrialSearchRequest;
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudySingleResponse;
@@ -78,8 +79,8 @@ public class BrAPIServiceV2 implements BrAPIService{
         try {
              apiClient.authenticate(t -> context.getSharedPreferences("Settings", 0)
                         .getString(GeneralKeys.BRAPI_TOKEN, null));
-        } catch (ApiException e) {
-            e.printStackTrace();
+        } catch (ApiException error) {
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
@@ -117,9 +118,9 @@ public class BrAPIServiceV2 implements BrAPIService{
             BrAPIImage request = mapImage(image);
             imagesApi.imagesPostAsync(Arrays.asList(request), callback);
 
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            e.printStackTrace();
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
 
     }
@@ -176,14 +177,15 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
                 }
             };
 
             imagesApi.imagesImageDbIdImagecontentPutAsync(image.getDbId(), image.getImageData(), callback);
 
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            e.printStackTrace();
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
 
     }
@@ -203,15 +205,16 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
                 }
             };
 
             BrAPIImage request = mapImage(image);
             imagesApi.imagesImageDbIdPutAsync(image.getDbId(), request, callback);
 
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            e.printStackTrace();
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
 
     }
@@ -236,14 +239,15 @@ public class BrAPIServiceV2 implements BrAPIService{
                @Override
                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                    failFunction.apply(error.getCode());
+                   Log.e("BrAPIServiceV2", "API Exception", error);
                }
            };
            ProgramQueryParams queryParams = new ProgramQueryParams();
            queryParams.page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
            programsApi.programsGetAsync(queryParams, callback);
-       } catch (ApiException e) {
-           failFunction.apply(e.getCode());
-           e.printStackTrace();
+       } catch (ApiException error) {
+           failFunction.apply(error.getCode());
+           Log.e("BrAPIServiceV2", "API Exception", error);
        }
     }
 
@@ -280,14 +284,15 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
                 }
             };
             TrialQueryParams queryParams = new TrialQueryParams();
             queryParams.programDbId(programDbId).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
             trialsApi.trialsGetAsync(queryParams, callback);
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            e.printStackTrace();
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
     }
 
@@ -331,6 +336,7 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
                 }
             };
 
@@ -338,9 +344,9 @@ public class BrAPIServiceV2 implements BrAPIService{
             queryParams.active("true").programDbId(programDbId).trialDbId(trialDbId).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
             studiesApi.studiesGetAsync(queryParams, callback);
 
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            e.printStackTrace();
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
 
     }
@@ -362,14 +368,15 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
                 }
             };
 
             studiesApi.studiesStudyDbIdGetAsync(studyDbId, callback);
 
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            e.printStackTrace();
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
     }
 
@@ -420,9 +427,9 @@ public class BrAPIServiceV2 implements BrAPIService{
                             ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
                             queryParams.studyDbId(studyDbId).observationUnitLevelName("plot").page(recursiveCounter[0]).pageSize(pageSize);
                             observationUnitsApi.observationunitsGetAsync(queryParams, this);
-                        } catch (ApiException e) {
-                            failFunction.apply(e.getCode());
-                            e.printStackTrace();
+                        } catch (ApiException error) {
+                            failFunction.apply(error.getCode());
+                            Log.e("BrAPIServiceV2", "API Exception", error);
                         }
                     }
                 }
@@ -430,6 +437,7 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
                 }
 
             };
@@ -438,9 +446,9 @@ public class BrAPIServiceV2 implements BrAPIService{
             queryParams.studyDbId(studyDbId).observationUnitLevelName("plot").page(0).pageSize(pageSize);
             observationUnitsApi.observationunitsGetAsync(queryParams, callback);
 
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            e.printStackTrace();
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
     }
 
@@ -547,6 +555,7 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                     failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
                 }
 
             };
@@ -555,9 +564,9 @@ public class BrAPIServiceV2 implements BrAPIService{
             queryParams.page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
             traitsApi.variablesGetAsync(queryParams, callback);
 
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            Log.e("error-go", e.toString());
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
     }
 
@@ -588,6 +597,7 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
                     failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
                 }
             };
 
@@ -608,9 +618,9 @@ public class BrAPIServiceV2 implements BrAPIService{
 
             observationsApi.observationsPostAsync(request, callback);
 
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            e.printStackTrace();
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
     }
 
@@ -632,6 +642,7 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
                     failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
                 }
             };
 
@@ -651,9 +662,9 @@ public class BrAPIServiceV2 implements BrAPIService{
 
             observationsApi.observationsPutAsync(request, callback);
 
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            e.printStackTrace();
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
     }
 
@@ -699,9 +710,9 @@ public class BrAPIServiceV2 implements BrAPIService{
                             VariableQueryParams queryParams = new VariableQueryParams();
                             queryParams.studyDbId(studyDbId).page(recursiveCounter[0]).pageSize(pageSize);
                             traitsApi.variablesGetAsync(queryParams, this);
-                        } catch (ApiException e) {
-                            failFunction.apply(e.getCode());
-                            e.printStackTrace();
+                        } catch (ApiException error) {
+                            failFunction.apply(error.getCode());
+                            Log.e("BrAPIServiceV2", "API Exception", error);
                         }
                     }
                 }
@@ -709,6 +720,7 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
                     failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
                 }
             };
 
@@ -716,9 +728,9 @@ public class BrAPIServiceV2 implements BrAPIService{
             queryParams.studyDbId(studyDbId).page(0).pageSize(pageSize);
             traitsApi.variablesGetAsync(queryParams, callback);
 
-        } catch (ApiException e) {
-            failFunction.apply(e.getCode());
-            e.printStackTrace();
+        } catch (ApiException error) {
+            failFunction.apply(error.getCode());
+            Log.e("BrAPIServiceV2", "API Exception", error);
         }
     }
 
