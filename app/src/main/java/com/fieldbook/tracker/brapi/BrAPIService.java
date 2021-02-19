@@ -77,9 +77,9 @@ public class BrAPIService {
     private ObservationVariablesApi traitsApi;
     private String brapiBaseURL;
 
-    public BrAPIService(String brapiBaseURL, DataHelper dataHelper, Context context) {
+    public BrAPIService(String brapiBaseURL, Context context) {
 
-        this.dataHelper = dataHelper;
+        this.dataHelper = new DataHelper(context);
         this.brapiBaseURL = brapiBaseURL;
 
         ApiClient apiClient = new ApiClient().setBasePath(brapiBaseURL);
@@ -574,8 +574,14 @@ public class BrAPIService {
                     int page = response.getMetadata().getPagination().getCurrentPage();
                     if(page == 0){
                         //one time code
-                        study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
-                        study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
+                        //sometimes getData() size is 0 which causes an index out of bounds exception
+                        //error can be reproduced by trying to import Study 10 from the default brapi server
+                        try {
+                            study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
+                            study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
+                        } catch (IndexOutOfBoundsException e) {
+                            e.printStackTrace();
+                        }
                     }
                     //every time
                     study.getValues().addAll(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
