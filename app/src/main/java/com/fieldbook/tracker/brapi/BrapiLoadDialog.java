@@ -291,7 +291,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             // an error in the saveStudyDetails code outside of that handling.
             if (fail) {
                 Log.e("error-opef", brapiControllerResponse.message);
-                Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, R.string.brapi_study_incompatible, Toast.LENGTH_LONG).show();
             }
 
         }

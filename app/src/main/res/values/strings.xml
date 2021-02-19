@@ -534,6 +534,8 @@
     <string name="brapi_pagination">Page Size</string>
     <string name="brapi_timeout">Server Timeout</string>
 
+    <string name="brapi_study_incompatible">This BrAPI study is currently incompatible with Field Book. Studies must include row and column in the header.</string>
+
     <string name="trait_labelprint_preview_description">Label preview.</string>
     <string name="trait_labelprint_zebraconnect_button_description">Button which navigates to Zebra Connect app.</string>
     <string name="trait_labelprint_print_button_description">Button which prints labels configured in this dialog.</string>
