@@ -198,7 +198,11 @@ class ObservationDao {
 
             val internalTraitId = ObservationVariableDao.getTraitId(parent)
 
-            val timestamp = OffsetDateTime.now().format(internalTimeFormatter)
+            val timestamp = try {
+                OffsetDateTime.now().format(internalTimeFormatter)
+            } catch (e: Exception) { //ZoneRulesException
+                String()
+            }
 
             db.insert(Observation.tableName, null, contentValuesOf(
                     "observation_variable_name" to parent,
@@ -320,7 +324,7 @@ class ObservationDao {
                 db.update(Observation.tableName,
                         ContentValues().apply {
                             put("observation_db_id", it.dbId)
-                            put("last_synced_time", it.lastSyncedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.getDefault())))
+                            put("last_synced_time", it.lastSyncedTime.format(internalTimeFormatter))
                         },
                         "${Observation.PK} = ?", arrayOf(it.fieldBookDbId))
 
@@ -336,7 +340,7 @@ class ObservationDao {
                     ContentValues().apply {
                         put("observation_db_id", image.dbId)
                         if (writeLastSyncedTime) {
-                            put("last_synced_time", image.lastSyncedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault())))
+                            put("last_synced_time", image.lastSyncedTime.format(internalTimeFormatter))
                         }
                     },
                     "_id = ?", arrayOf(image.fieldBookDbId))
