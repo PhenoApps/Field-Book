@@ -11,9 +11,7 @@ import com.fieldbook.tracker.brapi.BrapiLoadDialog
 import com.fieldbook.tracker.brapi.model.BrapiProgram
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails
 import com.fieldbook.tracker.brapi.model.BrapiTrial
-import com.fieldbook.tracker.brapi.service.BrAPIService
-import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
-import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
+import com.fieldbook.tracker.brapi.service.*
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.views.PageControllerView
 import kotlinx.coroutines.CoroutineScope
@@ -39,17 +37,12 @@ class BrapiImportActivity : Activity() {
     private var mFilterState: Int = PROGRAMS
 
     /**
-     * Used to search for studies across multiple programs and trials.
-     */
-    private data class ProgramTrialPair(val program: BrapiProgram, val trial: BrapiTrial)
-
-    /**
      * Whenever a list row is chosen, it is added to a set of ids (or removed if already chosen).
      * When the next table is chosen, all the ids in the respective set will be used to query.
      */
     private var mProgramIds = HashSet<BrapiProgram>()
     private var mStudyIds = HashSet<BrapiStudyDetails>()
-    private var mTrialIds = HashSet<ProgramTrialPair>()
+    private var mTrialIds = HashSet<BrapiTrial>()
 
     private val mScope by lazy {
         CoroutineScope(Dispatchers.IO)
@@ -59,9 +52,9 @@ class BrapiImportActivity : Activity() {
         findViewById(R.id.pageControllerView)
     }
 
-    private val mService by lazy {
+    private val mService: BrAPIServiceV2 by lazy {
 
-        BrAPIServiceFactory.getBrAPIService(this)
+        BrAPIServiceFactory.getBrAPIService(this) as BrAPIServiceV2
 
     }
 
@@ -183,12 +176,12 @@ class BrapiImportActivity : Activity() {
         when(mFilterState) {
             PROGRAMS -> super.onBackPressed()
             TRIALS -> {
-                mTrialIds = HashSet<ProgramTrialPair>()
+                mTrialIds = HashSet<BrapiTrial>()
                 mProgramIds = HashSet<BrapiProgram>()
                 mFilterState = PROGRAMS
             }
             STUDIES -> {
-                mTrialIds = HashSet<ProgramTrialPair>()
+                mTrialIds = HashSet<BrapiTrial>()
                 mStudyIds = HashSet<BrapiStudyDetails>()
                 mFilterState = TRIALS
             }
@@ -280,52 +273,40 @@ class BrapiImportActivity : Activity() {
 
         mPaginationManager.reset()
 
-        val brapiTrials = ArrayList<ProgramTrialPair>()
-
         if (mProgramIds.isEmpty()) {
 
+            //search for all trials
             mService.getPrograms(mPaginationManager, { programs ->
 
-                programs.forEach { program ->
-
-                    callGetTrials(brapiTrials, program)
-                }
+                callSearchTrials(programs)
 
                 null
 
             }) { fail -> handleFailure(fail) }
 
-        } else mProgramIds.forEach { program ->//iterate over all programs selected by the user
-
-           callGetTrials(brapiTrials, program)
-
-        }
+        } else callSearchTrials(mProgramIds.toList())
     }
 
-    private fun callGetTrials(programTrials: ArrayList<ProgramTrialPair>, program: BrapiProgram) {
+    private fun callSearchStudies(programs: List<BrapiProgram>, trials: List<BrapiTrial>) {
 
-        //query for all trials within all selected programs and add them to a list
-        mService.getTrials(program.programDbId, mPaginationManager, { trials ->
+        mService.searchStudies(
+            programs.map { it.programDbId },
+            trials.map { it.trialDbId }, mPaginationManager, { studies ->
 
-            programTrials.addAll(trials.mapNotNull { ProgramTrialPair(program, it) }.toTypedArray())
+            buildArrayAdapter(studies)
 
-            buildArrayAdapter(programTrials)
-
-            null // brapi calls require a return type of Void
+            null
 
         }) { fail -> handleFailure(fail) }
     }
 
-    private fun callGetStudies(studies: ArrayList<BrapiStudyDetails>, program: BrapiProgram, trial: BrapiTrial) {
+    private fun callSearchTrials(programs: List<BrapiProgram>) {
 
-        //query for all trials within all selected programs and add them to a list
-        mService.getStudies(program.programDbId, trial.trialDbId, mPaginationManager, { data ->
+        mService.searchTrials(programs.map { it.programDbId }, mPaginationManager, { trials ->
 
-            studies.addAll(data.mapNotNull { it }.toTypedArray())
+            buildArrayAdapter(trials)
 
-            buildArrayAdapter(studies)
-
-            null // brapi calls require a return type of Void
+            null
 
         }) { fail -> handleFailure(fail) }
     }
@@ -337,59 +318,14 @@ class BrapiImportActivity : Activity() {
 
         mPaginationManager.reset()
 
-        val brapiStudies = ArrayList<BrapiStudyDetails>()
-
         //check if both sets are empty, otherwise the user has chosen programs and no trials exist for that program
         when {
 
-            mProgramIds.isEmpty() -> {
+            mProgramIds.isEmpty() -> callSearchStudies(listOf(), mTrialIds.toList())
 
-                //check all combinations or program/trials
-                mService.getPrograms(mPaginationManager, { programs ->
+            mTrialIds.isEmpty() -> callSearchStudies(mProgramIds.toList(), listOf())
 
-                    programs.forEach { program ->
-
-                        mService.getTrials(program.programDbId, mPaginationManager, { trials ->
-
-                            trials.forEach { trial ->
-
-                                callGetStudies(brapiStudies, program, trial)
-                            }
-
-                            null
-
-                        }) { fail -> handleFailure(fail) }
-                    }
-
-                    null
-
-                }) { fail -> handleFailure(fail) }
-            }
-
-            mTrialIds.isEmpty() -> {
-
-                //check all trials in the chosen programs
-                mProgramIds.forEach { program ->
-
-                    mService.getTrials(program.programDbId, mPaginationManager, { trials ->
-
-                        trials.forEach { trial ->
-
-                            callGetStudies(brapiStudies, program, trial)
-                        }
-
-                        null
-
-                    }) { fail -> handleFailure(fail) }
-                }
-
-            }
-
-            else -> mTrialIds.forEach { pair -> //iterate over all program/trials selected by the user
-
-                callGetStudies(brapiStudies, pair.program, pair.trial)
-
-            }
+            else -> callSearchStudies(mProgramIds.toList(), mTrialIds.toList())
         }
     }
 
@@ -452,7 +388,7 @@ class BrapiImportActivity : Activity() {
             when (val item = data[position]) {
 
                 is BrapiProgram -> mProgramIds.addOrRemove(item)
-                is ProgramTrialPair -> mTrialIds.addOrRemove(item)
+                is BrapiTrial -> mTrialIds.addOrRemove(item)
                 is BrapiStudyDetails -> mStudyIds.addOrRemove(item)
 
             }
@@ -466,7 +402,7 @@ class BrapiImportActivity : Activity() {
             when (it) {
 
                 is BrapiProgram -> it.programName?.let { name -> itemDataList.add(name)  }
-                is ProgramTrialPair -> it.trial.trialName?.let { name -> itemDataList.add(name) }
+                is BrapiTrial -> it.trialName?.let { name -> itemDataList.add(name) }
                 is BrapiStudyDetails -> it.studyName?.let { name -> itemDataList.add(name) }
 
             }

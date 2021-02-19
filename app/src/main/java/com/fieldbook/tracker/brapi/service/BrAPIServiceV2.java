@@ -36,6 +36,8 @@ import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
 import org.brapi.v2.model.core.BrAPITrial;
+import org.brapi.v2.model.core.request.BrAPIStudySearchRequest;
+import org.brapi.v2.model.core.request.BrAPITrialSearchRequest;
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudySingleResponse;
@@ -289,6 +291,85 @@ public class BrAPIServiceV2 implements BrAPIService{
             failFunction.apply(e.getCode());
             e.printStackTrace();
         }
+    }
+
+    public void searchTrials(List<String> programDbIds, BrapiPaginationManager paginationManager,
+                          final Function<List<BrapiTrial>, Void> function,
+                          final Function<Integer, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
+        try {
+            BrapiV2ApiCallBack<BrAPITrialListResponse> callback = new BrapiV2ApiCallBack<BrAPITrialListResponse>() {
+                @Override
+                public void onSuccess(BrAPITrialListResponse trialsResponse, int i, Map<String, List<String>> map) {
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage.equals(paginationManager.getPage())) {
+                        updatePageInfo(paginationManager, trialsResponse.getMetadata());
+                        List<BrAPITrial> trialList = trialsResponse.getResult().getData();
+                        function.apply(mapTrials(trialList));
+                    }
+                }
+
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    failFunction.apply(error.getCode());
+                }
+            };
+
+            BrAPITrialSearchRequest request = new BrAPITrialSearchRequest();
+            request.programDbIds(programDbIds).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
+
+            trialsApi.searchTrialsPostAsync(request, callback);
+        } catch (ApiException e) {
+            failFunction.apply(e.getCode());
+            e.printStackTrace();
+        }
+    }
+
+    public void searchStudies(List<String> programDbIds, List<String> trialDbIds, BrapiPaginationManager paginationManager,
+                             final Function<List<BrapiStudyDetails>, Void> function,
+                             final Function<Integer, Void> failFunction) {
+        Integer initPage = paginationManager.getPage();
+        try {
+            BrapiV2ApiCallBack<BrAPIStudyListResponse> callback = new BrapiV2ApiCallBack<BrAPIStudyListResponse>() {
+                @Override
+                public void onSuccess(BrAPIStudyListResponse studiesResponse, int i, Map<String, List<String>> map) {
+                    // Cancel processing if the page that was processed is not the page
+                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
+                    if (initPage.equals(paginationManager.getPage())) {
+                        updatePageInfo(paginationManager, studiesResponse.getMetadata());
+                        List<BrAPIStudy> studyList = studiesResponse.getResult().getData();
+                        function.apply(mapStudies(studyList));
+                    }
+                }
+
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    failFunction.apply(error.getCode());
+                }
+            };
+
+            BrAPIStudySearchRequest request = new BrAPIStudySearchRequest();
+            request.programDbIds(programDbIds).trialDbIds(trialDbIds).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
+
+            studiesApi.searchStudiesPostAsync(request, callback);
+        } catch (ApiException e) {
+            failFunction.apply(e.getCode());
+            e.printStackTrace();
+        }
+    }
+
+    private List<BrapiStudyDetails> mapStudies(List<BrAPIStudy> studies) {
+        List<BrapiStudyDetails> brapiStudies = new ArrayList<>();
+        if (studies != null) {
+            for (BrAPIStudy study : studies) {
+                BrapiStudyDetails brapiStudy = new BrapiStudyDetails();
+                brapiStudy.setStudyName(study.getStudyName());
+                brapiStudy.setStudyDbId(study.getStudyDbId());
+                brapiStudies.add(brapiStudy);
+            }
+        }
+        return brapiStudies;
     }
 
     private List<BrapiTrial> mapTrials(List<BrAPITrial> trialList) {
