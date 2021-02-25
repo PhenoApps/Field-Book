@@ -23,34 +23,24 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         app:constraint_referenced_ids="dialog_field_creator_plot_pattern_text_view,
-            plot_linear_button, plot_zigzag_button,
-            field_creator_plot_insert_text_view"/>
+            plot_linear_button, plot_zigzag_button"/>
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/dialog_field_creator_group_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:constraint_referenced_ids="dialog_field_creator_field_size_text_view,
             dialog_field_creator_field_row_edit_text, dialog_field_creator_field_column_edit_text,
             dialog_field_creator_size_button, dialog_field_creator_field_name_edit_text"/>
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/dialog_field_creator_group_review"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:visibility="visible"
-        app:constraint_referenced_ids="dialog_field_creator_submit_button,
-            dialog_field_creator_cancel_button"/>
 
     <!---region Choose rows and columns view group -->
 
     <TextView
         android:id="@+id/dialog_field_creator_field_size_text_view"
         style="@style/FieldCreatorDialog.TextSummary"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/dialog_field_creator_ask_size"
         app:layout_constraintEnd_toEndOf="parent"
@@ -59,32 +49,32 @@
 
     <EditText
         android:id="@+id/dialog_field_creator_field_name_edit_text"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/dialog_field_creator_ask_name_hint"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/dialog_field_creator_field_size_text_view"
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_field_size_text_view" />
 
     <EditText
         android:id="@+id/dialog_field_creator_field_row_edit_text"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/dialog_field_creator_ask_row_hint"
         android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/dialog_field_creator_field_size_text_view"
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_field_name_edit_text" />
 
     <EditText
         android:id="@+id/dialog_field_creator_field_column_edit_text"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/dialog_field_creator_ask_columns_hint"
         android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/dialog_field_creator_field_size_text_view"
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_field_row_edit_text" />
 
     <Button
@@ -160,7 +150,8 @@
         android:layout_height="64dp"
         android:src="@drawable/ic_plot_pattern_linear"
         app:layout_constraintStart_toStartOf="@+id/dialog_field_creator_plot_pattern_text_view"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_plot_pattern_text_view" />
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_plot_pattern_text_view"
+        android:contentDescription="@string/dialog_field_creator_linear_button_content_desc" />
 
     <ImageButton
         android:id="@+id/plot_zigzag_button"
@@ -168,29 +159,32 @@
         android:layout_height="64dp"
         android:src="@drawable/ic_plot_pattern_zigzag"
         app:layout_constraintEnd_toEndOf="@+id/dialog_field_creator_plot_pattern_text_view"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_plot_pattern_text_view" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/field_creator_plot_insert_text_view"
-        app:layout_constraintTop_toBottomOf="@id/plot_linear_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_plot_pattern_text_view"
+        android:contentDescription="@string/dialog_field_creator_zig_button_content_desc" />
 
     <!--endregion-->
 
     <!--region Review view group-->
 
-    <TextView
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/dialog_field_creator_group_review"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:visibility="gone"
+        app:constraint_referenced_ids="dialog_field_creator_review_title_text,
+            dialog_field_creator_review_text, field_creator_plot_large_field_text_view,
+            dialog_field_creator_review_image, dialog_field_creator_submit_button,
+            dialog_field_creator_cancel_button, field_creator_plot_insert_text_view"/>
+
+    <TextView style="@style/FieldCreatorDialog.Title"
         android:id="@+id/dialog_field_creator_review_title_text"
-        style="@style/FieldCreatorDialog.Title"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@+id/dialog_field_creator_review_image"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="@string/dialog_field_creator_review_title" />
+        android:text="@string/dialog_field_creator_review_title" />
 
     <TextView
         android:layout_width="match_parent"
@@ -201,34 +195,51 @@
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_review_image"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="0dp"
+    <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/dialog_field_creator_review_list"
+        android:id="@+id/field_creator_plot_large_field_text_view"
+        tools:text="Large Field Detected, transaction might take a long time."
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_review_text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@android:layout/simple_list_item_2"/>
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/field_creator_plot_insert_text_view"
+        tools:text="Inserting plot 1 at row 4 column 2"
+        app:layout_constraintTop_toBottomOf="@id/field_creator_plot_large_field_text_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <ImageView
+        android:id="@+id/dialog_field_creator_review_image"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:src="@drawable/ic_plot_pattern_linear"
-        android:id="@+id/dialog_field_creator_review_image"
-        app:layout_constraintStart_toEndOf="@id/dialog_field_creator_review_title_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_plot_pattern_linear"
+        android:contentDescription="@string/dialog_field_creator_review_image_content_desc" />
 
-    <ImageButton
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/dialog_field_creator_submit_button"
+        android:text="@android:string/ok"
+        app:layout_constraintTop_toBottomOf="@id/field_creator_plot_insert_text_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:id="@+id/dialog_field_creator_submit_button"/>
-
-    <ImageButton
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/dialog_field_creator_cancel_button"/>
-
+        android:id="@+id/dialog_field_creator_cancel_button"
+        android:text="@android:string/cancel"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_submit_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
     <!--endregion-->
+
 </androidx.constraintlayout.widget.ConstraintLayout>

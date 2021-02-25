@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:ignore="AppCompatResource">
     <item
         android:id="@+id/help"
         android:icon="@drawable/ic_tb_help"
         android:showAsAction="always"
         android:title="@string/tutorial_dialog_title" />
     <item
+        android:id="@+id/menu_field_editor_item_creator"
+        android:icon="@drawable/ic_tb_datagrid"
+        android:showAsAction="always"
+        android:title="" />
+    <item
         android:id="@+id/importField"
         android:icon="@drawable/ic_tb_add_circle"
         android:showAsAction="ifRoom"
-        android:title="@string/traits_toolbar_add_trait" />
+        android:title="@string/traits_toolbar_add_trait" /> <!-- TODO this is an incorrect title? -->
 </menu>
 

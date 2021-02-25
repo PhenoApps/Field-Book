@@ -558,8 +558,16 @@
     <string name="dialog_field_creator_top_right">Top Right</string>
     <string name="dialog_field_creator_bottom_right">Bottom Right</string>
     <!-- plot output string -->
+    <string name="dialog_field_creator_insert_field">Creating field rows: %1$s by cols: %2$s</string>
+    <string name="dialog_field_creator_insert_field_complete">Creating field rows: %1$s by cols: %2$s …complete.</string>
     <string name="dialog_field_creator_insert_plot">Inserting plot %1$s at row %2$s column %3$s</string>
     <!-- review section -->
     <string name="dialog_field_creator_review_title">Review</string>
+    <string name="dialog_field_creator_size_group_error">Please enter a valid name and format.</string>
+    <string name="dialog_field_creator_field_name_not_unique">Field name already in use.</string>
+    <string name="dialog_field_creator_large_field">Large Field Detected, transaction might take a long time.</string>
+    <string name="dialog_field_creator_linear_button_content_desc">Button to choose linear plot pattern.</string>
+    <string name="dialog_field_creator_zig_button_content_desc">Button to choose zig zag plot pattern.</string>
+    <string name="dialog_field_creator_review_image_content_desc">Image showing orientation and plot pattern.</string>
 
 </resources>

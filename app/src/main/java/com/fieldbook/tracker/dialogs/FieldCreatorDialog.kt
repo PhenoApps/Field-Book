@@ -1,40 +1,52 @@
 package com.fieldbook.tracker.dialogs
 
 import android.app.Dialog
-import android.database.sqlite.SQLiteException
+import android.database.sqlite.SQLiteAbortException
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.constraintlayout.widget.Group
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.FieldEditorActivity
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.database.withDatabase
-import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.objects.FieldObject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 import kotlin.math.*
 
+/**
+ * Extended Dialog class. Wizard for creating basic study/field details.
+ * Each constraint group defined in field_creator_dialog.xml has a respective function which
+ * starts by toggling its visibility.
+ * Size group: User chooses a name which must not already exist, and row and column integer > 0
+ * Start group: Four radio buttons to choose a starting point top left, top right, bottom left, bottom right
+ * Pattern group: Two buttons are used to choose a linear or zigzag pattern
+ * Review group: Summary of the chosen parameters, press OK to insert into database.
+ *
+ *                 FieldCreatorDialog dialog = new FieldCreatorDialog(this);
+ */
 class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(activity), CoroutineScope by MainScope() {
 
     private val helper by lazy { DataHelper(context) }
 
-    private val database by lazy { DataHelper.db }
-
     private val scope by lazy { CoroutineScope(Dispatchers.IO) }
 
-    private val gps by lazy { GPSTracker(context) }
-
     var studyDbId: Int = -1
+
+    var mCancelJobFlag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.field_creator_dialog)
+
+        //canceling the dialog might leave the insert job on the background thread
+        //which might be preferable for large plot sizes
+        setCancelable(false)
+
+        //for some reason this is required for the views to match the layout file
+        window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         setupSizeGroup()
 
@@ -54,22 +66,30 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
             //check that the rows/columns aren't empty
             val rowsText = findViewById<EditText>(R.id.dialog_field_creator_field_row_edit_text).text
             val colsText = findViewById<EditText>(R.id.dialog_field_creator_field_column_edit_text).text
-
-            if (rowsText.isNotBlank() && colsText.isNotBlank()) {
+            val nameText = findViewById<EditText>(R.id.dialog_field_creator_field_name_edit_text).text
+            if (nameText.isNotBlank() && rowsText.isNotBlank() && colsText.isNotBlank()) {
 
                 //check that the text can be parsed as a whole number and is greater than 0
                 try {
 
-                    val rows = rowsText.toString().toInt()
+                    //use database to check if the field name is unique
+                    if (helper.checkFieldName(nameText.toString()) == -1) {
 
-                    val cols = colsText.toString().toInt()
+                        val rows = rowsText.toString().toInt()
 
-                    if (rows < 1 || cols < 1) throw java.lang.NumberFormatException()
+                        val cols = colsText.toString().toInt()
 
-                    //change current group visibility before setting up next group
-                    sizeGroup.visibility = View.GONE
+                        if (rows < 1 || cols < 1
+                            || rows > Int.MAX_VALUE
+                            || cols > Int.MAX_VALUE) throw java.lang.NumberFormatException()
 
-                    setupRadioGroup(rows, cols)
+                        //change current group visibility before setting up next group
+                        sizeGroup.visibility = View.GONE
+
+                        setupRadioGroup(nameText.toString(), rows, cols)
+
+                    } else Toast.makeText(activity, R.string.dialog_field_creator_field_name_not_unique, Toast.LENGTH_LONG).show()
+
 
                 } catch (e: NumberFormatException) {
 
@@ -81,11 +101,12 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
                     colsText.clear()
                 }
-            }
+
+            } else Toast.makeText(activity, R.string.dialog_field_creator_size_group_error, Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun setupRadioGroup(rows: Int, cols: Int) {
+    private fun setupRadioGroup(name: String, rows: Int, cols: Int) {
 
         val radioGroup = findViewById<Group>(R.id.dialog_field_creator_group_start_point)
 
@@ -100,13 +121,13 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
                     radioGroup.visibility = View.GONE
 
-                    setupPatternGroup(rows, cols, id)
+                    setupPatternGroup(name, rows, cols, id)
                 }
             }
         }
     }
 
-    private fun setupPatternGroup(rows: Int, cols: Int, startId: Int) {
+    private fun setupPatternGroup(name: String, rows: Int, cols: Int, startId: Int) {
 
         val patternGroup = findViewById<Group>(R.id.dialog_field_creator_group_pattern)
 
@@ -136,52 +157,187 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
             (findViewById(id) as? ImageButton)?.setOnClickListener {
 
-                insertBasicField(rows, cols, startId, id)
+                patternGroup.visibility = View.GONE
 
+                setupReviewGroup(name, rows, cols, startId, id)
             }
         }
     }
 
-    private fun insertBasicField(rows: Int, cols: Int, startId: Int, pattern: Int) {
+    private fun setupReviewGroup(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
+
+        //set the group visibility
+        val reviewGroup = findViewById<Group>(R.id.dialog_field_creator_group_review)
+        reviewGroup.visibility = View.VISIBLE
+
+        //initialize ui view objects
+        val reviewTitleText = findViewById<TextView>(R.id.dialog_field_creator_review_text)
+        //val reviewInsertText = findViewById<TextView>(R.id.field_creator_plot_insert_text_view)
+        val largeTextView = findViewById<TextView>(R.id.field_creator_plot_large_field_text_view)
+        val submitButton = findViewById<Button>(R.id.dialog_field_creator_submit_button)
+        val cancelButton = findViewById<Button>(R.id.dialog_field_creator_cancel_button)
+        val imageView = findViewById<ImageView>(R.id.dialog_field_creator_review_image)
+
+        //warning if numbers are greater than 50
+        if (rows*cols > 50*50) {
+            largeTextView.text = activity.getString(R.string.dialog_field_creator_large_field)
+        }
+
+        //set current plow(?) pattern: use rotation
+        when (pattern) {
+            R.id.plot_linear_button -> {
+
+                imageView.setImageResource(R.drawable.ic_plot_pattern_linear)
+
+                //mirror linear pattern when starting on the right
+                when (startId) {
+                    R.id.dialog_field_creator_top_right_radio_button,
+                    R.id.dialog_field_creator_bottom_right_radio_button -> {
+                        imageView.scaleX = -1.0f
+                        imageView.scaleY = -1.0f
+                    }
+                }
+            }
+            R.id.plot_zigzag_button -> {
+
+                imageView.setImageResource(R.drawable.ic_plot_pattern_zigzag)
+
+                //mirror or flip zig zag pattern
+                when (startId) {
+                    R.id.dialog_field_creator_top_right_radio_button,
+                    R.id.dialog_field_creator_bottom_right_radio_button -> {
+                        if (startId == R.id.dialog_field_creator_bottom_right_radio_button) {
+                            imageView.scaleY = -1.0f
+                        }
+                        imageView.scaleX = -1.0f
+                    }
+                    R.id.dialog_field_creator_bottom_left_radio_button -> {
+                        imageView.scaleY = -1.0f
+                    }
+                }
+            }
+        }
+
+        //set field format review, shows rows and columns
+        reviewTitleText.text = activity.getString(R.string.dialog_field_creator_insert_field,
+            rows.toString(), cols.toString())
+
+        //dismiss the dialog if the user clicks the cancel button, otherwise insert the data
+        cancelButton.setOnClickListener {
+            dismiss()
+        }
+
+        submitButton.setOnClickListener {
+            it.isEnabled = false //no accidental double clicks...
+            insertBasicField(name, rows, cols, startId, pattern)
+        }
+
+    }
+
+    //launch database IO coroutine that creates the field and its data
+    private fun insertBasicField(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
+
+        //insert job is cancelled when the cancel button is pressed
+        val cancelButton = findViewById<Button>(R.id.dialog_field_creator_cancel_button)
+        cancelButton.setOnClickListener { mCancelJobFlag = true }
 
         scope.launch {
 
-            val field = FieldObject().apply {
-                unique_id = "observationUnitDbId"
-                primary_id = "Row"
-                secondary_id = "Column"
-                exp_sort = "Plot"
-                exp_name = UUID.randomUUID().toString()
-                count = (rows * cols).toString()
+            with(DataHelper.db) {
+
+                try {
+
+                    beginTransaction()
+
+                    val field = FieldObject().apply {
+                        unique_id = "observationUnitDbId"
+                        primary_id = "Row"
+                        secondary_id = "Column"
+                        exp_sort = "Plot"
+                        exp_name = name
+                        count = (rows * cols).toString()
+                    }
+
+                    val fieldColumns = listOf("Row", "Column", "Plot", "observationUnitDbId")
+                    studyDbId = helper.createField(field, fieldColumns)
+
+                    updateFieldInsertText(rows.toString(), cols.toString())
+
+                    //eight different cases to consider, P = patterns (linear and zigzag), S = starting states (TL, BR, TR, BL)
+                    when (startId) {
+                        R.id.dialog_field_creator_top_left_radio_button -> {
+                            if (pattern == R.id.plot_linear_button) insertPlotData(
+                                fieldColumns,
+                                rows,
+                                cols
+                            )
+                            else insertPlotData(fieldColumns, rows, cols, linear = false)
+                        }
+                        R.id.dialog_field_creator_bottom_left_radio_button -> {
+                            if (pattern == R.id.plot_linear_button) insertPlotData(
+                                fieldColumns,
+                                rows,
+                                cols,
+                                ttb = false
+                            )
+                            else insertPlotData(fieldColumns, rows, cols, linear = false, ttb = false)
+                        }
+                        R.id.dialog_field_creator_top_right_radio_button -> {
+                            if (pattern == R.id.plot_linear_button) insertPlotData(
+                                fieldColumns,
+                                rows,
+                                cols,
+                                ltr = false
+                            )
+                            else insertPlotData(fieldColumns, rows, cols, linear = false, ltr = false)
+                        }
+                        else -> {
+                            if (pattern == R.id.plot_linear_button) insertPlotData(
+                                fieldColumns,
+                                rows,
+                                cols,
+                                ttb = false,
+                                ltr = false
+                            )
+                            else insertPlotData(
+                                fieldColumns,
+                                rows,
+                                cols,
+                                linear = false,
+                                ttb = false,
+                                ltr = false
+                            )
+                        }
+                    }
+
+                    setTransactionSuccessful()
+
+                } catch (e: SQLiteAbortException) {
+
+                    e.printStackTrace()
+
+                } finally {
+
+                    endTransaction()
+
+                    this@FieldCreatorDialog.dismiss()
+
+                }
             }
-
-            val fieldColumns = listOf("Row", "Column", "Plot", "observationUnitDbId")
-            studyDbId = helper.createField(field, fieldColumns)
-
-            when (startId) {
-                R.id.dialog_field_creator_top_left_radio_button -> {
-                    if (pattern == R.id.plot_linear_button) insertLinearPlotData(fieldColumns, rows, cols)
-                    else insertZigZagPlotData(studyDbId, fieldColumns, rows, cols)
-                }
-                R.id.dialog_field_creator_bottom_left_radio_button -> {
-                    if (pattern == R.id.plot_linear_button) insertLinearBottomPlotData(fieldColumns, rows, cols)
-                    else insertZigZagBottomPlotData(studyDbId, fieldColumns, rows, cols)
-                }
-                R.id.dialog_field_creator_top_right_radio_button -> {
-                    if (pattern == R.id.plot_linear_button) insertLinearRtlPlotData(fieldColumns, rows, cols)
-                    else insertZigZagRtlPlotData(studyDbId, fieldColumns, rows, cols)
-                }
-                else -> {
-                    if (pattern == R.id.plot) insertLinearBottomRtlPlotData(studyDbId, fieldColumns, rows, cols)
-                    else insertZigZagBottomRtlPlotData(studyDbId, fieldColumns, rows, cols)
-                }
-            }
-
-            this@FieldCreatorDialog.dismiss()
-
         }
     }
 
+    private fun updateFieldInsertText(row: String, col: String) = activity.runOnUiThread {
+        findViewById<TextView>(R.id.dialog_field_creator_review_text).text =
+            activity.getString(R.string.dialog_field_creator_insert_field_complete, row, col)
+    }
+
+    private fun updatePlotInsertText(row: String, col: String, index: String) = activity.runOnUiThread {
+        findViewById<TextView>(R.id.field_creator_plot_insert_text_view).text =
+            activity.getString(R.string.dialog_field_creator_insert_plot, index, row, col)
+    }
+
+    //insert a unique id plot and notify the ui
     private fun insertPlotData(fieldColumns: List<String>, i: Int, j: Int, k: Int,
                                uuid: String = UUID.randomUUID().toString()) {
 
@@ -195,157 +351,31 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
     }
 
-    private fun insertLinearPlotData(fieldColumns: List<String>, rows: Int, cols: Int) {
+    //basic nested for loop to fill the field
+    //General function for both linear and zigzag patterns
+    //top-to-bottom parameter is used to change vertical orientation
+    //left-to-right parameter is used to change horizontal orientation
+    //zigzag patterns use an additional variable to toggle the "sow" direction
+    private fun insertPlotData(fieldColumns: List<String>, rows: Int, cols: Int,
+                                     linear: Boolean = true, ttb: Boolean = true, ltr: Boolean = true) {
 
+        var direction = ltr
         var plotIndex = 0
-        for (i in 0 until rows) {
+        for (i in if (ttb) 0 until rows else rows-1 downTo 0) {
 
-            for (j in 0 until cols) {
+            for (j in if (direction) 0 until cols else cols-1 downTo 0) {
 
                 plotIndex += 1
 
                 insertPlotData(fieldColumns, i, j, plotIndex)
 
-            }
-        }
-    }
-
-    /**
-     * Top - down, Right to left plot creator.
-     */
-    private fun insertLinearRtlPlotData(fieldColumns: List<String>, rows: Int, cols: Int) {
-
-        var plotIndex = 0
-        for (i in 0 until rows) {
-
-            for (j in cols-1 downTo 1) {
-
-                plotIndex += 1
-
-                insertPlotData(fieldColumns, i, j, plotIndex)
+                //throws an exception which is caught in a transaction
+                if (mCancelJobFlag) throw SQLiteAbortException()
 
             }
+
+            //flip the direction before iterating over columns again
+            if (!linear) direction = !direction
         }
     }
-
-    //bottom left linear pattern
-    private fun insertLinearBottomPlotData(fieldColumns: List<String>, rows: Int, cols: Int) {
-
-        var plotIndex = 0
-        for (i in rows-1 downTo 0) {
-
-            for (j in 0 until cols) {
-
-                plotIndex += 1
-
-                insertPlotData(fieldColumns, i, j, plotIndex)
-
-            }
-        }
-    }
-
-    private fun insertLinearBottomRtlPlotData(studyDbId: Int, fieldColumns: List<String>, rows: Int, cols: Int) {
-
-        var plotIndex = 0
-        for (i in rows-1 downTo 1) {
-
-            for (j in cols-1 downTo 1) {
-
-                plotIndex += 1
-
-                insertPlotData(fieldColumns, i, j, plotIndex)
-
-            }
-        }
-    }
-
-    private fun insertZigZagBottomRtlPlotData(studyDbId: Int, fieldColumns: List<String>, rows: Int, cols: Int) {
-
-        var plotIndex = 0
-        for (i in 0 until rows) {
-
-            for (j in 0 until cols) {
-
-                plotIndex += 1
-
-                val row = i.toString()
-                val col = j.toString()
-                val index = plotIndex.toString()
-                val uuid = UUID.randomUUID().toString()
-                helper.createFieldData(studyDbId, fieldColumns,
-                    listOf(row, col, index, uuid))
-
-                updatePlotInsertText(row, col, index)
-            }
-        }
-    }
-
-    private fun insertZigZagBottomPlotData(studyDbId: Int, fieldColumns: List<String>, rows: Int, cols: Int) {
-
-        var plotIndex = 0
-        for (i in 0 until rows) {
-
-            for (j in 0 until cols) {
-
-                plotIndex += 1
-
-                val row = i.toString()
-                val col = j.toString()
-                val index = plotIndex.toString()
-                val uuid = UUID.randomUUID().toString()
-                helper.createFieldData(studyDbId, fieldColumns,
-                    listOf(row, col, index, uuid))
-
-                updatePlotInsertText(row, col, index)
-            }
-        }
-    }
-
-    private fun insertZigZagPlotData(studyDbId: Int, fieldColumns: List<String>, rows: Int, cols: Int) {
-
-        var plotIndex = 0
-        for (i in 0 until rows) {
-
-            for (j in 0 until cols) {
-
-                plotIndex += 1
-
-                val row = i.toString()
-                val col = j.toString()
-                val index = plotIndex.toString()
-                val uuid = UUID.randomUUID().toString()
-                helper.createFieldData(studyDbId, fieldColumns,
-                    listOf(row, col, index, uuid))
-
-                updatePlotInsertText(row, col, index)
-            }
-        }
-    }
-
-    private fun insertZigZagRtlPlotData(studyDbId: Int, fieldColumns: List<String>, rows: Int, cols: Int) {
-
-        var plotIndex = 0
-        for (i in 0 until rows) {
-
-            for (j in 0 until cols) {
-
-                plotIndex += 1
-
-                val row = i.toString()
-                val col = j.toString()
-                val index = plotIndex.toString()
-                val uuid = UUID.randomUUID().toString()
-                helper.createFieldData(studyDbId, fieldColumns,
-                    listOf(row, col, index, uuid))
-
-                updatePlotInsertText(row, col, index)
-            }
-        }
-    }
-
-    private fun updatePlotInsertText(row: String, col: String, index: String) = activity.runOnUiThread {
-        findViewById<TextView>(R.id.field_creator_plot_insert_text_view).text =
-            activity.getString(R.string.dialog_field_creator_insert_plot, index, row, col)
-    }
-
 }

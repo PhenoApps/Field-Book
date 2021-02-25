@@ -97,4 +97,11 @@
         <item name="colorControlNormal">#343434</item>
     </style>
 
+    <style name="FieldCreatorDialog" />
+    <style name="FieldCreatorDialog.TextSummary">
+        <item name="android:textSize">18sp</item>
+    </style>
+    <style name="FieldCreatorDialog.Title">
+        <item name="android:textSize">24sp</item>
+    </style>
 </resources>
