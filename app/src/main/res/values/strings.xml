@@ -544,4 +544,22 @@
 
     <string name="pref_profile_summary">Shows a dialog every 24 hours, verifying the person\'s name.</string>
     <string name="pref_profile_title">Verify person every 24 hours.</string>
+
+    <!-- Field Creator Dialog -->
+    <string name="dialog_field_creator_ask_size">Please choose a field name and size.</string>
+    <string name="dialog_field_creator_ask_start_point">Please choose a field starting point.</string>
+    <string name="dialog_field_creator_ask_pattern">Please choose a field pattern.</string>
+    <string name="dialog_field_creator_ask_name_hint">Name</string>
+    <string name="dialog_field_creator_ask_row_hint">Rows</string>
+    <string name="dialog_field_creator_ask_columns_hint">Columns</string>
+    <!-- Radio box strings -->
+    <string name="dialog_field_creator_top_left">Top Left</string>
+    <string name="dialog_field_creator_bottom_left">Bottom Left</string>
+    <string name="dialog_field_creator_top_right">Top Right</string>
+    <string name="dialog_field_creator_bottom_right">Bottom Right</string>
+    <!-- plot output string -->
+    <string name="dialog_field_creator_insert_plot">Inserting plot %1$s at row %2$s column %3$s</string>
+    <!-- review section -->
+    <string name="dialog_field_creator_review_title">Review</string>
+
 </resources>
