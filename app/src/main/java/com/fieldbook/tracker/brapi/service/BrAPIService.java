@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.brapi.service;
 
         import android.app.Activity;
+        import android.app.PendingIntent;
         import android.content.ActivityNotFoundException;
         import android.content.Context;
         import android.content.Intent;
@@ -10,6 +11,7 @@ package com.fieldbook.tracker.brapi.service;
         import android.util.Patterns;
         import android.widget.Toast;
 
+        import androidx.annotation.Nullable;
         import androidx.arch.core.util.Function;
 
         import com.fieldbook.tracker.R;
@@ -23,7 +25,14 @@ package com.fieldbook.tracker.brapi.service;
         import com.fieldbook.tracker.brapi.model.Observation;
         import com.fieldbook.tracker.preferences.GeneralKeys;
         import com.fieldbook.tracker.objects.TraitObject;
+        import com.fieldbook.tracker.preferences.PreferencesActivity;
         import com.fieldbook.tracker.utilities.Constants;
+
+        import net.openid.appauth.AuthorizationException;
+        import net.openid.appauth.AuthorizationRequest;
+        import net.openid.appauth.AuthorizationService;
+        import net.openid.appauth.AuthorizationServiceConfiguration;
+        import net.openid.appauth.ResponseTypeValues;
 
         import java.net.MalformedURLException;
         import java.net.URL;
@@ -45,29 +54,68 @@ public interface BrAPIService {
         }
 
         try {
-            String url = sharedPreferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://%s";
-            url = String.format(url, target);
-            try {
-                // Go to url with the default browser
-                Uri uri = Uri.parse(url);
-                Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                context.startActivity(i);
+            String clientId = "fieldbook";
+            Uri redirectURI = Uri.parse("https://fieldbook.phenoapps.org/");
 
-                // We require no response since this starts a new activity.
-                return new BrapiControllerResponse(null, "");
+            AuthorizationServiceConfiguration.fetchFromUrl(
+                    Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + "/brapi/auth/.well-known/openid-configuration"),
+                    new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+                        public void onFetchConfigurationCompleted(
+                                @Nullable AuthorizationServiceConfiguration serviceConfig,
+                                @Nullable AuthorizationException ex) {
+                            if (ex != null) {
+                                Log.e("BrAPIService", "failed to fetch configuration");
+                                return;
+                            }
 
-            } catch (ActivityNotFoundException ex) {
-                Log.e("BrAPI", "Error starting BrAPI auth", ex);
-                return new BrapiControllerResponse(false, context.getString(R.string.brapi_auth_error_starting));
+                            AuthorizationRequest.Builder authRequestBuilder =
+                                    new AuthorizationRequest.Builder(
+                                            serviceConfig, // the authorization service configuration
+                                            clientId, // the client ID, typically pre-registered and static
+                                            ResponseTypeValues.TOKEN, // the response_type value: we want a code
+                                            redirectURI); // the redirect URI to which the auth response is sent
 
-            }
+                            AuthorizationRequest authRequest = authRequestBuilder.build();
+
+                            AuthorizationService authService = new AuthorizationService(context);
+
+                            authService.performAuthorizationRequest(
+                                    authRequest,
+                                    PendingIntent.getActivity(context, 0, new Intent(context, PreferencesActivity.class), 0),
+                                    PendingIntent.getActivity(context, 0, new Intent(context, PreferencesActivity.class), 0));
+
+                        }
+                    });
+
+
+
+
+            //String url = sharedPreferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://%s";
+//            String url = "https://auth.brapi.org/auth/realms/brapi/protocol/openid-connect/auth?response_type=token&client_id=fieldbook&redirect_uri=https://fieldbook.phenoapps.org/%s";
+//            url = String.format(url, target);
+//            try {
+//                // Go to url with the default browser
+//                Uri uri = Uri.parse(url);
+//                Intent i = new Intent(Intent.ACTION_VIEW, uri);
+//                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+//                context.startActivity(i);
+//
+//                // We require no response since this starts a new activity.
+//                return new BrapiControllerResponse(null, "");
+//
+//            } catch (ActivityNotFoundException ex) {
+//                Log.e("BrAPI", "Error starting BrAPI auth", ex);
+//                return new BrapiControllerResponse(false, context.getString(R.string.brapi_auth_error_starting));
+//
+//            }
         } catch (Exception ex) {
             Log.e("BrAPI", "Error starting BrAPI auth", ex);
             return new BrapiControllerResponse(false, context.getString(R.string.brapi_auth_error_starting));
 
         }
+        // We require no response since this starts a new activity.
+        return new BrapiControllerResponse(null, "");
     }
 
     // Returns true on successful parsing. False otherwise.
