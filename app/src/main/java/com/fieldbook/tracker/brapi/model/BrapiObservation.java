@@ -45,9 +45,11 @@ public class BrapiObservation {
     private OffsetDateTime convertTime(String time) {
         OffsetDateTime converted = null;
         try {
-            //TODO: locale
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
-            converted = OffsetDateTime.parse(time, formatter);
+            if (time != null) {
+                //TODO: locale
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
+                converted = OffsetDateTime.parse(time, formatter);
+            }
         } catch (DateTimeParseException e) {
             e.printStackTrace();
         } finally {

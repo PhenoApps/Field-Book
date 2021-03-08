@@ -577,7 +577,7 @@ public class BrAPIServiceV1 implements BrAPIService {
         return newObservation;
     }
 
-    public void postPhenotypes(List<Observation> observations,
+    public void postObservations(List<Observation> observations,
                                final Function<List<Observation>, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {

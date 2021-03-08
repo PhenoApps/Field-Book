@@ -3,6 +3,7 @@ package com.fieldbook.tracker.database.dao
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.database.*
@@ -48,7 +49,7 @@ class ObservationDao {
                 study.study_alias,
                 
                 vars.external_db_id AS external_db_id,
-                vars.observation_variable_name as observation_variable_name
+                vars.observation_variable_name as observation_variable_name,
                 vars.observation_variable_details
                 
             FROM ${Observation.tableName} AS obs
@@ -63,14 +64,14 @@ class ObservationDao {
                 AND vars.observation_variable_field_book_format = 'photo'
                 
         """.trimIndent(), arrayOf(hostUrl)).toTable()
-                    .map { row -> FieldBookImage(row["value"].toString(), missingPhoto).apply {
-                        unitDbId = row["uniqueName"].toString()
-                        setDescriptiveOntologyTerms(listOf(row["firstName"].toString()))
-                        setDescription(row["observation_variable_details"].toString())
-                        setTimestamp(row["observation_time_stamp"].toString())
-                        fieldBookDbId = row["id"].toString()
-                        dbId = row["observation_db_id"].toString()
-                        setLastSyncedTime(row["last_synced_time"].toString())
+                    .map { row -> FieldBookImage(getStringVal(row, "value"), missingPhoto).apply {
+                        unitDbId = getStringVal(row, "uniqueName")
+                        setDescriptiveOntologyTerms(listOf(getStringVal(row, "firstName")))
+                        setDescription(getStringVal(row, "observation_variable_details"))
+                        setTimestamp(getStringVal(row, "observation_time_stamp"))
+                        fieldBookDbId = getStringVal(row, "id")
+                        dbId = getStringVal(row, "observation_db_id")
+                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
                     } }
 
         } ?: emptyList()
@@ -82,7 +83,6 @@ class ObservationDao {
          */
         @SuppressLint("Recycle")
         fun getObservations(hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
-
             db.rawQuery("""
                 SELECT props.observationUnitDbId AS uniqueName,
                     props.observationUnitName AS firstName,
@@ -98,7 +98,7 @@ class ObservationDao {
                 study.study_alias,
                 
                 vars.external_db_id AS external_db_id,
-                vars.observation_variable_name as observation_variable_name
+                vars.observation_variable_name as observation_variable_name, 
                 vars.observation_variable_details
                 
             FROM ${Observation.tableName} AS obs
@@ -114,19 +114,28 @@ class ObservationDao {
                 
         """.trimIndent(), arrayOf(hostUrl)).toTable()
                     .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
-                        unitDbId = row["uniqueName"].toString()
-                        variableDbId = row["external_db_id"].toString()
-                        value = row["value"].toString()
-                        variableName = row["observation_variable_name"].toString()
-                        fieldBookDbId = row["id"].toString()
-                        dbId = row["observation_db_id"].toString()
-                        setTimestamp(row["observation_time_stamp"].toString())
-                        setLastSyncedTime(row["last_synced_time"].toString())
-                        setCollector(row["collector"].toString())
-                        setStudyId(row[Study.FK].toString())
+                        unitDbId = getStringVal(row, "uniqueName")
+                        variableDbId = getStringVal(row, "external_db_id")
+                        value = getStringVal(row, "value")
+                        variableName = getStringVal(row, "observation_variable_name")
+                        fieldBookDbId = getStringVal(row, "id")
+                        dbId = getStringVal(row, "observation_db_id")
+                        setTimestamp(getStringVal(row, "observation_time_stamp"))
+                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
+                        setCollector(getStringVal(row, "collector"))
+                        setStudyId(getStringVal(row, Study.FK))
                     } }
 
         } ?: emptyList()
+
+        fun getStringVal(row: Map<String, Any?>, column: String) : String? {
+            if(row != null && column != null){
+                if (row[column] != null){
+                    return row[column].toString();
+                }
+            }
+            return null;
+        }
 
         fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
@@ -164,7 +173,8 @@ class ObservationDao {
         fun getUserTraitObservations(expId: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
 
             db.query(sNonImageObservationsViewName,
-                    where = "${Study.FK} = ? AND (trait_data_source = 'local' OR trait_data_source IS NULL)", whereArgs = arrayOf(expId)).toTable()
+                    // TODO change study_db_id to match ${Study.FK} in db
+                    where = "study_db_id = ? AND (trait_data_source = 'local' OR trait_data_source IS NULL)", whereArgs = arrayOf(expId)).toTable()
                     .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
                         this.fieldBookDbId = row["id"].toString()
                         this.value = row["value"].toString()
@@ -277,12 +287,13 @@ class ObservationDao {
             BrapiObservation().apply {
 
                 db.query(Observation.tableName,
-                        arrayOf(Observation.PK, ObservationUnit.FK, "last_synced_time"),
+                        arrayOf(Observation.PK, ObservationUnit.FK, "observation_db_id", "last_synced_time"),
                         where = "observation_variable_name LIKE ? AND ${ObservationUnit.FK} LIKE ?",
                         whereArgs = arrayOf(parent, plotId)).toTable().forEach {
 
-                    dbId = it[ObservationUnit.FK].toString()
-                    setLastSyncedTime(it["last_synced_time"].toString())
+                    dbId = getStringVal(it, "observation_db_id")
+                    unitDbId = getStringVal(it, ObservationUnit.FK)
+                    setLastSyncedTime(getStringVal(it,"last_synced_time"))
                 }
             }
         }

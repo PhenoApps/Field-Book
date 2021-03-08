@@ -23,6 +23,8 @@ import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.R;
 
+import java.util.ArrayList;
+
 public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener {
 
     private Button saveBtn;
@@ -170,8 +172,20 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                        // Allow load to continue even if Traits fail to load
                         Toast.makeText(context, context.getString(R.string.brapi_study_traits_error), Toast.LENGTH_LONG).show();
+
+                        BrapiStudyDetails emptyTraits = new BrapiStudyDetails();
+                        emptyTraits.setTraits(new ArrayList<>());
+                        BrapiStudyDetails.merge(studyDetails, emptyTraits);
+                        loadStudy();
+                        // Check if user should save yet
+                        traitLoadStatus = true;
+                        if (checkAllLoadsFinished()) {
+                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                            saveBtn.setVisibility(View.VISIBLE);
+                            resetLoadStatus();
+                        }
                     }
                 });
                 return null;
