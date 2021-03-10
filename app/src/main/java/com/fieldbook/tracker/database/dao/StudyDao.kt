@@ -113,7 +113,9 @@ class StudyDao {
                 null, "null" -> ""
                 else -> date
             }
-            it.exp_source = this["study_source"].toString()
+            this["study_source"]?.let { source ->
+                it.exp_source = this["study_source"].toString()
+            }
             it.count = this["count"].toString()
         }
 
