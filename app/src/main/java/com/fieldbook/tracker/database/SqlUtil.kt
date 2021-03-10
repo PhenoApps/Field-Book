@@ -146,40 +146,10 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 } else mutableListOf()
 
 /**
- * A wrapper function to catch all backend exceptions.
- * This function should be used for all database calls.
- * This way there is a single point of failure if we get mutex access errors.
+ * Previously this function would try to capture all errors,
+ * now we expect exceptions to be handled whenever using this function s.a activity code or BrapiService
  */
-inline fun <reified T> withDatabase(crossinline function: (SQLiteDatabase) -> T): T? = try {
-
-    DataHelper.db?.let { database ->
-
-        function(database)
-
-    }
-
-} catch (npe: NullPointerException) {
-    npe.printStackTrace()
-    null
-} catch (e: Exception) {
-    e.printStackTrace()
-    null
-} catch (e: IllegalArgumentException) {
-    e.printStackTrace()
-    null
-} catch (ie: IndexOutOfBoundsException) {
-    ie.printStackTrace()
-    null
-} catch (ie: IndexOutOfBoundsException) {
-    ie.printStackTrace()
-    null
-} catch (e: IllegalArgumentException) {
-    e.printStackTrace()
-    null
-} catch (noElem: NoSuchElementException) {
-    noElem.printStackTrace()
-    null
-}
+fun <T> withDatabase(function: (SQLiteDatabase) -> T): T? = if (DataHelper.db != null) function(DataHelper.db) else null
 
 var internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ")
 

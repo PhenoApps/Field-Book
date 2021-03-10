@@ -6,6 +6,7 @@
         <new>Major database overhaul</new>
         <new>Updated Boolean trait layout</new>
         <new>BrAPI page size setting</new>
+        <new>BrAPI server timeout setting</new>
         <new>Field Book requests person confirmation every 24hrs</new>
         <info>Print a label adds an observation record</info>
         <bugfix>Trait files can be imported via cloud</bugfix>

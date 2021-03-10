@@ -56,6 +56,7 @@
             android:key="INFOBAR_NUMBER"
             android:summary="@string/preferences_appearance_infobar_number_description"
             android:title="@string/preferences_appearance_infobar_number"
+            android:defaultValue="3"
             app:nppc_maxValue="20"
             app:nppc_minValue="1" />
 
