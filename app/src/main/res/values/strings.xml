@@ -62,6 +62,7 @@
     <string name="fields_filter">Filter</string>
     <string name="fields_reimport">Reimport</string>
     <string name="fields_archive">Archive</string>
+    <string name="fields_toolbar_add_field">Import Field</string>
 
     <!-- Settings Activity  -->
     <string name="settings_fields">Fields</string>

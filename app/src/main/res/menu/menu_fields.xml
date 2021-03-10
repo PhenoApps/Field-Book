@@ -9,13 +9,12 @@
         android:title="@string/tutorial_dialog_title" />
     <item
         android:id="@+id/menu_field_editor_item_creator"
-        android:icon="@drawable/ic_tb_datagrid"
+        android:icon="@drawable/ic_fields_creator"
         android:showAsAction="always"
         android:title="" />
     <item
         android:id="@+id/importField"
         android:icon="@drawable/ic_tb_add_circle"
         android:showAsAction="ifRoom"
-        android:title="@string/traits_toolbar_add_trait" /> <!-- TODO this is an incorrect title? -->
+        android:title="@string/fields_toolbar_add_field" />
 </menu>
-
