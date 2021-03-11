@@ -230,7 +230,11 @@ class ObservationVariableDao {
                             put("position", t.realPosition)
                         })
 
-                ObservationVariableValueDao.insert(t.minimum as String, t.maximum as String, t.categories as String, varRowId.toString())
+                ObservationVariableValueDao.insert(
+                        (t.minimum as? String).orEmpty(),
+                        (t.maximum as? String).orEmpty(),
+                        (t.categories as? String).orEmpty(),
+                        varRowId.toString())
 
                 varRowId
 
