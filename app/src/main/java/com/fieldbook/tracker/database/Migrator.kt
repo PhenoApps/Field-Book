@@ -202,9 +202,9 @@ class Migrator {
                 traits.forEachIndexed { index, trait ->
                     //iterate trhough mapping of the old columns that are now attr/vals
                     mapOf(
-                            "validValuesMin" to trait.minimum as String,
-                            "validValuesMax" to trait.maximum as String,
-                            "category" to trait.categories as String,
+                            "validValuesMin" to (trait.minimum ?: ""),
+                            "validValuesMax" to (trait.maximum ?: ""),
+                            "category" to (trait.categories ?: ""),
                     ).asSequence().forEach { attrValue ->
 
                         //TODO: commenting this out would create a sparse table from the unused attribute values
