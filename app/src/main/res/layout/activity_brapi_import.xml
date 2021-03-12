@@ -6,20 +6,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView style="@style/BrapiImportServerTextView"
+    <TextView
         android:id="@+id/serverTextView"
+        style="@style/BrapiImportServerTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:layout_margin="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="https://www.yourbrapiserver.org/brapi/v1" />
 
-    <Button style="@style/BrapiImportTextView"
+    <Button
         android:id="@+id/currentButton"
+        style="@style/BrapiImportTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@drawable/custom_button_oval"
         android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,11 +35,11 @@
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        tools:listitem="@android:layout/simple_list_item_1"
         app:layout_constraintBottom_toTopOf="@id/pageControllerView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/currentButton" />
+        app:layout_constraintTop_toBottomOf="@id/currentButton"
+        tools:listitem="@android:layout/simple_list_item_1" />
 
     <com.fieldbook.tracker.views.PageControllerView
         android:id="@+id/pageControllerView"
@@ -45,10 +50,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/listView" />
 
-    <Button style="@style/BrapiImportTextView"
+    <Button
         android:id="@+id/nextButton"
+        style="@style/BrapiImportTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@drawable/custom_button_oval"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
