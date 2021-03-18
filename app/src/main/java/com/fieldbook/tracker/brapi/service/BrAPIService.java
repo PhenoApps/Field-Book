@@ -13,6 +13,7 @@ package com.fieldbook.tracker.brapi.service;
 
         import androidx.annotation.Nullable;
         import androidx.arch.core.util.Function;
+        import androidx.browser.customtabs.CustomTabsIntent;
 
         import com.fieldbook.tracker.R;
         import com.fieldbook.tracker.brapi.ApiError;
@@ -33,6 +34,7 @@ package com.fieldbook.tracker.brapi.service;
         import net.openid.appauth.AuthorizationService;
         import net.openid.appauth.AuthorizationServiceConfiguration;
         import net.openid.appauth.ResponseTypeValues;
+        import net.openid.appauth.browser.CustomTabManager;
 
         import java.net.MalformedURLException;
         import java.net.URL;
@@ -72,12 +74,15 @@ public interface BrAPIService {
                                     new AuthorizationRequest.Builder(
                                             serviceConfig, // the authorization service configuration
                                             clientId, // the client ID, typically pre-registered and static
-                                            ResponseTypeValues.TOKEN, // the response_type value: we want a code
+                                            ResponseTypeValues.TOKEN, // the response_type value: we want a token
                                             redirectURI); // the redirect URI to which the auth response is sent
 
                             AuthorizationRequest authRequest = authRequestBuilder.build();
 
                             AuthorizationService authService = new AuthorizationService(context);
+
+//                            CustomTabsIntent tab = authService.createCustomTabsIntentBuilder().build();
+//                            CustomTabsIntent.setAlwaysUseBrowserUI(tab.intent);
 
                             authService.performAuthorizationRequest(
                                     authRequest,
@@ -129,7 +134,7 @@ public interface BrAPIService {
             // coming from a deep link if it is coming from deep link on pause and resume.
             activity.getIntent().setData(null);
 
-            Integer status = Integer.parseInt(data.getQueryParameter("status"));
+            Integer status = 200; // Integer.parseInt(data.getQueryParameter("status"));
 
             // Check that we actually have the data. If not return failure.
             if (status == null) {
@@ -139,11 +144,15 @@ public interface BrAPIService {
             if (status == 200) {
                 SharedPreferences preferences = activity.getSharedPreferences("Settings", 0);
                 SharedPreferences.Editor editor = preferences.edit();
-                String token = data.getQueryParameter("token");
-
+                data = Uri.parse(data.toString().replaceFirst("#", "?"));
+                String token = data.getQueryParameter("access_token");
                 // Check that we received a token.
                 if (token == null) {
                     return new BrapiControllerResponse(false, "No access token received in response from host.");
+                }
+
+                if(token.startsWith("Bearer ")){
+                    token = token.replaceFirst("Bearer ", "");
                 }
 
                 editor.putString(GeneralKeys.BRAPI_TOKEN, token);
