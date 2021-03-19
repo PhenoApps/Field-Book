@@ -572,7 +572,7 @@ public class BrAPIServiceV2 implements BrAPIService{
         return newObservation;
     }
 
-    public void postObservations(List<Observation> observations,
+    public void createObservations(List<Observation> observations,
                                final Function<List<Observation>, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
@@ -616,7 +616,7 @@ public class BrAPIServiceV2 implements BrAPIService{
         }
     }
 
-    public void putObservations(List<Observation> observations,
+    public void updateObservations(List<Observation> observations,
                                 final Function<List<Observation>, Void> function,
                                 final Function<Integer, Void> failFunction) {
         try {

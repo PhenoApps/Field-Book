@@ -577,56 +577,14 @@ public class BrAPIServiceV1 implements BrAPIService {
         return newObservation;
     }
 
-    public void postObservations(List<Observation> observations,
-                               final Function<List<Observation>, Void> function,
-                               final Function<Integer, Void> failFunction) {
-        try {
-            BrapiV1ApiCallBack<NewObservationDbIdsResponse> callback = new BrapiV1ApiCallBack<NewObservationDbIdsResponse>() {
-                @Override
-                public void onSuccess(NewObservationDbIdsResponse phenotypesResponse, int i, Map<String, List<String>> map) {
-                    List<Observation> newObservations = new ArrayList<>();
-                    for(NewObservationDbIdsObservations obs: phenotypesResponse.getResult().getObservations()){
-                        newObservations.add(mapToObservation(obs));
-                    }
-                    function.apply(newObservations);
-                }
-
-                @Override
-                public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
-                    failFunction.apply(e.getCode());
-                }
-            };
-
-            PhenotypesRequest request = new PhenotypesRequest();
-
-            // TODO: group by study and observationunit db ids
-            for (Observation observation : observations) {
-                PhenotypesRequestObservation request_observation = new PhenotypesRequestObservation();
-                request_observation.setCollector(observation.getCollector().trim());
-                request_observation.setObservationDbId(""); // new entry only for post
-                request_observation.setObservationTimeStamp(observation.getTimestamp());
-                request_observation.setObservationVariableDbId(observation.getVariableDbId());
-                request_observation.setObservationVariableName(observation.getVariableName());
-                request_observation.season("Spring 2018"); // workaround for test server
-                request_observation.setValue(observation.getValue());
-
-                PhenotypesRequestData request_data = new PhenotypesRequestData();
-                request_data.addObservationsItem(request_observation);
-                request_data.setObservationUnitDbId(observation.getUnitDbId());
-                request_data.setStudyDbId(observation.getStudyId());
-
-                request.addDataItem(request_data);
-            }
-
-            phenotypesApi.phenotypesPostAsync(request, null, getBrapiToken(), callback);
-
-        } catch (ApiException e) {
-            e.printStackTrace();
-        }
+    public void createObservations(List<Observation> observations,
+                                   final Function<List<Observation>, Void> function,
+                                   final Function<Integer, Void> failFunction) {
+        updateObservations(observations, function, failFunction);
     }
 
     // will only ever have one study in current architecture
-    public void putObservations(List<Observation> observations,
+    public void updateObservations(List<Observation> observations,
                                 final Function<List<Observation>, Void> function,
                                 final Function<Integer, Void> failFunction) {
 

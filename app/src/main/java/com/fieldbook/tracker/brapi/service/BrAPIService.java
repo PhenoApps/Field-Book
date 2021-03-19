@@ -218,6 +218,15 @@ public interface BrAPIService {
 
     public void getOntology(BrapiPaginationManager paginationManager, final Function<List<TraitObject>, Void> function, final Function<Integer, Void> failFunction);
 
+    public void createObservations(List<Observation> observations,
+                                   final Function<List<Observation>, Void> function,
+                                   final Function<Integer, Void> failFunction);
+
+    public void updateObservations(List<Observation> observations,
+                                   final Function<List<Observation>, Void> function,
+                                   final Function<Integer, Void> failFunction);
+
+    /*
     public void postObservations(List<Observation> observations,
                                final Function<List<Observation>, Void> function,
                                final Function<Integer, Void> failFunction);
@@ -226,6 +235,8 @@ public interface BrAPIService {
     public void putObservations(List<Observation> observations,
                                 final Function<List<Observation>, Void> function,
                                 final Function<Integer, Void> failFunction);
+
+     */
 
     public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
