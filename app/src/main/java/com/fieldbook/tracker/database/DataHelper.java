@@ -13,6 +13,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.Image;
@@ -114,10 +116,43 @@ public class DataHelper {
     }
 
     /**
+     * V9 special character delete function.
+     * TODO: If we want to accept headers with special characters we need to rethink the dynamic range table.
+     * @param s, the column to sanitize
+     * @return output, a new string without special characters
+     */
+    public static String replaceSpecialChars(String s) {
+
+        final Pattern p = Pattern.compile("[()<>/;\\*%$`\"\']");
+
+        int lastIndex = 0;
+
+        StringBuilder output = new StringBuilder();
+
+        Matcher matcher = p.matcher(s);
+
+        while (matcher.find()) {
+
+            output.append(s, lastIndex, matcher.start());
+
+            lastIndex = matcher.end();
+
+        }
+
+        if (lastIndex < s.length()) {
+
+            output.append(s, lastIndex, s.length());
+
+        }
+
+        return output.toString();
+    }
+
+    /**
      * V2 - Check if a string has any special characters
      */
     public static boolean hasSpecialChars(String s) {
-        final Pattern p = Pattern.compile("[()<>/;\\*%$]");
+        final Pattern p = Pattern.compile("[()<>/;\\*%$`\"\']");
         final Matcher m = p.matcher(s);
 
         return m.find();
