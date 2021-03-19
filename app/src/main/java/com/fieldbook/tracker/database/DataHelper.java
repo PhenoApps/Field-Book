@@ -13,8 +13,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
-
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.Image;
