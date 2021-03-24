@@ -485,32 +485,32 @@ public class FieldEditorActivity extends AppCompatActivity {
         List<String> list = Arrays.asList(reservedNames);
 
         //TODO causing crash
-        boolean hasSpecialCharacters = false;
-        for (int i = 0; i < importColumns.length; i++) {
-
-            String s = importColumns[i];
-
-            if (DataHelper.hasSpecialChars(s)) {
-
-                hasSpecialCharacters = true;
-
-                importColumns[i] = DataHelper.replaceSpecialChars(s);
-            }
-
-            if (list.contains(s.toLowerCase())) {
-
-                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_name) + " \"" + s + "\"");
-
-                return;
-            }
-        }
-
-        if (hasSpecialCharacters) {
-
-
-            //Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns) + " (\"" + s + "\")");
-
-        }
+//        boolean hasSpecialCharacters = false;
+//        for (int i = 0; i < importColumns.length; i++) {
+//
+//            String s = importColumns[i];
+//
+//            if (DataHelper.hasSpecialChars(s)) {
+//
+//                hasSpecialCharacters = true;
+//
+//                importColumns[i] = DataHelper.replaceSpecialChars(s);
+//            }
+//
+//            if (list.contains(s.toLowerCase())) {
+//
+//                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_name) + " \"" + s + "\"");
+//
+//                return;
+//            }
+//        }
+//
+//        if (hasSpecialCharacters) {
+//
+//
+//            //Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns) + " (\"" + s + "\")");
+//
+//        }
 
         importDialog(importColumns);
     }
@@ -623,15 +623,15 @@ public class FieldEditorActivity extends AppCompatActivity {
                 String[] data;
                 String[] columns = fieldFile.readNext();
 
-                //match and delete special characters from header line
-                for (int i = 0; i < columns.length; i++) {
-
-                    String header = columns[i];
-
-                    if (DataHelper.hasSpecialChars(header)) {
-                        columns[i] = DataHelper.replaceSpecialChars(header);
-                    }
-                }
+//                //match and delete special characters from header line
+//                for (int i = 0; i < columns.length; i++) {
+//
+//                    String header = columns[i];
+//
+//                    if (DataHelper.hasSpecialChars(header)) {
+//                        columns[i] = DataHelper.replaceSpecialChars(header);
+//                    }
+//                }
 
                 FieldObject f = fieldFile.createFieldObject();
                 f.setUnique_id(unique.getSelectedItem().toString());
