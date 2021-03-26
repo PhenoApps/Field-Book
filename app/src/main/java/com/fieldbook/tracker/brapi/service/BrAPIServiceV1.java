@@ -84,6 +84,11 @@ public class BrAPIServiceV1 implements BrAPIService {
         this.observationsApi = new ObservationsApi(apiClient);
     }
 
+    @Override
+    public void authorizeClient() {
+
+    }
+
     private String getBrapiToken() {
         SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
         return "Bearer " + preferences.getString(GeneralKeys.BRAPI_TOKEN, "");

@@ -53,6 +53,8 @@ public class BrapiActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        brAPIService.authorizeClient();
+        loadStudiesList();
     }
 
     @Override
@@ -136,7 +138,6 @@ public class BrapiActivity extends AppCompatActivity {
 
             @Override
             public Void apply(final Integer code) {
-
                 (BrapiActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

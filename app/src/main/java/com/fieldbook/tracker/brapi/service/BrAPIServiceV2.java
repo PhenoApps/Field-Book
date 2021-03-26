@@ -64,6 +64,7 @@ import java.util.Map;
 public class BrAPIServiceV2 implements BrAPIService{
 
     private final Context context;
+    private final BrAPIClient apiClient;
     private final ImagesApi imagesApi;
     private final StudiesApi studiesApi;
     private final ProgramsApi programsApi;
@@ -75,13 +76,8 @@ public class BrAPIServiceV2 implements BrAPIService{
     public BrAPIServiceV2(Context context) {
         this.context = context;
         // Make timeout longer. Set it to 60 seconds for now
-        BrAPIClient apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), 60000);
-        try {
-             apiClient.authenticate(t -> context.getSharedPreferences("Settings", 0)
-                        .getString(GeneralKeys.BRAPI_TOKEN, null));
-        } catch (ApiException error) {
-            Log.e("BrAPIServiceV2", "API Exception", error);
-        }
+        this.apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), 60000);
+
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
         this.programsApi = new ProgramsApi(apiClient);
@@ -89,6 +85,16 @@ public class BrAPIServiceV2 implements BrAPIService{
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
         this.observationUnitsApi = new ObservationUnitsApi(apiClient);
+    }
+
+    @Override
+    public void authorizeClient(){
+        try {
+            apiClient.authenticate(t -> context.getSharedPreferences("Settings", 0)
+                    .getString(GeneralKeys.BRAPI_TOKEN, null));
+        } catch (ApiException error) {
+            Log.e("BrAPIServiceV2", "API Exception", error);
+        }
     }
 
     private void updatePageInfo(BrapiPaginationManager paginationManager, BrAPIMetadata metadata){

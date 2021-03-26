@@ -42,7 +42,6 @@ package com.fieldbook.tracker.brapi.service;
 
 public interface BrAPIService {
 
-    public static String exportTarget = "export";
     public static String notUniqueFieldMessage = "not_unique";
     public static String notUniqueIdMessage = "not_unique_id";
 
@@ -113,7 +112,7 @@ public interface BrAPIService {
         switch (apiError) {
             case UNAUTHORIZED:
                 // Start the login process
-                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(context, null);
+                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(context);
                 brapiAuth.show();
                 toastMsg = context.getString(R.string.brapi_auth_deny);
                 break;
@@ -159,4 +158,6 @@ public interface BrAPIService {
     public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
     public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails);
+
+    public void authorizeClient();
 }

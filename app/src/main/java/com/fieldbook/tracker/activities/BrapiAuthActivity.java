@@ -28,8 +28,6 @@ import net.openid.appauth.ResponseTypeValues;
 
 public class BrapiAuthActivity extends AppCompatActivity {
 
-    private boolean useOldFlow = false;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +35,12 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
         SharedPreferences sp = getSharedPreferences("Settings", 0);
         // Start our login process
-        authorizeBrAPI(sp, this, null);
+        String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+        if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
+            authorizeBrAPI(sp, this);
+        }else if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
+            authorizeBrAPI_OLD(sp, this);
+        }
     }
 
     @Override
@@ -51,16 +54,20 @@ public class BrapiAuthActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
+        SharedPreferences sp = getSharedPreferences("Settings", 0);
         AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
         Uri data = getIntent().getData();
 
         if (data != null) {
             // authorization completed
-            if(useOldFlow){
-                checkBrapiAuth_OLD(data);
-            }else {
+
+            String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+            if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
                 checkBrapiAuth(data);
+            }else if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
+                checkBrapiAuth_OLD(data);
             }
+
             // Clear our data from our deep link so the app doesn't think it is
             // coming from a deep link if it is coming from deep link on pause and resume.
             getIntent().setData(null);
@@ -73,7 +80,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
         }
     }
 
-    public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context, String target) {
+    public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(GeneralKeys.BRAPI_TOKEN, null);
         editor.apply();
@@ -81,17 +88,17 @@ public class BrapiAuthActivity extends AppCompatActivity {
         try {
             String clientId = "fieldbook";
             Uri redirectURI = Uri.parse("https://fieldbook.phenoapps.org/");
+            Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
 
-            AuthorizationServiceConfiguration.fetchFromUrl(
-                    Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + "/brapi/auth/.well-known/openid-configuration"),
+            AuthorizationServiceConfiguration.fetchFromUrl(oidcConfigURI,
                     new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
                         public void onFetchConfigurationCompleted(
                                 @Nullable AuthorizationServiceConfiguration serviceConfig,
                                 @Nullable AuthorizationException ex) {
                             if (ex != null) {
                                 Log.e("BrAPIService", "failed to fetch configuration");
-                                useOldFlow = true;
-                                authorizeBrAPI_OLD(sharedPreferences, context, target);
+                                authError(ex);
+                                finish();
                                 return;
                             }
 
@@ -102,7 +109,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
                                             ResponseTypeValues.TOKEN, // the response_type value: we want a token
                                             redirectURI); // the redirect URI to which the auth response is sent
 
-                            AuthorizationRequest authRequest = authRequestBuilder.build();
+                            AuthorizationRequest authRequest = authRequestBuilder.setPrompt("login").build();
 
                             AuthorizationService authService = new AuthorizationService(context);
 
@@ -122,18 +129,13 @@ public class BrapiAuthActivity extends AppCompatActivity {
         }
     }
 
-    public void authorizeBrAPI_OLD(SharedPreferences sharedPreferences, Context context, String target) {
+    public void authorizeBrAPI_OLD(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(GeneralKeys.BRAPI_TOKEN, null);
         editor.apply();
 
-        if (target == null) {
-            target = "";
-        }
-
         try {
-            String url = sharedPreferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://%s";
-            url = String.format(url, target);
+            String url = sharedPreferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://";
             try {
                 // Go to url with the default browser
                 Uri uri = Uri.parse(url);

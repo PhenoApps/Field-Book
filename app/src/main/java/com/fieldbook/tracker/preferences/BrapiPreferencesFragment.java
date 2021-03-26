@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.preference.EditTextPreference;
+import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
@@ -29,12 +30,20 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private PreferenceCategory brapiPrefCategory;
     private Preference brapiAuthButton;
     private Preference brapiLogoutButton;
-    private Preference brapiURLPreference;
-    private EditTextPreference brapiPaginationPreference;
+    private EditTextPreference brapiURLPreference;
+    private EditTextPreference brapiOIDCURLPreference;
+    private ListPreference brapiOIDCFlow;
     private Preference brapiServerBarcode;
     private Preference brapiServerCassavabase;
     private Preference brapiServerDefaultTest;
     private String barcodeResult;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        // Occurs before onCreate function. We get the context this way.
+        BrapiPreferencesFragment.this.context = context;
+    }
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -49,22 +58,16 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiAuthButton = findPreference("authorizeBrapi");
         brapiLogoutButton = findPreference("revokeBrapiAuth");
 
-        brapiURLPreference = findPreference("BRAPI_BASE_URL");
+        brapiURLPreference = findPreference(GeneralKeys.BRAPI_BASE_URL);
         brapiURLPreference.setOnPreferenceChangeListener(this);
-        brapiPaginationPreference = findPreference("BRAPI_PAGE_SIZE");
+        brapiOIDCURLPreference = findPreference(GeneralKeys.BRAPI_OIDC_URL);
+        brapiOIDCFlow = findPreference(GeneralKeys.BRAPI_OIDC_FLOW);
 
         brapiServerBarcode = findPreference("brapi_server_barcode");
         brapiServerCassavabase = findPreference("brapi_server_cassavabase");
         brapiServerDefaultTest = findPreference("brapi_server_default");
 
         registerBrapiButtonListeners();
-        setBaseURLSummary();
-        setButtonView();
-    }
-
-    private void setBaseURLSummary() {
-        String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
-        brapiURLPreference.setSummary(url);
     }
 
     @Override
@@ -72,6 +75,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         super.onResume();
         setBaseURLSummary();
         setButtonView();
+    }
+
+    private void setBaseURLSummary() {
+        String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
+        brapiURLPreference.setSummary(url);
     }
 
     private void brapiAuth() {
@@ -89,9 +97,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if (preference.equals(brapiURLPreference)) {
 
             // This is done after this function, but set the value for our brapi function
-            SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
-            editor.putString(GeneralKeys.BRAPI_BASE_URL, newValue.toString());
-            editor.apply();
+            SharedPreferences sp = prefMgr.getSharedPreferences();
+            String oldBaseUrl = sp.getString(GeneralKeys.BRAPI_BASE_URL, "");
+            String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
+            String newOidcUrl = oldOidcUrl.replaceFirst(oldBaseUrl, newValue.toString());
+            this.brapiURLPreference.setText(newValue.toString());
+            this.brapiOIDCURLPreference.setText(newOidcUrl);
 
             // Call our brapi authorize function
             if (brapiPrefCategory != null) {
@@ -102,14 +113,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         }
 
         return true;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        // Occurs before the on create function. We get the context this way.
-        BrapiPreferencesFragment.this.context = context;
     }
 
     private void registerBrapiButtonListeners() {
@@ -125,9 +128,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     return true;
                 }
             });
-
-            // Set our button visibility and text
-            setButtonView();
         }
 
         if (brapiLogoutButton != null) {
@@ -169,9 +169,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             brapiServerCassavabase.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
-                    editor.putString(GeneralKeys.BRAPI_BASE_URL, "https://www.cassavabase.org");
-                    editor.apply();
+                    brapiURLPreference.setText("https://www.cassavabase.org");
+                    brapiOIDCURLPreference.setText("https://www.cassavabase.org/brapi/auth/.well-known/openid-configuration");
+                    brapiOIDCFlow.setValue(getString(R.string.preferences_brapi_oidc_flow_old_custom));
 
                     brapiAuth();
                     setBaseURLSummary();
@@ -184,9 +184,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             brapiServerDefaultTest.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
-                    editor.putString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
-                    editor.apply();
+                    brapiURLPreference.setText(getString(R.string.brapi_base_url_default));
+                    brapiOIDCURLPreference.setText(getString(R.string.brapi_oidc_url_default));
+                    brapiOIDCFlow.setValue(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
 
                     brapiAuth();
                     setBaseURLSummary();
