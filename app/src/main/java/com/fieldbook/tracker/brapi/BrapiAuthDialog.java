@@ -57,8 +57,8 @@ public class BrapiAuthDialog extends Dialog implements android.view.View.OnClick
                 // Start our brapi authentication process.
                 dismiss();
                 // Show our error message if it exists
-                BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(preferences, context, target);
-                processBrapiControllerMessage(brapiControllerResponse);
+//                BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(preferences, context, target);
+  //              processBrapiControllerMessage(brapiControllerResponse);
                 break;
 
         }

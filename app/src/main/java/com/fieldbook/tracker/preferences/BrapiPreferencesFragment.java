@@ -14,6 +14,8 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.BrapiAuthActivity;
+import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -32,7 +34,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private Preference brapiServerBarcode;
     private Preference brapiServerCassavabase;
     private Preference brapiServerDefaultTest;
-    private BrapiControllerResponse brapiControllerResponse;
     private String barcodeResult;
 
     @Override
@@ -43,8 +44,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.brapi_info_title));
-
-        registerBrapiButtonListeners();
 
         brapiPrefCategory = prefMgr.findPreference("brapi_category");
         brapiAuthButton = findPreference("authorizeBrapi");
@@ -58,46 +57,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiServerCassavabase = findPreference("brapi_server_cassavabase");
         brapiServerDefaultTest = findPreference("brapi_server_default");
 
+        registerBrapiButtonListeners();
         setBaseURLSummary();
         setButtonView();
-
-        brapiServerBarcode.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-
-                new IntentIntegrator(getActivity())
-                        .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(true)
-                        .setRequestCode(101)
-                        .initiateScan();
-
-                return true;
-            }
-        });
-
-        brapiServerCassavabase.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
-                editor.putString(GeneralKeys.BRAPI_BASE_URL, "https://www.cassavabase.org");
-                editor.apply();
-
-                brapiAuth();
-                return true;
-            }
-        });
-
-        brapiServerDefaultTest.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
-                editor.putString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
-                editor.apply();
-
-                setBaseURLSummary();
-                return true;
-            }
-        });
     }
 
     private void setBaseURLSummary() {
@@ -109,6 +71,16 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     public void onResume() {
         super.onResume();
         setBaseURLSummary();
+        setButtonView();
+    }
+
+    private void brapiAuth() {
+        String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
+        if (brapiHost != null) {
+            Intent intent = new Intent();
+            intent.setClassName(context, BrapiAuthActivity.class.getName());
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -123,13 +95,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
             // Call our brapi authorize function
             if (brapiPrefCategory != null) {
-
-                // Start our login process
-                BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), context, null);
-
-                // Show our error message if it exists
-                processResponseMessage(brapiControllerResponse);
-
+                brapiAuth();
                 // Set our button visibility and text
                 setButtonView();
             }
@@ -146,26 +112,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         BrapiPreferencesFragment.this.context = context;
     }
 
-    private void processResponseMessage(BrapiControllerResponse brapiControllerResponse) {
-        // Only show the error message
-        if (brapiControllerResponse.status != null) {
-            if (!brapiControllerResponse.status) {
-                Toast.makeText(context, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    private void brapiAuth() {
-        String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
-        if (brapiHost != null) {
-            // Start our login process
-            BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), context, null);
-
-            // Show our error message if it exists
-            processResponseMessage(brapiControllerResponse);
-        }
-    }
-
     private void registerBrapiButtonListeners() {
 
         if (brapiAuthButton != null) {
@@ -174,11 +120,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 public boolean onPreferenceClick(Preference preference) {
                     String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
                     if (brapiHost != null) {
-                        // Start our login process
-                        BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), context, null);
-
-                        // Show our error message if it exists
-                        processResponseMessage(brapiControllerResponse);
+                        brapiAuth();
                     }
                     return true;
                 }
@@ -202,6 +144,52 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     // Set our button visibility and text
                     setButtonView();
 
+                    return true;
+                }
+            });
+        }
+
+        if (brapiServerBarcode != null) {
+            brapiServerBarcode.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+
+                    new IntentIntegrator(getActivity())
+                            .setPrompt(getString(R.string.main_barcode_text))
+                            .setBeepEnabled(true)
+                            .setRequestCode(101)
+                            .initiateScan();
+
+                    return true;
+                }
+            });
+        }
+
+        if (brapiServerCassavabase != null) {
+            brapiServerCassavabase.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
+                    editor.putString(GeneralKeys.BRAPI_BASE_URL, "https://www.cassavabase.org");
+                    editor.apply();
+
+                    brapiAuth();
+                    setBaseURLSummary();
+                    return true;
+                }
+            });
+        }
+
+        if (brapiServerDefaultTest != null) {
+            brapiServerDefaultTest.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
+                    editor.putString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
+                    editor.apply();
+
+                    brapiAuth();
+                    setBaseURLSummary();
                     return true;
                 }
             });

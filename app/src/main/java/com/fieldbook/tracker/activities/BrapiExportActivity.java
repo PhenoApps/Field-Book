@@ -128,10 +128,10 @@ public class BrapiExportActivity extends AppCompatActivity {
         super.onResume();
 
         // Check out brapi auth
-        BrapiControllerResponse brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
+//        BrapiControllerResponse brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
 
         // Check whether our brapi auth response was exists or was successful
-        processBrapiControllerMessage(brapiControllerResponse);
+    //    processBrapiControllerMessage(brapiControllerResponse);
 
     }
 

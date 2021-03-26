@@ -19,9 +19,6 @@ import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
 public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, SearchPreferenceResultListener {
 
-    private static BrapiPreferencesFragment preferencesFragmentBrapi;
-    private static Preference brapiPrefCategory;
-    private BrapiControllerResponse brapiControllerResponse;
     private PreferencesFragment prefsFragment;
 
     @Override
@@ -34,8 +31,6 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
-
-        preferencesFragmentBrapi = new BrapiPreferencesFragment();
 
         prefsFragment = new PreferencesFragment();
         getSupportFragmentManager().beginTransaction()
@@ -69,29 +64,6 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
                 prefsFragment.onSearchResultClicked(result);
             }
         });
-    }
-
-    public void processMessage(BrapiControllerResponse brapiControllerResponse) {
-        if (brapiControllerResponse.status != null) {
-            if (!brapiControllerResponse.status) {
-                Toast.makeText(this, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, R.string.brapi_auth_success, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        // If our preference page was resumed, we will want to see if it was resumed from a deep link.
-        brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
-
-        // Set our button visibility and text
-        //todo null object reference
-        //preferencesFragmentBrapi.setButtonView();
-        processMessage(brapiControllerResponse);
     }
 
     @Override
