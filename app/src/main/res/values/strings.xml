@@ -469,7 +469,7 @@
     <string name="brapi_base_url_default">https://test-server.brapi.org</string>
     <string name="brapi_oidc_url">OIDC Discovery URL</string>
     <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
-    <string name="brapi_oidc_url_default">https://test-server.brapi.org/brapi/auth/.well-known/openid-configuration</string>
+    <string name="brapi_oidc_url_default">https://test-server.brapi.org/.well-known/openid-configuration</string>
     <string name="brapi_save_authorize">Save and Authorize</string>
     <string name="brapi_authorize">Authorize</string>
     <string name="brapi_reauthorize">Reauthorize BrAPI</string>

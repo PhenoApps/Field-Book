@@ -96,7 +96,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
                                 @Nullable AuthorizationServiceConfiguration serviceConfig,
                                 @Nullable AuthorizationException ex) {
                             if (ex != null) {
-                                Log.e("BrAPIService", "failed to fetch configuration");
+                                Log.e("BrAPIService", "failed to fetch configuration", ex);
                                 authError(ex);
                                 finish();
                                 return;

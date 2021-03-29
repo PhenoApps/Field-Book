@@ -170,7 +170,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     brapiURLPreference.setText("https://www.cassavabase.org");
-                    brapiOIDCURLPreference.setText("https://www.cassavabase.org/brapi/auth/.well-known/openid-configuration");
+                    brapiOIDCURLPreference.setText("https://www.cassavabase.org/.well-known/openid-configuration");
                     brapiOIDCFlow.setValue(getString(R.string.preferences_brapi_oidc_flow_old_custom));
 
                     brapiAuth();
