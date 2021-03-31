@@ -241,18 +241,23 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
             TraitObject trait = selectedTraits.get(i);
 
+            TraitObject existingTraitByName = ConfigActivity.dt.getTraitByName(trait.getTrait());
+            TraitObject existingTraitByExId = ConfigActivity.dt.getTraitByExternalDbId(trait.getExternalDbId(), trait.getTraitDataSource());
             // Check if the trait already exists
-            if (ConfigActivity.dt.hasTrait(trait.getTrait())) {
+            if (existingTraitByName != null) {
                 secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getTrait());
                 // Skip this one, continue on.
                 continue;
+            }else if (existingTraitByExId != null) {
+                // Update existing trait
+                trait.setId(existingTraitByExId.getId());
+                long saveStatus = ConfigActivity.dt.updateTrait(trait);
+                successfulSaves += saveStatus == -1 ? 0 : 1;
+            }else{
+                // Insert our new trait
+                long saveStatus = ConfigActivity.dt.insertTraits(trait);
+                successfulSaves += saveStatus == -1 ? 0 : 1;
             }
-
-            // Insert our new trait
-            long saveStatus = ConfigActivity.dt.insertTraits(trait);
-
-            successfulSaves += saveStatus == -1 ? 0 : 1;
-
         }
 
         SharedPreferences ep = getSharedPreferences("Settings", 0);

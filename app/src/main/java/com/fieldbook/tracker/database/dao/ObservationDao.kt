@@ -182,9 +182,9 @@ class ObservationDao {
 
         } ?: emptyList()
 
-        fun isBrapiSynced(rid: String, parent: String): Boolean = withDatabase { db ->
+        fun isBrapiSynced(exp_id: String, rid: String, parent: String): Boolean = withDatabase { db ->
 
-            getObservation(rid, parent)?.let { observation ->
+            getObservation(exp_id, rid, parent)?.let { observation ->
 
                 observation.status in arrayOf(
                         com.fieldbook.tracker.brapi.model.BrapiObservation.Status.SYNCED,
@@ -206,7 +206,8 @@ class ObservationDao {
 
             val rep = getRep(rid, parent) + 1
 
-            val internalTraitId = ObservationVariableDao.getTraitId(parent)
+            val traitObj = ObservationVariableDao.getTraitByName(parent)
+            val internalTraitId = if (traitObj == null) {-1} else {traitObj.id}
 
             val timestamp = try {
                 OffsetDateTime.now().format(internalTimeFormatter)
@@ -222,7 +223,7 @@ class ObservationDao {
                     "observation_time_stamp" to timestamp,
                     "collector" to person,
                     "geoCoordinates" to location,
-                    "last_synced_time" to lastSyncedTime,
+                    "last_synced_time" to lastSyncedTime?.format(internalTimeFormatter),
                     "rep" to rep,
                     "notes" to notes,
                     Study.FK to exp_id.toInt(),
@@ -282,14 +283,14 @@ class ObservationDao {
         plotId is actually uniqueName
         parent is trait/variable name
          */
-        fun getObservation(plotId: String, parent: String): BrapiObservation? = withDatabase { db ->
+        fun getObservation(exp_id: String, plotId: String, parent: String): BrapiObservation? = withDatabase { db ->
 
             BrapiObservation().apply {
 
                 db.query(Observation.tableName,
                         arrayOf(Observation.PK, ObservationUnit.FK, "observation_db_id", "last_synced_time"),
-                        where = "observation_variable_name LIKE ? AND ${ObservationUnit.FK} LIKE ?",
-                        whereArgs = arrayOf(parent, plotId)).toTable().forEach {
+                        where = "${Study.FK} = ? AND observation_variable_name LIKE ? AND ${ObservationUnit.FK} LIKE ?",
+                        whereArgs = arrayOf(exp_id, parent, plotId)).toTable().forEach {
 
                     dbId = getStringVal(it, "observation_db_id")
                     unitDbId = getStringVal(it, ObservationUnit.FK)

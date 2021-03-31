@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.*
+import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
 
 class ObservationVariableDao {
@@ -18,25 +19,36 @@ class ObservationVariableDao {
 
         } ?: 0
 
-        fun getTraitId(name: String): Int = withDatabase { db ->
+        fun getTraitByName(name: String): TraitObject? = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
-                    select = arrayOf(ObservationVariable.PK),
-                    where = "observation_variable_name = ?",
-                    whereArgs = arrayOf(name))
-                    .toFirst()[ObservationVariable.PK].toString().toInt()
-
-        } ?: -1
-
-        fun hasTrait(name: String): Boolean = withDatabase { db ->
-
-            db.query(ObservationVariable.tableName,
-                    select = arrayOf("observation_variable_name"),
+//                    select = arrayOf("observation_variable_name"),
                     where = "observation_variable_name = ? COLLATE NOCASE",
-                    whereArgs = arrayOf(name)).toFirst().isNotEmpty()
+                    whereArgs = arrayOf(name)).toFirst().toTraitObject()
 
-        } ?: false
+        }
 
+        fun getTraitByExternalDbId(externalDbId: String, traitDataSource: String): TraitObject? = withDatabase { db ->
+
+            db.query(ObservationVariable.tableName,
+                    where = "external_db_id = ? AND trait_data_source = ? ",
+                    whereArgs = arrayOf(externalDbId, traitDataSource)).toFirst().toTraitObject()
+
+        }
+
+        private fun Map<String, Any?>.toTraitObject() = if (this.isEmpty()) {null} else { TraitObject().also {
+
+            it.id = this[ObservationVariable.PK].toString()
+            it.trait = this["observation_variable_name"].toString()
+            it.format = this["observation_variable_field_book_format"].toString()
+            it.defaultValue = this["default_value"].toString()
+            it.details = this["observation_variable_details"].toString()
+            it.realPosition = this["position"].toString()
+            it.visible = this["visible"].toString() == "true"
+            it.externalDbId = this["external_db_id"].toString()
+            it.traitDataSource = this["trait_data_source"].toString()
+
+        }}
         /**
          * TODO: Replace with View.
          */
@@ -214,7 +226,7 @@ class ObservationVariableDao {
         //TODO missing obs. vars. for min/max/categories
         fun insertTraits(t: TraitObject) = withDatabase { db ->
 
-            if (hasTrait(t.trait)) -1
+            if (getTraitByName(t.trait) != null) -1
             else {
 
                 val varRowId = db.insert(ObservationVariable.tableName, null,

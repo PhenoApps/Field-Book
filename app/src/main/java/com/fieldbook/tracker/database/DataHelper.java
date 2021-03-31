@@ -241,9 +241,9 @@ public class DataHelper {
 //        return largest;
     }
 
-    public Boolean isBrapiSynced(String rid, String parent) {
+    public Boolean isBrapiSynced(String exp_id, String rid, String parent) {
 
-        return ObservationDao.Companion.isBrapiSynced(rid, parent);
+        return ObservationDao.Companion.isBrapiSynced(exp_id, rid, parent);
 
 //        Boolean synced = false;
 //        Observation o = new Observation();
@@ -1180,9 +1180,9 @@ public class DataHelper {
     /**
      * Get observation data that needs to be saved on edits
      */
-    public Observation getObservation(String plotId, String parent) {
+    public Observation getObservation(String exp_id, String plotId, String parent) {
 
-        return ObservationDao.Companion.getObservation(plotId, parent);
+        return ObservationDao.Companion.getObservation(exp_id, plotId, parent);
 
         //        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ?", new String[]{plotId, parent},
 //                null, null, null
@@ -1827,25 +1827,18 @@ public class DataHelper {
 //        }
     }
 
-    /**
-     * V2 - Check if trait exists (non case sensitive)
-     */
-    public boolean hasTrait(String name) {
+    public TraitObject getTraitByName(String name) {
+        return ObservationVariableDao.Companion.getTraitByName(name);
+    }
 
-        return ObservationVariableDao.Companion.hasTrait(name);
+    public TraitObject getTraitByExternalDbId(String externalDbId, String traitDataSource) {
+        return ObservationVariableDao.Companion.getTraitByExternalDbId(externalDbId, traitDataSource);
+    }
 
-//        boolean exist;
-//
-//        Cursor cursor = db.rawQuery("select id from traits where " +
-//                "trait = ? COLLATE NOCASE", new String[]{name});
-//
-//        exist = cursor.moveToFirst();
-//
-//        if (!cursor.isClosed()) {
-//            cursor.close();
-//        }
-//
-//        return exist;
+    public long updateTrait(TraitObject trait) {
+        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getTrait(),
+                trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
+                trait.getDetails(), trait.getCategories());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {

@@ -189,22 +189,20 @@ public class BrapiExportActivity extends AppCompatActivity {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                if (numNewObservations == 0 && numEditedObservations == 0) {
-                    createObservationsComplete = true;
-                    updateObservationsComplete = true;
-                }
                 if (numNewObservations > 0) {
-                    if (numEditedImages == 0) {
-                        updateObservationsComplete = true;
-                    }
                     createObservations();
+                }else{
+                    createObservationsComplete = true;
+                    uploadComplete();
                 }
+
                 if (numEditedObservations > 0) {
-                    if (numNewObservations == 0) {
-                        createObservationsComplete = true;
-                    }
                     updateObservations();
+                }else{
+                    updateObservationsComplete = true;
+                    uploadComplete();
                 }
+
                 if (numNewImages > 0) {
                     loadNewImages();
                     postImages(imagesNew);

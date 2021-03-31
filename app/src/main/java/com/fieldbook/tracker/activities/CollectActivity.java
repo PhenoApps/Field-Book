@@ -352,8 +352,9 @@ public class CollectActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 // if a brapi observation that has been synced, don't allow deleting
+                String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
                 TraitObject currentTrait = traitBox.getCurrentTrait();
-                if (dt.isBrapiSynced(rangeBox.getPlotID(), currentTrait.getTrait())) {
+                if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
                     if (currentTrait.getFormat().equals("photo")) {
                         // I want to use abstract method
                         Map newTraits = traitBox.getNewTraits();
@@ -636,12 +637,12 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         traitBox.update(parent, value);
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
-        Observation observation = dt.getObservation(rangeBox.getPlotID(), parent);
+        Observation observation = dt.getObservation(exp_id, rangeBox.getPlotID(), parent);
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
@@ -670,8 +671,9 @@ public class CollectActivity extends AppCompatActivity {
             return;
         }
 
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
         TraitObject trait = traitBox.getCurrentTrait();
-        if (dt.isBrapiSynced(rangeBox.getPlotID(), trait.getTrait())) {
+        if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), trait.getTrait())) {
             brapiDelete(parent, true);
         } else {
             // Always remove existing trait before inserting again
