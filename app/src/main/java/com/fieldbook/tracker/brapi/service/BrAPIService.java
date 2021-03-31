@@ -218,7 +218,7 @@ public interface BrAPIService {
 
     public void getOntology(BrapiPaginationManager paginationManager, final Function<List<TraitObject>, Void> function, final Function<Integer, Void> failFunction);
 
-    public void postPhenotypes(List<Observation> observations,
+    public void postObservations(List<Observation> observations,
                                final Function<List<Observation>, Void> function,
                                final Function<Integer, Void> failFunction);
 

@@ -536,9 +536,11 @@ public class BrAPIServiceV2 implements BrAPIService{
             List<BrAPIObservationUnitLevelRelationship> levels = pos.getObservationLevelRelationships();
             levels.add(pos.getObservationLevel());
             for(BrAPIObservationUnitLevelRelationship level: levels){
-                String attributeName = level.getLevelName().getBrapiValue();
-                attributeName = attributeName.substring(0,1).toUpperCase() + attributeName.substring(1).toLowerCase();
-                attributesMap.put(attributeName, level.getLevelCode());
+                if(level.getLevelName() != null) {
+                    String attributeName = level.getLevelName().getBrapiValue();
+                    attributeName = attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1).toLowerCase();
+                    attributesMap.put(attributeName, level.getLevelCode());
+                }
             }
 
             if (pos.getPositionCoordinateX() != null){
@@ -557,7 +559,7 @@ public class BrAPIServiceV2 implements BrAPIService{
                 attributesMap.put(rowColStr, pos.getPositionCoordinateY());
             }
 
-            if (pos.getEntryType().getBrapiValue() != null)
+            if (pos.getEntryType() != null && pos.getEntryType().getBrapiValue() != null)
                 attributesMap.put("EntryType", pos.getEntryType().getBrapiValue());
             if (unit.getGermplasmName() != null)
                 attributesMap.put("Germplasm", unit.getGermplasmName());
@@ -651,7 +653,7 @@ public class BrAPIServiceV2 implements BrAPIService{
         return newObservation;
     }
 
-    public void postPhenotypes(List<Observation> observations,
+    public void postObservations(List<Observation> observations,
                                final Function<List<Observation>, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
