@@ -142,7 +142,7 @@ class BrapiProgramsFragment: BaseBrapiFragment() {
 
             this@BrapiProgramsFragment.runOnUiThread {
 
-                listView?.adapter = ArrayAdapter(ctx, android.R.layout.simple_list_item_single_choice, itemDataList)
+                listView?.adapter = ArrayAdapter(ctx, android.R.layout.simple_list_item_multiple_choice, itemDataList)
 
             }
         }
