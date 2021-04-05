@@ -38,6 +38,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.adapters.FieldAdapter;
+import com.fieldbook.tracker.fragments.BrapiProgramsFragment;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -227,7 +228,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                     BrapiActivity.class.getName());
         } else {
             intent.setClassName(FieldEditorActivity.this,
-                    BrapiImportActivity.class.getName());
+                    BrapiProgramsFragment.class.getName());
         }
 
         startActivityForResult(intent, 1);

@@ -537,7 +537,7 @@ public class BrAPIServiceV2 implements BrAPIService{
             levels.add(pos.getObservationLevel());
             for(BrAPIObservationUnitLevelRelationship level: levels){
                 if(level.getLevelName() != null) {
-                    String attributeName = level.getLevelName().getBrapiValue();
+                    String attributeName = level.getLevelName();//.getBrapiValue(); //TODO: I had to comment this out, it as causing a reference error.
                     attributeName = attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1).toLowerCase();
                     attributesMap.put(attributeName, level.getLevelCode());
                 }
