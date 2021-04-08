@@ -16,14 +16,23 @@ import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.util.*
+import io.swagger.client.model.Metadata
+import io.swagger.client.model.MetadataPagination
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.brapi.v2.model.BrAPIAcceptedSearchResponse
+import org.brapi.v2.model.core.BrAPITrial
+import org.brapi.v2.model.core.response.BrAPIListResponse
 import org.brapi.v2.model.core.response.BrAPITrialListResponse
+import org.brapi.v2.model.core.response.BrAPITrialListResponseResult
+import java.net.URLEncoder
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
+@KtorExperimentalAPI
 class BrapiTrialsFragment: BaseBrapiFragment() {
 
     private var mTrials = HashSet<BrapiTrial>()
@@ -35,15 +44,13 @@ class BrapiTrialsFragment: BaseBrapiFragment() {
         const val STUDIES_REQUEST = 802
         const val KEY_TRIALS_ARRAY = "org.phenoapps.brapi.trials_bundle"
     }
+
     /**
      * For this import activity, the top bar shows the current table we are filtering for,
      * which navigates to the previous table on click (like a back button).
      * Similarly, the bottom bar moves to the next table but is like a select all query if no fields are chosen.
      */
-    @KtorExperimentalAPI
     private fun setupTopAndBottomButtons() {
-
-        mPaginationManager.reset()
 
         findViewById<Button>(R.id.currentButton)?.setOnClickListener {
             //update UI with the new state
@@ -61,124 +68,55 @@ class BrapiTrialsFragment: BaseBrapiFragment() {
         }
     }
 
-    data class SearchResult(val searchResultDbId: String? = null)
-    data class TrialSearchRequest(val page: Int, val pageSize: Int, val result: SearchResult? = null, val programDbIds: Array<String>? = null) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as TrialSearchRequest
-
-            if (page != other.page) return false
-            if (pageSize != other.pageSize) return false
-            if (result != other.result) return false
-            if (programDbIds != null) {
-                if (other.programDbIds == null) return false
-                if (!programDbIds.contentEquals(other.programDbIds)) return false
-            } else if (other.programDbIds != null) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result1 = page
-            result1 = 31 * result1 + pageSize
-            result1 = 31 * result1 + (result?.hashCode() ?: 0)
-            result1 = 31 * result1 + (programDbIds?.contentHashCode() ?: 0)
-            return result1
-        }
-    }
-
-    @KtorExperimentalAPI
-    private fun callSearchTrials(programs: List<String>) {
+    private fun callSearchTrials(names: List<String>?, programs: List<String>?, page: Int? = null) {
 
         switchProgress()
 
         mScope.launch {
 
-            val response = withContext(Dispatchers.Default) {
-
-                httpClient.post<TrialSearchRequest> {
-
-                    url("${BrAPIService.getBrapiUrl(applicationContext)}/search/trials/")
-
-                    contentType(ContentType.Application.Json)
-
-                    body = TrialSearchRequest(mPaginationManager.page, mPaginationManager.pageSize,
-                            programDbIds = programs.toTypedArray())
-
-                }
-
-            }
-
-            switchProgress()
-
-            if (response.result?.searchResultDbId == null) {
-
-                fastSearchTrials(programs)
-
-            } else {
-
-                getTrialSearchRequestData(response.result.searchResultDbId)
-            }
-        }
-    }
-
-    @KtorExperimentalAPI
-    private fun getTrialSearchRequestData(searchResultDbId: String) {
-
-        switchProgress()
-
-        mScope.launch {
-
-            val response = withContext(Dispatchers.Default) {
+            val response = withContext(mScope.coroutineContext) {
 
                 httpClient.get<BrAPITrialListResponse> {
 
-                    url("${BrAPIService.getBrapiUrl(applicationContext)}/search/trials/$searchResultDbId")
+                    val currentPage = page?.toString() ?: ""
+                    val baseUrl = BrAPIService.getBrapiUrl(applicationContext)
 
+                    val urlParams = (names?.joinToString("&")
+                        { "trialName=${URLEncoder.encode(it, "UTF-8")}" }) ?: ""
+
+                    val programsUrlParams = (programs?.joinToString("&") { "programDbId=$it" }) ?: ""
+
+                    url("$baseUrl/trials?$urlParams&$programsUrlParams&page=$currentPage")
                 }
             }
 
             switchProgress()
 
-            buildArrayAdapter(response.result.data.map {
-                BrapiTrial().apply {
-                    trialDbId = it.trialDbId
-                    trialName = it.trialName
-                }
-            })
+            runOnUiThread {
+                mPaginationManager.updatePageInfo(response.metadata?.pagination?.totalPages)
+
+                buildArrayAdapter(response.result.data.map {
+                    BrapiTrial().apply {
+                        this.trialName = it.trialName
+                        this.trialDbId = it.trialDbId
+                    }
+                })
+            }
         }
-    }
-
-    /**
-     * Uses brapi client to do a fast search on trials. Works on test-server but not guaranteed for other servers.
-     */
-    private fun fastSearchTrials(programs: List<String>) {
-
-        mService.searchTrials(programs, mPaginationManager, { trials ->
-
-            buildArrayAdapter(trials)
-
-            null
-
-        }) { fail -> handleFailure(fail) }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        findViewById<Button>(R.id.currentButton)?.text = "Trials"
+        findViewById<Button>(R.id.currentButton)?.text = getString(R.string.trials)
 
-        findViewById<Button>(R.id.nextButton)?.text = "Studies"
+        findViewById<Button>(R.id.nextButton)?.text = getString(R.string.studies)
 
         setupTopAndBottomButtons()
 
     }
 
-    //load and display programs
-    @KtorExperimentalAPI
-    override fun loadBrAPIData() {
+    override fun loadBrAPIData(names: List<String>?) {
 
         mScope.launch { //uses Dispatchers.IO for network background processing
 
@@ -188,7 +126,7 @@ class BrapiTrialsFragment: BaseBrapiFragment() {
 
                 programIds?.let {
 
-                    callSearchTrials(it)
+                    callSearchTrials(names, it, mPaginationManager.page)
 
                 }
 
@@ -207,7 +145,12 @@ class BrapiTrialsFragment: BaseBrapiFragment() {
      * or ProgramTrialPair. All of which contain information to reconstruct the filter tree
      * from user input.
      */
-    private fun <T> buildArrayAdapter(data: List<T>) {
+    private fun <T> buildArrayAdapter(data: List<T>?) {
+
+        if (data == null || data.isEmpty()) {
+            Toast.makeText(applicationContext, R.string.import_error_or_empty_response, Toast.LENGTH_SHORT).show()
+            return
+        }
 
         val listView = findViewById<ListView>(R.id.listView)
 

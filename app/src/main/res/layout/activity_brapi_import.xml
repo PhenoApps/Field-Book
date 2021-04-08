@@ -31,6 +31,28 @@
         app:layout_constraintTop_toBottomOf="@id/serverTextView"
         tools:text="Programs" />
 
+    <EditText
+        android:id="@+id/nameEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:hint="@string/fragment_brapi_import_search_name_hint"
+        android:inputType="text"
+        app:layout_constraintBottom_toTopOf="@id/listView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/searchButton"
+        app:layout_constraintTop_toBottomOf="@id/currentButton" />
+
+    <Button
+        android:id="@+id/searchButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="@string/search"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/currentButton"
+        app:layout_constraintBottom_toTopOf="@id/listView"/>
+
     <ListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
@@ -38,7 +60,7 @@
         app:layout_constraintBottom_toTopOf="@id/pageControllerView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/currentButton"
+        app:layout_constraintTop_toBottomOf="@id/nameEditText"
         tools:listitem="@android:layout/simple_list_item_1" />
 
     <com.fieldbook.tracker.views.PageControllerView

@@ -4,27 +4,38 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
-import android.transition.Explode
-import android.transition.TransitionInflater
 import android.util.Log
 import android.view.View
-import android.view.Window
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.*
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import com.fieldbook.tracker.views.PageControllerView
+import com.google.gson.*
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonToken
+import com.google.gson.stream.JsonWriter
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
+import io.ktor.client.features.json.JsonSerializer
+import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.util.*
+import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import java.io.IOException
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.*
-import kotlin.collections.HashSet
 
+@KtorExperimentalAPI
 abstract class BaseBrapiFragment: FragmentActivity() {
 
     companion object {
@@ -49,15 +60,73 @@ abstract class BaseBrapiFragment: FragmentActivity() {
 
     }
 
-    @KtorExperimentalAPI
-    protected val httpClient = HttpClient(CIO) {
+    /**
+     * Brapi type adapter that catches parsing exceptions and returns a default date.
+     * This can only be used in O and above because BrAPI dates use java.time.OffsetDateTime
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    class OffsetDateTimeTypeAdapter constructor(private var formatter: DateTimeFormatter) : TypeAdapter<OffsetDateTime?>() {
 
-        install(JsonFeature) {
-            serializer = GsonSerializer {
-                serializeNulls()
-                disableHtmlEscaping()
+        @Throws(IOException::class)
+        override fun write(out: JsonWriter, date: OffsetDateTime?) {
+            if (date == null) {
+                out.nullValue()
+            } else {
+                out.value(formatter.format(date))
             }
         }
+
+        @Throws(IOException::class)
+        override fun read(`in`: JsonReader): OffsetDateTime? {
+            return when (`in`.peek()) {
+                JsonToken.NULL -> {
+                    `in`.nextNull()
+                    null
+                }
+                else -> {
+                    var date = `in`.nextString()
+                    if (date.endsWith("+0000")) {
+                        date = date.substring(0, date.length - 5) + "Z"
+                    }
+                    try {
+                        OffsetDateTime.parse(date, formatter)
+                    } catch (e: DateTimeParseException) {
+                        e.printStackTrace()
+                        OffsetDateTime.MIN
+                    }
+                }
+            }
+        }
+    }
+
+    //uses brapi v2 client json serializer
+    //if the client receives malformed json it will cancel the response
+    @RequiresApi(Build.VERSION_CODES.O)
+    class Serializer : JsonSerializer {
+
+        private val backend = org.brapi.client.v2.JSON().apply {
+            this.gson = this.gson.newBuilder().registerTypeAdapter(OffsetDateTime::class.java,
+                            OffsetDateTimeTypeAdapter(DateTimeFormatter.ISO_OFFSET_DATE_TIME)).create()
+        }
+
+
+        override fun write(data: Any, contentType: ContentType): OutgoingContent =
+                TextContent(backend.serialize(data), contentType)
+
+        override fun read(type: TypeInfo, body: Input): Any {
+            val text = body.readText()
+            return backend.deserialize(text, type.reifiedType)
+        }
+    }
+
+    protected var httpClient = HttpClient(CIO) {
+
+        install(JsonFeature) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                serializer = Serializer()
+            } else serializer = GsonSerializer()
+        }
+        expectSuccess = false
         engine {
             maxConnectionsCount = 32
             requestTimeout = 1000000
@@ -86,6 +155,35 @@ abstract class BaseBrapiFragment: FragmentActivity() {
         }
     }
 
+    //allow user to type ',' delimited names and search for them
+    private fun setupSearch() {
+
+        val searchEditText = findViewById<EditText>(R.id.nameEditText)
+        val searchButton = findViewById<Button>(R.id.searchButton)
+
+        searchButton.setOnClickListener {
+
+            mPaginationManager.reset()
+
+            searchEditText.text?.toString()?.let { namesDelimited ->
+                val tokens = namesDelimited.split(",")
+                if (tokens.isNotEmpty()) {
+                    loadBrAPIData(tokens)
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        httpClient.close()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        httpClient.close()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -95,18 +193,7 @@ abstract class BaseBrapiFragment: FragmentActivity() {
             //checks that the preference brapi url matches a web url
             if (BrAPIService.hasValidBaseUrl(this)) {
 
-//                // inside your activity (if you did not enable transitions in your theme)
-//                with(window) {
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//
-//                        this?.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-//
-//                        val inflater = TransitionInflater.from(context)
-//                        exitTransition = inflater.inflateTransition(R.transition.slide_in)
-//                        enterTransition = inflater.inflateTransition(R.transition.slide_out)
-//                    }
-//                }
-
+                //set transitions between fragments
                 overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top)
 
                 setContentView(R.layout.activity_brapi_import)
@@ -116,6 +203,8 @@ abstract class BaseBrapiFragment: FragmentActivity() {
                 findViewById<ListView>(R.id.listView)?.choiceMode = ListView.CHOICE_MODE_MULTIPLE
 
                 setupPageController()
+
+                setupSearch()
 
                 loadBrAPIData()
 
@@ -168,8 +257,8 @@ abstract class BaseBrapiFragment: FragmentActivity() {
         }
     }
 
-    //load and display programs
-    abstract fun loadBrAPIData()
+    //load and display data given a list of searchable names, an empty list searches for all data
+    abstract fun loadBrAPIData(names: List<String>? = null)
 
     //function used to toggle existence of an item in a set
     protected fun <T> HashSet<T>.addOrRemove(item: T) {

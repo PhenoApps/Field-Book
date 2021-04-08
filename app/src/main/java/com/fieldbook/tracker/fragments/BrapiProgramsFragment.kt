@@ -1,25 +1,32 @@
 package com.fieldbook.tracker.fragments
 
-import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.transition.Explode
 import android.util.Log
-import android.view.View
-import android.view.Window
 import android.widget.*
 import androidx.annotation.RequiresApi
-import androidx.core.os.bundleOf
 import androidx.fragment.app.*
-import androidx.transition.Slide
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.brapi.model.BrapiProgram
+import com.fieldbook.tracker.brapi.model.BrapiTrial
+import com.fieldbook.tracker.brapi.service.BrAPIService
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.util.*
+import io.swagger.client.model.Metadata
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.brapi.v2.model.core.response.BrAPIProgramListResponse
+import org.brapi.v2.model.core.response.BrAPIProgramListResponseResult
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
+@KtorExperimentalAPI
 class BrapiProgramsFragment: BaseBrapiFragment() {
 
     private var mPrograms = HashSet<BrapiProgram>()
@@ -59,43 +66,55 @@ class BrapiProgramsFragment: BaseBrapiFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        findViewById<Button>(R.id.currentButton)?.text = "Programs"
+        findViewById<Button>(R.id.currentButton)?.text = getString(R.string.programs)
 
-        findViewById<Button>(R.id.nextButton)?.text = "Trials"
+        findViewById<Button>(R.id.nextButton)?.text = getString(R.string.trials)
 
         setupTopAndBottomButtons()
     }
 
-    //create a list of programs from brapi data source
-    private fun loadPrograms() {
+    private fun loadPrograms(names: List<String>?, page: Int? = null) {
 
         switchProgress()
 
-        mService.getPrograms(mPaginationManager, { programs ->
+        mScope.launch {
+
+            val response = withContext(Dispatchers.Default) {
+
+                httpClient.get<BrAPIProgramListResponse> {
+
+                    val baseUrl = BrAPIService.getBrapiUrl(applicationContext)
+                    val urlParams = (names?.joinToString("&")
+                        { "programName=${URLEncoder.encode(it, "UTF-8")}" }) ?: ""
+                    if (page == null) {
+                        url("$baseUrl/programs?$urlParams")
+                    } else url("$baseUrl/programs$urlParams&page=$page")
+                }
+            }
 
             switchProgress()
 
-            buildArrayAdapter(programs)
+            runOnUiThread {
+                mPaginationManager.updatePageInfo(response.metadata?.pagination?.totalPages)
 
-            null
-
-        }) { fail ->
-
-            switchProgress()
-
-            handleFailure(fail)
-
+                buildArrayAdapter(response.result.data.map {
+                    BrapiProgram().apply {
+                        this.programDbId = it.programDbId
+                        this.programName = it.programName
+                    }
+                })
+            }
         }
     }
 
     //load and display programs
-    override fun loadBrAPIData() {
+    override fun loadBrAPIData(names: List<String>?) {
 
         mScope.launch { //uses Dispatchers.IO for network background processing
 
             try {
 
-                loadPrograms()
+                loadPrograms(names)
 
             } catch (cme: ConcurrentModificationException) {
 
@@ -112,7 +131,12 @@ class BrapiProgramsFragment: BaseBrapiFragment() {
      * or ProgramTrialPair. All of which contain information to reconstruct the filter tree
      * from user input.
      */
-    private fun <T> buildArrayAdapter(data: List<T>) {
+    private fun <T> buildArrayAdapter(data: List<T>?) {
+
+        if (data == null || data.isEmpty()) {
+            Toast.makeText(applicationContext, R.string.import_error_or_empty_response, Toast.LENGTH_SHORT).show()
+            return
+        }
 
         val listView = findViewById<ListView>(R.id.listView)
 

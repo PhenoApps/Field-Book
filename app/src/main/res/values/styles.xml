@@ -107,5 +107,5 @@
         <item name="android:gravity">center</item>
         <item name="android:textSize">@dimen/text_size_xlarge</item>
     </style>
-    
+
 </resources>
