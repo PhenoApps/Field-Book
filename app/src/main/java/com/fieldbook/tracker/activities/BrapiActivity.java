@@ -34,6 +34,8 @@ public class BrapiActivity extends AppCompatActivity {
     private BrAPIService brAPIService;
     private BrapiStudyDetails selectedStudy;
 
+    BrapiLoadDialog brapiLoadDialog;
+
     // Filter by
     private String programDbId;
     private String trialDbId;
@@ -45,11 +47,14 @@ public class BrapiActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        brapiLoadDialog.dismiss();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        brAPIService.authorizeClient();
+        loadStudiesList();
     }
 
     @Override
@@ -62,6 +67,7 @@ public class BrapiActivity extends AppCompatActivity {
                 paginationManager = new BrapiPaginationManager(this);
 
                 brAPIService = BrAPIServiceFactory.getBrAPIService(BrapiActivity.this);
+                brapiLoadDialog = new BrapiLoadDialog(this);
 
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
@@ -132,7 +138,6 @@ public class BrapiActivity extends AppCompatActivity {
 
             @Override
             public Void apply(final Integer code) {
-
                 (BrapiActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -188,9 +193,8 @@ public class BrapiActivity extends AppCompatActivity {
 
     private void saveStudy() {
         if(this.selectedStudy != null) {
-            BrapiLoadDialog bld = new BrapiLoadDialog(this);
-            bld.setSelectedStudy(this.selectedStudy);
-            bld.show();
+            brapiLoadDialog.setSelectedStudy(this.selectedStudy);
+            brapiLoadDialog.show();
         }else{
             Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_study, Toast.LENGTH_SHORT).show();
         }

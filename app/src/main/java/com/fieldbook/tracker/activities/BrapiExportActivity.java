@@ -135,10 +135,10 @@ public class BrapiExportActivity extends AppCompatActivity {
         super.onResume();
 
         // Check out brapi auth
-        BrapiControllerResponse brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
+//        BrapiControllerResponse brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
 
         // Check whether our brapi auth response was exists or was successful
-        processBrapiControllerMessage(brapiControllerResponse);
+    //    processBrapiControllerMessage(brapiControllerResponse);
 
     }
 
@@ -523,9 +523,7 @@ public class BrapiExportActivity extends AppCompatActivity {
                     putImageContentError == UploadError.API_UNAUTHORIZED_ERROR ||
                     putImageMetaDataError == UploadError.API_UNAUTHORIZED_ERROR) {
                 reset();
-                // Start the login process
-                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(BrapiExportActivity.this, BrAPIService.exportTarget);
-                brapiAuth.show();
+                BrAPIService.handleConnectionError(this, 401);
                 return;
             } else {
                 String message;

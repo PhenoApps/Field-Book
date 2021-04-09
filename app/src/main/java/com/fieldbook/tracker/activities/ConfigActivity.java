@@ -569,7 +569,7 @@ public class ConfigActivity extends AppCompatActivity {
             startActivity(exportIntent);
         } else {
             // Show our login dialog
-            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this, BrAPIService.exportTarget);
+            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this);
             brapiAuth.show();
         }
     }

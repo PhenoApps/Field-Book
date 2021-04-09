@@ -71,8 +71,8 @@ public class BrAPIServiceV1 implements BrAPIService {
     public BrAPIServiceV1(Context context) {
         this.context = context;
         ApiClient apiClient = new ApiClient().setBasePath(BrAPIService.getBrapiUrl(context));
-        // Make timeout longer. Set it to 60 seconds for now
-        apiClient.setReadTimeout(60000);
+        // 2 minute timeout to accomodate longer response times
+        apiClient.setReadTimeout(2*60000);
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
         this.programsApi = new ProgramsApi(apiClient);
@@ -80,6 +80,11 @@ public class BrAPIServiceV1 implements BrAPIService {
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
+    }
+
+    @Override
+    public void authorizeClient() {
+
     }
 
     private String getBrapiToken() {

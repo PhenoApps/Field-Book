@@ -45,6 +45,31 @@
 
     <PreferenceCategory
         android:key="brapi_server_list"
+        android:title="@string/preferences_brapi_advanced_title"
+        app:iconSpaceReserved="false">
+
+        <EditTextPreference
+            android:defaultValue="@string/brapi_oidc_url_default"
+            android:dialogMessage="@string/brapi_oidc_url_desc"
+            android:dialogTitle="@string/brapi_oidc_url"
+            android:icon="@drawable/ic_adv_brapi_base"
+            android:key="BRAPI_OIDC_URL"
+            android:summary="@string/brapi_oidc_url_desc"
+            android:title="@string/brapi_oidc_url" />
+
+        <ListPreference
+            android:defaultValue="@string/preferences_brapi_oidc_flow_oauth_implicit"
+            android:entries="@array/pref_brapi_oidc_flow"
+            android:entryValues="@array/pref_brapi_oidc_flow"
+            android:icon="@drawable/ic_pref_brapi_version"
+            android:key="BRAPI_OIDC_FLOW"
+            android:summary="%s"
+            android:title="@string/preferences_brapi_oidc_flow" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="brapi_server_list"
         android:title="@string/preferences_brapi_servers_title"
         app:iconSpaceReserved="false">
 

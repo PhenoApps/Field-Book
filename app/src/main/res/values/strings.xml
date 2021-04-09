@@ -197,6 +197,7 @@
     <string name="preferences_behavior_disable_entry_arrow_neither">Neither</string>
 
     <string name="preferences_brapi_core_title">Configuration</string>
+    <string name="preferences_brapi_advanced_title">Advanced Auth Settings</string>
     <string name="preferences_brapi_servers_title">Community Servers</string>
     <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
     <string name="preferences_brapi_server_barcode_prompt">Scan a server URL</string>
@@ -207,6 +208,9 @@
     <string name="preferences_brapi_version_v1">V1</string>
     <string name="preferences_brapi_version_v2">V2</string>
     <string name="prefrences_brapi_page_size">Page Size</string>
+    <string name="preferences_brapi_oidc_flow">OIDC Flow</string>
+    <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
+    <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
 
     <string name="preferences_naming">Naming</string>
     <string name="preferences_naming_photo">Photo name format</string>
@@ -462,6 +466,10 @@
     <string name="preferences_brapi" translatable="false">BrAPI</string>
     <string name="brapi_base_url">BrAPI Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
+    <string name="brapi_base_url_default">https://test-server.brapi.org</string>
+    <string name="brapi_oidc_url">OIDC Discovery URL</string>
+    <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
+    <string name="brapi_oidc_url_default">https://test-server.brapi.org/.well-known/openid-configuration</string>
     <string name="brapi_save_authorize">Save and Authorize</string>
     <string name="brapi_authorize">Authorize</string>
     <string name="brapi_reauthorize">Reauthorize BrAPI</string>
@@ -471,7 +479,6 @@
     <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
     <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
     <string name="brapi_btn_auth_summary">Brapi is currently authorized with %1$s</string>
-    <string name="brapi_base_url_default">https://test-server.brapi.org</string>
     <string name="brapi_load_data_button">Load Fields</string>
     <string name="brapi_load_traits_button">Load Traits</string>
     <string name="brapi_save_data_button">Save Field</string>
