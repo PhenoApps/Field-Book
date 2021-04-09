@@ -97,3 +97,5 @@ dependencies {
 repositories {
     mavenCentral()
 }
+task prepareKotlinBuildScriptModel {
+}
