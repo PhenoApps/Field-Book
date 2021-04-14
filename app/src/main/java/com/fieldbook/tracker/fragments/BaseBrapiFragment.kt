@@ -142,6 +142,23 @@ abstract class BaseBrapiFragment: FragmentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        httpClient = HttpClient(CIO) {
+
+            install(JsonFeature) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    serializer = Serializer()
+                } else serializer = GsonSerializer()
+            }
+            expectSuccess = false
+            engine {
+                maxConnectionsCount = 32
+                requestTimeout = 1000000
+            }
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         httpClient.close()

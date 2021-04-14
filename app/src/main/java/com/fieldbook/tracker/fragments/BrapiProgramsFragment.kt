@@ -79,16 +79,16 @@ class BrapiProgramsFragment: BaseBrapiFragment() {
 
         mScope.launch {
 
-            val response = withContext(Dispatchers.Default) {
+            val response = withContext(mScope.coroutineContext) {
 
                 httpClient.get<BrAPIProgramListResponse> {
 
+                    val currentPage = page?.toString() ?: ""
                     val baseUrl = BrAPIService.getBrapiUrl(applicationContext)
                     val urlParams = (names?.joinToString("&")
                         { "programName=${URLEncoder.encode(it, "UTF-8")}" }) ?: ""
-                    if (page == null) {
-                        url("$baseUrl/programs?$urlParams")
-                    } else url("$baseUrl/programs$urlParams&page=$page")
+
+                    url("$baseUrl/programs?$urlParams&page=$currentPage")
                 }
             }
 
@@ -114,7 +114,7 @@ class BrapiProgramsFragment: BaseBrapiFragment() {
 
             try {
 
-                loadPrograms(names)
+                loadPrograms(names, mPaginationManager.page)
 
             } catch (cme: ConcurrentModificationException) {
 
