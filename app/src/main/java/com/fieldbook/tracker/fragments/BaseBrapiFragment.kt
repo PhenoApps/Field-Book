@@ -13,6 +13,8 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
+import com.fieldbook.tracker.brapi.typeadapters.LocalDateTypeAdapter
+import com.fieldbook.tracker.brapi.typeadapters.OffsetDateTimeTypeAdapter
 import com.fieldbook.tracker.views.PageControllerView
 import com.google.gson.*
 import com.google.gson.stream.JsonReader
@@ -29,6 +31,7 @@ import io.ktor.util.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import org.threeten.bp.LocalDateTime
 import java.io.IOException
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -60,53 +63,18 @@ abstract class BaseBrapiFragment: FragmentActivity() {
 
     }
 
-    /**
-     * Brapi type adapter that catches parsing exceptions and returns a default date.
-     * This can only be used in O and above because BrAPI dates use java.time.OffsetDateTime
-     */
-    @RequiresApi(Build.VERSION_CODES.O)
-    class OffsetDateTimeTypeAdapter constructor(private var formatter: DateTimeFormatter) : TypeAdapter<OffsetDateTime?>() {
-
-        @Throws(IOException::class)
-        override fun write(out: JsonWriter, date: OffsetDateTime?) {
-            if (date == null) {
-                out.nullValue()
-            } else {
-                out.value(formatter.format(date))
-            }
-        }
-
-        @Throws(IOException::class)
-        override fun read(`in`: JsonReader): OffsetDateTime? {
-            return when (`in`.peek()) {
-                JsonToken.NULL -> {
-                    `in`.nextNull()
-                    null
-                }
-                else -> {
-                    var date = `in`.nextString()
-                    if (date.endsWith("+0000")) {
-                        date = date.substring(0, date.length - 5) + "Z"
-                    }
-                    try {
-                        OffsetDateTime.parse(date, formatter)
-                    } catch (e: DateTimeParseException) {
-                        e.printStackTrace()
-                        OffsetDateTime.MIN
-                    }
-                }
-            }
-        }
-    }
-
     //uses brapi v2 client json serializer
     //if the client receives malformed json it will cancel the response
     @RequiresApi(Build.VERSION_CODES.O)
     class Serializer : JsonSerializer {
 
         private val backend = org.brapi.client.v2.JSON().apply {
-            this.gson = this.gson.newBuilder().registerTypeAdapter(OffsetDateTime::class.java,
-                            OffsetDateTimeTypeAdapter(DateTimeFormatter.ISO_OFFSET_DATE_TIME)).create()
+            this.gson = this.gson.newBuilder()
+                    .registerTypeAdapter(LocalDateTime::class.java,
+                            LocalDateTypeAdapter(DateTimeFormatter.ISO_LOCAL_DATE))
+                    .registerTypeAdapter(OffsetDateTime::class.java,
+                            OffsetDateTimeTypeAdapter(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                    .create()
         }
 
 
