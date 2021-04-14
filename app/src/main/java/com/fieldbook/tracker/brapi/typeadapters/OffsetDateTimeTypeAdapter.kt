@@ -7,7 +7,10 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
 import java.io.IOException
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
@@ -42,8 +45,15 @@ class OffsetDateTimeTypeAdapter(private var formatter: DateTimeFormatter) : Type
                 try {
                     OffsetDateTime.parse(date, formatter)
                 } catch (e: DateTimeParseException) {
-                    e.printStackTrace()
-                    OffsetDateTime.MIN
+                    //e.printStackTrace()
+                    try {
+                        OffsetDateTime.of(LocalDate.parse(date,
+                                DateTimeFormatter.ISO_LOCAL_DATE),
+                                LocalTime.NOON, ZoneOffset.UTC)
+                    } catch (e: DateTimeParseException) {
+                        e.printStackTrace()
+                        OffsetDateTime.MIN
+                    }
                 }
             }
         }
