@@ -11,19 +11,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="dialog_field_creator_text_view,
-            dialog_field_creator_top_left_radio_button,
+        app:constraint_referenced_ids="dialog_field_creator_top_left_radio_button,
             dialog_field_creator_top_right_radio_button,
             dialog_field_creator_bottom_left_radio_button,
-            dialog_field_creator_bottom_right_radio_button"/>
+            dialog_field_creator_bottom_right_radio_button,
+            dialog_field_creator_start_back_button"/>
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/dialog_field_creator_group_pattern"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="dialog_field_creator_plot_pattern_text_view,
-            plot_linear_button, plot_zigzag_button"/>
+        app:constraint_referenced_ids="plot_linear_button, plot_zigzag_button,
+            dialog_field_creator_pattern_back_button"/>
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/dialog_field_creator_group_size"
@@ -31,21 +31,11 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:visibility="visible"
-        app:constraint_referenced_ids="dialog_field_creator_field_size_text_view,
-            dialog_field_creator_field_row_edit_text, dialog_field_creator_field_column_edit_text,
+        app:constraint_referenced_ids="dialog_field_creator_field_row_edit_text,
+            dialog_field_creator_field_column_edit_text,
             dialog_field_creator_size_button, dialog_field_creator_field_name_edit_text"/>
 
     <!---region Choose rows and columns view group -->
-
-    <TextView
-        android:id="@+id/dialog_field_creator_field_size_text_view"
-        style="@style/FieldCreatorDialog.TextSummary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_field_creator_ask_size"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/dialog_field_creator_field_name_edit_text"
@@ -54,8 +44,8 @@
         android:hint="@string/dialog_field_creator_ask_name_hint"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/dialog_field_creator_field_size_text_view"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_field_size_text_view" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <EditText
         android:id="@+id/dialog_field_creator_field_row_edit_text"
@@ -64,7 +54,7 @@
         android:hint="@string/dialog_field_creator_ask_row_hint"
         android:inputType="number"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/dialog_field_creator_field_size_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_field_name_edit_text" />
 
     <EditText
@@ -74,10 +64,10 @@
         android:hint="@string/dialog_field_creator_ask_columns_hint"
         android:inputType="number"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/dialog_field_creator_field_size_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_field_row_edit_text" />
 
-    <Button
+    <Button style="@style/ButtonStyle"
         android:id="@+id/dialog_field_creator_size_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -90,15 +80,6 @@
     <!-- endregion -->
 
     <!---region Choose starting point view group -->
-
-    <TextView  style="@style/FieldCreatorDialog.TextSummary"
-        android:id="@+id/dialog_field_creator_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_field_creator_ask_start_point"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <RadioButton
         android:id="@+id/dialog_field_creator_bottom_right_radio_button"
@@ -122,7 +103,7 @@
         android:layout_height="wrap_content"
         android:text="@string/dialog_field_creator_top_left"
         app:layout_constraintStart_toStartOf="@+id/dialog_field_creator_bottom_left_radio_button"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_text_view" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <RadioButton
         android:id="@+id/dialog_field_creator_top_right_radio_button"
@@ -130,37 +111,49 @@
         android:layout_height="wrap_content"
         android:text="@string/dialog_field_creator_top_right"
         app:layout_constraintStart_toStartOf="@+id/dialog_field_creator_bottom_right_radio_button"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_text_view" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button style="@style/ButtonStyle"
+        android:id="@+id/dialog_field_creator_start_back_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dialog_back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_bottom_right_radio_button" />
+
     <!-- endregion -->
 
     <!---region Choose plot pattern view group -->
 
-    <TextView   style="@style/FieldCreatorDialog.TextSummary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/dialog_field_creator_plot_pattern_text_view"
-        android:text="@string/dialog_field_creator_ask_pattern"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <ImageButton
+    <ImageButton style="@style/ButtonStyle"
         android:id="@+id/plot_linear_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/ic_plot_pattern_linear"
-        app:layout_constraintStart_toStartOf="@+id/dialog_field_creator_plot_pattern_text_view"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_plot_pattern_text_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:contentDescription="@string/dialog_field_creator_linear_button_content_desc" />
 
-    <ImageButton
+    <ImageButton style="@style/ButtonStyle"
         android:id="@+id/plot_zigzag_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/ic_plot_pattern_zigzag"
-        app:layout_constraintEnd_toEndOf="@+id/dialog_field_creator_plot_pattern_text_view"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_plot_pattern_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:contentDescription="@string/dialog_field_creator_zig_button_content_desc" />
+
+    <Button style="@style/ButtonStyle"
+        android:id="@+id/dialog_field_creator_pattern_back_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dialog_back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/plot_zigzag_button" />
 
     <!--endregion-->
 
@@ -172,19 +165,11 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:visibility="gone"
-        app:constraint_referenced_ids="dialog_field_creator_review_title_text,
-            dialog_field_creator_review_text, field_creator_plot_large_field_text_view,
+        app:constraint_referenced_ids="dialog_field_creator_review_text,
+            field_creator_plot_large_field_text_view,
             dialog_field_creator_review_image, dialog_field_creator_submit_button,
-            dialog_field_creator_cancel_button, field_creator_plot_insert_text_view"/>
-
-    <TextView style="@style/FieldCreatorDialog.Title"
-        android:id="@+id/dialog_field_creator_review_title_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/dialog_field_creator_review_image"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:text="@string/dialog_field_creator_review_title" />
+            dialog_field_creator_cancel_button, field_creator_plot_insert_text_view,
+            dialog_field_creator_back_button"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -222,7 +207,7 @@
         tools:src="@drawable/ic_plot_pattern_linear"
         android:contentDescription="@string/dialog_field_creator_review_image_content_desc" />
 
-    <Button
+    <Button style="@style/ButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/dialog_field_creator_submit_button"
@@ -231,14 +216,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <Button
+    <Button style="@style/ButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/dialog_field_creator_back_button"
+        android:text="@string/dialog_back"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_submit_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button style="@style/ButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:id="@+id/dialog_field_creator_cancel_button"
         android:text="@android:string/cancel"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_submit_button"
+        app:layout_constraintTop_toBottomOf="@id/dialog_field_creator_back_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
     <!--endregion-->
 

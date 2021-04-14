@@ -570,5 +570,6 @@
     <string name="dialog_field_creator_linear_button_content_desc">Button to choose linear plot pattern.</string>
     <string name="dialog_field_creator_zig_button_content_desc">Button to choose zig zag plot pattern.</string>
     <string name="dialog_field_creator_review_image_content_desc">Image showing orientation and plot pattern.</string>
+    <string name="dialog_back">Back</string>
 
 </resources>

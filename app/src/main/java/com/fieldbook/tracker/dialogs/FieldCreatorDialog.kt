@@ -26,7 +26,7 @@ import kotlin.math.*
  *
  *                 FieldCreatorDialog dialog = new FieldCreatorDialog(this);
  */
-class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(activity), CoroutineScope by MainScope() {
+class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(activity, R.style.Dialog), CoroutineScope by MainScope() {
 
     private val helper by lazy { DataHelper(context) }
 
@@ -43,7 +43,9 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
         //canceling the dialog might leave the insert job on the background thread
         //which might be preferable for large plot sizes
-        setCancelable(false)
+        //setCancelable(false)
+
+        setCanceledOnTouchOutside(true)
 
         //for some reason this is required for the views to match the layout file
         window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -56,9 +58,13 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
     //row*column plots will be generated based on a chosen pattern
     private fun setupSizeGroup() {
 
+        setTitle(R.string.dialog_field_creator_ask_size)
+
         val sizeGroup = findViewById<Group>(R.id.dialog_field_creator_group_size)
 
         val submitSizeButton = findViewById<Button>(R.id.dialog_field_creator_size_button)
+
+        sizeGroup.visibility = View.VISIBLE
 
         //when the size OK button is pressed...
         submitSizeButton.setOnClickListener {
@@ -88,18 +94,18 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
                         setupRadioGroup(nameText.toString(), rows, cols)
 
-                    } else Toast.makeText(activity, R.string.dialog_field_creator_field_name_not_unique, Toast.LENGTH_LONG).show()
+                    } else {
+
+                        Toast.makeText(activity, R.string.dialog_field_creator_field_name_not_unique, Toast.LENGTH_LONG).show()
+
+                        nameText.clear()
+                    }
 
 
                 } catch (e: NumberFormatException) {
 
                     e.printStackTrace()
 
-                } finally { //quit by clearing the edit texts
-
-                    rowsText.clear()
-
-                    colsText.clear()
                 }
 
             } else Toast.makeText(activity, R.string.dialog_field_creator_size_group_error, Toast.LENGTH_LONG).show()
@@ -108,20 +114,41 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
     private fun setupRadioGroup(name: String, rows: Int, cols: Int) {
 
-        val radioGroup = findViewById<Group>(R.id.dialog_field_creator_group_start_point)
+        setTitle(R.string.dialog_field_creator_ask_start_point)
 
-        radioGroup.visibility = View.VISIBLE
+        val group = findViewById<Group>(R.id.dialog_field_creator_group_start_point)
+
+        group.visibility = View.VISIBLE
+
+        val backButton = findViewById<Button>(R.id.dialog_field_creator_start_back_button)
+
+        backButton.setOnClickListener {
+
+            group.visibility = View.GONE
+
+            setupSizeGroup()
+        }
 
         //set click listeners for the buttons, when one is pressed switch to the next group
-        radioGroup.referencedIds.forEach { id ->
+        group.referencedIds.forEach { id ->
+
+            (findViewById(id) as? RadioButton)?.apply {
+
+                isChecked = false
+            }
+        }
+
+        //set click listeners for the buttons, when one is pressed switch to the next group
+        group.referencedIds.forEach { id ->
 
             (findViewById(id) as? RadioButton)?.apply {
 
                 setOnClickListener {
 
-                    radioGroup.visibility = View.GONE
+                    group.visibility = View.GONE
 
-                    setupPatternGroup(name, rows, cols, id)
+                    setupPatternGroup(name, rows, cols, this.id)
+
                 }
             }
         }
@@ -129,10 +156,21 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
     private fun setupPatternGroup(name: String, rows: Int, cols: Int, startId: Int) {
 
+        setTitle(R.string.dialog_field_creator_ask_pattern)
+
         val patternGroup = findViewById<Group>(R.id.dialog_field_creator_group_pattern)
 
         val linearButton = findViewById<ImageButton>(R.id.plot_linear_button)
         val zigButton = findViewById<ImageButton>(R.id.plot_zigzag_button)
+
+        val backButton = findViewById<Button>(R.id.dialog_field_creator_pattern_back_button)
+
+        backButton.setOnClickListener {
+
+            patternGroup.visibility = View.GONE
+
+            setupRadioGroup(name, rows, cols)
+        }
 
         //rotate the image patterns based on the chosen starting point
         when (startId) {
@@ -166,6 +204,8 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
     private fun setupReviewGroup(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
 
+        this.setTitle(context.getString(R.string.dialog_field_creator_review_title))
+
         //set the group visibility
         val reviewGroup = findViewById<Group>(R.id.dialog_field_creator_group_review)
         reviewGroup.visibility = View.VISIBLE
@@ -176,6 +216,7 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
         val largeTextView = findViewById<TextView>(R.id.field_creator_plot_large_field_text_view)
         val submitButton = findViewById<Button>(R.id.dialog_field_creator_submit_button)
         val cancelButton = findViewById<Button>(R.id.dialog_field_creator_cancel_button)
+        val backButton = findViewById<Button>(R.id.dialog_field_creator_back_button)
         val imageView = findViewById<ImageView>(R.id.dialog_field_creator_review_image)
 
         //warning if numbers are greater than 50
@@ -227,8 +268,20 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
             dismiss()
         }
 
+        backButton.setOnClickListener {
+
+            reviewGroup.visibility = View.GONE
+
+            setupPatternGroup(name, rows, cols, startId)
+
+        }
+
         submitButton.setOnClickListener {
+
             it.isEnabled = false //no accidental double clicks...
+
+            backButton.isEnabled = false //no going back now
+
             insertBasicField(name, rows, cols, startId, pattern)
         }
 
@@ -250,7 +303,7 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
                     beginTransaction()
 
                     val field = FieldObject().apply {
-                        unique_id = "observationUnitDbId"
+                        unique_id = "plot_id"
                         primary_id = "Row"
                         secondary_id = "Column"
                         exp_sort = "Plot"
@@ -258,57 +311,63 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
                         count = (rows * cols).toString()
                     }
 
-                    val fieldColumns = listOf("Row", "Column", "Plot", "observationUnitDbId")
+                    val fieldColumns = listOf("Row", "Column", "Plot", "plot_id")
                     studyDbId = helper.createField(field, fieldColumns)
 
                     updateFieldInsertText(rows.toString(), cols.toString())
 
+                    insertPlotData(
+                            fieldColumns,
+                            rows,
+                            cols
+                    )
+
                     //eight different cases to consider, P = patterns (linear and zigzag), S = starting states (TL, BR, TR, BL)
-                    when (startId) {
-                        R.id.dialog_field_creator_top_left_radio_button -> {
-                            if (pattern == R.id.plot_linear_button) insertPlotData(
-                                fieldColumns,
-                                rows,
-                                cols
-                            )
-                            else insertPlotData(fieldColumns, rows, cols, linear = false)
-                        }
-                        R.id.dialog_field_creator_bottom_left_radio_button -> {
-                            if (pattern == R.id.plot_linear_button) insertPlotData(
-                                fieldColumns,
-                                rows,
-                                cols,
-                                ttb = false
-                            )
-                            else insertPlotData(fieldColumns, rows, cols, linear = false, ttb = false)
-                        }
-                        R.id.dialog_field_creator_top_right_radio_button -> {
-                            if (pattern == R.id.plot_linear_button) insertPlotData(
-                                fieldColumns,
-                                rows,
-                                cols,
-                                ltr = false
-                            )
-                            else insertPlotData(fieldColumns, rows, cols, linear = false, ltr = false)
-                        }
-                        else -> {
-                            if (pattern == R.id.plot_linear_button) insertPlotData(
-                                fieldColumns,
-                                rows,
-                                cols,
-                                ttb = false,
-                                ltr = false
-                            )
-                            else insertPlotData(
-                                fieldColumns,
-                                rows,
-                                cols,
-                                linear = false,
-                                ttb = false,
-                                ltr = false
-                            )
-                        }
-                    }
+//                    when (startId) {
+//                        R.id.dialog_field_creator_top_left_radio_button -> {
+//                            if (pattern == R.id.plot_linear_button) insertPlotData(
+//                                fieldColumns,
+//                                rows,
+//                                cols
+//                            )
+//                            else insertPlotData(fieldColumns, rows, cols, linear = false)
+//                        }
+//                        R.id.dialog_field_creator_bottom_left_radio_button -> {
+//                            if (pattern == R.id.plot_linear_button) insertPlotData(
+//                                fieldColumns,
+//                                rows,
+//                                cols,
+//                                ttb = false
+//                            )
+//                            else insertPlotData(fieldColumns, rows, cols, linear = false, ttb = false)
+//                        }
+//                        R.id.dialog_field_creator_top_right_radio_button -> {
+//                            if (pattern == R.id.plot_linear_button) insertPlotData(
+//                                fieldColumns,
+//                                rows,
+//                                cols,
+//                                ltr = false
+//                            )
+//                            else insertPlotData(fieldColumns, rows, cols, linear = false, ltr = false)
+//                        }
+//                        else -> {
+//                            if (pattern == R.id.plot_linear_button) insertPlotData(
+//                                fieldColumns,
+//                                rows,
+//                                cols,
+//                                ttb = false,
+//                                ltr = false
+//                            )
+//                            else insertPlotData(
+//                                fieldColumns,
+//                                rows,
+//                                cols,
+//                                linear = false,
+//                                ttb = false,
+//                                ltr = false
+//                            )
+//                        }
+//                    }
 
                     setTransactionSuccessful()
 
@@ -361,9 +420,9 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
         var direction = ltr
         var plotIndex = 0
-        for (i in if (ttb) 0 until rows else rows-1 downTo 0) {
+        for (i in if (ttb) 1 until rows else rows-1 downTo 0) {
 
-            for (j in if (direction) 0 until cols else cols-1 downTo 0) {
+            for (j in if (direction) 1 until cols else cols-1 downTo 0) {
 
                 plotIndex += 1
 
