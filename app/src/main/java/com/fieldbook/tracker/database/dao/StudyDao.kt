@@ -2,7 +2,6 @@ package com.fieldbook.tracker.database.dao
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteStatement
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
@@ -30,7 +29,7 @@ class StudyDao {
             //create a select statement based on the saved plot attribute names
             val select = headers.map { col ->
 
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS `$col`"
+                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
 
             }
 

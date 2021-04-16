@@ -399,6 +399,7 @@
     <string name="import_error_unique">Unique identifier column contains duplicates or has already been used in a different file</string>
     <string name="import_error_unsupported">This file type is not currently supported</string>
     <string name="import_error_columns">Column names contain illegal characters or words: </string>
+    <string name="import_error_columns_replaced">Column names contain illegal characters or words, and were replaced during import.</string>
     <string name="import_error_column_name">Column name in imported file cannot be: </string>
     <string name="import_error_unique_characters_illegal">Selected column contains characters which cannot be used in the unique identifier</string>
     <string name="import_error_column_choice">Columns cannot be used for the same assignment</string>

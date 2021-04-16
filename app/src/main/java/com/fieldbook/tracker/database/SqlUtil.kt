@@ -40,7 +40,7 @@ fun getTime(): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
  */
 fun SQLiteDatabase.query(table: String, select: Array<String>? = null, where: String? = null, whereArgs: Array<String>? = null, orderBy: String? = null): Cursor {
 
-    return this.query(table, select, where, whereArgs, null, null, orderBy)
+    return this.query(table, select?.map { "`$it`" }?.toTypedArray(), where, whereArgs, null, null, orderBy)
 
 }
 

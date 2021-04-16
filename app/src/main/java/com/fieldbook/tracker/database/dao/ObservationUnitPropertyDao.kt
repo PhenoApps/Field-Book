@@ -74,8 +74,8 @@ class ObservationUnitPropertyDao {
         fun getDropDownRange(uniqueName: String, trait: String, plotId: String): Array<String>? = withDatabase { db ->
 
             db.query(sObservationUnitPropertyViewName,
-                    select = arrayOf("`$trait`"),
-                    where = "`$uniqueName` LIKE ?",
+                    select = arrayOf(trait),
+                    where = "$uniqueName LIKE ?",
                     whereArgs = arrayOf(plotId)).toTable().map {
                 it[trait].toString()
             }.toTypedArray()

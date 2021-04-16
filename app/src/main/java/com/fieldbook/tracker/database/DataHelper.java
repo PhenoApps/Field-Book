@@ -121,7 +121,7 @@ public class DataHelper {
      */
     public static String replaceSpecialChars(String s) {
 
-        final Pattern p = Pattern.compile("[()<>/;\\*%$`\"\']");
+        final Pattern p = Pattern.compile("[\\[\\]`\"\']");
 
         int lastIndex = 0;
 
@@ -150,7 +150,9 @@ public class DataHelper {
      * V2 - Check if a string has any special characters
      */
     public static boolean hasSpecialChars(String s) {
-        final Pattern p = Pattern.compile("[()<>/;\\*%$`\"\']");
+//        final Pattern p = Pattern.compile("[()<>/;\\*%$`\"\']");
+        final Pattern p = Pattern.compile("[\\[\\]`\"\']");
+
         final Matcher m = p.matcher(s);
 
         return m.find();
