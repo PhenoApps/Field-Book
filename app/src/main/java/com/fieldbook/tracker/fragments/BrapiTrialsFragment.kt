@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.*
 import androidx.fragment.app.*
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.brapi.model.BrapiProgram
 import com.fieldbook.tracker.brapi.model.BrapiTrial
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import io.ktor.client.*
@@ -25,6 +26,7 @@ import kotlinx.coroutines.withContext
 import org.brapi.v2.model.BrAPIAcceptedSearchResponse
 import org.brapi.v2.model.core.BrAPITrial
 import org.brapi.v2.model.core.response.BrAPIListResponse
+import org.brapi.v2.model.core.response.BrAPIProgramListResponse
 import org.brapi.v2.model.core.response.BrAPITrialListResponse
 import org.brapi.v2.model.core.response.BrAPITrialListResponseResult
 import java.net.URLEncoder
@@ -68,34 +70,41 @@ class BrapiTrialsFragment: BaseBrapiFragment() {
         }
     }
 
-    private fun callSearchTrials(names: List<String>?, programs: List<String>?, page: Int? = null) {
+    private val trialsCache = HashMap<Int, BrAPITrialListResponse?>()
+    private fun callSearchTrials(names: List<String>?, programs: List<String>?, page: Int = 0) {
+
+        val pageSize = mPaginationManager.pageSize
 
         switchProgress()
 
         mScope.launch {
 
-            val response = withContext(mScope.coroutineContext) {
+            for (p in page until page+pageSize) {
 
-                httpClient.get<BrAPITrialListResponse> {
+                if (p !in trialsCache.keys) {
+                    trialsCache[p] = withContext(mScope.coroutineContext) {
 
-                    val currentPage = page?.toString() ?: ""
-                    val baseUrl = BrAPIService.getBrapiUrl(applicationContext)
+                        httpClient.get<BrAPITrialListResponse> {
 
-                    val urlParams = (names?.joinToString("&")
-                        { "trialName=${URLEncoder.encode(it, "UTF-8")}" }) ?: ""
+                            val baseUrl = BrAPIService.getBrapiUrl(applicationContext)
 
-                    val programsUrlParams = (programs?.joinToString("&") { "programDbId=$it" }) ?: ""
+                            val urlParams = (names?.joinToString("&")
+                            { "trialName=${URLEncoder.encode(it, "UTF-8")}" }) ?: ""
 
-                    url("$baseUrl/trials?$urlParams&$programsUrlParams&page=$currentPage")
+                            val programsUrlParams = (programs?.joinToString("&") { "programDbId=$it" }) ?: ""
+
+                            url("$baseUrl/trials?$urlParams&$programsUrlParams&page=$p")
+                        }
+                    }
                 }
             }
 
             switchProgress()
 
             runOnUiThread {
-                mPaginationManager.updatePageInfo(response.metadata?.pagination?.totalPages)
+                mPaginationManager.updatePageInfo(trialsCache[page]?.metadata?.pagination?.totalPages)
 
-                buildArrayAdapter(response.result.data.map {
+                buildArrayAdapter(trialsCache[page]?.result?.data?.map {
                     BrapiTrial().apply {
                         this.trialName = it.trialName
                         this.trialDbId = it.trialDbId

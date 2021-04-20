@@ -16,6 +16,7 @@ import io.ktor.http.*
 import io.ktor.util.*
 import io.swagger.client.model.Metadata
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse
@@ -73,31 +74,39 @@ class BrapiProgramsFragment: BaseBrapiFragment() {
         setupTopAndBottomButtons()
     }
 
-    private fun loadPrograms(names: List<String>?, page: Int? = null) {
+    private val programCache = HashMap<Int, BrAPIProgramListResponse?>()
+    private fun loadPrograms(names: List<String>?, page: Int = 0) {
+
+        val pageSize = mPaginationManager.pageSize
 
         switchProgress()
 
         mScope.launch {
 
-            val response = withContext(mScope.coroutineContext) {
+            for (p in page until page+pageSize) {
 
-                httpClient.get<BrAPIProgramListResponse> {
+                if (p !in programCache.keys) {
+                    programCache[p] = withContext(mScope.coroutineContext) {
 
-                    val currentPage = page?.toString() ?: ""
-                    val baseUrl = BrAPIService.getBrapiUrl(applicationContext)
-                    val urlParams = (names?.joinToString("&")
-                        { "programName=${URLEncoder.encode(it, "UTF-8")}" }) ?: ""
+                        httpClient.get<BrAPIProgramListResponse> {
 
-                    url("$baseUrl/programs?$urlParams&page=$currentPage")
+                            val baseUrl = BrAPIService.getBrapiUrl(applicationContext)
+                            val urlParams = (names?.joinToString("&")
+                            { "programName=${URLEncoder.encode(it, "UTF-8")}" }) ?: ""
+
+                            url("$baseUrl/programs?$urlParams&page=$p")
+                        }
+                    }
                 }
             }
 
             switchProgress()
 
             runOnUiThread {
-                mPaginationManager.updatePageInfo(response.metadata?.pagination?.totalPages)
+                mPaginationManager.updatePageInfo(
+                        programCache[page]?.metadata?.pagination?.totalPages)
 
-                buildArrayAdapter(response.result.data.map {
+                buildArrayAdapter(programCache[page]?.result?.data?.map {
                     BrapiProgram().apply {
                         this.programDbId = it.programDbId
                         this.programName = it.programName

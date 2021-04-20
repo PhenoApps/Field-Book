@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse
 import org.brapi.v2.model.core.response.BrAPIStudyListResponseResult
+import org.brapi.v2.model.core.response.BrAPITrialListResponse
 import java.net.URLEncoder
 import java.util.*
 import kotlin.collections.ArrayList
@@ -64,34 +65,42 @@ class BrapiStudiesFragment: BaseBrapiFragment() {
         }
     }
 
-    private fun callSearchStudies(names: List<String>?, trials: List<String>?, page: Int? = null) {
+    private val studiesCache = HashMap<Int, BrAPIStudyListResponse?>()
+    private fun callSearchStudies(names: List<String>?, trials: List<String>?, page: Int = 0) {
+
+        val pageSize = mPaginationManager.pageSize
 
         switchProgress()
 
         mScope.launch {
 
-            val response = withContext(mScope.coroutineContext) {
+            for (p in page until page+pageSize) {
 
-                httpClient.get<BrAPIStudyListResponse> {
+                if (p !in studiesCache.keys) {
+                    studiesCache[p] = withContext(mScope.coroutineContext) {
 
-                    val currentPage = page?.toString() ?: ""
-                    val baseUrl = BrAPIService.getBrapiUrl(applicationContext)
+                        httpClient.get<BrAPIStudyListResponse> {
 
-                    val urlParams = (names?.joinToString("&")
-                        { "studyName=${URLEncoder.encode(it, "UTF-8")}" }) ?: ""
+                            val currentPage = page?.toString() ?: ""
+                            val baseUrl = BrAPIService.getBrapiUrl(applicationContext)
 
-                    val trialUrlParams = (trials?.joinToString("&") { "trialDbId=$it" }) ?: ""
+                            val urlParams = (names?.joinToString("&")
+                            { "studyName=${URLEncoder.encode(it, "UTF-8")}" }) ?: ""
 
-                    url("$baseUrl/studies?$urlParams&$trialUrlParams&page=$currentPage")
+                            val trialUrlParams = (trials?.joinToString("&") { "trialDbId=$it" }) ?: ""
+
+                            url("$baseUrl/studies?$urlParams&$trialUrlParams&page=$p")
+                        }
+                    }
                 }
             }
 
             switchProgress()
 
             runOnUiThread {
-                mPaginationManager.updatePageInfo(response.metadata?.pagination?.totalPages ?: 1)
+                mPaginationManager.updatePageInfo(studiesCache[page]?.metadata?.pagination?.totalPages ?: 1)
 
-                buildArrayAdapter(response.result?.data?.map {
+                buildArrayAdapter(studiesCache[page]?.result?.data?.map {
                     BrapiStudyDetails().apply {
                         this.studyDbId = it.studyDbId
                         this.studyName = it.studyName
