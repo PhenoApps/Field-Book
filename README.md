@@ -7,28 +7,6 @@ Field Book uses custom layouts for different types of data to that allow rapid d
 Development of Field Book has been supported by the [Collaborative Crop Research Program][1] of The McKnight Foundation and the National Science Foundation under Grant No. (1543958).
 
 ## Contributors
-### Developers
-| [<img src="https://avatars3.githubusercontent.com/u/1869534?s=460&v=4" width="100px;"/><br /><sub><b>Trevor Rife</b></sub>](https://github.com/trife) | [<img src="https://avatars2.githubusercontent.com/u/32845555?s=460&v=4" width="100px;"/><br /><sub><b>Peter Selby</b></sub>](https://github.com/BrapiCoordinatorSelby) | [<img src="https://avatars3.githubusercontent.com/u/36747798?s=460&v=4" width="100px;"/><br /><sub><b>Shanshan Wu</b></sub>](https://github.com/Jessssica33) | [<img src="https://avatars3.githubusercontent.com/u/53413353?s=460&v=4" width="100px;"/><br /><sub><b>Nick Palladino</b></sub>](https://github.com/nickpalladino) | [<img src="https://avatars0.githubusercontent.com/u/17887341?s=460&v=4" width="100px;"/><br /><sub><b>Chris Tucker</b></sub>](https://github.com/ctucker3) |
-| :---: | :---: | :---: | :---: | :---: |
-
-| [<img src="https://avatars0.githubusercontent.com/u/58535480?s=460&v=4" width="100px;"/><br /><sub><b>Minoru Inamori</b></sub>](https://github.com/m-inamori) | [<img src="https://avatars2.githubusercontent.com/u/11297346?s=460&u=3e12ac6ed46fe661bbee80fc460afab51a002f52&v=4" width="100px;"/><br /><sub><b>Bryan Ellerbrock</b></sub>](https://github.com/bellerbrock) | [<img src="https://avatars0.githubusercontent.com/u/15052304?s=460&v=4" width="100px;"/><br /><sub><b>Marcus McHale</b></sub>](https://github.com/marcusmchale) | [<img src="https://avatars1.githubusercontent.com/u/3004635?s=460&u=cc7a914d5bf5bd75719ee3eb53d8776b86415ce7&v=4" width="100px;"/><br /><sub><b>Tim Parsons</b></sub>](https://github.com/timparsons) | [<img src="https://avatars2.githubusercontent.com/u/14339308?s=460&u=df0695479a9766f1cd4b3f9da5e4d469bde0070f&v=4" width="100px;"/><br /><sub><b>dmeidlin</b></sub>](https://github.com/dmeidlin) |
-| :---: | :---: | :---: | :---: | :---: |
-
-### Translators
-Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit Singh,  Erena Edae,  Tatiana Danilova,  Rodrigo Pedrozo,  Cristiano Lemes da Silva,  Sophie Bouchet,  Hiroyoshi Iwata,  Goro Ishikawa,  Khaled El-Shamaa, Mokhlesur Rahman, Alice Brunazzi
-
-## License
-    Licensed under the GNU General Public License version 2 (GPLv2)
-    You may obtain a copy of the License at
-
-       http://www.gnu.org/licenses/gpl-2.0.html
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -38,7 +16,7 @@ Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit S
     <td align="center"><a href="https://github.com/BrapiCoordinatorSelby"><img src="https://avatars.githubusercontent.com/u/32845555?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peter Selby</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=BrapiCoordinatorSelby" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/timparsons"><img src="https://avatars.githubusercontent.com/u/3004635?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Tim Parsons</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=timparsons" title="Code">💻</a> <a href="https://github.com/PhenoApps/Field-Book/pulls?q=is%3Apr+reviewed-by%3Atimparsons" title="Reviewed Pull Requests">👀</a></td>
     <td align="center"><a href="https://github.com/nickpalladino"><img src="https://avatars.githubusercontent.com/u/53413353?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nick</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=nickpalladino" title="Code">💻</a> <a href="https://github.com/PhenoApps/Field-Book/pulls?q=is%3Apr+reviewed-by%3Anickpalladino" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Anickpalladino" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://avatars.githubusercontent.com/u/17887341?v=4"><img src="https://github.com/ctucker3?s=100" width="100px;" alt=""/><br /><sub><b>Chris Tucker</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=ctucker3" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/ctucker3"><img src="https://avatars.githubusercontent.com/u/17887341?v=4" width="100px;" alt=""/><br /><sub><b>Chris Tucker</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=ctucker3" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/chaneylc"><img src="https://avatars.githubusercontent.com/u/5421632?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Chaney Courtney</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=chaneylc" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/dmeidlin"><img src="https://avatars.githubusercontent.com/u/14339308?v=4?s=100" width="100px;" alt=""/><br /><sub><b>dmeidlin</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=dmeidlin" title="Code">💻</a></td>
   </tr>
@@ -60,5 +38,17 @@ Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit S
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
+## License
+    Licensed under the GNU General Public License version 2 (GPLv2)
+    You may obtain a copy of the License at
+
+       http://www.gnu.org/licenses/gpl-2.0.html
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 [1]: http://ccrp.org/
