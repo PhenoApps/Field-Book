@@ -1,4 +1,7 @@
-# Field Book <a href="https://play.google.com/store/apps/details?id=com.fieldbook.tracker"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="50"></a>
+# Field Book <a href="https://play.google.com/store/apps/details?id=com.fieldbook.tracker"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="50"></a>
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-28-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Field Book is a simple app for taking phenotypic notes. Collecting data in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity.
 
