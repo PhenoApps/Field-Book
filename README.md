@@ -32,9 +32,33 @@ Irazema Fuentes-Bueno,  Sandra Dunckel,  Shuangye Wu,  Narinder Singh,  Daljit S
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/trife"><img src="https://avatars.githubusercontent.com/u/1869534?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Trevor Rife</b></sub></a><br /><a href="#projectManagement-trife" title="Project Management">📆</a> <a href="https://github.com/PhenoApps/Field-Book/commits?author=trife" title="Code">💻</a> <a href="#design-trife" title="Design">🎨</a></td>
+    <td align="center"><a href="https://github.com/BrapiCoordinatorSelby"><img src="https://avatars.githubusercontent.com/u/32845555?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peter Selby</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=BrapiCoordinatorSelby" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/timparsons"><img src="https://avatars.githubusercontent.com/u/3004635?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Tim Parsons</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=timparsons" title="Code">💻</a> <a href="https://github.com/PhenoApps/Field-Book/pulls?q=is%3Apr+reviewed-by%3Atimparsons" title="Reviewed Pull Requests">👀</a></td>
+    <td align="center"><a href="https://github.com/nickpalladino"><img src="https://avatars.githubusercontent.com/u/53413353?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nick</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=nickpalladino" title="Code">💻</a> <a href="https://github.com/PhenoApps/Field-Book/pulls?q=is%3Apr+reviewed-by%3Anickpalladino" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Anickpalladino" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://avatars.githubusercontent.com/u/17887341?v=4"><img src="https://github.com/ctucker3?s=100" width="100px;" alt=""/><br /><sub><b>Chris Tucker</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=ctucker3" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/chaneylc"><img src="https://avatars.githubusercontent.com/u/5421632?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Chaney Courtney</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=chaneylc" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/dmeidlin"><img src="https://avatars.githubusercontent.com/u/14339308?v=4?s=100" width="100px;" alt=""/><br /><sub><b>dmeidlin</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=dmeidlin" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/m-inamori"><img src="https://avatars.githubusercontent.com/u/58535480?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Minoru Inamori</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=m-inamori" title="Code">💻</a> <a href="#ideas-m-inamori" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/nahuel-soldevilla"><img src="https://avatars.githubusercontent.com/u/19394293?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nahuel Soldevilla</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=nahuel-soldevilla" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Jessssica33"><img src="https://avatars.githubusercontent.com/u/36747798?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jessssica33</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=Jessssica33" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/abatac"><img src="https://avatars.githubusercontent.com/u/5011207?v=4?s=100" width="100px;" alt=""/><br /><sub><b>abatac</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=abatac" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/marcusmchale"><img src="https://avatars.githubusercontent.com/u/15052304?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Marcus McHale</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=marcusmchale" title="Code">💻</a> <a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Amarcusmchale" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/bellerbrock"><img src="https://avatars.githubusercontent.com/u/11297346?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bryan Ellerbrock</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=bellerbrock" title="Code">💻</a> <a href="#ideas-bellerbrock" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="http://cropgen.github.io"><img src="https://avatars.githubusercontent.com/u/7772391?v=4?s=100" width="100px;" alt=""/><br /><sub><b>narinder singh</b></sub></a><br /><a href="#translation-cropgen" title="Translation">🌍</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="http://www.wheatgenetics.org"><img src="https://avatars.githubusercontent.com/u/7775048?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Daljit Singh</b></sub></a><br /><a href="#translation-singhdj2" title="Translation">🌍</a></td>
+  </tr>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 [1]: http://ccrp.org/
