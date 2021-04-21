@@ -255,6 +255,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "khaled-alshamaa",
+      "name": "Khaled Al-Shamaa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11270404?v=4",
+      "profile": "https://www.ar-php.org/",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
