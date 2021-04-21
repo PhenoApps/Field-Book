@@ -49,8 +49,8 @@
     {
       "login": "ctucker3",
       "name": "Chris Tucker",
-      "avatar_url": "https://github.com/ctucker3",
-      "profile": "https://avatars.githubusercontent.com/u/17887341?v=4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17887341?v=4",
+      "profile": "https://github.com/ctucker3",
       "contributions": [
         "code"
       ]
@@ -214,7 +214,7 @@
     {
       "login": "",
       "name": "Sophie Bouchet",
-      "avatar_url": "",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
       "profile": "",
       "contributions": [
         "translation"
@@ -252,6 +252,15 @@
       "name": "Alice Brunazzi",
       "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
       "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "khaled-alshamaa",
+      "name": "Khaled Al-Shamaa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11270404?v=4",
+      "profile": "https://www.ar-php.org/",
       "contributions": [
         "translation"
       ]
