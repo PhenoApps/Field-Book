@@ -140,8 +140,8 @@ class ObservationDao {
         fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sRemoteImageObservationsViewName, where = "trait_data_source <> ?", whereArgs = arrayOf(hostUrl)).toTable()
-                    .map { row -> FieldBookImage(row["value"].toString(), missingPhoto).apply {
-                        this.fieldBookDbId = row["id"].toString()
+                    .map { row -> FieldBookImage(getStringVal(row, "value"), missingPhoto).apply {
+                        this.fieldBookDbId = getStringVal(row, "id")
                     } }
 
         } ?: emptyList()
@@ -155,8 +155,8 @@ class ObservationDao {
                     where = "trait_data_source <> ? AND trait_data_source <> 'local' AND trait_data_source IS NOT NULL",
                     whereArgs = arrayOf(hostUrl)).toTable()
                     .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
-                        this.fieldBookDbId = row["id"].toString()
-                        this.value = row["value"].toString()
+                        this.fieldBookDbId = getStringVal(row, "id")
+                        this.value = getStringVal(row, "value")
                     } }
 
         } ?: emptyList()
@@ -164,8 +164,8 @@ class ObservationDao {
         fun getUserTraitImageObservations(expId: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sLocalImageObservationsViewName, where = "${Study.FK} = ?", whereArgs = arrayOf(expId)).toTable()
-                    .map { row -> FieldBookImage(row["value"].toString(), missingPhoto).apply {
-                        this.fieldBookDbId = row["id"].toString()
+                    .map { row -> FieldBookImage(getStringVal(row, "value"), missingPhoto).apply {
+                        this.fieldBookDbId = getStringVal(row, "id")
                     } }
 
         } ?: emptyList()
@@ -176,8 +176,8 @@ class ObservationDao {
                     // TODO change study_db_id to match ${Study.FK} in db
                     where = "study_db_id = ? AND (trait_data_source = 'local' OR trait_data_source IS NULL)", whereArgs = arrayOf(expId)).toTable()
                     .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
-                        this.fieldBookDbId = row["id"].toString()
-                        this.value = row["value"].toString()
+                        this.fieldBookDbId = getStringVal(row, "id")
+                        this.value = getStringVal(row, "value")
                     } }
 
         } ?: emptyList()
@@ -306,8 +306,8 @@ class ObservationDao {
                         arrayOf("observation_db_id", "last_synced_time"),
                         where = "${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND value LIKE ?",
                         whereArgs = arrayOf(plotId, parent, value)).toFirst().let {
-                    dbId = it["observation_db_id"].toString()
-//                    lastSyncedTime = it["last_synced_time"].toString()
+                    dbId = getStringVal(it, "observation_db_id")
+                    setLastSyncedTime(getStringVal(it,"last_synced_time"))
                 }
             }
         }
@@ -355,7 +355,7 @@ class ObservationDao {
                             put("last_synced_time", image.lastSyncedTime.format(internalTimeFormatter))
                         }
                     },
-                    "_id = ?", arrayOf(image.fieldBookDbId))
+                    Observation.PK + " = ?", arrayOf(image.fieldBookDbId))
 
         }
 

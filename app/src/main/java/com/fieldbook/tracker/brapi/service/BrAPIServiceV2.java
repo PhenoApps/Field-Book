@@ -162,6 +162,7 @@ public class BrAPIServiceV2 implements BrAPIService{
         request.setWidth(image.getImageWidth());
         request.setMimeType(image.getMimeType());
         request.setUnitDbId(image.getObservationUnitDbId());
+        request.setDbId(image.getImageDbId());
         // TODO fix these
         //request.setLocation(image.getImageLocation());
         request.setTimestamp(TimeAdapter.convertFrom(image.getImageTimeStamp()));

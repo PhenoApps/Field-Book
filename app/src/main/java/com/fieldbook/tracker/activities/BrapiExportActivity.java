@@ -620,7 +620,7 @@ public class BrapiExportActivity extends AppCompatActivity {
         UploadError retVal = UploadError.NONE;
         // keep track of responses to be processed when finished?
 
-        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
+        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
                 Locale.getDefault());
         String syncTime = timeStamp.format(Calendar.getInstance().getTime());
 

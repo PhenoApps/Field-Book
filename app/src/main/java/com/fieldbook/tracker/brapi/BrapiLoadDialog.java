@@ -63,10 +63,13 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         saveBtn.setOnClickListener(this);
         Button cancelBtn = findViewById(R.id.brapi_cancel_btn);
         cancelBtn.setOnClickListener(this);
-        studyDetails = new BrapiStudyDetails();
+    }
 
+    @Override
+    protected void onStart(){
         // Set our OK button to be disabled until we are finished loading
         saveBtn.setVisibility(View.GONE);
+        studyDetails = new BrapiStudyDetails();
         buildStudyDetails();
         loadStudy();
     }

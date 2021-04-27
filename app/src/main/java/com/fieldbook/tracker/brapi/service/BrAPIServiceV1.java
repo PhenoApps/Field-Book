@@ -151,6 +151,7 @@ public class BrAPIServiceV1 implements BrAPIService {
         request.setWidth(image.getImageWidth());
         request.setMimeType(image.getMimeType());
         request.setUnitDbId(image.getObservationUnitDbId());
+        request.setDbId(image.getImageDbId());
         return request;
     }
 
