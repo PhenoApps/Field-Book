@@ -12,7 +12,9 @@ import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.Image;
@@ -32,6 +34,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.utilities.Utils;
 
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
@@ -53,6 +56,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.fieldbook.tracker.activities.ConfigActivity.dt;
 
 /**
  * All database related functions are here
@@ -92,10 +97,10 @@ public class DataHelper {
     public DataHelper(Context context) {
         try {
             this.context = context;
-            openHelper = new OpenHelper(this.context);
-            db = openHelper.getWritableDatabase();
-
             ep = context.getSharedPreferences("Settings", 0);
+
+            openHelper = new OpenHelper(this);
+            db = openHelper.getWritableDatabase();
 
             //this.insertTraits = db.compileStatement(INSERTTRAITS);
             //this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
@@ -2334,9 +2339,11 @@ public class DataHelper {
      */
     private static class OpenHelper extends SQLiteOpenHelper {
         SharedPreferences ep2;
-        OpenHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
-            ep2 = context.getSharedPreferences("Settings", 0);
+        DataHelper helper;
+        OpenHelper(DataHelper helper) {
+            super(helper.context, DATABASE_NAME, null, DATABASE_VERSION);
+            ep2 = helper.context.getSharedPreferences("Settings", 0);
+            this.helper = helper;
         }
 
         @Override
@@ -2537,6 +2544,19 @@ public class DataHelper {
 
             if (oldVersion <= 9 & newVersion >= 9) {
 
+                // Backup database
+                try {
+                    helper.open();
+                    helper.exportDatabase("backup_v8");
+                    File exportedDb = new File(ep2.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup_v8.db");
+                    File exportedSp = new File(ep2.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup_v8.db_sharedpref.xml");
+                    Utils.scanFile(helper.context, exportedDb);
+                    Utils.scanFile(helper.context, exportedSp);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage());
+                }
+                
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
             }
