@@ -29,6 +29,10 @@ android {
                 }
             }
         }
+
+        debug {
+            debuggable true
+        }
     }
 
     compileOptions {
