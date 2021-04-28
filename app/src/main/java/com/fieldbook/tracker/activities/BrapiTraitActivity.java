@@ -54,7 +54,6 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
                 loadToolbar();
                 // Get the setting information for our brapi integration
-
                 brAPIService = BrAPIServiceFactory.getBrAPIService(this);
 
                 // Make a clean list to track our selected traits
@@ -237,6 +236,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
         String secondaryMessage = "";
         // For now, only give the ability to create new variables
         // Determine later if the need to edit existing variables is needed.
+        int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
         for (int i = 0; i < selectedTraits.size(); ++i) {
 
             TraitObject trait = selectedTraits.get(i);
@@ -255,6 +255,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 successfulSaves += saveStatus == -1 ? 0 : 1;
             }else{
                 // Insert our new trait
+                trait.setRealPosition(pos + i);
                 long saveStatus = ConfigActivity.dt.insertTraits(trait);
                 successfulSaves += saveStatus == -1 ? 0 : 1;
             }

@@ -14,8 +14,8 @@ class ObservationVariableDao {
 
         fun getMaxPosition(): Int = withDatabase { db ->
 
-            db.query(ObservationVariable.tableName,
-                    select = arrayOf("MAX(position) as result")).toFirst()["result"].toString().toInt()
+            db.query(ObservationVariable.tableName, select = arrayOf("MAX(position) as result"))
+                    .toFirst()["result"]?.toString()?.toInt()
 
         } ?: 0
 
@@ -43,7 +43,7 @@ class ObservationVariableDao {
             it.format = this["observation_variable_field_book_format"].toString()
             it.defaultValue = this["default_value"].toString()
             it.details = this["observation_variable_details"].toString()
-            it.realPosition = this["position"].toString()
+            it.realPosition = this["position"].toString().toInt()
             it.visible = this["visible"].toString() == "true"
             it.externalDbId = this["external_db_id"].toString()
             it.traitDataSource = this["trait_data_source"].toString()
@@ -184,7 +184,7 @@ class ObservationVariableDao {
                     details = it["observation_variable_details"] as? String ?: ""
                     id = (it[ObservationVariable.PK] as? Int ?: -1).toString()
                     externalDbId = it["external_db_id"] as? String ?: ""
-                    realPosition = (it["position"] as? Int ?: -1).toString()
+                    realPosition = (it["position"] as? Int ?: -1)
                     visible = (it["visible"] as String).toBoolean()
 
                     //initialize these to the empty string or else they will be null
@@ -263,7 +263,7 @@ class ObservationVariableDao {
             db.delete(ObservationVariable.tableName, null, null)
         }
 
-        fun updateTraitPosition(id: String, realPosition: String) = withDatabase { db ->
+        fun updateTraitPosition(id: String, realPosition: Int) = withDatabase { db ->
 
             db.update(ObservationVariable.tableName, ContentValues().apply {
                 put("position", realPosition)

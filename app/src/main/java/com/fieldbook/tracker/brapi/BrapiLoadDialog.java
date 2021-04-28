@@ -57,8 +57,8 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         this.setCanceledOnTouchOutside(false);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_brapi_import);
-
         brAPIService = BrAPIServiceFactory.getBrAPIService(this.context);
+
         saveBtn = findViewById(R.id.brapi_save_btn);
         saveBtn.setOnClickListener(this);
         Button cancelBtn = findViewById(R.id.brapi_cancel_btn);
@@ -302,7 +302,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             // an error in the saveStudyDetails code outside of that handling.
             if (fail) {
                 Log.e("error-opef", brapiControllerResponse.message);
-                Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, R.string.brapi_study_incompatible, Toast.LENGTH_LONG).show();
             }
 
         }

@@ -32,6 +32,7 @@ import io.swagger.client.api.ObservationsApi;
 import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ProgramsApi;
 import io.swagger.client.api.StudiesApi;
+
 import io.swagger.client.api.TrialsApi;
 import io.swagger.client.model.Image;
 import io.swagger.client.model.ImageResponse;
@@ -45,9 +46,6 @@ import io.swagger.client.model.ObservationUnit;
 import io.swagger.client.model.ObservationUnitsResponse1;
 import io.swagger.client.model.ObservationVariable;
 import io.swagger.client.model.ObservationVariablesResponse;
-import io.swagger.client.model.PhenotypesRequest;
-import io.swagger.client.model.PhenotypesRequestData;
-import io.swagger.client.model.PhenotypesRequestObservation;
 import io.swagger.client.model.Program;
 import io.swagger.client.model.ProgramsResponse;
 import io.swagger.client.model.StudiesResponse;
@@ -71,8 +69,8 @@ public class BrAPIServiceV1 implements BrAPIService {
     public BrAPIServiceV1(Context context) {
         this.context = context;
         ApiClient apiClient = new ApiClient().setBasePath(BrAPIService.getBrapiUrl(context));
-        // 2 minute timeout to accomodate longer response times
-        apiClient.setReadTimeout(2*60000);
+        apiClient.setReadTimeout(getTimeoutValue(context) * 1000);
+
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
         this.programsApi = new ProgramsApi(apiClient);
@@ -80,6 +78,29 @@ public class BrAPIServiceV1 implements BrAPIService {
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
+    }
+
+    private Integer getTimeoutValue(Context context) {
+        String timeoutString = context.getSharedPreferences("Settings", 0)
+                .getString(GeneralKeys.BRAPI_TIMEOUT, "120");
+
+        int timeout = 120;
+
+        try {
+            if (timeoutString != null) {
+                timeout = Integer.parseInt(timeoutString);
+            }
+        } catch (NumberFormatException nfe) {
+            String message = nfe.getLocalizedMessage();
+            if (message != null) {
+                Log.d("FieldBookError", nfe.getLocalizedMessage());
+            } else {
+                Log.d("FieldBookError", "Timeout Preference number format error.");
+            }
+            nfe.printStackTrace();
+        }
+
+        return timeout;
     }
 
     @Override
@@ -415,8 +436,14 @@ public class BrAPIServiceV1 implements BrAPIService {
                     int page = response.getMetadata().getPagination().getCurrentPage();
                     if(page == 0){
                         //one time code
-                        study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
-                        study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
+                        //sometimes getData() size is 0 which causes an index out of bounds exception
+                        //error can be reproduced by trying to import Study 10 from the default brapi server
+                        try {
+                            study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
+                            study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
+                        } catch (IndexOutOfBoundsException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     //every time
@@ -775,7 +802,7 @@ public class BrAPIServiceV1 implements BrAPIService {
 
             // Set some config variables in fieldbook
             trait.setVisible(true);
-            trait.setRealPosition("");
+            trait.setRealPosition(0);
 
             traits.add(trait);
         }

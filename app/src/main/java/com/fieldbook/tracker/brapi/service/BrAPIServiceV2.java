@@ -795,7 +795,7 @@ public class BrAPIServiceV2 implements BrAPIService{
 
             // Set some config variables in fieldbook
             trait.setVisible(true);
-            trait.setRealPosition("");
+            trait.setRealPosition(0);
 
             traits.add(trait);
         }

@@ -13,7 +13,7 @@ public class TraitObject {
     private String maximum;
     private String details;
     private String categories;
-    private String realPosition;
+    private int realPosition;
     private String id;
     private Boolean visible;
     private String externalDbId;
@@ -75,11 +75,11 @@ public class TraitObject {
         this.categories = categories;
     }
 
-    public String getRealPosition() {
+    public int getRealPosition() {
         return realPosition;
     }
 
-    public void setRealPosition(String realPosition) {
+    public void setRealPosition(int realPosition) {
         this.realPosition = realPosition;
     }
 

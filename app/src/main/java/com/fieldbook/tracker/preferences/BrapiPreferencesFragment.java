@@ -4,9 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.Selection;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -35,6 +40,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private ListPreference brapiOIDCFlow;
     private Preference brapiServerBarcode;
     private Preference brapiServerCassavabase;
+    private Preference brapiServerT3wheat;
+    private Preference brapiServerT3oat;
+    private Preference brapiServerT3barley;
     private Preference brapiServerDefaultTest;
     private String barcodeResult;
 
@@ -47,6 +55,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName("Settings");
 
@@ -63,59 +72,46 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiOIDCURLPreference = findPreference(GeneralKeys.BRAPI_OIDC_URL);
         brapiOIDCFlow = findPreference(GeneralKeys.BRAPI_OIDC_FLOW);
 
+//        EditTextPreference brapiPaginationPreference = (EditTextPreference) findPreference(GeneralKeys.BRAPI_PAGE_SIZE);
+//        brapiPaginationPreference.setSummary(prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
+//        brapiPaginationPreference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+//            @Override
+//            public void onBindEditText(@NonNull EditText editText) {
+//                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+//            }
+//        });
+//
+//        EditTextPreference brapiTimeoutPreference = findPreference(GeneralKeys.BRAPI_TIMEOUT);
+//        brapiTimeoutPreference.setSummary(prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_TIMEOUT, "120"));
+//        brapiTimeoutPreference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+//            @Override
+//            public void onBindEditText(@NonNull EditText editText) {
+//                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+//            }
+//        });
+
         brapiServerBarcode = findPreference("brapi_server_barcode");
         brapiServerCassavabase = findPreference("brapi_server_cassavabase");
+        brapiServerT3wheat = findPreference("brapi_server_t3_wheat");
+        brapiServerT3oat = findPreference("brapi_server_t3_oat");
+        brapiServerT3barley = findPreference("brapi_server_t3_barley");
         brapiServerDefaultTest = findPreference("brapi_server_default");
 
-        registerBrapiButtonListeners();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setBaseURLSummary();
-        setButtonView();
-    }
-
-    private void setBaseURLSummary() {
-        String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
-        brapiURLPreference.setSummary(url);
-    }
-
-    private void brapiAuth() {
-        String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
-        if (brapiHost != null) {
-            Intent intent = new Intent();
-            intent.setClassName(context, BrapiAuthActivity.class.getName());
-            startActivity(intent);
-        }
-    }
-
-    @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-
-        if (preference.equals(brapiURLPreference)) {
-
-            // This is done after this function, but set the value for our brapi function
-            SharedPreferences sp = prefMgr.getSharedPreferences();
-            String oldBaseUrl = sp.getString(GeneralKeys.BRAPI_BASE_URL, "");
-            String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
-            String newOidcUrl = oldOidcUrl.replaceFirst(oldBaseUrl, newValue.toString());
-            this.brapiURLPreference.setText(newValue.toString());
-            this.brapiOIDCURLPreference.setText(newOidcUrl);
-
-            // Call our brapi authorize function
-            if (brapiPrefCategory != null) {
-                brapiAuth();
-                // Set our button visibility and text
-                setButtonView();
-            }
-        }
-
-        return true;
-    }
-
-    private void registerBrapiButtonListeners() {
+//        brapiPaginationPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+//            @Override
+//            public boolean onPreferenceChange(Preference preference, Object newValue) {
+//                brapiPaginationPreference.setSummary(newValue.toString());
+//                return true;
+//            }
+//        });
+//
+//        brapiTimeoutPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+//            @Override
+//            public boolean onPreferenceChange(Preference preference, Object newValue) {
+//                brapiTimeoutPreference.setSummary(newValue.toString());
+//                return true;
+//            }
+//        });
 
         if (brapiAuthButton != null) {
             brapiAuthButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -128,6 +124,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     return true;
                 }
             });
+
+            // Set our button visibility and text
+            setButtonView();
         }
 
         if (brapiLogoutButton != null) {
@@ -159,41 +158,88 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                             .setBeepEnabled(true)
                             .setRequestCode(101)
                             .initiateScan();
-
                     return true;
                 }
             });
         }
+    }
 
-        if (brapiServerCassavabase != null) {
-            brapiServerCassavabase.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    brapiURLPreference.setText("https://www.cassavabase.org");
-                    brapiOIDCURLPreference.setText("https://www.cassavabase.org/.well-known/openid-configuration");
-                    brapiOIDCFlow.setValue(getString(R.string.preferences_brapi_oidc_flow_old_custom));
+    @Override
+    public void onResume() {
+        super.onResume();
+//        setBaseURLSummary();
+        setButtonView();
+    }
 
-                    brapiAuth();
-                    setBaseURLSummary();
-                    return true;
-                }
-            });
+//    private void setBaseURLSummary() {
+//        String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
+//        brapiURLPreference.setSummary(url);
+//    }
+
+    private void brapiAuth() {
+        String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
+        if (brapiHost != null) {
+            Intent intent = new Intent();
+            intent.setClassName(context, BrapiAuthActivity.class.getName());
+            startActivity(intent);
+        }
+    }
+
+    private void setServer(String url, String oidcUrl, String oidcFlow) {
+        brapiURLPreference.setText(url);
+        brapiOIDCURLPreference.setText(oidcUrl);
+        if(oidcFlow != null)
+            brapiOIDCFlow.setValue(oidcFlow);
+
+//        setBaseURLSummary();
+        brapiAuth();
+    }
+
+    @Override
+    public boolean onPreferenceTreeClick(Preference preference) {
+        switch (preference.getKey()){
+            case "brapi_server_cassavabase":
+                setServer("https://www.cassavabase.org",
+                        "https://www.cassavabase.org/.well-known/openid-configuration",
+                        getString(R.string.preferences_brapi_oidc_flow_old_custom));
+                break;
+            case "brapi_server_t3_wheat":
+                setServer("https://wheat-sandbox.triticeaetoolbox.org",
+                        "https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
+                        getString(R.string.preferences_brapi_oidc_flow_old_custom));
+                break;
+            case "brapi_server_t3_oat":
+                setServer("https://oat-sandbox.triticeaetoolbox.org",
+                        "https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
+                        getString(R.string.preferences_brapi_oidc_flow_old_custom));
+                break;
+            case "brapi_server_t3_barley":
+                setServer("https://barley-sandbox.triticeaetoolbox.org",
+                        "https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
+                        getString(R.string.preferences_brapi_oidc_flow_old_custom));
+                break;
+            case "brapi_server_default":
+                setServer(getString(R.string.brapi_base_url_default),
+                        getString(R.string.brapi_oidc_url_default),
+                        getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
+                break;
         }
 
-        if (brapiServerDefaultTest != null) {
-            brapiServerDefaultTest.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    brapiURLPreference.setText(getString(R.string.brapi_base_url_default));
-                    brapiOIDCURLPreference.setText(getString(R.string.brapi_oidc_url_default));
-                    brapiOIDCFlow.setValue(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
+        return super.onPreferenceTreeClick(preference);
+    }
 
-                    brapiAuth();
-                    setBaseURLSummary();
-                    return true;
-                }
-            });
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        if (preference.equals(brapiURLPreference)) {
+            SharedPreferences sp = prefMgr.getSharedPreferences();
+            String oldBaseUrl = sp.getString(GeneralKeys.BRAPI_BASE_URL, "");
+            String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
+            String newOidcUrl = oldOidcUrl.replaceFirst(oldBaseUrl, newValue.toString());
+            setServer(newValue.toString(), newOidcUrl, null);
         }
+
+        return true;
     }
 
     public void setButtonView() {

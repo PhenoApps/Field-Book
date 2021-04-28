@@ -202,9 +202,9 @@ class Migrator {
                 traits.forEachIndexed { index, trait ->
                     //iterate trhough mapping of the old columns that are now attr/vals
                     mapOf(
-                            "validValuesMin" to trait.minimum as String,
-                            "validValuesMax" to trait.maximum as String,
-                            "category" to trait.categories as String,
+                            "validValuesMin" to (trait.minimum ?: ""),
+                            "validValuesMax" to (trait.maximum ?: ""),
+                            "category" to (trait.categories ?: ""),
                     ).asSequence().forEach { attrValue ->
 
                         //TODO: commenting this out would create a sparse table from the unused attribute values
@@ -490,7 +490,7 @@ class Migrator {
                 mapOf(PK to "INTEGER PRIMARY KEY AUTOINCREMENT",
                         "observation_unit_attribute_db_id" to "INT REFERENCES ${ObservationUnitAttribute.tableName}(${ObservationUnitAttribute.PK})",
                         "observation_unit_value_name" to "TEXT",
-                        ObservationUnit.FK to "INT REFERENCES ${ObservationUnit.tableName}(${ObservationUnit.PK})",
+                        ObservationUnit.FK to "INT",
                         Study.FK to "INT REFERENCES ${Study.tableName}(${Study.PK}) ON DELETE CASCADE")
             }
             val migratePattern by lazy {

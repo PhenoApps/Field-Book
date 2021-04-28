@@ -1787,7 +1787,7 @@ public class DataHelper {
     /**
      * V2 - Update the ordering of traits
      */
-    public void updateTraitPosition(String id, String realPosition) {
+    public void updateTraitPosition(String id, int realPosition) {
 
         ObservationVariableDao.Companion.updateTraitPosition(id, realPosition);
 
@@ -2365,7 +2365,7 @@ public class DataHelper {
                     o.setMaximum(cursor.getString(5));
                     o.setDetails(cursor.getString(6));
                     o.setCategories(cursor.getString(7));
-                    o.setRealPosition(cursor.getString(9));
+                    o.setRealPosition(cursor.getInt(9));
 
                     list.add(o);
 

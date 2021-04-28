@@ -176,10 +176,6 @@
     <string name="preferences_general_skip_entries_with_data_description">跳过当前性状已有数据的记录</string>
     <string name="preferences_general_share_disable">禁用文件分享</string>
     <string name="preferences_general_share_disable_description">导出文件时，不显示分享对话框</string>
-    <string name="preferences_general_entry_left_disable">禁用向左箭头</string>
-    <string name="preferences_general_entry_left_disable_description">未采集数据时，向左箭头禁用</string>
-    <string name="preferences_general_entry_right_disable">禁用向右箭头</string>
-    <string name="preferences_general_entry_right_disable_description">未采集数据时，向右箭头禁用</string>
     <string name="preferences_general_barcode_camera">转到条码指定的记录</string>
     <string name="preferences_general_barcode_camera_description">扫描条码，然后转到特定记录</string>
     <string name="preferences_general_feature_next_missing">下个无数据记录</string>
@@ -369,11 +365,11 @@
     <string name="citation_title">引用</string>
     <string name="citation_string">如果利用田间记载本进行科研，请引用如下的杂志文章：</string>
     <!-- Brapi strings -->
-    <string name="brapi_base_url">BrAPI基础网址</string>
+    <string name="brapi_base_url">基础网址</string>
     <string name="brapi_base_url_desc">连接到BrAPI服务器的基础网址</string>
     <string name="brapi_save_authorize">保存和授权</string>
     <string name="brapi_authorize">授权BrAPI</string>
-    <string name="brapi_reauthorize">再授权BrAPI</string>
+    <string name="brapi_reauthorize">再授权</string>
     <string name="brapi_revoke_auth">退出</string>
     <string name="brapi_auth_success">BrAPI授权成功</string>
     <string name="brapi_auth_deny">BrAPI授权被拒绝</string>

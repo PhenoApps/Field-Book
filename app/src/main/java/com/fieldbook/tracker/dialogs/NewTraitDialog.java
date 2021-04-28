@@ -316,7 +316,7 @@ public class NewTraitDialog extends DialogFragment {
         t.setDetails(details.getText().toString());
         t.setCategories(categories.getText().toString());
         t.setVisible(true);
-        t.setRealPosition(String.valueOf(pos));
+        t.setRealPosition(pos);
         return t;
     }
 

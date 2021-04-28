@@ -57,6 +57,8 @@ public class GeneralKeys {
     public static final String BRAPI_TOKEN                          = "BRAPI_TOKEN";
     public static final String BRAPI_VERSION                        = "BRAPI_VERSION";
     public static final String BRAPI_PAGE_SIZE                      = "BRAPI_PAGE_SIZE";
+    public static final String BRAPI_TIMEOUT                        = "BRAPI_TIMEOUT";
+
     // @formatter:on
 
     private GeneralKeys() {

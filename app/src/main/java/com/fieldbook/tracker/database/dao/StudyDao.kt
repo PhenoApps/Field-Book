@@ -3,7 +3,6 @@ package com.fieldbook.tracker.database.dao
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import androidx.core.content.contentValuesOf
-import androidx.core.database.getStringOrNull
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
 import com.fieldbook.tracker.objects.FieldObject
@@ -12,10 +11,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.Study
-import com.fieldbook.tracker.database.models.StudyModel
-import kotlin.math.exp
-import kotlin.system.measureTimeMillis
-import kotlin.time.milliseconds
+
 
 class StudyDao {
 
@@ -214,6 +210,9 @@ class StudyDao {
 
         data class FieldPreferenceNames(val unique: String, val primary: String, val secondary: String)
 
+        /**
+         * This function should always be called within a transaction.
+         */
         fun createFieldData(exp_id: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
 
             val names = getNames(exp_id)!!
@@ -224,37 +223,24 @@ class StudyDao {
             val primaryIndex = columns.indexOf(names.primary)
             val secondaryIndex = columns.indexOf(names.secondary)
 
-            db.beginTransaction()
+            val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
+                    Study.FK to exp_id,
+                    "observation_unit_db_id" to data[uniqueIndex],
+                    "primary_id" to data[primaryIndex],
+                    "secondary_id" to data[secondaryIndex]))
 
-            try {
+            columns.forEachIndexed { index, it ->
 
-                val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
+                val attrId = ObservationUnitAttributeDao.getIdByName(it)
+
+                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
                         Study.FK to exp_id,
-                        "observation_unit_db_id" to data[uniqueIndex],
-                        "primary_id" to data[primaryIndex],
-                        "secondary_id" to data[secondaryIndex]))
-
-                columns.forEachIndexed { index, it ->
-
-                    val attrId = ObservationUnitAttributeDao.getIdByName(it)
-
-                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                            Study.FK to exp_id,
-                            ObservationUnit.FK to rowid,
-                            ObservationUnitAttribute.FK to attrId,
-                            "observation_unit_value_name" to data[index]
-                    ))
-                }
-
-                db.setTransactionSuccessful()
-
-            } catch (e: Exception) {
-
-                e.printStackTrace()
-            } finally {
-
-                db.endTransaction()
+                        ObservationUnit.FK to rowid,
+                        ObservationUnitAttribute.FK to attrId,
+                        "observation_unit_value_name" to data[index]
+                ))
             }
+
         }
 
         private fun updateImportDate(db: SQLiteDatabase, exp_id: Int) {
