@@ -477,6 +477,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     private void loadFile(FieldFileObject.FieldFileBase fieldFile) {
+
         String[] importColumns = fieldFile.getColumns();
 
         String[] reservedNames = new String[]{"id"};
@@ -484,16 +485,31 @@ public class FieldEditorActivity extends AppCompatActivity {
         List<String> list = Arrays.asList(reservedNames);
 
         //TODO causing crash
-        for (String s : importColumns) {
+        boolean hasSpecialCharacters = false;
+        for (int i = 0; i < importColumns.length; i++) {
+
+            String s = importColumns[i];
+
             if (DataHelper.hasSpecialChars(s)) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns) + " (\"" + s + "\")");
-                return;
+
+                hasSpecialCharacters = true;
+
+                importColumns[i] = DataHelper.replaceSpecialChars(s);
             }
 
             if (list.contains(s.toLowerCase())) {
+
                 Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_name) + " \"" + s + "\"");
+
                 return;
             }
+        }
+
+        if (hasSpecialCharacters) {
+
+
+            Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns_replaced));
+
         }
 
         importDialog(importColumns);
@@ -606,6 +622,16 @@ public class FieldEditorActivity extends AppCompatActivity {
                 fieldFile.open();
                 String[] data;
                 String[] columns = fieldFile.readNext();
+
+                //match and delete special characters from header line
+                for (int i = 0; i < columns.length; i++) {
+
+                    String header = columns[i];
+
+                    if (DataHelper.hasSpecialChars(header)) {
+                        columns[i] = DataHelper.replaceSpecialChars(header);
+                    }
+                }
 
                 FieldObject f = fieldFile.createFieldObject();
                 f.setUnique_id(unique.getSelectedItem().toString());
