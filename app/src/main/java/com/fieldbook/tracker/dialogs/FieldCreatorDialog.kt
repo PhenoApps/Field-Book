@@ -319,7 +319,8 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
                     insertPlotData(
                             fieldColumns,
                             rows,
-                            cols
+                            cols,
+                            linear = pattern == R.id.plot_linear_button
                     )
 
                     //eight different cases to consider, P = patterns (linear and zigzag), S = starting states (TL, BR, TR, BL)
@@ -420,9 +421,9 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
         var direction = ltr
         var plotIndex = 0
-        for (i in if (ttb) 1 until rows else rows-1 downTo 0) {
+        for (i in if (ttb) 1 until rows+1 else rows downTo 1) {
 
-            for (j in if (direction) 1 until cols else cols-1 downTo 0) {
+            for (j in if (direction) 1 until cols+1 else cols downTo 1) {
 
                 plotIndex += 1
 
