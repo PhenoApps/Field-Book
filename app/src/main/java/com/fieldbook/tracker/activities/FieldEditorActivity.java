@@ -38,6 +38,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.adapters.FieldAdapter;
+import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -344,6 +345,24 @@ public class FieldEditorActivity extends AppCompatActivity {
                     default:
                         showFileDialog();
                 }
+                break;
+
+            case R.id.menu_field_editor_item_creator:
+
+                FieldCreatorDialog dialog = new FieldCreatorDialog(this);
+
+                //when the dialog is dismissed, the field data is created or failed
+                dialog.setOnDismissListener((dismiss -> {
+
+                    //update list of fields
+                    fieldList = findViewById(R.id.myList);
+                    mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
+                    fieldList.setAdapter(mAdapter);
+
+                }));
+
+                dialog.show();
+
                 break;
 
             case android.R.id.home:
