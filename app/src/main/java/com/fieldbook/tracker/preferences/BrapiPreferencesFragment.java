@@ -4,9 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.Selection;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
@@ -27,16 +32,19 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private PreferenceCategory brapiPrefCategory;
     private Preference brapiAuthButton;
     private Preference brapiLogoutButton;
-    private Preference brapiURLPreference;
-    private EditTextPreference brapiPaginationPreference;
+    private EditTextPreference brapiURLPreference;
     private Preference brapiServerBarcode;
     private Preference brapiServerCassavabase;
+    private Preference brapiServerT3wheat;
+    private Preference brapiServerT3oat;
+    private Preference brapiServerT3barley;
     private Preference brapiServerDefaultTest;
     private BrapiControllerResponse brapiControllerResponse;
     private String barcodeResult;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName("Settings");
 
@@ -44,22 +52,88 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.brapi_info_title));
 
-        registerBrapiButtonListeners();
-
         brapiPrefCategory = prefMgr.findPreference("brapi_category");
         brapiAuthButton = findPreference("authorizeBrapi");
         brapiLogoutButton = findPreference("revokeBrapiAuth");
 
         brapiURLPreference = findPreference("BRAPI_BASE_URL");
         brapiURLPreference.setOnPreferenceChangeListener(this);
-        brapiPaginationPreference = findPreference("paginationBrapi");
+
+        EditTextPreference brapiPaginationPreference = (EditTextPreference) findPreference("BRAPI_PAGINATION");
+        brapiPaginationPreference.setSummary(prefMgr.getSharedPreferences().getString("BRAPI_PAGINATION", "1000"));
+        brapiPaginationPreference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+            @Override
+            public void onBindEditText(@NonNull EditText editText) {
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+            }
+        });
+
+        EditTextPreference brapiTimeoutPreference = findPreference("BRAPI_TIMEOUT");
+        brapiTimeoutPreference.setSummary(prefMgr.getSharedPreferences().getString("BRAPI_TIMEOUT", "120"));
+        brapiTimeoutPreference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+            @Override
+            public void onBindEditText(@NonNull EditText editText) {
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+            }
+        });
 
         brapiServerBarcode = findPreference("brapi_server_barcode");
         brapiServerCassavabase = findPreference("brapi_server_cassavabase");
+        brapiServerT3wheat = findPreference("brapi_server_t3_wheat");
+        brapiServerT3oat = findPreference("brapi_server_t3_oat");
+        brapiServerT3barley = findPreference("brapi_server_t3_barley");
         brapiServerDefaultTest = findPreference("brapi_server_default");
 
         setBaseURLSummary();
         setButtonView();
+
+        brapiPaginationPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                brapiPaginationPreference.setSummary(newValue.toString());
+                return true;
+            }
+        });
+
+        brapiTimeoutPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                brapiTimeoutPreference.setSummary(newValue.toString());
+                return true;
+            }
+        });
+
+        if (brapiAuthButton != null) {
+            brapiAuthButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    brapiAuth();
+                    return true;
+                }
+            });
+
+            // Set our button visibility and text
+            setButtonView();
+        }
+
+        if (brapiLogoutButton != null) {
+            brapiLogoutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    SharedPreferences preferences = prefMgr.getSharedPreferences();
+
+                    // Clear our brapi token
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString(GeneralKeys.BRAPI_TOKEN, null);
+                    editor.apply();
+
+                    // Set our button visibility and text
+                    setButtonView();
+
+                    return true;
+                }
+            });
+        }
 
         brapiServerBarcode.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -70,31 +144,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                         .setBeepEnabled(true)
                         .setRequestCode(101)
                         .initiateScan();
-
-                return true;
-            }
-        });
-
-        brapiServerCassavabase.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
-                editor.putString(GeneralKeys.BRAPI_BASE_URL, "https://www.cassavabase.org");
-                editor.apply();
-
-                brapiAuth();
-                return true;
-            }
-        });
-
-        brapiServerDefaultTest.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
-                editor.putString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
-                editor.apply();
-
-                setBaseURLSummary();
                 return true;
             }
         });
@@ -105,21 +154,48 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiURLPreference.setSummary(url);
     }
 
+    private void setServer(String url) {
+        brapiURLPreference.setText(url);
+        setBaseURLSummary();
+        brapiAuth();
+    }
+
+    @Override
+    public boolean onPreferenceTreeClick(Preference preference) {
+        switch (preference.getKey()){
+            case "brapi_server_cassavabase":
+                setServer("https://www.cassavabase.org");
+                break;
+            case "brapi_server_t3_wheat":
+                setServer("https://wheat-sandbox.triticeaetoolbox.org");
+                break;
+            case "brapi_server_t3_oat":
+                setServer("https://oat-sandbox.triticeaetoolbox.org");
+                break;
+            case "brapi_server_t3_barley":
+                setServer("https://barley-sandbox.triticeaetoolbox.org");
+                break;
+            case "brapi_server_default":
+                setServer(getString(R.string.brapi_base_url_default));
+                break;
+        }
+
+        return super.onPreferenceTreeClick(preference);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         setBaseURLSummary();
+        setButtonView();
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-
         if (preference.equals(brapiURLPreference)) {
 
             // This is done after this function, but set the value for our brapi function
-            SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
-            editor.putString(GeneralKeys.BRAPI_BASE_URL, newValue.toString());
-            editor.apply();
+            setServer(newValue.toString());
 
             // Call our brapi authorize function
             if (brapiPrefCategory != null) {
@@ -163,48 +239,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
             // Show our error message if it exists
             processResponseMessage(brapiControllerResponse);
-        }
-    }
-
-    private void registerBrapiButtonListeners() {
-
-        if (brapiAuthButton != null) {
-            brapiAuthButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
-                    if (brapiHost != null) {
-                        // Start our login process
-                        BrapiControllerResponse brapiControllerResponse = BrAPIService.authorizeBrAPI(prefMgr.getSharedPreferences(), context, null);
-
-                        // Show our error message if it exists
-                        processResponseMessage(brapiControllerResponse);
-                    }
-                    return true;
-                }
-            });
-
-            // Set our button visibility and text
-            setButtonView();
-        }
-
-        if (brapiLogoutButton != null) {
-            brapiLogoutButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    SharedPreferences preferences = prefMgr.getSharedPreferences();
-
-                    // Clear our brapi token
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putString(GeneralKeys.BRAPI_TOKEN, null);
-                    editor.apply();
-
-                    // Set our button visibility and text
-                    setButtonView();
-
-                    return true;
-                }
-            });
         }
     }
 
