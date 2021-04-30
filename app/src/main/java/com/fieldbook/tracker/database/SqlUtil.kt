@@ -36,11 +36,21 @@ fun getTime(): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
 //endregion
 
 /**
+ * Wrapper that doesn't sanitize select arguments, for cases when nested queries or SQL internal functions are used.
+ * Note: parameters should be sanitized manually when calling this function.
+ */
+fun SQLiteDatabase.queryForMax(table: String, select: Array<String>? = null, where: String? = null, whereArgs: Array<String>? = null, orderBy: String? = null): Cursor {
+
+    return this.query(table, select, where, whereArgs, null, null, orderBy)
+
+}
+
+/**
  * Simple wrapper function that has default arguments.
  */
 fun SQLiteDatabase.query(table: String, select: Array<String>? = null, where: String? = null, whereArgs: Array<String>? = null, orderBy: String? = null): Cursor {
 
-    return this.query(table, select, where, whereArgs, null, null, orderBy)
+    return this.query(table, select?.map { "`$it`" }?.toTypedArray(), where, whereArgs, null, null, orderBy)
 
 }
 
