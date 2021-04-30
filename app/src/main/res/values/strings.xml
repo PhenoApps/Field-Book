@@ -580,4 +580,6 @@
     <string name="dialog_back">Back</string>
 
     <string name="data_helper_backup_v8_error">An error occurred when backing up v8 database.</string>
+    <string name="preferences_general_flip_flop_arrows_description">Swaps the trait and plot arrows when collecting.</string>
+    <string name="preferences_general_flip_flop_arrows">Flip Flop Collect Arrows</string>
 </resources>

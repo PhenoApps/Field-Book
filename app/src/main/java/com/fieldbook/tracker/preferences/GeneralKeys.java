@@ -25,7 +25,7 @@ public class GeneralKeys {
     public static final String VOLUME_NAVIGATION                    = "VOLUME_NAVIGATION";
     public static final String CYCLING_TRAITS_ADVANCES              = "CycleTraits";
     public static final String DISABLE_ENTRY_ARROW_NO_DATA          = "DISABLE_ENTRY_ARROW_NO_DATA";
-
+    public static final String FLIP_FLOP_COLLECT_ARROWS             = "FLIP_FLOP_TRAIT_ARROWS";
 
     // General
     public static final String TUTORIAL_MODE                        = "Tips";
