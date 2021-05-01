@@ -105,6 +105,7 @@
     <string name="traits_format_angle">Angle</string>
     <string name="traits_format_video">Video</string>
     <string name="traits_format_location">Location</string>
+    <string name="traits_format_gnss">GNSS</string>
     <string name="traits_format_printer">Printer</string>
     <string name="traits_format_barcode">Barcode</string>
     <string name="traits_format_labelprint">Zebra Label Print</string>
@@ -592,6 +593,9 @@
     <string name="dialog_back">Back</string>
 
     <string name="data_helper_backup_v8_error">An error occurred when backing up v8 database.</string>
+    <string name="gnss_no_paired_device">Please pair a device before collecting data.</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device.</string>
     <string name="preferences_general_flip_flop_arrows_description">Swaps the trait and plot arrow functions</string>
     <string name="preferences_general_flip_flop_arrows">Flip Flop Arrows</string>
 </resources>
