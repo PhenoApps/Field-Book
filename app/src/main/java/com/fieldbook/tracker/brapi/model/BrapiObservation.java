@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.brapi.model;
 
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
@@ -6,9 +6,9 @@ import org.threeten.bp.format.DateTimeParseException;
 
 public class BrapiObservation {
 
-    protected OffsetDateTime timestamp;
-    String unitDbId;
-    String variableDbId;
+    private OffsetDateTime timestamp;
+    private String unitDbId;
+    private String variableDbId;
     private String dbId;
     private OffsetDateTime lastSyncedTime;
     private String fieldbookDbId;
@@ -45,9 +45,11 @@ public class BrapiObservation {
     private OffsetDateTime convertTime(String time) {
         OffsetDateTime converted = null;
         try {
-            //TODO: locale
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
-            converted = OffsetDateTime.parse(time, formatter);
+            if (time != null) {
+                //TODO: locale
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
+                converted = OffsetDateTime.parse(time, formatter);
+            }
         } catch (DateTimeParseException e) {
             e.printStackTrace();
         } finally {
@@ -95,7 +97,7 @@ public class BrapiObservation {
     }
 
     // Objects.hashCode Jdk7
-    private int arraysHashCode(Object a[]) {
+    private int arraysHashCode(Object[] a) {
         if (a == null)
             return 0;
 

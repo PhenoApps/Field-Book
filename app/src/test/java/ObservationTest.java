@@ -1,5 +1,5 @@
-import com.fieldbook.tracker.brapi.BrapiObservation;
-import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.brapi.model.BrapiObservation;
+import com.fieldbook.tracker.brapi.model.Observation;
 
 import org.junit.Test;
 

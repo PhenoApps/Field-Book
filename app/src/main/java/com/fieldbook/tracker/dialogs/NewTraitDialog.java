@@ -316,7 +316,7 @@ public class NewTraitDialog extends DialogFragment {
         t.setDetails(details.getText().toString());
         t.setCategories(categories.getText().toString());
         t.setVisible(true);
-        t.setRealPosition(String.valueOf(pos));
+        t.setRealPosition(pos);
         return t;
     }
 
@@ -562,7 +562,7 @@ public class NewTraitDialog extends DialogFragment {
 
             // Disallow duplicate traits
             final String traitName = trait.getText().toString().trim();
-            final boolean exists = ConfigActivity.dt.hasTrait(traitName);
+            final boolean exists = ConfigActivity.dt.getTraitByName(traitName) != null;
             if (!edit) {
                 if (exists) {
                     return getResString(R.string.traits_create_warning_duplicate);
