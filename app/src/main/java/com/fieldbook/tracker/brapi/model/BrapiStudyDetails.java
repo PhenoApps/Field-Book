@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.brapi.model;
 
 import com.fieldbook.tracker.objects.TraitObject;
 
@@ -15,7 +15,7 @@ public class BrapiStudyDetails {
   private List<List<String>> values;
   private List<TraitObject> traits;
 
-  static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2) {
+  public static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2) {
     if (sd2.getStudyDbId() != null)
       sd1.setStudyDbId(sd2.getStudyDbId());
     if (sd2.getStudyName() != null)
@@ -36,11 +36,11 @@ public class BrapiStudyDetails {
       sd1.setTraits(sd2.getTraits());
   }
 
-  String getCommonCropName() {
+  public String getCommonCropName() {
     return commonCropName;
   }
 
-  void setCommonCropName(String commonCropName) {
+  public void setCommonCropName(String commonCropName) {
     this.commonCropName = commonCropName;
   }
 
@@ -56,31 +56,31 @@ public class BrapiStudyDetails {
     return studyDbId;
   }
 
-  void setStudyDbId(String studyDbId) {
+  public void setStudyDbId(String studyDbId) {
     this.studyDbId = studyDbId;
   }
 
-  String getStudyName() {
+  public String getStudyName() {
     return studyName;
   }
 
-  void setStudyName(String studyName) {
+  public void setStudyName(String studyName) {
     this.studyName = studyName;
   }
 
-  String getStudyDescription() {
+  public String getStudyDescription() {
     return studyDescription;
   }
 
-  void setStudyDescription(String studyDescription) {
+  public void setStudyDescription(String studyDescription) {
     this.studyDescription = studyDescription;
   }
 
-  String getStudyLocation() {
+  public String getStudyLocation() {
     return studyLocation;
   }
 
-  void setStudyLocation(String studyLocation) {
+  public void setStudyLocation(String studyLocation) {
     this.studyLocation = studyLocation;
   }
 
@@ -88,7 +88,7 @@ public class BrapiStudyDetails {
     return numberOfPlots;
   }
 
-  void setNumberOfPlots(Integer numberOfPlots) {
+  public void setNumberOfPlots(Integer numberOfPlots) {
     this.numberOfPlots = numberOfPlots;
   }
 

@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
@@ -17,17 +16,14 @@ import android.widget.Toast;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.Image;
-import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
-import com.fieldbook.tracker.database.dao.ObservationVariableValueDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
-import com.fieldbook.tracker.database.models.ObservationUnitPropertyModel;
-import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -51,7 +47,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -286,9 +281,9 @@ public class DataHelper {
 //        return largest;
     }
 
-    public Boolean isBrapiSynced(String rid, String parent) {
+    public Boolean isBrapiSynced(String exp_id, String rid, String parent) {
 
-        return ObservationDao.Companion.isBrapiSynced(rid, parent);
+        return ObservationDao.Companion.isBrapiSynced(exp_id, rid, parent);
 
 //        Boolean synced = false;
 //        Observation o = new Observation();
@@ -362,7 +357,7 @@ public class DataHelper {
     /**
      * Get user created trait observations for currently selected study
      */
-    public List<Image> getUserTraitImageObservations() {
+    public List<FieldBookImage> getUserTraitImageObservations() {
 
         String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
@@ -450,7 +445,7 @@ public class DataHelper {
 //        return observations;
     }
 
-    public List<Image> getWrongSourceImageObservations(String hostUrl) {
+    public List<FieldBookImage> getWrongSourceImageObservations(String hostUrl) {
 
         return ObservationDao.Companion.getWrongSourceImageObservations(hostUrl, missingPhoto);
 
@@ -567,7 +562,7 @@ public class DataHelper {
     /**
      * Get the image observations for brapi export to external system
      */
-    public List<Image> getImageObservations(String hostUrl) {
+    public List<FieldBookImage> getImageObservations(String hostUrl) {
 
         return ObservationDao.Companion.getHostImageObservations(hostUrl, missingPhoto);
 
@@ -666,14 +661,14 @@ public class DataHelper {
 //        db.endTransaction();
     }
 
-    public void updateImages(List<Image> images) {
+    public void updateImages(List<FieldBookImage> images) {
         ArrayList<String> ids = new ArrayList<String>();
 
         db.beginTransaction();
         String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
         SQLiteStatement update = db.compileStatement(sql);
 
-        for (Image image : images) {
+        for (FieldBookImage image : images) {
             update.bindString(1, image.getDbId());
             update.bindString(2, image.getLastSyncedTime().format(timeFormat));
             update.bindString(3, image.getFieldbookDbId());
@@ -684,7 +679,7 @@ public class DataHelper {
         db.endTransaction();
     }
 
-    public void updateImage(Image image, Boolean writeLastSyncedTime) {
+    public void updateImage(FieldBookImage image, Boolean writeLastSyncedTime) {
 
         ObservationDao.Companion.updateImage(image, writeLastSyncedTime);
 
@@ -1225,9 +1220,9 @@ public class DataHelper {
     /**
      * Get observation data that needs to be saved on edits
      */
-    public Observation getObservation(String plotId, String parent) {
+    public Observation getObservation(String exp_id, String plotId, String parent) {
 
-        return ObservationDao.Companion.getObservation(plotId, parent);
+        return ObservationDao.Companion.getObservation(exp_id, plotId, parent);
 
         //        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ?", new String[]{plotId, parent},
 //                null, null, null
@@ -1832,7 +1827,7 @@ public class DataHelper {
     /**
      * V2 - Update the ordering of traits
      */
-    public void updateTraitPosition(String id, String realPosition) {
+    public void updateTraitPosition(String id, int realPosition) {
 
         ObservationVariableDao.Companion.updateTraitPosition(id, realPosition);
 
@@ -1872,25 +1867,18 @@ public class DataHelper {
 //        }
     }
 
-    /**
-     * V2 - Check if trait exists (non case sensitive)
-     */
-    public boolean hasTrait(String name) {
+    public TraitObject getTraitByName(String name) {
+        return ObservationVariableDao.Companion.getTraitByName(name);
+    }
 
-        return ObservationVariableDao.Companion.hasTrait(name);
+    public TraitObject getTraitByExternalDbId(String externalDbId, String traitDataSource) {
+        return ObservationVariableDao.Companion.getTraitByExternalDbId(externalDbId, traitDataSource);
+    }
 
-//        boolean exist;
-//
-//        Cursor cursor = db.rawQuery("select id from traits where " +
-//                "trait = ? COLLATE NOCASE", new String[]{name});
-//
-//        exist = cursor.moveToFirst();
-//
-//        if (!cursor.isClosed()) {
-//            cursor.close();
-//        }
-//
-//        return exist;
+    public long updateTrait(TraitObject trait) {
+        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getTrait(),
+                trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
+                trait.getDetails(), trait.getCategories());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -2419,7 +2407,7 @@ public class DataHelper {
                     o.setMaximum(cursor.getString(5));
                     o.setDetails(cursor.getString(6));
                     o.setCategories(cursor.getString(7));
-                    o.setRealPosition(cursor.getString(9));
+                    o.setRealPosition(cursor.getInt(9));
 
                     list.add(o);
 

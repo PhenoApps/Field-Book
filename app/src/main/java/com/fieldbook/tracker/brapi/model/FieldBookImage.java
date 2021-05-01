@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.brapi;
+package com.fieldbook.tracker.brapi.model;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 import io.swagger.client.model.GeoJSON;
 
-public class Image extends BrapiObservation {
+public class FieldBookImage extends BrapiObservation {
 
     private File file;
     private int width;
@@ -35,7 +35,11 @@ public class Image extends BrapiObservation {
     private List<String> descriptiveOntologyTerms;
     private String description;
 
-    public Image(String filePath, Bitmap missingPhoto) {
+    public FieldBookImage() {
+
+    }
+
+    public FieldBookImage(String filePath, Bitmap missingPhoto) {
 
         this.file = new File(filePath);
         this.fileSize = file.length();
@@ -46,7 +50,7 @@ public class Image extends BrapiObservation {
         this.additionalInfo = new HashMap<>();
     }
 
-    public Image(io.swagger.client.model.Image response) {
+    public FieldBookImage(io.swagger.client.model.Image response) {
         this.setDbId(response.getImageDbId());
         this.setUnitDbId(response.getObservationUnitDbId());
         this.fileName = response.getImageFileName();
@@ -56,14 +60,14 @@ public class Image extends BrapiObservation {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Image that = (Image) o;
-        return objectsEquals(unitDbId, that.getUnitDbId()) &&
+        FieldBookImage that = (FieldBookImage) o;
+        return objectsEquals(getUnitDbId(), that.getUnitDbId()) &&
                 objectsEquals(fileName, that.getFileName());
     }
 
     @Override
     public int hashCode() {
-        return objectsHash(unitDbId, fileName);//, timestamp);
+        return objectsHash(getUnitDbId(), fileName);//, timestamp);
     }
 
     public GeoJSON getLocation() {
@@ -78,12 +82,52 @@ public class Image extends BrapiObservation {
         return height;
     }
 
-    long getFileSize() {
+    public long getFileSize() {
         return fileSize;
     }
 
     public String getFileName() {
         return fileName;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public void setFileSize(long fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public void setMissing(Bitmap missing) {
+        this.missing = missing;
+    }
+
+    public void setLocation(GeoJSON location) {
+        this.location = location;
+    }
+
+    public void setBytes(byte[] bytes) {
+        this.bytes = bytes;
     }
 
     public String getImageName() {
@@ -98,22 +142,26 @@ public class Image extends BrapiObservation {
         return file;
     }
 
-    String getCopyright() {
-        if(timestamp != null) {
-            return String.valueOf(timestamp.getYear());
+    public String getCopyright() {
+        if(getTimestamp() != null) {
+            return String.valueOf(getTimestamp().getYear());
         }
         return null;
     }
 
-    Map<String, String> getAdditionalInfo() {
+    public Map<String, String> getAdditionalInfo() {
         return additionalInfo;
     }
 
-    byte[] getImageData() {
+    public void setAdditionalInfo(Map<String, String> additionalInfo) {
+        this.additionalInfo = additionalInfo;
+    }
+
+    public byte[] getImageData() {
         return bytes;
     }
 
-    List<String> getDescriptiveOntologyTerms() {
+    public List<String> getDescriptiveOntologyTerms() {
         return this.descriptiveOntologyTerms;
     }
 
@@ -121,7 +169,7 @@ public class Image extends BrapiObservation {
         this.descriptiveOntologyTerms = descriptiveOntologyTerms;
     }
 
-    String getDescription() {
+    public String getDescription() {
         return this.description;
     }
 

@@ -3,7 +3,6 @@ package com.fieldbook.tracker.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,17 +18,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiPaginationManager;
-import com.fieldbook.tracker.brapi.BrapiTrial;
-import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
+import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.swagger.client.ApiException;
 
 public class BrapiTrialActivity extends AppCompatActivity {
     private BrAPIService brAPIService;
@@ -44,10 +40,9 @@ public class BrapiTrialActivity extends AppCompatActivity {
             if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi_trials);
                 paginationManager = new BrapiPaginationManager(this);
+                brAPIService = BrAPIServiceFactory.getBrAPIService(BrapiTrialActivity.this);
+
                 String brapiBaseURL = BrAPIService.getBrapiUrl(this);
-
-                brAPIService = new BrAPIService(brapiBaseURL, this);
-
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
                 baseURLText.setText(brapiBaseURL);
 
@@ -91,7 +86,7 @@ public class BrapiTrialActivity extends AppCompatActivity {
 
         String programDbId = getIntent().getStringExtra(BrapiActivity.PROGRAM_DB_ID_INTENT_PARAM);
 
-        brAPIService.getTrials(BrAPIService.getBrapiToken(this), programDbId, paginationManager, new Function<List<BrapiTrial>, Void>() {
+        brAPIService.getTrials(programDbId, paginationManager, new Function<List<BrapiTrial>, Void>() {
             @Override
             public Void apply(List<BrapiTrial> trials) {
                 (BrapiTrialActivity.this).runOnUiThread(new Runnable() {
@@ -111,15 +106,15 @@ public class BrapiTrialActivity extends AppCompatActivity {
                 });
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(ApiException error) {
+            public Void apply(Integer code) {
                 (BrapiTrialActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
-                        if(BrAPIService.isConnectionError(error.getCode())){
-                            BrAPIService.handleConnectionError(BrapiTrialActivity.this, error.getCode());
+                        if(BrAPIService.isConnectionError(code)){
+                            BrAPIService.handleConnectionError(BrapiTrialActivity.this, code);
                         }else {
                             Toast.makeText(getApplicationContext(), getString(R.string.brapi_trials_error), Toast.LENGTH_LONG).show();
                         }
@@ -134,7 +129,10 @@ public class BrapiTrialActivity extends AppCompatActivity {
     private ListAdapter buildTrialsArrayAdapter(List<BrapiTrial> trials) {
         List<Object> itemDataList = new ArrayList<>();
         for (BrapiTrial trial : trials) {
-            itemDataList.add(trial.getTrialName());
+            if(trial.getTrialName() != null)
+                itemDataList.add(trial.getTrialName());
+            else
+                itemDataList.add(trial.getTrialDbId());
         }
         ListAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
         return adapter;

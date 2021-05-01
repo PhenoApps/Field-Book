@@ -25,7 +25,7 @@ public class GeneralKeys {
     public static final String VOLUME_NAVIGATION                    = "VOLUME_NAVIGATION";
     public static final String CYCLING_TRAITS_ADVANCES              = "CycleTraits";
     public static final String DISABLE_ENTRY_ARROW_NO_DATA          = "DISABLE_ENTRY_ARROW_NO_DATA";
-
+    public static final String FLIP_FLOP_COLLECT_ARROWS             = "FLIP_FLOP_TRAIT_ARROWS";
 
     // General
     public static final String TUTORIAL_MODE                        = "Tips";
@@ -52,9 +52,13 @@ public class GeneralKeys {
 
     //BrAPI
     public static final String BRAPI_BASE_URL                       = "BRAPI_BASE_URL";
+    public static final String BRAPI_OIDC_URL                       = "BRAPI_OIDC_URL";
+    public static final String BRAPI_OIDC_FLOW                      = "BRAPI_OIDC_FLOW";
     public static final String BRAPI_TOKEN                          = "BRAPI_TOKEN";
-    public static final String BRAPI_PAGINATION                     = "BRAPI_PAGINATION";
+    public static final String BRAPI_VERSION                        = "BRAPI_VERSION";
+    public static final String BRAPI_PAGE_SIZE                      = "BRAPI_PAGE_SIZE";
     public static final String BRAPI_TIMEOUT                        = "BRAPI_TIMEOUT";
+
     // @formatter:on
 
     private GeneralKeys() {

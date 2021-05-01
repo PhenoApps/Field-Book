@@ -18,6 +18,8 @@ import android.os.Handler;
 import android.os.Message;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
@@ -54,7 +56,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.Observation;
+import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.TraitObject;
@@ -251,7 +253,6 @@ public class CollectActivity extends AppCompatActivity {
         traitBox = new TraitBox(this);
         rangeBox = new RangeBox(this);
         initCurrentVals();
-
     }
 
     private void refreshMain() {
@@ -352,8 +353,9 @@ public class CollectActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 // if a brapi observation that has been synced, don't allow deleting
+                String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
                 TraitObject currentTrait = traitBox.getCurrentTrait();
-                if (dt.isBrapiSynced(rangeBox.getPlotID(), currentTrait.getTrait())) {
+                if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
                     if (currentTrait.getFormat().equals("photo")) {
                         // I want to use abstract method
                         Map newTraits = traitBox.getNewTraits();
@@ -636,12 +638,12 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         traitBox.update(parent, value);
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
-        Observation observation = dt.getObservation(rangeBox.getPlotID(), parent);
+        Observation observation = dt.getObservation(exp_id, rangeBox.getPlotID(), parent);
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
@@ -670,8 +672,9 @@ public class CollectActivity extends AppCompatActivity {
             return;
         }
 
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
         TraitObject trait = traitBox.getCurrentTrait();
-        if (dt.isBrapiSynced(rangeBox.getPlotID(), trait.getTrait())) {
+        if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), trait.getTrait())) {
             brapiDelete(parent, true);
         } else {
             // Always remove existing trait before inserting again
@@ -1157,12 +1160,28 @@ public class CollectActivity extends AppCompatActivity {
             newTraits = new HashMap();
 
             traitType = findViewById(R.id.traitType);
-            traitLeft = findViewById(R.id.traitLeft);
-            traitRight = findViewById(R.id.traitRight);
+
+            //determine trait button function based on user-preferences
+            //issues217 introduces the ability to swap trait and plot arrows
+            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            if (flipFlopArrows) {
+                traitLeft = findViewById(R.id.rangeLeft);
+                traitRight = findViewById(R.id.rangeRight);
+            } else {
+                traitLeft = findViewById(R.id.traitLeft);
+                traitRight = findViewById(R.id.traitRight);
+            }
+
             traitDetails = findViewById(R.id.traitDetails);
 
-            traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft, R.drawable.main_trait_left_arrow_unpressed,
-                    R.drawable.main_trait_left_arrow_pressed));
+            //change click-arrow based on preferences
+            if (flipFlopArrows) {
+                traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft, R.drawable.main_entry_left_unpressed,
+                        R.drawable.main_entry_left_pressed));
+            } else {
+                traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft, R.drawable.main_trait_left_arrow_unpressed,
+                        R.drawable.main_trait_left_arrow_pressed));
+            }
 
             // Go to previous trait
             traitLeft.setOnClickListener(new OnClickListener() {
@@ -1172,8 +1191,14 @@ public class CollectActivity extends AppCompatActivity {
                 }
             });
 
-            traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight, R.drawable.main_trait_right_unpressed,
-                    R.drawable.main_trait_right_pressed));
+            //change click-arrow based on preferences
+            if (flipFlopArrows) {
+                traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight, R.drawable.main_entry_right_unpressed,
+                        R.drawable.main_entry_right_pressed));
+            } else {
+                traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight, R.drawable.main_trait_right_unpressed,
+                        R.drawable.main_trait_right_pressed));
+            }
 
             // Go to next trait
             traitRight.setOnClickListener(new OnClickListener() {
@@ -1505,8 +1530,16 @@ public class CollectActivity extends AppCompatActivity {
             rangeName = findViewById(R.id.rangeName);
             plotName = findViewById(R.id.plotName);
 
-            rangeLeft = findViewById(R.id.rangeLeft);
-            rangeRight = findViewById(R.id.rangeRight);
+            //determine range button function based on user-preferences
+            //issues217 introduces the ability to swap trait and plot arrows
+            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            if (flipFlopArrows) {
+                rangeLeft = findViewById(R.id.traitLeft);
+                rangeRight = findViewById(R.id.traitRight);
+            } else {
+                rangeLeft = findViewById(R.id.rangeLeft);
+                rangeRight = findViewById(R.id.rangeRight);
+            }
 
             tvRange = findViewById(R.id.tvRange);
             tvPlot = findViewById(R.id.tvPlot);
@@ -1613,16 +1646,34 @@ public class CollectActivity extends AppCompatActivity {
 
         private OnTouchListener createOnLeftTouchListener() {
             Runnable actionLeft = createRunnable("left");
-            return createOnTouchListener(rangeLeft, actionLeft,
-                    R.drawable.main_entry_left_pressed,
-                    R.drawable.main_entry_left_unpressed);
+
+            //change click-arrow based on preferences
+            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            if (flipFlopArrows) {
+                return createOnTouchListener(rangeLeft, actionLeft,
+                        R.drawable.main_trait_left_arrow_pressed,
+                        R.drawable.main_trait_left_arrow_unpressed);
+            } else {
+                return createOnTouchListener(rangeLeft, actionLeft,
+                        R.drawable.main_entry_left_pressed,
+                        R.drawable.main_entry_left_unpressed);
+            }
         }
 
         private OnTouchListener createOnRightTouchListener() {
             Runnable actionRight = createRunnable("right");
-            return createOnTouchListener(rangeRight, actionRight,
-                    R.drawable.main_entry_right_pressed,
-                    R.drawable.main_entry_right_unpressed);
+
+            //change click-arrow based on preferences
+            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            if (flipFlopArrows) {
+                return createOnTouchListener(rangeRight, actionRight,
+                        R.drawable.main_trait_right_pressed,
+                        R.drawable.main_trait_right_unpressed);
+            } else {
+                return createOnTouchListener(rangeRight, actionRight,
+                        R.drawable.main_entry_right_pressed,
+                        R.drawable.main_entry_right_unpressed);
+            }
         }
 
         private OnTouchListener createOnTouchListener(final ImageView control,

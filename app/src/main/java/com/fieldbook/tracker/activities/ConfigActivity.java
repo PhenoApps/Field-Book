@@ -45,10 +45,9 @@ import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.Migrator;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
@@ -66,7 +65,6 @@ import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -559,7 +557,7 @@ public class ConfigActivity extends AppCompatActivity {
         // Check that the field data source is the same as the current target
         if (!BrAPIService.checkMatchBrapiUrl(ConfigActivity.this, activeField.getExp_source())) {
 
-            String hostURL = BrAPIService.getHostUrl(BrAPIService.getBrapiUrl(ConfigActivity.this));
+            String hostURL = BrAPIService.getHostUrl(ConfigActivity.this);
             String badSourceMsg = getResources().getString(R.string.brapi_field_non_matching_sources, activeField.getExp_source(), hostURL);
             Toast.makeText(ConfigActivity.this, badSourceMsg, Toast.LENGTH_LONG).show();
             return;
@@ -571,7 +569,7 @@ public class ConfigActivity extends AppCompatActivity {
             startActivity(exportIntent);
         } else {
             // Show our login dialog
-            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this, BrAPIService.exportTarget);
+            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this);
             brapiAuth.show();
         }
     }

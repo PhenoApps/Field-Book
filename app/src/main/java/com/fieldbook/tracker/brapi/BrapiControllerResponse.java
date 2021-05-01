@@ -6,7 +6,7 @@ public class BrapiControllerResponse {
     public Boolean status;
     public String message;
 
-    BrapiControllerResponse(Boolean status, String message) {
+    public BrapiControllerResponse(Boolean status, String message) {
 
         this.status = status;
         this.message = message;

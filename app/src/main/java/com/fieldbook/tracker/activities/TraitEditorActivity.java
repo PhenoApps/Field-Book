@@ -119,16 +119,16 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                         // e.g. 6
                         String currentID = mAdapter.getItem(to).getId();
-                        String currentPosition = mAdapter.getItem(to).getRealPosition();
+                        Integer currentPosition = mAdapter.getItem(to).getRealPosition();
 
                         ConfigActivity.dt.updateTraitPosition(currentID, currentPosition);
-                        ConfigActivity.dt.updateTraitPosition(prevID, String.valueOf(Integer.parseInt(currentPosition) + 1));
+                        ConfigActivity.dt.updateTraitPosition(prevID, currentPosition + 1);
 
                         // Push everything below down by 1
                         int newCount = 2;
 
                         for (int i = to + 1; i < mAdapter.getCount(); i++) {
-                            ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), String.valueOf(Integer.parseInt(currentPosition) + newCount));
+                            ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), currentPosition + newCount);
                             newCount++;
                         }
 
@@ -145,16 +145,16 @@ public class TraitEditorActivity extends AppCompatActivity {
                         String prevID = mAdapter.getItem(from).getId();
 
                         // e.g. 6
-                        String currentPosition = mAdapter.getItem(to).getRealPosition();
+                        Integer currentPosition = mAdapter.getItem(to).getRealPosition();
 
-                        if (Integer.parseInt(currentPosition) - to >= 0) {
+                        if (currentPosition - to >= 0) {
                             Log.w("Reorder", "top1");
 
                             // Reorder everything above
-                            int newCount = Integer.parseInt(currentPosition) - to;
+                            int newCount = currentPosition - to;
 
                             for (int i = 0; i < to; i++) {
-                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), String.valueOf(newCount));
+                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), newCount);
                                 newCount++;
                             }
 
@@ -169,15 +169,15 @@ public class TraitEditorActivity extends AppCompatActivity {
                             Log.w("Reorder", "top2");
 
                             for (int i = 0; i < to; i++) {
-                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), String.valueOf(i));
+                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), i);
                             }
 
                             Log.w("Reorder", "current");
 
-                            ConfigActivity.dt.updateTraitPosition(prevID, String.valueOf(to));
+                            ConfigActivity.dt.updateTraitPosition(prevID, to);
 
                             // Reset current position as well, otherwise we don't know where it points to
-                            currentPosition = String.valueOf(to);
+                            currentPosition = to;
                         }
 
                         Log.w("Reorder", "below");
@@ -189,7 +189,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                         for (int i = to; i < mAdapter.getCount(); i++) {
                             if (i != from) {
-                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), String.valueOf(Integer.parseInt(currentPosition) + newCount));
+                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), currentPosition + newCount);
                                 newCount++;
                             }
                         }
@@ -1086,7 +1086,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                         t.setDetails(data[5]);
                         t.setCategories(data[6]);
                         //t.visible = data[7].toLowerCase();
-                        t.setRealPosition(data[8]);
+                        t.setRealPosition(Integer.parseInt(data[8]));
                         if (data[7].toLowerCase().equals("true")) {
                             t.setVisible(true);
                         } else {

@@ -7,33 +7,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fieldbook.tracker.brapi.ApiError;
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiAuthDialog;
-import com.fieldbook.tracker.brapi.BrapiListResponse;
-import com.fieldbook.tracker.brapi.BrapiPaginationManager;
-import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fieldbook.tracker.objects.TraitObject;
-
-import io.swagger.client.ApiException;
-import io.swagger.client.model.Metadata;
 
 public class BrapiTraitActivity extends AppCompatActivity {
 
@@ -57,20 +48,19 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         // Load the traits from breedbase if user is connected to the internet
         if (Utils.isConnected(this)) {
-            if (brAPIService.hasValidBaseUrl(this)) {
+            if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_traits_brapi);
                 paginationManager = new BrapiPaginationManager(this);
 
                 loadToolbar();
                 // Get the setting information for our brapi integration
-                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
-
-                brAPIService = new BrAPIService(brapiBaseURL, this);
+                brAPIService = BrAPIServiceFactory.getBrAPIService(this);
 
                 // Make a clean list to track our selected traits
                 selectedTraits = new ArrayList<>();
 
                 // Set the url on our interface
+                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 TextView baseURLText = findViewById(R.id.brapiBaseUrl);
                 baseURLText.setText(brapiBaseURL);
 
@@ -113,16 +103,13 @@ public class BrapiTraitActivity extends AppCompatActivity {
         paginationManager.refreshPageIndicator();
 
         // Call our API to get the data
-        brAPIService.getOntology(BrAPIService.getBrapiToken(this), paginationManager, new Function<BrapiListResponse<TraitObject>, Void>() {
+        brAPIService.getOntology(paginationManager, new Function<List<TraitObject>, Void>() {
             @Override
-            public Void apply(final BrapiListResponse<TraitObject> input) {
+            public Void apply(final List<TraitObject> traits) {
 
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
-                            final List<TraitObject> traits = input.getData();
-
                             // Build our array adapter
                             traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
 
@@ -172,15 +159,15 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 return null;
             }
 
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(final ApiException error) {
+            public Void apply(final Integer code) {
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
-                        if(BrAPIService.isConnectionError(error.getCode())){
-                            BrAPIService.handleConnectionError(BrapiTraitActivity.this, error.getCode());
+                        if(BrAPIService.isConnectionError(code)){
+                            BrAPIService.handleConnectionError(BrapiTraitActivity.this, code);
                         }else {
                             Toast.makeText(getApplicationContext(), getString(R.string.brapi_ontology_error), Toast.LENGTH_LONG).show();
                         }
@@ -199,8 +186,10 @@ public class BrapiTraitActivity extends AppCompatActivity {
         ArrayList<String> itemDataList = new ArrayList<>();
 
         for (TraitObject trait : traits) {
-
-            itemDataList.add(trait.getTrait());
+            if(trait.getTrait() != null)
+                itemDataList.add(trait.getTrait());
+            else
+                itemDataList.add(trait.getId());
         }
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, itemDataList);
@@ -247,22 +236,29 @@ public class BrapiTraitActivity extends AppCompatActivity {
         String secondaryMessage = "";
         // For now, only give the ability to create new variables
         // Determine later if the need to edit existing variables is needed.
+        int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
         for (int i = 0; i < selectedTraits.size(); ++i) {
 
             TraitObject trait = selectedTraits.get(i);
 
+            TraitObject existingTraitByName = ConfigActivity.dt.getTraitByName(trait.getTrait());
+            TraitObject existingTraitByExId = ConfigActivity.dt.getTraitByExternalDbId(trait.getExternalDbId(), trait.getTraitDataSource());
             // Check if the trait already exists
-            if (ConfigActivity.dt.hasTrait(trait.getTrait())) {
+            if (existingTraitByName != null) {
                 secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getTrait());
                 // Skip this one, continue on.
                 continue;
+            }else if (existingTraitByExId != null) {
+                // Update existing trait
+                trait.setId(existingTraitByExId.getId());
+                long saveStatus = ConfigActivity.dt.updateTrait(trait);
+                successfulSaves += saveStatus == -1 ? 0 : 1;
+            }else{
+                // Insert our new trait
+                trait.setRealPosition(pos + i);
+                long saveStatus = ConfigActivity.dt.insertTraits(trait);
+                successfulSaves += saveStatus == -1 ? 0 : 1;
             }
-
-            // Insert our new trait
-            long saveStatus = ConfigActivity.dt.insertTraits(trait);
-
-            successfulSaves += saveStatus == -1 ? 0 : 1;
-
         }
 
         SharedPreferences ep = getSharedPreferences("Settings", 0);
