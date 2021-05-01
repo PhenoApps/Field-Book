@@ -38,6 +38,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.adapters.FieldAdapter;
+import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -346,6 +347,24 @@ public class FieldEditorActivity extends AppCompatActivity {
                 }
                 break;
 
+            case R.id.menu_field_editor_item_creator:
+
+                FieldCreatorDialog dialog = new FieldCreatorDialog(this);
+
+                //when the dialog is dismissed, the field data is created or failed
+                dialog.setOnDismissListener((dismiss -> {
+
+                    //update list of fields
+                    fieldList = findViewById(R.id.myList);
+                    mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
+                    fieldList.setAdapter(mAdapter);
+
+                }));
+
+                dialog.show();
+
+                break;
+
             case android.R.id.home:
                 CollectActivity.reloadData = true;
                 finish();
@@ -477,6 +496,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     private void loadFile(FieldFileObject.FieldFileBase fieldFile) {
+
         String[] importColumns = fieldFile.getColumns();
 
         String[] reservedNames = new String[]{"id"};
@@ -484,16 +504,31 @@ public class FieldEditorActivity extends AppCompatActivity {
         List<String> list = Arrays.asList(reservedNames);
 
         //TODO causing crash
-        for (String s : importColumns) {
+        boolean hasSpecialCharacters = false;
+        for (int i = 0; i < importColumns.length; i++) {
+
+            String s = importColumns[i];
+
             if (DataHelper.hasSpecialChars(s)) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns) + " (\"" + s + "\")");
-                return;
+
+                hasSpecialCharacters = true;
+
+                importColumns[i] = DataHelper.replaceSpecialChars(s);
             }
 
             if (list.contains(s.toLowerCase())) {
+
                 Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_name) + " \"" + s + "\"");
+
                 return;
             }
+        }
+
+        if (hasSpecialCharacters) {
+
+
+            Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns_replaced));
+
         }
 
         importDialog(importColumns);
@@ -606,6 +641,16 @@ public class FieldEditorActivity extends AppCompatActivity {
                 fieldFile.open();
                 String[] data;
                 String[] columns = fieldFile.readNext();
+
+                //match and delete special characters from header line
+                for (int i = 0; i < columns.length; i++) {
+
+                    String header = columns[i];
+
+                    if (DataHelper.hasSpecialChars(header)) {
+                        columns[i] = DataHelper.replaceSpecialChars(header);
+                    }
+                }
 
                 FieldObject f = fieldFile.createFieldObject();
                 f.setUnique_id(unique.getSelectedItem().toString());

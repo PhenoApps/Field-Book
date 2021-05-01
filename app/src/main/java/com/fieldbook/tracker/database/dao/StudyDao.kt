@@ -29,7 +29,7 @@ class StudyDao {
             //create a select statement based on the saved plot attribute names
             val select = headers.map { col ->
 
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS `$col`"
+                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
 
             }
 

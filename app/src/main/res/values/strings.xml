@@ -62,6 +62,7 @@
     <string name="fields_filter">Filter</string>
     <string name="fields_reimport">Reimport</string>
     <string name="fields_archive">Archive</string>
+    <string name="fields_toolbar_add_field">Import Field</string>
 
     <!-- Settings Activity  -->
     <string name="settings_fields">Fields</string>
@@ -407,6 +408,7 @@
     <string name="import_error_unique">Unique identifier column contains duplicates or has already been used in a different file</string>
     <string name="import_error_unsupported">This file type is not currently supported</string>
     <string name="import_error_columns">Column names contain illegal characters or words: </string>
+    <string name="import_error_columns_replaced">Column names contain illegal characters that will be replaced during import.</string>
     <string name="import_error_column_name">Column name in imported file cannot be: </string>
     <string name="import_error_unique_characters_illegal">Selected column contains characters which cannot be used in the unique identifier</string>
     <string name="import_error_column_choice">Columns cannot be used for the same assignment</string>
@@ -562,4 +564,32 @@
 
     <string name="pref_profile_summary">Shows a dialog every 24 hours, verifying the person\'s name.</string>
     <string name="pref_profile_title">Verify person every 24 hours.</string>
+
+    <!-- Field Creator Dialog -->
+    <string name="dialog_field_creator_ask_size">Please choose a field name and size.</string>
+    <string name="dialog_field_creator_ask_start_point">Please choose a field starting point.</string>
+    <string name="dialog_field_creator_ask_pattern">Please choose a field pattern.</string>
+    <string name="dialog_field_creator_ask_name_hint">Name</string>
+    <string name="dialog_field_creator_ask_row_hint">Rows</string>
+    <string name="dialog_field_creator_ask_columns_hint">Columns</string>
+    <!-- Radio box strings -->
+    <string name="dialog_field_creator_top_left">Top Left</string>
+    <string name="dialog_field_creator_bottom_left">Bottom Left</string>
+    <string name="dialog_field_creator_top_right">Top Right</string>
+    <string name="dialog_field_creator_bottom_right">Bottom Right</string>
+    <!-- plot output string -->
+    <string name="dialog_field_creator_insert_field">Creating field rows: %1$s by cols: %2$s</string>
+    <string name="dialog_field_creator_insert_field_complete">Creating field rows: %1$s by cols: %2$s …complete.</string>
+    <string name="dialog_field_creator_insert_plot">Inserting plot %1$s at row %2$s column %3$s</string>
+    <!-- review section -->
+    <string name="dialog_field_creator_review_title">Review</string>
+    <string name="dialog_field_creator_size_group_error">Please enter a valid name and format.</string>
+    <string name="dialog_field_creator_field_name_not_unique">Field name already in use.</string>
+    <string name="dialog_field_creator_large_field">Large Field Detected, transaction might take a long time.</string>
+    <string name="dialog_field_creator_linear_button_content_desc">Button to choose linear plot pattern.</string>
+    <string name="dialog_field_creator_zig_button_content_desc">Button to choose zig zag plot pattern.</string>
+    <string name="dialog_field_creator_review_image_content_desc">Image showing orientation and plot pattern.</string>
+    <string name="dialog_back">Back</string>
+
+    <string name="data_helper_backup_v8_error">An error occurred when backing up v8 database.</string>
 </resources>

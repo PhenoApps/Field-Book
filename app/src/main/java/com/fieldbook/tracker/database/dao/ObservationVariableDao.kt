@@ -14,8 +14,9 @@ class ObservationVariableDao {
 
         fun getMaxPosition(): Int = withDatabase { db ->
 
-            db.query(ObservationVariable.tableName, select = arrayOf("MAX(position) as result"))
-                    .toFirst()["result"]?.toString()?.toInt()
+
+            db.queryForMax(ObservationVariable.tableName,
+                    select = arrayOf("MAX(position) as result")).toFirst()["result"].toString().toInt()
 
         } ?: 0
 
