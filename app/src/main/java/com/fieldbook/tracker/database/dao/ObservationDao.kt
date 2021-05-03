@@ -128,7 +128,7 @@ class ObservationDao {
 
         } ?: emptyList()
 
-        fun getStringVal(row: Map<String, Any?>, column: String) : String? {
+        private fun getStringVal(row: Map<String, Any?>?, column: String?) : String? {
             if(row != null && column != null){
                 if (row[column] != null){
                     return row[column].toString();
@@ -182,7 +182,7 @@ class ObservationDao {
 
         } ?: emptyList()
 
-        fun isBrapiSynced(exp_id: String, rid: String, parent: String): Boolean = withDatabase { db ->
+        fun isBrapiSynced(exp_id: String, rid: String, parent: String): Boolean = withDatabase {
 
             getObservation(exp_id, rid, parent)?.let { observation ->
 

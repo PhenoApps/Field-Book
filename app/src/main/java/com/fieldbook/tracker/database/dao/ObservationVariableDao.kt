@@ -244,9 +244,9 @@ class ObservationVariableDao {
                         })
 
                 ObservationVariableValueDao.insert(
-                        (t.minimum as? String).orEmpty(),
-                        (t.maximum as? String).orEmpty(),
-                        (t.categories as? String).orEmpty(),
+                        t.minimum.orEmpty(),
+                        t.maximum.orEmpty(),
+                        t.categories.orEmpty(),
                         varRowId.toString())
 
                 varRowId
@@ -279,6 +279,7 @@ class ObservationVariableDao {
                 put("observation_variable_name", trait)
                 put("observation_variable_field_book_format", format)
                 put("default_value", defaultValue)
+                put("observation_variable_details", details)
             }, "${ObservationVariable.PK} = ?", arrayOf(id)).toLong()
 
             arrayOf("validValuesMin", "validValuesMax", "category").forEach {

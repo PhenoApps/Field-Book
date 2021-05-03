@@ -35,7 +35,7 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.util.Arrays;
 
 public class SearchActivity extends AppCompatActivity {
-    public static String TICK = "`";
+    public static String TICK = "\"";
     private static String TAG = "Field Book";
     private SharedPreferences ep;
     private LinearLayout parent;
@@ -170,7 +170,7 @@ public class SearchActivity extends AppCompatActivity {
                             // 5: less than
                             case 5:
                                 if (before)
-                                    value = prefix + c.getSelectedItem().toString() + " < " + trunc;
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " < " + trunc;
                                 else
                                     value = prefix + c.getSelectedItem().toString() + " and userValue < " + trunc;
                                 break;

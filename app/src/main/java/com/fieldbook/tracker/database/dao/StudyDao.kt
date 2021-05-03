@@ -114,7 +114,7 @@ class StudyDao {
                 else -> date
             }
             this["study_source"]?.let { source ->
-                it.exp_source = this["study_source"].toString()
+                it.exp_source = source.toString()
             }
             it.count = this["count"].toString()
         }
@@ -311,7 +311,7 @@ class StudyDao {
 
         } ?: -1
 
-        fun getCount(studyId: Int): Int = withDatabase { db ->
+        fun getCount(studyId: Int): Int = withDatabase {
 
             ObservationUnitDao.getAll(studyId).size
 

@@ -282,13 +282,15 @@ class FieldCreatorDialog(private val activity: FieldEditorActivity) : Dialog(act
 
             backButton.isEnabled = false //no going back now
 
-            insertBasicField(name, rows, cols, startId, pattern)
+            insertBasicField(name, rows, cols, pattern)
         }
 
     }
 
     //launch database IO coroutine that creates the field and its data
-    private fun insertBasicField(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
+//    private fun insertBasicField(name: String, rows: Int, cols: Int, startId: Int, pattern: Int) {
+
+    private fun insertBasicField(name: String, rows: Int, cols: Int, pattern: Int) {
 
         //insert job is cancelled when the cancel button is pressed
         val cancelButton = findViewById<Button>(R.id.dialog_field_creator_cancel_button)
