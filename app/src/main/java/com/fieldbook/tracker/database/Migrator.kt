@@ -199,7 +199,7 @@ class Migrator {
                 //val traits = ObservationVariableDao.getAllTraitObjects()
                 //iterate over all traits, insert observation variable values using the above mapping
                 //old schema has extra columns in the trait table which are now bridged with attr/vals in the new schema
-                traits.forEachIndexed { index, trait ->
+                traits.forEachIndexed { _, trait ->
                     //iterate trhough mapping of the old columns that are now attr/vals
                     mapOf(
                             "validValuesMin" to (trait.minimum ?: ""),

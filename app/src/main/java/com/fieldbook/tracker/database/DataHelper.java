@@ -67,12 +67,6 @@ public class DataHelper {
     private static final String PLOTS = "plots";
     private static final String PLOT_ATTRIBUTES = "plot_attributes";
     private static final String PLOT_VALUES = "plot_values";
-    private static final String INSERTTRAITS = "insert into "
-            + TRAITS
-            + "(external_db_id, trait_data_source, trait, format, defaultValue, minimum, maximum, details, categories, "
-            + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?,?,?)";
-    private static final String INSERTUSERTRAITS = "insert into " + USER_TRAITS
-            + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id, observation_db_id, last_synced_time) values (?,?,?,?,?,?,?,?,?,?,?,?)";
     public static SQLiteDatabase db;
     private static String TAG = "Field Book";
     private static String TICK = "`";
@@ -725,9 +719,6 @@ public class DataHelper {
 
         try {
             db = openHelper.getWritableDatabase();
-
-            this.insertTraits = db.compileStatement(INSERTTRAITS);
-            this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -1396,12 +1387,10 @@ public class DataHelper {
      * between ranges on screen
      * //TODO add catch here for sqlite error
      */
-    public RangeObject getRange(int id) {
+    public RangeObject getRange(String first, String second, String unique, int id) {
 
         return ObservationUnitPropertyDao.Companion.getRangeFromId(
-                ep.getString("ImportFirstName", ""),
-                ep.getString("ImportSecondName", ""),
-                ep.getString("ImportUniqueName", ""),
+                first, second, unique,
                 id);
 
 //        RangeObject data = new RangeObject();

@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.database.dao
 
 import android.content.ContentValues
-import com.fieldbook.tracker.brapi.Observation
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import java.util.HashMap
