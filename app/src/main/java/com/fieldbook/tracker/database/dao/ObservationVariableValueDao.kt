@@ -41,7 +41,7 @@ class ObservationVariableValueDao {
 
                 val attrId = ObservationVariableAttributeDao.getAttributeIdByName(attrValue.key)
 
-                val rowid = db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
+                db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
 
                         ObservationVariable.FK to id,
                         Migrator.ObservationVariableAttribute.FK to attrId,

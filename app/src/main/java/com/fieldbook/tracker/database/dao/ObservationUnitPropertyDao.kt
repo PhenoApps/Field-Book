@@ -18,12 +18,12 @@ class ObservationUnitPropertyDao {
 //            db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
 //        }
 
-        fun getAllRangeId(): Array<Integer> = withDatabase { db ->
+        fun getAllRangeId(): Array<Int> = withDatabase { db ->
             val table = db.query(sObservationUnitPropertyViewName,
                     select = arrayOf("id"),
                     orderBy = "id").toTable()
 
-            table.map { (it["id"] as java.lang.Integer) }
+            table.map { (it["id"] as Int) }
                     .toTypedArray()
         } ?: emptyArray()
 
@@ -152,7 +152,7 @@ class ObservationUnitPropertyDao {
 
                 val varSelectFields = arrayOf("observation_variable_name")
                 val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates")
-                val outputFields = fieldList + varSelectFields + obsSelectFields
+                //val outputFields = fieldList + varSelectFields + obsSelectFields
                 val query = """
         SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }} ${if (fieldList.isNotEmpty()) "," else " "} 
             ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }} ${if (varSelectFields.isNotEmpty()) "," else " "}
@@ -169,7 +169,6 @@ class ObservationUnitPropertyDao {
     """.trimIndent()
 
 //        println(query)
-                val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
 
                 val table = db.rawQuery(query, null).toTable()
 

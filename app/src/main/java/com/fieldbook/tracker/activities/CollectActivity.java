@@ -452,7 +452,8 @@ public class CollectActivity extends AppCompatActivity {
 
         //move to plot id
         if (type.equals("id")) {
-            for (int j = 1; j <= rangeID.length; j++) {
+            int rangeSize = rangeID.length;
+            for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
                 if (rangeBox.getCRange().plot_id.equals(data)) {
@@ -1479,6 +1480,12 @@ public class CollectActivity extends AppCompatActivity {
 
         private Handler repeatHandler;
 
+        /**
+         * unique plot names used in range queries
+         * query and save them once during initialization
+         */
+        private String firstName, secondName, uniqueName;
+
         private int delay = 100;
         private int count = 1;
 
@@ -1490,6 +1497,10 @@ public class CollectActivity extends AppCompatActivity {
             cRange.plot_id = "";
             cRange.range = "";
             lastRange = "";
+
+            firstName = ep.getString("ImportFirstName", "");
+            secondName = ep.getString("ImportSecondName", "");
+            uniqueName = ep.getString("ImportUniqueName", "");
 
             initAndPlot();
         }
@@ -1737,7 +1748,7 @@ public class CollectActivity extends AppCompatActivity {
                 paging = movePaging(paging, step, true);
 
                 // Refresh onscreen controls
-                cRange = dt.getRange(rangeID[paging - 1]);
+                cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[paging - 1]);
                 rangeBox.saveLastPlot();
 
                 if (cRange.plot_id.length() == 0)
@@ -1768,7 +1779,7 @@ public class CollectActivity extends AppCompatActivity {
 
             setAllRangeID();
             if (rangeID != null) {
-                cRange = dt.getRange(rangeID[0]);
+                cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[0]);
 
                 //TODO NullPointerException
                 lastRange = cRange.range;
@@ -1780,7 +1791,7 @@ public class CollectActivity extends AppCompatActivity {
 
         // Refresh onscreen controls
         void refresh() {
-            cRange = dt.getRange(rangeID[paging - 1]);
+            cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[paging - 1]);
 
             display();
             final SharedPreferences ep = parent.getPreference();
@@ -1845,11 +1856,11 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         public void setRange(final int id) {
-            cRange = dt.getRange(id);
+            cRange = dt.getRange(firstName, secondName, uniqueName, id);
         }
 
         void setRangeByIndex(final int j) {
-            cRange = dt.getRange(rangeID[j]);
+            cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[j]);
         }
 
         void setLastRange() {

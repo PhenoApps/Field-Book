@@ -81,7 +81,7 @@ class NmeaParser {
                 //All messages should have  $TI where TI is the talker identifier
                 //followed by a 3-4(?) character nmea message type
                 if (nmeaType.length == 6) {
-                    val talkerId = nmeaType.substring(0, 2)
+                    //val talkerId = nmeaType.substring(0, 2)
                     nmeaType = nmeaType.substring(3)
                 }
             }
@@ -143,7 +143,7 @@ class NmeaParser {
                             gsv = ArrayList()
                         }
 
-                        var index = sentence[2].toInt()
+                        //var index = sentence[2].toInt()
                         gsvSatsInView = sentence[3].toInt()
 
                         for (i in 4 until 12 step 4) {
