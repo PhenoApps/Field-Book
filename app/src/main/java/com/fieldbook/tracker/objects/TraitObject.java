@@ -13,11 +13,11 @@ public class TraitObject {
     private String maximum;
     private String details;
     private String categories;
-    private String realPosition;
+    private int realPosition;
     private String id;
     private Boolean visible;
-    private String external_db_id;
-    private String trait_data_source;
+    private String externalDbId;
+    private String traitDataSource;
 
     public String getTrait() {
         return trait;
@@ -75,11 +75,11 @@ public class TraitObject {
         this.categories = categories;
     }
 
-    public String getRealPosition() {
+    public int getRealPosition() {
         return realPosition;
     }
 
-    public void setRealPosition(String realPosition) {
+    public void setRealPosition(int realPosition) {
         this.realPosition = realPosition;
     }
 
@@ -100,19 +100,19 @@ public class TraitObject {
     }
 
     public String getExternalDbId() {
-        return external_db_id;
+        return externalDbId;
     }
 
     public void setExternalDbId(String externalDbId) {
-        this.external_db_id = externalDbId;
+        this.externalDbId = externalDbId;
     }
 
     public String getTraitDataSource() {
-        return trait_data_source;
+        return traitDataSource;
     }
 
     public void setTraitDataSource(String traitDataSource) {
-        this.trait_data_source = traitDataSource;
+        this.traitDataSource = traitDataSource;
     }
 
     public boolean isValidValue(final String s) {

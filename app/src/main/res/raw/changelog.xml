@@ -1,5 +1,25 @@
 <changelog>
     <release
+        date="2021-02-15"
+        versionCode="500"
+        versionName="v5.0">
+        <new>Major database overhaul</new>
+        <new>BrAPI v2 support</new>
+        <new>New GNSS trait</new>
+        <new>Added setting to swap plot/trait arrows</new>
+        <new>BrAPI page size setting</new>
+        <new>Updated Boolean trait layout</new>
+        <new>BrAPI server timeout setting</new>
+        <new>Design custom fields directly within Field Book</new>
+        <new>Field Book requests person confirmation every 24hrs</new>
+        <info>Print a label adds an observation record</info>
+        <info>Updated UI libraries- email me if anything breaks</info>
+        <bugfix>Fixed issue with special characters in file headers</bugfix>
+        <bugfix>Fixed issue with categorical trait layout</bugfix>
+        <bugfix>Trait files can be imported via cloud</bugfix>
+    </release>
+
+    <release
         date="2020-10-01"
         versionCode="450"
         versionName="v4.5">

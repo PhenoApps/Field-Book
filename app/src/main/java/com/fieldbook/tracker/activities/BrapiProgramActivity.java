@@ -18,19 +18,19 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiProgram;
-import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
+import com.fieldbook.tracker.brapi.model.BrapiProgram;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.swagger.client.ApiException;
-
 public class BrapiProgramActivity extends AppCompatActivity {
     private BrAPIService brAPIService;
     private BrapiProgram brapiProgram;
+    private BrapiPaginationManager paginationManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,9 +39,10 @@ public class BrapiProgramActivity extends AppCompatActivity {
         if (Utils.isConnected(this)) {
             if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi_programs);
-                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
-                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiProgramActivity.this));
+                paginationManager = new BrapiPaginationManager(this);
+                brAPIService = BrAPIServiceFactory.getBrAPIService(BrapiProgramActivity.this);
 
+                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
                 baseURLText.setText(brapiBaseURL);
 
@@ -80,8 +81,10 @@ public class BrapiProgramActivity extends AppCompatActivity {
         ListView programsView = findViewById(R.id.brapiPrograms);
         programsView.setVisibility(View.GONE);
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+        //init page numbers
+        paginationManager.refreshPageIndicator();
 
-        brAPIService.getPrograms(BrAPIService.getBrapiToken(this), new Function<List<BrapiProgram>, Void>() {
+        brAPIService.getPrograms(paginationManager, new Function<List<BrapiProgram>, Void>() {
             @Override
             public Void apply(List<BrapiProgram> programs) {
                 (BrapiProgramActivity.this).runOnUiThread(new Runnable() {
@@ -101,15 +104,15 @@ public class BrapiProgramActivity extends AppCompatActivity {
                 });
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(ApiException error) {
+            public Void apply(Integer code) {
                 (BrapiProgramActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
-                        if(BrAPIService.isConnectionError(error.getCode())){
-                            BrAPIService.handleConnectionError(BrapiProgramActivity.this, error.getCode());
+                        if(BrAPIService.isConnectionError(code)){
+                            BrAPIService.handleConnectionError(BrapiProgramActivity.this, code);
                         }else {
                             Toast.makeText(getApplicationContext(), getString(R.string.brapi_programs_error), Toast.LENGTH_LONG).show();
                         }
@@ -124,7 +127,10 @@ public class BrapiProgramActivity extends AppCompatActivity {
     private ListAdapter buildProgramsArrayAdapter(List<BrapiProgram> programs) {
         List<Object> itemDataList = new ArrayList<>();
         for (BrapiProgram program : programs) {
-            itemDataList.add(program.getProgramName());
+            if(program.getProgramName() != null)
+                itemDataList.add(program.getProgramName());
+            else
+                itemDataList.add(program.getProgramDbId());
         }
         ListAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
         return adapter;
@@ -133,6 +139,7 @@ public class BrapiProgramActivity extends AppCompatActivity {
     public void buttonClicked(View view) {
         switch (view.getId()) {
             case R.id.loadPrograms:
+                paginationManager.reset();
                 loadPrograms();
                 break;
             case R.id.selectProgram:
@@ -144,6 +151,12 @@ public class BrapiProgramActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_program, Toast.LENGTH_SHORT).show();
                 }
+                break;
+            case R.id.prev:
+            case R.id.next:
+                // Update current page (if allowed) and start brapi call.
+                paginationManager.setNewPage(view.getId());
+                loadPrograms();
                 break;
         }
     }

@@ -16,18 +16,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.ApiError;
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiAuthDialog;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.BrapiLoadDialog;
-import com.fieldbook.tracker.brapi.BrapiStudySummary;
-import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.swagger.client.ApiException;
 
 /**
  * API test Screen
@@ -35,11 +32,14 @@ import io.swagger.client.ApiException;
 public class BrapiActivity extends AppCompatActivity {
 
     private BrAPIService brAPIService;
-    private BrapiStudySummary selectedStudy;
+    private BrapiStudyDetails selectedStudy;
+
+    BrapiLoadDialog brapiLoadDialog;
 
     // Filter by
     private String programDbId;
     private String trialDbId;
+    private BrapiPaginationManager paginationManager;
     private static final int FILTER_BY_PROGRAM_REQUEST_CODE = 1;
     private static final int FILTER_BY_TRIAL_REQUEST_CODE = 2;
     public static final String PROGRAM_DB_ID_INTENT_PARAM = "programDbId";
@@ -47,11 +47,14 @@ public class BrapiActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        brapiLoadDialog.dismiss();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        brAPIService.authorizeClient();
+        loadStudiesList();
     }
 
     @Override
@@ -61,9 +64,12 @@ public class BrapiActivity extends AppCompatActivity {
         if (Utils.isConnected(this)) {
             if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_brapi);
-                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
-                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(BrapiActivity.this));
+                paginationManager = new BrapiPaginationManager(this);
 
+                brAPIService = BrAPIServiceFactory.getBrAPIService(BrapiActivity.this);
+                brapiLoadDialog = new BrapiLoadDialog(this);
+
+                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 TextView baseURLText = findViewById(R.id.brapiBaseURL);
                 baseURLText.setText(brapiBaseURL);
 
@@ -99,9 +105,13 @@ public class BrapiActivity extends AppCompatActivity {
         listStudies.setVisibility(View.GONE);
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
-        brAPIService.getStudies(BrAPIService.getBrapiToken(this), this.programDbId, this.trialDbId, new Function<List<BrapiStudySummary>, Void>() {
+        //init page numbers
+        paginationManager.refreshPageIndicator();
+        Integer initPage = paginationManager.getPage();
+
+        brAPIService.getStudies(this.programDbId, this.trialDbId, paginationManager, new Function<List<BrapiStudyDetails>, Void>() {
             @Override
-            public Void apply(final List<BrapiStudySummary> studies) {
+            public Void apply(final List<BrapiStudyDetails> studies) {
 
                 (BrapiActivity.this).runOnUiThread(new Runnable() {
                     @Override
@@ -123,18 +133,17 @@ public class BrapiActivity extends AppCompatActivity {
 
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
 
 
             @Override
-            public Void apply(final ApiException error) {
-
+            public Void apply(final Integer code) {
                 (BrapiActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
-                        if(BrAPIService.isConnectionError(error.getCode())){
-                            BrAPIService.handleConnectionError(BrapiActivity.this, error.getCode());
+                        if(BrAPIService.isConnectionError(code)){
+                            BrAPIService.handleConnectionError(BrapiActivity.this, code);
                         }else {
                             Toast.makeText(getApplicationContext(), getString(R.string.brapi_studies_error), Toast.LENGTH_LONG).show();
                         }
@@ -148,11 +157,14 @@ public class BrapiActivity extends AppCompatActivity {
         });
     }
 
-    private ArrayAdapter buildStudiesArrayAdapter(List<BrapiStudySummary> studies) {
+    private ArrayAdapter buildStudiesArrayAdapter(List<BrapiStudyDetails> studies) {
         ArrayList<String> itemDataList = new ArrayList<>();
 
-        for (BrapiStudySummary study : studies) {
-            itemDataList.add(study.getStudyName());
+        for (BrapiStudyDetails study : studies) {
+            if(study.getStudyName() != null)
+                itemDataList.add(study.getStudyName());
+            else
+                itemDataList.add(study.getStudyDbId());
         }
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
@@ -163,19 +175,26 @@ public class BrapiActivity extends AppCompatActivity {
     public void buttonClicked(View view) {
         switch (view.getId()) {
             case R.id.loadStudies:
+                // Start from beginning
+                paginationManager.reset();
                 loadStudiesList();
                 break;
             case R.id.save:
                 saveStudy();
+                break;
+            case R.id.prev:
+            case R.id.next:
+                // Update current page (if allowed) and start brapi call.
+                paginationManager.setNewPage(view.getId());
+                loadStudiesList();
                 break;
         }
     }
 
     private void saveStudy() {
         if(this.selectedStudy != null) {
-            BrapiLoadDialog bld = new BrapiLoadDialog(this);
-            bld.setSelectedStudy(this.selectedStudy);
-            bld.show();
+            brapiLoadDialog.setSelectedStudy(this.selectedStudy);
+            brapiLoadDialog.show();
         }else{
             Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_study, Toast.LENGTH_SHORT).show();
         }
@@ -209,11 +228,13 @@ public class BrapiActivity extends AppCompatActivity {
                 programDbId = data.getDataString();
                 // reset previous filter
                 trialDbId = null;
+                paginationManager.reset();
                 loadStudiesList();
             }
         } else if (requestCode == FILTER_BY_TRIAL_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 trialDbId = data.getDataString();
+                paginationManager.reset();
                 loadStudiesList();
             }
         }

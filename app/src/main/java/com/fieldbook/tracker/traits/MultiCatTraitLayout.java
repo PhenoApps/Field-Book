@@ -101,9 +101,11 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                gridMultiCat.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                View lastChild = gridMultiCat.getChildAt(gridMultiCat.getChildCount() - 1);
-                gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, lastChild.getBottom()));
+                gridMultiCat.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                gridMultiCat.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+//                View lastChild = gridMultiCat.getChildAt(gridMultiCat.getChildCount() - 1);
+//                gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, lastChild.getBottom()));
+                gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             }
         });
     }

@@ -6,14 +6,14 @@
         android:title="@string/preferences_brapi_core_title"
         app:iconSpaceReserved="false">
 
-        <EditTextPreference
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
             android:defaultValue="@string/brapi_base_url_default"
             android:dialogMessage="@string/brapi_base_url_desc"
             android:dialogTitle="@string/brapi_base_url"
             android:icon="@drawable/ic_adv_brapi_base"
             android:key="BRAPI_BASE_URL"
             android:positiveButtonText="@string/brapi_save_authorize"
-            android:summary="@string/brapi_base_url_desc"
+            android:summary="%s"
             android:title="@string/brapi_base_url" />
 
         <Preference
@@ -22,33 +22,98 @@
             android:title="@string/brapi_authorize" />
 
         <Preference
-            android:icon="@drawable/ic_exit_to_app"
+            android:icon="@drawable/ic_pref_brapi_logout"
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />
+
+        <ListPreference
+            android:defaultValue="@string/preferences_brapi_version_v1"
+            android:entries="@array/pref_brapi_version"
+            android:entryValues="@array/pref_brapi_version"
+            android:icon="@drawable/ic_pref_brapi_version"
+            android:key="BRAPI_VERSION"
+            android:summary="%s"
+            android:title="@string/preferences_brapi_version" />
+
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="1000"
+            android:icon="@drawable/ic_pref_brapi_pagination"
+            android:inputType="number"
+            android:key="BRAPI_PAGE_SIZE"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/brapi_pagination" />
+
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="120"
+            android:icon="@drawable/ic_pref_brapi_timeout"
+            android:inputType="number"
+            android:key="BRAPI_TIMEOUT"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/brapi_timeout" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="brapi_server_list"
+        android:title="@string/preferences_brapi_advanced_title"
+        app:iconSpaceReserved="false">
+
+        <EditTextPreference
+            android:defaultValue="@string/brapi_oidc_url_default"
+            android:dialogMessage="@string/brapi_oidc_url_desc"
+            android:dialogTitle="@string/brapi_oidc_url"
+            android:icon="@drawable/ic_adv_brapi_base"
+            android:key="BRAPI_OIDC_URL"
+            android:summary="@string/brapi_oidc_url_desc"
+            android:title="@string/brapi_oidc_url" />
+
+        <ListPreference
+            android:defaultValue="@string/preferences_brapi_oidc_flow_oauth_implicit"
+            android:entries="@array/pref_brapi_oidc_flow"
+            android:entryValues="@array/pref_brapi_oidc_flow"
+            android:icon="@drawable/ic_pref_brapi_version"
+            android:key="BRAPI_OIDC_FLOW"
+            android:summary="%s"
+            android:title="@string/preferences_brapi_oidc_flow" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="brapi_server_list"
         android:title="@string/preferences_brapi_servers_title"
-        app:iconSpaceReserved="false">
+        app:iconSpaceReserved="false"
+        app:initialExpandedChildrenCount="1">
 
         <Preference
             android:icon="@drawable/ic_trait_barcode"
             android:key="brapi_server_barcode"
-            android:title="@string/preferences_brapi_server_barcode">
-        </Preference>
+            android:title="@string/preferences_brapi_server_barcode" />
 
         <Preference
             android:icon="@drawable/ic_pref_brapi_server"
             android:key="brapi_server_cassavabase"
-            android:title="@string/preferences_brapi_server_cassavabase">
-        </Preference>
+            android:title="@string/preferences_brapi_server_cassavabase" />
+
+        <Preference
+            android:icon="@drawable/ic_pref_brapi_server"
+            android:key="brapi_server_t3_wheat"
+            android:title="@string/preferences_brapi_server_t3_wheat" />
+
+        <Preference
+            android:icon="@drawable/ic_pref_brapi_server"
+            android:key="brapi_server_t3_oat"
+            android:title="@string/preferences_brapi_server_t3_oat" />
+
+        <Preference
+            android:icon="@drawable/ic_pref_brapi_server"
+            android:key="brapi_server_t3_barley"
+            android:title="@string/preferences_brapi_server_t3_barley" />
 
         <Preference
             android:icon="@drawable/ic_pref_brapi_server"
             android:key="brapi_server_default"
-            android:title="@string/preferences_brapi_server_test">
-        </Preference>
+            android:title="@string/preferences_brapi_server_test" />
 
         <Preference
             android:icon="@drawable/ic_pref_brapi_server_add"
@@ -57,7 +122,7 @@
 
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://github.com/PhenoApps/Field-Book/issues/new?assignees=&amp;labels=enhancement%2C+feature+request&amp;template=feature_request.md&amp;title=%5BREQUEST%5D"/>
+                android:data="https://github.com/PhenoApps/Field-Book/issues/new?assignees=&amp;labels=enhancement%2C+feature+request&amp;template=feature_request.md&amp;title=%5BREQUEST%5D" />
         </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

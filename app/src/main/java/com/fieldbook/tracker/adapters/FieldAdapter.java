@@ -226,6 +226,10 @@ public class FieldAdapter extends BaseAdapter {
 
         setEditorItem(ep, selectedField);
 
+        SharedPreferences.Editor ed = ep.edit();
+        ed.putInt("SelectedFieldExpId", selectedField.getExp_id());
+        ed.apply();
+
         ConfigActivity.dt.switchField(selectedField.getExp_id());
         CollectActivity.reloadData = true;
         notifyDataSetChanged();

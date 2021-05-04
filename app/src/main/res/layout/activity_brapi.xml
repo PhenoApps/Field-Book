@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="0"
         android:gravity="center"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <ProgressBar
             android:layout_width="wrap_content"
@@ -62,19 +62,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="bottom|center"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/save"
-            android:layout_width="wrap_content"
+        <include
+            layout="@layout/brapi_pagination_buttons"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="5dp"
-            android:onClick="buttonClicked"
-            android:text="@string/brapi_save_data_button"
-            android:textColor="@color/s_text"
-            android:textSize="20sp" />
+            android:gravity="bottom|center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:onClick="buttonClicked"
+                android:text="@string/brapi_save_data_button"
+                android:textColor="@color/s_text"
+                android:textSize="20sp" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

@@ -80,6 +80,21 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             }
         });
 
+        Bundle arguments = getArguments();
+
+        if (arguments != null) {
+
+            boolean updatePerson = arguments.getBoolean("PersonUpdate", false);
+
+            if (updatePerson) {
+
+                showPersonDialog();
+
+            }
+        }
+
+        ep.edit().putLong("LastTimeAppOpened", System.nanoTime()).apply();
+
     }
 
     private void showClearSettingsDialog() {

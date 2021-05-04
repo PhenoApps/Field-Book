@@ -11,16 +11,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fieldbook.tracker.brapi.ApiError;
-import com.fieldbook.tracker.brapi.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiAuthDialog;
-import com.fieldbook.tracker.brapi.BrapiListResponse;
-import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -29,18 +26,11 @@ import java.util.List;
 
 import com.fieldbook.tracker.objects.TraitObject;
 
-import io.swagger.client.ApiException;
-import io.swagger.client.model.Metadata;
-
 public class BrapiTraitActivity extends AppCompatActivity {
 
     private BrAPIService brAPIService;
     private List<TraitObject> selectedTraits;
-    private Integer currentPage = 0;
-    private Integer totalPages = 1;
-    private Integer resultsPerPage = 15;
-    private Button nextBtn;
-    private Button prevBtn;
+    private BrapiPaginationManager paginationManager;
 
     @Override
     public void onDestroy() {
@@ -58,30 +48,23 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
         // Load the traits from breedbase if user is connected to the internet
         if (Utils.isConnected(this)) {
-            if (brAPIService.hasValidBaseUrl(this)) {
+            if (BrAPIService.hasValidBaseUrl(this)) {
                 setContentView(R.layout.activity_traits_brapi);
-
-                // Make our prev and next buttons invisible
-                nextBtn = findViewById(R.id.next);
-                prevBtn = findViewById(R.id.prev);
-
-                // Initially make next and prev gone until we know there are more than 1 page.
-                nextBtn.setVisibility(View.INVISIBLE);
-                prevBtn.setVisibility(View.INVISIBLE);
+                paginationManager = new BrapiPaginationManager(this);
 
                 loadToolbar();
                 // Get the setting information for our brapi integration
-                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
-                brAPIService = new BrAPIService(brapiBaseURL, new DataHelper(this));
+                brAPIService = BrAPIServiceFactory.getBrAPIService(this);
 
                 // Make a clean list to track our selected traits
                 selectedTraits = new ArrayList<>();
 
                 // Set the url on our interface
+                String brapiBaseURL = BrAPIService.getBrapiUrl(this);
                 TextView baseURLText = findViewById(R.id.brapiBaseUrl);
                 baseURLText.setText(brapiBaseURL);
 
-                loadTraitsList(BrapiTraitActivity.this.currentPage, BrapiTraitActivity.this.resultsPerPage);
+                loadTraitsList();
             } else {
                 Toast.makeText(getApplicationContext(), R.string.brapi_must_configure_url, Toast.LENGTH_SHORT).show();
                 finish();
@@ -106,8 +89,8 @@ public class BrapiTraitActivity extends AppCompatActivity {
         }
     }
 
-    // Load the traits from breedbase
-    public void loadTraitsList(final Integer page, Integer pageSize) {
+    // Load the traits from server
+    public void loadTraitsList() {
 
         // Get our UI elements for the list of traits
         final ListView traitList = findViewById(R.id.brapiTraits);
@@ -116,35 +99,17 @@ public class BrapiTraitActivity extends AppCompatActivity {
         // Show our progress bar
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
-        TextView pageIndicator = findViewById(R.id.page_indicator);
-        pageIndicator.setText(String.format("Page %d of %d", page + 1, BrapiTraitActivity.this.totalPages));
-
-        // Determine our button visibility. Not necessary if we only have 1 page.
-        determineBtnVisibility();
+        //init page numbers
+        paginationManager.refreshPageIndicator();
 
         // Call our API to get the data
-        brAPIService.getOntology(BrAPIService.getBrapiToken(this), page, pageSize, new Function<BrapiListResponse<TraitObject>, Void>() {
+        brAPIService.getOntology(paginationManager, new Function<List<TraitObject>, Void>() {
             @Override
-            public Void apply(final BrapiListResponse<TraitObject> input) {
+            public Void apply(final List<TraitObject> traits) {
 
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        // Cancel processing if the page that was processed is not the page
-                        // that we are currently on.
-                        if (page == BrapiTraitActivity.this.currentPage) {
-
-                            final List<TraitObject> traits = input.getData();
-
-                            // Update the total pages
-                            final Metadata metadata = input.getMetadata();
-                            BrapiTraitActivity.this.totalPages = metadata.getPagination().getTotalPages();
-                            TextView pageIndicator = findViewById(R.id.page_indicator);
-                            pageIndicator.setText(String.format("Page %d of %d", BrapiTraitActivity.this.currentPage + 1,
-                                    BrapiTraitActivity.this.totalPages));
-
-                            determineBtnVisibility();
-
                             // Build our array adapter
                             traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
 
@@ -190,20 +155,19 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
                             findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                         }
-                    }
                 });
                 return null;
             }
 
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(final ApiException error) {
+            public Void apply(final Integer code) {
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         // Show error message. We don't finish the activity intentionally.
-                        if(BrAPIService.isConnectionError(error.getCode())){
-                            BrAPIService.handleConnectionError(BrapiTraitActivity.this, error.getCode());
+                        if(BrAPIService.isConnectionError(code)){
+                            BrAPIService.handleConnectionError(BrapiTraitActivity.this, code);
                         }else {
                             Toast.makeText(getApplicationContext(), getString(R.string.brapi_ontology_error), Toast.LENGTH_LONG).show();
                         }
@@ -222,8 +186,10 @@ public class BrapiTraitActivity extends AppCompatActivity {
         ArrayList<String> itemDataList = new ArrayList<>();
 
         for (TraitObject trait : traits) {
-
-            itemDataList.add(trait.getTrait());
+            if(trait.getTrait() != null)
+                itemDataList.add(trait.getTrait());
+            else
+                itemDataList.add(trait.getId());
         }
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, itemDataList);
@@ -236,15 +202,11 @@ public class BrapiTraitActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.loadTraits:
                 // Start from beginning
-                nextBtn.setVisibility(View.INVISIBLE);
-                prevBtn.setVisibility(View.INVISIBLE);
-
-                BrapiTraitActivity.this.currentPage = 0;
-                loadTraitsList(BrapiTraitActivity.this.currentPage, BrapiTraitActivity.this.resultsPerPage);
+                paginationManager.reset();
+                loadTraitsList();
                 break;
 
             case R.id.save:
-
                 // Save the selected traits
                 String saveMessage = saveTraits();
 
@@ -253,31 +215,10 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 Toast.makeText(this, saveMessage, Toast.LENGTH_LONG).show();
                 break;
             case R.id.prev:
-
-                // Query the previous page of traits
-                Integer prevPage = BrapiTraitActivity.this.currentPage - 1;
-
-                if (prevPage >= 0) {
-                    // We are allowed to change pages. Update current page and start brapi call.
-                    BrapiTraitActivity.this.currentPage = prevPage;
-                    loadTraitsList(prevPage, BrapiTraitActivity.this.resultsPerPage);
-
-                }
-
-                break;
-
             case R.id.next:
-
-                // Query the next page of traits
-                Integer nextPage = BrapiTraitActivity.this.currentPage + 1;
-                Integer totalPages = BrapiTraitActivity.this.totalPages;
-
-                if (nextPage < totalPages) {
-                    // We are allowed to change pages. Update current page and start brapi call.
-                    BrapiTraitActivity.this.currentPage = nextPage;
-                    loadTraitsList(nextPage, BrapiTraitActivity.this.resultsPerPage);
-
-                }
+                // Update current page (if allowed) and start brapi call.
+                paginationManager.setNewPage(view.getId());
+                loadTraitsList();
                 break;
         }
     }
@@ -295,22 +236,29 @@ public class BrapiTraitActivity extends AppCompatActivity {
         String secondaryMessage = "";
         // For now, only give the ability to create new variables
         // Determine later if the need to edit existing variables is needed.
+        int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
         for (int i = 0; i < selectedTraits.size(); ++i) {
 
             TraitObject trait = selectedTraits.get(i);
 
+            TraitObject existingTraitByName = ConfigActivity.dt.getTraitByName(trait.getTrait());
+            TraitObject existingTraitByExId = ConfigActivity.dt.getTraitByExternalDbId(trait.getExternalDbId(), trait.getTraitDataSource());
             // Check if the trait already exists
-            if (ConfigActivity.dt.hasTrait(trait.getTrait())) {
+            if (existingTraitByName != null) {
                 secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getTrait());
                 // Skip this one, continue on.
                 continue;
+            }else if (existingTraitByExId != null) {
+                // Update existing trait
+                trait.setId(existingTraitByExId.getId());
+                long saveStatus = ConfigActivity.dt.updateTrait(trait);
+                successfulSaves += saveStatus == -1 ? 0 : 1;
+            }else{
+                // Insert our new trait
+                trait.setRealPosition(pos + i);
+                long saveStatus = ConfigActivity.dt.insertTraits(trait);
+                successfulSaves += saveStatus == -1 ? 0 : 1;
             }
-
-            // Insert our new trait
-            long saveStatus = ConfigActivity.dt.insertTraits(trait);
-
-            successfulSaves += saveStatus == -1 ? 0 : 1;
-
         }
 
         SharedPreferences ep = getSharedPreferences("Settings", 0);
@@ -343,20 +291,4 @@ public class BrapiTraitActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void determineBtnVisibility() {
-
-        if (currentPage == 0) {
-            prevBtn.setVisibility(View.INVISIBLE);
-        } else {
-            prevBtn.setVisibility(View.VISIBLE);
-        }
-
-        // Determine what buttons should be visible
-        if (currentPage == (totalPages - 1)) {
-            nextBtn.setVisibility(View.INVISIBLE);
-        } else {
-            nextBtn.setVisibility(View.VISIBLE);
-        }
-
-    }
 }

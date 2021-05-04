@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.fieldbook.tracker.traits.GNSSTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/gnssLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageButton
+            android:id="@+id/gnss_connect_button"
+            android:layout_margin="16dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_satellite_variant"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.Group
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/gnss_group"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:constraint_referenced_ids="accHeader,accTextView,
+                utcHeader,utcTextView,
+                satsHeader,satTextView,
+                latHeader,latTextView,
+                lngHeader,lngTextView,
+                altHeader,altTextView,
+                hdopHeader,hdopTextView,
+                gnss_collect_button, disconnect_button"/>
+        
+        <TextView
+            android:id="@+id/utcHeader"
+            style="@style/TextHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            android:text="UTC"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginLeft="8dp" />
+
+        <TextView
+            android:id="@+id/utcTextView"
+            style="@style/TextData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            app:layout_constraintStart_toEndOf="@+id/utcHeader"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginLeft="8dp" />
+
+        <TextView
+            android:id="@+id/satsHeader"
+            style="@style/TextHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:drawableStart="@drawable/ic_satellite_variant"
+            app:layout_constraintEnd_toStartOf="@+id/satTextView"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginRight="8dp"
+            android:drawableLeft="@drawable/ic_satellite_variant" />
+
+        <TextView
+            android:id="@+id/satTextView"
+            style="@style/TextData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginRight="8dp" />
+
+        <TextView
+            android:id="@+id/latHeader"
+            style="@style/TextHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Latitude:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/utcHeader"
+            android:layout_marginLeft="8dp" />
+
+        <TextView
+            android:id="@+id/latTextView"
+            style="@style/TextData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toEndOf="@+id/latHeader"
+            app:layout_constraintTop_toBottomOf="@+id/utcHeader"
+            android:layout_marginLeft="8dp" />
+
+        <TextView
+            android:id="@+id/lngHeader"
+            style="@style/TextHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="Longitude:"
+            app:layout_constraintEnd_toStartOf="@+id/lngTextView"
+            app:layout_constraintTop_toBottomOf="@+id/utcHeader"
+            android:layout_marginRight="8dp" />
+
+        <TextView
+            android:id="@+id/lngTextView"
+            style="@style/TextData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/utcHeader"
+            android:layout_marginRight="8dp" />
+
+        <TextView
+            android:id="@+id/altHeader"
+            style="@style/TextHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Altitude:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/latHeader"
+            android:layout_marginLeft="8dp" />
+
+        <TextView
+            android:id="@+id/altTextView"
+            style="@style/TextData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toEndOf="@+id/altHeader"
+            app:layout_constraintTop_toBottomOf="@+id/latHeader"
+            android:layout_marginLeft="8dp" />
+
+        <TextView
+            android:id="@+id/hdopHeader"
+            style="@style/TextHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="HDOP:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/altHeader"
+            android:layout_marginLeft="8dp" />
+
+        <TextView
+            android:id="@+id/hdopTextView"
+            style="@style/TextData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toEndOf="@+id/hdopHeader"
+            app:layout_constraintTop_toBottomOf="@+id/altHeader"
+            android:layout_marginLeft="8dp" />
+
+        <TextView
+            android:id="@+id/accHeader"
+            style="@style/TextHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="Accuracy:"
+            app:layout_constraintEnd_toStartOf="@+id/accTextView"
+            app:layout_constraintTop_toBottomOf="@+id/latHeader"
+            android:layout_marginRight="8dp" />
+
+        <TextView
+            android:id="@+id/accTextView"
+            style="@style/TextData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/latHeader"
+            android:layout_marginRight="8dp" />
+
+        <ImageButton
+            android:id="@+id/gnss_collect_button"
+            android:layout_margin="16dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_trait_location"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/hdopHeader" />
+
+        <Button
+            android:id="@+id/disconnect_button"
+            android:layout_margin="16dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/disconnect"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/gnss_collect_button" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.fieldbook.tracker.traits.GNSSTraitLayout>

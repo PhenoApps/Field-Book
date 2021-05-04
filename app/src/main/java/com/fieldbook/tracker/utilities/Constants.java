@@ -35,6 +35,7 @@ public class Constants extends Application {
 
     public final static int PERM_REQ = 100;
 
-    public static final String BRAPI_PATH = "/brapi/v1";
+    public static final String BRAPI_PATH_V1 = "/brapi/v1";
+    public static final String BRAPI_PATH_V2 = "/brapi/v2";
 
 }

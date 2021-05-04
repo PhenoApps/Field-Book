@@ -83,8 +83,6 @@
     <string name="preferences_general_use_day_number">বছর এর দিনটি ব্যাবহার করুন</string>
     <string name="preferences_general_skip_entries_with_data">উপাত্ত বিশিষ্ট এন্ট্রি লুকিয়ে রাখুন</string>
     <string name="preferences_general_share_disable">নথিতে অংশগ্রহণ অক্ষম করুন</string>
-    <string name="preferences_general_entry_left_disable">বাম তীর চিহ্নের দিকে যাওয়া অক্ষম করুন</string>
-    <string name="preferences_general_entry_right_disable">ডান তীর চিহ্নের দিকে যাওয়া অক্ষম করুন</string>
     <string name="preferences_general_barcode_camera">ক্যামেরা বারকোড স্ক্যানার</string>
     <string name="preferences_sound_primary_order_sound">প্রাথমিক সারির শব্দ</string>
     <string name="preferences_general_feature_next_missing">উপাত্তহীন পরবর্তী এন্ট্রি</string>
@@ -96,8 +94,6 @@
     <string name="preferences_general_use_day_number_description">ডাটা সংগ্রহের সময় তারিখের পরিবর্তে বছরের দিন উল্লেখ করুন</string>
     <string name="preferences_general_skip_entries_with_data_description">যে সকল এন্ট্রির বর্তমান বৈশিষ্ট্যের উপাত্ত ইতিমধ্যেই উপাস্থিত  তাদেরকে পরিত্যাগ করুন</string>
     <string name="preferences_general_share_disable_description">নথি পাঠানোর সময় তাতে অংশগ্রহণকৃত ডায়ালগ দেখানো হবেনা</string>
-    <string name="preferences_general_entry_left_disable_description">কোন উপাত্ত সংগৃহীত না হলে তীর চিহ্নের বাম এন্ট্রি দেখাবেনা</string>
-    <string name="preferences_general_entry_right_disable_description">কোন উপাত্ত সংগৃহীত না হলে তীর চিহ্নের ডান এন্ট্রি দেখাবেনা</string>
     <string name="preferences_general_barcode_camera_description">বারকোড স্ক্যান করার জন্য ক্যামেরা খুলুন এবং নির্ধারিত এন্ট্রিতে যান</string>
     <string name="preferences_sound_primary_order_sound_description">প্রাথমিক সারির পরিবর্তন হলে সতর্কতার শব্দ শোনান</string>
     <string name="preferences_general_feature_next_missing_description">বর্তমান বৈশিষ্ট্যে উপাত্ত ছাড়াই পরবর্তী এন্ট্রিতে গেলে মনোযোগ আকর্ষণ করুন</string>

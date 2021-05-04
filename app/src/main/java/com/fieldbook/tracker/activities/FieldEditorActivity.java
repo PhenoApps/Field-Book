@@ -38,6 +38,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.adapters.FieldAdapter;
+import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -94,6 +95,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     // Helper function to load data
     public static void loadData() {
         try {
+            ConfigActivity.dt.open();
             mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
             fieldList.setAdapter(mAdapter);
         } catch (Exception e) {
@@ -138,7 +140,8 @@ public class FieldEditorActivity extends AppCompatActivity {
         if (ConfigActivity.dt == null) {    // when resuming
             ConfigActivity.dt = new DataHelper(this);
         }
-        ConfigActivity.dt.updateExpTable(false, true, false, 0);
+        ConfigActivity.dt.open();
+        ConfigActivity.dt.updateExpTable(false, true, false, ep.getInt("SelectedFieldExpId", 0));
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
@@ -344,6 +347,24 @@ public class FieldEditorActivity extends AppCompatActivity {
                 }
                 break;
 
+            case R.id.menu_field_editor_item_creator:
+
+                FieldCreatorDialog dialog = new FieldCreatorDialog(this);
+
+                //when the dialog is dismissed, the field data is created or failed
+                dialog.setOnDismissListener((dismiss -> {
+
+                    //update list of fields
+                    fieldList = findViewById(R.id.myList);
+                    mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
+                    fieldList.setAdapter(mAdapter);
+
+                }));
+
+                dialog.show();
+
+                break;
+
             case android.R.id.home:
                 CollectActivity.reloadData = true;
                 finish();
@@ -475,6 +496,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     private void loadFile(FieldFileObject.FieldFileBase fieldFile) {
+
         String[] importColumns = fieldFile.getColumns();
 
         String[] reservedNames = new String[]{"id"};
@@ -482,16 +504,31 @@ public class FieldEditorActivity extends AppCompatActivity {
         List<String> list = Arrays.asList(reservedNames);
 
         //TODO causing crash
-        for (String s : importColumns) {
+        boolean hasSpecialCharacters = false;
+        for (int i = 0; i < importColumns.length; i++) {
+
+            String s = importColumns[i];
+
             if (DataHelper.hasSpecialChars(s)) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns) + " (\"" + s + "\")");
-                return;
+
+                hasSpecialCharacters = true;
+
+                importColumns[i] = DataHelper.replaceSpecialChars(s);
             }
 
             if (list.contains(s.toLowerCase())) {
+
                 Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_name) + " \"" + s + "\"");
+
                 return;
             }
+        }
+
+        if (hasSpecialCharacters) {
+
+
+            Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns_replaced));
+
         }
 
         importDialog(importColumns);
@@ -605,6 +642,16 @@ public class FieldEditorActivity extends AppCompatActivity {
                 String[] data;
                 String[] columns = fieldFile.readNext();
 
+                //match and delete special characters from header line
+                for (int i = 0; i < columns.length; i++) {
+
+                    String header = columns[i];
+
+                    if (DataHelper.hasSpecialChars(header)) {
+                        columns[i] = DataHelper.replaceSpecialChars(header);
+                    }
+                }
+
                 FieldObject f = fieldFile.createFieldObject();
                 f.setUnique_id(unique.getSelectedItem().toString());
                 f.setPrimary_id(primary.getSelectedItem().toString());
@@ -668,14 +715,23 @@ public class FieldEditorActivity extends AppCompatActivity {
                 Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unique_characters_illegal));
             } else {
                 Editor ed = ep.edit();
-                ed.putString("ImportUniqueName", unique.getSelectedItem().toString());
-                ed.putString("ImportFirstName", primary.getSelectedItem().toString());
-                ed.putString("ImportSecondName", secondary.getSelectedItem().toString());
+
+                String uniqueName = unique.getSelectedItem().toString();
+                String firstName = primary.getSelectedItem().toString();
+                String secondName = secondary.getSelectedItem().toString();
+
+                ed.putString("ImportUniqueName", uniqueName);
+                ed.putString("ImportFirstName", firstName);
+                ed.putString("ImportSecondName", secondName);
                 ed.putBoolean("ImportFieldFinished", true);
+                ed.putInt("SelectedFieldExpId", exp_id);
+
                 ed.apply();
 
                 CollectActivity.reloadData = true;
                 loadData();
+
+                ConfigActivity.dt.open();
                 ConfigActivity.dt.switchField(exp_id);
             }
         }
