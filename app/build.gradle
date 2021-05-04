@@ -4,6 +4,17 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
 android {
+    signingConfigs {
+        playStoreConfig {
+            Properties keystoreProps = new Properties()
+            keystoreProps.load(new FileInputStream(file('keystore.config')))
+
+            keyAlias keystoreProps['keyAlias']
+            keyPassword keystoreProps['keyPassword']
+            storePassword keystoreProps['storePassword']
+            storeFile file('prospector.keystore.jks')
+        }
+    }
 
     compileSdkVersion 29
     buildToolsVersion '29.0.3'
@@ -21,13 +32,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-
-            signingConfig getSigningConfig()
-            applicationVariants.all { variant ->
-                variant.outputs.all {
-                    outputFileName = "${variant.name}-${variant.versionName}.apk"
-                }
-            }
+            signingConfig signingConfigs.playStoreConfig //Add your own signing config
         }
 
         debug {
