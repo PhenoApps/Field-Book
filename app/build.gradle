@@ -12,7 +12,7 @@ android {
             keyAlias keystoreProps['keyAlias']
             keyPassword keystoreProps['keyPassword']
             storePassword keystoreProps['storePassword']
-            storeFile file('prospector.keystore.jks')
+            storeFile file('keystore.keystore.jks')
         }
     }
 
