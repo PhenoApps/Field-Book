@@ -2157,6 +2157,8 @@ public class DataHelper {
 
             Migrator.Companion.migrateSchema(db, getAllTraitObjects());
 
+            ep.edit().putInt("SelectedFieldExpId", -1).apply();
+
         }
 
     }
@@ -2536,6 +2538,7 @@ public class DataHelper {
                 
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
+                ep2.edit().putInt("SelectedFieldExpId", -1).apply();
             }
         }
     }
