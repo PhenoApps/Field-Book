@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.database.dao
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
@@ -14,10 +15,19 @@ class ObservationVariableDao {
 
         fun getMaxPosition(): Int = withDatabase { db ->
 
+            try {
 
-            db.queryForMax(ObservationVariable.tableName,
-                    select = arrayOf("MAX(position) as result")).toFirst()["result"].toString().toInt()
+                db.queryForMax(
+                    ObservationVariable.tableName,
+                    select = arrayOf("MAX(position) as result")
+                ).toFirst()["result"].toString().toInt()
 
+            } catch (nfe: NumberFormatException) {
+
+                //return 0 if the position column is empty or cannot be parsed into an integer
+                0
+
+            }
         } ?: 0
 
         fun getTraitByName(name: String): TraitObject? = withDatabase { db ->
@@ -44,7 +54,17 @@ class ObservationVariableDao {
             it.format = this["observation_variable_field_book_format"].toString()
             it.defaultValue = this["default_value"].toString()
             it.details = this["observation_variable_details"].toString()
-            it.realPosition = this["position"].toString().toInt()
+
+            it.realPosition = try {
+
+                 this["position"].toString().toInt()
+
+            } catch (nfe: java.lang.NumberFormatException) {
+
+                //return 0 if the position column is empty or cannot be parsed into an integer
+                0
+            }
+
             it.visible = this["visible"].toString() == "true"
             it.externalDbId = this["external_db_id"].toString()
             it.traitDataSource = this["trait_data_source"].toString()
@@ -53,6 +73,7 @@ class ObservationVariableDao {
         /**
          * TODO: Replace with View.
          */
+        @SuppressLint("Recycle")
         fun getTraitExists(uniqueName: String, id: Int, parent: String, trait: String): Boolean = withDatabase { db ->
 
             val query = """
