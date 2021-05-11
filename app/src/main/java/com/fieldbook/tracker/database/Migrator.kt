@@ -278,6 +278,9 @@ class Migrator {
 
             try {
 
+                //hack to repopulate trait positions if they're shy
+                //brapi bug made trait positions empty
+                var traitPosition = 1
                 do {
 
                     val row = mutableMapOf<String, Any?>()
@@ -285,10 +288,13 @@ class Migrator {
                     columnNames.forEach {
                         val index = getColumnIndexOrThrow(it)
                         pattern.getOrElse(it) { null }?.let { colName ->
-                            row[colName] = when (getType(index)) {
-                                0 -> null
-                                1 -> getInt(index)
-                                else -> getStringOrNull(index) ?: getBlobOrNull(index)
+                            row[colName] = when(it) {
+                                "realPosition" -> traitPosition++
+                                else -> when (getType(index)) {
+                                    0 -> null
+                                    1 -> getInt(index)
+                                    else -> getStringOrNull(index) ?: getBlobOrNull(index)
+                                }
                             }
                         }
                     }
