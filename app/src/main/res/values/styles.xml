@@ -118,4 +118,62 @@
     <style name="FieldCreatorDialog.Title">
         <item name="android:textSize">24sp</item>
     </style>
+
+    <!-- data grid styles -->
+    <style name="LegendText">
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:marqueeRepeatLimit">marquee_forever</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+    </style>
+
+    <style name="CellText">
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:gravity">start</item>
+        <item name="android:maxLines">1</item>
+<!--        <item name="android:textAlignment">viewStart</item>-->
+        <item name="android:textSize">16sp</item>
+        <item name="android:background">@drawable/cell</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:marqueeRepeatLimit">marquee_forever</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+    </style>
+
+    <style name="CellText.Header">
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">18sp</item>
+<!--        <item name="android:paddingStart">8dp</item>-->
+<!--        <item name="android:paddingEnd">8dp</item>-->
+        <item name="android:background">@drawable/text_cell</item>
+    </style>
+
+    <style name="CellText.ParentCellText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:background">@drawable/text_cell</item>
+    </style>
+
+    <style name="NumericCellText">
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:gravity">start</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:marqueeRepeatLimit">marquee_forever</item>
+<!--        <item name="android:textAlignment">viewEnd</item>-->
+        <item name="android:textSize">16sp</item>
+        <item name="android:background">@drawable/cell</item>
+    </style>
+
+    <style name="NumericCellText.ParentCellText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:background">@drawable/text_cell</item>
+    </style>
+
 </resources>

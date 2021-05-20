@@ -61,10 +61,10 @@
             android:theme="@style/ActivityDialog"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".activities.DatagridActivity"
+            android:name=".activities.DataGridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:theme="@style/ActivityDialog" />
+            android:theme="@style/AppTheme"/>
         <activity
             android:name=".activities.BrapiActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
