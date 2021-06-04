@@ -32,7 +32,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-            signingConfig signingConfigs.playStoreConfig //Add your own signing config
+            // signingConfig signingConfigs.playStoreConfig //Add your own signing config
         }
 
         debug {
