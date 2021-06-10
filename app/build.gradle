@@ -6,13 +6,17 @@ apply plugin: 'com.google.firebase.crashlytics'
 android {
     signingConfigs {
         playStoreConfig {
-            Properties keystoreProps = new Properties()
-            keystoreProps.load(new FileInputStream(file('keystore.config')))
+            def propsFile = rootProject.file('keystore.config')
+            def configName = 'release'
 
-            keyAlias keystoreProps['keyAlias']
-            keyPassword keystoreProps['keyPassword']
-            storePassword keystoreProps['storePassword']
-            storeFile file('keystore.keystore')
+            if (propsFile.exists() && android.signingConfigs.hasProperty(configName)) {
+                def props = new Properties()
+                props.load(new FileInputStream(propsFile))
+                android.signingConfigs[configName].storeFile = file(props['keystore.keystore'])
+                android.signingConfigs[configName].storePassword = props['storePassword']
+                android.signingConfigs[configName].keyAlias = props['keyAlias']
+                android.signingConfigs[configName].keyPassword = props['keyPassword']
+            }
         }
     }
 
@@ -29,14 +33,14 @@ android {
     }
 
     buildTypes {
+        debug {
+            debuggable true
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.playStoreConfig //Add your own signing config
-        }
-
-        debug {
-            debuggable true
         }
     }
 
