@@ -32,7 +32,7 @@
             app:layout_constraintTop_toTopOf="@+id/scrollView"
             app:layout_constraintVertical_bias="0.0" />
 
-        <com.fieldbook.tracker.views.NoFlingScrollView
+        <androidx.core.widget.NestedScrollView
             android:id="@+id/scrollView"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -50,7 +50,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-        </com.fieldbook.tracker.views.NoFlingScrollView>
+        </androidx.core.widget.NestedScrollView>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

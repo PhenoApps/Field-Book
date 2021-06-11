@@ -5,8 +5,10 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,7 +16,6 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.HeaderAdapter
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.utilities.Utils
-import com.fieldbook.tracker.views.NoFlingScrollView
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -58,8 +59,13 @@ class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener 
     private lateinit var table: RecyclerView
     private lateinit var columns: RecyclerView
     private lateinit var rows: RecyclerView
-    private lateinit var scrollView: NoFlingScrollView
+    private lateinit var scrollView: NestedScrollView
 
+    private var totalRows: Int = 0
+    private var absoluteTablePosition: Int = 0
+
+    private var rowPosition = 0
+    private var tablePosition = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -89,6 +95,11 @@ class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener 
 
         rows.adapter = mRowAdapter
 
+        table.setHasFixedSize(true)
+        table.itemAnimator = null
+        rows.setHasFixedSize(true)
+        rows.itemAnimator = null
+
         loadGridData()
 
     }
@@ -97,16 +108,25 @@ class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener 
 
         val scrollListeners = ArrayList<RecyclerView.OnScrollListener>()
 
-        val scrollViewListener = View.OnScrollChangeListener { _, p1, p2, _, p4 ->
+        val nullScroller = (View.OnScrollChangeListener { _, _, _, _, _ ->  })
 
-            rows.removeOnScrollListener(scrollListeners[2])
+        fun setNestedScroller() {
 
-            rows.scrollBy(p1, p2-p4)
+            //parent nest scroll view handles static header vertical scrolling
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                scrollView.setOnScrollChangeListener { _, p1, p2, p3, p4 ->
 
-            rows.addOnScrollListener(scrollListeners[2])
+                    rows.removeOnScrollListener(scrollListeners[2])
 
+                    rows.scrollBy(0, p2-p4)
+
+                    rows.addOnScrollListener(scrollListeners[2])
+
+                }
+            }
         }
 
+        //table scroller handles horizontal scrolling of columns
         scrollListeners.add(object : RecyclerView.OnScrollListener() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -119,15 +139,10 @@ class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener 
 
                 columns.addOnScrollListener(scrollListeners[1])
 
-                rows.removeOnScrollListener(scrollListeners[2])
-
-                rows.scrollBy(dx, dy)
-
-                rows.addOnScrollListener(scrollListeners[2])
-
             }
         })
 
+        //cols scroller
         scrollListeners.add(object : RecyclerView.OnScrollListener() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -142,6 +157,7 @@ class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener 
             }
         })
 
+        //rows scroller
         scrollListeners.add(object : RecyclerView.OnScrollListener() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -149,14 +165,12 @@ class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener 
                 super.onScrolled(recyclerView, dx, dy)
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    scrollView.setOnScrollChangeListener { _: View, _: Int, _: Int, _: Int, _: Int -> }
+                    scrollView.setOnScrollChangeListener(nullScroller)
                 }
 
                 scrollView.scrollBy(dx, dy)
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    scrollView.setOnScrollChangeListener(scrollViewListener)
-                }
+                setNestedScroller()
             }
         })
 
@@ -166,9 +180,8 @@ class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener 
 
         rows.addOnScrollListener(scrollListeners[2])
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            scrollView.setOnScrollChangeListener(scrollViewListener)
-        }
+        setNestedScroller()
+
     }
 
     /**
@@ -195,6 +208,8 @@ class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener 
         cursor.moveToPosition(-1)
 
         val rows: Int = cursor.count
+
+        totalRows = rows
 
         cursor.moveToFirst()
 
