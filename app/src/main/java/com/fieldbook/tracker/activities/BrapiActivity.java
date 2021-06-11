@@ -47,7 +47,9 @@ public class BrapiActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        brapiLoadDialog.dismiss();
+        if (brapiLoadDialog != null) {
+            brapiLoadDialog.dismiss();
+        }
     }
 
     @Override
