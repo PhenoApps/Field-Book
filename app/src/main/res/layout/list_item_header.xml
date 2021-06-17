@@ -24,6 +24,7 @@
     </data>
 
     <LinearLayout
+        android:id="@+id/container"
         android:layout_width="64dp"
         android:layout_height="24dp"
         android:layout_marginBottom="4dp"
@@ -43,20 +44,6 @@
             android:scrollbars="none"
             android:text="@{name}"
             android:textSize="12sp"/>
-
-        <View
-            android:id="@+id/emptyView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/table_cell"/>
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:progress="@{current}"
-            android:max="@{goal}"/>
 
     </LinearLayout>
 </layout>

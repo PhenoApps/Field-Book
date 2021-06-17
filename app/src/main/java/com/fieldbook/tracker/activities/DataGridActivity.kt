@@ -2,22 +2,21 @@ package com.fieldbook.tracker.activities
 
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.*
-import androidx.annotation.RequiresApi
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.GestureDetectorCompat
-import androidx.core.widget.NestedScrollView
+import androidx.constraintlayout.widget.Group
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.evrencoskun.tableview.TableView
+import com.evrencoskun.tableview.listener.ITableViewListener
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.adapters.HeaderAdapter
+import com.fieldbook.tracker.adapters.DataGridAdapter
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.utilities.Utils
+import kotlinx.coroutines.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * @author Chaney
@@ -36,36 +35,50 @@ import kotlin.collections.ArrayList
  *
  * TODO: Discuss using an async task and adding a progress bar while the data loads, currently there is a lag between clicking and moving to this activity on large databases.
  */
-class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener {
+class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITableViewListener {
 
     /***
      * Polymorphism class structure to serve different cell types to the grid.
      */
-    open class BlockData
-    data class HeaderData(val name: String, val code: String) : BlockData()
-    data class CellData(val value: String?, val color: Int = Color.GREEN, val onClick: View.OnClickListener? = null): BlockData()
-    class EmptyCell: BlockData()
+    open class BlockData(open val code: String) {
+        override fun hashCode(): Int {
+            return code.hashCode()
+        }
 
-    //gestures are used to synchronize scrolling between headers and table data
-    private lateinit var mGesture: GestureDetectorCompat
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
 
-    private lateinit var mDataAdapter: HeaderAdapter    //used to store table cells s.a 2
-    private lateinit var mRowAdapter: HeaderAdapter     //used to store plotids s.a 13RNP00042
-    private lateinit var mColumnAdapter: HeaderAdapter  //used to store trait s.a height
+            other as BlockData
+
+            if (code != other.code) return false
+
+            return true
+        }
+    }
+
+    data class HeaderData(val name: String, override val code: String) : BlockData(code)
+    data class CellData(val value: String?, override val code: String, val color: Int = Color.GREEN, val onClick: View.OnClickListener? = null): BlockData(code)
+    class EmptyCell(override val code: String): BlockData(code)
+
+    //coroutine scope for launching background processes
+    private val scope by lazy {
+        CoroutineScope(Dispatchers.IO)
+    }
 
     /**
      * views that are initialized in oncreate
      */
-    private lateinit var table: RecyclerView
-    private lateinit var columns: RecyclerView
-    private lateinit var rows: RecyclerView
-    private lateinit var scrollView: NestedScrollView
+    private lateinit var mTableView: TableView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var dataGridGroup: Group
 
-    private var totalRows: Int = 0
-    private var absoluteTablePosition: Int = 0
-
-    private var rowPosition = 0
-    private var tablePosition = 0
+    /**
+     * Adapters/lists used to store grid information, also used for click events
+     */
+    private lateinit var mAdapter: DataGridAdapter
+    private lateinit var mPlotIds: ArrayList<String>
+    private lateinit var mTraits: Array<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -75,119 +88,31 @@ class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener 
         //this creates a 'binding' variable that has all the views as fields, an alternative to findViewById
         val binding = DataBindingUtil.setContentView<ActivityDataGridBinding>(this, R.layout.activity_data_grid)
 
-        table = binding.table
-        columns = binding.columns
-        rows = binding.rows
-        scrollView = binding.scrollView
+        setSupportActionBar(binding.toolbar)
 
-        mGesture = GestureDetectorCompat(this, this@DataGridActivity)
+        if (supportActionBar != null) {
+            supportActionBar?.title = null
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            supportActionBar?.setHomeButtonEnabled(true)
+        }
 
-        //initialize the adapters that control the data inside each recycler view
-        mDataAdapter = HeaderAdapter(this)
-        mRowAdapter = HeaderAdapter(this)
-        mColumnAdapter = HeaderAdapter(this)
-
-        table.adapter = mDataAdapter
-
-        synchronizeScrollBars()
-
-        columns.adapter = mColumnAdapter
-
-        rows.adapter = mRowAdapter
-
-        table.setHasFixedSize(true)
-        table.itemAnimator = null
-        rows.setHasFixedSize(true)
-        rows.itemAnimator = null
+        progressBar = binding.dataGridProgressBar
+        dataGridGroup = binding.dataGridGroup
+        mTableView = binding.tableView
 
         loadGridData()
 
     }
 
-    private fun synchronizeScrollBars() {
-
-        val scrollListeners = ArrayList<RecyclerView.OnScrollListener>()
-
-        val nullScroller = (View.OnScrollChangeListener { _, _, _, _, _ ->  })
-
-        fun setNestedScroller() {
-
-            //parent nest scroll view handles static header vertical scrolling
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                scrollView.setOnScrollChangeListener { _, p1, p2, p3, p4 ->
-
-                    rows.removeOnScrollListener(scrollListeners[2])
-
-                    rows.scrollBy(0, p2-p4)
-
-                    rows.addOnScrollListener(scrollListeners[2])
-
-                }
+    //finish activity when back button is pressed
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                finish()
             }
         }
-
-        //table scroller handles horizontal scrolling of columns
-        scrollListeners.add(object : RecyclerView.OnScrollListener() {
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-
-                super.onScrolled(recyclerView, dx, dy)
-
-                columns.removeOnScrollListener(scrollListeners[1])
-
-                columns.scrollBy(dx, dy)
-
-                columns.addOnScrollListener(scrollListeners[1])
-
-            }
-        })
-
-        //cols scroller
-        scrollListeners.add(object : RecyclerView.OnScrollListener() {
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-
-                super.onScrolled(recyclerView, dx, dy)
-
-                table.removeOnScrollListener(scrollListeners[0])
-
-                table.scrollBy(dx, dy)
-
-                table.addOnScrollListener(scrollListeners[0])
-            }
-        })
-
-        //rows scroller
-        scrollListeners.add(object : RecyclerView.OnScrollListener() {
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-
-                super.onScrolled(recyclerView, dx, dy)
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    scrollView.setOnScrollChangeListener(nullScroller)
-                }
-
-                scrollView.scrollBy(dx, dy)
-
-                setNestedScroller()
-            }
-        })
-
-        table.addOnScrollListener(scrollListeners[0])
-
-        columns.addOnScrollListener(scrollListeners[1])
-
-        rows.addOnScrollListener(scrollListeners[2])
-
-        setNestedScroller()
-
+        return super.onOptionsItemSelected(item)
     }
-
-    /**
-     * view holder data structure that helps form the cursor for collect activity
-     */
-    data class GridCursor(val plotId: String, val traitIndex: Int, val value: String)
 
     /**
      * Uses the convertDatabaseToTable query to create a spreadsheet of values.
@@ -199,108 +124,134 @@ class DataGridActivity : AppCompatActivity(), GestureDetector.OnGestureListener 
 
         val columns = arrayOf(ep.getString("ImportUniqueName", "") ?: "")
 
-        val traits = ConfigActivity.dt.visibleTrait
+        //background processing
+        scope.launch {
 
-        (this.columns.adapter as? HeaderAdapter)?.submitList(traits.map { HeaderData(it, it) })
+            //query database for visible traits
+            mTraits = ConfigActivity.dt.visibleTrait
 
-        val cursor = ConfigActivity.dt.convertDatabaseToTable(columns, traits)
+            //expensive database call
+            val cursor = ConfigActivity.dt.convertDatabaseToTable(columns, mTraits)
 
-        cursor.moveToPosition(-1)
+            cursor.moveToPosition(-1)
 
-        val rows: Int = cursor.count
+            cursor.moveToFirst()
 
-        totalRows = rows
+            mPlotIds = arrayListOf()
 
-        cursor.moveToFirst()
+            val dataMap = arrayListOf<List<CellData>>()
 
-        val data = arrayListOf<GridCursor>()
-        val plotIdData = arrayOfNulls<String>(rows)
+            //iterate over cursor results and populate lists of plot ids and related trait values
+            val rows: Int = cursor.count
 
-        //data map is used to load the traits into memory so it can be transposed into the spreadsheet
-        val dataMap = mutableMapOf<String, ArrayList<String>>().withDefault { arrayListOf() }
+            for (i in 0 until rows) {
 
-        for (i in 0 until rows) {
+                val plotId = cursor.getString(cursor.getColumnIndex(cursor.getColumnName(0)))
 
-            val plotId = cursor.getString(cursor.getColumnIndex(cursor.getColumnName(0)))
+                val dataList = arrayListOf<CellData>()
 
-            plotIdData[i] = plotId
+                mPlotIds.add(plotId)
 
-            dataMap[plotId] = arrayListOf()
+                mTraits.forEachIndexed { _, variable ->
 
-            traits.forEach { variable ->
+                    val index = cursor.getColumnIndex(variable)
 
-                val index = cursor.getColumnIndex(variable)
+                    val value = cursor.getString(index) ?: ""
 
-                val value = cursor.getString(index) ?: ""
+                    dataList.add(CellData(value, plotId))
 
-                dataMap[plotId]?.add(value)
+                }
+
+                dataMap.add(dataList)
+
+                cursor.moveToNext()
 
             }
-            cursor.moveToNext()
-        }
 
-        //transpose the data into the data array
-        traits.forEachIndexed { index, _ ->
+            mAdapter = DataGridAdapter()
 
-            dataMap.keys.forEach { plotId ->
+            runOnUiThread {
 
-                dataMap[plotId]?.get(index)?.let { data.add(GridCursor(plotId, index, it)) }
+                mTableView.setHasFixedWidth(true)
+
+                mTableView.tableViewListener = this@DataGridActivity
+
+                mTableView.isShowHorizontalSeparators = false
+
+                mTableView.isShowVerticalSeparators = false
+
+                mTableView.setAdapter(mAdapter)
+
+                mAdapter.setAllItems(mTraits.map { HeaderData(it, it) },
+                    mPlotIds.map { HeaderData(it, it) },
+                    dataMap.toList())
+            }
+
+            cursor.close() //always remember to close your cursor! :)
+
+            //update the ui after background processing ends
+            runOnUiThread {
+
+                dataGridGroup.visibility = View.VISIBLE
+
+                progressBar.visibility = View.GONE
             }
         }
+    }
 
+    override fun onCellClicked(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {
 
-        (this.rows.adapter as? HeaderAdapter)?.submitList(plotIdData.mapNotNull { it }.map { HeaderData(it, it) })
+        //populate plotId clicked from parameters and global store
+        val plotId = mPlotIds[row]
 
-        table.layoutManager = GridLayoutManager(this, rows, GridLayoutManager.HORIZONTAL, false)
+        //this is the onlick handler which displays a quick message and sets the intent result / finishes
+        Utils.makeToast(applicationContext, plotId)
 
-        (this.table.adapter as? HeaderAdapter)?.submitList(data.map { cell -> CellData(cell.value) {
+        val returnIntent = Intent()
 
-            //this is the onlick handler which displays a quick message and sets the intent result / finishes
-            Utils.makeToast(applicationContext, cell.plotId)
+        returnIntent.putExtra("result", plotId)
 
-            val returnIntent = Intent()
+        //the trait index is used to move collect activity to the clicked trait
+        returnIntent.putExtra("trait", column)
 
-            returnIntent.putExtra("result", cell.plotId)
+        setResult(RESULT_OK, returnIntent)
 
-            //the trait index is used to move collect activity to the clicked trait
-            returnIntent.putExtra("trait", cell.traitIndex)
-
-            setResult(RESULT_OK, returnIntent)
-
-            finish()
-
-        } })
-
-        cursor.close() //always remember to close your cursor! :)
+        finish()
 
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun onShowPress(p0: MotionEvent?) {
+    override fun onCellDoubleClicked(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {
         TODO("Not yet implemented")
     }
 
-    override fun onSingleTapUp(p0: MotionEvent?): Boolean {
+    override fun onCellLongPressed(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {
         TODO("Not yet implemented")
     }
 
-    override fun onDown(p0: MotionEvent?): Boolean {
+    override fun onColumnHeaderClicked(columnHeaderView: RecyclerView.ViewHolder, column: Int) {
         TODO("Not yet implemented")
     }
 
-    override fun onFling(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean {
+    override fun onColumnHeaderDoubleClicked(
+        columnHeaderView: RecyclerView.ViewHolder,
+        column: Int
+    ) {
         TODO("Not yet implemented")
     }
 
-    override fun onScroll(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean {
+    override fun onColumnHeaderLongPressed(columnHeaderView: RecyclerView.ViewHolder, column: Int) {
         TODO("Not yet implemented")
     }
 
-    override fun onLongPress(p0: MotionEvent?) {
+    override fun onRowHeaderClicked(rowHeaderView: RecyclerView.ViewHolder, row: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onRowHeaderDoubleClicked(rowHeaderView: RecyclerView.ViewHolder, row: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onRowHeaderLongPressed(rowHeaderView: RecyclerView.ViewHolder, row: Int) {
         TODO("Not yet implemented")
     }
 }
