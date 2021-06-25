@@ -35,7 +35,7 @@ class ObservationDao {
         fun getHostImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.rawQuery("""
-                SELECT props.observationUnitDbId AS uniqueName,
+                SELECT DISTINCT props.observationUnitDbId AS uniqueName,
                        props.observationUnitName AS firstName,
                 obs.${Observation.PK} AS id, 
                 obs.value AS value, 
