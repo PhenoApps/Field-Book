@@ -35,7 +35,7 @@ class ObservationDao {
         fun getHostImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.rawQuery("""
-                SELECT props.observationUnitDbId AS uniqueName,
+                SELECT DISTINCT props.observationUnitDbId AS uniqueName,
                        props.observationUnitName AS firstName,
                 obs.${Observation.PK} AS id, 
                 obs.value AS value, 
@@ -84,7 +84,7 @@ class ObservationDao {
         @SuppressLint("Recycle")
         fun getObservations(hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
             db.rawQuery("""
-                SELECT props.observationUnitDbId AS uniqueName,
+                SELECT DISTINCT props.observationUnitDbId AS uniqueName,
                     props.observationUnitName AS firstName,
                     obs.${Observation.PK} AS id, 
                     obs.value AS value, 
@@ -122,8 +122,9 @@ class ObservationDao {
                         dbId = getStringVal(row, "observation_db_id")
                         setTimestamp(getStringVal(row, "observation_time_stamp"))
                         setLastSyncedTime(getStringVal(row, "last_synced_time"))
-                        setCollector(getStringVal(row, "collector"))
-                        setStudyId(getStringVal(row, Study.FK))
+                        collector = getStringVal(row, "collector")
+                        //study alias is the actual brapi private key
+                        studyId = getStringVal(row, "study_alias")
                     } }
 
         } ?: emptyList()

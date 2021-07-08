@@ -426,51 +426,54 @@ public class BrAPIServiceV1 implements BrAPIService {
             BrapiV1ApiCallBack<ObservationUnitsResponse1> callback = new BrapiV1ApiCallBack<ObservationUnitsResponse1>() {
                 @Override
                 public void onSuccess(ObservationUnitsResponse1 response, int i, Map<String, List<String>> map) {
-                    final BrapiStudyDetails study = new BrapiStudyDetails();
-                    study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
-                    study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
-                    study.setValues(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
 
-                    function.apply(study);
+                    //bugfix for index out of bounds occurring when no data is in response
+                    if (response.getResult().getData().size() > 0) {
 
-                    int page = response.getMetadata().getPagination().getCurrentPage();
-                    if(page == 0){
-                        //one time code
-                        //sometimes getData() size is 0 which causes an index out of bounds exception
-                        //error can be reproduced by trying to import Study 10 from the default brapi server
-                        try {
-                            study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
-                            study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
-                        } catch (IndexOutOfBoundsException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                        final BrapiStudyDetails study = new BrapiStudyDetails();
+                        study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
+                        study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
+                        study.setValues(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
 
-                    //every time
-                    study.getValues().addAll(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
-
-                    recursiveCounter[0] = recursiveCounter[0] + 1;
-
-                    // Stop after 50 iterations (for safety)
-                    // Stop if the current page is the last page according to the server
-                    // Stop if there are no more contents
-                    if((recursiveCounter[0] > 50)
-                            || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
-                            || (response.getResult().getData().size() == 0)){
-                        // Stop recursive loop
                         function.apply(study);
-                    }else {
-                        try {
-                            studiesApi.studiesStudyDbIdObservationunitsGetAsync(
-                                    studyDbId, "plot", recursiveCounter[0], pageSize,
-                                    getBrapiToken(), this);
-                        } catch (ApiException e) {
-                            failFunction.apply(e.getCode());
-                            e.printStackTrace();
+
+                        int page = response.getMetadata().getPagination().getCurrentPage();
+                        if(page == 0){
+                            //one time code
+                            //sometimes getData() size is 0 which causes an index out of bounds exception
+                            //error can be reproduced by trying to import Study 10 from the default brapi server
+                            try {
+                                study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
+                                study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
+                            } catch (IndexOutOfBoundsException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        //every time
+                        study.getValues().addAll(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
+
+                        recursiveCounter[0] = recursiveCounter[0] + 1;
+
+                        // Stop after 50 iterations (for safety)
+                        // Stop if the current page is the last page according to the server
+                        // Stop if there are no more contents
+                        if((recursiveCounter[0] > 50)
+                                || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
+                                || (response.getResult().getData().size() == 0)){
+                            // Stop recursive loop
+                            function.apply(study);
+                        }else {
+                            try {
+                                studiesApi.studiesStudyDbIdObservationunitsGetAsync(
+                                        studyDbId, "plot", recursiveCounter[0], pageSize,
+                                        getBrapiToken(), this);
+                            } catch (ApiException e) {
+                                failFunction.apply(e.getCode());
+                                e.printStackTrace();
+                            }
                         }
                     }
-
-
                 }
 
                 @Override
