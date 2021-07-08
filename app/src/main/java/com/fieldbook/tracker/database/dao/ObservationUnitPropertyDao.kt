@@ -161,14 +161,12 @@ class ObservationUnitPropertyDao {
              $sObservationUnitPropertyViewName AS props, 
              ${ObservationVariable.tableName} AS vars
         WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
-            AND obs.observation_variable_name = vars.observation_variable_name
-            AND obs.observation_variable_field_book_format = vars.observation_variable_field_book_format
+            AND obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK}
             AND obs.value IS NOT NULL 
-            AND vars.observation_variable_name IN ${traits.map { "\"${it.replace("'", "''")}\"" }.joinToString(",", "(", ")")}
         
     """.trimIndent()
 
-//        println(query)
+        //println(query)
 
                 val table = db.rawQuery(query, null).toTable()
 
