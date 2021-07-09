@@ -32,9 +32,7 @@ import java.util.*
  * Intent i = Intent()
  * i.putExtra("result", plotId)
  * i.putExtra("trait", 1) <- actually a trait index s.a 0 -> "height", 1 -> "lodging"
- *
- * TODO: Discuss using an async task and adding a progress bar while the data loads, currently there is a lag between clicking and moving to this activity on large databases.
- */
+ **/
 class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITableViewListener {
 
     /***
@@ -220,38 +218,17 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
     }
 
-    override fun onCellDoubleClicked(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onCellLongPressed(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onColumnHeaderClicked(columnHeaderView: RecyclerView.ViewHolder, column: Int) {
-        TODO("Not yet implemented")
-    }
-
+    //region unimplemented click events
+    override fun onCellDoubleClicked(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {}
+    override fun onCellLongPressed(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {}
+    override fun onColumnHeaderClicked(columnHeaderView: RecyclerView.ViewHolder, column: Int) {}
     override fun onColumnHeaderDoubleClicked(
         columnHeaderView: RecyclerView.ViewHolder,
         column: Int
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onColumnHeaderLongPressed(columnHeaderView: RecyclerView.ViewHolder, column: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onRowHeaderClicked(rowHeaderView: RecyclerView.ViewHolder, row: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onRowHeaderDoubleClicked(rowHeaderView: RecyclerView.ViewHolder, row: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onRowHeaderLongPressed(rowHeaderView: RecyclerView.ViewHolder, row: Int) {
-        TODO("Not yet implemented")
-    }
+    ) {}
+    override fun onColumnHeaderLongPressed(columnHeaderView: RecyclerView.ViewHolder, column: Int) {}
+    override fun onRowHeaderClicked(rowHeaderView: RecyclerView.ViewHolder, row: Int) {}
+    override fun onRowHeaderDoubleClicked(rowHeaderView: RecyclerView.ViewHolder, row: Int) {}
+    override fun onRowHeaderLongPressed(rowHeaderView: RecyclerView.ViewHolder, row: Int) {}
+    //endregion
 }
