@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
@@ -7,12 +8,14 @@ android {
     signingConfigs {
         playStoreConfig {
             Properties keystoreProps = new Properties()
-            keystoreProps.load(new FileInputStream(file('keystore.config')))
+            if (file('keystore.config').exists()) {
+                keystoreProps.load(new FileInputStream(file('keystore.config')))
 
-            keyAlias keystoreProps['keyAlias']
-            keyPassword keystoreProps['keyPassword']
-            storePassword keystoreProps['storePassword']
-            storeFile file('keystore.keystore')
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+                storePassword keystoreProps['storePassword']
+                storeFile file('keystore.keystore')
+            } else println("Non-keystore build.")
         }
     }
 
@@ -23,7 +26,7 @@ android {
         applicationId "com.fieldbook.tracker"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode = 491
+        versionCode = 492
         versionName = '5.0'
         multiDexEnabled true
     }
@@ -38,6 +41,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.playStoreConfig //Add your own signing config
         }
+    }
+
+    buildFeatures {
+        dataBinding = true
     }
 
     compileOptions {
@@ -66,7 +73,7 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.exifinterface:exifinterface:1.3.2'
     implementation "androidx.legacy:legacy-preference-v14:1.0.0"
@@ -102,6 +109,10 @@ dependencies {
     
     implementation "androidx.core:core-ktx:1.3.2"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1"
+
+    implementation project(path: ':table')
+
+    kapt 'com.android.databinding:compiler:3.1.4'
 
     testImplementation 'androidx.test:core:1.3.0'
     testImplementation 'org.robolectric:robolectric:4.3.1'

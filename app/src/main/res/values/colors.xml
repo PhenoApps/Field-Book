@@ -14,4 +14,11 @@
     <color name="button_pressed">#33b5e5</color>
 
     <color name="black">#000000</color>
+
+    <!-- data grid colors -->
+    <color name="progressBlank">#AAAAAAAA</color>
+    <color name="progressStart">#9000FF00</color>
+    <color name="progressMid">#90FFFF00</color>
+    <color name="progressEnd">#90FF0000</color>
+
 </resources>

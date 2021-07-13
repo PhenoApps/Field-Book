@@ -408,7 +408,7 @@ public class CollectActivity extends AppCompatActivity {
     }
 
     // Moves to specific plot/range/plot_id
-    private void moveToSearch(String type, int[] rangeID, String range, String plot, String data) {
+    private void moveToSearch(String type, int[] rangeID, String range, String plot, String data, int trait) {
 
         if (rangeID == null) {
             return;
@@ -457,7 +457,11 @@ public class CollectActivity extends AppCompatActivity {
                 rangeBox.setRangeByIndex(j - 1);
 
                 if (rangeBox.getCRange().plot_id.equals(data)) {
-                    moveToResultCore(j);
+
+                    if (trait == -1) {
+                        moveToResultCore(j);
+                    } else moveToResultCore(j, trait);
+
                     return;
                 }
             }
@@ -473,6 +477,26 @@ public class CollectActivity extends AppCompatActivity {
         rangeBox.display();
 
         traitBox.setNewTraits(rangeBox.getPlotID());
+
+        initWidgets(false);
+    }
+
+    /**
+     * Overloaded version of original moveToResultCore.
+     * This version is only called after a grid search, which supplies the trait the user clicked on.
+     * This search will update the trait box to the clicked trait.
+     * @param j the range box page
+     * @param traitIndex the trait to move to
+     */
+    private void moveToResultCore(int j, int traitIndex) {
+        rangeBox.setPaging(j);
+
+        // Reload traits based on selected plot
+        rangeBox.display();
+
+        traitBox.setNewTraits(rangeBox.getPlotID());
+
+        traitBox.setSelection(traitIndex);
 
         initWidgets(false);
     }
@@ -542,7 +566,7 @@ public class CollectActivity extends AppCompatActivity {
             if (ep.getString("lastplot", null) != null) {
                 rangeBox.setAllRangeID();
                 int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, ep.getString("lastplot", null));
+                moveToSearch("id", rangeID, null, null, ep.getString("lastplot", null), -1);
             }
 
         } else if (partialReload) {
@@ -557,7 +581,7 @@ public class CollectActivity extends AppCompatActivity {
             int[] rangeID = rangeBox.getRangeID();
 
             if (rangeID != null) {
-                moveToSearch("search", rangeID, searchRange, searchPlot, null);
+                moveToSearch("search", rangeID, searchRange, searchPlot, null, -1);
             }
         }
 
@@ -812,9 +836,10 @@ public class CollectActivity extends AppCompatActivity {
                 showSummary();
                 break;
             case R.id.datagrid:
-                intent.setClassName(CollectActivity.this,
-                        DatagridActivity.class.getName());
-                startActivityForResult(intent, 2);
+                Intent i = new Intent();
+                i.setClassName(CollectActivity.this,
+                        DataGridActivity.class.getName());
+                startActivityForResult(i, 2);
                 break;
             case R.id.lockData:
                 dataLocked = !dataLocked;
@@ -857,7 +882,7 @@ public class CollectActivity extends AppCompatActivity {
                 inputPlotId = barcodeId.getText().toString();
                 rangeBox.setAllRangeID();
                 int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, inputPlotId);
+                moveToSearch("id", rangeID, null, null, inputPlotId, -1);
                 goToId.dismiss();
             }
         });
@@ -995,9 +1020,10 @@ public class CollectActivity extends AppCompatActivity {
             case 2:
                 if (resultCode == RESULT_OK) {
                     inputPlotId = data.getStringExtra("result");
+                    int trait = data.getIntExtra("trait", -1);
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
-                    moveToSearch("id", rangeID, null, null, inputPlotId);
+                    moveToSearch("id", rangeID, null, null, inputPlotId, trait);
                 }
                 break;
             case 98:
@@ -1006,7 +1032,7 @@ public class CollectActivity extends AppCompatActivity {
                     inputPlotId = plotSearchResult.getContents();
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
-                    moveToSearch("id", rangeID, null, null, inputPlotId);
+                    moveToSearch("id", rangeID, null, null, inputPlotId, -1);
                 }
                 break;
             case 99:
@@ -1622,7 +1648,7 @@ public class CollectActivity extends AppCompatActivity {
                     // do not do bit check on event, crashes keyboard
                     if (actionId == EditorInfo.IME_ACTION_DONE) {
                         try {
-                            moveToSearch(searchType, rangeID, null, null, view.getText().toString());
+                            moveToSearch(searchType, rangeID, null, null, view.getText().toString(), -1);
                             InputMethodManager imm = parent.getIMM();
                             imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
                         } catch (Exception ignore) {

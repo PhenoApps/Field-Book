@@ -12,6 +12,7 @@
         <new>BrAPI server timeout setting</new>
         <new>Design custom fields directly within Field Book</new>
         <new>Field Book requests person confirmation every 24hrs</new>
+        <new>Updated Datagrid layout</new>
         <info>Print a label adds an observation record</info>
         <bugfix>Fixed issue with special characters in file headers</bugfix>
         <bugfix>Fixed issue with categorical trait layout</bugfix>
