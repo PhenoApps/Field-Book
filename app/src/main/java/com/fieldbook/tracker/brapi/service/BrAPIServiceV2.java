@@ -746,6 +746,12 @@ public class BrAPIServiceV2 implements BrAPIService{
     private List<TraitObject> mapTraits(List<BrAPIObservationVariable> variables) {
         List<TraitObject> traits = new ArrayList<>();
         for (BrAPIObservationVariable var : variables) {
+
+            // Skip the trait if there brapi trait field isn't present
+            if (var.getTrait() == null) {
+                continue;
+            }
+
             TraitObject trait = new TraitObject();
             trait.setDefaultValue(var.getDefaultValue());
 
