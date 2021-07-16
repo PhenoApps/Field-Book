@@ -548,6 +548,7 @@
     <string name="brapi_auth_btn">Log In to Site</string>
     <string name="brapi_pagination">Page Size</string>
     <string name="brapi_timeout">Server Timeout</string>
+    <string name="brapi_skipped_traits">Successfully fetched traits. %1$d traits ignored because of missing brapi \'trait\' field</string>
 
     <string name="brapi_study_incompatible">This BrAPI study is currently incompatible with Field Book. Studies must include row and column in the header.</string>
 

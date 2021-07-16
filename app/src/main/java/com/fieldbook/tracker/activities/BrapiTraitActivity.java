@@ -23,6 +23,7 @@ import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import com.fieldbook.tracker.objects.TraitObject;
 
@@ -103,13 +104,20 @@ public class BrapiTraitActivity extends AppCompatActivity {
         paginationManager.refreshPageIndicator();
 
         // Call our API to get the data
-        brAPIService.getOntology(paginationManager, new Function<List<TraitObject>, Void>() {
+        brAPIService.getOntology(paginationManager, new BiFunction<List<TraitObject>, Integer, Void>() {
             @Override
-            public Void apply(final List<TraitObject> traits) {
+            public Void apply(final List<TraitObject> traits, Integer variablesMissingTrait) {
 
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
+                            if (variablesMissingTrait > 0) {
+                                Toast.makeText(getApplicationContext(),
+                                        getString(R.string.brapi_skipped_traits, variablesMissingTrait),
+                                        Toast.LENGTH_LONG).show();
+                            }
+
                             // Build our array adapter
                             traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
 

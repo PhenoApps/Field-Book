@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.arch.core.util.Function;
 
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
@@ -570,7 +572,7 @@ public class BrAPIServiceV1 implements BrAPIService {
     }
 
     public void getOntology(BrapiPaginationManager paginationManager,
-                            final Function<List<TraitObject>, Void> function,
+                            final BiFunction<List<TraitObject>, Integer, Void> function,
                             final Function<Integer, Void> failFunction) {
         Integer initPage = paginationManager.getPage();
         try {
@@ -583,9 +585,9 @@ public class BrAPIServiceV1 implements BrAPIService {
                         updatePageInfo(paginationManager, response.getMetadata());
                         // Result contains a list of observation variables
                         List<ObservationVariable> brapiTraitList = response.getResult().getData();
-                        final List<TraitObject> traitsList = mapTraits(brapiTraitList);
+                        final Pair<List<TraitObject>, Integer> traitsResult = mapTraits(brapiTraitList);
 
-                        function.apply(traitsList);
+                        function.apply(traitsResult.first, traitsResult.second);
                     }
                 }
 
@@ -710,7 +712,7 @@ public class BrAPIServiceV1 implements BrAPIService {
                 @Override
                 public void onSuccess(StudyObservationVariablesResponse response, int i, Map<String, List<String>> map) {
                     //every time
-                    study.getTraits().addAll(mapTraits(response.getResult().getData()));
+                    study.getTraits().addAll(mapTraits(response.getResult().getData()).first);
                     recursiveCounter[0] = recursiveCounter[0] + 1;
 
                     int page = response.getMetadata().getPagination().getCurrentPage();
@@ -749,9 +751,17 @@ public class BrAPIServiceV1 implements BrAPIService {
         }
     }
 
-    private List<TraitObject> mapTraits(List<ObservationVariable> variables) {
+    private Pair<List<TraitObject>, Integer> mapTraits(List<ObservationVariable> variables) {
         List<TraitObject> traits = new ArrayList<>();
+        Integer variablesMissingTrait = 0;
         for (ObservationVariable var : variables) {
+
+            // Skip the trait if there brapi trait field isn't present
+            if (var.getTrait() == null) {
+                variablesMissingTrait += 1;
+                continue;
+            }
+
             TraitObject trait = new TraitObject();
             trait.setDefaultValue(var.getDefaultValue());
 
@@ -809,7 +819,8 @@ public class BrAPIServiceV1 implements BrAPIService {
 
             traits.add(trait);
         }
-        return traits;
+
+        return Pair.create(traits, variablesMissingTrait);
     }
 
     private String buildCategoryDescriptionString(List<String> categories) {
