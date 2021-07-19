@@ -40,6 +40,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        brAPIService.authorizeClient();
     }
 
     @Override
@@ -55,6 +56,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 loadToolbar();
                 // Get the setting information for our brapi integration
                 brAPIService = BrAPIServiceFactory.getBrAPIService(this);
+                brAPIService.authorizeClient();
 
                 // Make a clean list to track our selected traits
                 selectedTraits = new ArrayList<>();
