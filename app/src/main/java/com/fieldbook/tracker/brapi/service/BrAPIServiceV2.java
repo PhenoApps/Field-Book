@@ -804,10 +804,12 @@ public class BrAPIServiceV2 implements BrAPIService{
 
     private String buildCategoryList(List<BrAPIScaleValidValuesCategories> categories) {
         StringBuilder sb = new StringBuilder();
-        for (int j = 0; j < categories.size(); ++j) {
-            sb.append(categories.get(j).getLabel());
-            if (j != categories.size() - 1) {
-                sb.append("/");
+        if (categories != null) {
+            for (int j = 0; j < categories.size(); ++j) {
+                sb.append(categories.get(j).getLabel());
+                if (j != categories.size() - 1) {
+                    sb.append("/");
+                }
             }
         }
         return sb.toString();
