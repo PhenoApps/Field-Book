@@ -52,6 +52,8 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 
+import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.LayoutCollections;
@@ -1063,6 +1065,15 @@ public class CollectActivity extends AppCompatActivity {
         return dt.getTraitExists(ID, trait.getTrait(), trait.getFormat());
     }
 
+    public boolean existsAllTraits(final int ID) {
+        final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
+        final String[] formats = VisibleObservationVariableDao.Companion.getFormat();
+        for (int i = 0; i < traits.length; i++) {
+            if (!dt.getTraitExists(ID, traits[i], formats[i])) return false;
+        }
+        return true;
+    }
+
     public Map getNewTraits() {
         return traitBox.getNewTraits();
     }
@@ -1927,41 +1938,66 @@ public class CollectActivity extends AppCompatActivity {
             return movePaging(pos, 1, false);
         }
 
+        private int checkSkipTraits(int step, int pos, boolean cyclic, boolean skipMode) {
+
+            if (step == 1 && pos == rangeID.length) {
+                return 1;
+            }
+
+            final int prevPos = pos;
+            while (true) {
+                pos = moveSimply(pos, step);
+                // absorb the differece
+                // between single click and repeated clicks
+                if (cyclic) {
+                    if (pos == prevPos) {
+                        return pos;
+                    } else if (pos == 1) {
+                        pos = rangeID.length;
+                    } else if (pos == rangeID.length) {
+                        pos = 1;
+                    }
+                } else {
+                    if (pos == 1 || pos == prevPos) {
+                        return pos;
+                    }
+                }
+
+                if (skipMode) {
+                    if (!parent.existsTrait(rangeID[pos - 1])) {
+                        return pos;
+                    }
+                } else {
+                    if (!parent.existsAllTraits(rangeID[pos - 1])) {
+                        return pos;
+                    }
+                }
+            }
+        }
+
         private int movePaging(int pos, int step, boolean cyclic) {
             // If ignore existing data is enabled, then skip accordingly
             final SharedPreferences ep = parent.getPreference();
 
-            if (ep.getBoolean(GeneralKeys.HIDE_ENTRIES_WITH_DATA, false)) {
-                if (step == 1 && pos == rangeID.length) {
-                    return 1;
+            //three options: 1. disabled 2. skip active trait 3. skip but check all traits
+            String skipMode = ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1");
+
+            switch (skipMode) {
+
+                case "2" : {
+
+                    return checkSkipTraits(step, pos, cyclic, true);
+
                 }
 
-                final int prevPos = pos;
-                TraitObject trait = parent.getTraitBox().getCurrentTrait();
-                while (true) {
-                    pos = moveSimply(pos, step);
-                    // absorb the differece
-                    // between single click and repeated clicks
-                    if (cyclic) {
-                        if (pos == prevPos) {
-                            return pos;
-                        } else if (pos == 1) {
-                            pos = rangeID.length;
-                        } else if (pos == rangeID.length) {
-                            pos = 1;
-                        }
-                    } else {
-                        if (pos == 1 || pos == prevPos) {
-                            return pos;
-                        }
-                    }
+                case "3" : {
 
-                    if (!parent.existsTrait(rangeID[pos - 1])) {
-                        return pos;
-                    }
+                    return checkSkipTraits(step, pos, cyclic, false);
+
                 }
-            } else {
-                return moveSimply(pos, step);
+
+                default : return moveSimply(pos, step);
+
             }
         }
 

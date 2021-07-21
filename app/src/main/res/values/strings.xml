@@ -234,6 +234,9 @@
     <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
     <string name="preferences_general_skip_entries_with_data">Skip entries with data</string>
     <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the current trait</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Skip entries across all traits</string>
+    <string name="preferences_general_skip_entries_across_all_traits_description">Skip entries that have data for all traits</string>
+    <string name="preferences_general_skip_entries_disabled">Disabled</string>
     <string name="preferences_general_share_disable">Disable file sharing</string>
     <string name="preferences_general_share_disable_description">When files are exported, the share dialog will not be displayed</string>
     <string name="preferences_general_barcode_camera">Move to entry via barcode</string>
