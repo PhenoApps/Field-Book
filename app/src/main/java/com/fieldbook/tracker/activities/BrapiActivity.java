@@ -56,7 +56,6 @@ public class BrapiActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         brAPIService.authorizeClient();
-        loadStudiesList();
     }
 
     @Override

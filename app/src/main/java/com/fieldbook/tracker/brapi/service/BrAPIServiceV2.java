@@ -158,10 +158,10 @@ public class BrAPIServiceV2 implements BrAPIService{
         request.setDescription(image.getDescription());
         request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
         request.setFileName(image.getImageFileName());
-        request.setFileSize((int) image.getImageFileSize());
-        request.setHeight(image.getImageHeight());
+        if (image.getImageFileSize() != null) request.setFileSize((int) image.getImageFileSize());
+        if (image.getImageHeight() != null) request.setHeight(image.getImageHeight());
+        if (image.getImageWidth() != null) request.setWidth(image.getImageWidth());
         request.setImageName(image.getImageName());
-        request.setWidth(image.getImageWidth());
         request.setMimeType(image.getMimeType());
         request.setUnitDbId(image.getObservationUnitDbId());
         request.setDbId(image.getImageDbId());
@@ -815,10 +815,12 @@ public class BrAPIServiceV2 implements BrAPIService{
 
     private String buildCategoryList(List<BrAPIScaleValidValuesCategories> categories) {
         StringBuilder sb = new StringBuilder();
-        for (int j = 0; j < categories.size(); ++j) {
-            sb.append(categories.get(j).getLabel());
-            if (j != categories.size() - 1) {
-                sb.append("/");
+        if (categories != null) {
+            for (int j = 0; j < categories.size(); ++j) {
+                sb.append(categories.get(j).getLabel());
+                if (j != categories.size() - 1) {
+                    sb.append("/");
+                }
             }
         }
         return sb.toString();

@@ -66,7 +66,7 @@ class ObservationDao {
         """.trimIndent(), arrayOf(hostUrl)).toTable()
                     .map { row -> FieldBookImage(getStringVal(row, "value"), missingPhoto).apply {
                         unitDbId = getStringVal(row, "uniqueName")
-                        setDescriptiveOntologyTerms(listOf(getStringVal(row, "firstName")))
+                        setDescriptiveOntologyTerms(listOf(getStringVal(row, "external_db_id")))
                         setDescription(getStringVal(row, "observation_variable_details"))
                         setTimestamp(getStringVal(row, "observation_time_stamp"))
                         fieldBookDbId = getStringVal(row, "id")

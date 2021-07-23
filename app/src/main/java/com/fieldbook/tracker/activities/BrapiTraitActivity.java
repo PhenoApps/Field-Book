@@ -41,6 +41,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        brAPIService.authorizeClient();
     }
 
     @Override
