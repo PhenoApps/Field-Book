@@ -39,6 +39,7 @@ package com.fieldbook.tracker.brapi.service;
         import java.net.MalformedURLException;
         import java.net.URL;
         import java.util.List;
+        import java.util.function.BiFunction;
 
 public interface BrAPIService {
 
@@ -144,7 +145,7 @@ public interface BrAPIService {
 
     public void getPlotDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getOntology(BrapiPaginationManager paginationManager, final Function<List<TraitObject>, Void> function, final Function<Integer, Void> failFunction);
+    public void getOntology(BrapiPaginationManager paginationManager, final BiFunction<List<TraitObject>, Integer, Void> function, final Function<Integer, Void> failFunction);
 
     public void createObservations(List<Observation> observations,
                                    final Function<List<Observation>, Void> function,
