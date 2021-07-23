@@ -452,9 +452,6 @@ public class BrAPIServiceV1 implements BrAPIService {
                             }
                         }
 
-                        //every time
-                        study.getValues().addAll(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
-
                         recursiveCounter[0] = recursiveCounter[0] + 1;
 
                         // Stop after 50 iterations (for safety)
