@@ -226,8 +226,8 @@ class StudyDao {
             val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
                     Study.FK to exp_id,
                     "observation_unit_db_id" to data[uniqueIndex],
-                    "primary_id" to data[primaryIndex],
-                    "secondary_id" to data[secondaryIndex]))
+                    "primary_id" to if (primaryIndex < 0) -1 else data[primaryIndex],
+                    "secondary_id" to if (secondaryIndex < 0) -1 else data[secondaryIndex]))
 
             columns.forEachIndexed { index, it ->
 
