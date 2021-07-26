@@ -232,8 +232,8 @@
     <string name="preferences_general_title">General</string>
     <string name="preferences_general_use_day_number">Use day of year</string>
     <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
-    <string name="preferences_general_skip_entries_with_data">Skip entries with data</string>
-    <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the current trait</string>
+    <string name="preferences_general_skip_entries_with_data">Skip entries across active trait</string>
+    <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the active trait</string>
     <string name="preferences_general_skip_entries_across_all_traits">Skip entries across all traits</string>
     <string name="preferences_general_skip_entries_across_all_traits_description">Skip entries that have data for all traits</string>
     <string name="preferences_general_skip_entries_disabled">Disabled</string>
