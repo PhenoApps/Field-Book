@@ -170,7 +170,9 @@ class ObservationVariableDao {
 
         fun getAllTraitsForExport(): Cursor {
 
-            val requiredFields = getTraitPropertyColumns()
+            val requiredFields = arrayOf("trait", "format", "defaultValue", "minimum",
+                "maximum", "details", "categories", "isVisible", "realPosition")
+            //val requiredFields = getTraitPropertyColumns()
             //trait,format,defaultValue,minimum,maximum,details,categories,isVisible,realPosition
             return MatrixCursor(requiredFields).also { cursor ->
                 val traits = getAllTraitObjects()
