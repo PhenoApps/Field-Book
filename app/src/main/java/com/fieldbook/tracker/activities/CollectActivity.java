@@ -18,8 +18,6 @@ import android.os.Handler;
 import android.os.Message;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
@@ -1065,13 +1063,18 @@ public class CollectActivity extends AppCompatActivity {
         return dt.getTraitExists(ID, trait.getTrait(), trait.getFormat());
     }
 
-    public boolean existsAllTraits(final int ID) {
+    /**
+     * Iterates over all traits for the given ID and returns the trait's index which is missing
+     * @param ID the plot identifier
+     * @return index of the trait missing or -1 if all traits exist
+     */
+    public int existsAllTraits(final int ID) {
         final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
         final String[] formats = VisibleObservationVariableDao.Companion.getFormat();
         for (int i = 0; i < traits.length; i++) {
-            if (!dt.getTraitExists(ID, traits[i], formats[i])) return false;
+            if (!dt.getTraitExists(ID, traits[i], formats[i])) return i;
         }
-        return true;
+        return -1;
     }
 
     public Map getNewTraits() {
@@ -1945,7 +1948,12 @@ public class CollectActivity extends AppCompatActivity {
             }
 
             final int prevPos = pos;
+
+            //this keeps track of the previous loops position
+            //while prevPos keeps track of what position this function was called with.
+            int localPrev;
             while (true) {
+                localPrev = pos;
                 pos = moveSimply(pos, step);
                 // absorb the differece
                 // between single click and repeated clicks
@@ -1968,8 +1976,14 @@ public class CollectActivity extends AppCompatActivity {
                         return pos;
                     }
                 } else {
-                    if (!parent.existsAllTraits(rangeID[pos - 1])) {
-                        return pos;
+                    //check all traits for the currently selected range id
+                    int nextTrait = parent.existsAllTraits(rangeID[localPrev - 1]);
+
+                    //this will return -1 if all traits exists
+                    //otherwise, set the selection to the missing trait and return the current pos
+                    if (nextTrait > -1) {
+                        traitBox.setSelection(nextTrait);
+                        return localPrev;
                     }
                 }
             }
