@@ -1,6 +1,6 @@
 <changelog>
     <release
-        date="2021-08-01"
+        date="2021-07-28"
         versionCode="500"
         versionName="v5.0">
         <new>Major database overhaul</new>
