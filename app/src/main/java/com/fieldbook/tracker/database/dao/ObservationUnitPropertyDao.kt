@@ -161,12 +161,11 @@ class ObservationUnitPropertyDao {
              $sObservationUnitPropertyViewName AS props, 
              ${ObservationVariable.tableName} AS vars
         WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
-            AND obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK}
             AND obs.value IS NOT NULL 
         
     """.trimIndent()
 
-        //println(query)
+//        println(query)
 
                 val table = db.rawQuery(query, null).toTable()
 
