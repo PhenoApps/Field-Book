@@ -49,7 +49,7 @@
 
     <ListPreference
         android:icon="@drawable/ic_adv_hide_entries"
-        android:key="IgnoreExisting"
+        android:key="com.fieldbook.tracker.HIDE_ENTRIES"
         android:summary="@string/preferences_general_skip_entries_disabled"
         android:title="@string/preferences_general_skip_entries_with_data"
         android:entries="@array/pref_behavior_skip_entries_entries"

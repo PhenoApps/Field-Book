@@ -21,7 +21,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
         setPreferencesFromResource(R.xml.preferences_behavior, rootKey);
 
-        Preference skipEntriesPref = this.findPreference("IgnoreExisting");
+        Preference skipEntriesPref = this.findPreference(GeneralKeys.HIDE_ENTRIES_WITH_DATA);
 
         if (skipEntriesPref != null) {
 
@@ -53,7 +53,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
         //When the skip entries preference is changed, update the summary that is defined in string.xml.
         if (preference.hasKey()) {
 
-            if (preference.getKey().equals("IgnoreExisting")) {
+            if (preference.getKey().equals(GeneralKeys.HIDE_ENTRIES_WITH_DATA)) {
 
                 switchSkipPreferenceMode((String) newValue, preference);
 

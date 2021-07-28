@@ -34,7 +34,7 @@ public class GeneralKeys {
     public static final String UNIQUE_CAMERA                        = "BarcodeScan";
     public static final String UNIQUE_TEXT                          = "JumpToPlot";
     public static final String DATAGRID_SETTING                     = "DataGrid";
-    public static final String HIDE_ENTRIES_WITH_DATA               = "IgnoreExisting";
+    public static final String HIDE_ENTRIES_WITH_DATA               = "com.fieldbook.tracker.HIDE_ENTRIES";
     public static final String USE_DAY_OF_YEAR                      = "UseDay";
     public static final String DISABLE_SHARE                        = "DisableShare";
 
