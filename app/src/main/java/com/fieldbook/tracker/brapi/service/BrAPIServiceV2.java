@@ -3,6 +3,7 @@ package com.fieldbook.tracker.brapi.service;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.arch.core.util.Function;
 
@@ -60,6 +61,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 public class BrAPIServiceV2 implements BrAPIService{
 
@@ -156,10 +158,10 @@ public class BrAPIServiceV2 implements BrAPIService{
         request.setDescription(image.getDescription());
         request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
         request.setFileName(image.getImageFileName());
-        request.setFileSize((int) image.getImageFileSize());
-        request.setHeight(image.getImageHeight());
+        if (image.getImageFileSize() != null) request.setFileSize((int) image.getImageFileSize());
+        if (image.getImageHeight() != null) request.setHeight(image.getImageHeight());
+        if (image.getImageWidth() != null) request.setWidth(image.getImageWidth());
         request.setImageName(image.getImageName());
-        request.setWidth(image.getImageWidth());
         request.setMimeType(image.getMimeType());
         request.setUnitDbId(image.getObservationUnitDbId());
         request.setDbId(image.getImageDbId());
@@ -541,7 +543,7 @@ public class BrAPIServiceV2 implements BrAPIService{
     }
 
     public void getOntology(final BrapiPaginationManager paginationManager,
-                            final Function<List<TraitObject>, Void> function,
+                            final BiFunction<List<TraitObject>, Integer, Void> function,
                             final Function<Integer, Void> failFunction) {
         Integer initPage = paginationManager.getPage();
         try {
@@ -555,9 +557,9 @@ public class BrAPIServiceV2 implements BrAPIService{
                         updatePageInfo(paginationManager, response.getMetadata());
                         // Result contains a list of observation variables
                         List<BrAPIObservationVariable> brapiTraitList = response.getResult().getData();
-                        final List<TraitObject> traitsList = mapTraits(brapiTraitList);
+                        final Pair<List<TraitObject>, Integer> traitsResult = mapTraits(brapiTraitList);
 
-                        function.apply(traitsList);
+                        function.apply(traitsResult.first, traitsResult.second);
                     }
                 }
 
@@ -701,7 +703,7 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onSuccess(BrAPIObservationVariableListResponse response, int i, Map<String, List<String>> map) {
                     //every time
-                    study.getTraits().addAll(mapTraits(response.getResult().getData()));
+                    study.getTraits().addAll(mapTraits(response.getResult().getData()).first);
                     recursiveCounter[0] = recursiveCounter[0] + 1;
 
                     int page = response.getMetadata().getPagination().getCurrentPage();
@@ -743,9 +745,17 @@ public class BrAPIServiceV2 implements BrAPIService{
         }
     }
 
-    private List<TraitObject> mapTraits(List<BrAPIObservationVariable> variables) {
+    private Pair<List<TraitObject>, Integer> mapTraits(List<BrAPIObservationVariable> variables) {
         List<TraitObject> traits = new ArrayList<>();
+        Integer variablesMissingTrait = 0;
         for (BrAPIObservationVariable var : variables) {
+
+            // Skip the trait if there brapi trait field isn't present
+            if (var.getTrait() == null) {
+                variablesMissingTrait += 1;
+                continue;
+            }
+
             TraitObject trait = new TraitObject();
             trait.setDefaultValue(var.getDefaultValue());
 
@@ -799,15 +809,18 @@ public class BrAPIServiceV2 implements BrAPIService{
 
             traits.add(trait);
         }
-        return traits;
+
+        return Pair.create(traits, variablesMissingTrait);
     }
 
     private String buildCategoryList(List<BrAPIScaleValidValuesCategories> categories) {
         StringBuilder sb = new StringBuilder();
-        for (int j = 0; j < categories.size(); ++j) {
-            sb.append(categories.get(j).getLabel());
-            if (j != categories.size() - 1) {
-                sb.append("/");
+        if (categories != null) {
+            for (int j = 0; j < categories.size(); ++j) {
+                sb.append(categories.get(j).getLabel());
+                if (j != categories.size() - 1) {
+                    sb.append("/");
+                }
             }
         }
         return sb.toString();
