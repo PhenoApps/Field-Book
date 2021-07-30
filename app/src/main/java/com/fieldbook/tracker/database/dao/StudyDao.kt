@@ -182,8 +182,12 @@ class StudyDao {
                     }).toInt()
 
                     try {
+                        //TODO remove when we handle primary/secondary ids better
+                        val actualColumns = columns.toMutableList()
                         //insert observation unit attributes using columns parameter
-                        columns.forEach {
+                        if (e.primary_id !in columns) actualColumns += e.primary_id
+                        if (e.secondary_id !in columns) actualColumns += e.secondary_id
+                        actualColumns.forEach {
                             db.insert(ObservationUnitAttribute.tableName, null, contentValuesOf(
                                     "observation_unit_attribute_name" to it,
                                     Study.FK to rowid
@@ -223,11 +227,21 @@ class StudyDao {
             val primaryIndex = columns.indexOf(names.primary)
             val secondaryIndex = columns.indexOf(names.secondary)
 
+            //TODO remove when we handle primary/secondary ids better
+            //check if data size matches the columns size, on mismatch fill with dummy data
+            //mainly fixes issues with BrAPI when xtype/ytype and row/col values are not given
+            val actualData = if (data.size != columns.size) {
+                val tempData = data.toMutableList()
+                for (i in 0..(columns.size - data.size))
+                    tempData += "NA"
+                tempData
+            } else data
+
             val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
                     Study.FK to exp_id,
-                    "observation_unit_db_id" to data[uniqueIndex],
-                    "primary_id" to if (primaryIndex < 0) -1 else data[primaryIndex],
-                    "secondary_id" to if (secondaryIndex < 0) -1 else data[secondaryIndex]))
+                    "observation_unit_db_id" to actualData[uniqueIndex],
+                    "primary_id" to actualData[primaryIndex],
+                    "secondary_id" to actualData[secondaryIndex]))
 
             columns.forEachIndexed { index, it ->
 
@@ -237,7 +251,7 @@ class StudyDao {
                         Study.FK to exp_id,
                         ObservationUnit.FK to rowid,
                         ObservationUnitAttribute.FK to attrId,
-                        "observation_unit_value_name" to data[index]
+                        "observation_unit_value_name" to actualData[index]
                 ))
             }
 
