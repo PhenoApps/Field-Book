@@ -1,8 +1,8 @@
 <changelog>
     <release
         date="2021-07-28"
-        versionCode="500"
-        versionName="v5.0">
+        versionCode="501"
+        versionName="v5.0.1">
         <new>Major database overhaul</new>
         <new>BrAPI v2 support</new>
         <new>New GNSS trait</new>
