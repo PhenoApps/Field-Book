@@ -240,8 +240,8 @@ class StudyDao {
             val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
                     Study.FK to exp_id,
                     "observation_unit_db_id" to actualData[uniqueIndex],
-                    "primary_id" to actualData[primaryIndex],
-                    "secondary_id" to actualData[secondaryIndex]))
+                    "primary_id" to if (primaryIndex < 0) "NA" else actualData[primaryIndex],
+                    "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex]))
 
             columns.forEachIndexed { index, it ->
 
@@ -255,6 +255,29 @@ class StudyDao {
                 ))
             }
 
+            if (primaryIndex < 0) {
+
+                val attrId = ObservationUnitAttributeDao.getIdByName("Row")
+
+                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                    Study.FK to exp_id,
+                    ObservationUnit.FK to rowid,
+                    ObservationUnitAttribute.FK to attrId,
+                    "observation_unit_value_name" to "NA"
+                ))
+            }
+
+            if (secondaryIndex < 0) {
+
+                val attrId = ObservationUnitAttributeDao.getIdByName("Column")
+
+                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                    Study.FK to exp_id,
+                    ObservationUnit.FK to rowid,
+                    ObservationUnitAttribute.FK to attrId,
+                    "observation_unit_value_name" to "NA"
+                ))
+            }
         }
 
         private fun updateImportDate(db: SQLiteDatabase, exp_id: Int) {
