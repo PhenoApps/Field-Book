@@ -138,6 +138,12 @@ class ObservationUnitPropertyDao {
         } ?: emptyArray<String?>()
 
 
+        /**
+         * This function is used when database is checked on export.
+         * The traits array is used to determine which traits are exported.
+         * In the case of "all active traits" only the visible traits are given to this query.
+         * The final AND clause checks if the query's observation_variable_name exists in the list of traits.
+         */
         fun getExportDbData(uniqueName: String, fieldList: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
@@ -161,7 +167,8 @@ class ObservationUnitPropertyDao {
              $sObservationUnitPropertyViewName AS props, 
              ${ObservationVariable.tableName} AS vars
         WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
-            AND obs.value IS NOT NULL 
+            AND obs.value IS NOT NULL
+            AND vars.observation_variable_name in ${traits.map { "'$it'" }.joinToString(",", "(", ")")}
         
     """.trimIndent()
 
