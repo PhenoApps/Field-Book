@@ -1232,9 +1232,9 @@ public class DataHelper {
 
     }
 
-    public Observation getObservationByValue(String plotId, String parent, String value) {
+    public Observation getObservationByValue(String exp_id, String plotId, String parent, String value) {
 
-        return ObservationDao.Companion.getObservationByValue(plotId, parent, value);
+        return ObservationDao.Companion.getObservationByValue(exp_id, plotId, parent, value);
 
 //        Observation o = new Observation();
 //
@@ -1455,9 +1455,9 @@ public class DataHelper {
      * Helper function
      * v2.5
      */
-    public void deleteTraitByValue(String rid, String parent, String value) {
+    public void deleteTraitByValue(String expId, String rid, String parent, String value) {
 
-        ObservationDao.Companion.deleteTraitByValue(rid, parent, value);
+        ObservationDao.Companion.deleteTraitByValue(expId, rid, parent, value);
 
 //        try {
 //            db.delete(USER_TRAITS, "rid like ? and parent like ? and userValue = ?",
@@ -1484,9 +1484,9 @@ public class DataHelper {
      * Returns list of files associated with a specific plot
      */
 
-    public ArrayList<String> getPlotPhotos(String plot, String trait) {
+    public ArrayList<String> getPlotPhotos(String exp_id, String plot, String trait) {
 
-        return ObservationDao.Companion.getPlotPhotos(plot, trait);
+        return ObservationDao.Companion.getPlotPhotos(exp_id, plot, trait);
 
 //        try {
 //            //Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"}, "rid like ? and trait like ?", new String[]{plot, trait},

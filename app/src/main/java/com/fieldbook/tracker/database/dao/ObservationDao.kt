@@ -256,11 +256,11 @@ class ObservationDao {
         /**
          * Should trait be observation_field_book_format?
          */
-        fun getPlotPhotos(plot: String, trait: String): ArrayList<String> = withDatabase { db ->
+        fun getPlotPhotos(expId: String, plot: String, trait: String): ArrayList<String> = withDatabase { db ->
 
             ArrayList(db.query(Observation.tableName, arrayOf("value"),
-                    where = "${ObservationUnit.FK} = ? AND observation_variable_name LIKE ?",
-                    whereArgs = arrayOf(plot, trait)).toTable().map {
+                    where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_name LIKE ?",
+                    whereArgs = arrayOf(expId, plot, trait)).toTable().map {
                 it["value"] as String
             })
 
@@ -300,13 +300,13 @@ class ObservationDao {
             }
         }
 
-        fun getObservationByValue(plotId: String, parent: String, value: String): BrapiObservation? = withDatabase { db ->
+        fun getObservationByValue(expId: String, plotId: String, parent: String, value: String): BrapiObservation? = withDatabase { db ->
 
             BrapiObservation().apply {
                 db.query(Observation.tableName,
                         arrayOf("observation_db_id", "last_synced_time"),
-                        where = "${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND value LIKE ?",
-                        whereArgs = arrayOf(plotId, parent, value)).toFirst().let {
+                        where = "${Study.FK} = ? AND ${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND value LIKE ?",
+                        whereArgs = arrayOf(expId, plotId, parent, value)).toFirst().let {
                     dbId = getStringVal(it, "observation_db_id")
                     setLastSyncedTime(getStringVal(it,"last_synced_time"))
                 }
@@ -319,11 +319,11 @@ class ObservationDao {
                     arrayOf(id, rid, parent))
         }
 
-        fun deleteTraitByValue(rid: String, parent: String, value: String) = withDatabase { db ->
+        fun deleteTraitByValue(expId: String, rid: String, parent: String, value: String) = withDatabase { db ->
 
             db.delete(Observation.tableName,
-                    "${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND value = ?",
-                    arrayOf(rid, parent, value))
+                    "${Study.FK} = ? AND ${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND value = ?",
+                    arrayOf(expId, rid, parent, value))
         }
 
         /**
