@@ -143,6 +143,9 @@ class ObservationUnitPropertyDao {
          * The traits array is used to determine which traits are exported.
          * In the case of "all active traits" only the visible traits are given to this query.
          * The final AND clause checks if the query's observation_variable_name exists in the list of traits.
+         * Database format prints off one observation per row s.a
+         * "plot_id","column","plot","tray_row","tray_id","seed_id","seed_name","pedigree","trait","value","timestamp","person","location","number"
+         * "13RPN00001","1","1","1","13RPN_TRAY001","12GHT00001B","Kharkof","Kharkof","height","3","2021-08-05 11:52:45.379-05:00"," ","","2"
          */
         fun getExportDbData(uniqueName: String, fieldList: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
@@ -168,6 +171,7 @@ class ObservationUnitPropertyDao {
              ${ObservationVariable.tableName} AS vars
         WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
             AND obs.value IS NOT NULL
+            AND vars.observation_variable_name = obs.observation_variable_name
             AND vars.observation_variable_name in ${traits.map { "'$it'" }.joinToString(",", "(", ")")}
         
     """.trimIndent()
