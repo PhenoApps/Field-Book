@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -495,25 +496,41 @@ public class FieldEditorActivity extends AppCompatActivity {
         loadFile(fieldFile);
     }
 
+    /**
+     * The user selects between the columns in fieldFile to determine the primary/secondary/unique ids
+     * These ids are used to navigate between plots in the collect activity.
+     * Sanitization has to happen here to ensure no empty string column is selected.
+     * Also special characters are checked for and replaced here, if they exist a message is shown to the user.
+     * @param fieldFile contains the parsed input file which has columns
+     */
     private void loadFile(FieldFileObject.FieldFileBase fieldFile) {
 
         String[] importColumns = fieldFile.getColumns();
 
+        //only reserved word for now is id which is used in many queries
+        //other sqlite keywords are sanitized with a tick mark to make them an identifier
         String[] reservedNames = new String[]{"id"};
+
+        //replace specials and emptys and add them to the actual columns list to be displayed
+        ArrayList<String> actualColumns = new ArrayList<>();
 
         List<String> list = Arrays.asList(reservedNames);
 
-        //TODO causing crash
+        //define flag to let the user know characters were replaced at the end of the loop
         boolean hasSpecialCharacters = false;
         for (int i = 0; i < importColumns.length; i++) {
 
             String s = importColumns[i];
+            boolean added = false;
 
+            //replace the special characters, only add to the actual list if it is not empty
             if (DataHelper.hasSpecialChars(s)) {
 
                 hasSpecialCharacters = true;
+                added = true;
+                String replaced = DataHelper.replaceSpecialChars(s);
+                if (!replaced.isEmpty()) actualColumns.add(DataHelper.replaceSpecialChars(s));
 
-                importColumns[i] = DataHelper.replaceSpecialChars(s);
             }
 
             if (list.contains(s.toLowerCase())) {
@@ -522,6 +539,13 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                 return;
             }
+
+            if (!added) {
+
+                if (!s.isEmpty()) actualColumns.add(s);
+
+            }
+
         }
 
         if (hasSpecialCharacters) {
@@ -531,7 +555,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         }
 
-        importDialog(importColumns);
+        importDialog(actualColumns.toArray(new String[] {}));
     }
 
     private void importDialog(String[] columns) {

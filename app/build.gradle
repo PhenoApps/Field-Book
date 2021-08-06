@@ -26,8 +26,8 @@ android {
         applicationId "com.fieldbook.tracker"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode = 501
-        versionName = '5.0.1'
+        versionCode = 502
+        versionName = '5.0.2'
         multiDexEnabled true
     }
 
@@ -104,7 +104,7 @@ dependencies {
     implementation 'com.github.ByteHamster:SearchPreference:v2.0.0'
     implementation "com.github.skydoves:colorpickerpreference:2.0.4"
 
-    implementation "org.brapi:brapi-java-client:2.0-SNAPSHOT"
+    implementation "org.brapi:brapi-java-client:2.0.1"
     implementation 'net.openid:appauth:0.9.0'
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava' //google messed up some packages, this package is temporary until the issue is fixed (Feb 2021)
     
