@@ -158,31 +158,22 @@ class ObservationUnitPropertyDao {
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
-//        "select " + fields + ", traits.trait, user_traits.userValue, " +
-//                "user_traits.timeTaken, user_traits.person, user_traits.location, user_traits.rep" +
-//                " from user_traits, range, traits where " +
-//                "user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK +
-//                " and user_traits.parent = traits.trait and " +
-//                "user_traits.trait = traits.format and user_traits.userValue is not null and " + activeTraits;
-
                 val varSelectFields = arrayOf("observation_variable_name")
-                val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates")
+                val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
                 //val outputFields = fieldList + varSelectFields + obsSelectFields
                 val query = """
-        SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }} ${if (fieldList.isNotEmpty()) "," else " "} 
-            ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }} ${if (varSelectFields.isNotEmpty()) "," else " "}
-            ${obsSelectFields.joinToString { "obs.`$it` AS `$it`" }}
-        FROM ${Observation.tableName} AS obs, 
-             $sObservationUnitPropertyViewName AS props, 
-             ${ObservationVariable.tableName} AS vars
-        WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
-            AND obs.value IS NOT NULL
-            AND vars.observation_variable_name = obs.observation_variable_name
-            AND vars.observation_variable_name in ${traits.map { "'$it'" }.joinToString(",", "(", ")")}
-        
-    """.trimIndent()
-
-//        println(query)
+                    SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }} ${if (fieldList.isNotEmpty()) "," else " "} 
+                        ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }} ${if (varSelectFields.isNotEmpty()) "," else " "}
+                        ${obsSelectFields.joinToString { "obs.`$it` AS `$it`" }}
+                    FROM ${Observation.tableName} AS obs, 
+                         $sObservationUnitPropertyViewName AS props, 
+                         ${ObservationVariable.tableName} AS vars
+                    WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
+                        AND obs.value IS NOT NULL
+                        AND vars.observation_variable_name = obs.observation_variable_name
+                        AND vars.observation_variable_name in ${traits.map { "'$it'" }.joinToString(",", "(", ")")}
+                    
+                """.trimIndent()
 
                 val table = db.rawQuery(query, null).toTable()
 
@@ -194,7 +185,8 @@ class ObservationUnitPropertyDao {
                             "timeTaken" -> row["observation_time_stamp"]
                             "person" -> row["collector"]
                             "location" -> row["geoCoordinates"]
-                            else -> 2 //TODO: Trevor what do do with rep
+                            "rep" -> row["rep"]
+                            else -> String()
                         }
                     })
                 }
