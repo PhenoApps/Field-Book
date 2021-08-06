@@ -102,6 +102,8 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
     public void loadLayoutWork() {
 
+        String exp_id = Integer.toString(getPrefs().getInt("SelectedFieldExpId", 0));
+
         // Always set to null as default, then fill in with trait value
         photoLocation = new ArrayList<>();
         drawables = new ArrayList<>();
@@ -110,7 +112,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
         if (img.listFiles() != null) {
 
             //TODO causes crash
-            photoLocation = ConfigActivity.dt.getPlotPhotos(getCRange().plot_id, getCurrentTrait().getTrait());
+            photoLocation = ConfigActivity.dt.getPlotPhotos(exp_id, getCRange().plot_id, getCurrentTrait().getTrait());
 
             for (int i = 0; i < photoLocation.size(); i++) {
                 drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
@@ -258,17 +260,30 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
             newTraits.put(parent, value);
 
-            //Observation observation = ConfigActivity.dt.getObservation(getCRange().plot_id, parent);
-            Observation observation = ConfigActivity.dt.getObservationByValue(getCRange().plot_id, parent, value);
-
-            ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, parent, value);
-
             String exp_id = Integer.toString(getPrefs().getInt("SelectedFieldExpId", 0));
-            ConfigActivity.dt.insertUserTraits(getCRange().plot_id, parent, trait, newValue == null ? value : newValue, getPrefs().getString("FirstName", "") + " " + getPrefs().getString("LastName", ""), getPrefs().getString("Location", ""), "", exp_id, observation.getDbId(), observation.getLastSyncedTime()); //TODO add notes and exp_id
+
+            //Observation observation = ConfigActivity.dt.getObservation(getCRange().plot_id, parent);
+            Observation observation = ConfigActivity.dt.getObservationByValue(exp_id, getCRange().plot_id, parent, value);
+
+            ConfigActivity.dt.deleteTraitByValue(exp_id, getCRange().plot_id, parent, value);
+
+            ConfigActivity.dt.insertUserTraits(getCRange().plot_id,
+                    parent,
+                    trait,
+                    newValue == null ? value : newValue,
+                    getPrefs().getString("FirstName", "") + " " + getPrefs().getString("LastName", ""),
+                    getPrefs().getString("Location", ""),
+                    "",
+                    exp_id,
+                    observation.getDbId(),
+                    observation.getLastSyncedTime()); //TODO add notes and exp_id
         }
     }
 
     private void deletePhotoWarning(final Boolean brapiDelete, final Map newTraits) {
+
+        String exp_id = Integer.toString(getPrefs().getInt("SelectedFieldExpId", 0));
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
         builder.setTitle(getContext().getString(R.string.dialog_warning));
@@ -301,7 +316,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                         //ConfigActivity.dt.updateTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), item, "NA");
                         loadLayout();
                     } else {
-                        ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), item);
+                        ConfigActivity.dt.deleteTraitByValue(exp_id, getCRange().plot_id, getCurrentTrait().getTrait(), item);
                     }
 
                     // Only do a purge by trait when there are no more images left
@@ -315,7 +330,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                     photo.setAdapter(photoAdapter);
                 } else {
                     // If an NA exists, delete it
-                    ConfigActivity.dt.deleteTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), "NA");
+                    ConfigActivity.dt.deleteTraitByValue(exp_id, getCRange().plot_id, getCurrentTrait().getTrait(), "NA");
                     ArrayList<Drawable> emptyList = new ArrayList<>();
 
                     photoAdapter = new GalleryImageAdapter((Activity) getContext(), emptyList);
