@@ -71,11 +71,17 @@ class ObservationUnitPropertyDao {
             plot_id = ""
         }
 
+        /**
+         * This function's parameter trait is not always a trait and can be an observation unit property column.
+         * For example this is used when selecting the top-left drop down in the collect activity.
+         */
         fun getDropDownRange(uniqueName: String, trait: String, plotId: String): Array<String>? = withDatabase { db ->
 
+            //added sanitation to the uniqueName in case it has a space
+            val unique = if ("`" in uniqueName) uniqueName else "`$uniqueName`"
             db.query(sObservationUnitPropertyViewName,
                     select = arrayOf(trait),
-                    where = "$uniqueName LIKE ?",
+                    where = "$unique LIKE ?",
                     whereArgs = arrayOf(plotId)).toTable().map {
                 it[trait].toString()
             }.toTypedArray()
