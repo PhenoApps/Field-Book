@@ -1,5 +1,14 @@
 <changelog>
     <release
+        date="2021-08-06"
+        versionCode="502"
+        versionName="v5.0.2">
+        <bugfix>Fixed several bugs with database export format</bugfix>
+        <bugfix>Fixed several bugs with BrAPI field importing</bugfix>
+        <bugfix>Updated GNSS trait icon</bugfix>
+    </release>
+
+    <release
         date="2021-07-28"
         versionCode="501"
         versionName="v5.0.1">
