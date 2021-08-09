@@ -71,11 +71,17 @@ class ObservationUnitPropertyDao {
             plot_id = ""
         }
 
+        /**
+         * This function's parameter trait is not always a trait and can be an observation unit property column.
+         * For example this is used when selecting the top-left drop down in the collect activity.
+         */
         fun getDropDownRange(uniqueName: String, trait: String, plotId: String): Array<String>? = withDatabase { db ->
 
+            //added sanitation to the uniqueName in case it has a space
+            val unique = if ("`" in uniqueName) uniqueName else "`$uniqueName`"
             db.query(sObservationUnitPropertyViewName,
                     select = arrayOf(trait),
-                    where = "$uniqueName LIKE ?",
+                    where = "$unique LIKE ?",
                     whereArgs = arrayOf(plotId)).toTable().map {
                 it[trait].toString()
             }.toTypedArray()
@@ -138,6 +144,15 @@ class ObservationUnitPropertyDao {
         } ?: emptyArray<String?>()
 
 
+        /**
+         * This function is used when database is checked on export.
+         * The traits array is used to determine which traits are exported.
+         * In the case of "all active traits" only the visible traits are given to this query.
+         * The final AND clause checks if the query's observation_variable_name exists in the list of traits.
+         * Database format prints off one observation per row s.a
+         * "plot_id","column","plot","tray_row","tray_id","seed_id","seed_name","pedigree","trait","value","timestamp","person","location","number"
+         * "13RPN00001","1","1","1","13RPN_TRAY001","12GHT00001B","Kharkof","Kharkof","height","3","2021-08-05 11:52:45.379-05:00"," ","","2"
+         */
         fun getExportDbData(uniqueName: String, fieldList: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
@@ -161,7 +176,9 @@ class ObservationUnitPropertyDao {
              $sObservationUnitPropertyViewName AS props, 
              ${ObservationVariable.tableName} AS vars
         WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
-            AND obs.value IS NOT NULL 
+            AND obs.value IS NOT NULL
+            AND vars.observation_variable_name = obs.observation_variable_name
+            AND vars.observation_variable_name in ${traits.map { "'$it'" }.joinToString(",", "(", ")")}
         
     """.trimIndent()
 

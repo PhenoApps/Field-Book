@@ -135,7 +135,6 @@ public class BrAPIServiceV2 implements BrAPIService{
 
     private BrAPIImage mapImage(FieldBookImage image) {
         BrAPIImage request = new BrAPIImage();
-        request.setAdditionalInfo(image.getAdditionalInfo());
         request.setCopyright(image.getCopyright());
         request.setDescription(image.getDescription());
         request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
@@ -154,7 +153,6 @@ public class BrAPIServiceV2 implements BrAPIService{
 
     private FieldBookImage mapToImage(BrAPIImage image) {
         FieldBookImage request = new FieldBookImage();
-        request.setAdditionalInfo(image.getAdditionalInfo());
         request.setDescription(image.getDescription());
         request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
         request.setFileName(image.getImageFileName());
