@@ -71,22 +71,18 @@ fun Cursor.toFirst(): Map<String, Any?> = if (moveToFirst()) {
 
     val row = mutableMapOf<String, Any?>()
 
-    columnNames.forEach {
-        val index = getColumnIndexOrThrow(it)
-        if (index > -1) {
-            row[it] = when (getType(index)) {
-                //null field type
-                0 -> null
-                //int field type
-                1 -> getIntOrNull(index)
-                //string field type
-                //blob field type 3
-                else -> {
-                    getStringOrNull(index) ?: getBlobOrNull(index).toString()
-                }
+    columnNames.forEachIndexed { index, _ ->
+        row[getColumnName(index)] = when (getType(index)) {
+            //null field type
+            0 -> null
+            //int field type
+            1 -> getIntOrNull(index)
+            //string field type
+            //blob field type 3
+            else -> {
+                getStringOrNull(index) ?: getBlobOrNull(index).toString()
             }
         }
-
     }
 
     close()
