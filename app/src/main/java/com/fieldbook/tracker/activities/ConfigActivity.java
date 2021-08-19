@@ -901,10 +901,10 @@ public class ConfigActivity extends AppCompatActivity {
                 return (0);
             }
 
-            if (exportTraits.length > 64) {
-                tooManyTraits = true;
-                return (0);
-            }
+//            if (exportTraits.length > 64) {
+//                tooManyTraits = true;
+//                return (0);
+//            }
 
             if (checkDbBool) {
                 if (exportData.getCount() > 0) {
