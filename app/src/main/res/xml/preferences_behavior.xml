@@ -61,4 +61,34 @@
         android:summary="@string/preferences_general_flip_flop_arrows_description"
         android:title="@string/preferences_general_flip_flop_arrows" />
 
+    <PreferenceCategory android:title="@string/pref_behavior_geonav_category_title">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_explore_black_24dp"
+            android:key="com.fieldbook.tracker.geonav.ENABLE_GEONAV"
+            android:summary="@string/pref_geonav_enable_summary"
+            android:title="@string/pref_geonav_enable_title" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/pref_geonav_search_angles"
+            android:entryValues="@array/pref_geonav_search_angle_values"
+            android:icon="@drawable/ic_compass_calibration_black_24dp"
+            android:key="com.fieldbook.tracker.geonav.SEARCH_ANGLE"
+            android:summary="@string/pref_geonav_search_angle_summary"
+            android:title="@string/pref_geonav_search_angle_title" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/pref_geonav_update_intervals"
+            android:entryValues="@array/pref_geonav_update_interval_values"
+            android:icon="@drawable/ic_hourglass_empty_black_24dp"
+            android:key="com.fieldbook.tracker.geonav.UPDATE_INTERVAL"
+            android:summary="@string/pref_geonav_update_interval_summary"
+            android:title="@string/pref_geonav_update_interval_title" />
+
+        <Preference android:title="@string/pref_geonav_pair"
+            android:icon="@drawable/ic_bluetooth_black_24dp"
+            android:key="com.fieldbook.tracker.geonav.PAIR_BLUETOOTH"/>
+    </PreferenceCategory>
 </PreferenceScreen>
