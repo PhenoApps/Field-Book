@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.hardware.GeomagneticField;
 
 public class GPSTracker extends Service implements LocationListener {
 
@@ -28,6 +29,8 @@ public class GPSTracker extends Service implements LocationListener {
     Location location; // location
     double latitude; // latitude
     double longitude; // longitude
+    double altitude;
+    float declination;
 
     public GPSTracker(Context context) {
         this.mContext = context;
@@ -114,6 +117,33 @@ public class GPSTracker extends Service implements LocationListener {
         }
 
         return longitude;
+    }
+
+    /**
+     * Function to get the alittude
+     */
+    public double getAltitude() {
+        if (location != null) {
+            altitude = location.getAltitude();
+        }
+
+        return altitude;
+    }
+
+    /**
+     * Function to get the declination.
+     * Angle between true north and magnetic north
+     */
+    public float getDeclination() {
+        if (location != null) {
+            declination = new GeomagneticField(
+                (float) getLatitude(),
+                (float) getLongitude(),
+                (float) getAltitude(),
+                System.currentTimeMillis()).getDeclination();
+        }
+
+        return declination;
     }
 
     /**

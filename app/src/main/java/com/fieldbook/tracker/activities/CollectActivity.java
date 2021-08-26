@@ -8,6 +8,13 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
+import android.hardware.GeomagneticField;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,9 +49,15 @@ import android.view.MenuInflater;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.core.view.MenuItemCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
+import com.fieldbook.tracker.database.dao.ObservationDao;
+import com.fieldbook.tracker.database.dao.ObservationUnitDao;
+import com.fieldbook.tracker.database.models.ObservationModel;
+import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.LayoutCollections;
@@ -58,21 +71,30 @@ import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.GeodeticUtils;
+import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.Utils;
 
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import kotlin.Pair;
 
 import static com.fieldbook.tracker.activities.ConfigActivity.dt;
 
@@ -81,7 +103,7 @@ import static com.fieldbook.tracker.activities.ConfigActivity.dt;
  */
 
 @SuppressLint("ClickableViewAccessibility")
-public class CollectActivity extends AppCompatActivity {
+public class CollectActivity extends AppCompatActivity implements SensorEventListener {
 
     public static boolean searchReload;
     public static String searchRange;
@@ -90,6 +112,7 @@ public class CollectActivity extends AppCompatActivity {
     public static boolean partialReload;
     public static Activity thisActivity;
     public static String TAG = "Field Book";
+    public static String GEOTAG = "GeoNav";
 
     ImageButton deleteValue;
     ImageButton missingValue;
@@ -138,6 +161,19 @@ public class CollectActivity extends AppCompatActivity {
             }
         }
     };
+
+    /**
+     * GeoNav sensors and variables
+     */
+    private Boolean mGeoNavActivated = false;
+    private float[] mGravity;
+    private float[] mGeomagneticField;
+    private LocationManager mLocationManager;
+    private Float mDeclination = null;
+    private GPSTracker mGpsTracker;
+    private Double mAzimuth = null;
+    private Timer mScheduler = null;
+    private boolean mNotWarnedInterference = false;
 
     private TextWatcher cvText;
     private InputMethodManager imm;
@@ -511,6 +547,8 @@ public class CollectActivity extends AppCompatActivity {
 
         updateLastOpenedTime();
 
+        stopGeoNav();
+
         super.onPause();
     }
 
@@ -732,6 +770,12 @@ public class CollectActivity extends AppCompatActivity {
         systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
         systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
 
+        //added in geonav 310 only make goenav switch visible if preference is set
+        MenuItem geoNavEnable = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
+        geoNavEnable.setVisible(ep.getBoolean(GeneralKeys.ENABLE_GEONAV, false));
+//        View actionView = MenuItemCompat.getActionView(geoNavEnable);
+//        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
+
         customizeToolbarIcons();
 
         lockData(dataLocked);
@@ -843,8 +887,229 @@ public class CollectActivity extends AppCompatActivity {
             case android.R.id.home:
                 finish();
                 break;
+            case R.id.action_act_collect_geonav_sw:
+
+                Log.d(GEOTAG, "Menu item clicked.");
+
+                mGeoNavActivated = !mGeoNavActivated;
+                if (mGeoNavActivated) startGeoNav();
+                else stopGeoNav();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     *
+     */
+    private void startGeoNav() {
+
+        Log.d(GEOTAG, "Starting GeoNav search.");
+
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+        if (sensorManager != null) {
+
+            Log.d(GEOTAG, "Sensor manager registering.");
+
+            sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_UI);
+            sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_UI);
+
+            //todo check preferences for pair BT rover, if non paired use gps tracker
+
+            String interval = ep.getString(GeneralKeys.UPDATE_INTERVAL, "0");
+            long period = 1000L;
+            switch (interval) {
+                case "0": {
+                    period = 1000L;
+                    break;
+                }
+                case "1": {
+                    period = 5000L;
+                    break;
+                }
+                case "2": {
+                    period = 10000L;
+                    break;
+                }
+            }
+
+            Log.d(GEOTAG, "Geo Preference chose interval: " + period);
+
+            mGpsTracker = new GPSTracker(this);
+
+            mScheduler = new Timer();
+
+            mScheduler.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+
+                    runImpactZoneAlgorithm();
+                }
+            }, 0, period);
+
+        } else {
+
+            Log.d(GEOTAG, "Sensor manager unsuccessfully registered.");
+
+            Toast.makeText(this, R.string.activity_collect_sensor_manager_failed,
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void runImpactZoneAlgorithm() {
+
+        String thetaPref = ep.getString(GeneralKeys.SEARCH_ANGLE, "0");
+        double theta = 22.5;
+        switch (thetaPref) {
+            case "0": {
+                theta = 22.5;
+                break;
+            }
+            case "1": {
+                theta = 45.0;
+                break;
+            }
+            case "2": {
+                theta = 67.5;
+                break;
+            }
+            case "3": {
+                theta = 90.0;
+                break;
+            }
+        }
+
+        Log.d(GEOTAG, "Impact Zone angle: " + theta);
+
+        if (mGpsTracker != null && mAzimuth != null && mGpsTracker.canGetLocation()) {
+
+            Location start = new Location("start location");
+            start.setLongitude(mGpsTracker.getLongitude());
+            start.setLatitude(mGpsTracker.getLatitude());
+
+            String studyId = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+
+            ObservationModel[] obs = ObservationDao.Companion.getAll(studyId);
+
+            ArrayList<ObservationModel> coordinates = new ArrayList<>();
+
+            for (ObservationModel o : obs) {
+                String format = o.getObservation_variable_field_book_format();
+                String geos = o.getGeo_coordinates();
+                if ((format != null && (format.equals("location") || format.equals("gnss")))
+                        || (geos != null && !geos.isEmpty())) {
+                    coordinates.add(o);
+                }
+            }
+
+            long toc = System.currentTimeMillis();
+            Log.d(GEOTAG, "Impact Zone searching " + coordinates.size() + " locations.");
+
+            Pair<ObservationModel, Double> target = GeodeticUtils.Companion
+                    .impactZoneSearch(start, coordinates, mAzimuth, theta);
+
+            long tic = System.currentTimeMillis();
+
+            Log.d(GEOTAG, "Impact search took: " + (tic-toc)*10e-9);
+
+            if (target.getFirst() != null) {
+
+                String id = target.getFirst().getObservation_unit_id();
+
+                thisActivity.runOnUiThread(() -> {
+                    Toast.makeText(this, id, Toast.LENGTH_SHORT).show();
+                });
+
+                Log.d(TAG, "Found target " + target.getFirst().getObservation_unit_id());
+            }
+
+        } else {
+
+            Log.d(TAG, "Waiting for location...");
+        }
+    }
+
+    private void stopGeoNav() {
+
+        ((SensorManager) getSystemService(SENSOR_SERVICE)).unregisterListener(this);
+
+        if (mScheduler != null) {
+            mScheduler.purge();
+            mScheduler.cancel();
+            mScheduler = null;
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        if (event != null && event.sensor != null) {
+
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                mGravity = event.values;
+            } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                mGeomagneticField = event.values;
+            }
+
+            if (mGravity != null && mGeomagneticField != null) {
+
+                double teslas = calculateNoise(mGeomagneticField);
+
+                if ((teslas < 25 || teslas > 65) && mNotWarnedInterference) {
+                    mNotWarnedInterference = true;
+                    Toast.makeText(this, R.string.activity_collect_geomagnetic_noise_detected,
+                            Toast.LENGTH_SHORT).show();
+                }
+
+                float[] R = new float[9];
+                float[] I = new float[9];
+
+                if (SensorManager.getRotationMatrix(R, I, mGravity, mGeomagneticField)) {
+
+                    float[] orientation = new float[3];
+
+                    SensorManager.getOrientation(R, orientation);
+
+                    /*
+                     * values[0]: Azimuth, angle of rotation about the -z axis.
+                     * This value represents the angle between the device's y axis and the magnetic north pole.
+                     * When facing north, this angle is 0, when facing south, this angle is π.
+                     * Likewise, when facing east, this angle is π/2, and when facing west, this angle is -π/2.
+                     * The range of values is -π to π.
+                     */
+                    mAzimuth = (orientation[0] * 360 / (2 * Math.PI));
+
+                    if (mGpsTracker != null) {
+
+                        mDeclination = mGpsTracker.getDeclination();
+
+                    }
+
+                    //if the declination has been found, correct the direction
+                    if (mDeclination != null) {
+
+                        mAzimuth += mDeclination.intValue();
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    private Double calculateNoise(float[] field) {
+
+        double sum = 0.0;
+
+        for (float xyz : field) {
+            sum += Math.pow(xyz, 2);
+        }
+
+        return Math.sqrt(sum);
     }
 
     void lockData(boolean lock) {
