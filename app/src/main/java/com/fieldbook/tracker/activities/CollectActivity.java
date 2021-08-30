@@ -1,9 +1,13 @@
 package com.fieldbook.tracker.activities;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;import android.content.Context;
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
@@ -46,10 +50,13 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.view.MenuItemCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
@@ -58,6 +65,9 @@ import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.location.GPSTracker;
+import com.fieldbook.tracker.location.gnss.ConnectThread;
+import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver;
+import com.fieldbook.tracker.location.gnss.NmeaParser;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.LayoutCollections;
@@ -82,6 +92,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.jetbrains.annotations.NotNull;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
@@ -97,6 +108,7 @@ import java.util.TimerTask;
 import kotlin.Pair;
 
 import static com.fieldbook.tracker.activities.ConfigActivity.dt;
+import static com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.ACTION_BROADCAST_GNSS;
 
 /**
  * All main screen logic resides here
@@ -173,7 +185,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private GPSTracker mGpsTracker;
     private Double mAzimuth = null;
     private Timer mScheduler = null;
-    private boolean mNotWarnedInterference = false;
+    private boolean mNotWarnedInterference = true;
+    private LocalBroadcastManager mLocalBroadcastManager = null;
+    private ConnectThread mConnectThread = null;
+    private Location mExternalLocation = null;
 
     private TextWatcher cvText;
     private InputMethodManager imm;
@@ -214,6 +229,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         ConfigActivity.dt.open();
 
         loadScreen();
+
+        setupLocalBroadcastManager();
     }
 
     private void initCurrentVals() {
@@ -900,7 +917,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     }
 
     /**
-     *
+     * Called when the toolbar enable geonav icon is set to true.
+     * Begins listening for sensor events to obtain an azimuth for the user.
+     * Starts a timer (with interval defined in the preferences) that runs the IZ algorithm.
      */
     private void startGeoNav() {
 
@@ -915,8 +934,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_UI);
             sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_UI);
 
-            //todo check preferences for pair BT rover, if non paired use gps tracker
-
+            //set update interval from the preferences can be 1s, 5s or 10s
             String interval = ep.getString(GeneralKeys.UPDATE_INTERVAL, "0");
             long period = 1000L;
             switch (interval) {
@@ -936,15 +954,36 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             Log.d(GEOTAG, "Geo Preference chose interval: " + period);
 
-            mGpsTracker = new GPSTracker(this);
+            //find the mac address of the device, if not found then start the internal GPS
+            String address = ep.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "");
+            String internalGps = getString(R.string.pref_behavior_geonav_internal_gps_choice);
+            boolean internal = true;
 
+            if (address == null || address.isEmpty() || address.equals(internalGps)) {
+
+                mGpsTracker = new GPSTracker(this);
+
+            } else {
+
+                BluetoothDevice device = getDeviceByAddress(address);
+
+                if (device != null) {
+
+                    setupCommunicationsUi(device);
+
+                }
+
+                internal = false;
+            }
+
+            //start the timer and schedule the IZ algorithm
             mScheduler = new Timer();
 
+            final boolean internalFlag = internal;
             mScheduler.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-
-                    runImpactZoneAlgorithm();
+                    runImpactZoneAlgorithm(internalFlag);
                 }
             }, 0, period);
 
@@ -957,8 +996,142 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
-    private void runImpactZoneAlgorithm() {
+    /**
+     * This handler is used within the connect thread to broadcast messages.
+     */
+    private final Handler mHandler = new Handler(msg -> {
 
+        String nmea = (String) msg.obj;
+
+        if (nmea != null) {
+
+            if (msg.what == GNSSResponseReceiver.MESSAGE_OUTPUT_CODE) {
+
+                if (mLocalBroadcastManager != null) {
+
+                    Intent broadcastNmea = new Intent(ACTION_BROADCAST_GNSS);
+                    broadcastNmea.putExtra(GNSSResponseReceiver.MESSAGE_STRING_EXTRA_KEY, nmea);
+
+                    mLocalBroadcastManager.sendBroadcast(broadcastNmea);
+                }
+
+            }
+
+        } else return false;
+
+        return true;
+    });
+
+    /**
+     * A simple search function to find the bluetooth device correlated to the given address.
+     * @param address the mac address that belongs to a given paired device
+     * @return the paired device, could be null if the address is not in the paired list
+     */
+    @Nullable
+    private BluetoothDevice getDeviceByAddress(String address) {
+
+        BluetoothDevice device = null;
+
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (adapter.isEnabled()) {
+
+            Set<BluetoothDevice> paired = adapter.getBondedDevices();
+            if (!paired.isEmpty()) {
+
+                for (BluetoothDevice d : paired) {
+
+                    if (d.getAddress().equals(address)) {
+
+                        device = d;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        return device;
+    }
+
+    /**
+     * Starts the connect thread which messages the LBM with nmea messages.
+     * @param device the paired device that has been chosen in the preferences.
+     */
+    private void setupCommunicationsUi(BluetoothDevice device) {
+
+        mConnectThread = new ConnectThread(device, mHandler);
+
+        mConnectThread.start();
+
+    }
+
+    /**
+     * When an external gps unit is used, a local bm must be setup to
+     * communicate between the activity and the connect thread.
+     */
+    private void setupLocalBroadcastManager() {
+
+        //initialize lbm and create a filter to broadcast nmea strings
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_BROADCAST_GNSS);
+
+        /*
+         * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
+         * The parser parameter is a model for the parsed message, and is used to populate the
+         * trait layout UI.
+         */
+        mLocalBroadcastManager.registerReceiver(new GNSSResponseReceiver() {
+            @Override
+            public void onGNSSParsed$app_debug(@NotNull NmeaParser parser) {
+
+                String lat = GeodeticUtils.Companion.truncateFixQuality(parser.getLatitude(), parser.getFix());
+                String lng = GeodeticUtils.Companion.truncateFixQuality(parser.getLongitude(), parser.getFix());
+                String alt = parser.getAltitude();
+                int altLength = alt.length();
+                alt = alt.substring(0, altLength-1); //drop the "M"
+
+                mExternalLocation = new Location("GeoNav Rover");
+
+                //initialize the double values, attempt to parse the strings, if impossible then don't update the coordinate.
+                double latValue = Double.NaN;
+                double lngValue = Double.NaN;
+                double altValue = Double.NaN;
+                try {
+
+                    latValue = Double.parseDouble(lat);
+                    lngValue = Double.parseDouble(lng);
+                    altValue = Double.parseDouble(alt);
+
+                } catch (NumberFormatException nfe) {
+
+                    nfe.printStackTrace();
+                }
+
+                if (!Double.isNaN(latValue) && !Double.isNaN(lngValue)) {
+
+                    mExternalLocation.setLatitude(latValue);
+                    mExternalLocation.setLongitude(lngValue);
+                    mExternalLocation.setAltitude(altValue);
+                }
+
+            }
+        }, filter);
+    }
+
+    /**
+     * This function is called periodically based on preferences, if the geonav enable
+     * switch is true in the toolbar. The function takes a parameter to determine whether
+     * the internal or an external gps is used. The internal gps uses the GPSTracker class,
+     * while the external GPS location is populated with NMEA data parsed from a communications
+     * thread with a paired bluetooth device (chosen in the Settings under Behavior/GeoNav).
+     * @param internal the flag determining what gps data to use
+     */
+    private void runImpactZoneAlgorithm(boolean internal) {
+
+        //the angle of the IZ algorithm to use, see Geodetic util class for more details
         String thetaPref = ep.getString(GeneralKeys.SEARCH_ANGLE, "0");
         double theta = 22.5;
         switch (thetaPref) {
@@ -982,18 +1155,27 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         Log.d(GEOTAG, "Impact Zone angle: " + theta);
 
-        if (mGpsTracker != null && mAzimuth != null && mGpsTracker.canGetLocation()) {
+        //user must have a valid pointing direction before attempting the IZ
+        if (mAzimuth != null) {
 
+            //initialize the start position and fill with external or internal GPS coordinates
             Location start = new Location("start location");
-            start.setLongitude(mGpsTracker.getLongitude());
-            start.setLatitude(mGpsTracker.getLatitude());
+            if (internal && mGpsTracker != null && mGpsTracker.canGetLocation()) {
+                start.setLongitude(mGpsTracker.getLongitude());
+                start.setLatitude(mGpsTracker.getLatitude());
+            } else if (!internal) {
+                start = mExternalLocation;
+            }
 
+            //get current field id
             String studyId = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
+            //find all observations within the field
             ObservationModel[] obs = ObservationDao.Companion.getAll(studyId);
 
+            //TODO search over observation_units geo_coordinates column
+            //find all plots with location or gnss formatted data
             ArrayList<ObservationModel> coordinates = new ArrayList<>();
-
             for (ObservationModel o : obs) {
                 String format = o.getObservation_variable_field_book_format();
                 String geos = o.getGeo_coordinates();
@@ -1003,25 +1185,39 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 }
             }
 
+            //run the algorithm and time how long it takes
             long toc = System.currentTimeMillis();
             Log.d(GEOTAG, "Impact Zone searching " + coordinates.size() + " locations.");
 
-            Pair<ObservationModel, Double> target = GeodeticUtils.Companion
-                    .impactZoneSearch(start, coordinates, mAzimuth, theta);
+            if (start != null) {
 
-            long tic = System.currentTimeMillis();
+                Pair<ObservationModel, Double> target = GeodeticUtils.Companion
+                        .impactZoneSearch(start, coordinates, mAzimuth, theta);
+                long tic = System.currentTimeMillis();
 
-            Log.d(GEOTAG, "Impact search took: " + (tic-toc)*10e-9);
+                Log.d(GEOTAG, "Impact search took: " + (tic-toc)*10e-9);
 
-            if (target.getFirst() != null) {
+                //if we received a result then show it to the user, create a button to navigate to the plot
+                if (target.getFirst() != null) {
 
-                String id = target.getFirst().getObservation_unit_id();
+                    String id = target.getFirst().getObservation_unit_id();
 
-                thisActivity.runOnUiThread(() -> {
-                    Toast.makeText(this, id, Toast.LENGTH_SHORT).show();
-                });
+                    thisActivity.runOnUiThread(() -> {
 
-                Log.d(TAG, "Found target " + target.getFirst().getObservation_unit_id());
+                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.layout_main),
+                                id, Snackbar.LENGTH_LONG);
+                        mySnackbar.setAction(R.string.activity_collect_geonav_navigate, (view) -> {
+
+                            //when navigate button is pressed use rangeBox to go to the plot id
+                            moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
+
+                        });
+
+                        mySnackbar.show();
+                    });
+
+                    Log.d(TAG, "Found target " + target.getFirst().getObservation_unit_id());
+                }
             }
 
         } else {
@@ -1030,6 +1226,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
+    /**
+     * Called when the toolbar GeoNav Enable icon is switched to off, or the activity is paused.
+     * Simply unlistens to the sensor manager and stops the geonav timer.
+     */
     private void stopGeoNav() {
 
         ((SensorManager) getSystemService(SENSOR_SERVICE)).unregisterListener(this);
@@ -1041,6 +1241,15 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
+    /**
+     * Sensor data listener for the collect activity.
+     * This is used to find the direction the user is facing.
+     * It is possible that the sensors are experiencing nosie and the hardware should be calibrated.
+     * TODO: add calibration image on first event or when noise is detected.
+     * For Android hardware it is necessary to calibrate before the first event should be accepted.
+     * A global flag mNotWarnedInterference is used to defer the interference notification if already seen.
+     * @param event the sensor event, could be magnetic or accelerometer
+     */
     @Override
     public void onSensorChanged(SensorEvent event) {
 
@@ -1057,7 +1266,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 double teslas = calculateNoise(mGeomagneticField);
 
                 if ((teslas < 25 || teslas > 65) && mNotWarnedInterference) {
-                    mNotWarnedInterference = true;
+                    mNotWarnedInterference = false;
                     Toast.makeText(this, R.string.activity_collect_geomagnetic_noise_detected,
                             Toast.LENGTH_SHORT).show();
                 }
@@ -1084,6 +1293,13 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                         mDeclination = mGpsTracker.getDeclination();
 
+                    } else if (mExternalLocation != null) {
+
+                        mDeclination = new GeomagneticField(
+                                (float) mExternalLocation.getLatitude(),
+                                (float) mExternalLocation.getLongitude(),
+                                (float) mExternalLocation.getAltitude(),
+                                System.currentTimeMillis()).getDeclination();
                     }
 
                     //if the declination has been found, correct the direction
@@ -1101,6 +1317,13 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
     }
 
+    /**
+     * Aggregates the vectors of the field array to create a constant.
+     * This output is used in a threshold to determine whether the geomagnetic field
+     * is experiencing noise.
+     * @param field the geomagnetic vectors x, y, z
+     * @return the square root of the summation of all squared vectors
+     */
     private Double calculateNoise(float[] field) {
 
         double sum = 0.0;

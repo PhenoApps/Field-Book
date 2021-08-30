@@ -49,7 +49,7 @@
     <item
         android:id="@+id/action_act_collect_geonav_sw"
         android:icon="@drawable/ic_explore_black_24dp"
-        app:showAsAction="always"
-        android:title=""/>
+        app:showAsAction="ifRoom"
+        android:title="@string/menu_collect_start_geo_nav_title"/>
 </menu>
 

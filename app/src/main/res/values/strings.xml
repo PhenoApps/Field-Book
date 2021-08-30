@@ -610,4 +610,7 @@
     <string name="activity_collect_sensor_manager_failed">Failed to start sensor manager.</string>
     <string name="activity_collect_geomagnetic_noise_detected">Interference detected, the compass might not be accurate.</string>
     <string name="activity_collect_geonav_starting">Starting GeoNav search.</string>
+    <string name="pref_behavior_geonav_internal_gps_choice">Internal GPS</string>
+    <string name="activity_collect_geonav_navigate">Navigate</string>
+    <string name="menu_collect_start_geo_nav_title">Start GeoNav</string>
 </resources>
