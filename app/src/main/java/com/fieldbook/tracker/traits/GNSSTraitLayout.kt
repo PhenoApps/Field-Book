@@ -146,14 +146,30 @@ class GNSSTraitLayout : BaseTraitLayout {
     //    "name": "Dinagat Islands"
     //  }
     //}
-    data class Coordinates(val latitude: String, val longitude: String)
-    data class Geometry(val type: String = "Point", val coordinates: Coordinates)
+    data class Geometry(val type: String = "Point", val coordinates: Array<String>) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Geometry
+
+            if (type != other.type) return false
+            if (!coordinates.contentEquals(other.coordinates)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = type.hashCode()
+            result = 31 * result + coordinates.contentHashCode()
+            return result
+        }
+    }
+
     data class GeoJSON(val type: String = "Feature", val geometry: Geometry, val properties: Map<String, String>? = null) {
         fun toJson() = JSONObject(mapOf("type" to this.type,
                 "geometry" to mapOf("type" to this.geometry.type,
-                        "coordinates" to with(this.geometry.coordinates) {
-                            arrayOf(longitude, latitude)
-                        },
+                        "coordinates" to this.geometry.coordinates,
                         "properties" to properties
                 )))
     }
@@ -176,7 +192,7 @@ class GNSSTraitLayout : BaseTraitLayout {
 
             //geo json object : elevation (stored in obs. units, used in navigation)
             //geo json has properties map for additional info
-            val geoJson = GeoJSON(geometry = Geometry(coordinates = Coordinates(latitude, longitude)),
+            val geoJson = GeoJSON(geometry = Geometry(coordinates = arrayOf(latitude, longitude)),
                     properties = mapOf("altitude" to elevation))
 
             with(ObservationUnitDao.getAll(studyDbId.toInt()).first { it.observation_unit_db_id == cRange.plot_id }) {

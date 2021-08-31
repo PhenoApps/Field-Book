@@ -66,6 +66,7 @@ public class GeneralKeys {
     public static final String UPDATE_INTERVAL                      = GEONAV_PREFIX + "UPDATE_INTERVAL";
     public static final String PAIR_BLUETOOTH                       = GEONAV_PREFIX + "PAIR_BLUETOOTH";
     public static final String PAIRED_DEVICE_ADDRESS                = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS";
+    public static final String GEONAV_AUTO                          = GEONAV_PREFIX + "GEONAV_AUTO";
     // @formatter:on
 
     private GeneralKeys() {

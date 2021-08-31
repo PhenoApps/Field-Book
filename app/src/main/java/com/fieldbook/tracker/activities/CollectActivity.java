@@ -230,7 +230,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         loadScreen();
 
-        setupLocalBroadcastManager();
     }
 
     private void initCurrentVals() {
@@ -576,6 +575,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             rangeBox.saveLastPlot();
         }
 
+        stopGeoNav();
+
         super.onDestroy();
     }
 
@@ -633,6 +634,15 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             if (rangeID != null) {
                 moveToSearch("search", rangeID, searchRange, searchPlot, null, -1);
             }
+        }
+
+        setupLocalBroadcastManager();
+
+        ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
+
+        if (ep.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+
+            startGeoNav();
         }
 
         checkLastOpened();
@@ -904,13 +914,31 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             case android.R.id.home:
                 finish();
                 break;
+            /*
+             * Toggling the geo nav icon turns the automatic plot navigation on/off.
+             * If geonav is enabled, collect activity will auto move to the plot in user's vicinity
+             */
             case R.id.action_act_collect_geonav_sw:
 
                 Log.d(GEOTAG, "Menu item clicked.");
 
                 mGeoNavActivated = !mGeoNavActivated;
-                if (mGeoNavActivated) startGeoNav();
-                else stopGeoNav();
+                MenuItem navItem = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
+                if (mGeoNavActivated) {
+
+                    navItem.setIcon(R.drawable.ic_explore_black_24dp);
+
+                    ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, true).apply();
+
+                }
+                else {
+
+                    navItem.setIcon(R.drawable.ic_explore_off_black_24dp);
+
+                    ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply();
+
+                }
+
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -985,7 +1013,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 public void run() {
                     runImpactZoneAlgorithm(internalFlag);
                 }
-            }, 0, period);
+            }, 2000L, period);
 
         } else {
 
@@ -1085,7 +1113,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
          */
         mLocalBroadcastManager.registerReceiver(new GNSSResponseReceiver() {
             @Override
-            public void onGNSSParsed$app_debug(@NotNull NmeaParser parser) {
+            public void onGNSSParsed(@NotNull NmeaParser parser) {
 
                 String lat = GeodeticUtils.Companion.truncateFixQuality(parser.getLatitude(), parser.getFix());
                 String lng = GeodeticUtils.Companion.truncateFixQuality(parser.getLongitude(), parser.getFix());
@@ -1116,7 +1144,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     mExternalLocation.setLongitude(lngValue);
                     mExternalLocation.setAltitude(altValue);
                 }
-
             }
         }, filter);
     }
@@ -1168,20 +1195,16 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
 
             //get current field id
-            String studyId = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+            int studyId = ep.getInt("SelectedFieldExpId", 0);
 
-            //find all observations within the field
-            ObservationModel[] obs = ObservationDao.Companion.getAll(studyId);
+            //find all observation units within the field
+            ObservationUnitModel[] units = ObservationUnitDao.Companion.getAll(studyId);
+            List<ObservationUnitModel> coordinates = new ArrayList<>();
 
-            //TODO search over observation_units geo_coordinates column
-            //find all plots with location or gnss formatted data
-            ArrayList<ObservationModel> coordinates = new ArrayList<>();
-            for (ObservationModel o : obs) {
-                String format = o.getObservation_variable_field_book_format();
-                String geos = o.getGeo_coordinates();
-                if ((format != null && (format.equals("location") || format.equals("gnss")))
-                        || (geos != null && !geos.isEmpty())) {
-                    coordinates.add(o);
+            //add all units that have non null coordinates.
+            for (ObservationUnitModel model : units) {
+                if (model.getGeo_coordinates() != null && !model.getGeo_coordinates().isEmpty()) {
+                    coordinates.add(model);
                 }
             }
 
@@ -1191,8 +1214,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             if (start != null) {
 
-                Pair<ObservationModel, Double> target = GeodeticUtils.Companion
-                        .impactZoneSearch(start, coordinates, mAzimuth, theta);
+                Pair<ObservationUnitModel, Double> target = GeodeticUtils.Companion
+                        .impactZoneSearch(start,
+                                coordinates.toArray(new ObservationUnitModel[] {}),
+                                mAzimuth, theta);
+
                 long tic = System.currentTimeMillis();
 
                 Log.d(GEOTAG, "Impact search took: " + (tic-toc)*10e-9);
@@ -1200,23 +1226,37 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 //if we received a result then show it to the user, create a button to navigate to the plot
                 if (target.getFirst() != null) {
 
-                    String id = target.getFirst().getObservation_unit_id();
+                    String id = target.getFirst().getObservation_unit_db_id();
 
-                    thisActivity.runOnUiThread(() -> {
+                    if (!id.equals(rangeBox.cRange.plot_id)) {
 
-                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.layout_main),
-                                id, Snackbar.LENGTH_LONG);
-                        mySnackbar.setAction(R.string.activity_collect_geonav_navigate, (view) -> {
+                        thisActivity.runOnUiThread(() -> {
 
-                            //when navigate button is pressed use rangeBox to go to the plot id
-                            moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
+                            if (ep.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
+
+                                moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
+
+                                Toast.makeText(this, R.string.activity_collect_found_plot, Toast.LENGTH_SHORT).show();
+
+                            } else {
+
+                                Snackbar mySnackbar = Snackbar.make(findViewById(R.id.layout_main),
+                                    id, Snackbar.LENGTH_LONG);
+
+                                mySnackbar.setAction(R.string.activity_collect_geonav_navigate, (view) -> {
+
+                                    //when navigate button is pressed use rangeBox to go to the plot id
+                                    moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
+
+                                });
+
+                                mySnackbar.show();
+                            }
 
                         });
+                    }
 
-                        mySnackbar.show();
-                    });
-
-                    Log.d(TAG, "Found target " + target.getFirst().getObservation_unit_id());
+                    Log.d(TAG, "Found target " + id);
                 }
             }
 
@@ -1228,11 +1268,13 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
     /**
      * Called when the toolbar GeoNav Enable icon is switched to off, or the activity is paused.
-     * Simply unlistens to the sensor manager and stops the geonav timer.
+     * Simply stops listening to the sensor manager and stops the geonav timer.
      */
     private void stopGeoNav() {
 
         ((SensorManager) getSystemService(SENSOR_SERVICE)).unregisterListener(this);
+
+        ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
 
         if (mScheduler != null) {
             mScheduler.purge();

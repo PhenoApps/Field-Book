@@ -3,6 +3,11 @@ package com.fieldbook.tracker.utilities
 import android.location.Location
 import android.util.Log
 import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.database.models.ObservationUnitModel
+import com.fieldbook.tracker.traits.GNSSTraitLayout
+import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
+import java.lang.NumberFormatException
 import kotlin.math.*
 
 class GeodeticUtils {
@@ -27,27 +32,64 @@ class GeodeticUtils {
          * @return a object representing the returned location and it's distance
          **/
         fun impactZoneSearch(start: Location,
-                             coordinates: List<ObservationModel>,
+                             coordinates: Array<ObservationUnitModel>,
                              azimuth: Double,
-                             theta: Double): Pair<ObservationModel?, Double> {
+                             theta: Double): Pair<ObservationUnitModel?, Double> {
 
             //Log.d("GeoNav", "User bearing: $azimuth")
             //greedy algorithm to find closest point, first point is set to inf
             var closestDistance = Double.MAX_VALUE
-            var closestPoint: ObservationModel? = null
+            var closestPoint: ObservationUnitModel? = null
 
             coordinates.forEach { coordinate ->
                 val location = Location("search")
                 val latLngString =
                     (if (coordinate.geo_coordinates == null
-                        || coordinate.geo_coordinates?.isBlank() == true
-                    ) coordinate.value
+                        || coordinate.geo_coordinates?.isBlank() == true) ""
                     else coordinate.geo_coordinates) ?: ""
-                val latLngTokens = latLngString.split(";")
-                if (latLngTokens.size == 2) {
-                    location.latitude = latLngTokens[0].toDouble()
-                    location.longitude = latLngTokens[1].toDouble()
-                    //Log.d("GeoNav", "${coordinate.observation_unit_id}")
+
+                //first try parsing as geojson, then try semi colon delimited
+                var nonJson = false
+                var failed = false
+
+                try {
+
+                    val geoJson = Gson().fromJson(latLngString, GNSSTraitLayout.GeoJSON::class.java)
+
+                    location.latitude = geoJson.geometry.coordinates[0].toDouble()
+
+                    location.longitude = geoJson.geometry.coordinates[1].toDouble()
+
+                } catch (e: Exception) {  //could be a NPE, number format exception, index out of bounds or json syntax exception,
+
+                    failed = true
+                    nonJson = true
+
+                }
+
+                if (nonJson) { //check semi colon delimited values can be parsed to doubles
+
+                    val latLngTokens = latLngString.split(";")
+
+                    if (latLngTokens.size == 2) {
+
+                        try {
+
+                            location.latitude = latLngTokens[0].toDouble()
+
+                            location.longitude = latLngTokens[1].toDouble()
+
+                            failed = false
+
+                        } catch (e: NumberFormatException) {
+
+                            failed = true
+
+                        }
+                    }
+                }
+
+                if (!failed) {
                     if (checkThetaThreshold(start, location, azimuth, theta)) {
                         val distance: Double = distanceHaversine(start, location)
                         if (closestDistance > distance) {
