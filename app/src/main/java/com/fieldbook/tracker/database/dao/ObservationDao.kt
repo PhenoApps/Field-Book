@@ -137,7 +137,7 @@ class ObservationDao {
             return null;
         }
 
-        fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
+        fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<Image> = withDatabase { db ->
 
             db.query(sRemoteImageObservationsViewName, where = "trait_data_source <> ?", whereArgs = arrayOf(hostUrl)).toTable()
                     .map { row -> Image(getStringVal(row, "value"), missingPhoto).apply {

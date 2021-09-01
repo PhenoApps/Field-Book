@@ -74,10 +74,10 @@ class BrapiStudiesFragment: BaseBrapiFragment() {
 
         mScope.launch {
 
-            for (p in page until page+pageSize) {
+            //for (p in page until page+pageSize) {
 
-                if (p !in studiesCache.keys) {
-                    studiesCache[p] = withContext(mScope.coroutineContext) {
+                if (page !in studiesCache.keys) {
+                    studiesCache[page] = withContext(mScope.coroutineContext) {
 
                         httpClient.get<BrAPIStudyListResponse> {
 
@@ -89,11 +89,11 @@ class BrapiStudiesFragment: BaseBrapiFragment() {
 
                             val trialUrlParams = (trials?.joinToString("&") { "trialDbId=$it" }) ?: ""
 
-                            url("$baseUrl/studies?$urlParams&$trialUrlParams&page=$p")
+                            url("$baseUrl/studies?$urlParams&$trialUrlParams&page=$page")
                         }
                     }
                 }
-            }
+            //}
 
             switchProgress()
 

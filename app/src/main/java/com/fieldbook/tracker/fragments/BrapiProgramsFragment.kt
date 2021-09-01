@@ -83,10 +83,10 @@ class BrapiProgramsFragment: BaseBrapiFragment() {
 
         mScope.launch {
 
-            for (p in page until page+pageSize) {
+            //for (p in page until page+pageSize) {
 
-                if (p !in programCache.keys) {
-                    programCache[p] = withContext(mScope.coroutineContext) {
+                if (page !in programCache.keys) {
+                    programCache[page] = withContext(mScope.coroutineContext) {
 
                         httpClient.get<BrAPIProgramListResponse> {
 
@@ -94,11 +94,11 @@ class BrapiProgramsFragment: BaseBrapiFragment() {
                             val urlParams = (names?.joinToString("&")
                             { "programName=${URLEncoder.encode(it, "UTF-8")}" }) ?: ""
 
-                            url("$baseUrl/programs?$urlParams&page=$p")
+                            url("$baseUrl/programs?$urlParams&page=$page")
                         }
                     }
                 }
-            }
+            //}
 
             switchProgress()
 

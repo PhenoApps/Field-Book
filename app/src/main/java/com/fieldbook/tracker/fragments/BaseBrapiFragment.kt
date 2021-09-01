@@ -137,7 +137,7 @@ abstract class BaseBrapiFragment: FragmentActivity() {
                 val tokens = namesDelimited.split(",")
                 if (tokens.isNotEmpty()) {
                     loadBrAPIData(tokens)
-                }
+                } else loadBrAPIData(listOf(namesDelimited))
             }
         }
     }

@@ -11,8 +11,6 @@ import com.fieldbook.tracker.brapi.model.BrapiTrial
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
-import io.ktor.client.features.auth.*
-import io.ktor.client.features.auth.providers.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -79,10 +77,10 @@ class BrapiTrialsFragment: BaseBrapiFragment() {
 
         mScope.launch {
 
-            for (p in page until page+pageSize) {
+            //for (p in page until page+pageSize) {
 
-                if (p !in trialsCache.keys) {
-                    trialsCache[p] = withContext(mScope.coroutineContext) {
+                if (page !in trialsCache.keys) {
+                    trialsCache[page] = withContext(mScope.coroutineContext) {
 
                         httpClient.get<BrAPITrialListResponse> {
 
@@ -93,11 +91,11 @@ class BrapiTrialsFragment: BaseBrapiFragment() {
 
                             val programsUrlParams = (programs?.joinToString("&") { "programDbId=$it" }) ?: ""
 
-                            url("$baseUrl/trials?$urlParams&$programsUrlParams&page=$p")
+                            url("$baseUrl/trials?$urlParams&$programsUrlParams&page=$page")
                         }
                     }
                 }
-            }
+            //}
 
             switchProgress()
 
