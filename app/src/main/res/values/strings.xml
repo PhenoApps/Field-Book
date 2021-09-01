@@ -62,6 +62,7 @@
     <string name="fields_filter">Filter</string>
     <string name="fields_reimport">Reimport</string>
     <string name="fields_archive">Archive</string>
+    <string name="fields_toolbar_add_field">Import Field</string>
 
     <!-- Settings Activity  -->
     <string name="settings_fields">Fields</string>
@@ -104,6 +105,7 @@
     <string name="traits_format_angle">Angle</string>
     <string name="traits_format_video">Video</string>
     <string name="traits_format_location">Location</string>
+    <string name="traits_format_gnss">GNSS</string>
     <string name="traits_format_printer">Printer</string>
     <string name="traits_format_barcode">Barcode</string>
     <string name="traits_format_labelprint">Zebra Label Print</string>
@@ -197,16 +199,23 @@
     <string name="preferences_behavior_disable_entry_arrow_neither">Neither</string>
 
     <string name="preferences_brapi_core_title">Configuration</string>
+    <string name="preferences_brapi_advanced_title">Advanced Auth Settings</string>
     <string name="preferences_brapi_servers_title">Community Servers</string>
     <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
     <string name="preferences_brapi_server_barcode_prompt">Scan a server URL</string>
     <string name="preferences_brapi_server_cassavabase">CassavaBase</string>
+    <string name="preferences_brapi_server_t3_wheat">T3 Wheat Sandbox</string>
+    <string name="preferences_brapi_server_t3_oat">T3 Oat Sandbox</string>
+    <string name="preferences_brapi_server_t3_barley">T3 Barley Sandbox</string>
     <string name="preferences_brapi_server_test">Default Test Server</string>
     <string name="preferences_brapi_server_add">Submit a server</string>
     <string name="preferences_brapi_version">BrAPI Version</string>
     <string name="preferences_brapi_version_v1">V1</string>
     <string name="preferences_brapi_version_v2">V2</string>
     <string name="prefrences_brapi_page_size">Page Size</string>
+    <string name="preferences_brapi_oidc_flow">OIDC Flow</string>
+    <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
+    <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
 
     <string name="preferences_naming">Naming</string>
     <string name="preferences_naming_photo">Photo name format</string>
@@ -400,6 +409,7 @@
     <string name="import_error_unique">Unique identifier column contains duplicates or has already been used in a different file</string>
     <string name="import_error_unsupported">This file type is not currently supported</string>
     <string name="import_error_columns">Column names contain illegal characters or words: </string>
+    <string name="import_error_columns_replaced">Column names contain illegal characters that will be replaced during import.</string>
     <string name="import_error_column_name">Column name in imported file cannot be: </string>
     <string name="import_error_unique_characters_illegal">Selected column contains characters which cannot be used in the unique identifier</string>
     <string name="import_error_column_choice">Columns cannot be used for the same assignment</string>
@@ -460,18 +470,22 @@
 
     <!-- Brapi strings -->
     <string name="preferences_brapi" translatable="false">BrAPI</string>
-    <string name="brapi_base_url">BrAPI Base URL</string>
+    <string name="brapi_base_url">Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
+    <string name="brapi_base_url_default">https://test-server.brapi.org</string>
+    <string name="brapi_oidc_url">OIDC Discovery URL</string>
+    <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
+    <string name="brapi_oidc_url_default">https://test-server.brapi.org/.well-known/openid-configuration</string>
     <string name="brapi_save_authorize">Save and Authorize</string>
     <string name="brapi_authorize">Authorize</string>
-    <string name="brapi_reauthorize">Reauthorize BrAPI</string>
+    <string name="brapi_reauthorize">Reauthorize</string>
     <string name="brapi_revoke_auth">Log Out</string>
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>
     <string name="brapi_auth_deny">BrAPI Authorization Denied</string>
     <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
     <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
-    <string name="brapi_btn_auth_summary">Brapi is currently authorized with %1$s</string>
-    <string name="brapi_base_url_default">https://test-server.brapi.org</string>
+    <string name="brapi_btn_auth_summary">Brapi is currently authorized with \n%1$s</string>
+
     <string name="brapi_load_data_button">Load Fields</string>
     <string name="brapi_load_traits_button">Load Traits</string>
     <string name="brapi_save_data_button">Save Field</string>
@@ -533,6 +547,11 @@
     </string>
     <string name="brapi_info_title">Breeding API</string>
     <string name="brapi_auth_btn">Log In to Site</string>
+    <string name="brapi_pagination">Page Size</string>
+    <string name="brapi_timeout">Server Timeout</string>
+    <string name="brapi_skipped_traits">Successfully fetched traits. %1$d traits ignored because of missing brapi \'trait\' field</string>
+
+    <string name="brapi_study_incompatible">This BrAPI study is currently incompatible with Field Book. Studies must include row and column in the header.</string>
 
     <string name="trait_labelprint_preview_description">Label preview.</string>
     <string name="trait_labelprint_zebraconnect_button_description">Button which navigates to Zebra Connect app.</string>
@@ -555,4 +574,37 @@
     <string name="import_error_or_empty_response">The search resulted in an error or no results were found.</string>
     <string name="import_title">Import</string>
     <string name="programs">Programs</string>
+
+    <!-- Field Creator Dialog -->
+    <string name="dialog_field_creator_ask_size">Please choose a field name and size.</string>
+    <string name="dialog_field_creator_ask_start_point">Please choose a field starting point.</string>
+    <string name="dialog_field_creator_ask_pattern">Please choose a field pattern.</string>
+    <string name="dialog_field_creator_ask_name_hint">Name</string>
+    <string name="dialog_field_creator_ask_row_hint">Rows</string>
+    <string name="dialog_field_creator_ask_columns_hint">Columns</string>
+    <!-- Radio box strings -->
+    <string name="dialog_field_creator_top_left">Top Left</string>
+    <string name="dialog_field_creator_bottom_left">Bottom Left</string>
+    <string name="dialog_field_creator_top_right">Top Right</string>
+    <string name="dialog_field_creator_bottom_right">Bottom Right</string>
+    <!-- plot output string -->
+    <string name="dialog_field_creator_insert_field">Creating field rows: %1$s by cols: %2$s</string>
+    <string name="dialog_field_creator_insert_field_complete">Creating field rows: %1$s by cols: %2$s …complete.</string>
+    <string name="dialog_field_creator_insert_plot">Inserting plot %1$s at row %2$s column %3$s</string>
+    <!-- review section -->
+    <string name="dialog_field_creator_review_title">Review</string>
+    <string name="dialog_field_creator_size_group_error">Please enter a valid name and format.</string>
+    <string name="dialog_field_creator_field_name_not_unique">Field name already in use.</string>
+    <string name="dialog_field_creator_large_field">Large Field Detected, transaction might take a long time.</string>
+    <string name="dialog_field_creator_linear_button_content_desc">Button to choose linear plot pattern.</string>
+    <string name="dialog_field_creator_zig_button_content_desc">Button to choose zig zag plot pattern.</string>
+    <string name="dialog_field_creator_review_image_content_desc">Image showing orientation and plot pattern.</string>
+    <string name="dialog_back">Back</string>
+
+    <string name="data_helper_backup_v8_error">An error occurred when backing up v8 database.</string>
+    <string name="gnss_no_paired_device">Please pair a device before collecting data.</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device.</string>
+    <string name="preferences_general_flip_flop_arrows_description">Swaps the trait and plot arrow functions</string>
+    <string name="preferences_general_flip_flop_arrows">Flip Flop Arrows</string>
 </resources>

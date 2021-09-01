@@ -1,0 +1,275 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "trife",
+      "name": "Trevor Rife",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1869534?v=4",
+      "profile": "https://github.com/trife",
+      "contributions": [
+        "projectManagement",
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "BrapiCoordinatorSelby",
+      "name": "Peter Selby",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32845555?v=4",
+      "profile": "https://github.com/BrapiCoordinatorSelby",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "timparsons",
+      "name": "Tim Parsons",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3004635?v=4",
+      "profile": "https://github.com/timparsons",
+      "contributions": [
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "nickpalladino",
+      "name": "Nick",
+      "avatar_url": "https://avatars.githubusercontent.com/u/53413353?v=4",
+      "profile": "https://github.com/nickpalladino",
+      "contributions": [
+        "code",
+        "review",
+        "bug"
+      ]
+    },
+    {
+      "login": "ctucker3",
+      "name": "Chris Tucker",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17887341?v=4",
+      "profile": "https://github.com/ctucker3",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "chaneylc",
+      "name": "Chaney Courtney",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5421632?v=4",
+      "profile": "https://github.com/chaneylc",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "dmeidlin",
+      "name": "dmeidlin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14339308?v=4",
+      "profile": "https://github.com/dmeidlin",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "m-inamori",
+      "name": "Minoru Inamori",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58535480?v=4",
+      "profile": "https://github.com/m-inamori",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "nahuel-soldevilla",
+      "name": "Nahuel Soldevilla",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19394293?v=4",
+      "profile": "https://github.com/nahuel-soldevilla",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Jessssica33",
+      "name": "Jessssica33",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36747798?v=4",
+      "profile": "https://github.com/Jessssica33",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "abatac",
+      "name": "abatac",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5011207?v=4",
+      "profile": "https://github.com/abatac",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "marcusmchale",
+      "name": "Marcus McHale",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15052304?v=4",
+      "profile": "https://github.com/marcusmchale",
+      "contributions": [
+        "code",
+        "bug"
+      ]
+    },
+    {
+      "login": "bellerbrock",
+      "name": "Bryan Ellerbrock",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11297346?v=4",
+      "profile": "https://github.com/bellerbrock",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "",
+      "name": "Irazema Fuentes-Bueno",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
+      "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "cropgen",
+      "name": "narinder singh",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7772391?v=4",
+      "profile": "http://cropgen.github.io",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "singhdj2",
+      "name": "Daljit Singh",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7775048?v=4",
+      "profile": "https://github.com/singhdj2",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "sdunckel",
+      "name": "Sandra Dunckel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4632324?v=4",
+      "profile": "https://github.com/sdunckel",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "",
+      "name": "Shuangye Wu",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
+      "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "",
+      "name": "Erena Edae",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
+      "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "",
+      "name": "Tatiana Danilova",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
+      "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "",
+      "name": "Rodrigo Pedrozo",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
+      "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "",
+      "name": "Cristiano Lemes da Silva",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
+      "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "",
+      "name": "Sophie Bouchet",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
+      "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "hiroiw",
+      "name": "Hiroyoshi Iwata",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17869371?v=4",
+      "profile": "https://github.com/hiroiw",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "",
+      "name": "Goro Ishikawa",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
+      "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "",
+      "name": "Mokhlesur Rahman",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
+      "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "",
+      "name": "Alice Brunazzi",
+      "avatar_url": "https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png",
+      "profile": "",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "khaled-alshamaa",
+      "name": "Khaled Al-Shamaa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11270404?v=4",
+      "profile": "https://www.ar-php.org/",
+      "contributions": [
+        "translation"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "Field-Book",
+  "projectOwner": "PhenoApps",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

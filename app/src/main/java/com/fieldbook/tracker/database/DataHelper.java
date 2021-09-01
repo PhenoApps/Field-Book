@@ -11,7 +11,9 @@ import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
@@ -28,6 +30,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.utilities.Utils;
 
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
@@ -49,6 +52,8 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.fieldbook.tracker.activities.ConfigActivity.dt;
+
 /**
  * All database related functions are here
  */
@@ -62,12 +67,6 @@ public class DataHelper {
     private static final String PLOTS = "plots";
     private static final String PLOT_ATTRIBUTES = "plot_attributes";
     private static final String PLOT_VALUES = "plot_values";
-    private static final String INSERTTRAITS = "insert into "
-            + TRAITS
-            + "(external_db_id, trait_data_source, trait, format, defaultValue, minimum, maximum, details, categories, "
-            + "isVisible, realPosition) values (?,?,?,?,?,?,?,?,?,?,?)";
-    private static final String INSERTUSERTRAITS = "insert into " + USER_TRAITS
-            + "(rid, parent, trait, userValue, timeTaken, person, location, rep, notes, exp_id, observation_db_id, last_synced_time) values (?,?,?,?,?,?,?,?,?,?,?,?)";
     public static SQLiteDatabase db;
     private static String TAG = "Field Book";
     private static String TICK = "`";
@@ -87,10 +86,10 @@ public class DataHelper {
     public DataHelper(Context context) {
         try {
             this.context = context;
-            openHelper = new OpenHelper(this.context);
-            db = openHelper.getWritableDatabase();
-
             ep = context.getSharedPreferences("Settings", 0);
+
+            openHelper = new OpenHelper(this);
+            db = openHelper.getWritableDatabase();
 
             //this.insertTraits = db.compileStatement(INSERTTRAITS);
             //this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
@@ -109,10 +108,45 @@ public class DataHelper {
     }
 
     /**
+     * V9 special character delete function.
+     * TODO: If we want to accept headers with special characters we need to rethink the dynamic range table.
+     * @param s, the column to sanitize
+     * @return output, a new string without special characters
+     */
+    public static String replaceSpecialChars(String s) {
+
+        final Pattern p = Pattern.compile("[\\[\\]`\"\']");
+
+        int lastIndex = 0;
+
+        StringBuilder output = new StringBuilder();
+
+        Matcher matcher = p.matcher(s);
+
+        while (matcher.find()) {
+
+            output.append(s, lastIndex, matcher.start());
+
+            lastIndex = matcher.end();
+
+        }
+
+        if (lastIndex < s.length()) {
+
+            output.append(s, lastIndex, s.length());
+
+        }
+
+        return output.toString();
+    }
+
+    /**
      * V2 - Check if a string has any special characters
      */
     public static boolean hasSpecialChars(String s) {
-        final Pattern p = Pattern.compile("[()<>/;\\*%$]");
+//        final Pattern p = Pattern.compile("[()<>/;\\*%$`\"\']");
+        final Pattern p = Pattern.compile("[\\[\\]`\"\']");
+
         final Matcher m = p.matcher(s);
 
         return m.find();
@@ -241,9 +275,9 @@ public class DataHelper {
 //        return largest;
     }
 
-    public Boolean isBrapiSynced(String rid, String parent) {
+    public Boolean isBrapiSynced(String exp_id, String rid, String parent) {
 
-        return ObservationDao.Companion.isBrapiSynced(rid, parent);
+        return ObservationDao.Companion.isBrapiSynced(exp_id, rid, parent);
 
 //        Boolean synced = false;
 //        Observation o = new Observation();
@@ -685,9 +719,6 @@ public class DataHelper {
 
         try {
             db = openHelper.getWritableDatabase();
-
-            this.insertTraits = db.compileStatement(INSERTTRAITS);
-            this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -1180,9 +1211,9 @@ public class DataHelper {
     /**
      * Get observation data that needs to be saved on edits
      */
-    public Observation getObservation(String plotId, String parent) {
+    public Observation getObservation(String exp_id, String plotId, String parent) {
 
-        return ObservationDao.Companion.getObservation(plotId, parent);
+        return ObservationDao.Companion.getObservation(exp_id, plotId, parent);
 
         //        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ?", new String[]{plotId, parent},
 //                null, null, null
@@ -1201,9 +1232,9 @@ public class DataHelper {
 
     }
 
-    public Observation getObservationByValue(String plotId, String parent, String value) {
+    public Observation getObservationByValue(String exp_id, String plotId, String parent, String value) {
 
-        return ObservationDao.Companion.getObservationByValue(plotId, parent, value);
+        return ObservationDao.Companion.getObservationByValue(exp_id, plotId, parent, value);
 
 //        Observation o = new Observation();
 //
@@ -1356,12 +1387,10 @@ public class DataHelper {
      * between ranges on screen
      * //TODO add catch here for sqlite error
      */
-    public RangeObject getRange(int id) {
+    public RangeObject getRange(String first, String second, String unique, int id) {
 
         return ObservationUnitPropertyDao.Companion.getRangeFromId(
-                ep.getString("ImportFirstName", ""),
-                ep.getString("ImportSecondName", ""),
-                ep.getString("ImportUniqueName", ""),
+                first, second, unique,
                 id);
 
 //        RangeObject data = new RangeObject();
@@ -1426,9 +1455,9 @@ public class DataHelper {
      * Helper function
      * v2.5
      */
-    public void deleteTraitByValue(String rid, String parent, String value) {
+    public void deleteTraitByValue(String expId, String rid, String parent, String value) {
 
-        ObservationDao.Companion.deleteTraitByValue(rid, parent, value);
+        ObservationDao.Companion.deleteTraitByValue(expId, rid, parent, value);
 
 //        try {
 //            db.delete(USER_TRAITS, "rid like ? and parent like ? and userValue = ?",
@@ -1455,9 +1484,9 @@ public class DataHelper {
      * Returns list of files associated with a specific plot
      */
 
-    public ArrayList<String> getPlotPhotos(String plot, String trait) {
+    public ArrayList<String> getPlotPhotos(String exp_id, String plot, String trait) {
 
-        return ObservationDao.Companion.getPlotPhotos(plot, trait);
+        return ObservationDao.Companion.getPlotPhotos(exp_id, plot, trait);
 
 //        try {
 //            //Cursor cursor = db.query(USER_TRAITS, new String[]{"userValue"}, "rid like ? and trait like ?", new String[]{plot, trait},
@@ -1787,7 +1816,7 @@ public class DataHelper {
     /**
      * V2 - Update the ordering of traits
      */
-    public void updateTraitPosition(String id, String realPosition) {
+    public void updateTraitPosition(String id, int realPosition) {
 
         ObservationVariableDao.Companion.updateTraitPosition(id, realPosition);
 
@@ -1827,25 +1856,18 @@ public class DataHelper {
 //        }
     }
 
-    /**
-     * V2 - Check if trait exists (non case sensitive)
-     */
-    public boolean hasTrait(String name) {
+    public TraitObject getTraitByName(String name) {
+        return ObservationVariableDao.Companion.getTraitByName(name);
+    }
 
-        return ObservationVariableDao.Companion.hasTrait(name);
+    public TraitObject getTraitByExternalDbId(String externalDbId, String traitDataSource) {
+        return ObservationVariableDao.Companion.getTraitByExternalDbId(externalDbId, traitDataSource);
+    }
 
-//        boolean exist;
-//
-//        Cursor cursor = db.rawQuery("select id from traits where " +
-//                "trait = ? COLLATE NOCASE", new String[]{name});
-//
-//        exist = cursor.moveToFirst();
-//
-//        if (!cursor.isClosed()) {
-//            cursor.close();
-//        }
-//
-//        return exist;
+    public long updateTrait(TraitObject trait) {
+        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getTrait(),
+                trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
+                trait.getDetails(), trait.getCategories());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -2135,6 +2157,8 @@ public class DataHelper {
 
             Migrator.Companion.migrateSchema(db, getAllTraitObjects());
 
+            ep.edit().putInt("SelectedFieldExpId", -1).apply();
+
         }
 
     }
@@ -2294,9 +2318,11 @@ public class DataHelper {
      */
     private static class OpenHelper extends SQLiteOpenHelper {
         SharedPreferences ep2;
-        OpenHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
-            ep2 = context.getSharedPreferences("Settings", 0);
+        DataHelper helper;
+        OpenHelper(DataHelper helper) {
+            super(helper.context, DATABASE_NAME, null, DATABASE_VERSION);
+            ep2 = helper.context.getSharedPreferences("Settings", 0);
+            this.helper = helper;
         }
 
         @Override
@@ -2372,7 +2398,7 @@ public class DataHelper {
                     o.setMaximum(cursor.getString(5));
                     o.setDetails(cursor.getString(6));
                     o.setCategories(cursor.getString(7));
-                    o.setRealPosition(cursor.getString(9));
+                    o.setRealPosition(cursor.getInt(9));
 
                     list.add(o);
 
@@ -2497,8 +2523,22 @@ public class DataHelper {
 
             if (oldVersion <= 9 & newVersion >= 9) {
 
+                // Backup database
+                try {
+                    helper.open();
+                    helper.exportDatabase("backup_v8");
+                    File exportedDb = new File(ep2.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup_v8.db");
+                    File exportedSp = new File(ep2.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup_v8.db_sharedpref.xml");
+                    Utils.scanFile(helper.context, exportedDb);
+                    Utils.scanFile(helper.context, exportedSp);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage());
+                }
+                
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
+                ep2.edit().putInt("SelectedFieldExpId", -1).apply();
             }
         }
     }

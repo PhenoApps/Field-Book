@@ -33,7 +33,7 @@ class ObservationDao {
         fun getHostImageObservations(hostUrl: String, missingPhoto: Bitmap): List<Image> = withDatabase { db ->
 
             db.rawQuery("""
-                SELECT props.observationUnitDbId AS uniqueName,
+                SELECT DISTINCT props.observationUnitDbId AS uniqueName,
                        props.observationUnitName AS firstName,
                 obs.${Observation.PK} AS id, 
                 obs.value AS value, 
@@ -64,7 +64,7 @@ class ObservationDao {
         """.trimIndent(), arrayOf(hostUrl)).toTable()
                     .map { row -> Image(row["value"].toString(), missingPhoto).apply {
                         unitDbId = row["uniqueName"].toString()
-                        setDescriptiveOntologyTerms(listOf(row["firstName"].toString()))
+                        setDescriptiveOntologyTerms(listOf(row["external_db_id"].toString()))
                         setDescription(row["observation_variable_details"].toString())
                         setTimestamp(row["observation_time_stamp"].toString())
                         fieldBookDbId = row["id"].toString()
@@ -83,7 +83,7 @@ class ObservationDao {
         fun getObservations(hostUrl: String): List<BrapiObservation> = withDatabase { db ->
 
             db.rawQuery("""
-                SELECT props.observationUnitDbId AS uniqueName,
+                SELECT DISTINCT props.observationUnitDbId AS uniqueName,
                     props.observationUnitName AS firstName,
                     obs.${Observation.PK} AS id, 
                     obs.value AS value, 
@@ -112,26 +112,36 @@ class ObservationDao {
                 AND vars.observation_variable_field_book_format <> 'photo'
                 
         """.trimIndent(), arrayOf(hostUrl)).toTable()
-                    .map { row -> BrapiObservation().apply {
-                        unitDbId = row["uniqueName"].toString()
-                        variableDbId = row["external_db_id"].toString()
-                        value = row["value"].toString()
-                        variableName = row["observation_variable_name"].toString()
-                        fieldBookDbId = row["id"].toString()
-                        dbId = row["observation_db_id"].toString()
-                        setTimestamp(row["observation_time_stamp"].toString())
-                        setLastSyncedTime(row["last_synced_time"].toString())
-                        setCollector(row["collector"].toString())
-                        setStudyId(row[Study.FK].toString())
+                    .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
+                        unitDbId = getStringVal(row, "uniqueName")
+                        variableDbId = getStringVal(row, "external_db_id")
+                        value = getStringVal(row, "value")
+                        variableName = getStringVal(row, "observation_variable_name")
+                        fieldBookDbId = getStringVal(row, "id")
+                        dbId = getStringVal(row, "observation_db_id")
+                        setTimestamp(getStringVal(row, "observation_time_stamp"))
+                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
+                        collector = getStringVal(row, "collector")
+                        //study alias is the actual brapi private key
+                        studyId = getStringVal(row, "study_alias")
                     } }
 
         } ?: emptyList()
 
-        fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<Image> = withDatabase { db ->
+        private fun getStringVal(row: Map<String, Any?>?, column: String?) : String? {
+            if(row != null && column != null){
+                if (row[column] != null){
+                    return row[column].toString();
+                }
+            }
+            return null;
+        }
+
+        fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sRemoteImageObservationsViewName, where = "trait_data_source <> ?", whereArgs = arrayOf(hostUrl)).toTable()
-                    .map { row -> Image(row["value"].toString(), missingPhoto).apply {
-                        this.fieldBookDbId = row["id"].toString()
+                    .map { row -> Image(getStringVal(row, "value"), missingPhoto).apply {
+                        this.fieldBookDbId = getStringVal(row, "id")
                     } }
 
         } ?: emptyList()
@@ -145,8 +155,8 @@ class ObservationDao {
                     where = "trait_data_source <> ? AND trait_data_source <> 'local' AND trait_data_source IS NOT NULL",
                     whereArgs = arrayOf(hostUrl)).toTable()
                     .map { row -> BrapiObservation().apply {
-                        this.fieldBookDbId = row["id"].toString()
-                        this.value = row["value"].toString()
+                        this.fieldBookDbId = getStringVal(row, "id")
+                        this.value = getStringVal(row, "value")
                     } }
 
         } ?: emptyList()
@@ -154,8 +164,8 @@ class ObservationDao {
         fun getUserTraitImageObservations(expId: String, missingPhoto: Bitmap): List<Image> = withDatabase { db ->
 
             db.query(sLocalImageObservationsViewName, where = "${Study.FK} = ?", whereArgs = arrayOf(expId)).toTable()
-                    .map { row -> Image(row["value"].toString(), missingPhoto).apply {
-                        this.fieldBookDbId = row["id"].toString()
+                    .map { row -> Image(getStringVal(row, "value"), missingPhoto).apply {
+                        this.fieldBookDbId = getStringVal(row, "id")
                     } }
 
         } ?: emptyList()
@@ -165,15 +175,15 @@ class ObservationDao {
             db.query(sNonImageObservationsViewName,
                     where = "${Study.FK} = ? AND (trait_data_source = 'local' OR trait_data_source IS NULL)", whereArgs = arrayOf(expId)).toTable()
                     .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
-                        this.fieldBookDbId = row["id"].toString()
-                        this.value = row["value"].toString()
+                        this.fieldBookDbId = getStringVal(row, "id")
+                        this.value = getStringVal(row, "value")
                     } }
 
         } ?: emptyList()
 
-        fun isBrapiSynced(rid: String, parent: String): Boolean = withDatabase { db ->
+        fun isBrapiSynced(exp_id: String, rid: String, parent: String): Boolean = withDatabase {
 
-            getObservation(rid, parent)?.let { observation ->
+            getObservation(exp_id, rid, parent)?.let { observation ->
 
                 observation.status in arrayOf(
                         com.fieldbook.tracker.brapi.model.BrapiObservation.Status.SYNCED,
@@ -195,7 +205,8 @@ class ObservationDao {
 
             val rep = getRep(rid, parent) + 1
 
-            val internalTraitId = ObservationVariableDao.getTraitId(parent)
+            val traitObj = ObservationVariableDao.getTraitByName(parent)
+            val internalTraitId = if (traitObj == null) {-1} else {traitObj.id}
 
             val timestamp = try {
                 OffsetDateTime.now().format(internalTimeFormatter)
@@ -211,7 +222,7 @@ class ObservationDao {
                     "observation_time_stamp" to timestamp,
                     "collector" to person,
                     "geoCoordinates" to location,
-                    "last_synced_time" to lastSyncedTime,
+                    "last_synced_time" to lastSyncedTime?.format(internalTimeFormatter),
                     "rep" to rep,
                     "notes" to notes,
                     Study.FK to exp_id.toInt(),
@@ -243,11 +254,11 @@ class ObservationDao {
         /**
          * Should trait be observation_field_book_format?
          */
-        fun getPlotPhotos(plot: String, trait: String): ArrayList<String> = withDatabase { db ->
+        fun getPlotPhotos(expId: String, plot: String, trait: String): ArrayList<String> = withDatabase { db ->
 
             ArrayList(db.query(Observation.tableName, arrayOf("value"),
-                    where = "${ObservationUnit.FK} = ? AND observation_variable_name LIKE ?",
-                    whereArgs = arrayOf(plot, trait)).toTable().map {
+                    where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_name LIKE ?",
+                    whereArgs = arrayOf(expId, plot, trait)).toTable().map {
                 it["value"] as String
             })
 
@@ -271,14 +282,14 @@ class ObservationDao {
         plotId is actually uniqueName
         parent is trait/variable name
          */
-        fun getObservation(plotId: String, parent: String): BrapiObservation? = withDatabase { db ->
+        fun getObservation(exp_id: String, plotId: String, parent: String): BrapiObservation? = withDatabase { db ->
 
             BrapiObservation().apply {
 
                 db.query(Observation.tableName,
                         arrayOf(Observation.PK, ObservationUnit.FK, "last_synced_time"),
-                        where = "observation_variable_name LIKE ? AND ${ObservationUnit.FK} LIKE ?",
-                        whereArgs = arrayOf(parent, plotId)).toTable().forEach {
+                        where = "${Study.FK} = ? AND observation_variable_name LIKE ? AND ${ObservationUnit.FK} LIKE ?",
+                        whereArgs = arrayOf(exp_id, parent, plotId)).toTable().forEach {
 
                     dbId = it[ObservationUnit.FK].toString()
                     setLastSyncedTime(it["last_synced_time"].toString())
@@ -286,15 +297,15 @@ class ObservationDao {
             }
         }
 
-        fun getObservationByValue(plotId: String, parent: String, value: String): BrapiObservation? = withDatabase { db ->
+        fun getObservationByValue(expId: String, plotId: String, parent: String, value: String): BrapiObservation? = withDatabase { db ->
 
             BrapiObservation().apply {
                 db.query(Observation.tableName,
                         arrayOf("observation_db_id", "last_synced_time"),
-                        where = "${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND value LIKE ?",
-                        whereArgs = arrayOf(plotId, parent, value)).toFirst().let {
-                    dbId = it["observation_db_id"].toString()
-//                    lastSyncedTime = it["last_synced_time"].toString()
+                        where = "${Study.FK} = ? AND ${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND value LIKE ?",
+                        whereArgs = arrayOf(expId, plotId, parent, value)).toFirst().let {
+                    dbId = getStringVal(it, "observation_db_id")
+                    setLastSyncedTime(getStringVal(it,"last_synced_time"))
                 }
             }
         }
@@ -305,11 +316,11 @@ class ObservationDao {
                     arrayOf(id, rid, parent))
         }
 
-        fun deleteTraitByValue(rid: String, parent: String, value: String) = withDatabase { db ->
+        fun deleteTraitByValue(expId: String, rid: String, parent: String, value: String) = withDatabase { db ->
 
             db.delete(Observation.tableName,
-                    "${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND value = ?",
-                    arrayOf(rid, parent, value))
+                    "${Study.FK} = ? AND ${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND value = ?",
+                    arrayOf(expId, rid, parent, value))
         }
 
         /**
@@ -342,7 +353,7 @@ class ObservationDao {
                             put("last_synced_time", image.lastSyncedTime.format(internalTimeFormatter))
                         }
                     },
-                    "_id = ?", arrayOf(image.fieldBookDbId))
+                    Observation.PK + " = ?", arrayOf(image.fieldBookDbId))
 
         }
 

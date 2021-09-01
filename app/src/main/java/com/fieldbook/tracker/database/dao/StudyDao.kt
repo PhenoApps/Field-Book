@@ -3,7 +3,6 @@ package com.fieldbook.tracker.database.dao
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import androidx.core.content.contentValuesOf
-import androidx.core.database.getStringOrNull
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
 import com.fieldbook.tracker.objects.FieldObject
@@ -12,10 +11,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.Study
-import com.fieldbook.tracker.database.models.StudyModel
-import kotlin.math.exp
-import kotlin.system.measureTimeMillis
-import kotlin.time.milliseconds
+
 
 class StudyDao {
 
@@ -33,7 +29,7 @@ class StudyDao {
             //create a select statement based on the saved plot attribute names
             val select = headers.map { col ->
 
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS `$col`"
+                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
 
             }
 
@@ -118,7 +114,7 @@ class StudyDao {
                 else -> date
             }
             this["study_source"]?.let { source ->
-                it.exp_source = this["study_source"].toString()
+                it.exp_source = source.toString()
             }
             it.count = this["count"].toString()
         }
@@ -186,8 +182,12 @@ class StudyDao {
                     }).toInt()
 
                     try {
+                        //TODO remove when we handle primary/secondary ids better
+                        val actualColumns = columns.toMutableList()
                         //insert observation unit attributes using columns parameter
-                        columns.forEach {
+                        if (e.primary_id !in columns) actualColumns += e.primary_id
+                        if (e.secondary_id !in columns) actualColumns += e.secondary_id
+                        actualColumns.forEach {
                             db.insert(ObservationUnitAttribute.tableName, null, contentValuesOf(
                                     "observation_unit_attribute_name" to it,
                                     Study.FK to rowid
@@ -214,6 +214,9 @@ class StudyDao {
 
         data class FieldPreferenceNames(val unique: String, val primary: String, val secondary: String)
 
+        /**
+         * This function should always be called within a transaction.
+         */
         fun createFieldData(exp_id: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
 
             val names = getNames(exp_id)!!
@@ -224,36 +227,56 @@ class StudyDao {
             val primaryIndex = columns.indexOf(names.primary)
             val secondaryIndex = columns.indexOf(names.secondary)
 
-            db.beginTransaction()
+            //TODO remove when we handle primary/secondary ids better
+            //check if data size matches the columns size, on mismatch fill with dummy data
+            //mainly fixes issues with BrAPI when xtype/ytype and row/col values are not given
+            val actualData = if (data.size != columns.size) {
+                val tempData = data.toMutableList()
+                for (i in 0..(columns.size - data.size))
+                    tempData += "NA"
+                tempData
+            } else data
 
-            try {
+            val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
+                    Study.FK to exp_id,
+                    "observation_unit_db_id" to actualData[uniqueIndex],
+                    "primary_id" to if (primaryIndex < 0) "NA" else actualData[primaryIndex],
+                    "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex]))
 
-                val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
+            columns.forEachIndexed { index, it ->
+
+                val attrId = ObservationUnitAttributeDao.getIdByName(it)
+
+                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
                         Study.FK to exp_id,
-                        "observation_unit_db_id" to data[uniqueIndex],
-                        "primary_id" to data[primaryIndex],
-                        "secondary_id" to data[secondaryIndex]))
+                        ObservationUnit.FK to rowid,
+                        ObservationUnitAttribute.FK to attrId,
+                        "observation_unit_value_name" to actualData[index]
+                ))
+            }
 
-                columns.forEachIndexed { index, it ->
+            if (primaryIndex < 0) {
 
-                    val attrId = ObservationUnitAttributeDao.getIdByName(it)
+                val attrId = ObservationUnitAttributeDao.getIdByName("Row")
 
-                    db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
-                            Study.FK to exp_id,
-                            ObservationUnit.FK to rowid,
-                            ObservationUnitAttribute.FK to attrId,
-                            "observation_unit_value_name" to data[index]
-                    ))
-                }
+                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                    Study.FK to exp_id,
+                    ObservationUnit.FK to rowid,
+                    ObservationUnitAttribute.FK to attrId,
+                    "observation_unit_value_name" to "NA"
+                ))
+            }
 
-                db.setTransactionSuccessful()
+            if (secondaryIndex < 0) {
 
-            } catch (e: Exception) {
+                val attrId = ObservationUnitAttributeDao.getIdByName("Column")
 
-                e.printStackTrace()
-            } finally {
-
-                db.endTransaction()
+                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                    Study.FK to exp_id,
+                    ObservationUnit.FK to rowid,
+                    ObservationUnitAttribute.FK to attrId,
+                    "observation_unit_value_name" to "NA"
+                ))
             }
         }
 
@@ -325,7 +348,7 @@ class StudyDao {
 
         } ?: -1
 
-        fun getCount(studyId: Int): Int = withDatabase { db ->
+        fun getCount(studyId: Int): Int = withDatabase {
 
             ObservationUnitDao.getAll(studyId).size
 

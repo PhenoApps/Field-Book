@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.SharedPreferences;
 import android.database.DatabaseUtils;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,7 +37,7 @@ import com.fieldbook.tracker.utilities.Utils;
 import java.util.Arrays;
 
 public class SearchActivity extends AppCompatActivity {
-    public static String TICK = "`";
+    public static String TICK = "\"";
     private static String TAG = "Field Book";
     private SharedPreferences ep;
     private LinearLayout parent;
@@ -88,8 +90,8 @@ public class SearchActivity extends AppCompatActivity {
 
                 try {
                     // Create the sql query based on user selection
-                    String sql1 = "select range.id, range." + TICK + ep.getString("ImportFirstName", "") + TICK + "," + " range." + TICK + ep.getString("ImportSecondName", "") + TICK + " from range where range.id is not null ";
-                    String sql2 = "select range.id, range." + TICK + ep.getString("ImportFirstName", "") + TICK + "," + "range." + TICK + ep.getString("ImportSecondName", "") + TICK + " from traits, range, user_traits where user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK + " and user_traits.parent = traits.trait and user_traits.trait = traits.format ";
+                    String sql1 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString("ImportFirstName", "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString("ImportSecondName", "") + TICK + " from ObservationUnitProperty where ObservationUnitProperty.id is not null ";
+                    String sql2 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString("ImportFirstName", "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString("ImportSecondName", "") + TICK + " from observation_variables, ObservationUnitProperty, observations where observations.observation_unit_id = ObservationUnitProperty." + TICK + ep.getString("ImportUniqueName", "") + TICK + " and observations.observation_variable_name = observation_variables.observation_variable_name and observations.observation_variable_field_book_format = observation_variables.observation_variable_field_book_format ";
 
                     String sql = "";
 
@@ -110,11 +112,11 @@ public class SearchActivity extends AppCompatActivity {
 
                         if (c.getSelectedItemPosition() < rangeUntil) {
                             before = true;
-                            prefix = "range.";
+                            prefix = "ObservationUnitProperty.";
                         } else {
                             before = false;
                             threeTables = true;
-                            prefix = "user_traits.parent='";
+                            prefix = "observation_variables.observation_variable_name=";
                         }
 
                         // This is to prevent crashes when the user uses special characters
@@ -132,7 +134,7 @@ public class SearchActivity extends AppCompatActivity {
                                 if (before)
                                     value = prefix + TICK + c.getSelectedItem().toString() + TICK + " = " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
                                 else
-                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and userValue = " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and value = " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
                                 break;
 
                             // 1: Not equals to
@@ -140,7 +142,7 @@ public class SearchActivity extends AppCompatActivity {
                                 if (before)
                                     value = prefix + TICK + c.getSelectedItem().toString() + TICK + " != " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
                                 else
-                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and userValue != " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and value != " + DatabaseUtils.sqlEscapeString(t.getText().toString()) + "";
                                 break;
 
                             // 2: Is Like
@@ -148,7 +150,7 @@ public class SearchActivity extends AppCompatActivity {
                                 if (before)
                                     value = prefix + TICK + c.getSelectedItem().toString() + TICK + " like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
                                 else
-                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and user_traits.userValue like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and observations.value like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
                                 break;
 
                             // 3: Not is like
@@ -156,7 +158,7 @@ public class SearchActivity extends AppCompatActivity {
                                 if (before)
                                     value = prefix + TICK + c.getSelectedItem().toString() + TICK + " not like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
                                 else
-                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and user_traits.userValue not like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and observations.value not like " + DatabaseUtils.sqlEscapeString("%" + t.getText().toString() + "%") + "";
                                 break;
 
                             // 4: More than
@@ -164,15 +166,15 @@ public class SearchActivity extends AppCompatActivity {
                                 if (before)
                                     value = prefix + TICK + c.getSelectedItem().toString() + TICK + " > " + trunc;
                                 else
-                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and userValue > " + trunc;
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and value > " + trunc;
                                 break;
 
                             // 5: less than
                             case 5:
                                 if (before)
-                                    value = prefix + c.getSelectedItem().toString() + " < " + trunc;
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " < " + trunc;
                                 else
-                                    value = prefix + c.getSelectedItem().toString() + " and userValue < " + trunc;
+                                    value = prefix + TICK + c.getSelectedItem().toString() + TICK + " and value < " + trunc;
                                 break;
 
                         }
@@ -215,6 +217,9 @@ public class SearchActivity extends AppCompatActivity {
 
                     Button closeBtn = layout.findViewById(R.id.closeBtn);
                     ListView myList = layout.findViewById(R.id.myList);
+
+                    myList.setDivider(new ColorDrawable(Color.BLACK));
+                    myList.setDividerHeight(5);
 
                     closeBtn.setTransformationMethod(null);
 

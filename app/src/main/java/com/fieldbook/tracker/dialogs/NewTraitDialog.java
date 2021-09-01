@@ -316,7 +316,7 @@ public class NewTraitDialog extends DialogFragment {
         t.setDetails(details.getText().toString());
         t.setCategories(categories.getText().toString());
         t.setVisible(true);
-        t.setRealPosition(String.valueOf(pos));
+        t.setRealPosition(pos);
         return t;
     }
 
@@ -562,7 +562,7 @@ public class NewTraitDialog extends DialogFragment {
 
             // Disallow duplicate traits
             final String traitName = trait.getText().toString().trim();
-            final boolean exists = ConfigActivity.dt.hasTrait(traitName);
+            final boolean exists = ConfigActivity.dt.getTraitByName(traitName) != null;
             if (!edit) {
                 if (exists) {
                     return getResString(R.string.traits_create_warning_duplicate);
@@ -996,6 +996,22 @@ public class NewTraitDialog extends DialogFragment {
         }
     }
 
+    private class TraitFormatGnss extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
+        public String getEnglishString() {
+            return "GNSS";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_gnss;
+        }
+    }
+
     private class TraitFormatBarcode extends TraitFormatNotValue {
 
         @Override
@@ -1047,6 +1063,7 @@ public class NewTraitDialog extends DialogFragment {
             traitFormatList.add(new TraitFormatLocation());
             //traitFormatList.add(new TraitFormatBarcode());
             traitFormatList.add(new TraitFormatZebraLablePrint());
+            traitFormatList.add(new TraitFormatGnss());
         }
 
         public int size() {

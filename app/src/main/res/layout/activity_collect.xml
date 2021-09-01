@@ -364,6 +364,11 @@
                 android:layout_height="wrap_content" />
 
             <include
+                layout="@layout/trait_gnss"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
+
+            <include
                 layout="@layout/trait_angle"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />

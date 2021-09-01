@@ -1,10 +1,12 @@
 package com.fieldbook.tracker.database.dao
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.MatrixCursor
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.*
+import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
 
 class ObservationVariableDao {
@@ -13,33 +15,65 @@ class ObservationVariableDao {
 
         fun getMaxPosition(): Int = withDatabase { db ->
 
-            db.query(ObservationVariable.tableName,
-                    select = arrayOf("MAX(position) as result")).toFirst()["result"].toString().toInt()
+            try {
 
+                db.queryForMax(
+                    ObservationVariable.tableName,
+                    select = arrayOf("MAX(position) as result")
+                ).toFirst()["result"].toString().toInt()
+
+            } catch (nfe: NumberFormatException) {
+
+                //return 0 if the position column is empty or cannot be parsed into an integer
+                0
+
+            }
         } ?: 0
 
-        fun getTraitId(name: String): Int = withDatabase { db ->
+        fun getTraitByName(name: String): TraitObject? = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
-                    select = arrayOf(ObservationVariable.PK),
-                    where = "observation_variable_name = ?",
-                    whereArgs = arrayOf(name))
-                    .toFirst()[ObservationVariable.PK].toString().toInt()
-
-        } ?: -1
-
-        fun hasTrait(name: String): Boolean = withDatabase { db ->
-
-            db.query(ObservationVariable.tableName,
-                    select = arrayOf("observation_variable_name"),
+//                    select = arrayOf("observation_variable_name"),
                     where = "observation_variable_name = ? COLLATE NOCASE",
-                    whereArgs = arrayOf(name)).toFirst().isNotEmpty()
+                    whereArgs = arrayOf(name)).toFirst().toTraitObject()
 
-        } ?: false
+        }
 
+        fun getTraitByExternalDbId(externalDbId: String, traitDataSource: String): TraitObject? = withDatabase { db ->
+
+            db.query(ObservationVariable.tableName,
+                    where = "external_db_id = ? AND trait_data_source = ? ",
+                    whereArgs = arrayOf(externalDbId, traitDataSource)).toFirst().toTraitObject()
+
+        }
+
+        private fun Map<String, Any?>.toTraitObject() = if (this.isEmpty()) {null} else { TraitObject().also {
+
+            it.id = this[ObservationVariable.PK].toString()
+            it.trait = this["observation_variable_name"].toString()
+            it.format = this["observation_variable_field_book_format"].toString()
+            it.defaultValue = this["default_value"].toString()
+            it.details = this["observation_variable_details"].toString()
+
+            it.realPosition = try {
+
+                 this["position"].toString().toInt()
+
+            } catch (nfe: java.lang.NumberFormatException) {
+
+                //return 0 if the position column is empty or cannot be parsed into an integer
+                0
+            }
+
+            it.visible = this["visible"].toString() == "true"
+            it.externalDbId = this["external_db_id"].toString()
+            it.traitDataSource = this["trait_data_source"].toString()
+
+        }}
         /**
          * TODO: Replace with View.
          */
+        @SuppressLint("Recycle")
         fun getTraitExists(uniqueName: String, id: Int, parent: String, trait: String): Boolean = withDatabase { db ->
 
             val query = """
@@ -136,7 +170,9 @@ class ObservationVariableDao {
 
         fun getAllTraitsForExport(): Cursor {
 
-            val requiredFields = getTraitPropertyColumns()
+            val requiredFields = arrayOf("trait", "format", "defaultValue", "minimum",
+                "maximum", "details", "categories", "isVisible", "realPosition")
+            //val requiredFields = getTraitPropertyColumns()
             //trait,format,defaultValue,minimum,maximum,details,categories,isVisible,realPosition
             return MatrixCursor(requiredFields).also { cursor ->
                 val traits = getAllTraitObjects()
@@ -172,7 +208,7 @@ class ObservationVariableDao {
                     details = it["observation_variable_details"] as? String ?: ""
                     id = (it[ObservationVariable.PK] as? Int ?: -1).toString()
                     externalDbId = it["external_db_id"] as? String ?: ""
-                    realPosition = (it["position"] as? Int ?: -1).toString()
+                    realPosition = (it["position"] as? Int ?: -1)
                     visible = (it["visible"] as String).toBoolean()
 
                     //initialize these to the empty string or else they will be null
@@ -214,7 +250,7 @@ class ObservationVariableDao {
         //TODO missing obs. vars. for min/max/categories
         fun insertTraits(t: TraitObject) = withDatabase { db ->
 
-            if (hasTrait(t.trait)) -1
+            if (getTraitByName(t.trait) != null) -1
             else {
 
                 val varRowId = db.insert(ObservationVariable.tableName, null,
@@ -230,7 +266,11 @@ class ObservationVariableDao {
                             put("position", t.realPosition)
                         })
 
-                ObservationVariableValueDao.insert(t.minimum as String, t.maximum as String, t.categories as String, varRowId.toString())
+                ObservationVariableValueDao.insert(
+                        t.minimum.orEmpty(),
+                        t.maximum.orEmpty(),
+                        t.categories.orEmpty(),
+                        varRowId.toString())
 
                 varRowId
 
@@ -247,7 +287,7 @@ class ObservationVariableDao {
             db.delete(ObservationVariable.tableName, null, null)
         }
 
-        fun updateTraitPosition(id: String, realPosition: String) = withDatabase { db ->
+        fun updateTraitPosition(id: String, realPosition: Int) = withDatabase { db ->
 
             db.update(ObservationVariable.tableName, ContentValues().apply {
                 put("position", realPosition)
@@ -262,6 +302,7 @@ class ObservationVariableDao {
                 put("observation_variable_name", trait)
                 put("observation_variable_field_book_format", format)
                 put("default_value", defaultValue)
+                put("observation_variable_details", details)
             }, "${ObservationVariable.PK} = ?", arrayOf(id)).toLong()
 
             arrayOf("validValuesMin", "validValuesMax", "category").forEach {

@@ -36,11 +36,21 @@ fun getTime(): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
 //endregion
 
 /**
+ * Wrapper that doesn't sanitize select arguments, for cases when nested queries or SQL internal functions are used.
+ * Note: parameters should be sanitized manually when calling this function.
+ */
+fun SQLiteDatabase.queryForMax(table: String, select: Array<String>? = null, where: String? = null, whereArgs: Array<String>? = null, orderBy: String? = null): Cursor {
+
+    return this.query(table, select, where, whereArgs, null, null, orderBy)
+
+}
+
+/**
  * Simple wrapper function that has default arguments.
  */
 fun SQLiteDatabase.query(table: String, select: Array<String>? = null, where: String? = null, whereArgs: Array<String>? = null, orderBy: String? = null): Cursor {
 
-    return this.query(table, select, where, whereArgs, null, null, orderBy)
+    return this.query(table, select?.map { "`$it`" }?.toTypedArray(), where, whereArgs, null, null, orderBy)
 
 }
 
@@ -146,40 +156,10 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 } else mutableListOf()
 
 /**
- * A wrapper function to catch all backend exceptions.
- * This function should be used for all database calls.
- * This way there is a single point of failure if we get mutex access errors.
+ * Previously this function would try to capture all errors,
+ * now we expect exceptions to be handled whenever using this function s.a activity code or BrapiService
  */
-inline fun <reified T> withDatabase(crossinline function: (SQLiteDatabase) -> T): T? = try {
-
-    DataHelper.db?.let { database ->
-
-        function(database)
-
-    }
-
-} catch (npe: NullPointerException) {
-    npe.printStackTrace()
-    null
-} catch (e: Exception) {
-    e.printStackTrace()
-    null
-} catch (e: IllegalArgumentException) {
-    e.printStackTrace()
-    null
-} catch (ie: IndexOutOfBoundsException) {
-    ie.printStackTrace()
-    null
-} catch (ie: IndexOutOfBoundsException) {
-    ie.printStackTrace()
-    null
-} catch (e: IllegalArgumentException) {
-    e.printStackTrace()
-    null
-} catch (noElem: NoSuchElementException) {
-    noElem.printStackTrace()
-    null
-}
+fun <T> withDatabase(function: (SQLiteDatabase) -> T): T? = if (DataHelper.db != null) function(DataHelper.db) else null
 
 var internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ")
 

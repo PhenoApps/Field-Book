@@ -5,10 +5,8 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1;
-import com.fieldbook.tracker.brapi.BrapiListResponse;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
-import com.fieldbook.tracker.brapi.BrapiStudySummary;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
@@ -43,8 +41,8 @@ public class BrapiServiceTest {
     Boolean checkGetPlotDetailsResult = false;
     Boolean checkGetTraitsResult = false;
     Boolean checkGetOntologyResult = false;
-    List<NewObservationDbIdsObservations> putObservationsResponse;
-    Image postImageMetaDataResponse;
+    List<Observation> putObservationsResponse;
+    FieldBookImage postImageMetaDataResponse;
     Bitmap missingImage;
     private String programDbId = "1";
     private String trialDbId = "101";
@@ -53,7 +51,11 @@ public class BrapiServiceTest {
     @Before
     public void setUp() throws Exception {
         // Instantiate our brapi service class
-        this.brAPIService = new BrAPIServiceV1(brapiBaseUrl, null);
+<<<<<<< HEAD
+        this.brAPIService = new BrAPIServiceV1(null);
+=======
+        this.brAPIService = new BrAPIService(brapiBaseUrl, null, null);
+>>>>>>> develop
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap missingImage = Bitmap.createBitmap(100, 100, conf);
     }
@@ -68,9 +70,9 @@ public class BrapiServiceTest {
 
         BrapiPaginationManager pageMan = new BrapiPaginationManager(0, 1000);
         // Call our get studies endpoint with the same parsing that our classes use.
-        this.brAPIService.getStudies(brapiToken, this.programDbId, this.trialDbId, pageMan, new Function<List<BrapiStudySummary>, Void>() {
+        this.brAPIService.getStudies(this.programDbId, this.trialDbId, pageMan, new Function<List<BrapiStudyDetails>, Void>() {
             @Override
-            public Void apply(List<BrapiStudySummary> input) {
+            public Void apply(List<BrapiStudyDetails> input) {
                 // Check that there is atleast one study returned.
                 BrapiServiceTest.this.checkGetStudiesResult = input.size() > 0;
 
@@ -79,9 +81,9 @@ public class BrapiServiceTest {
 
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(ApiException error) {
+            public Void apply(Integer error) {
                 BrapiServiceTest.this.checkGetStudiesResult = false;
                 // Notify the countdown that we are finish
                 signal.countDown();
@@ -108,7 +110,7 @@ public class BrapiServiceTest {
         final String brapiToken = "Bearer YYYY";
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getStudyDetails(brapiToken, studyDbId, new Function<BrapiStudyDetails, Void>() {
+        this.brAPIService.getStudyDetails(studyDbId, new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(BrapiStudyDetails input) {
                 // Check that the study db id we passed is what we are getting back
@@ -119,9 +121,9 @@ public class BrapiServiceTest {
 
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(ApiException input) {
+            public Void apply(Integer input) {
                 BrapiServiceTest.this.checkGetStudyDetailsResult = false;
                 // Notify the countdown that we are finish
                 signal.countDown();
@@ -149,7 +151,7 @@ public class BrapiServiceTest {
         final String brapiToken = "Bearer YYYY";
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getPlotDetails(brapiToken, studyDbId, new Function<BrapiStudyDetails, Void>() {
+        this.brAPIService.getPlotDetails(studyDbId, new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(BrapiStudyDetails input) {
                 // Check that we are getting some results back
@@ -160,9 +162,9 @@ public class BrapiServiceTest {
 
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(ApiException input) {
+            public Void apply(Integer input) {
                 BrapiServiceTest.this.checkGetPlotDetailsResult = false;
                 // Notify the countdown that we are finish
                 signal.countDown();
@@ -191,20 +193,20 @@ public class BrapiServiceTest {
         BrapiPaginationManager pageMan = new BrapiPaginationManager(0, 1000);
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getOntology(brapiToken, pageMan, new Function<BrapiListResponse<TraitObject>, Void>() {
+        this.brAPIService.getOntology(pageMan, new Function<List<TraitObject>, Void>() {
             @Override
-            public Void apply(BrapiListResponse<TraitObject> input) {
+            public Void apply(List<TraitObject> input) {
                 // Check that we are getting some results back
-                BrapiServiceTest.this.checkGetOntologyResult = input.getData().size() > 0;
+                BrapiServiceTest.this.checkGetOntologyResult = input.size() > 0;
 
                 // Notify the countdown that we are finish
                 signal.countDown();
 
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(ApiException input) {
+            public Void apply(Integer input) {
                 BrapiServiceTest.this.checkGetOntologyResult = false;
                 // Notify the countdown that we are finish
                 signal.countDown();
@@ -232,7 +234,7 @@ public class BrapiServiceTest {
         final String brapiToken = "Bearer YYYY";
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getTraits(brapiToken, studyDbId, new Function<BrapiStudyDetails, Void>() {
+        this.brAPIService.getTraits(studyDbId, new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(BrapiStudyDetails input) {
                 // Check that we are getting some results back
@@ -243,9 +245,9 @@ public class BrapiServiceTest {
 
                 return null;
             }
-        }, new Function<ApiException, Void>() {
+        }, new Function<Integer, Void>() {
             @Override
-            public Void apply(ApiException input) {
+            public Void apply(Integer input) {
                 BrapiServiceTest.this.checkGetTraitsResult = false;
                 // Notify the countdown that we are finish
                 signal.countDown();
@@ -281,9 +283,9 @@ public class BrapiServiceTest {
         testObservations.add(testObservation);
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.putObservations(testObservations, brapiToken, new Function<List<NewObservationDbIdsObservations>, Void>() {
+        this.brAPIService.putObservations(testObservations, new Function<List<Observation>, Void>() {
                     @Override
-                    public Void apply(final List<NewObservationDbIdsObservations> observationDbIds) {
+                    public Void apply(final List<Observation> observationDbIds) {
 
                         putObservationsResponse = observationDbIds;
                         signal.countDown();
@@ -308,8 +310,8 @@ public class BrapiServiceTest {
 
             assertTrue(putObservationsResponse != null);
             assertTrue(putObservationsResponse.size() == 1);
-            assertTrue(putObservationsResponse.get(0).getObservationUnitDbId().equals("1"));
-            assertTrue(putObservationsResponse.get(0).getObservationVariableDbId().equals("MO_123:100002"));
+            assertTrue(putObservationsResponse.get(0).getDbId().equals("1"));
+            assertTrue(putObservationsResponse.get(0).getVariableDbId().equals("MO_123:100002"));
 
         } catch (InterruptedException e) {
             fail(e.toString());
@@ -327,9 +329,9 @@ public class BrapiServiceTest {
         image.setUnitDbId("1");
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.postImageMetaData(image, brapiToken, new Function<Image, Void>() {
+        this.brAPIService.postImageMetaData(image, new Function<FieldBookImage, Void>() {
                     @Override
-                    public Void apply(final Image response) {
+                    public Void apply(final FieldBookImage response) {
 
                         postImageMetaDataResponse = response;
                         signal.countDown();

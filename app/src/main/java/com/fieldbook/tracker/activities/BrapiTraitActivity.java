@@ -23,6 +23,7 @@ import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import com.fieldbook.tracker.objects.TraitObject;
 
@@ -40,6 +41,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        brAPIService.authorizeClient();
     }
 
     @Override
@@ -54,7 +56,6 @@ public class BrapiTraitActivity extends AppCompatActivity {
 
                 loadToolbar();
                 // Get the setting information for our brapi integration
-
                 brAPIService = BrAPIServiceFactory.getBrAPIService(this);
 
                 // Make a clean list to track our selected traits
@@ -104,13 +105,20 @@ public class BrapiTraitActivity extends AppCompatActivity {
         paginationManager.refreshPageIndicator();
 
         // Call our API to get the data
-        brAPIService.getOntology(paginationManager, new Function<List<TraitObject>, Void>() {
+        brAPIService.getOntology(paginationManager, new BiFunction<List<TraitObject>, Integer, Void>() {
             @Override
-            public Void apply(final List<TraitObject> traits) {
+            public Void apply(final List<TraitObject> traits, Integer variablesMissingTrait) {
 
                 (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
+                            if (variablesMissingTrait > 0) {
+                                Toast.makeText(getApplicationContext(),
+                                        getString(R.string.brapi_skipped_traits, variablesMissingTrait),
+                                        Toast.LENGTH_LONG).show();
+                            }
+
                             // Build our array adapter
                             traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
 
@@ -237,22 +245,29 @@ public class BrapiTraitActivity extends AppCompatActivity {
         String secondaryMessage = "";
         // For now, only give the ability to create new variables
         // Determine later if the need to edit existing variables is needed.
+        int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
         for (int i = 0; i < selectedTraits.size(); ++i) {
 
             TraitObject trait = selectedTraits.get(i);
 
+            TraitObject existingTraitByName = ConfigActivity.dt.getTraitByName(trait.getTrait());
+            TraitObject existingTraitByExId = ConfigActivity.dt.getTraitByExternalDbId(trait.getExternalDbId(), trait.getTraitDataSource());
             // Check if the trait already exists
-            if (ConfigActivity.dt.hasTrait(trait.getTrait())) {
+            if (existingTraitByName != null) {
                 secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getTrait());
                 // Skip this one, continue on.
                 continue;
+            }else if (existingTraitByExId != null) {
+                // Update existing trait
+                trait.setId(existingTraitByExId.getId());
+                long saveStatus = ConfigActivity.dt.updateTrait(trait);
+                successfulSaves += saveStatus == -1 ? 0 : 1;
+            }else{
+                // Insert our new trait
+                trait.setRealPosition(pos + i);
+                long saveStatus = ConfigActivity.dt.insertTraits(trait);
+                successfulSaves += saveStatus == -1 ? 0 : 1;
             }
-
-            // Insert our new trait
-            long saveStatus = ConfigActivity.dt.insertTraits(trait);
-
-            successfulSaves += saveStatus == -1 ? 0 : 1;
-
         }
 
         SharedPreferences ep = getSharedPreferences("Settings", 0);

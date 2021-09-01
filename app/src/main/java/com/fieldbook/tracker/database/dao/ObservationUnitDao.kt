@@ -1,9 +1,8 @@
 package com.fieldbook.tracker.database.dao
 
+import android.content.ContentValues
+import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.models.ObservationUnitModel
-import com.fieldbook.tracker.database.query
-import com.fieldbook.tracker.database.toTable
-import com.fieldbook.tracker.database.withDatabase
 import java.util.HashMap
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.Migrator.ObservationUnit
@@ -37,12 +36,18 @@ class ObservationUnitDao {
 
         } ?: emptyArray()
 
-//        fun getAll(): Array<ObservationUnitModel> = withDatabase { db ->
-//
-//            arrayOf(*db.query(ObservationUnit.tableName).toTable()
-//                    .map { ObservationUnitModel(it) }
-//                    .toTypedArray())
-//
-//        } ?: emptyArray()
+
+        /**
+         * Updates a given observation unit row with a geo coordinates string.
+         */
+        fun updateObservationUnit(unit: ObservationUnitModel, geoCoordinates: String) = withDatabase { db ->
+
+            db.update(ObservationUnit.tableName,
+                    ContentValues().apply {
+                        put("geo_coordinates", geoCoordinates)
+                    },
+                    "${ObservationUnit.PK} = ?", arrayOf(unit.internal_id_observation_unit.toString()))
+
+        }
     }
 }

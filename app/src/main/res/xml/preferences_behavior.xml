@@ -54,4 +54,11 @@
         android:summary="@string/preferences_general_skip_entries_with_data_description"
         android:title="@string/preferences_general_skip_entries_with_data" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_gesture_tap"
+        android:key="FLIP_FLOP_ARROWS"
+        android:summary="@string/preferences_general_flip_flop_arrows_description"
+        android:title="@string/preferences_general_flip_flop_arrows" />
+
 </PreferenceScreen>

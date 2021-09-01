@@ -36,7 +36,8 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private BrAPIService brAPIService;
     private DataHelper dataHelper;
-    private List<Observation> observationsNeedingSync;
+    private List<Observation> newObservations;
+    private List<Observation> editedObservations;
     private List<FieldBookImage> imagesNew;
     private List<FieldBookImage> imagesEditedIncomplete;
 
@@ -44,7 +45,8 @@ public class BrapiExportActivity extends AppCompatActivity {
     private int putImageContentUpdatesCount;
     private int putImageMetaDataUpdatesCount;
 
-    private Boolean observationsComplete;
+    private Boolean createObservationsComplete;
+    private Boolean updateObservationsComplete;
 
     private int numNewObservations;
     private int numSyncedObservations;
@@ -53,7 +55,8 @@ public class BrapiExportActivity extends AppCompatActivity {
     private int numSyncedImages;
     private int numEditedImages;
     private int numIncompleteImages;
-    private UploadError putObservationsError;
+    private UploadError createObservationsError;
+    private UploadError updateObservationsError;
     private UploadError postImageMetaDataError;
     private UploadError putImageContentError;
     private UploadError putImageMetaDataError;
@@ -76,7 +79,8 @@ public class BrapiExportActivity extends AppCompatActivity {
 
                 brAPIService = BrAPIServiceFactory.getBrAPIService(this);
 
-                putObservationsError = UploadError.NONE;
+                createObservationsError = UploadError.NONE;
+                updateObservationsError = UploadError.NONE;
                 postImageMetaDataError = UploadError.NONE;
                 putImageContentError = UploadError.NONE;
                 putImageMetaDataError = UploadError.NONE;
@@ -85,7 +89,9 @@ public class BrapiExportActivity extends AppCompatActivity {
                 putImageContentUpdatesCount = 0;
                 putImageMetaDataUpdatesCount = 0;
 
-                observationsNeedingSync = new ArrayList<>();
+                newObservations = new ArrayList<>();
+                editedObservations = new ArrayList<>();
+
                 numNewObservations = 0;
                 numSyncedObservations = 0;
                 numEditedObservations = 0;
@@ -95,7 +101,8 @@ public class BrapiExportActivity extends AppCompatActivity {
                 numSyncedImages = 0;
                 numEditedImages = 0;
                 numIncompleteImages = 0;
-                observationsComplete = false;
+                createObservationsComplete = false;
+                updateObservationsComplete = false;
 
                 loadToolbar();
                 loadStatistics();
@@ -128,10 +135,10 @@ public class BrapiExportActivity extends AppCompatActivity {
         super.onResume();
 
         // Check out brapi auth
-        BrapiControllerResponse brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
+//        BrapiControllerResponse brapiControllerResponse = BrAPIService.checkBrapiAuth(this);
 
         // Check whether our brapi auth response was exists or was successful
-        processBrapiControllerMessage(brapiControllerResponse);
+    //    processBrapiControllerMessage(brapiControllerResponse);
 
     }
 
@@ -182,11 +189,20 @@ public class BrapiExportActivity extends AppCompatActivity {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                if (numNewObservations > 0 || numEditedObservations > 0) {
-                    putObservations();
-                } else if (numNewObservations == 0 && numEditedObservations == 0) {
-                    observationsComplete = true;
+                if (numNewObservations > 0) {
+                    createObservations();
+                }else{
+                    createObservationsComplete = true;
+                    uploadComplete();
                 }
+
+                if (numEditedObservations > 0) {
+                    updateObservations();
+                }else{
+                    updateObservationsComplete = true;
+                    uploadComplete();
+                }
+
                 if (numNewImages > 0) {
                     loadNewImages();
                     postImages(imagesNew);
@@ -227,9 +243,8 @@ public class BrapiExportActivity extends AppCompatActivity {
         this.findViewById(R.id.saving_panel).setVisibility(View.GONE);
     }
 
-    private void putObservations() {
-
-        brAPIService.putObservations(observationsNeedingSync,
+    private void createObservations() {
+        brAPIService.createObservations(newObservations,
                 new Function<List<Observation>, Void>() {
                     @Override
                     public Void apply(final List<Observation> observationDbIds) {
@@ -237,8 +252,8 @@ public class BrapiExportActivity extends AppCompatActivity {
                         (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                processPutObservationsResponse(observationDbIds);
-                                observationsComplete = true;
+                                processCreateObservationsResponse(observationDbIds);
+                                createObservationsComplete = true;
                                 uploadComplete();
                             }
                         });
@@ -252,8 +267,45 @@ public class BrapiExportActivity extends AppCompatActivity {
                         (BrapiExportActivity.this).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                putObservationsError = processErrorCode(code);
-                                observationsComplete = true;
+                                createObservationsError = processErrorCode(code);
+                                createObservationsComplete = true;
+                                uploadComplete();
+                            }
+                        });
+
+                        return null;
+                    }
+                }
+        );
+    }
+
+    private void updateObservations() {
+
+        brAPIService.updateObservations(editedObservations,
+                new Function<List<Observation>, Void>() {
+                    @Override
+                    public Void apply(final List<Observation> observationDbIds) {
+
+                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                processUpdateObservationsResponse(observationDbIds);
+                                updateObservationsComplete = true;
+                                uploadComplete();
+                            }
+                        });
+                        return null;
+                    }
+                }, new Function<Integer, Void>() {
+
+                    @Override
+                    public Void apply(final Integer code) {
+
+                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateObservationsError = processErrorCode(code);
+                                updateObservationsComplete = true;
                                 uploadComplete();
                             }
                         });
@@ -465,19 +517,20 @@ public class BrapiExportActivity extends AppCompatActivity {
             hideSaving();
 
             // show upload status
-            if (putObservationsError == UploadError.API_UNAUTHORIZED_ERROR ||
+            if (createObservationsError == UploadError.API_UNAUTHORIZED_ERROR ||
+                    updateObservationsError == UploadError.API_UNAUTHORIZED_ERROR ||
                     postImageMetaDataError == UploadError.API_UNAUTHORIZED_ERROR ||
                     putImageContentError == UploadError.API_UNAUTHORIZED_ERROR ||
                     putImageMetaDataError == UploadError.API_UNAUTHORIZED_ERROR) {
                 reset();
-                // Start the login process
-                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(BrapiExportActivity.this, BrAPIService.exportTarget);
-                brapiAuth.show();
+                BrAPIService.handleConnectionError(this, 401);
                 return;
             } else {
                 String message;
-                if (putObservationsError != UploadError.NONE) {
-                    message = getMessageForErrorCode(putObservationsError);
+                if (createObservationsError != UploadError.NONE) {
+                    message = getMessageForErrorCode(createObservationsError);
+                } else if (updateObservationsError != UploadError.NONE) {
+                    message = getMessageForErrorCode(updateObservationsError);
                 } else if (postImageMetaDataError != UploadError.NONE) {
                     message = getMessageForErrorCode(postImageMetaDataError);
                 } else if (putImageContentError != UploadError.NONE) {
@@ -505,15 +558,17 @@ public class BrapiExportActivity extends AppCompatActivity {
     }
 
     private Boolean observationsComplete() {
-        return observationsComplete;
+        return createObservationsComplete && updateObservationsComplete;
     }
 
     private void reset() {
-        putObservationsError = UploadError.NONE;
+        createObservationsError = UploadError.NONE;
+        updateObservationsError = UploadError.NONE;
         postImageMetaDataError = UploadError.NONE;
         putImageContentError = UploadError.NONE;
         putImageMetaDataError = UploadError.NONE;
-        observationsComplete = false;
+        createObservationsComplete = false;
+        updateObservationsComplete = false;
         postImageMetaDataUpdatesCount = 0;
         putImageContentUpdatesCount = 0;
         putImageMetaDataUpdatesCount = 0;
@@ -565,7 +620,7 @@ public class BrapiExportActivity extends AppCompatActivity {
         UploadError retVal = UploadError.NONE;
         // keep track of responses to be processed when finished?
 
-        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ",
+        SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
                 Locale.getDefault());
         String syncTime = timeStamp.format(Calendar.getInstance().getTime());
 
@@ -582,9 +637,14 @@ public class BrapiExportActivity extends AppCompatActivity {
         return retVal;
     }
 
-    private void processPutObservationsResponse(List<Observation> observationDbIds) {
-        UploadError error = processResponse(observationDbIds, observationsNeedingSync);
-        putObservationsError = error;
+    private void processCreateObservationsResponse(List<Observation> observationDbIds) {
+        UploadError error = processResponse(observationDbIds, newObservations);
+        updateObservationsError = error;
+    }
+
+    private void processUpdateObservationsResponse(List<Observation> observationDbIds) {
+        UploadError error = processResponse(observationDbIds, editedObservations);
+        updateObservationsError = error;
     }
 
     private void processPostImageResponse(FieldBookImage response, String fieldBookId) {
@@ -624,7 +684,6 @@ public class BrapiExportActivity extends AppCompatActivity {
 
         String hostURL = BrAPIService.getHostUrl(this);
         List<Observation> observations = dataHelper.getObservations(hostURL);
-        observationsNeedingSync.clear();
         List<Observation> userCreatedTraitObservations = dataHelper.getUserTraitObservations();
         List<Observation> wrongSourceObservations = dataHelper.getWrongSourceObservations(hostURL);
 
@@ -638,14 +697,14 @@ public class BrapiExportActivity extends AppCompatActivity {
             switch (observation.getStatus()) {
                 case NEW:
                     numNewObservations++;
-                    observationsNeedingSync.add(observation);
+                    newObservations.add(observation);
                     break;
                 case SYNCED:
                     numSyncedObservations++;
                     break;
                 case EDITED:
                     numEditedObservations++;
-                    observationsNeedingSync.add(observation);
+                    editedObservations.add(observation);
                     break;
             }
         }

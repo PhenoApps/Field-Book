@@ -199,12 +199,12 @@ class Migrator {
                 //val traits = ObservationVariableDao.getAllTraitObjects()
                 //iterate over all traits, insert observation variable values using the above mapping
                 //old schema has extra columns in the trait table which are now bridged with attr/vals in the new schema
-                traits.forEachIndexed { index, trait ->
+                traits.forEachIndexed { _, trait ->
                     //iterate trhough mapping of the old columns that are now attr/vals
                     mapOf(
-                            "validValuesMin" to trait.minimum as String,
-                            "validValuesMax" to trait.maximum as String,
-                            "category" to trait.categories as String,
+                            "validValuesMin" to (trait.minimum ?: ""),
+                            "validValuesMax" to (trait.maximum ?: ""),
+                            "category" to (trait.categories ?: ""),
                     ).asSequence().forEach { attrValue ->
 
                         //TODO: commenting this out would create a sparse table from the unused attribute values
@@ -278,6 +278,9 @@ class Migrator {
 
             try {
 
+                //hack to repopulate trait positions if they're shy
+                //brapi bug made trait positions empty
+                var traitPosition = 1
                 do {
 
                     val row = mutableMapOf<String, Any?>()
@@ -285,10 +288,13 @@ class Migrator {
                     columnNames.forEach {
                         val index = getColumnIndexOrThrow(it)
                         pattern.getOrElse(it) { null }?.let { colName ->
-                            row[colName] = when (getType(index)) {
-                                0 -> null
-                                1 -> getInt(index)
-                                else -> getStringOrNull(index) ?: getBlobOrNull(index)
+                            row[colName] = when(it) {
+                                "realPosition" -> traitPosition++
+                                else -> when (getType(index)) {
+                                    0 -> null
+                                    1 -> getInt(index)
+                                    else -> getStringOrNull(index) ?: getBlobOrNull(index)
+                                }
                             }
                         }
                     }
@@ -490,7 +496,7 @@ class Migrator {
                 mapOf(PK to "INTEGER PRIMARY KEY AUTOINCREMENT",
                         "observation_unit_attribute_db_id" to "INT REFERENCES ${ObservationUnitAttribute.tableName}(${ObservationUnitAttribute.PK})",
                         "observation_unit_value_name" to "TEXT",
-                        ObservationUnit.FK to "INT REFERENCES ${ObservationUnit.tableName}(${ObservationUnit.PK})",
+                        ObservationUnit.FK to "INT",
                         Study.FK to "INT REFERENCES ${Study.tableName}(${Study.PK}) ON DELETE CASCADE")
             }
             val migratePattern by lazy {

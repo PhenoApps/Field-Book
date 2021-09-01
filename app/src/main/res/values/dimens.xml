@@ -14,4 +14,11 @@
     <dimen name="button_width_numeric">85dp</dimen>
     <dimen name="button_width_disease">60dp</dimen>
 
+    <dimen name="column_width">120dp</dimen>
+    <dimen name="row_height">120dp</dimen>
+    <dimen name="column_header_height">120dp</dimen>
+    <dimen name="row_header_width">120dp</dimen>
+
+    <dimen name="default_row_header_width">55dp</dimen>
+    <dimen name="default_column_header_height">40dp</dimen>
 </resources>

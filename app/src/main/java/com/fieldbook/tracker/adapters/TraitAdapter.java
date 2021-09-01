@@ -87,7 +87,7 @@ public class TraitAdapter extends BaseAdapter {
         }
 
         holder.id = getItem(position).getId();
-        holder.realPosition = getItem(position).getRealPosition();
+        holder.realPosition = String.valueOf(getItem(position).getRealPosition());
         holder.name.setText(getItem(position).getTrait());
 
         switch (getItem(position).getFormat()) {
@@ -134,6 +134,9 @@ public class TraitAdapter extends BaseAdapter {
                 holder.format.setBackgroundResource(R.drawable.ic_trait_barcode);
                 break;
             case "zebra label print":
+                holder.format.setBackgroundResource(R.drawable.ic_trait_labelprint);
+                break;
+            case "gnss":
                 holder.format.setBackgroundResource(R.drawable.ic_trait_labelprint);
                 break;
             default:
@@ -238,7 +241,7 @@ public class TraitAdapter extends BaseAdapter {
         TraitObject trait = getItem(position);
         trait.setTrait(newTraitName);
         trait.setVisible(true);
-        trait.setRealPosition(String.valueOf(pos));
+        trait.setRealPosition(pos);
 
         //MainActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
         ConfigActivity.dt.insertTraits(trait);

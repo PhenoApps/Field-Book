@@ -1,8 +1,5 @@
 package com.fieldbook.tracker.activities;
 
-import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.AlertDialog;
-
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -19,11 +16,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.FileProvider;
-
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,6 +36,12 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
@@ -56,9 +54,11 @@ import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
+
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
+
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -569,7 +569,7 @@ public class ConfigActivity extends AppCompatActivity {
             startActivity(exportIntent);
         } else {
             // Show our login dialog
-            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this, BrAPIService.exportTarget);
+            BrapiAuthDialog brapiAuth = new BrapiAuthDialog(ConfigActivity.this);
             brapiAuth.show();
         }
     }

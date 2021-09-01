@@ -1,11 +1,7 @@
 package com.fieldbook.tracker.activities;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-
-import androidx.appcompat.app.AlertDialog;
-
-import android.content.Context;
+import android.app.Activity;import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,14 +11,7 @@ import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-
-import android.text.Editable;
+import android.os.Message;import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -50,6 +39,12 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.LayoutCollections;
@@ -64,8 +59,10 @@ import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
+
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -251,7 +248,6 @@ public class CollectActivity extends AppCompatActivity {
         traitBox = new TraitBox(this);
         rangeBox = new RangeBox(this);
         initCurrentVals();
-
     }
 
     private void refreshMain() {
@@ -352,8 +348,9 @@ public class CollectActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 // if a brapi observation that has been synced, don't allow deleting
+                String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
                 TraitObject currentTrait = traitBox.getCurrentTrait();
-                if (dt.isBrapiSynced(rangeBox.getPlotID(), currentTrait.getTrait())) {
+                if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
                     if (currentTrait.getFormat().equals("photo")) {
                         // I want to use abstract method
                         Map newTraits = traitBox.getNewTraits();
@@ -406,7 +403,7 @@ public class CollectActivity extends AppCompatActivity {
     }
 
     // Moves to specific plot/range/plot_id
-    private void moveToSearch(String type, int[] rangeID, String range, String plot, String data) {
+    private void moveToSearch(String type, int[] rangeID, String range, String plot, String data, int trait) {
 
         if (rangeID == null) {
             return;
@@ -450,11 +447,16 @@ public class CollectActivity extends AppCompatActivity {
 
         //move to plot id
         if (type.equals("id")) {
-            for (int j = 1; j <= rangeID.length; j++) {
+            int rangeSize = rangeID.length;
+            for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
                 if (rangeBox.getCRange().plot_id.equals(data)) {
-                    moveToResultCore(j);
+
+                    if (trait == -1) {
+                        moveToResultCore(j);
+                    } else moveToResultCore(j, trait);
+
                     return;
                 }
             }
@@ -470,6 +472,26 @@ public class CollectActivity extends AppCompatActivity {
         rangeBox.display();
 
         traitBox.setNewTraits(rangeBox.getPlotID());
+
+        initWidgets(false);
+    }
+
+    /**
+     * Overloaded version of original moveToResultCore.
+     * This version is only called after a grid search, which supplies the trait the user clicked on.
+     * This search will update the trait box to the clicked trait.
+     * @param j the range box page
+     * @param traitIndex the trait to move to
+     */
+    private void moveToResultCore(int j, int traitIndex) {
+        rangeBox.setPaging(j);
+
+        // Reload traits based on selected plot
+        rangeBox.display();
+
+        traitBox.setNewTraits(rangeBox.getPlotID());
+
+        traitBox.setSelection(traitIndex);
 
         initWidgets(false);
     }
@@ -539,7 +561,7 @@ public class CollectActivity extends AppCompatActivity {
             if (ep.getString("lastplot", null) != null) {
                 rangeBox.setAllRangeID();
                 int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, ep.getString("lastplot", null));
+                moveToSearch("id", rangeID, null, null, ep.getString("lastplot", null), -1);
             }
 
         } else if (partialReload) {
@@ -554,7 +576,7 @@ public class CollectActivity extends AppCompatActivity {
             int[] rangeID = rangeBox.getRangeID();
 
             if (rangeID != null) {
-                moveToSearch("search", rangeID, searchRange, searchPlot, null);
+                moveToSearch("search", rangeID, searchRange, searchPlot, null, -1);
             }
         }
 
@@ -636,12 +658,12 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         traitBox.update(parent, value);
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
-        Observation observation = dt.getObservation(rangeBox.getPlotID(), parent);
+        Observation observation = dt.getObservation(exp_id, rangeBox.getPlotID(), parent);
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
@@ -670,8 +692,9 @@ public class CollectActivity extends AppCompatActivity {
             return;
         }
 
+        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
         TraitObject trait = traitBox.getCurrentTrait();
-        if (dt.isBrapiSynced(rangeBox.getPlotID(), trait.getTrait())) {
+        if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), trait.getTrait())) {
             brapiDelete(parent, true);
         } else {
             // Always remove existing trait before inserting again
@@ -808,9 +831,10 @@ public class CollectActivity extends AppCompatActivity {
                 showSummary();
                 break;
             case R.id.datagrid:
-                intent.setClassName(CollectActivity.this,
-                        DatagridActivity.class.getName());
-                startActivityForResult(intent, 2);
+                Intent i = new Intent();
+                i.setClassName(CollectActivity.this,
+                        DataGridActivity.class.getName());
+                startActivityForResult(i, 2);
                 break;
             case R.id.lockData:
                 dataLocked = !dataLocked;
@@ -853,7 +877,7 @@ public class CollectActivity extends AppCompatActivity {
                 inputPlotId = barcodeId.getText().toString();
                 rangeBox.setAllRangeID();
                 int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, inputPlotId);
+                moveToSearch("id", rangeID, null, null, inputPlotId, -1);
                 goToId.dismiss();
             }
         });
@@ -991,9 +1015,10 @@ public class CollectActivity extends AppCompatActivity {
             case 2:
                 if (resultCode == RESULT_OK) {
                     inputPlotId = data.getStringExtra("result");
+                    int trait = data.getIntExtra("trait", -1);
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
-                    moveToSearch("id", rangeID, null, null, inputPlotId);
+                    moveToSearch("id", rangeID, null, null, inputPlotId, trait);
                 }
                 break;
             case 98:
@@ -1002,7 +1027,7 @@ public class CollectActivity extends AppCompatActivity {
                     inputPlotId = plotSearchResult.getContents();
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
-                    moveToSearch("id", rangeID, null, null, inputPlotId);
+                    moveToSearch("id", rangeID, null, null, inputPlotId, -1);
                 }
                 break;
             case 99:
@@ -1157,12 +1182,28 @@ public class CollectActivity extends AppCompatActivity {
             newTraits = new HashMap();
 
             traitType = findViewById(R.id.traitType);
-            traitLeft = findViewById(R.id.traitLeft);
-            traitRight = findViewById(R.id.traitRight);
+
+            //determine trait button function based on user-preferences
+            //issues217 introduces the ability to swap trait and plot arrows
+            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            if (flipFlopArrows) {
+                traitLeft = findViewById(R.id.rangeLeft);
+                traitRight = findViewById(R.id.rangeRight);
+            } else {
+                traitLeft = findViewById(R.id.traitLeft);
+                traitRight = findViewById(R.id.traitRight);
+            }
+
             traitDetails = findViewById(R.id.traitDetails);
 
-            traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft, R.drawable.main_trait_left_arrow_unpressed,
-                    R.drawable.main_trait_left_arrow_pressed));
+            //change click-arrow based on preferences
+            if (flipFlopArrows) {
+                traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft, R.drawable.main_entry_left_unpressed,
+                        R.drawable.main_entry_left_pressed));
+            } else {
+                traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft, R.drawable.main_trait_left_arrow_unpressed,
+                        R.drawable.main_trait_left_arrow_pressed));
+            }
 
             // Go to previous trait
             traitLeft.setOnClickListener(new OnClickListener() {
@@ -1172,8 +1213,14 @@ public class CollectActivity extends AppCompatActivity {
                 }
             });
 
-            traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight, R.drawable.main_trait_right_unpressed,
-                    R.drawable.main_trait_right_pressed));
+            //change click-arrow based on preferences
+            if (flipFlopArrows) {
+                traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight, R.drawable.main_entry_right_unpressed,
+                        R.drawable.main_entry_right_pressed));
+            } else {
+                traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight, R.drawable.main_trait_right_unpressed,
+                        R.drawable.main_trait_right_pressed));
+            }
 
             // Go to next trait
             traitRight.setOnClickListener(new OnClickListener() {
@@ -1454,6 +1501,12 @@ public class CollectActivity extends AppCompatActivity {
 
         private Handler repeatHandler;
 
+        /**
+         * unique plot names used in range queries
+         * query and save them once during initialization
+         */
+        private String firstName, secondName, uniqueName;
+
         private int delay = 100;
         private int count = 1;
 
@@ -1465,6 +1518,10 @@ public class CollectActivity extends AppCompatActivity {
             cRange.plot_id = "";
             cRange.range = "";
             lastRange = "";
+
+            firstName = ep.getString("ImportFirstName", "");
+            secondName = ep.getString("ImportSecondName", "");
+            uniqueName = ep.getString("ImportUniqueName", "");
 
             initAndPlot();
         }
@@ -1505,8 +1562,16 @@ public class CollectActivity extends AppCompatActivity {
             rangeName = findViewById(R.id.rangeName);
             plotName = findViewById(R.id.plotName);
 
-            rangeLeft = findViewById(R.id.rangeLeft);
-            rangeRight = findViewById(R.id.rangeRight);
+            //determine range button function based on user-preferences
+            //issues217 introduces the ability to swap trait and plot arrows
+            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            if (flipFlopArrows) {
+                rangeLeft = findViewById(R.id.traitLeft);
+                rangeRight = findViewById(R.id.traitRight);
+            } else {
+                rangeLeft = findViewById(R.id.rangeLeft);
+                rangeRight = findViewById(R.id.rangeRight);
+            }
 
             tvRange = findViewById(R.id.tvRange);
             tvPlot = findViewById(R.id.tvPlot);
@@ -1578,7 +1643,7 @@ public class CollectActivity extends AppCompatActivity {
                     // do not do bit check on event, crashes keyboard
                     if (actionId == EditorInfo.IME_ACTION_DONE) {
                         try {
-                            moveToSearch(searchType, rangeID, null, null, view.getText().toString());
+                            moveToSearch(searchType, rangeID, null, null, view.getText().toString(), -1);
                             InputMethodManager imm = parent.getIMM();
                             imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
                         } catch (Exception ignore) {
@@ -1613,16 +1678,34 @@ public class CollectActivity extends AppCompatActivity {
 
         private OnTouchListener createOnLeftTouchListener() {
             Runnable actionLeft = createRunnable("left");
-            return createOnTouchListener(rangeLeft, actionLeft,
-                    R.drawable.main_entry_left_pressed,
-                    R.drawable.main_entry_left_unpressed);
+
+            //change click-arrow based on preferences
+            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            if (flipFlopArrows) {
+                return createOnTouchListener(rangeLeft, actionLeft,
+                        R.drawable.main_trait_left_arrow_pressed,
+                        R.drawable.main_trait_left_arrow_unpressed);
+            } else {
+                return createOnTouchListener(rangeLeft, actionLeft,
+                        R.drawable.main_entry_left_pressed,
+                        R.drawable.main_entry_left_unpressed);
+            }
         }
 
         private OnTouchListener createOnRightTouchListener() {
             Runnable actionRight = createRunnable("right");
-            return createOnTouchListener(rangeRight, actionRight,
-                    R.drawable.main_entry_right_pressed,
-                    R.drawable.main_entry_right_unpressed);
+
+            //change click-arrow based on preferences
+            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            if (flipFlopArrows) {
+                return createOnTouchListener(rangeRight, actionRight,
+                        R.drawable.main_trait_right_pressed,
+                        R.drawable.main_trait_right_unpressed);
+            } else {
+                return createOnTouchListener(rangeRight, actionRight,
+                        R.drawable.main_entry_right_pressed,
+                        R.drawable.main_entry_right_unpressed);
+            }
         }
 
         private OnTouchListener createOnTouchListener(final ImageView control,
@@ -1686,7 +1769,7 @@ public class CollectActivity extends AppCompatActivity {
                 paging = movePaging(paging, step, true);
 
                 // Refresh onscreen controls
-                cRange = dt.getRange(rangeID[paging - 1]);
+                cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[paging - 1]);
                 rangeBox.saveLastPlot();
 
                 if (cRange.plot_id.length() == 0)
@@ -1717,7 +1800,7 @@ public class CollectActivity extends AppCompatActivity {
 
             setAllRangeID();
             if (rangeID != null) {
-                cRange = dt.getRange(rangeID[0]);
+                cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[0]);
 
                 //TODO NullPointerException
                 lastRange = cRange.range;
@@ -1729,7 +1812,7 @@ public class CollectActivity extends AppCompatActivity {
 
         // Refresh onscreen controls
         void refresh() {
-            cRange = dt.getRange(rangeID[paging - 1]);
+            cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[paging - 1]);
 
             display();
             final SharedPreferences ep = parent.getPreference();
@@ -1794,11 +1877,11 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         public void setRange(final int id) {
-            cRange = dt.getRange(id);
+            cRange = dt.getRange(firstName, secondName, uniqueName, id);
         }
 
         void setRangeByIndex(final int j) {
-            cRange = dt.getRange(rangeID[j]);
+            cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[j]);
         }
 
         void setLastRange() {

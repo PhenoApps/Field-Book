@@ -13,22 +13,22 @@
                 android:summary="@string/preferences_theme_app_color_description"
                 android:title="@string/preferences_theme_app_color_title" />
     -->
-        <com.skydoves.colorpickerpreference.ColorPickerPreference
-            android:icon="@drawable/ic_pref_theme_saved_data_color"
-            android:key="SAVED_DATA_COLOR"
-            android:summary="@string/preferences_theme_data_saved_description"
-            android:title="@string/preferences_theme_data_saved_title"
-            app:preference_attachAlphaSlideBar="false"
-            app:preference_attachBrightnessSlideBar="true"
-            app:preference_dialog_title="@string/preferences_theme_data_saved_title"
-            app:preference_dialog_negative="@string/dialog_cancel"
-            app:preference_dialog_positive="@string/dialog_save"
-            app:preference_selector="@drawable/wheel" />
+    <com.skydoves.colorpickerpreference.ColorPickerPreference
+        android:icon="@drawable/ic_pref_theme_saved_data_color"
+        android:key="SAVED_DATA_COLOR"
+        android:summary="@string/preferences_theme_data_saved_description"
+        android:title="@string/preferences_theme_data_saved_title"
+        app:preference_attachAlphaSlideBar="false"
+        app:preference_attachBrightnessSlideBar="true"
+        app:preference_dialog_negative="@string/dialog_cancel"
+        app:preference_dialog_positive="@string/dialog_save"
+        app:preference_dialog_title="@string/preferences_theme_data_saved_title"
+        app:preference_selector="@drawable/wheel" />
 
-        <Preference
-            android:icon="@drawable/ic_pref_theme_restore_default"
-            android:key="RESTORE_DEFAULT_THEME"
-            android:summary="@string/preferences_theme_reset_description"
-            android:title="@string/preferences_theme_reset_title" />
+    <Preference
+        android:icon="@drawable/ic_pref_theme_restore_default"
+        android:key="RESTORE_DEFAULT_THEME"
+        android:summary="@string/preferences_theme_reset_description"
+        android:title="@string/preferences_theme_reset_title" />
 
 </PreferenceScreen>
