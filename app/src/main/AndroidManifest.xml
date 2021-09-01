@@ -168,6 +168,9 @@
             android:stateNotNeeded="true"
             tools:replace="android:screenOrientation" />
 
+        <activity android:name=".activities.CropontologyActivity"
+            android:theme="@style/AppTheme"/>
+
         <provider
             android:name=".provider.GenericFileProvider"
             android:authorities="com.fieldbook.tracker.fileprovider"

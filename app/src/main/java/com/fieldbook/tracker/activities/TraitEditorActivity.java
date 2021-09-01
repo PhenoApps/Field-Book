@@ -519,6 +519,11 @@ public class TraitEditorActivity extends AppCompatActivity {
                 CollectActivity.reloadData = true;
                 finish();
                 break;
+
+            case R.id.action_import_traits_from_cropontology:
+                Intent cropOntologyIntent = new Intent(this, CropontologyActivity.class);
+                startActivity(cropOntologyIntent);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

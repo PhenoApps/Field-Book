@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name='name'
+            type='String'/>
+        <variable
+            name='description'
+            type='String'/>
+        <variable
+            name='id'
+            type='String'/>
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView style="@style/Widget.MaterialComponents.TextView"
+            android:id="@+id/list_item_simple_name_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@{name}"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Simple List Item 1" />
+
+        <TextView style="@style/Widget.MaterialComponents.TextView"
+            android:id="@+id/list_item_simple_description_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@{description}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/list_item_simple_name_tv"
+            tools:text="Hidden text"
+            android:visibility="gone"/>
+
+        <View
+            android:background="@drawable/list_item_divider"
+            android:layout_height="1dp"
+            android:layout_width="match_parent"
+            app:layout_constraintTop_toBottomOf="@id/list_item_simple_description_tv"            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

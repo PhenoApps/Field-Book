@@ -30,5 +30,11 @@
         android:icon="@drawable/ic_tb_import_export"
         android:showAsAction="ifRoom"
         android:title="@string/traits_toolbar_import_export" />
+    <item
+        android:id="@+id/action_import_traits_from_cropontology"
+        android:icon="@drawable/ic_pref_source_import_default"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:showAsAction="ifRoom"
+        android:title="@string/menu_traits_import_from_cropontology_title"/>
 </menu>
 
