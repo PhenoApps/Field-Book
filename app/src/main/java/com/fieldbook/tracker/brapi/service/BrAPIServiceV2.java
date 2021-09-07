@@ -815,7 +815,8 @@ public class BrAPIServiceV2 implements BrAPIService{
         StringBuilder sb = new StringBuilder();
         if (categories != null) {
             for (int j = 0; j < categories.size(); ++j) {
-                sb.append(categories.get(j).getLabel());
+                // Use the "value" like brapi v1
+                sb.append(categories.get(j).getValue());
                 if (j != categories.size() - 1) {
                     sb.append("/");
                 }

@@ -158,31 +158,22 @@ class ObservationUnitPropertyDao {
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
-//        "select " + fields + ", traits.trait, user_traits.userValue, " +
-//                "user_traits.timeTaken, user_traits.person, user_traits.location, user_traits.rep" +
-//                " from user_traits, range, traits where " +
-//                "user_traits.rid = range." + TICK + ep.getString("ImportUniqueName", "") + TICK +
-//                " and user_traits.parent = traits.trait and " +
-//                "user_traits.trait = traits.format and user_traits.userValue is not null and " + activeTraits;
-
                 val varSelectFields = arrayOf("observation_variable_name")
-                val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates")
+                val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
                 //val outputFields = fieldList + varSelectFields + obsSelectFields
                 val query = """
-        SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }} ${if (fieldList.isNotEmpty()) "," else " "} 
-            ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }} ${if (varSelectFields.isNotEmpty()) "," else " "}
-            ${obsSelectFields.joinToString { "obs.`$it` AS `$it`" }}
-        FROM ${Observation.tableName} AS obs, 
-             $sObservationUnitPropertyViewName AS props, 
-             ${ObservationVariable.tableName} AS vars
-        WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
-            AND obs.value IS NOT NULL
-            AND vars.observation_variable_name = obs.observation_variable_name
-            AND vars.observation_variable_name in ${traits.map { "'$it'" }.joinToString(",", "(", ")")}
-        
-    """.trimIndent()
-
-//        println(query)
+                    SELECT ${fieldList.joinToString { "props.`$it` AS `$it`" }} ${if (fieldList.isNotEmpty()) "," else " "} 
+                        ${varSelectFields.joinToString { "vars.`$it` AS `$it`" }} ${if (varSelectFields.isNotEmpty()) "," else " "}
+                        ${obsSelectFields.joinToString { "obs.`$it` AS `$it`" }}
+                    FROM ${Observation.tableName} AS obs, 
+                         $sObservationUnitPropertyViewName AS props, 
+                         ${ObservationVariable.tableName} AS vars
+                    WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
+                        AND obs.value IS NOT NULL
+                        AND vars.observation_variable_name = obs.observation_variable_name
+                        AND vars.observation_variable_name in ${traits.map { "'$it'" }.joinToString(",", "(", ")")}
+                    
+                """.trimIndent()
 
                 val table = db.rawQuery(query, null).toTable()
 
@@ -194,34 +185,47 @@ class ObservationUnitPropertyDao {
                             "timeTaken" -> row["observation_time_stamp"]
                             "person" -> row["collector"]
                             "location" -> row["geoCoordinates"]
-                            else -> 2 //TODO: Trevor what do do with rep
+                            "rep" -> row["rep"]
+                            else -> String()
                         }
                     })
                 }
             }
         }
 
+        /**
+         * Called in ConfigActivity
+         * This will print all observation data (if a trait is not observed it is null/empty string) for all observation units.
+         * The user decides whether to print all plot-related fields s.a unique id, primary/secondary name or just the unique name.
+         * The select variable dynamically builds what the user chooses from the col parameter.
+         * The maxStatements parameter builds aggregate case statements for each variable, this way the output has column names that are one-to-one with variable names.
+         *  Where the column observation_variable_name value will be the observation value.
+         * Left join is used to capture all observation_units, even if they did not make an observation.
+         * Finally group by props.id to output the aggregation for all observation units, otherwise only a single column would aggregate.
+         * Inputs:
+         * @param uniqueName the preference string that user chooses on field selection for unique plot names
+         * @param col the plot descriptors, this will be either the unique name or all plot descriptors
+         * @param traits the list of traits to print, either all traits or just the active ones
+         * @return a cursor that is used in CSVWriter and closed elsewhere
+         */
         fun convertDatabaseToTable(uniqueName: String, col: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
-            val query: String
-            val rangeArgs = arrayOfNulls<String>(col.size)
-            val traitArgs = arrayOfNulls<String>(traits.size)
-            var joinArgs = ""
+            val select = col.joinToString(",") { "props.$it" }
 
-            for (i in col.indices) {
-                rangeArgs[i] = "prop.`${col[i]}`"
+            val maxStatements = arrayListOf<String>()
+            traits.forEach {
+                maxStatements.add(
+                    "MAX (CASE WHEN o.observation_variable_name='$it' THEN o.value ELSE NULL END) AS '$it'"
+                )
             }
 
-            for (i in traits.indices) {
-                traitArgs[i] = "m" + i + ".value AS '" + traits[i] + "'"
-                joinArgs = (joinArgs + "LEFT JOIN observations m" + i + " ON prop.`$uniqueName`"
-                        + " = m" + i + ".observation_unit_id AND m" + i + ".observation_variable_name = '" + traits[i] + "' ")
-            }
-
-            query = "SELECT " + rangeArgs.joinToString(",") + " , " + traitArgs.joinToString(",") +
-                    " FROM $sObservationUnitPropertyViewName AS prop " + joinArgs + " GROUP BY prop.`$uniqueName` ORDER BY prop.id"
-
-            println(query)
+            val query = """
+                SELECT $select,
+                ${maxStatements.joinToString(",\n")}
+                FROM ObservationUnitProperty as props
+                LEFT JOIN observations o ON props.${uniqueName} = o.observation_unit_id
+                GROUP BY props.id
+            """.trimIndent()
 
             db.rawQuery(query, null)
         }

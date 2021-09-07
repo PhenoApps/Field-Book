@@ -71,22 +71,18 @@ fun Cursor.toFirst(): Map<String, Any?> = if (moveToFirst()) {
 
     val row = mutableMapOf<String, Any?>()
 
-    columnNames.forEach {
-        val index = getColumnIndexOrThrow(it)
-        if (index > -1) {
-            row[it] = when (getType(index)) {
-                //null field type
-                0 -> null
-                //int field type
-                1 -> getIntOrNull(index)
-                //string field type
-                //blob field type 3
-                else -> {
-                    getStringOrNull(index) ?: getBlobOrNull(index).toString()
-                }
+    columnNames.forEachIndexed { index, _ ->
+        row[getColumnName(index)] = when (getType(index)) {
+            //null field type
+            0 -> null
+            //int field type
+            1 -> getIntOrNull(index)
+            //string field type
+            //blob field type 3
+            else -> {
+                getStringOrNull(index) ?: getBlobOrNull(index).toString()
             }
         }
-
     }
 
     close()
@@ -106,9 +102,7 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 
         val row = mutableMapOf<String, Any?>().withDefault { String() }
 
-        columnNames.forEach {
-            val index = getColumnIndex(it)
-            if (index > -1) {
+        columnNames.forEachIndexed { index, _ ->
 //                    <li>{@link #FIELD_TYPE_NULL}</li>
 //                    *   <li>{@link #FIELD_TYPE_INTEGER}</li>
 //                    *   <li>{@link #FIELD_TYPE_FLOAT}</li>
@@ -122,16 +116,16 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 //                    }
 //                    println(getType(index))
 
-                row[it] = when (getType(index)) {
-                    //null field type
-                    0 -> null
-                    //int field type
-                    1 -> getIntOrNull(index)
-                    //string field type
-                    //blob field type 3
-                    else -> {
-                        getStringOrNull(index) ?: getBlobOrNull(index).toString()
-                    }
+            row[getColumnName(index)] = when (getType(index)) {
+                //null field type
+                0 -> null
+                //int field type
+                1 -> getIntOrNull(index)
+                //string field type
+                //blob field type 3
+                else -> {
+                    getStringOrNull(index) ?: getBlobOrNull(index).toString()
+                }
 //                        in IntegerColumns -> getIntOrNull(index)
 //                        else -> {
 //                            try {
@@ -141,8 +135,8 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 //                                String()
 //                            }
 //                        }
-                }
             }
+
         }
 
         table.add(row)
