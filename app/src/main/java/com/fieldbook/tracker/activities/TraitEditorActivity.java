@@ -1078,13 +1078,13 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                     if (data != null) {
                         TraitObject t = new TraitObject();
-                        t.setTrait(data[0]);
-                        t.setFormat(data[1]);
-                        t.setDefaultValue(data[2]);
+                        t.setTrait(DataHelper.replaceSpecialChars(data[0]));
+                        t.setFormat(DataHelper.replaceSpecialChars(data[1]));
+                        t.setDefaultValue(DataHelper.replaceSpecialChars(data[2]));
                         t.setMinimum(data[3]);
                         t.setMaximum(data[4]);
-                        t.setDetails(data[5]);
-                        t.setCategories(data[6]);
+                        t.setDetails(DataHelper.replaceSpecialChars(data[5]));
+                        t.setCategories(DataHelper.replaceSpecialChars(data[6]));
                         //t.visible = data[7].toLowerCase();
                         t.setRealPosition(Integer.parseInt(data[8]));
                         if (data[7].toLowerCase().equals("true")) {
