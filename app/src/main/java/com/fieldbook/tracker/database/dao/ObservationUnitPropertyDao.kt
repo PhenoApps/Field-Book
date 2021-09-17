@@ -2,12 +2,9 @@ package com.fieldbook.tracker.database.dao
 
 import android.database.Cursor
 import android.database.MatrixCursor
+import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
-import com.fieldbook.tracker.database.query
-import com.fieldbook.tracker.database.toFirst
-import com.fieldbook.tracker.database.toTable
-import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.RangeObject
 
 class ObservationUnitPropertyDao {
@@ -155,6 +152,7 @@ class ObservationUnitPropertyDao {
          */
         fun getExportDbData(uniqueName: String, fieldList: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
@@ -171,7 +169,7 @@ class ObservationUnitPropertyDao {
                     WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
                         AND obs.value IS NOT NULL
                         AND vars.observation_variable_name = obs.observation_variable_name
-                        AND vars.observation_variable_name in ${traits.map { "'$it'" }.joinToString(",", "(", ")")}
+                        AND vars.observation_variable_name in ${sanitizeTraits.map { "'$it'" }.joinToString(",", "(", ")")}
                     
                 """.trimIndent()
 
@@ -210,10 +208,11 @@ class ObservationUnitPropertyDao {
          */
         fun convertDatabaseToTable(uniqueName: String, col: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
             val select = col.joinToString(",") { "props.$it" }
 
             val maxStatements = arrayListOf<String>()
-            traits.forEach {
+            sanitizeTraits.forEach {
                 maxStatements.add(
                     "MAX (CASE WHEN o.observation_variable_name='$it' THEN o.value ELSE NULL END) AS '$it'"
                 )

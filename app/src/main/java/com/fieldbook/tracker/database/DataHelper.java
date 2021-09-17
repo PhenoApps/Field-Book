@@ -140,6 +140,16 @@ public class DataHelper {
         return output.toString();
     }
 
+    public static String replaceIdentifiers(String s) {
+
+        String saniString = s.replaceAll("'", "''");
+        saniString = saniString.replaceAll("\\]", "'\\]");
+        saniString = saniString.replaceAll("\\[", "'\\[");
+        saniString = saniString.replaceAll("\"", "'\"");
+
+        return saniString;
+    }
+
     /**
      * V2 - Check if a string has any special characters
      */
