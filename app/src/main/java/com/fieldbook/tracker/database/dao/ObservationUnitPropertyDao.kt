@@ -152,7 +152,7 @@ class ObservationUnitPropertyDao {
          */
         fun getExportDbData(uniqueName: String, fieldList: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
-            val sanitizeTraits = traits.map { DataHelper.replaceSpecialChars(it) }
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
@@ -208,7 +208,7 @@ class ObservationUnitPropertyDao {
          */
         fun convertDatabaseToTable(uniqueName: String, col: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
-            val sanitizeTraits = traits.map { DataHelper.replaceSpecialChars(it) }
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
             val select = col.joinToString(",") { "props.$it" }
 
             val maxStatements = arrayListOf<String>()
