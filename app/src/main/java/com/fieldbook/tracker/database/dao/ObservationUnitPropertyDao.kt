@@ -169,11 +169,11 @@ class ObservationUnitPropertyDao {
                     WHERE obs.${ObservationUnit.FK} = props.`$uniqueName`
                         AND obs.value IS NOT NULL
                         AND vars.observation_variable_name = obs.observation_variable_name
-                        AND vars.observation_variable_name in ${sanitizeTraits.map { "'$it'" }.joinToString(",", "(", ")")}
+                        AND vars.observation_variable_name in ${traits.map { "?" }.joinToString(",", "(", ")")}
                     
                 """.trimIndent()
 
-                val table = db.rawQuery(query, null).toTable()
+                val table = db.rawQuery(query, traits).toTable()
 
                 table.forEach { row ->
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {

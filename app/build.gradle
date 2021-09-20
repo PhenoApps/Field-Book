@@ -26,8 +26,8 @@ android {
         applicationId "com.fieldbook.tracker"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode = 504
-        versionName = '5.0.4'
+        versionCode = 505
+        versionName = '5.0.5'
         multiDexEnabled true
     }
 
