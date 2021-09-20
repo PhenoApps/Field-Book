@@ -152,7 +152,6 @@ class ObservationUnitPropertyDao {
          */
         fun getExportDbData(uniqueName: String, fieldList: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
-            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
