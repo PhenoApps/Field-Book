@@ -1,9 +1,16 @@
 <changelog>
     <release
+        date="2021-09-20"
+        versionCode="505"
+        versionName="v5.0.5">
+        <bugfix>Fixed an issue with the fix for apostrophes in trait names</bugfix>
+    </release>
+
+    <release
         date="2021-09-17"
         versionCode="504"
         versionName="v5.0.4">
-        <bugfix>Fixed an issues with apostrophes in trait names</bugfix>
+        <bugfix>Fixed an issue with apostrophes in trait names</bugfix>
     </release>
 
     <release
