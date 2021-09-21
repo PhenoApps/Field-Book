@@ -1,5 +1,12 @@
 <changelog>
     <release
+        date="2021-09-21"
+        versionCode="506"
+        versionName="v5.0.6">
+        <bugfix>Fixed an issue with import file headers</bugfix>
+    </release>
+
+    <release
         date="2021-09-20"
         versionCode="505"
         versionName="v5.0.5">

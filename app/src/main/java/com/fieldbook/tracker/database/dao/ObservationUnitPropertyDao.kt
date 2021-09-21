@@ -152,7 +152,6 @@ class ObservationUnitPropertyDao {
          */
         fun getExportDbData(uniqueName: String, fieldList: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
-            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
@@ -209,7 +208,7 @@ class ObservationUnitPropertyDao {
         fun convertDatabaseToTable(uniqueName: String, col: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
 
             val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
-            val select = col.joinToString(",") { "props.$it" }
+            val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
 
             val maxStatements = arrayListOf<String>()
             sanitizeTraits.forEach {
@@ -222,7 +221,7 @@ class ObservationUnitPropertyDao {
                 SELECT $select,
                 ${maxStatements.joinToString(",\n")}
                 FROM ObservationUnitProperty as props
-                LEFT JOIN observations o ON props.${uniqueName} = o.observation_unit_id
+                LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id
                 GROUP BY props.id
             """.trimIndent()
 
