@@ -141,6 +141,19 @@ public class DataHelper {
     }
 
     /**
+     * Used to sanitize traits in the selection clause of raw queries.
+     * Android SDK (SQLiteDatabase classes specifically) doesn't allow sanitization of columns in select clauses.
+     * Because FB accepts any trait/observation unit property name and eventually pivots these into columns names in
+     * DataHelper.switchField this function is necessary to manually sanitize.
+     * @param s string to sanitize
+     * @return string with escaped apostrophes
+     */
+    public static String replaceIdentifiers(String s) {
+
+        return s.replaceAll("'", "''");
+    }
+
+    /**
      * V2 - Check if a string has any special characters
      */
     public static boolean hasSpecialChars(String s) {
