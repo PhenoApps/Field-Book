@@ -599,4 +599,7 @@
     <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device.</string>
     <string name="preferences_general_flip_flop_arrows_description">Swaps the trait and plot arrow functions</string>
     <string name="preferences_general_flip_flop_arrows">Flip Flop Arrows</string>
+    <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
+    <string name="act_field_editor_no_suitable_columns_error">Import file has no suitable columns to choose from.</string>
+    <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>
 </resources>
