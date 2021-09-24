@@ -599,4 +599,5 @@
     <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device.</string>
     <string name="preferences_general_flip_flop_arrows_description">Swaps the trait and plot arrow functions</string>
     <string name="preferences_general_flip_flop_arrows">Flip Flop Arrows</string>
+    <string name="trait_date_calendar_picker_content_description">Button that opens a calendar picker.</string>
 </resources>
