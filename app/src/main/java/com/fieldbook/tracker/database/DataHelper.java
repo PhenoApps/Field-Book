@@ -19,6 +19,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
+import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
@@ -2170,10 +2171,16 @@ public class DataHelper {
 
             Migrator.Companion.migrateSchema(db, getAllTraitObjects());
 
-            ep.edit().putInt("SelectedFieldExpId", -1).apply();
-
         }
 
+        SharedPreferences.Editor edit = ep.edit();
+
+        edit.putInt("SelectedFieldExpId", -1).apply();
+        edit.putString("ImportUniqueName", "");
+        edit.putString("ImportFirstName", "");
+        edit.putString("ImportSecondName", "");
+        edit.putBoolean("ImportFieldFinished", false);
+        edit.apply();
     }
 
     /**
