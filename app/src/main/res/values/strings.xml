@@ -262,7 +262,7 @@
     <!-- Trait text and errors -->
     <string name="trait_layout_data_stored">Saved</string>
     <string name="trait_layout_print_title">Print Label</string>
-    <string name="trait_layout_print_status_title">Printer status</string>
+    <string name="trait_layout_print_status_title">Printer message</string>
     <string name="trait_layout_print_status">Retrieving connection status…</string>
     <string name="trait_layout_print_label_size_title">Size:</string>
     <string name="trait_layout_print_text_field_title">Text:</string>
@@ -281,6 +281,8 @@
     <string name="trait_error_disease_severity">Severity already stored</string>
     <string name="trait_delete_warning_photo">Are you sure you want to delete this photo?</string>
 
+    <string name="trait_date_calendar_picker_content_description">Button that opens a calendar picker.</string>
+  
     <!-- Tutorial -->
     <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">Would you like to enable the tutorial? This setting can be changed in the Settings.</string>
@@ -552,6 +554,13 @@
 
     <string name="brapi_study_incompatible">This BrAPI study is currently incompatible with Field Book. Studies must include row and column in the header.</string>
 
+    <!--- Zebra printer errors -->
+    <string name="printer_open">Printer is open</string>
+    <string name="printer_paused">Printer is paused</string>
+    <string name="printer_empty">Printer is empty</string>
+    <string name="printer_not_connected">Printer not connected</string>
+    <string name="no_device_paired">No device paired</string>
+
     <string name="trait_labelprint_preview_description">Label preview.</string>
     <string name="trait_labelprint_zebraconnect_button_description">Button which navigates to Zebra Connect app.</string>
     <string name="trait_labelprint_print_button_description">Button which prints labels configured in this dialog.</string>
@@ -602,4 +611,6 @@
     <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
     <string name="act_field_editor_no_suitable_columns_error">Import file has no suitable columns to choose from.</string>
     <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>
+    <string name="printer_success">Print success</string>
+    <string name="bluetooth_printer_choose_device_title">Choose bluetooth device to print from.</string>
 </resources>

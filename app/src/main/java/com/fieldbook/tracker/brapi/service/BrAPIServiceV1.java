@@ -421,7 +421,8 @@ public class BrAPIServiceV1 implements BrAPIService {
                                final Function<Integer, Void> failFunction) {
         try {
             final Integer[] recursiveCounter = {0};
-            final Integer pageSize = 1000;
+            final Integer pageSize = Integer.parseInt(context.getSharedPreferences("Settings", 0)
+                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setValues(new ArrayList<>());
 
@@ -431,14 +432,6 @@ public class BrAPIServiceV1 implements BrAPIService {
 
                     //bugfix for index out of bounds occurring when no data is in response
                     if (response.getResult().getData().size() > 0) {
-
-                        final BrapiStudyDetails study = new BrapiStudyDetails();
-                        study.setNumberOfPlots(response.getMetadata().getPagination().getTotalCount());
-                        study.setAttributes(mapAttributes(response.getResult().getData().get(0)));
-                        study.setValues(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
-
-                        function.apply(study);
-
                         int page = response.getMetadata().getPagination().getCurrentPage();
                         if(page == 0){
                             //one time code
@@ -451,6 +444,8 @@ public class BrAPIServiceV1 implements BrAPIService {
                                 e.printStackTrace();
                             }
                         }
+
+                        study.getValues().addAll(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
 
                         recursiveCounter[0] = recursiveCounter[0] + 1;
 
