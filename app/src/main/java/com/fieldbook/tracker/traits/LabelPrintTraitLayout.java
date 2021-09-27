@@ -2,10 +2,11 @@ package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -20,18 +21,18 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.utilities.BluetoothUtil;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,7 +48,6 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     private ArrayAdapter<String> sizeArrayAdapter;
     private ArrayAdapter<String> fieldArrayAdapter;
     private ArrayAdapter<String> copiesArrayAdapter;
-    private ImageView exampleLabel;
 
     private Spinner labelsize;
     private Spinner textfield1;
@@ -57,13 +57,11 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     private Spinner barcodefield;
     private Spinner labelcopies;
 
-    public LabelPrintTraitLayout(Context context) {
-        super(context);
-    }
+    private BluetoothUtil mBluetoothUtil;
 
-    public LabelPrintTraitLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+    public LabelPrintTraitLayout(Context context) { super(context); }
+
+    public LabelPrintTraitLayout(Context context, AttributeSet attrs) { super(context, attrs); }
 
     public LabelPrintTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -78,8 +76,42 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         return "zebra label print";
     }
 
+    /**
+     * The PrintThread class sends messages to this receiver.
+     * When a message is found, it will show the message as a toast.
+     * If the print was successful it will be saved to the db.
+     */
+    private final BroadcastReceiver mPrinterMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent != null && intent.getExtras() != null) {
+
+                String message = intent.getExtras().getString("message");
+                String size = intent.getExtras().getString("size");
+
+                if (message != null) {
+
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+
+                }
+
+                if (size != null) {
+
+                    // record each print event
+                    ((CollectActivity) getContext()).insertPrintObservation(size);
+                }
+            }
+        }
+    };
+
     @Override
     public void init() {
+
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mPrinterMessageReceiver,
+                new IntentFilter("printer_message"));
+
+        mBluetoothUtil = new BluetoothUtil();
 
         String[] prefixTraits = ConfigActivity.dt.getRangeColumnNames();
         optionsList = new ArrayList<>(Arrays.asList(prefixTraits));
@@ -123,46 +155,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         getEtCurVal().setVisibility(EditText.GONE);
 
-        final ImageView exampleLabel = findViewById(R.id.labelPreview);
-
-        /*
-        Zebra button is used as a quick navigation to the ZebraPrintConnect app, if it's installed.
-         */
-        final ImageButton zebraButton = findViewById(R.id.zebraButton);
-
         try {
-
-            /*
-             * OnClick event for the zebra icon button, it will attempt to open the zebra connect application.
-             */
-            zebraButton.setOnClickListener((OnClickListener) v -> {
-
-                try {
-
-                    Intent zebraConnectIntent = getContext().getPackageManager().getLaunchIntentForPackage("com.zebra.printconnect");
-
-                    getContext().startActivity(zebraConnectIntent);
-
-                } catch (NullPointerException e) {
-
-                    String message = e.getLocalizedMessage();
-
-                    if (message != null) {
-
-                        Log.d("FieldBookError", message);
-
-                    } else {
-
-                        Log.d("FieldBookError", "Null pointer during Zebra Connect Intent.");
-
-                    }
-
-                    e.printStackTrace();
-
-                    showDownloadDialog();
-                }
-
-            });
 
             // Change spinner visibility, label example image for detailed label option
             labelsize.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -249,255 +242,132 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         }
 
-        PackageManager pm = getContext().getPackageManager();
+        /*
+         * This section handles print events. TODO: Create a label prototype based class. Move most of this logic to a function/class. chaneylc 8/26/2020
+         * More info on prototyping: https://refactoring.guru/design-patterns/prototype
+         */
+        ImageButton printLabel = findViewById(R.id.printLabelButton);
+        printLabel.setOnClickListener(view -> {
+            HashMap<String, String> labelSizes = new HashMap<>();
+            labelSizes.put(labelSizeArray[0], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO180,120^BQ,,sizeb^FDMA,barcode^FS^XZ");
+            labelSizes.put(labelSizeArray[1], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO30,120^BQ,,sizeb^FDMA,barcode^FS^FO260,140^FB349,2,0,C,0^A0,size2,^FDtext2^FS^FO260,270^FB349,2,0,C,0^A0,size3,^FDtext3^FS^FO260,320^FB349,2,0,C,0^A0,size4,^FDtext4^FS^XZ");
+            labelSizes.put(labelSizeArray[2], "^XA^POI^PW406^LL0203^FO0,10^FB399,2,0,C,0^A0,size1,^FDtext1^FS^FO125,50^BQ,,sizeb^FDMA,barcode^FS^XZ");
+            labelSizes.put(labelSizeArray[3], "^XA^POI^PW406^LL0203^FO15,50^BQ,,sizeb^FDMA,barcode^FS^FO0,10^FB406,1,0,C,0^A0,size1,^FDtext1^FS^FO155,60^FB250,1,0,C,0^A0,size2,^FDtext2^FS^FO155,130^FB250,1,0,C,0^A0,size3,^FDtext3^FS^FO155,155^FB250,1,0,C,0^A0,size4,^FDtext4^FS^XZ");
 
-        try {
+            //get and handle selected items from dropdowns
+            String size = labelsize.getSelectedItem().toString();
+            String text1 = getValueFromSpinner(textfield1, options);
+            String text2 = getValueFromSpinner(textfield2, options);
+            String text3 = getValueFromSpinner(textfield3, options);
+            String text4 = getValueFromSpinner(textfield4, options);
+            String barcode = getValueFromSpinner(barcodefield, options);
 
-            pm.getPackageInfo("com.zebra.printconnect", PackageManager.GET_ACTIVITIES);
+            // Save selected options for next time
+            SharedPreferences.Editor ed = getPrefs().edit();
+            ed.putString("SIZE", size);
 
-            //Get and display printer status
-            final TextView printStatus = (TextView) findViewById(R.id.printStatus);
-            Intent statusIntent = new Intent();
-            statusIntent.setComponent(new ComponentName("com.zebra.printconnect",
-                    "com.zebra.printconnect.print.GetPrinterStatusService"));
+            if (textfield1 != null) {
+                ed.putString("TEXT", textfield1.getSelectedItem().toString());
+            }
+            if (textfield2 != null && textfield2.getSelectedItem() != null) {
+                ed.putString("TEXT2", textfield2.getSelectedItem().toString());
+            }
+            if (textfield3 != null && textfield3.getSelectedItem() != null) {
+                ed.putString("TEXT3", textfield3.getSelectedItem().toString());
+            }
+            if (textfield4 != null && textfield4.getSelectedItem() != null) {
+                ed.putString("TEXT4", textfield4.getSelectedItem().toString());
+            }
+            if (barcodefield != null && barcodefield.getSelectedItem() != null) {
+                ed.putString("BARCODE", barcodefield.getSelectedItem().toString());
+            }
+            if (labelcopies != null && labelcopies.getSelectedItem() != null) {
+                ed.putString("COPIES", labelcopies.getSelectedItem().toString());
+            }
+            ed.apply();
 
-            ResultReceiver buildIPCSafeReceiver2 = new ResultReceiver(null) {
-                @Override
-                protected void onReceiveResult(int resultCode, Bundle resultData) {
-                    if (resultCode == 0) { // Result code 0 indicates success
-                        // Handle successful printer status retrieval
+            int length = barcode.length();
+            int barcode_size = 6;
 
-                        @SuppressWarnings("UNCHECKED_CAST")
-                        HashMap<String, String> printerStatusMap = (HashMap<String, String>)
-                                resultData.getSerializable("PrinterStatusMap");
+            // Scale barcode based on label size and variable field length
+            switch (size) {
+                case "3\" x 2\" simple":
+                    barcode_size = 10 - (length / 15);
+                    break;
+                case "3\" x 2\" detailed":
+                    barcode_size = 9 - (length / 15);
+                    break;
+                case "2\" x 1\" simple":
+                case "2\" x 1\" detailed":
+                    barcode_size = 5 - (length / 15);
+                    break;
+                default:
+                    //Log.d(((MainActivity) getContext()).TAG, "Matched no sizes");
+                    break;
+            }
 
-                        if (printerStatusMap != null) {
+            int dotsAvailable1;
+            int dotsAvailable2;
 
-                            final String successMessage = printerStatusMap.get("friendlyName") + " is connected.";
+            // Scale text based on label size and variable field length
+            if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
+                dotsAvailable1 = 399;
+                dotsAvailable2 = 250;
 
-                            Log.d(CollectActivity.TAG, successMessage);
+            } else {
+                dotsAvailable1 = 599;
+                dotsAvailable2 = 349;
+            }
 
-                            ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(successMessage));
-                        }
+            String size1 = Integer.toString(dotsAvailable1 * 3 / (text1.length() + 13));
+            String size2 = Integer.toString(dotsAvailable2 * 2 / (text2.length() + 5));
+            String size3 = Integer.toString(dotsAvailable2 * 2 / (text3.length() + 5));
+            String size4 = Integer.toString(dotsAvailable2 * 2 / (text4.length() + 5));
 
+            // Replace placeholders in zpl code
+            String labelData = labelSizes.get(size);
 
-                    } else {
-                        // Handle unsuccessful printer status retrieval
-                        final String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
+            if (labelData != null) {
 
-                        if (errorMessage != null) {
+                labelData = labelData.replace("text1", text1);
+                labelData = labelData.replace("text2", text2);
+                labelData = labelData.replace("text3", text3);
+                labelData = labelData.replace("text4", text4);
+                labelData = labelData.replace("size1", size1);
+                labelData = labelData.replace("size2", size2);
+                labelData = labelData.replace("size3", size3);
+                labelData = labelData.replace("size4", size4);
+                labelData = labelData.replace("barcode", barcode);
+                labelData = labelData.replace("sizeb", Integer.toString(barcode_size));
 
-                            Log.e(CollectActivity.TAG, errorMessage);
+            }
+            //Log.d(((MainActivity) getContext()).TAG, labelData);
 
-                            ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(errorMessage));
+            if (labelcopies != null) {
 
-                        } else {
+                int copiespos = labelcopies.getSelectedItemPosition();
 
-                            Log.d("FieldBookError", "Error during print label trait connecting to ZebraConnect.");
-                        }
-                    }
+                ArrayList<String> labels = new ArrayList<>();
+                for (int j = 0; j <= copiespos; j++) {
 
-                }
-            };
-
-            statusIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver2));
-            getContext().startService(statusIntent);
-
-            /*
-             * This section handles print events. TODO: Create a label prototype based class. Move most of this logic to a function/class. chaneylc 8/26/2020
-             * More info on prototyping: https://refactoring.guru/design-patterns/prototype
-             */
-            ImageButton printLabel = findViewById(R.id.printLabelButton);
-            printLabel.setOnClickListener(view -> {
-                HashMap<String, String> labelSizes = new HashMap<>();
-                labelSizes.put(labelSizeArray[0], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO180,120^BQ,,sizeb^FDMA,barcode^FS^XZ");
-                labelSizes.put(labelSizeArray[1], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO30,120^BQ,,sizeb^FDMA,barcode^FS^FO260,140^FB349,2,0,C,0^A0,size2,^FDtext2^FS^FO260,270^FB349,2,0,C,0^A0,size3,^FDtext3^FS^FO260,320^FB349,2,0,C,0^A0,size4,^FDtext4^FS^XZ");
-                labelSizes.put(labelSizeArray[2], "^XA^POI^PW406^LL0203^FO0,10^FB399,2,0,C,0^A0,size1,^FDtext1^FS^FO125,50^BQ,,sizeb^FDMA,barcode^FS^XZ");
-                labelSizes.put(labelSizeArray[3], "^XA^POI^PW406^LL0203^FO15,50^BQ,,sizeb^FDMA,barcode^FS^FO0,10^FB406,1,0,C,0^A0,size1,^FDtext1^FS^FO155,60^FB250,1,0,C,0^A0,size2,^FDtext2^FS^FO155,130^FB250,1,0,C,0^A0,size3,^FDtext3^FS^FO155,155^FB250,1,0,C,0^A0,size4,^FDtext4^FS^XZ");
-
-                //get and handle selected items from dropdowns
-                String size = labelsize.getSelectedItem().toString();
-                String text1 = getValueFromSpinner(textfield1, options);
-                String text2 = getValueFromSpinner(textfield2, options);
-                String text3 = getValueFromSpinner(textfield3, options);
-                String text4 = getValueFromSpinner(textfield4, options);
-                String barcode = getValueFromSpinner(barcodefield, options);
-
-                // Save selected options for next time
-                SharedPreferences.Editor ed = getPrefs().edit();
-                ed.putString("SIZE", size);
-
-                if (textfield1 != null) {
-                    ed.putString("TEXT", textfield1.getSelectedItem().toString());
-                }
-                if (textfield2 != null && textfield2.getSelectedItem() != null) {
-                    ed.putString("TEXT2", textfield2.getSelectedItem().toString());
-                }
-                if (textfield3 != null && textfield3.getSelectedItem() != null) {
-                    ed.putString("TEXT3", textfield3.getSelectedItem().toString());
-                }
-                if (textfield4 != null && textfield4.getSelectedItem() != null) {
-                    ed.putString("TEXT4", textfield4.getSelectedItem().toString());
-                }
-                if (barcodefield != null && barcodefield.getSelectedItem() != null) {
-                    ed.putString("BARCODE", barcodefield.getSelectedItem().toString());
-                }
-                if (labelcopies != null && labelcopies.getSelectedItem() != null) {
-                    ed.putString("COPIES", labelcopies.getSelectedItem().toString());
-                }
-                ed.apply();
-
-                int length = barcode.length();
-                int barcode_size = 6;
-
-                // Scale barcode based on label size and variable field length
-                switch (size) {
-                    case "3\" x 2\" simple":
-                        barcode_size = 10 - (length / 15);
-                        break;
-                    case "3\" x 2\" detailed":
-                        barcode_size = 9 - (length / 15);
-                        break;
-                    case "2\" x 1\" simple":
-                    case "2\" x 1\" detailed":
-                        barcode_size = 5 - (length / 15);
-                        break;
-                    default:
-                        //Log.d(((MainActivity) getContext()).TAG, "Matched no sizes");
-                        break;
+                    labels.add(labelData);
                 }
 
-                int dotsAvailable1;
-                int dotsAvailable2;
+                /*
+                 * As of v5.0.6 the app no longer requires the extra PrintConnect app.
+                 * This bluetooth utility class is used to connect with a paired printer and send print commands.
+                 * A local broadcast receiver is used to communicate with the print thread within this utility class.
+                 */
+                mBluetoothUtil.print(getContext(), size, labels);
 
-                // Scale text based on label size and variable field length
-                if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
-                    dotsAvailable1 = 399;
-                    dotsAvailable2 = 250;
+            }
+        });
 
-                } else {
-                    dotsAvailable1 = 599;
-                    dotsAvailable2 = 349;
-                }
-
-                String size1 = Integer.toString(dotsAvailable1 * 3 / (text1.length() + 13));
-                String size2 = Integer.toString(dotsAvailable2 * 2 / (text2.length() + 5));
-                String size3 = Integer.toString(dotsAvailable2 * 2 / (text3.length() + 5));
-                String size4 = Integer.toString(dotsAvailable2 * 2 / (text4.length() + 5));
-
-                // Replace placeholders in zpl code
-                String labelData = labelSizes.get(size);
-
-                if (labelData != null) {
-
-                    labelData = labelData.replace("text1", text1);
-                    labelData = labelData.replace("text2", text2);
-                    labelData = labelData.replace("text3", text3);
-                    labelData = labelData.replace("text4", text4);
-                    labelData = labelData.replace("size1", size1);
-                    labelData = labelData.replace("size2", size2);
-                    labelData = labelData.replace("size3", size3);
-                    labelData = labelData.replace("size4", size4);
-                    labelData = labelData.replace("barcode", barcode);
-                    labelData = labelData.replace("sizeb", Integer.toString(barcode_size));
-
-                }
-                //Log.d(((MainActivity) getContext()).TAG, labelData);
-
-                if (labelcopies != null) {
-
-                    int copiespos = labelcopies.getSelectedItemPosition();
-
-                    StringBuilder passthroughData = new StringBuilder();
-                    for (int j = 0; j <= copiespos; j++) {
-                        passthroughData.append(labelData);
-                    }
-
-                    byte[] passthroughBytes = null;
-
-                    try {
-
-                        passthroughBytes = passthroughData.toString().getBytes("UTF-8");
-
-                    } catch (UnsupportedEncodingException e) {
-
-                        e.printStackTrace();
-
-                    }
-
-                    Intent printIntent = new Intent();
-                    printIntent.setComponent(new ComponentName("com.zebra.printconnect", "com.zebra.printconnect.print.PassthroughService"));
-                    printIntent.putExtra("com.zebra.printconnect.PrintService.PASSTHROUGH_DATA", passthroughBytes);
-
-                    ResultReceiver buildIPCSafeReceiver = new ResultReceiver(null) {
-                        @Override
-                        protected void onReceiveResult(int resultCode, Bundle resultData) {
-                            if (resultCode == 0) {
-                                // Handle successful print
-                                ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(R.string.trait_printlabel_after_print_message));
-                                // record each print event
-                                ((CollectActivity) getContext()).insertPrintObservation(size);
-                            } else {
-                                // Error message (null on successful print)
-                                // Handle unsuccessful print
-                                String errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE");
-                                //Log.e(((MainActivity) getContext()).TAG, "Unable to print label. Make sure the PrintConnect app is installed and connected to your Zebra printer.");
-                                ((Activity) getContext()).runOnUiThread(() -> printStatus.setText(R.string.trait_printlabel_after_print_error));
-                            }
-                        }
-                    };
-
-                    printIntent.setExtrasClassLoader(getContext().getClassLoader());
-                    printIntent.putExtra("com.zebra.printconnect.PrintService.RESULT_RECEIVER", receiverForSending(buildIPCSafeReceiver));
-                    getContext().startService(printIntent);
-                }
-            });
-
-
-        } catch (PackageManager.NameNotFoundException e) {
-            //Log.d(((MainActivity) getContext()).TAG, "Print Connect package not found");
-            showDownloadDialog();
-        }
     }
 
     @Override
     public void deleteTraitListener() {
 
-    }
-
-    /**
-     * Dialog used to download PrintConnect, an app used for Zebra printer connections and tuning.
-     * @return AlertDialog
-     */
-    private AlertDialog showDownloadDialog() {
-        //Log.d(((MainActivity) getContext()).TAG, "Building Download dialog");
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
-
-        builder.setTitle("Install PrintConnect?")
-                .setMessage("This trait requires PrintConnect. Would you like to install it?");
-
-        builder.setPositiveButton("Install", (dialogInterface, i) -> {
-
-            Uri uri = Uri.parse("market://details?id=com.zebra.printconnect");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            try {
-                getContext().startActivity(intent);
-            } catch (ActivityNotFoundException ignored) {
-
-            }
-        });
-        builder.setNegativeButton("Cancel", null);
-
-        return builder.show();
-    }
-
-    public ResultReceiver receiverForSending(ResultReceiver actualReceiver) {
-        Parcel parcel = Parcel.obtain();
-        actualReceiver.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        ResultReceiver receiverForSending = ResultReceiver.CREATOR.createFromParcel(parcel);
-        parcel.recycle();
-        return receiverForSending;
     }
 
     /**
