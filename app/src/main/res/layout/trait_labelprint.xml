@@ -217,44 +217,4 @@
 
     </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:paddingStart="3dp"
-        android:paddingLeft="3dp"
-        android:paddingRight="3dp"
-        android:paddingEnd="3dp">
-
-        <ImageButton
-            android:id="@+id/zebraButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/zebra_icon"
-            android:contentDescription="@string/trait_labelprint_zebraconnect_button_description" />
-
-        <TextView
-            android:id="@+id/printStatusTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:text="@string/trait_layout_print_status_title"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/printStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/printStatusTitle"
-            android:layout_centerHorizontal="true"
-            android:text="@string/trait_layout_print_status"
-            android:textColor="#595959"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-    </RelativeLayout>
-
 </com.fieldbook.tracker.traits.LabelPrintTraitLayout>
