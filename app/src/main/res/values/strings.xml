@@ -281,6 +281,8 @@
     <string name="trait_error_disease_severity">Severity already stored</string>
     <string name="trait_delete_warning_photo">Are you sure you want to delete this photo?</string>
 
+    <string name="trait_date_calendar_picker_content_description">Button that opens a calendar picker.</string>
+  
     <!-- Tutorial -->
     <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">Would you like to enable the tutorial? This setting can be changed in the Settings.</string>
