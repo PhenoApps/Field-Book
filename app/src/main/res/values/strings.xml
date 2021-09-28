@@ -599,4 +599,12 @@
     <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device.</string>
     <string name="preferences_general_flip_flop_arrows_description">Swaps the trait and plot arrow functions</string>
     <string name="preferences_general_flip_flop_arrows">Flip Flop Arrows</string>
+    <string name="pref_behavior_geonav_category_title">GeoNav</string>
+    <string name="pref_geonav_enable_summary">Enables usage of device location to navigate fields.</string>
+    <string name="pref_geonav_enable_title">Enable GeoNav</string>
+    <string name="pref_geonav_search_angle_summary">GeoNav creates a cone in front of the user to detect which field to select.</string>
+    <string name="pref_geonav_search_angle_title">GeoNav Search Angle</string>
+    <string name="pref_geonav_update_interval_summary">The number of seconds between location updates.</string>
+    <string name="pref_geonav_update_interval_title">Update Interval</string>
+    <string name="pref_geonav_pair">Pair Device</string>
 </resources>
