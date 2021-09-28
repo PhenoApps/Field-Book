@@ -619,4 +619,6 @@
     <string name="activity_field_editor_switch_field">"Switch to field %s"</string>
     <string name="activity_field_editor_switch_field_action">Switch</string>
     <string name="activity_field_editor_no_location_yet">No location found yet.</string>
+    <string name="activity_field_editor_switch_field_same">Closest field already selected.</string>
+    <string name="gps">GPS</string>
 </resources>

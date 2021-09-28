@@ -448,25 +448,33 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                     int studyId = model.getStudy_id();
 
-                    Snackbar mySnackbar = Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
-                            getString(R.string.activity_field_editor_switch_field, String.valueOf(studyId)),
-                            Snackbar.LENGTH_LONG);
+                    if (studyId == ep.getInt("SelectedFieldExpId", -1)) {
 
-                    mySnackbar.setAction(R.string.activity_field_editor_switch_field_action, (view) -> {
+                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
+                                getString(R.string.activity_field_editor_switch_field_same),
+                                Snackbar.LENGTH_LONG).show();
 
-                        int count = mAdapter.getCount();
+                    } else {
 
-                        for (int i = 0; i < count; i++) {
-                            FieldObject field = mAdapter.getItem(i);
-                            if (field.getExp_id() == studyId) {
-                                mAdapter.getView(i, null, null).performClick();
+                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
+                                getString(R.string.activity_field_editor_switch_field, String.valueOf(studyId)),
+                                Snackbar.LENGTH_LONG);
+
+                        mySnackbar.setAction(R.string.activity_field_editor_switch_field_action, (view) -> {
+
+                            int count = mAdapter.getCount();
+
+                            for (int i = 0; i < count; i++) {
+                                FieldObject field = mAdapter.getItem(i);
+                                if (field.getExp_id() == studyId) {
+                                    mAdapter.getView(i, null, null).performClick();
+                                }
                             }
-                        }
 
-                    });
+                        });
 
-                    mySnackbar.show();
-
+                        mySnackbar.show();
+                    }
                 }
 
             } catch (NoSuchElementException e) {

@@ -1,11 +1,14 @@
 package com.fieldbook.tracker.traits
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
+import android.location.Location
 import android.os.Handler
 import android.util.AttributeSet
 import android.view.View
@@ -17,6 +20,7 @@ import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.dao.ObservationUnitDao
+import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.Companion.ACTION_BROADCAST_GNSS
@@ -32,10 +36,10 @@ import org.json.JSONObject
  * Second step is to choose the device to listen to, this will automatically establish a connection
  * and begin listening for NMEA messages.
  */
-class GNSSTraitLayout : BaseTraitLayout {
+class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private val mPrefs by lazy {
-        PreferenceManager.getDefaultSharedPreferences(context)
+        context.getSharedPreferences("Settings", MODE_PRIVATE)
     }
 
     //thread used to establish a connection with
@@ -43,6 +47,8 @@ class GNSSTraitLayout : BaseTraitLayout {
 
     //used for communication between threads and ui thread
     private lateinit var mLocalBroadcastManager: LocalBroadcastManager
+
+    private var mGpsTracker: GPSTracker? = null
 
     constructor(context: Context?) : super(context) {}
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
@@ -97,7 +103,7 @@ class GNSSTraitLayout : BaseTraitLayout {
                             val maxSats = maxOf(parser.satellites.toInt(), parser.gsv.size)
                             satTextView.text = "${parser.gsv.size}/$maxSats"
                         }
-                        altTextView.text = parser.altitude
+                        altTextView.text = truncateFixQuality(parser.altitude, parser.fix)
                     }
 
                 },
@@ -106,6 +112,8 @@ class GNSSTraitLayout : BaseTraitLayout {
 
         //check for the address in the preferences
         val address = mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
+
+        val internalGpsString = context.getString(R.string.pref_behavior_geonav_internal_gps_choice)
 
         //if an address has not been chosen, then create the connection button
         if (address.isNullOrBlank()) {
@@ -117,7 +125,15 @@ class GNSSTraitLayout : BaseTraitLayout {
             val device = getDeviceByAddress(address)
 
             if (device != null) {
+
                 setupCommunicationsUi(device)
+
+            } else if (address == internalGpsString) {
+
+                //register the location listener to this class, locations will be received in onLocationChanged
+                mGpsTracker = GPSTracker(context, this)
+
+                setupCommunicationsUi()
 
             } else setupChooseBluetoothDevice()
         }
@@ -126,11 +142,11 @@ class GNSSTraitLayout : BaseTraitLayout {
     private fun setupChooseBluetoothDevice() {
 
         //setup connect button
-        val getLocation = findViewById<ImageButton>(R.id.gnss_connect_button)
-        getLocation.visibility = View.VISIBLE
+        val connectBtn = findViewById<ImageButton>(R.id.gnss_connect_button)
+        connectBtn.visibility = View.VISIBLE
 
         // Get Location
-        getLocation.setOnClickListener {
+        connectBtn.setOnClickListener {
             findPairedDevice()
         }
     }
@@ -245,14 +261,25 @@ class GNSSTraitLayout : BaseTraitLayout {
                     val builder = AlertDialog.Builder(context)
                     builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
 
-                    //when a device is chosen, start a connect thread
-                    builder.setSingleChoiceItems(pairedDevices.map { it.name }.toTypedArray(), -1) { dialog, which ->
+                    //add internal gps to device choice
+                    val devices = pairedDevices.map { it.name }.toTypedArray() +
+                            arrayOf(context.getString(R.string.pref_behavior_geonav_internal_gps_choice))
 
-                        val value = pairedDevices.toTypedArray()[which]
+                    //when a device is chosen, start a connect thread
+                    builder.setSingleChoiceItems(devices, -1) { dialog, which ->
+
+                        val value = devices[which]
 
                         if (value != null) {
 
-                            setupCommunicationsUi(value)
+                            val chosenDevice = pairedDevices.find { it.name == value }
+
+                            if (chosenDevice == null) {
+                                //register the location listener
+                                mGpsTracker = GPSTracker(context, this)
+                            }
+
+                            setupCommunicationsUi(chosenDevice)
 
                             dialog.dismiss()
                         }
@@ -278,7 +305,11 @@ class GNSSTraitLayout : BaseTraitLayout {
             //if the user already paired an external unit then show a list to connect from
             if (adapter.bondedDevices.isNotEmpty()) {
 
-                device = adapter.bondedDevices.first { it.address == address }
+                if (adapter.bondedDevices.any { it.address == address }) {
+
+                    device = adapter.bondedDevices.first { it.address == address }
+
+                }
 
             } else Toast.makeText(context, R.string.gnss_no_paired_device, Toast.LENGTH_SHORT).show()
 
@@ -287,10 +318,12 @@ class GNSSTraitLayout : BaseTraitLayout {
         return device
     }
 
-    private fun setupCommunicationsUi(value: BluetoothDevice) {
+    private fun setupCommunicationsUi(value: BluetoothDevice? = null) {
 
-        mConnectThread = ConnectThread(value, mHandler).apply {
-            start()
+        if (value != null) {
+            mConnectThread = ConnectThread(value, mHandler).apply {
+                start()
+            }
         }
 
         //make connected UI visible
@@ -319,7 +352,16 @@ class GNSSTraitLayout : BaseTraitLayout {
         disconnectButton.setOnClickListener {
             connectButton.visibility = View.VISIBLE
             connectGroup.visibility = View.GONE
-            mConnectThread.cancel()
+
+            if (value != null) {
+                mConnectThread.cancel()
+            }
+
+            if (mGpsTracker != null) {
+                mGpsTracker = null
+            }
+
+            setupChooseBluetoothDevice()
         }
     }
 
@@ -378,5 +420,29 @@ class GNSSTraitLayout : BaseTraitLayout {
         }
 
         true
+    }
+
+    /**
+     * Implementation of internal GPS location listener.
+     * This location listener is only used if internal GPS is selected in the preferences.
+     * This should update the UI with the current GPS information.
+     * @param location the non null location sent from internal GPS
+     */
+    override fun onLocationChanged(location: Location) {
+
+        val gps = context.getString(R.string.gps)
+
+        val latTextView = findViewById<TextView>(R.id.latTextView)
+        val lngTextView = findViewById<TextView>(R.id.lngTextView)
+        val accTextView = findViewById<TextView>(R.id.accTextView)
+        val utcTextView = findViewById<TextView>(R.id.utcTextView)
+        val altTextView = findViewById<TextView>(R.id.altTextView)
+
+        latTextView.text = truncateFixQuality(location.latitude.toString(), "internal")
+        lngTextView.text = truncateFixQuality(location.longitude.toString(), "internal")
+        accTextView.text = gps
+        utcTextView.text = location.time.toString()
+        altTextView.text = truncateFixQuality(location.altitude.toString(), "internal")
+
     }
 }

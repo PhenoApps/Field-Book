@@ -11,6 +11,8 @@ import android.os.IBinder;
 import android.util.Log;
 import android.hardware.GeomagneticField;
 
+import androidx.annotation.NonNull;
+
 public class GPSTracker extends Service implements LocationListener {
 
     // The minimum distance to change Updates in meters
@@ -32,9 +34,20 @@ public class GPSTracker extends Service implements LocationListener {
     double altitude;
     float declination;
 
+    GPSTrackerListener mListener = null;
+
+    public interface GPSTrackerListener {
+        void onLocationChanged(@NonNull Location location);
+    }
+
     public GPSTracker(Context context) {
         this.mContext = context;
         getLocation();
+    }
+
+    public GPSTracker(Context context, GPSTrackerListener listener) {
+        this(context);
+        this.mListener = listener;
     }
 
     public Location getLocation() {
@@ -157,6 +170,14 @@ public class GPSTracker extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
+        if (mListener != null) {
+
+            if (location != null) {
+
+                mListener.onLocationChanged(location);
+
+            }
+        }
     }
 
     @Override
