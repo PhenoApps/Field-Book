@@ -529,7 +529,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 hasSpecialCharacters = true;
                 added = true;
                 String replaced = DataHelper.replaceSpecialChars(s);
-                if (!replaced.isEmpty()) actualColumns.add(DataHelper.replaceSpecialChars(s));
+                if (!replaced.isEmpty()) actualColumns.add(replaced);
 
             }
 
@@ -548,14 +548,22 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         }
 
-        if (hasSpecialCharacters) {
+        if (actualColumns.size() > 0) {
+
+            if (hasSpecialCharacters) {
 
 
-            Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns_replaced));
+                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns_replaced));
 
+            }
+
+            importDialog(actualColumns.toArray(new String[] {}));
+
+        } else {
+
+            Toast.makeText(this, R.string.act_field_editor_no_suitable_columns_error,
+                    Toast.LENGTH_SHORT).show();
         }
-
-        importDialog(actualColumns.toArray(new String[] {}));
     }
 
     private void importDialog(String[] columns) {
@@ -665,6 +673,8 @@ public class FieldEditorActivity extends AppCompatActivity {
                 fieldFile.open();
                 String[] data;
                 String[] columns = fieldFile.readNext();
+                ArrayList<String> nonEmptyColumns = new ArrayList<>();
+                ArrayList<Integer> nonEmptyIndices = new ArrayList<>();
 
                 //match and delete special characters from header line
                 for (int i = 0; i < columns.length; i++) {
@@ -673,6 +683,12 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                     if (DataHelper.hasSpecialChars(header)) {
                         columns[i] = DataHelper.replaceSpecialChars(header);
+
+                    }
+
+                    if (!columns[i].isEmpty()) {
+                        nonEmptyColumns.add(columns[i]);
+                        nonEmptyIndices.add(i);
                     }
                 }
 
@@ -681,7 +697,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 f.setPrimary_id(primary.getSelectedItem().toString());
                 f.setSecondary_id(secondary.getSelectedItem().toString());
 
-                exp_id = ConfigActivity.dt.createField(f, Arrays.asList(columns));
+                exp_id = ConfigActivity.dt.createField(f, nonEmptyColumns);
 
                 DataHelper.db.beginTransaction();
 
@@ -691,7 +707,13 @@ public class FieldEditorActivity extends AppCompatActivity {
                         if (data == null)
                             break;
 
-                        ConfigActivity.dt.createFieldData(exp_id, Arrays.asList(columns), Arrays.asList(data));
+                        ArrayList<String> nonEmptyData = new ArrayList<>();
+                        for (int j = 0; j < data.length; j++) {
+                            if (nonEmptyIndices.contains(j)) {
+                                nonEmptyData.add(data[j]);
+                            }
+                        }
+                        ConfigActivity.dt.createFieldData(exp_id, nonEmptyColumns, nonEmptyData);
                     }
 
                     DataHelper.db.setTransactionSuccessful();

@@ -402,7 +402,8 @@ public class BrAPIServiceV2 implements BrAPIService{
                                final Function<Integer, Void> failFunction) {
         try {
             final Integer[] recursiveCounter = {0};
-            final Integer pageSize = 1000;
+            final Integer pageSize = Integer.parseInt(context.getSharedPreferences("Settings", 0)
+                    .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());

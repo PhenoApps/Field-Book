@@ -51,11 +51,7 @@ public class BrapiServiceTest {
     @Before
     public void setUp() throws Exception {
         // Instantiate our brapi service class
-<<<<<<< HEAD
         this.brAPIService = new BrAPIServiceV1(null);
-=======
-        this.brAPIService = new BrAPIService(brapiBaseUrl, null, null);
->>>>>>> develop
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap missingImage = Bitmap.createBitmap(100, 100, conf);
     }
@@ -193,17 +189,14 @@ public class BrapiServiceTest {
         BrapiPaginationManager pageMan = new BrapiPaginationManager(0, 1000);
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getOntology(pageMan, new Function<List<TraitObject>, Void>() {
-            @Override
-            public Void apply(List<TraitObject> input) {
+        this.brAPIService.getOntology(pageMan, (traitObjects, integer) -> {
                 // Check that we are getting some results back
-                BrapiServiceTest.this.checkGetOntologyResult = input.size() > 0;
+                BrapiServiceTest.this.checkGetOntologyResult = traitObjects.size() > 0;
 
                 // Notify the countdown that we are finish
                 signal.countDown();
 
                 return null;
-            }
         }, new Function<Integer, Void>() {
             @Override
             public Void apply(Integer input) {
@@ -283,7 +276,7 @@ public class BrapiServiceTest {
         testObservations.add(testObservation);
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.putObservations(testObservations, new Function<List<Observation>, Void>() {
+        this.brAPIService.updateObservations(testObservations,  new Function<List<Observation>, Void>() {
                     @Override
                     public Void apply(final List<Observation> observationDbIds) {
 

@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,8 +17,10 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -58,82 +61,101 @@ public class FileExploreActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-        String data = getIntent().getExtras().getString("path");
-        include = getIntent().getExtras().getStringArray("include");
-        exclude = getIntent().getExtras().getStringArray("exclude");
-        String title = getIntent().getExtras().getString("title");
-        path = new File(data);
+        if (getIntent() != null && getIntent().getExtras() != null) {
 
-        super.onCreate(savedInstanceState);
+            String data = getIntent().getExtras().getString("path");
+            include = getIntent().getExtras().getStringArray("include");
+            exclude = getIntent().getExtras().getStringArray("exclude");
+            String title = getIntent().getExtras().getString("title");
+            path = new File(data);
 
-        mainListView = new ListView(this);
+            super.onCreate(savedInstanceState);
 
-        android.view.WindowManager.LayoutParams params = this.getWindow().getAttributes();
-        params.width = LinearLayout.LayoutParams.MATCH_PARENT;
-        params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-        this.getWindow().setAttributes(params);
+            mainListView = new ListView(this);
 
-        setContentView(mainListView);
+            android.view.WindowManager.LayoutParams params = this.getWindow().getAttributes();
+            params.width = LinearLayout.LayoutParams.MATCH_PARENT;
+            params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+            this.getWindow().setAttributes(params);
 
-        loadFileList();
-        mainListView.setAdapter(adapter);
+            setContentView(mainListView);
 
-        if (title != null && title.length() > 0) {
-            this.setTitle(title);
-        }
+            try {
 
-        mainListView.setOnItemClickListener(new OnItemClickListener() {
+                loadFileList();
 
-            public void onItemClick(AdapterView<?> arg0, View arg1, int which, long arg3) {
-                chosenFile = fileList[which].file;
+            } catch (NullPointerException e) {
 
-                File sel = new File(path + "/" + chosenFile);
+                setResult(RESULT_CANCELED);
 
-                if (sel.isDirectory()) {
-                    firstLvl = false;
-
-                    // Adds chosen directory to list
-                    str.add(chosenFile);
-                    fileList = null;
-                    path = new File(sel + "");
-
-                    loadFileList();
-
-                    mainListView.setAdapter(adapter);
-                }
-
-                // Checks if 'up' was clicked
-                else if (chosenFile.equalsIgnoreCase("up") && !sel.exists()) {
-
-                    // present directory removed from list
-                    String s = str.remove(str.size() - 1);
-
-                    // path modified to exclude present directory
-                    path = new File(path.toString().substring(0,
-                            path.toString().lastIndexOf(s)));
-                    fileList = null;
-
-                    // if there are no more directories in the list, then
-                    // its the first level
-                    if (str.isEmpty()) {
-                        firstLvl = true;
-                    }
-                    loadFileList();
-                    mainListView.setAdapter(adapter);
-                }
-                // File picked
-                else {
-                    try {
-                        Intent returnIntent = new Intent();
-                        returnIntent.putExtra("result", sel.toString());
-                        setResult(RESULT_OK, returnIntent);
-                        finish();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+                finish();
             }
-        });
+
+            mainListView.setAdapter(adapter);
+
+            if (title != null && title.length() > 0) {
+                this.setTitle(title);
+            }
+
+            mainListView.setOnItemClickListener(new OnItemClickListener() {
+
+                public void onItemClick(AdapterView<?> arg0, View arg1, int which, long arg3) {
+                    chosenFile = fileList[which].file;
+
+                    File sel = new File(path + "/" + chosenFile);
+
+                    if (sel.isDirectory()) {
+                        firstLvl = false;
+
+                        // Adds chosen directory to list
+                        str.add(chosenFile);
+                        fileList = null;
+                        path = new File(sel + "");
+
+                        loadFileList();
+
+                        mainListView.setAdapter(adapter);
+                    }
+
+                    // Checks if 'up' was clicked
+                    else if (chosenFile.equalsIgnoreCase("up") && !sel.exists()) {
+
+                        // present directory removed from list
+                        String s = str.remove(str.size() - 1);
+
+                        // path modified to exclude present directory
+                        path = new File(path.toString().substring(0,
+                                path.toString().lastIndexOf(s)));
+                        fileList = null;
+
+                        // if there are no more directories in the list, then
+                        // its the first level
+                        if (str.isEmpty()) {
+                            firstLvl = true;
+                        }
+                        loadFileList();
+                        mainListView.setAdapter(adapter);
+                    }
+                    // File picked
+                    else {
+                        try {
+                            Intent returnIntent = new Intent();
+                            returnIntent.putExtra("result", sel.toString());
+                            setResult(RESULT_OK, returnIntent);
+                            finish();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+
+        } else {
+
+            setResult(RESULT_CANCELED);
+
+            finish();
+        }
     }
 
     private void loadFileList() {

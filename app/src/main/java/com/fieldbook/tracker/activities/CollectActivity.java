@@ -1010,6 +1010,8 @@ public class CollectActivity extends AppCompatActivity {
                     open.setDataAndType(FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", mChosenFile), mime);
 
                     startActivity(open);
+                } else {
+                    Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
                 }
                 break;
             case 2:
@@ -1769,7 +1771,8 @@ public class CollectActivity extends AppCompatActivity {
                 paging = movePaging(paging, step, true);
 
                 // Refresh onscreen controls
-                cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[paging - 1]);
+                updateCurrentRange(rangeID[paging -1]);
+
                 rangeBox.saveLastPlot();
 
                 if (cRange.plot_id.length() == 0)
@@ -1790,6 +1793,27 @@ public class CollectActivity extends AppCompatActivity {
             }
         }
 
+        /**
+         * Checks whether the preference study names are empty.
+         * If they are show a message, otherwise update the current range.
+         * @param id the range position to update to
+         */
+        private void updateCurrentRange(int id) {
+
+            if (!firstName.isEmpty() && !secondName.isEmpty() && !uniqueName.isEmpty()) {
+
+                cRange = dt.getRange(firstName, secondName, uniqueName, id);
+
+            } else {
+
+                Toast.makeText(CollectActivity.this,
+                        R.string.act_collect_study_names_empty, Toast.LENGTH_SHORT).show();
+
+                finish();
+            }
+
+        }
+
         void reload() {
             final SharedPreferences ep = parent.getPreference();
             switchVisibility(ep.getBoolean(GeneralKeys.QUICK_GOTO, false));
@@ -1800,7 +1824,8 @@ public class CollectActivity extends AppCompatActivity {
 
             setAllRangeID();
             if (rangeID != null) {
-                cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[0]);
+
+                updateCurrentRange(rangeID[0]);
 
                 //TODO NullPointerException
                 lastRange = cRange.range;
@@ -1812,7 +1837,8 @@ public class CollectActivity extends AppCompatActivity {
 
         // Refresh onscreen controls
         void refresh() {
-            cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[paging - 1]);
+
+            updateCurrentRange(rangeID[paging - 1]);
 
             display();
             final SharedPreferences ep = parent.getPreference();
@@ -1877,11 +1903,11 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         public void setRange(final int id) {
-            cRange = dt.getRange(firstName, secondName, uniqueName, id);
+            updateCurrentRange(id);
         }
 
         void setRangeByIndex(final int j) {
-            cRange = dt.getRange(firstName, secondName, uniqueName, rangeID[j]);
+            updateCurrentRange(rangeID[j]);
         }
 
         void setLastRange() {
