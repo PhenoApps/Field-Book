@@ -237,11 +237,22 @@ class StudyDao {
                 tempData
             } else data
 
+            val geoCoordinatesColumnName = "geo_coordinates"
+            var geoCoordinates = ""
+            val geoCoordinatesIndex: Int
+            if (geoCoordinatesColumnName in columns) {
+                geoCoordinatesIndex = columns.indexOf(geoCoordinatesColumnName)
+                if (geoCoordinatesIndex > -1) {
+                    geoCoordinates = data[geoCoordinatesIndex]
+                }
+            }
+            
             val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
                     Study.FK to exp_id,
                     "observation_unit_db_id" to actualData[uniqueIndex],
                     "primary_id" to if (primaryIndex < 0) "NA" else actualData[primaryIndex],
-                    "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex]))
+                    "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex],
+                     "geo_coordinates" to geoCoordinates))
 
             columns.forEachIndexed { index, it ->
 

@@ -13,6 +13,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.Group
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.dao.ObservationUnitDao
@@ -20,6 +21,8 @@ import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.Companion.ACTION_BROADCAST_GNSS
 import com.fieldbook.tracker.location.gnss.NmeaParser
+import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import org.json.JSONObject
 
 /**
@@ -30,6 +33,10 @@ import org.json.JSONObject
  * and begin listening for NMEA messages.
  */
 class GNSSTraitLayout : BaseTraitLayout {
+
+    private val mPrefs by lazy {
+        PreferenceManager.getDefaultSharedPreferences(context)
+    }
 
     //thread used to establish a connection with
     private lateinit var mConnectThread: ConnectThread
@@ -77,6 +84,7 @@ class GNSSTraitLayout : BaseTraitLayout {
                         val hdopTextView = findViewById<TextView>(R.id.hdopTextView)
 
                         //populate ui
+                        //TODO when this is RTK the string overlaps a bit
                         accTextView.text = parser.fix
                         latTextView.text = truncateFixQuality(parser.latitude, parser.fix)
                         lngTextView.text = truncateFixQuality(parser.longitude, parser.fix)
@@ -96,38 +104,35 @@ class GNSSTraitLayout : BaseTraitLayout {
                 filter
         )
 
-        //setup connect button
-        val getLocation = findViewById<ImageButton>(R.id.gnss_connect_button)
-        getLocation.visibility = View.VISIBLE
-        // Get Location
-        getLocation.setOnClickListener {
-            findPairedBTDevice()
+        //check for the address in the preferences
+        val address = mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
+
+        //if an address has not been chosen, then create the connection button
+        if (address.isNullOrBlank()) {
+
+            setupChooseBluetoothDevice()
+
+        } else { //otherwise get the bluetooth device and start comms
+
+            val device = getDeviceByAddress(address)
+
+            if (device != null) {
+                setupCommunicationsUi(device)
+
+            } else setupChooseBluetoothDevice()
         }
     }
 
-    /**
-     * Truncates the coordinate string based on the fix value.
-     * https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude
-     * basically: normal gps ~4decimal places, differential 5, rtk 8
-     */
-    fun truncateFixQuality(x: String, fix: String): String = try {
+    private fun setupChooseBluetoothDevice() {
 
-        val tokens = x.split(".")
+        //setup connect button
+        val getLocation = findViewById<ImageButton>(R.id.gnss_connect_button)
+        getLocation.visibility = View.VISIBLE
 
-        val head = tokens[0]
-        val tail = tokens[1]
-
-        "$head." + when (fix) {
-            "RTK", "manual input mode" -> if (tail.length > 8) tail.substring(0, 8) else tail
-            "DGPS", "Float RTK" -> if (tail.length > 5) tail.substring(0, 5) else tail
-            else -> if (tail.length > 4) tail.substring(0, 4) else tail
+        // Get Location
+        getLocation.setOnClickListener {
+            findPairedDevice()
         }
-
-    } catch (e: Exception) {
-
-        e.printStackTrace()
-
-        x
     }
 
     //based on RFC 7956
@@ -141,14 +146,30 @@ class GNSSTraitLayout : BaseTraitLayout {
     //    "name": "Dinagat Islands"
     //  }
     //}
-    data class Coordinates(val longitude: String, val latitude: String)
-    data class Geometry(val type: String = "Point", val coordinates: Coordinates)
+    data class Geometry(val type: String = "Point", val coordinates: Array<String>) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Geometry
+
+            if (type != other.type) return false
+            if (!coordinates.contentEquals(other.coordinates)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = type.hashCode()
+            result = 31 * result + coordinates.contentHashCode()
+            return result
+        }
+    }
+
     data class GeoJSON(val type: String = "Feature", val geometry: Geometry, val properties: Map<String, String>? = null) {
         fun toJson() = JSONObject(mapOf("type" to this.type,
                 "geometry" to mapOf("type" to this.geometry.type,
-                        "coordinates" to with(this.geometry.coordinates) {
-                            arrayOf(longitude, latitude)
-                        },
+                        "coordinates" to this.geometry.coordinates,
                         "properties" to properties
                 )))
     }
@@ -171,7 +192,7 @@ class GNSSTraitLayout : BaseTraitLayout {
 
             //geo json object : elevation (stored in obs. units, used in navigation)
             //geo json has properties map for additional info
-            val geoJson = GeoJSON(geometry = Geometry(coordinates = Coordinates(longitude, latitude)),
+            val geoJson = GeoJSON(geometry = Geometry(coordinates = arrayOf(latitude, longitude)),
                     properties = mapOf("altitude" to elevation))
 
             with(ObservationUnitDao.getAll(studyDbId.toInt()).first { it.observation_unit_db_id == cRange.plot_id }) {
@@ -186,7 +207,7 @@ class GNSSTraitLayout : BaseTraitLayout {
 //                    "utc" to utcTextView.text,
 //                    "satellites" to satTextView.text))
 
-            val coordinates = "$longitude, $latitude"
+            val coordinates = "$latitude; $longitude"
             etCurVal.setText(coordinates)
             updateTrait(currentTrait.trait, "gnss", coordinates)
         }
@@ -195,8 +216,8 @@ class GNSSTraitLayout : BaseTraitLayout {
     /**
      * When the connect button is pressed, this function is called which triggers a Dialog for
      * the user to choose bluetooth devices from.
-     */
-    private fun findPairedBTDevice() {
+     **/
+    private fun findPairedDevice() {
 
         clearUi()
 
@@ -231,38 +252,7 @@ class GNSSTraitLayout : BaseTraitLayout {
 
                         if (value != null) {
 
-                            mConnectThread = ConnectThread(value, mHandler).apply {
-                                start()
-                            }
-
-                            //make connected UI visible
-                            val connectGroup = findViewById<Group>(R.id.gnss_group)
-                            connectGroup.visibility = View.VISIBLE
-
-                            val connectButton = findViewById<ImageButton>(R.id.gnss_connect_button)
-                            connectButton.visibility = View.GONE
-
-                            val collectButton = findViewById<ImageButton>(R.id.gnss_collect_button)
-                            collectButton.setOnClickListener {
-
-                                val latTextView = findViewById<TextView>(R.id.latTextView)
-                                val lngTextView = findViewById<TextView>(R.id.lngTextView)
-                                val altTextView = findViewById<TextView>(R.id.altTextView)
-
-                                val latitude = latTextView.text.toString()
-                                val longitude = lngTextView.text.toString()
-                                val elevation = altTextView.text.toString()
-
-                                submitGnss(latitude, longitude, elevation)
-                            }
-
-                            //cancel the thread when the disconnect button is pressed
-                            val disconnectButton = findViewById<Button>(R.id.disconnect_button)
-                            disconnectButton.setOnClickListener {
-                                connectButton.visibility = View.VISIBLE
-                                connectGroup.visibility = View.GONE
-                                mConnectThread.cancel()
-                            }
+                            setupCommunicationsUi(value)
 
                             dialog.dismiss()
                         }
@@ -274,6 +264,63 @@ class GNSSTraitLayout : BaseTraitLayout {
             } else Toast.makeText(context, R.string.gnss_no_paired_device, Toast.LENGTH_SHORT).show()
 
         } else context.startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+    }
+
+    private fun getDeviceByAddress(address: String): BluetoothDevice? {
+
+        //device to return is by default null
+        var device: BluetoothDevice? = null
+
+        //check if the device has bluetooth enabled, if not, request it to be enabled via system action
+        val adapter = BluetoothAdapter.getDefaultAdapter()
+        if (adapter.isEnabled) {
+
+            //if the user already paired an external unit then show a list to connect from
+            if (adapter.bondedDevices.isNotEmpty()) {
+
+                device = adapter.bondedDevices.first { it.address == address }
+
+            } else Toast.makeText(context, R.string.gnss_no_paired_device, Toast.LENGTH_SHORT).show()
+
+        } else context.startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+
+        return device
+    }
+
+    private fun setupCommunicationsUi(value: BluetoothDevice) {
+
+        mConnectThread = ConnectThread(value, mHandler).apply {
+            start()
+        }
+
+        //make connected UI visible
+        val connectGroup = findViewById<Group>(R.id.gnss_group)
+        connectGroup.visibility = View.VISIBLE
+
+        val connectButton = findViewById<ImageButton>(R.id.gnss_connect_button)
+        connectButton.visibility = View.GONE
+
+        val collectButton = findViewById<ImageButton>(R.id.gnss_collect_button)
+        collectButton.setOnClickListener {
+
+            val latTextView = findViewById<TextView>(R.id.latTextView)
+            val lngTextView = findViewById<TextView>(R.id.lngTextView)
+            val altTextView = findViewById<TextView>(R.id.altTextView)
+
+            val latitude = latTextView.text.toString()
+            val longitude = lngTextView.text.toString()
+            val elevation = altTextView.text.toString()
+
+            submitGnss(latitude, longitude, elevation)
+        }
+
+        //cancel the thread when the disconnect button is pressed
+        val disconnectButton = findViewById<Button>(R.id.disconnect_button)
+        disconnectButton.setOnClickListener {
+            connectButton.visibility = View.VISIBLE
+            connectGroup.visibility = View.GONE
+            mConnectThread.cancel()
+        }
     }
 
     private fun clearUi() {

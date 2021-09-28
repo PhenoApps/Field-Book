@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/help"
         android:icon="@drawable/ic_tb_help"
@@ -45,5 +46,10 @@
         android:icon="@drawable/ic_tb_lock"
         android:showAsAction="always"
         android:title="" />
+    <item
+        android:id="@+id/action_act_collect_geonav_sw"
+        android:icon="@drawable/ic_explore_off_black_24dp"
+        android:showAsAction="always"
+        android:title="@string/menu_collect_start_geo_nav_title"/>
 </menu>
 
