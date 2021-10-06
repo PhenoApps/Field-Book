@@ -55,6 +55,7 @@ import org.brapi.v2.model.pheno.response.BrAPIImageSingleResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
+import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponseResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -701,8 +702,21 @@ public class BrAPIServiceV2 implements BrAPIService{
             BrapiV2ApiCallBack<BrAPIObservationVariableListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationVariableListResponse>() {
                 @Override
                 public void onSuccess(BrAPIObservationVariableListResponse response, int i, Map<String, List<String>> map) {
-                    //every time
-                    study.getTraits().addAll(mapTraits(response.getResult().getData()).first);
+
+                    //null check the response results before mapTraits,
+                    //this was causing a NPE which crashed the app if no traits were in a study
+                    BrAPIObservationVariableListResponseResult result = response.getResult();
+                    if (result != null) {
+
+                        List<BrAPIObservationVariable> data = result.getData();
+
+                        if (data != null) {
+
+                            study.getTraits().addAll(mapTraits(data).first);
+
+                        }
+                    }
+
                     recursiveCounter[0] = recursiveCounter[0] + 1;
 
                     int page = response.getMetadata().getPagination().getCurrentPage();
