@@ -31,6 +31,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 
 import org.threeten.bp.OffsetDateTime;
@@ -320,7 +321,7 @@ public class DataHelper {
      */
     public List<Observation> getUserTraitObservations() {
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserTraitObservations(exp_id);
 
@@ -367,7 +368,7 @@ public class DataHelper {
      */
     public List<FieldBookImage> getUserTraitImageObservations() {
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserTraitImageObservations(exp_id, missingPhoto);
 
@@ -1198,7 +1199,7 @@ public class DataHelper {
      */
     public HashMap getUserDetail(String plotId) {
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserDetail(exp_id, plotId);
 
@@ -2175,7 +2176,7 @@ public class DataHelper {
 
         SharedPreferences.Editor edit = ep.edit();
 
-        edit.putInt("SelectedFieldExpId", -1).apply();
+        edit.putInt(PrefsConstants.SELECTED_FIELD_ID, -1).apply();
         edit.putString("ImportUniqueName", "");
         edit.putString("ImportFirstName", "");
         edit.putString("ImportSecondName", "");
@@ -2558,7 +2559,7 @@ public class DataHelper {
                 
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
-                ep2.edit().putInt("SelectedFieldExpId", -1).apply();
+                ep2.edit().putInt(PrefsConstants.SELECTED_FIELD_ID, -1).apply();
             }
         }
     }

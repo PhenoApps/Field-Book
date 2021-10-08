@@ -1,19 +1,12 @@
 package com.fieldbook.tracker.brapi.service;
 
-        import android.app.Activity;
-        import android.app.PendingIntent;
-        import android.content.ActivityNotFoundException;
         import android.content.Context;
-        import android.content.Intent;
         import android.content.SharedPreferences;
-        import android.net.Uri;
         import android.util.Log;
         import android.util.Patterns;
         import android.widget.Toast;
 
-        import androidx.annotation.Nullable;
         import androidx.arch.core.util.Function;
-        import androidx.browser.customtabs.CustomTabsIntent;
 
         import com.fieldbook.tracker.R;
         import com.fieldbook.tracker.brapi.ApiError;
@@ -28,15 +21,7 @@ package com.fieldbook.tracker.brapi.service;
         import com.fieldbook.tracker.brapi.model.Observation;
         import com.fieldbook.tracker.preferences.GeneralKeys;
         import com.fieldbook.tracker.objects.TraitObject;
-        import com.fieldbook.tracker.preferences.PreferencesActivity;
         import com.fieldbook.tracker.utilities.Constants;
-
-        import net.openid.appauth.AuthorizationException;
-        import net.openid.appauth.AuthorizationRequest;
-        import net.openid.appauth.AuthorizationService;
-        import net.openid.appauth.AuthorizationServiceConfiguration;
-        import net.openid.appauth.ResponseTypeValues;
-        import net.openid.appauth.browser.CustomTabManager;
         import com.fieldbook.tracker.utilities.FailureFunction;
         import com.fieldbook.tracker.utilities.SuccessFunction;
 

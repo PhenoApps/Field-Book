@@ -24,6 +24,7 @@ import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 
 import java.util.ArrayList;
 
@@ -66,13 +67,13 @@ public class FieldAdapter extends BaseAdapter {
         boolean has_contents = item != null;
         if (has_contents) {
             ed.putString("FieldFile", item.getExp_name());
-            ed.putInt("SelectedFieldExpId", item.getExp_id());
+            ed.putInt(PrefsConstants.SELECTED_FIELD_ID, item.getExp_id());
             ed.putString("ImportUniqueName", item.getUnique_id());
             ed.putString("ImportFirstName", item.getPrimary_id());
             ed.putString("ImportSecondName", item.getSecondary_id());
         } else {
             ed.putString("FieldFile", null);
-            ed.putInt("SelectedFieldExpId", -1);
+            ed.putInt(PrefsConstants.SELECTED_FIELD_ID, -1);
             ed.putString("ImportUniqueName", null);
             ed.putString("ImportFirstName", null);
             ed.putString("ImportSecondName", null);
@@ -195,7 +196,7 @@ public class FieldAdapter extends BaseAdapter {
 
                 ConfigActivity.dt.deleteField(getItem(position).getExp_id());
 
-                if (getItem(position).getExp_id() == ep.getInt("SelectedFieldExpId", -1)) {
+                if (getItem(position).getExp_id() == ep.getInt(PrefsConstants.SELECTED_FIELD_ID, -1)) {
                     setEditorItem(ep, null);
                 }
 
@@ -227,7 +228,7 @@ public class FieldAdapter extends BaseAdapter {
         setEditorItem(ep, selectedField);
 
         SharedPreferences.Editor ed = ep.edit();
-        ed.putInt("SelectedFieldExpId", selectedField.getExp_id());
+        ed.putInt(PrefsConstants.SELECTED_FIELD_ID, selectedField.getExp_id());
         ed.apply();
 
         ConfigActivity.dt.switchField(selectedField.getExp_id());

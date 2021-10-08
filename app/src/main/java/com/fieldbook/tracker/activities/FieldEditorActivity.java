@@ -70,6 +70,7 @@ import java.util.Optional;
 
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -158,7 +159,7 @@ public class FieldEditorActivity extends AppCompatActivity {
             ConfigActivity.dt = new DataHelper(this);
         }
         ConfigActivity.dt.open();
-        ConfigActivity.dt.updateExpTable(false, true, false, ep.getInt("SelectedFieldExpId", 0));
+        ConfigActivity.dt.updateExpTable(false, true, false, ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
@@ -884,7 +885,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 ed.putString("ImportFirstName", firstName);
                 ed.putString("ImportSecondName", secondName);
                 ed.putBoolean("ImportFieldFinished", true);
-                ed.putInt("SelectedFieldExpId", exp_id);
+                ed.putInt(PrefsConstants.SELECTED_FIELD_ID, exp_id);
 
                 ed.apply();
 
