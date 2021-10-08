@@ -7,8 +7,10 @@ import android.util.Pair;
 
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiProgram;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.BrapiTrial;
@@ -18,6 +20,8 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.FailureFunction;
+import com.fieldbook.tracker.utilities.SuccessFunction;
 
 import org.brapi.client.v2.BrAPIClient;
 import org.brapi.client.v2.model.exceptions.ApiException;
@@ -46,6 +50,7 @@ import org.brapi.v2.model.core.response.BrAPITrialListResponse;
 import org.brapi.v2.model.pheno.BrAPIImage;
 import org.brapi.v2.model.pheno.BrAPIObservation;
 import org.brapi.v2.model.pheno.BrAPIObservationUnit;
+import org.brapi.v2.model.pheno.BrAPIObservationUnitHierarchyLevel;
 import org.brapi.v2.model.pheno.BrAPIObservationUnitLevelRelationship;
 import org.brapi.v2.model.pheno.BrAPIObservationUnitPosition;
 import org.brapi.v2.model.pheno.BrAPIObservationVariable;
@@ -53,6 +58,7 @@ import org.brapi.v2.model.pheno.BrAPIPositionCoordinateTypeEnum;
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.brapi.v2.model.pheno.response.BrAPIImageListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIImageSingleResponse;
+import org.brapi.v2.model.pheno.response.BrAPIObservationLevelListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
@@ -62,6 +68,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +108,35 @@ public class BrAPIServiceV2 implements BrAPIService{
                     .getString(GeneralKeys.BRAPI_TOKEN, null));
         } catch (ApiException error) {
             Log.e("BrAPIServiceV2", "API Exception", error);
+        }
+    }
+
+    @Override
+    public void getObservationLevels(String programDbId, SuccessFunction<List<BrapiObservationLevel>> successFn, FailureFunction<ApiError> failFn) {
+        BrapiV2ApiCallBack<BrAPIObservationLevelListResponse> callBack = new BrapiV2ApiCallBack<BrAPIObservationLevelListResponse>() {
+            @Override
+            public void onSuccess(BrAPIObservationLevelListResponse brAPIObservationLevelListResponse, int i, Map<String, List<String>> map) {
+                List<BrapiObservationLevel> observationLevels = new ArrayList<>();
+                Collections.sort(brAPIObservationLevelListResponse.getResult().getData(), Comparator.comparing(BrAPIObservationUnitHierarchyLevel::getLevelOrder));
+
+                for (BrAPIObservationUnitHierarchyLevel level : brAPIObservationLevelListResponse.getResult().getData()) {
+                    observationLevels.add(new BrapiObservationLevel().setObservationLevelName(level.getLevelName()));
+                }
+
+                successFn.apply(observationLevels);
+            }
+
+            @Override
+            public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                Log.e("BrAPIServiceV2", "Error fetching observation levels", error);
+                failFn.apply(new ApiError().setErrorCode(ApiErrorCode.processErrorCode(error.getCode())).setResponseBody(error.getResponseBody()));
+            }
+        };
+
+        try {
+            observationUnitsApi.observationlevelsGetAsync(null, null, programDbId, 0, 1000, callBack);
+        } catch (ApiException e) {
+            Log.e("BrAPIServiceV2", "Error sending BrAPI Request to fetch observation levels", e);
         }
     }
 

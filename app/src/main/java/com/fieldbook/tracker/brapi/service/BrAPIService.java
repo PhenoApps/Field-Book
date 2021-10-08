@@ -20,6 +20,7 @@ package com.fieldbook.tracker.brapi.service;
         import com.fieldbook.tracker.brapi.ApiErrorCode;
         import com.fieldbook.tracker.brapi.BrapiAuthDialog;
         import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+        import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
         import com.fieldbook.tracker.brapi.model.BrapiProgram;
         import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
         import com.fieldbook.tracker.brapi.model.BrapiTrial;
@@ -36,6 +37,8 @@ package com.fieldbook.tracker.brapi.service;
         import net.openid.appauth.AuthorizationServiceConfiguration;
         import net.openid.appauth.ResponseTypeValues;
         import net.openid.appauth.browser.CustomTabManager;
+        import com.fieldbook.tracker.utilities.FailureFunction;
+        import com.fieldbook.tracker.utilities.SuccessFunction;
 
         import java.net.MalformedURLException;
         import java.net.URL;
@@ -173,4 +176,6 @@ public interface BrAPIService {
     public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails);
 
     public void authorizeClient();
+
+    void getObservationLevels(String programDbId, final SuccessFunction<List<BrapiObservationLevel>> successFn, final FailureFunction<ApiError> failFn);
 }

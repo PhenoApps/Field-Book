@@ -8,8 +8,10 @@ import android.util.Pair;
 
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiProgram;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.BrapiTrial;
@@ -19,6 +21,8 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.FailureFunction;
+import com.fieldbook.tracker.utilities.SuccessFunction;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,6 +53,7 @@ import io.swagger.client.model.NewObservationDbIdsObservations;
 import io.swagger.client.model.NewObservationDbIdsResponse;
 import io.swagger.client.model.NewObservationsRequest;
 import io.swagger.client.model.NewObservationsRequestObservations;
+import io.swagger.client.model.ObservationLevelsResponse;
 import io.swagger.client.model.ObservationUnit;
 import io.swagger.client.model.ObservationUnitsResponse1;
 import io.swagger.client.model.ObservationVariable;
@@ -113,6 +118,34 @@ public class BrAPIServiceV1 implements BrAPIService {
     @Override
     public void authorizeClient() {
 
+    }
+
+    @Override
+    public void getObservationLevels(String programDbId, SuccessFunction<List<BrapiObservationLevel>> successFn, FailureFunction<ApiError> failFn) {
+        BrapiV1ApiCallBack<ObservationLevelsResponse> callBack = new BrapiV1ApiCallBack<ObservationLevelsResponse>() {
+            @Override
+            public void onSuccess(ObservationLevelsResponse brAPIObservationLevelListResponse, int i, Map<String, List<String>> map) {
+                List<BrapiObservationLevel> observationLevels = new ArrayList<>();
+
+                for (String level : brAPIObservationLevelListResponse.getResult().getData()) {
+                    observationLevels.add(new BrapiObservationLevel().setObservationLevelName(level));
+                }
+
+                successFn.apply(observationLevels);
+            }
+
+            @Override
+            public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                Log.e("BrAPIServiceV1", "Error fetching observation levels", error);
+                failFn.apply(new ApiError().setErrorCode(ApiErrorCode.processErrorCode(error.getCode())).setResponseBody(error.getResponseBody()));
+            }
+        };
+
+        try {
+            observationsApi.observationlevelsGetAsync(0, 1000, getBrapiToken(), callBack);
+        } catch (ApiException e) {
+            Log.e("BrAPIServiceV1", "Error sending BrAPI Request to fetch observation levels", e);
+        }
     }
 
     private String getBrapiToken() {

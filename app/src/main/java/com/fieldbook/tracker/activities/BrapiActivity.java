@@ -2,12 +2,14 @@ package com.fieldbook.tracker.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.BrapiLoadDialog;
@@ -43,6 +46,8 @@ public class BrapiActivity extends AppCompatActivity {
     private static final int FILTER_BY_PROGRAM_REQUEST_CODE = 1;
     private static final int FILTER_BY_TRIAL_REQUEST_CODE = 2;
     public static final String PROGRAM_DB_ID_INTENT_PARAM = "programDbId";
+    private List<BrapiObservationLevel> observationLevels;
+    private BrapiObservationLevel selectedObservationLevel;
 
     @Override
     public void onDestroy() {
@@ -75,7 +80,8 @@ public class BrapiActivity extends AppCompatActivity {
                 baseURLText.setText(brapiBaseURL);
 
                 loadToolbar();
-                loadStudiesList();
+//                loadStudiesList();
+                loadObservationLevels();
             } else {
                 Toast.makeText(getApplicationContext(), R.string.brapi_must_configure_url, Toast.LENGTH_SHORT).show();
                 finish();
@@ -94,11 +100,36 @@ public class BrapiActivity extends AppCompatActivity {
 
     private void loadToolbar() {
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(null);
+            getSupportActionBar().setTitle("BrAPI Field Import");
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+    }
+
+    private void setupObservationLevelsSpinner() {
+
+        selectedObservationLevel = observationLevels.get(0);
+        Spinner spinner = findViewById(R.id.studyObservationLevels);
+        List<String> levelOptionsList = new ArrayList<>();
+        for(BrapiObservationLevel level : observationLevels) {
+            levelOptionsList.add(level.getObservationLevelName());
+        }
+        ArrayAdapter<String> levelOptions = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_dropdown_item, levelOptionsList);
+
+        spinner.setAdapter(levelOptions);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
+                selectedObservationLevel = observationLevels.get(index);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 
     private void loadStudiesList() {
@@ -155,6 +186,19 @@ public class BrapiActivity extends AppCompatActivity {
                 return null;
 
             }
+        });
+    }
+
+    private void loadObservationLevels() {
+        brAPIService.getObservationLevels(programDbId, input -> {
+            this.observationLevels = input;
+//            brapiLoadDialog.setObservationLevels(input);
+            runOnUiThread(() -> {
+                setupObservationLevelsSpinner();
+                loadStudiesList();
+            });
+        }, failureInput -> {
+//            brapiLoadDialog.setObservationLevels(new ArrayList<>());
         });
     }
 

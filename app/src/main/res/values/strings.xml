@@ -499,6 +499,7 @@
     <string name="brapi_study_name">Name</string>
     <string name="brapi_study_description">Description</string>
     <string name="brapi_study_location">Location</string>
+    <string name="brapi_observation_level">Observation Level</string>
     <string name="brapi_study_num_plots"> Plots</string>
     <string name="brapi_study_num_traits"> Traits</string>
     <string name="brapi_not_found">ERROR: Target system does not support this operation via BrAPI.</string>
