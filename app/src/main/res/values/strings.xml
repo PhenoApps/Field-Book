@@ -408,8 +408,8 @@
     <string name="import_dialog_title_fields">Import field</string>
     <string name="import_dialog_title_traits">Import traits</string>
     <string name="import_dialog_unique">Unique identifier</string>
-    <string name="import_dialog_primary">Primary order</string>
-    <string name="import_dialog_secondary">Secondary order</string>
+    <string name="import_dialog_primary">Primary identifier</string>
+    <string name="import_dialog_secondary">Secondary identifier</string>
     <string name="import_dialog_importing">Please wait…</string>
 
     <string name="import_error_general">Error importing</string>
@@ -495,7 +495,7 @@
 
     <string name="brapi_load_data_button">Load Fields</string>
     <string name="brapi_load_traits_button">Load Traits</string>
-    <string name="brapi_save_data_button">Save Field</string>
+    <string name="brapi_save_data_button">Preview Field</string>
     <string name="brapi_study_name">Name</string>
     <string name="brapi_study_description">Description</string>
     <string name="brapi_study_location">Location</string>

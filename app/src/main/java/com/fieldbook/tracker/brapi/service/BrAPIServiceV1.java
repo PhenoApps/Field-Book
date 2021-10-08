@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
 import io.swagger.client.ApiClient;
@@ -455,10 +456,11 @@ public class BrAPIServiceV1 implements BrAPIService {
     }
 
     public void getPlotDetails(final String studyDbId,
+                               BrapiObservationLevel observationLevel,
                                final Function<BrapiStudyDetails, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
-            final Integer[] recursiveCounter = {0};
+            final AtomicInteger currentPage = new AtomicInteger(0);
             final Integer pageSize = Integer.parseInt(context.getSharedPreferences("Settings", 0)
                     .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
@@ -485,12 +487,12 @@ public class BrAPIServiceV1 implements BrAPIService {
 
                         study.getValues().addAll(mapAttributeValues(study.getAttributes(), response.getResult().getData()));
 
-                        recursiveCounter[0] = recursiveCounter[0] + 1;
+                        currentPage.incrementAndGet();
 
                         // Stop after 50 iterations (for safety)
                         // Stop if the current page is the last page according to the server
                         // Stop if there are no more contents
-                        if((recursiveCounter[0] > 50)
+                        if((currentPage.get() > 50)
                                 || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
                                 || (response.getResult().getData().size() == 0)){
                             // Stop recursive loop
@@ -498,7 +500,7 @@ public class BrAPIServiceV1 implements BrAPIService {
                         }else {
                             try {
                                 studiesApi.studiesStudyDbIdObservationunitsGetAsync(
-                                        studyDbId, "plot", recursiveCounter[0], pageSize,
+                                        studyDbId, observationLevel.getObservationLevelName(), currentPage.get(), pageSize,
                                         getBrapiToken(), this);
                             } catch (ApiException e) {
                                 failFunction.apply(e.getCode());
@@ -516,7 +518,7 @@ public class BrAPIServiceV1 implements BrAPIService {
             };
 
             studiesApi.studiesStudyDbIdObservationunitsGetAsync(
-                    studyDbId, "plot", 0, pageSize,
+                    studyDbId, observationLevel.getObservationLevelName(), 0, pageSize,
                     getBrapiToken(), callback);
 
         } catch (ApiException e) {
@@ -923,29 +925,33 @@ public class BrAPIServiceV1 implements BrAPIService {
     private String convertBrAPIDataType(String dataType) {
         //TODO: Check these out and make sure they match with fieldbook data types.
         switch (dataType) {
-            case "Code":
-                // Not the ideal solution for this conversion
-                return "text";
             case "Nominal":
                 return "categorical";
             case "Date":
                 return "date";
             case "Numerical":
+            case "Duration":
                 return "numeric";
             case "Ordinal":
                 // All Field Book categories are ordered, so this works
                 return "categorical";
-            case "Duration":
-                return "numeric";
+            case "Code": // Not the ideal solution for this conversion
             case "Text":
             default:
                 return "text";
         }
     }
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails) {
+    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId) {
 
         DataHelper dataHelper = new DataHelper(context);
+
+        String observationLevel = "Plot";
+
+        if(selectedObservationLevel.getObservationLevelName().toLowerCase().equals("plant")) {
+            observationLevel = "Plant";
+        }
+
         try {
             FieldObject field = new FieldObject();
             field.setExp_name(studyDetails.getStudyName());
@@ -962,9 +968,9 @@ public class BrAPIServiceV1 implements BrAPIService {
             }
 
             field.setUnique_id("observationUnitDbId");
-            field.setPrimary_id("Row");
-            field.setSecondary_id("Column");
-            field.setExp_sort("Plot");
+            field.setPrimary_id(primaryId);
+            field.setSecondary_id(secondaryId);
+            field.setExp_sort(observationLevel);
 
             // Do a pre-check to see if the field exists so we can show an error
             Integer FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
@@ -977,7 +983,7 @@ public class BrAPIServiceV1 implements BrAPIService {
 
             // Construct our map to check for uniques
             for (List<String> dataRow : studyDetails.getValues()) {
-                Integer idColumn = studyDetails.getAttributes().indexOf("Plot");
+                Integer idColumn = studyDetails.getAttributes().indexOf(observationLevel);
                 checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
             }
 

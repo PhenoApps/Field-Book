@@ -239,9 +239,12 @@ public class BrapiActivity extends AppCompatActivity {
     private void saveStudy() {
         if(this.selectedStudy != null) {
             brapiLoadDialog.setSelectedStudy(this.selectedStudy);
+            brapiLoadDialog.setObservationLevel(this.selectedObservationLevel);
             brapiLoadDialog.show();
-        }else{
-            Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_study, Toast.LENGTH_SHORT).show();
+        } else{
+            Toast toast = Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_study, Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+            toast.show();
         }
     }
 

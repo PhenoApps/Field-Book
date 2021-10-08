@@ -42,7 +42,6 @@ import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
 import org.brapi.v2.model.core.BrAPITrial;
-import org.brapi.v2.model.core.request.BrAPITrialSearchRequest;
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudySingleResponse;
@@ -439,15 +438,17 @@ public class BrAPIServiceV2 implements BrAPIService{
     }
 
     public void getPlotDetails(final String studyDbId,
-                               final Function<BrapiStudyDetails, Void> function,
+                               BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
-            final Integer[] recursiveCounter = {0};
             final Integer pageSize = Integer.parseInt(context.getSharedPreferences("Settings", 0)
                     .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
+
+            ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
+            queryParams.studyDbId(studyDbId).observationUnitLevelName(observationLevel.getObservationLevelName()).page(0).pageSize(pageSize);
 
             BrapiV2ApiCallBack<BrAPIObservationUnitListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationUnitListResponse>() {
                 @Override
@@ -461,20 +462,18 @@ public class BrAPIServiceV2 implements BrAPIService{
                     //every time
                     mapAttributeValues(study, response.getResult().getData());
 
-                    recursiveCounter[0] = recursiveCounter[0] + 1;
+                    queryParams.page(queryParams.page() + 1);
 
                     // Stop after 50 iterations (for safety)
                     // Stop if the current page is the last page according to the server
                     // Stop if there are no more contents
-                    if((recursiveCounter[0] > 50)
+                    if((queryParams.page() > 50)
                             || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
                             || (response.getResult().getData().size() == 0)){
                         // Stop recursive loop
                         function.apply(study);
                     }else {
                         try {
-                            ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
-                            queryParams.studyDbId(studyDbId).observationUnitLevelName("plot").page(recursiveCounter[0]).pageSize(pageSize);
                             observationUnitsApi.observationunitsGetAsync(queryParams, this);
                         } catch (ApiException error) {
                             failFunction.apply(error.getCode());
@@ -491,8 +490,6 @@ public class BrAPIServiceV2 implements BrAPIService{
 
             };
 
-            ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
-            queryParams.studyDbId(studyDbId).observationUnitLevelName("plot").page(0).pageSize(pageSize);
             observationUnitsApi.observationunitsGetAsync(queryParams, callback);
 
         } catch (ApiException error) {
@@ -938,9 +935,11 @@ public class BrAPIServiceV2 implements BrAPIService{
         }
     }
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails) {
+    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId) {
 
         DataHelper dataHelper = new DataHelper(context);
+
+        String observationLevel = selectedObservationLevel.getObservationLevelName().substring(0, 1).toUpperCase() + selectedObservationLevel.getObservationLevelName().substring(1);
         try {
             FieldObject field = new FieldObject();
             field.setExp_name(studyDetails.getStudyName());
@@ -957,9 +956,9 @@ public class BrAPIServiceV2 implements BrAPIService{
             }
 
             field.setUnique_id("ObservationUnitDbId");
-            field.setPrimary_id("Row");
-            field.setSecondary_id("Column");
-            field.setExp_sort("Plot");
+            field.setPrimary_id(primaryId);
+            field.setSecondary_id(secondaryId);
+            field.setExp_sort(observationLevel);
 
             // Do a pre-check to see if the field exists so we can show an error
             Integer FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
@@ -972,7 +971,7 @@ public class BrAPIServiceV2 implements BrAPIService{
 
             // Construct our map to check for uniques
             for (List<String> dataRow : studyDetails.getValues()) {
-                Integer idColumn = studyDetails.getAttributes().indexOf("Plot");
+                Integer idColumn = studyDetails.getAttributes().indexOf(observationLevel);
                 checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
             }
 
