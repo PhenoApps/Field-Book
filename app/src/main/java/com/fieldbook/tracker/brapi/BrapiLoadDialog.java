@@ -29,6 +29,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.R;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener {
 
@@ -84,14 +85,18 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     }
 
     private String makePlural(String observationLevelName) {
-        StringBuilder plural = new StringBuilder(observationLevelName.substring(0, 1).toUpperCase());
-        if(observationLevelName.endsWith("y")) {
-            plural.append(observationLevelName.substring(1, observationLevelName.length() - 1)).append("ies");
-        } else {
-            plural.append(observationLevelName.substring(1)).append("s");
-        }
+        if(Locale.getDefault().getLanguage().equals("en")) {
+            StringBuilder plural = new StringBuilder(observationLevelName.substring(0, 1).toUpperCase());
+            if (observationLevelName.endsWith("y")) {
+                plural.append(observationLevelName.substring(1, observationLevelName.length() - 1)).append("ies");
+            } else {
+                plural.append(observationLevelName.substring(1)).append("s");
+            }
 
-        return plural.toString();
+            return plural.toString();
+        } else {
+            return observationLevelName;
+        }
     }
 
     private void buildStudyDetails() {
@@ -160,7 +165,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                     @Override
                     public void run() {
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        new AlertDialog.Builder(context).setTitle(R.string.dialog_error_title)
+                        new AlertDialog.Builder(context).setTitle(R.string.dialog_save_error_title)
                                 .setPositiveButton(R.string.okButtonText, (dialogInterface, i) -> {
                                     ((Activity) context).finish();
                                 }).setMessage(R.string.brapi_plot_detail_error).create().show();
@@ -353,7 +358,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             // Display our message.
             if (!brapiControllerResponse.status) {
                 alertDialogBuilder = new AlertDialog.Builder(context);
-                alertDialogBuilder.setTitle("Import Error")
+                alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                         .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
                             // Finish our BrAPI import activity
                             ((Activity) context).finish();
@@ -374,7 +379,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             if (fail) {
                 Log.e("error-opef", brapiControllerResponse.message);
                 alertDialogBuilder = new AlertDialog.Builder(context);
-                alertDialogBuilder.setTitle("Import Error")
+                alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                         .setPositiveButton(R.string.okButtonText, (dialogInterface, i) -> {
                             // Finish our BrAPI import activity
                             ((Activity) context).finish();

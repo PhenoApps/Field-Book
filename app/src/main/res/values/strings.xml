@@ -72,8 +72,9 @@
     <string name="sort_dialog_error_missing_secondary">Please choose a secondary order</string>
     <string name="sort_dialog_error_duplicates">Ordering choices cannot be duplicated</string>
     <string name="sort_dialog_saved">Sorting updated</string>
-    <string name="dialog_error_title">Save Error</string>
+    <string name="dialog_save_error_title">Save Error</string>
     <string name="sort_dialog_error_saving">Error updating sorting</string>
+    <string name="sort_placeholder">Choose an option</string>
 
     <!-- Settings Activity  -->
     <string name="settings_fields">Fields</string>

@@ -46,12 +46,11 @@ public class FieldAdapter extends BaseAdapter {
     private static final int PRIMARY = 0;
     private static final int SECONDARY = 1;
     private static final int TERTIARY = 2;
-    private static final String PLACEHOLDER_OPTION = "Choose an option";
+    private final String PLACEHOLDER_OPTION;
 
     private LayoutInflater mLayoutInflater;
     private ArrayList<FieldObject> list;
     private Context context;
-    private View parentView;
     private SharedPreferences ep;
     private String selectedPrimary;
     private String selectedSecondary;
@@ -61,6 +60,8 @@ public class FieldAdapter extends BaseAdapter {
         this.context = context;
         mLayoutInflater = LayoutInflater.from(context);
         this.list = list;
+
+        PLACEHOLDER_OPTION = context.getString(R.string.sort_placeholder);
     }
 
     public int getCount() {
@@ -295,7 +296,7 @@ public class FieldAdapter extends BaseAdapter {
                     } catch (Exception e) {
                         Log.e("FieldAdapter", "Error updating sorting", e);
 
-                        new AlertDialog.Builder(context).setTitle(R.string.dialog_error_title)
+                        new AlertDialog.Builder(context).setTitle(R.string.dialog_save_error_title)
                                 .setPositiveButton(R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
                                 .setMessage(R.string.sort_dialog_error_saving)
                                 .create()
