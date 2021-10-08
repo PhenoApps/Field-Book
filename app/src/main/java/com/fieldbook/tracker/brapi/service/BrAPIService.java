@@ -17,6 +17,7 @@ package com.fieldbook.tracker.brapi.service;
 
         import com.fieldbook.tracker.R;
         import com.fieldbook.tracker.brapi.ApiError;
+        import com.fieldbook.tracker.brapi.ApiErrorCode;
         import com.fieldbook.tracker.brapi.BrapiAuthDialog;
         import com.fieldbook.tracker.brapi.BrapiControllerResponse;
         import com.fieldbook.tracker.brapi.model.BrapiProgram;
@@ -107,10 +108,10 @@ public interface BrAPIService {
     }
 
     public static void handleConnectionError(Context context, int code) {
-        ApiError apiError = ApiError.processErrorCode(code);
+        ApiErrorCode apiErrorCode = ApiErrorCode.processErrorCode(code);
         String toastMsg = "";
 
-        switch (apiError) {
+        switch (apiErrorCode) {
             case UNAUTHORIZED:
                 // Start the login process
                 BrapiAuthDialog brapiAuth = new BrapiAuthDialog(context);
