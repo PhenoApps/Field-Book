@@ -16,10 +16,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,7 +81,26 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
         }
 
-        final String[] cat = getCurrentTrait().getCategories().split("/");
+        String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+
+        //Todo possibly handle case where labelVarPref is not "label" or "value"
+        Gson g = new Gson();
+        String [] buttonCat;
+        if (getCurrentTrait().getAdditionalInfo()==""){
+            //If imported before additionalinfo added, use original retrieval from categories
+            buttonCat = getCurrentTrait().getCategories().split("/");
+        } else {
+            JsonObject catObject = g.fromJson(getCurrentTrait().getAdditionalInfo(),JsonObject.class);
+            JsonArray catValueLabel = catObject.getAsJsonArray("catValueLabel");
+            buttonCat = new String[catValueLabel.size()];
+            JsonObject valueLabelRow;
+            for (int i=0; i<catValueLabel.size();i++){
+                valueLabelRow = g.fromJson(catValueLabel.get(i), JsonObject.class);
+                buttonCat[i] = valueLabelRow.get(labelValPref).getAsString();
+            }
+        }
+
+        final String[] cat = buttonCat;
 
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
         layoutManager.setFlexWrap(FlexWrap.WRAP);

@@ -19,6 +19,10 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -577,9 +581,13 @@ public class BrAPIServiceV1 implements BrAPIService {
                         updatePageInfo(paginationManager, response.getMetadata());
                         // Result contains a list of observation variables
                         List<ObservationVariable> brapiTraitList = response.getResult().getData();
-                        final Pair<List<TraitObject>, Integer> traitsResult = mapTraits(brapiTraitList);
-
-                        function.apply(traitsResult.first, traitsResult.second);
+                        try {
+                            final Pair<List<TraitObject>, Integer> traitsResult = mapTraits(brapiTraitList);
+                            function.apply(traitsResult.first, traitsResult.second);
+                        } catch (JSONException e) {
+                            failFunction.apply(-1);
+                            Log.e("BrAPIServiceV1", "Trait mapping failed", e);
+                        }
                     }
                 }
 
@@ -704,7 +712,12 @@ public class BrAPIServiceV1 implements BrAPIService {
                 @Override
                 public void onSuccess(StudyObservationVariablesResponse response, int i, Map<String, List<String>> map) {
                     //every time
-                    study.getTraits().addAll(mapTraits(response.getResult().getData()).first);
+                    try {
+                        study.getTraits().addAll(mapTraits(response.getResult().getData()).first);
+                    } catch (JSONException e) {
+                        failFunction.apply(-1);
+                        Log.e("BrAPIServiceV1", "Trait mapping failed", e);
+                    }
                     recursiveCounter[0] = recursiveCounter[0] + 1;
 
                     int page = response.getMetadata().getPagination().getCurrentPage();
@@ -743,7 +756,7 @@ public class BrAPIServiceV1 implements BrAPIService {
         }
     }
 
-    private Pair<List<TraitObject>, Integer> mapTraits(List<ObservationVariable> variables) {
+    private Pair<List<TraitObject>, Integer> mapTraits(List<ObservationVariable> variables) throws JSONException {
         List<TraitObject> traits = new ArrayList<>();
         Integer variablesMissingTrait = 0;
         for (ObservationVariable var : variables) {
@@ -795,12 +808,12 @@ public class BrAPIServiceV1 implements BrAPIService {
                     } else {
                         trait.setMaximum("");
                     }
-
                     if (trait.getFormat().equals("categorical")) {
                         String details = trait.getDetails() + "\nCategories: ";
                         details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
                         trait.setDetails(details);
                         trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
+                        trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
                     }
                 }
             }
@@ -824,6 +837,20 @@ public class BrAPIServiceV1 implements BrAPIService {
             }
         }
         return sb.toString();
+    }
+
+    private String buildCategoryValueLabelJsonStr(List<String> categories) throws JSONException {
+        JSONObject catObj = new JSONObject();
+        JSONArray cats = new JSONArray();
+        for (int j = 0; j < categories.size(); ++j) {
+            JSONObject valueLabel = new JSONObject();
+            String parts[] = categories.get(j).split("=");
+            valueLabel.put("value", parts[0]);
+            valueLabel.put("label", parts[1]);
+            cats.put(valueLabel);
+        }
+        catObj.put("catValueLabel", cats);
+        return catObj.toString();
     }
 
     private String buildCategoryList(List<String> categories) {

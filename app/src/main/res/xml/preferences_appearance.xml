@@ -66,5 +66,16 @@
             android:key="QuickGoTo"
             android:summary="@string/preferences_appearance_quickgoto_description"
             android:title="@string/preferences_appearance_quickgoto" />
+
+        <ListPreference
+            android:defaultValue="@array/pref_collect_customize_labelval_default"
+            android:dialogTitle="@string/preferences_appearance_collect_labelval_customize"
+            android:entries="@array/pref_collect_labelval_customize_title"
+            android:entryValues="@array/pref_collect_customize_labelval"
+            android:icon="@drawable/ic_view_list_black_24dp"
+            android:key="LABELVAL_CUSTOMIZE"
+            android:summary="@string/preferences_appearance_collect_labelval_customize_description"
+            android:title="@string/preferences_appearance_collect_labelval_customize" />
+
     </PreferenceCategory>
 </PreferenceScreen>

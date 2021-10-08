@@ -67,28 +67,32 @@ class VisibleObservationVariableDao {
         fun getDetail(trait: String): TraitObject? = withDatabase { db ->
 
             //return a trait object but requires multiple queries to use the attr/values table.
-            TraitObject().apply {
-                //creates local scoping around the map result from querying for variable names
-                with(db.query(sVisibleObservationVariableViewName,
-                        select = arrayOf(ObservationVariable.PK,
-                                "observation_variable_name",
-                                "observation_variable_field_book_format",
-                                "observation_variable_details",
-                                "default_value"),
-                        where = "observation_variable_name LIKE ?",
-                        whereArgs = arrayOf(trait)).toFirst()) {
-                    //use the local scoping to initialize trait object fields
-                    setTrait(this["observation_variable_name"] as? String ?: "")
-                    format = this["observation_variable_field_book_format"] as? String ?: ""
-                    defaultValue = this["default_value"] as? String ?: ""
-                    details = this["observation_variable_details"] as? String ?: ""
-                    id = (this[ObservationVariable.PK] as? Int ?: -1).toString()
-                    externalDbId = this["external_db_id"] as? String ?: ""
+            //TODO temporarily commented out until a database migration can be made to handle additionalInfo
+//            TraitObject().apply {
+//                //creates local scoping around the map result from querying for variable names
+//                with(db.query(sVisibleObservationVariableViewName,
+//                        select = arrayOf(ObservationVariable.PK,
+//                                "observation_variable_name",
+//                                "observation_variable_field_book_format",
+//                                "observation_variable_details",
+//                                "default_value"),
+//                        where = "observation_variable_name LIKE ?",
+//                        whereArgs = arrayOf(trait)).toFirst()) {
+//                    //use the local scoping to initialize trait object fields
+//                    setTrait(this["observation_variable_name"] as? String ?: "")
+//                    format = this["observation_variable_field_book_format"] as? String ?: ""
+//                    defaultValue = this["default_value"] as? String ?: ""
+//                    details = this["observation_variable_details"] as? String ?: ""
+//                    id = (this[ObservationVariable.PK] as? Int ?: -1).toString()
+//                    externalDbId = this["external_db_id"] as? String ?: ""
+//                    additionalInfo = this["additional_info"] as? String ?: ""
+//
+//                    minimum = ""
+//                    maximum = ""
+//                    categories = ""
 
-                    minimum = ""
-                    maximum = ""
-                    categories = ""
 
+                ObservationVariableDao.getAllTraitObjects().first { it.trait == trait }.apply {
                     ObservationVariableValueDao.getVariableValues(id.toInt()).also { values ->
 
                         values?.forEach {
@@ -117,7 +121,7 @@ class VisibleObservationVariableDao {
 //                        maximum = values["validValuesMax"] as? String ?: ""
 //                        categories = values["category"] as? String ?: ""
                     }
-                }
+//                }
             }
         }
     }

@@ -14,6 +14,7 @@ public class GeneralKeys {
     public static final String APPLICATION_THEME                    = "APPLICATION_THEME";
     public static final String SAVED_DATA_COLOR                     = "SAVED_DATA_COLOR";
     public static final String RESTORE_DEFAULT_THEME                = "RESTORE_DEFAULT_THEME";
+    public static final String LABELVAL_CUSTOMIZE                   = "LABELVAL_CUSTOMIZE";
 
     // Profile
     public static final String PROFILE_NAME_FIRST                   = "FirstName";

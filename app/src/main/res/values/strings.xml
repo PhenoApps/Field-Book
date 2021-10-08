@@ -180,6 +180,11 @@
     <string name="preferences_appearance_toolbar_customize_summary">Summary</string>
     <string name="preferences_appearance_toolbar_customize_lock">Lock</string>
 
+    <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
+    <string name="preferences_appearance_collect_labelval_customize_description">Display values or labels on the collect screen</string>
+    <string name="preferences_appearance_collect_labelval_customize_value">Value</string>
+    <string name="preferences_appearance_collect_labelval_customize_label">Label</string>
+
     <string name="preferences_behavior_title">Behavior</string>
     <string name="preferences_behavior_volume_buttons_navigate">Map volume keys to entry navigation</string>
     <string name="preferences_behavior_volume_buttons_navigate_description">Volume keys go to next or previous entry</string>
