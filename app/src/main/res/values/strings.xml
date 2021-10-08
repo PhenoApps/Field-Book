@@ -48,6 +48,7 @@
 
     <!-- Fields Activity  -->
     <string name="fields_delete_study">Delete field</string>
+    <string name="fields_update_sort_study">Update Sorting</string>
     <string name="fields_delete_study_confirmation">Are you sure you want to delete this field? This will delete all data from this field.</string>
     <string name="fields_study_exists_message">This field already exists.</string>
     <string name="fields_select_study">Select or import a field.</string>
@@ -58,11 +59,21 @@
     <string name="fields_options">Options</string>
     <string name="fields_study_statistics">Statistics</string>
     <string name="fields_sort">Sort</string>
+    <string name="fields_sort_update">Unit Sorting</string>
     <string name="fields_delete">Delete</string>
     <string name="fields_filter">Filter</string>
     <string name="fields_reimport">Reimport</string>
     <string name="fields_archive">Archive</string>
     <string name="fields_toolbar_add_field">Import Field</string>
+    <string name="sort_dialog_primary">Primary order</string>
+    <string name="sort_dialog_secondary">Secondary order</string>
+    <string name="sort_dialog_tertiary">Tertiary order</string>
+    <string name="sort_dialog_error_missing_primary">Please choose a primary order</string>
+    <string name="sort_dialog_error_missing_secondary">Please choose a secondary order</string>
+    <string name="sort_dialog_error_duplicates">Ordering choices cannot be duplicated</string>
+    <string name="sort_dialog_saved">Sorting updated</string>
+    <string name="dialog_error_title">Save Error</string>
+    <string name="sort_dialog_error_saving">Error updating sorting</string>
 
     <!-- Settings Activity  -->
     <string name="settings_fields">Fields</string>

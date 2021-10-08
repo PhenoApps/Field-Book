@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,7 +20,6 @@ import androidx.appcompat.app.AlertDialog;
 
 import android.provider.OpenableColumns;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -58,7 +56,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -85,7 +82,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
     public static ListView fieldList;
     public static FieldAdapter mAdapter;
-    public static Activity thisActivity;
+    public static AppCompatActivity thisActivity;
     public static EditText trait;
     private static Handler mHandler = new Handler();
     private static FieldFileObject.FieldFileBase fieldFile;

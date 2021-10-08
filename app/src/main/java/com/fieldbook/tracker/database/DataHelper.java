@@ -11,15 +11,12 @@ import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
-import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
@@ -53,8 +50,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.fieldbook.tracker.activities.ConfigActivity.dt;
 
 /**
  * All database related functions are here
@@ -1318,7 +1313,8 @@ public class DataHelper {
             }
         }
 
-        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId();
+        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId(context.getSharedPreferences("Settings", 0)
+                .getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         int[] data = new int[result.length];
 

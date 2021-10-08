@@ -15,10 +15,24 @@ class ObservationUnitPropertyDao {
 //            db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
 //        }
 
-        fun getAllRangeId(): Array<Int> = withDatabase { db ->
+        fun getAllRangeId(exp_id:Int): Array<Int> = withDatabase { db ->
+            var sortCols = db.query(
+                Study.tableName,
+                select = arrayOf("study_sort_name"),
+                where = "${Study.PK} = ?",
+                whereArgs = arrayOf(exp_id.toString()),
+                orderBy = Study.PK
+            ).toFirst().get("study_sort_name")
+
+            if(sortCols != null) {
+                sortCols = "$sortCols, id"
+            } else {
+                sortCols = "id"
+            }
+
             val table = db.query(sObservationUnitPropertyViewName,
                     select = arrayOf("id"),
-                    orderBy = "id").toTable()
+                    orderBy = sortCols).toTable()
 
             table.map { (it["id"] as Int) }
                     .toTypedArray()
@@ -93,8 +107,8 @@ class ObservationUnitPropertyDao {
             var data: Array<String?>? = null
 
             if (cursor.moveToFirst()) {
-                val i = cursor.columnCount - 1
-                data = arrayOfNulls(i)
+//                val i = cursor.columnCount - 1
+                data = arrayOfNulls(cursor.columnCount)
                 var k = 0
                 for (j in 0 until cursor.columnCount) {
                     if (cursor.getColumnName(j) != "id") {
@@ -119,8 +133,8 @@ class ObservationUnitPropertyDao {
             var data: Array<String?>? = null
 
             if (cursor.moveToFirst()) {
-                val i = cursor.columnCount - 1
-                data = arrayOfNulls(i)
+//                val i = cursor.columnCount - 1
+                data = arrayOfNulls(cursor.columnCount)
                 var k = 0
                 for (j in 0 until cursor.columnCount) {
                     if (cursor.getColumnName(j) != "id") {
