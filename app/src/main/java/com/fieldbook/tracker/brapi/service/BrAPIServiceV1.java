@@ -453,7 +453,7 @@ public class BrAPIServiceV1 implements BrAPIService {
                         // Stop if the current page is the last page according to the server
                         // Stop if there are no more contents
                         if((recursiveCounter[0] > 50)
-                                || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
+                                || (page == response.getMetadata().getPagination().getTotalPages())
                                 || (response.getResult().getData().size() == 0)){
                             // Stop recursive loop
                             function.apply(study);
@@ -713,7 +713,7 @@ public class BrAPIServiceV1 implements BrAPIService {
                     // Stop if the current page is the last page according to the server
                     // Stop if there are no more contents
                     if((recursiveCounter[0] > 50)
-                            || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
+                            || (page == response.getMetadata().getPagination().getTotalPages())
                             || (response.getResult().getData().size() == 0)){
                         // Stop recursive loop
                         function.apply(study);
