@@ -813,7 +813,12 @@ public class BrAPIServiceV1 implements BrAPIService {
                         details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
                         trait.setDetails(details);
                         trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
-                        trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
+
+                        try {
+                            trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
+                        } catch (Exception e) {
+                            Log.d("FieldBookError", "Error parsing trait label/value.");
+                        }
                     }
                 }
             }
