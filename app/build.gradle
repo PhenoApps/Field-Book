@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         applicationId "com.fieldbook.tracker"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode = 507
         versionName = '5.0.7'
@@ -32,15 +32,18 @@ android {
     }
 
     buildTypes {
-        debug {
-            manifestPlaceholders = [crashlyticsCollectionEnabled: "false"]
-            debuggable true
-        }
 
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.playStoreConfig //Add your own signing config
+        }
+
+        debug {
+            clean
+            debuggable true
+            manifestPlaceholders = [crashlyticsCollectionEnabled: "false"]
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
