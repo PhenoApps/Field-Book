@@ -849,9 +849,10 @@ public class BrAPIServiceV1 implements BrAPIService {
         JSONArray cats = new JSONArray();
         for (int j = 0; j < categories.size(); ++j) {
             JSONObject valueLabel = new JSONObject();
+            //in the case where there are multiple labels, accept the last one
             String parts[] = categories.get(j).split("=");
             valueLabel.put("value", parts[0]);
-            valueLabel.put("label", parts[1]);
+            valueLabel.put("label", parts[parts.length-1]);
             cats.put(valueLabel);
         }
         catObj.put("catValueLabel", cats);
