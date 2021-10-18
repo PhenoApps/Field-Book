@@ -1,5 +1,22 @@
 <changelog>
     <release
+        date="2021-09-27"
+        versionCode="507"
+        versionName="v5.0.7">
+        <new>Date trait has calendar picker</new>
+        <bugfix>Improvements to Label Print Trait</bugfix>
+        <bugfix>File management and import fixes</bugfix>
+        <bugfix>BrAPI pagination fixes</bugfix>
+    </release>
+
+    <release
+        date="2021-09-21"
+        versionCode="506"
+        versionName="v5.0.6">
+        <bugfix>Fixed an issue with import file headers</bugfix>
+    </release>
+
+    <release
         date="2021-09-20"
         versionCode="505"
         versionName="v5.0.5">

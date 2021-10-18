@@ -8,7 +8,11 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.fragment.app.DialogFragment;
+
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.dialogs.DatePickerFragment;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.text.DateFormatSymbols;
@@ -22,6 +26,7 @@ public class DateTraitLayout extends BaseTraitLayout {
     Button addDayBtn;
     Button minusDayBtn;
     ImageButton saveDayBtn;
+    private ImageButton calendarVisibilityBtn;
     private TextView month;
     private TextView day;
     private String date;
@@ -58,6 +63,27 @@ public class DateTraitLayout extends BaseTraitLayout {
         minusDayBtn = findViewById(R.id.minusDateBtn);
         saveDayBtn = findViewById(R.id.enterBtn);
 
+        calendarVisibilityBtn = findViewById(R.id.trait_date_calendar_visibility_btn);
+
+        /*
+         * When the calendar view visibility button is pressed it starts the date picker dialog.
+         */
+        calendarVisibilityBtn.setOnClickListener((View) -> {
+            DialogFragment newFragment = new DatePickerFragment(dateFormat, date, (year, month, day) -> {
+
+                Calendar calendar = Calendar.getInstance();
+
+                calendar.set(year, month, day);
+
+                updateViewDate(calendar);
+
+                return true;
+            });
+
+            newFragment.show(((CollectActivity) getContext()).getSupportFragmentManager(),
+                    "datePicker");
+        });
+
         // Add day
         addDayBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
@@ -72,20 +98,8 @@ public class DateTraitLayout extends BaseTraitLayout {
 
                 // Add day
                 calendar.add(Calendar.DATE, 1);
-                date = dateFormat.format(calendar.getTime());
 
-                // Set text
-                day.setText(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)));
-                month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
-
-                // Change text color
-                if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-                    month.setTextColor(Color.BLUE);
-                    day.setTextColor(Color.BLUE);
-                } else {
-                    month.setTextColor(Color.BLACK);
-                    day.setTextColor(Color.BLACK);
-                }
+                updateViewDate(calendar);
             }
         });
 
@@ -103,20 +117,8 @@ public class DateTraitLayout extends BaseTraitLayout {
 
                 //Subtract day, rewrite date
                 calendar.add(Calendar.DATE, -1);
-                date = dateFormat.format(calendar.getTime());
 
-                //Set text
-                day.setText(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)));
-                month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
-
-                // Change text color
-                if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-                    month.setTextColor(Color.BLUE);
-                    day.setTextColor(Color.BLUE);
-                } else {
-                    month.setTextColor(Color.BLACK);
-                    day.setTextColor(Color.BLACK);
-                }
+                updateViewDate(calendar);
             }
         });
 
@@ -143,6 +145,25 @@ public class DateTraitLayout extends BaseTraitLayout {
                 day.setTextColor(Color.parseColor(getDisplayColor()));
             }
         });
+    }
+
+    private void updateViewDate(Calendar calendar) {
+
+        date = dateFormat.format(calendar.getTime());
+
+        //Set text
+        day.setText(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)));
+        month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
+
+        // Change text color
+        if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
+            month.setTextColor(Color.BLUE);
+            day.setTextColor(Color.BLUE);
+        } else {
+            month.setTextColor(Color.BLACK);
+            day.setTextColor(Color.BLACK);
+        }
+
     }
 
     @Override

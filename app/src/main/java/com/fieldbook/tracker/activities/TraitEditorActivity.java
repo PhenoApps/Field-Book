@@ -898,6 +898,8 @@ public class TraitEditorActivity extends AppCompatActivity {
                 if (!brapiDialogShown) {
                     brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, ConfigActivity.dt, null, true);
                 }
+            } else {
+                Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
             }
         }
 

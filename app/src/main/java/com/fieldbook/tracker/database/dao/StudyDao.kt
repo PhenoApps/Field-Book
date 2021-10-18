@@ -2,6 +2,8 @@ package com.fieldbook.tracker.database.dao
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
+import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
@@ -65,7 +67,22 @@ class StudyDao {
 
         fun deleteField(exp_id: Int) = withDatabase { db ->
 
-            db.delete(Study.tableName, "${Study.PK} = ?", arrayOf(exp_id.toString()))
+            try {
+
+                db.rawQuery("PRAGMA foreign_keys=OFF", null)
+                db.delete(ObservationUnit.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
+                db.delete(ObservationUnitValue.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
+                db.delete(ObservationUnitAttribute.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
+                db.delete(Study.tableName, "${Study.PK} = ?", arrayOf(exp_id.toString()))
+                db.rawQuery("PRAGMA foreign_keys=ON", null)
+
+            } catch (e: SQLiteException) {
+
+                e.printStackTrace()
+
+                Log.d("StudyDao", "error during field deletion")
+
+            }
 
         }
 
