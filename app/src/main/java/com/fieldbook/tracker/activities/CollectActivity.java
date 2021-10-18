@@ -891,8 +891,11 @@ public class CollectActivity extends AppCompatActivity {
         builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                IntentIntegrator integrator = new IntentIntegrator(thisActivity);
-                integrator.initiateScan();
+                new IntentIntegrator(thisActivity)
+                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setBeepEnabled(true)
+                        .setRequestCode(98)
+                        .initiateScan();
             }
         });
 
