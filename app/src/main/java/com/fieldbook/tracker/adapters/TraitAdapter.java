@@ -137,7 +137,7 @@ public class TraitAdapter extends BaseAdapter {
                 holder.format.setBackgroundResource(R.drawable.ic_trait_labelprint);
                 break;
             case "gnss":
-                holder.format.setBackgroundResource(R.drawable.ic_trait_labelprint);
+                holder.format.setBackgroundResource(R.drawable.ic_trait_gnss);
                 break;
             default:
                 holder.format.setBackgroundResource(R.drawable.ic_reorder);

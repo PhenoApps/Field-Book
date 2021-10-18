@@ -348,7 +348,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         }
 
         //cancel the thread when the disconnect button is pressed
-        val disconnectButton = findViewById<Button>(R.id.disconnect_button)
+        val disconnectButton = findViewById<ImageButton>(R.id.disconnect_button)
         disconnectButton.setOnClickListener {
             connectButton.visibility = View.VISIBLE
             connectGroup.visibility = View.GONE

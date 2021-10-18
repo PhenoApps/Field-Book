@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <CheckBoxPreference
         android:defaultValue="false"
@@ -61,7 +62,10 @@
         android:summary="@string/preferences_general_flip_flop_arrows_description"
         android:title="@string/preferences_general_flip_flop_arrows" />
 
-    <PreferenceCategory android:title="@string/pref_behavior_geonav_category_title">
+    <PreferenceCategory
+        android:title="@string/pref_behavior_geonav_category_title"
+        app:iconSpaceReserved="false">
+
         <CheckBoxPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_explore_black_24dp"
@@ -87,8 +91,9 @@
             android:summary="@string/pref_geonav_update_interval_summary"
             android:title="@string/pref_geonav_update_interval_title" />
 
-        <Preference android:title="@string/pref_geonav_pair"
+        <Preference
             android:icon="@drawable/ic_bluetooth_black_24dp"
-            android:key="com.fieldbook.tracker.geonav.PAIR_BLUETOOTH"/>
+            android:key="com.fieldbook.tracker.geonav.PAIR_BLUETOOTH"
+            android:title="@string/pref_geonav_pair" />
     </PreferenceCategory>
 </PreferenceScreen>
