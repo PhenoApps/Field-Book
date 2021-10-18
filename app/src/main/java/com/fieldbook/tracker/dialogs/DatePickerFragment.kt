@@ -2,9 +2,11 @@ package com.fieldbook.tracker.dialogs
 
 import android.app.DatePickerDialog
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
+import com.fieldbook.tracker.R
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -22,6 +24,7 @@ class DatePickerFragment(val format: SimpleDateFormat,
         // Use the current date as the default date in the picker
         val c = Calendar.getInstance()
 
+        //parse the date parameter and set the calendar's time
         format.parse(date)?.let { savedDate ->
             c.time = savedDate
         }
@@ -31,7 +34,24 @@ class DatePickerFragment(val format: SimpleDateFormat,
         val day = c.get(Calendar.DAY_OF_MONTH)
 
         // Create a new instance of DatePickerDialog and return it
-        return DatePickerDialog(requireContext(), this, year, month, day)
+        val dialog = DatePickerDialog(requireContext(), this, year, month, day)
+
+        //set a 'today' neutral button that resets the calendar to today's date
+        dialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.dialog_date_picker_neutral_button)) { _,_ -> }
+
+        //get neutral button when dialog is shown and update the calendar to today's date
+        dialog.setOnShowListener {
+
+            dialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener {
+
+                val today = Calendar.getInstance()
+
+                dialog.updateDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH))
+
+            }
+        }
+
+        return dialog
     }
 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
