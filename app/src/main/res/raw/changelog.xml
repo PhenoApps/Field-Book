@@ -1,5 +1,18 @@
 <changelog>
     <release
+        date="2021-10-18"
+        versionCode="510"
+        versionName="v5.1">
+        <new>Field Book GeoNav!</new>
+        <new>Identify and load nearest field</new>
+        <new>Identify and navigate to closest plot</new>
+        <new>New setting to adjust polling rate, angle, and GNSS device</new>
+        <new>Use internal GPS with GNSS trait</new>
+        <info>Increased required minimum Android version to 5.1</info>
+        <bugfix>Fixed 'Move to unique identifier' setting</bugfix>
+    </release>
+
+    <release
         date="2021-09-27"
         versionCode="507"
         versionName="v5.0.7">
