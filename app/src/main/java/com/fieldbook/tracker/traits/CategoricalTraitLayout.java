@@ -81,16 +81,19 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
         }
 
+        //read the preferences, default to displaying values instead of labels
         String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
 
-        //Todo possibly handle case where labelVarPref is not "label" or "value"
+        //read the json object stored in additional info of the trait object (only in BrAPI imported traits)
         Gson g = new Gson();
-        String [] buttonCat;
-        if (getCurrentTrait().getAdditionalInfo()==""){
-            //If imported before additionalinfo added, use original retrieval from categories
+        String[] buttonCat;
+        String additionalInfo = getCurrentTrait().getAdditionalInfo();
+
+        if (additionalInfo.equals("")){
+            //If imported before additional info was added, use original retrieval from categories
             buttonCat = getCurrentTrait().getCategories().split("/");
-        } else {
-            JsonObject catObject = g.fromJson(getCurrentTrait().getAdditionalInfo(),JsonObject.class);
+        } else { //otherwise decode the json object and populate the buttons with the value or label
+            JsonObject catObject = g.fromJson(additionalInfo,JsonObject.class);
             JsonArray catValueLabel = catObject.getAsJsonArray("catValueLabel");
             buttonCat = new String[catValueLabel.size()];
             JsonObject valueLabelRow;

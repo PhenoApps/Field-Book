@@ -847,6 +847,13 @@ public class BrAPIServiceV2 implements BrAPIService{
         return sb.toString();
     }
 
+    /**
+     * Called in map traits, this will build a JSON string that encodes
+     * value/label category pairs.
+     * @param categories the list of = delimited value/label pairs
+     * @return the json encoded valid values BrAPI object
+     * @throws JSONException captured in mapTraits
+     */
     private String buildCategoryValueLabelJsonStr(List<BrAPIScaleValidValuesCategories> categories) throws JSONException {
         JSONObject catObj = new JSONObject();
         JSONArray cats = new JSONArray();
