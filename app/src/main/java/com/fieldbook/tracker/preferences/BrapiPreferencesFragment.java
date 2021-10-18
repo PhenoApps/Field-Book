@@ -71,6 +71,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiURLPreference.setOnPreferenceChangeListener(this);
         brapiOIDCURLPreference = findPreference(GeneralKeys.BRAPI_OIDC_URL);
         brapiOIDCFlow = findPreference(GeneralKeys.BRAPI_OIDC_FLOW);
+        brapiOIDCFlow.setOnPreferenceChangeListener(this);
 
 //        EditTextPreference brapiPaginationPreference = (EditTextPreference) findPreference(GeneralKeys.BRAPI_PAGE_SIZE);
 //        brapiPaginationPreference.setSummary(prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
@@ -237,6 +238,18 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
             String newOidcUrl = oldOidcUrl.replaceFirst(oldBaseUrl, newValue.toString());
             setServer(newValue.toString(), newOidcUrl, null);
+        }
+
+        if (preference.equals(brapiOIDCFlow)) {
+            PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("brapi_oidc_settings");
+
+            if(brapiOIDCFlow.getValue().equalsIgnoreCase("Original Field Book Custom")) {
+                preferenceCategory.addPreference(brapiOIDCURLPreference);
+            } else {
+                preferenceCategory.removePreference(brapiOIDCURLPreference);
+            }
+
+            Log.d("Field Book",brapiOIDCFlow.getValue().toString());
         }
 
         return true;
