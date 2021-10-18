@@ -618,4 +618,5 @@
     <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>
     <string name="printer_success">Print success</string>
     <string name="bluetooth_printer_choose_device_title">Choose bluetooth device to print from.</string>
+    <string name="preferences_brapi_traits_title">BrAPI Variables</string>
 </resources>
