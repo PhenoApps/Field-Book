@@ -614,4 +614,5 @@
     <string name="printer_success">Print success</string>
     <string name="bluetooth_printer_choose_device_title">Choose bluetooth device to print from.</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book could not load the file.</string>
+    <string name="trait_counter_layout_failed">Counter failed to save, please recreate this trait.</string>
 </resources>

@@ -8,6 +8,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.utilities.Utils;
 
 public class CounterTraitLayout extends BaseTraitLayout {
 
@@ -44,13 +46,18 @@ public class CounterTraitLayout extends BaseTraitLayout {
         // Add counter
         addCounterBtn.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                //TODO NullPointerException
-                if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
-                    counterTv.setText("1");
+                TraitObject trait = getCurrentTrait();
+                if (trait != null) {
+                    if (getNewTraits().containsKey(trait.getTrait()) && getNewTraits().get(trait.getTrait()).toString().equals("NA")) {
+                        counterTv.setText("1");
+                    } else {
+                        counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) + 1));
+                    }
+                    updateTrait(getCurrentTrait().getTrait(), "counter", counterTv.getText().toString());
                 } else {
-                    counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) + 1));
+                    Context ctx = getContext();
+                    Utils.makeToast(ctx, ctx.getString(R.string.trait_counter_layout_failed));
                 }
-                updateTrait(getCurrentTrait().getTrait(), "counter", counterTv.getText().toString());
             }
         });
 
