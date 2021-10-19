@@ -18,7 +18,7 @@ abstract class GNSSResponseReceiver : BroadcastReceiver() {
         const val ACTION_BROADCAST_GNSS = "org.phenoapps.tracker.fieldbook.gnss.ACTION_BROADCAST_GNSS"
     }
 
-    internal abstract fun onGNSSParsed(parser: NmeaParser)
+    abstract fun onGNSSParsed(parser: NmeaParser)
 
     override fun onReceive(context: Context, intent: Intent) {
 

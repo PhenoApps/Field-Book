@@ -17,4 +17,9 @@
         android:icon="@drawable/ic_tb_add_circle"
         android:showAsAction="ifRoom"
         android:title="@string/fields_toolbar_add_field" />
+    <item
+        android:id="@+id/action_select_plot_by_distance"
+        android:icon="@drawable/ic_explore_black_24dp"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_fields_plot_by_distance_title"/>
 </menu>
