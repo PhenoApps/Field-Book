@@ -9,6 +9,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.hardware.GeomagneticField;
+
+import androidx.annotation.NonNull;
 
 public class GPSTracker extends Service implements LocationListener {
 
@@ -28,10 +31,23 @@ public class GPSTracker extends Service implements LocationListener {
     Location location; // location
     double latitude; // latitude
     double longitude; // longitude
+    double altitude;
+    float declination;
+
+    GPSTrackerListener mListener = null;
+
+    public interface GPSTrackerListener {
+        void onLocationChanged(@NonNull Location location);
+    }
 
     public GPSTracker(Context context) {
         this.mContext = context;
         getLocation();
+    }
+
+    public GPSTracker(Context context, GPSTrackerListener listener) {
+        this(context);
+        this.mListener = listener;
     }
 
     public Location getLocation() {
@@ -117,6 +133,33 @@ public class GPSTracker extends Service implements LocationListener {
     }
 
     /**
+     * Function to get the alittude
+     */
+    public double getAltitude() {
+        if (location != null) {
+            altitude = location.getAltitude();
+        }
+
+        return altitude;
+    }
+
+    /**
+     * Function to get the declination.
+     * Angle between true north and magnetic north
+     */
+    public float getDeclination() {
+        if (location != null) {
+            declination = new GeomagneticField(
+                (float) getLatitude(),
+                (float) getLongitude(),
+                (float) getAltitude(),
+                System.currentTimeMillis()).getDeclination();
+        }
+
+        return declination;
+    }
+
+    /**
      * Function to check GPS/wifi enabled
      *
      * @return boolean
@@ -127,6 +170,14 @@ public class GPSTracker extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
+        if (mListener != null) {
+
+            if (location != null) {
+
+                mListener.onLocationChanged(location);
+
+            }
+        }
     }
 
     @Override

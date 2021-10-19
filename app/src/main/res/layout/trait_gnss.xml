@@ -15,20 +15,19 @@
 
         <ImageButton
             android:id="@+id/gnss_connect_button"
-            android:layout_margin="16dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_margin="16dp"
             android:src="@drawable/ic_satellite_variant"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.Group
+            android:id="@+id/gnss_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/gnss_group"
             android:visibility="gone"
-            tools:visibility="visible"
             app:constraint_referenced_ids="accHeader,accTextView,
                 utcHeader,utcTextView,
                 satsHeader,satTextView,
@@ -36,20 +35,21 @@
                 lngHeader,lngTextView,
                 altHeader,altTextView,
                 hdopHeader,hdopTextView,
-                gnss_collect_button, disconnect_button"/>
-        
+                gnss_collect_button, disconnect_button"
+            tools:visibility="visible" />
+
         <TextView
             android:id="@+id/utcHeader"
             style="@style/TextHeader"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
             android:layout_weight="1"
             android:text="UTC"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginLeft="8dp" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/utcTextView"
@@ -57,11 +57,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
             android:layout_weight="1"
             app:layout_constraintStart_toEndOf="@+id/utcHeader"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginLeft="8dp" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/satsHeader"
@@ -70,11 +70,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:drawableStart="@drawable/ic_satellite_variant"
-            app:layout_constraintEnd_toStartOf="@+id/satTextView"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_marginRight="8dp"
-            android:drawableLeft="@drawable/ic_satellite_variant" />
+            android:drawableStart="@drawable/ic_satellite_variant"
+            android:drawableLeft="@drawable/ic_satellite_variant"
+            app:layout_constraintEnd_toStartOf="@+id/satTextView"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/satTextView"
@@ -83,9 +83,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginRight="8dp" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/latHeader"
@@ -93,22 +93,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
             android:text="Latitude:"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/utcHeader"
-            android:layout_marginLeft="8dp" />
+            app:layout_constraintTop_toBottomOf="@+id/utcHeader" />
 
         <TextView
             android:id="@+id/latTextView"
             style="@style/TextData"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintEnd_toStartOf="@+id/lngHeader"
             app:layout_constraintStart_toEndOf="@+id/latHeader"
             app:layout_constraintTop_toBottomOf="@+id/utcHeader"
-            android:layout_marginLeft="8dp" />
+            tools:text="108.199219921992" />
 
         <TextView
             android:id="@+id/lngHeader"
@@ -117,10 +121,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             android:text="Longitude:"
             app:layout_constraintEnd_toStartOf="@+id/lngTextView"
-            app:layout_constraintTop_toBottomOf="@+id/utcHeader"
-            android:layout_marginRight="8dp" />
+            app:layout_constraintTop_toBottomOf="@+id/utcHeader" />
 
         <TextView
             android:id="@+id/lngTextView"
@@ -129,9 +133,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/utcHeader"
-            android:layout_marginRight="8dp" />
+            tools:text="071.1719931993" />
 
         <TextView
             android:id="@+id/altHeader"
@@ -139,11 +144,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
             android:text="Altitude:"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/latHeader"
-            android:layout_marginLeft="8dp" />
+            app:layout_constraintTop_toBottomOf="@+id/latHeader" />
 
         <TextView
             android:id="@+id/altTextView"
@@ -151,10 +156,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toEndOf="@+id/altHeader"
-            app:layout_constraintTop_toBottomOf="@+id/latHeader"
-            android:layout_marginLeft="8dp" />
+            app:layout_constraintTop_toBottomOf="@+id/latHeader" />
 
         <TextView
             android:id="@+id/hdopHeader"
@@ -162,11 +167,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
             android:text="HDOP:"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/altHeader"
-            android:layout_marginLeft="8dp" />
+            app:layout_constraintTop_toBottomOf="@+id/altHeader" />
 
         <TextView
             android:id="@+id/hdopTextView"
@@ -174,10 +179,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toEndOf="@+id/hdopHeader"
-            app:layout_constraintTop_toBottomOf="@+id/altHeader"
-            android:layout_marginLeft="8dp" />
+            app:layout_constraintTop_toBottomOf="@+id/altHeader" />
 
         <TextView
             android:id="@+id/accHeader"
@@ -186,10 +191,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             android:text="Accuracy:"
             app:layout_constraintEnd_toStartOf="@+id/accTextView"
-            app:layout_constraintTop_toBottomOf="@+id/latHeader"
-            android:layout_marginRight="8dp" />
+            app:layout_constraintTop_toBottomOf="@+id/latHeader" />
 
         <TextView
             android:id="@+id/accTextView"
@@ -198,29 +203,32 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/latHeader"
-            android:layout_marginRight="8dp" />
+            app:layout_constraintTop_toBottomOf="@+id/latHeader" />
 
         <ImageButton
             android:id="@+id/gnss_collect_button"
-            android:layout_margin="16dp"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="16dp"
             android:src="@drawable/ic_trait_location"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/hdopHeader" />
+            app:layout_constraintStart_toEndOf="@id/disconnect_button"
+            app:layout_constraintTop_toBottomOf="@id/hdopHeader"
+            app:layout_constraintHorizontal_weight="4" />
 
-        <Button
+        <ImageButton
             android:id="@+id/disconnect_button"
-            android:layout_margin="16dp"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/disconnect"
+            android:layout_height="50dp"
+            android:layout_margin="16dp"
+            android:src="@drawable/trait_gnss_disconnect"
+            app:layout_constraintEnd_toStartOf="@id/gnss_collect_button"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/gnss_collect_button" />
+            app:layout_constraintTop_toBottomOf="@id/hdopHeader"
+            app:layout_constraintHorizontal_weight="1" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

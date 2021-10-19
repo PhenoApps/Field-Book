@@ -60,6 +60,14 @@ public class GeneralKeys {
     public static final String BRAPI_PAGE_SIZE                      = "BRAPI_PAGE_SIZE";
     public static final String BRAPI_TIMEOUT                        = "BRAPI_TIMEOUT";
 
+    //GeoNav
+    private static final String GEONAV_PREFIX                       = "com.fieldbook.tracker.geonav.";
+    public static final String ENABLE_GEONAV                        = GEONAV_PREFIX + "ENABLE_GEONAV";
+    public static final String SEARCH_ANGLE                         = GEONAV_PREFIX + "SEARCH_ANGLE";
+    public static final String UPDATE_INTERVAL                      = GEONAV_PREFIX + "UPDATE_INTERVAL";
+    public static final String PAIR_BLUETOOTH                       = GEONAV_PREFIX + "PAIR_BLUETOOTH";
+    public static final String PAIRED_DEVICE_ADDRESS                = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS";
+    public static final String GEONAV_AUTO                          = GEONAV_PREFIX + "GEONAV_AUTO";
     // @formatter:on
 
     private GeneralKeys() {

@@ -10,6 +10,7 @@ import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -38,7 +39,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.adapters.FieldAdapter;
+import com.fieldbook.tracker.database.dao.ObservationUnitDao;
+import com.fieldbook.tracker.database.models.ObservationModel;
+import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
+import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -55,13 +61,19 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.GeodeticUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.android.material.snackbar.Snackbar;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -85,6 +97,8 @@ public class FieldEditorActivity extends AppCompatActivity {
     private Menu systemMenu;
     private AlertDialog importFieldDialog;
     private int idColPosition;
+
+    private GPSTracker mGpsTracker;
 
     // Creates a new thread to do importing
     private Runnable importRunnable = new Runnable() {
@@ -120,6 +134,8 @@ public class FieldEditorActivity extends AppCompatActivity {
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
         }
         loadData();
+
+        mGpsTracker = new GPSTracker(this);
     }
 
     @Override
@@ -370,8 +386,106 @@ public class FieldEditorActivity extends AppCompatActivity {
                 CollectActivity.reloadData = true;
                 finish();
                 break;
+
+            case R.id.action_select_plot_by_distance:
+
+                if (mGpsTracker != null && mGpsTracker.canGetLocation()) {
+
+                    selectPlotByDistance();
+
+                } else {
+
+                    Toast.makeText(this, R.string.activity_field_editor_no_location_yet, Toast.LENGTH_SHORT).show();
+
+                }
+
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Programmatically selects the closest field to the user's location.
+     * Finds all observation units with geocoordinate data, sorts the list and finds the first item.
+     */
+    private void selectPlotByDistance() {
+
+        if (mGpsTracker != null && mGpsTracker.canGetLocation()) {
+
+            //get current coordinate of the user
+            Location thisLocation = mGpsTracker.getLocation();
+
+            ObservationUnitModel[] units = ObservationUnitDao.Companion.getAll();
+            List<ObservationUnitModel> coordinates = new ArrayList<>();
+
+            //find all observation units with a coordinate
+            for (ObservationUnitModel model : units) {
+                String latlng = model.getGeo_coordinates();
+                if (latlng != null && !latlng.isEmpty()) {
+                    coordinates.add(model);
+                }
+            }
+
+            //sort the coordinates based on the distance from the user
+            Collections.sort(coordinates, (a, b) -> {
+                double distanceA, distanceB;
+                Location locationA = a.getLocation();
+                Location locationB = b.getLocation();
+                if (locationA == null) distanceA = Double.MAX_VALUE;
+                else distanceA = thisLocation.distanceTo(locationA);
+                if (locationB == null) distanceB = Double.MAX_VALUE;
+                else distanceB = thisLocation.distanceTo(locationB);
+                return Double.compare(distanceA, distanceB);
+            });
+
+            Optional<ObservationUnitModel> closest = coordinates.stream().findFirst();
+
+            try {
+
+                if (closest.isPresent()) {
+
+                    ObservationUnitModel model = closest.get();
+
+                    int studyId = model.getStudy_id();
+
+                    if (studyId == ep.getInt("SelectedFieldExpId", -1)) {
+
+                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
+                                getString(R.string.activity_field_editor_switch_field_same),
+                                Snackbar.LENGTH_LONG).show();
+
+                    } else {
+
+                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
+                                getString(R.string.activity_field_editor_switch_field, String.valueOf(studyId)),
+                                Snackbar.LENGTH_LONG);
+
+                        mySnackbar.setAction(R.string.activity_field_editor_switch_field_action, (view) -> {
+
+                            int count = mAdapter.getCount();
+
+                            for (int i = 0; i < count; i++) {
+                                FieldObject field = mAdapter.getItem(i);
+                                if (field.getExp_id() == studyId) {
+                                    mAdapter.getView(i, null, null).performClick();
+                                }
+                            }
+
+                        });
+
+                        mySnackbar.show();
+                    }
+                }
+
+            } catch (NoSuchElementException e) {
+
+                Toast.makeText(this, R.string.activity_field_editor_no_field_found, Toast.LENGTH_SHORT).show();
+            }
+        } else {
+
+            Toast.makeText(this, R.string.activity_field_editor_no_location_yet, Toast.LENGTH_SHORT).show();
+
+        }
     }
 
     public String getFileName(Uri uri) {
