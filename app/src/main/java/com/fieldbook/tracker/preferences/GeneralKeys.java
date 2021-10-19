@@ -70,6 +70,9 @@ public class GeneralKeys {
     public static final String GEONAV_AUTO                          = GEONAV_PREFIX + "GEONAV_AUTO";
     // @formatter:on
 
+    //Calendar Trait
+    public static final String CALENDAR_LAST_SAVED_DATE             = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
+
     private GeneralKeys() {
 
     }
