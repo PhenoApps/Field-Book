@@ -55,6 +55,9 @@ import org.brapi.v2.model.pheno.response.BrAPIImageSingleResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -556,9 +559,13 @@ public class BrAPIServiceV2 implements BrAPIService{
                         updatePageInfo(paginationManager, response.getMetadata());
                         // Result contains a list of observation variables
                         List<BrAPIObservationVariable> brapiTraitList = response.getResult().getData();
-                        final Pair<List<TraitObject>, Integer> traitsResult = mapTraits(brapiTraitList);
-
-                        function.apply(traitsResult.first, traitsResult.second);
+                        try {
+                            final Pair<List<TraitObject>, Integer> traitsResult = mapTraits(brapiTraitList);
+                            function.apply(traitsResult.first, traitsResult.second);
+                        } catch (JSONException e) {
+                            failFunction.apply(-1);
+                            Log.e("BrAPIServiceV2", "Trait mapping failed", e);
+                        }
                     }
                 }
 
@@ -702,7 +709,12 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onSuccess(BrAPIObservationVariableListResponse response, int i, Map<String, List<String>> map) {
                     //every time
-                    study.getTraits().addAll(mapTraits(response.getResult().getData()).first);
+                    try {
+                        study.getTraits().addAll(mapTraits(response.getResult().getData()).first);
+                    } catch (JSONException error) {
+                        failFunction.apply(-1);
+                        Log.e("BrAPIServiceV2", "Traits failed to map", error);
+                    }
                     recursiveCounter[0] = recursiveCounter[0] + 1;
 
                     int page = response.getMetadata().getPagination().getCurrentPage();
@@ -744,7 +756,7 @@ public class BrAPIServiceV2 implements BrAPIService{
         }
     }
 
-    private Pair<List<TraitObject>, Integer> mapTraits(List<BrAPIObservationVariable> variables) {
+    private Pair<List<TraitObject>, Integer> mapTraits(List<BrAPIObservationVariable> variables) throws JSONException {
         List<TraitObject> traits = new ArrayList<>();
         Integer variablesMissingTrait = 0;
         for (BrAPIObservationVariable var : variables) {
@@ -799,6 +811,18 @@ public class BrAPIServiceV2 implements BrAPIService{
                 } else {
                     trait.setFormat("text");
                 }
+                //For categorical traits, include label value pairs in details
+                if (trait.getFormat().equals("categorical")) {
+                    String details = trait.getDetails() + "\nCategories: ";
+                    details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
+                    trait.setDetails(details);
+
+                    try {
+                        trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
+                    } catch (Exception e) {
+                        Log.d("FieldBookError", "Error parsing trait label/value.");
+                    }
+                }
 
             }
 
@@ -810,6 +834,37 @@ public class BrAPIServiceV2 implements BrAPIService{
         }
 
         return Pair.create(traits, variablesMissingTrait);
+    }
+
+    private String buildCategoryDescriptionString(List<BrAPIScaleValidValuesCategories> categories) {
+        StringBuilder sb = new StringBuilder();
+        for (int j = 0; j < categories.size(); ++j) {
+            sb.append(categories.get(j).getValue()+"="+categories.get(j).getLabel());
+            if (j != categories.size() - 1) {
+                sb.append("; ");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Called in map traits, this will build a JSON string that encodes
+     * value/label category pairs.
+     * @param categories the list of = delimited value/label pairs
+     * @return the json encoded valid values BrAPI object
+     * @throws JSONException captured in mapTraits
+     */
+    private String buildCategoryValueLabelJsonStr(List<BrAPIScaleValidValuesCategories> categories) throws JSONException {
+        JSONObject catObj = new JSONObject();
+        JSONArray cats = new JSONArray();
+        for (int j = 0; j < categories.size(); ++j) {
+            JSONObject valueLabel = new JSONObject();
+            valueLabel.put("value", categories.get(j).getValue());
+            valueLabel.put("label", categories.get(j).getLabel());
+            cats.put(valueLabel);
+        }
+        catObj.put("catValueLabel", cats);
+        return catObj.toString();
     }
 
     private String buildCategoryList(List<BrAPIScaleValidValuesCategories> categories) {

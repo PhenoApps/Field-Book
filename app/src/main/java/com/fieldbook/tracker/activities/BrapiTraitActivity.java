@@ -219,6 +219,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 // Save the selected traits
                 String saveMessage = saveTraits();
 
+                setResult(RESULT_OK);
                 // navigate back to our traits list page
                 finish();
                 Toast.makeText(this, saveMessage, Toast.LENGTH_LONG).show();
