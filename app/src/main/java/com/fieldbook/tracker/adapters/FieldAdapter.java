@@ -35,7 +35,7 @@ public class FieldAdapter extends BaseAdapter {
 
     private LayoutInflater mLayoutInflater;
     private ArrayList<FieldObject> list;
-    private Context context;
+    private final Context context;
     private SharedPreferences ep;
 
     public FieldAdapter(Context context, ArrayList<FieldObject> list) {
@@ -156,7 +156,7 @@ public class FieldAdapter extends BaseAdapter {
             // Do it when clicking ":"
             @Override
             public void onClick(final View view) {
-                PopupMenu popup = new PopupMenu(FieldEditorActivity.thisActivity, view);
+                PopupMenu popup = new PopupMenu(context, view);
                 //Inflating the Popup using xml file
                 popup.getMenuInflater().inflate(R.menu.menu_field_listitem, popup.getMenu());
 
@@ -172,8 +172,7 @@ public class FieldAdapter extends BaseAdapter {
             // Do it when selecting Delete or Statistics
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                final Activity thisActivity = FieldEditorActivity.thisActivity;
-                final String strDel = thisActivity.getString(R.string.fields_delete);
+                final String strDel = context.getString(R.string.fields_delete);
 
                 if (item.getTitle().equals(strDel)) {
                     AlertDialog alert = createDeleteItemAlertDialog(position);

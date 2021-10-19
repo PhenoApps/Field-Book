@@ -38,6 +38,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.fieldbook.tracker.adapters.FieldAdapter;
+import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -81,15 +82,17 @@ public class FieldEditorActivity extends AppCompatActivity {
     Spinner unique;
     Spinner primary;
     Spinner secondary;
-    int exp_id;
     private Menu systemMenu;
-    private AlertDialog importFieldDialog;
-    private int idColPosition;
 
     // Creates a new thread to do importing
-    private Runnable importRunnable = new Runnable() {
+    private final Runnable importRunnable = new Runnable() {
         public void run() {
-            new ImportRunnableTask().execute(0);
+            new ImportRunnableTask(thisActivity,
+                    fieldFile,
+                    unique.getSelectedItemPosition(),
+                    unique.getSelectedItem().toString(),
+                    primary.getSelectedItem().toString(),
+                    secondary.getSelectedItem().toString()).execute(0);
         }
     };
 
@@ -403,8 +406,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-
+        
         if (requestCode == 2) {
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra("result");
@@ -507,62 +509,69 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         String[] importColumns = fieldFile.getColumns();
 
-        //only reserved word for now is id which is used in many queries
-        //other sqlite keywords are sanitized with a tick mark to make them an identifier
-        String[] reservedNames = new String[]{"id"};
+        //in some cases getColumns is returning null, so print an error message to the user
+        if (importColumns != null) {
 
-        //replace specials and emptys and add them to the actual columns list to be displayed
-        ArrayList<String> actualColumns = new ArrayList<>();
+            //only reserved word for now is id which is used in many queries
+            //other sqlite keywords are sanitized with a tick mark to make them an identifier
+            String[] reservedNames = new String[]{"id"};
 
-        List<String> list = Arrays.asList(reservedNames);
+            //replace specials and emptys and add them to the actual columns list to be displayed
+            ArrayList<String> actualColumns = new ArrayList<>();
 
-        //define flag to let the user know characters were replaced at the end of the loop
-        boolean hasSpecialCharacters = false;
-        for (int i = 0; i < importColumns.length; i++) {
+            List<String> list = Arrays.asList(reservedNames);
 
-            String s = importColumns[i];
-            boolean added = false;
+            //define flag to let the user know characters were replaced at the end of the loop
+            boolean hasSpecialCharacters = false;
+            for (int i = 0; i < importColumns.length; i++) {
 
-            //replace the special characters, only add to the actual list if it is not empty
-            if (DataHelper.hasSpecialChars(s)) {
+                String s = importColumns[i];
+                boolean added = false;
 
-                hasSpecialCharacters = true;
-                added = true;
-                String replaced = DataHelper.replaceSpecialChars(s);
-                if (!replaced.isEmpty()) actualColumns.add(replaced);
+                //replace the special characters, only add to the actual list if it is not empty
+                if (DataHelper.hasSpecialChars(s)) {
 
-            }
+                    hasSpecialCharacters = true;
+                    added = true;
+                    String replaced = DataHelper.replaceSpecialChars(s);
+                    if (!replaced.isEmpty()) actualColumns.add(replaced);
 
-            if (list.contains(s.toLowerCase())) {
+                }
 
-                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_name) + " \"" + s + "\"");
+                if (list.contains(s.toLowerCase())) {
 
-                return;
-            }
+                    Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_name) + " \"" + s + "\"");
 
-            if (!added) {
+                    return;
+                }
 
-                if (!s.isEmpty()) actualColumns.add(s);
+                if (!added) {
 
-            }
+                    if (!s.isEmpty()) actualColumns.add(s);
 
-        }
-
-        if (actualColumns.size() > 0) {
-
-            if (hasSpecialCharacters) {
-
-
-                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns_replaced));
+                }
 
             }
 
-            importDialog(actualColumns.toArray(new String[] {}));
+            if (actualColumns.size() > 0) {
 
+                if (hasSpecialCharacters) {
+
+
+                    Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns_replaced));
+
+                }
+
+                importDialog(actualColumns.toArray(new String[] {}));
+
+            } else {
+
+                Toast.makeText(this, R.string.act_field_editor_no_suitable_columns_error,
+                        Toast.LENGTH_SHORT).show();
+            }
         } else {
 
-            Toast.makeText(this, R.string.act_field_editor_no_suitable_columns_error,
-                    Toast.LENGTH_SHORT).show();
+            Utils.makeToast(getApplicationContext(), getString(R.string.act_field_editor_failed_to_read_columns));
         }
     }
 
@@ -592,22 +601,13 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         });
 
-        importFieldDialog = builder.create();
+        AlertDialog importFieldDialog = builder.create();
         importFieldDialog.show();
         DialogUtils.styleDialogs(importFieldDialog);
 
         android.view.WindowManager.LayoutParams params2 = importFieldDialog.getWindow().getAttributes();
         params2.width = LayoutParams.MATCH_PARENT;
         importFieldDialog.getWindow().setAttributes(params2);
-    }
-
-    private boolean verifyUniqueColumn(FieldFileObject.FieldFileBase fieldFile) {
-        HashMap<String, String> check = fieldFile.getColumnSet(idColPosition);
-        if (check.isEmpty()) {
-            return false;
-        } else {
-            return ConfigActivity.dt.checkUnique(check);
-        }
     }
 
     // Helper function to set spinner adapter and listener
@@ -624,8 +624,6 @@ public class FieldEditorActivity extends AppCompatActivity {
         final String primaryS = primary.getSelectedItem().toString();
         final String secondaryS = secondary.getSelectedItem().toString();
 
-        idColPosition = unique.getSelectedItemPosition();
-
         if (uniqueS.equals(primaryS) || uniqueS.equals(secondaryS) || primaryS.equals(secondaryS)) {
             Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_choice));
             return false;
@@ -640,146 +638,5 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
-    }
-
-    private class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
-        ProgressDialog dialog;
-
-        boolean fail;
-        boolean uniqueFail;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = new ProgressDialog(FieldEditorActivity.this);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html.fromHtml(getString(R.string.import_dialog_importing)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            try {
-                if (!verifyUniqueColumn(fieldFile)) {
-                    uniqueFail = true;
-                    return 0;
-                }
-
-                if (fieldFile.hasSpecialCharasters()) {
-                    return 0;
-                }
-
-                fieldFile.open();
-                String[] data;
-                String[] columns = fieldFile.readNext();
-                ArrayList<String> nonEmptyColumns = new ArrayList<>();
-                ArrayList<Integer> nonEmptyIndices = new ArrayList<>();
-
-                //match and delete special characters from header line
-                for (int i = 0; i < columns.length; i++) {
-
-                    String header = columns[i];
-
-                    if (DataHelper.hasSpecialChars(header)) {
-                        columns[i] = DataHelper.replaceSpecialChars(header);
-
-                    }
-
-                    if (!columns[i].isEmpty()) {
-                        nonEmptyColumns.add(columns[i]);
-                        nonEmptyIndices.add(i);
-                    }
-                }
-
-                FieldObject f = fieldFile.createFieldObject();
-                f.setUnique_id(unique.getSelectedItem().toString());
-                f.setPrimary_id(primary.getSelectedItem().toString());
-                f.setSecondary_id(secondary.getSelectedItem().toString());
-
-                exp_id = ConfigActivity.dt.createField(f, nonEmptyColumns);
-
-                DataHelper.db.beginTransaction();
-
-                try {
-                    while (true) {
-                        data = fieldFile.readNext();
-                        if (data == null)
-                            break;
-
-                        ArrayList<String> nonEmptyData = new ArrayList<>();
-                        for (int j = 0; j < data.length; j++) {
-                            if (nonEmptyIndices.contains(j)) {
-                                nonEmptyData.add(data[j]);
-                            }
-                        }
-                        ConfigActivity.dt.createFieldData(exp_id, nonEmptyColumns, nonEmptyData);
-                    }
-
-                    DataHelper.db.setTransactionSuccessful();
-                } finally {
-                    DataHelper.db.endTransaction();
-                }
-
-                fieldFile.close();
-
-                ConfigActivity.dt.close();
-                ConfigActivity.dt.open();
-
-                File newDir = new File(fieldFile.getPath());
-                newDir.mkdirs();
-
-                ConfigActivity.dt.updateExpTable(true, false, false, exp_id);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail = true;
-
-                ConfigActivity.dt.close();
-                ConfigActivity.dt.open();
-            }
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (dialog.isShowing())
-                dialog.dismiss();
-
-            if (fail | uniqueFail | fieldFile.hasSpecialCharasters()) {
-                ConfigActivity.dt.deleteField(exp_id);
-                SharedPreferences.Editor ed = ep.edit();
-                ed.putString("FieldFile", null);
-                ed.putBoolean("ImportFieldFinished", false);
-                ed.apply();
-            }
-            if (fail) {
-                //makeToast(getString(R.string.import_error_general));
-            } else if (uniqueFail) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unique));
-            } else if (fieldFile.hasSpecialCharasters()) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unique_characters_illegal));
-            } else {
-                Editor ed = ep.edit();
-
-                String uniqueName = unique.getSelectedItem().toString();
-                String firstName = primary.getSelectedItem().toString();
-                String secondName = secondary.getSelectedItem().toString();
-
-                ed.putString("ImportUniqueName", uniqueName);
-                ed.putString("ImportFirstName", firstName);
-                ed.putString("ImportSecondName", secondName);
-                ed.putBoolean("ImportFieldFinished", true);
-                ed.putInt("SelectedFieldExpId", exp_id);
-
-                ed.apply();
-
-                CollectActivity.reloadData = true;
-                loadData();
-
-                ConfigActivity.dt.open();
-                ConfigActivity.dt.switchField(exp_id);
-            }
-        }
     }
 }

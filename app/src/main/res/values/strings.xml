@@ -613,4 +613,5 @@
     <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>
     <string name="printer_success">Print success</string>
     <string name="bluetooth_printer_choose_device_title">Choose bluetooth device to print from.</string>
+    <string name="act_field_editor_failed_to_read_columns">Field Book could not load the file.</string>
 </resources>
