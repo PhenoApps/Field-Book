@@ -8,6 +8,7 @@
         <new>Identify and navigate to closest plot</new>
         <new>New setting to adjust polling rate, angle, and GNSS device</new>
         <new>Use internal GPS with GNSS trait</new>
+        <info>Improved calendar picker behavior</info>
         <info>Increased required minimum Android version to 5.1</info>
         <bugfix>Fixed 'Move to unique identifier' setting</bugfix>
     </release>
