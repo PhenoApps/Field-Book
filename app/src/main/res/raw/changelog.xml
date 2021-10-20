@@ -17,6 +17,7 @@
         <info>Increased required minimum Android version to 5.1</info>
         <info>Primary/Secondary Order are now referred to internally as Primary/Secondary ID</info>
         <bugfix>Fixed 'Move to unique identifier' setting</bugfix>
+        <bugfix>Fixed bugs with Audio and Counter traits</bugfix>
         <bugfix>Numerous bug fixes</bugfix>
     </release>
 
