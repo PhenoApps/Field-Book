@@ -2,6 +2,8 @@ package com.fieldbook.tracker.objects;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 /**
  * Simple wrapper class for trait data
  */
@@ -24,7 +26,7 @@ public class TraitObject {
         return trait;
     }
 
-    public void setTrait(String trait) {
+    public void setTrait(@NonNull String trait) {
         this.trait = trait;
     }
 
@@ -32,7 +34,7 @@ public class TraitObject {
         return format;
     }
 
-    public void setFormat(String format) {
+    public void setFormat(@NonNull String format) {
         this.format = format;
     }
 

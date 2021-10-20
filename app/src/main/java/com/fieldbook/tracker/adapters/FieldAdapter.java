@@ -50,7 +50,7 @@ public class FieldAdapter extends BaseAdapter {
 
     private LayoutInflater mLayoutInflater;
     private ArrayList<FieldObject> list;
-    private Context context;
+    private final Context context;
     private SharedPreferences ep;
     private String selectedPrimary;
     private String selectedSecondary;
@@ -176,7 +176,7 @@ public class FieldAdapter extends BaseAdapter {
             // Do it when clicking ":"
             @Override
             public void onClick(final View view) {
-                PopupMenu popup = new PopupMenu(FieldEditorActivity.thisActivity, view);
+                PopupMenu popup = new PopupMenu(context, view);
                 //Inflating the Popup using xml file
                 popup.getMenuInflater().inflate(R.menu.menu_field_listitem, popup.getMenu());
 

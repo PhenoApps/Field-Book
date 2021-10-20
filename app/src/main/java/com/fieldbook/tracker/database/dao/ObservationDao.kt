@@ -275,7 +275,7 @@ class ObservationDao {
                             ObservationUnit.FK),
                     where = "${ObservationUnit.FK} LIKE ? AND ${Study.FK} LIKE ?",
                     whereArgs = arrayOf(plotId, expId))
-                    .toTable().map { it["observation_variable_name"].toString() to it["value"].toString() }
+                    .toTable().map { (it["observation_variable_name"] as? String ?: "") to it["value"].toString() }
                     .toTypedArray())
 
         } ?: hashMapOf()
@@ -313,6 +313,12 @@ class ObservationDao {
             }
         }
 
+        /**
+         * Deletes all observations for a given variable on a plot.
+         * @param id: the study id
+         * @param rid: the unique plot name
+         * @param parent: the observation variable (trait) name
+         */
         fun deleteTrait(id: String, rid: String, parent: String) = withDatabase { db ->
             db.delete(Observation.tableName,
                     "${Study.FK} = ? AND ${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ?",

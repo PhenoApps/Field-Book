@@ -1080,7 +1080,9 @@ public class TraitEditorActivity extends AppCompatActivity {
                 while (data != null) {
                     data = cr.readNext();
 
-                    if (data != null) {
+                    //if trait format or name is null then don't import
+                    if (data != null && data.length > 1
+                            && data[0] != null && data[1] != null) {
                         TraitObject t = new TraitObject();
                         t.setTrait(data[0]);
                         t.setFormat(data[1]);

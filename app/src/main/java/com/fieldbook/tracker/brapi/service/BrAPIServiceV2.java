@@ -61,6 +61,7 @@ import org.brapi.v2.model.pheno.response.BrAPIObservationLevelListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
+import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponseResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -594,6 +595,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         updatePageInfo(paginationManager, response.getMetadata());
                         // Result contains a list of observation variables
                         List<BrAPIObservationVariable> brapiTraitList = response.getResult().getData();
+
                         try {
                             final Pair<List<TraitObject>, Integer> traitsResult = mapTraits(brapiTraitList);
                             function.apply(traitsResult.first, traitsResult.second);
@@ -744,6 +746,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 @Override
                 public void onSuccess(BrAPIObservationVariableListResponse response, int i, Map<String, List<String>> map) {
                     //every time
+
                     try {
                         study.getTraits().addAll(mapTraits(response.getResult().getData()).first);
                     } catch (JSONException error) {
@@ -793,14 +796,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
     private Pair<List<TraitObject>, Integer> mapTraits(List<BrAPIObservationVariable> variables) throws JSONException {
         List<TraitObject> traits = new ArrayList<>();
-        Integer variablesMissingTrait = 0;
+        int variablesMissingTrait = 0;
         for (BrAPIObservationVariable var : variables) {
-
-            // Skip the trait if there brapi trait field isn't present
-            if (var.getTrait() == null) {
-                variablesMissingTrait += 1;
-                continue;
-            }
 
             TraitObject trait = new TraitObject();
             trait.setDefaultValue(var.getDefaultValue());
@@ -808,6 +805,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             // Get the synonyms for easier reading. Set it as the trait name.
             String synonym = var.getSynonyms().size() > 0 ? var.getSynonyms().get(0) : null;
             trait.setTrait(getPrioritizedValue(synonym, var.getObservationVariableName()));
+
+            //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
+            // Skip the trait if there brapi trait field isn't present
+            if (var.getTrait() == null || trait.getTrait() == null) {
+                variablesMissingTrait += 1;
+                continue;
+            }
 
             trait.setDetails(var.getTrait().getTraitDescription());
             // Get database id of external system to sync to enabled pushing through brAPI
@@ -960,7 +964,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setSecondary_id(secondaryId);
 
             // Do a pre-check to see if the field exists so we can show an error
-            Integer FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
+            int FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
             if (FieldUniqueStatus != -1) {
                 return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
             }
@@ -983,7 +987,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             // All checks finished, insert our data.
             int expId = dataHelper.createField(field, studyDetails.getAttributes());
 
-            Boolean fail = false;
+            boolean fail = false;
             String failMessage = "";
 
             // We want the saving of plots and traits wrap together in a transaction
