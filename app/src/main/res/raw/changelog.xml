@@ -8,10 +8,15 @@
         <new>Identify and navigate to closest plot</new>
         <new>New setting to adjust polling rate, angle, and GNSS device</new>
         <new>Use internal GPS with GNSS trait</new>
-        <info>Improved calendar picker behavior</info>
+        <new>Fields can be sorted to allow for different collection orders</new>
+        <new>Observation level can now be selected for BrAPI imported fields</new>
+        <new>Primary/Secondary ID can now be selected for BrAPI imported fields</new>
         <new>Use Label or Value for BrAPI categorical traits</new>
+        <info>Improved calendar picker behavior</info>
         <info>Increased required minimum Android version to 5.1</info>
+        <info>Primary/Secondary Order are now referred to internally as Primary/Secondary ID</info>
         <bugfix>Fixed 'Move to unique identifier' setting</bugfix>
+        <bugfix>Numerous bug fixes</bugfix>
     </release>
 
     <release
