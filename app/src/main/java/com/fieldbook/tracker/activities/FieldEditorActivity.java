@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,7 +20,6 @@ import androidx.appcompat.app.AlertDialog;
 
 import android.provider.OpenableColumns;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -58,7 +56,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,6 +67,7 @@ import java.util.Optional;
 
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -84,7 +82,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     private static final int DIALOG_LOAD_FIELDFILEEXCEL = 1001;
     public static ListView fieldList;
     public static FieldAdapter mAdapter;
-    public static Activity thisActivity;
+    public static AppCompatActivity thisActivity;
     public static EditText trait;
     private static Handler mHandler = new Handler();
     private static FieldFileObject.FieldFileBase fieldFile;
@@ -158,7 +156,7 @@ public class FieldEditorActivity extends AppCompatActivity {
             ConfigActivity.dt = new DataHelper(this);
         }
         ConfigActivity.dt.open();
-        ConfigActivity.dt.updateExpTable(false, true, false, ep.getInt("SelectedFieldExpId", 0));
+        ConfigActivity.dt.updateExpTable(false, true, false, ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
@@ -884,7 +882,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 ed.putString("ImportFirstName", firstName);
                 ed.putString("ImportSecondName", secondName);
                 ed.putBoolean("ImportFieldFinished", true);
-                ed.putInt("SelectedFieldExpId", exp_id);
+                ed.putInt(PrefsConstants.SELECTED_FIELD_ID, exp_id);
 
                 ed.apply();
 

@@ -1,29 +1,24 @@
 package com.fieldbook.tracker.brapi;
 
-import java.util.HashMap;
-import java.util.Map;
+public class ApiError {
+    private ApiErrorCode errorCode;
+    private String responseBody;
 
-public enum ApiError {
-    BAD_REQUEST(400),
-    UNAUTHORIZED(401),
-    NOT_FOUND(404),
-    FORBIDDEN(403);
-
-    private static final Map<Integer, ApiError> apiErrorsByCode = new HashMap<>();
-
-    static {
-        for (ApiError apiError : ApiError.values()) {
-            apiErrorsByCode.put(apiError.code, apiError);
-        }
+    public ApiErrorCode getErrorCode() {
+        return errorCode;
     }
 
-    private final int code;
-
-    ApiError(int code) {
-        this.code = code;
+    public ApiError setErrorCode(ApiErrorCode errorCode) {
+        this.errorCode = errorCode;
+        return this;
     }
 
-    public static ApiError processErrorCode(Integer code) {
-        return apiErrorsByCode.get(code);
+    public String getResponseBody() {
+        return responseBody;
+    }
+
+    public ApiError setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+        return this;
     }
 }

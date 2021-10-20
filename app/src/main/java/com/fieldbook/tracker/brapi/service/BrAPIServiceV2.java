@@ -7,7 +7,10 @@ import android.util.Pair;
 
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.brapi.ApiError;
+import com.fieldbook.tracker.brapi.ApiErrorCode;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiProgram;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.BrapiTrial;
@@ -17,6 +20,8 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.FailureFunction;
+import com.fieldbook.tracker.utilities.SuccessFunction;
 
 import org.brapi.client.v2.BrAPIClient;
 import org.brapi.client.v2.model.exceptions.ApiException;
@@ -37,7 +42,6 @@ import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
 import org.brapi.v2.model.core.BrAPITrial;
-import org.brapi.v2.model.core.request.BrAPITrialSearchRequest;
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudySingleResponse;
@@ -45,6 +49,7 @@ import org.brapi.v2.model.core.response.BrAPITrialListResponse;
 import org.brapi.v2.model.pheno.BrAPIImage;
 import org.brapi.v2.model.pheno.BrAPIObservation;
 import org.brapi.v2.model.pheno.BrAPIObservationUnit;
+import org.brapi.v2.model.pheno.BrAPIObservationUnitHierarchyLevel;
 import org.brapi.v2.model.pheno.BrAPIObservationUnitLevelRelationship;
 import org.brapi.v2.model.pheno.BrAPIObservationUnitPosition;
 import org.brapi.v2.model.pheno.BrAPIObservationVariable;
@@ -52,6 +57,7 @@ import org.brapi.v2.model.pheno.BrAPIPositionCoordinateTypeEnum;
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.brapi.v2.model.pheno.response.BrAPIImageListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIImageSingleResponse;
+import org.brapi.v2.model.pheno.response.BrAPIObservationLevelListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
@@ -61,12 +67,14 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class BrAPIServiceV2 implements BrAPIService{
+public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
     private final Context context;
     private final BrAPIClient apiClient;
@@ -81,7 +89,7 @@ public class BrAPIServiceV2 implements BrAPIService{
     public BrAPIServiceV2(Context context) {
         this.context = context;
         // Make timeout longer. Set it to 60 seconds for now
-        this.apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), 60000);
+        this.apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), getTimeoutValue(context) * 1000);
 
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
@@ -99,6 +107,35 @@ public class BrAPIServiceV2 implements BrAPIService{
                     .getString(GeneralKeys.BRAPI_TOKEN, null));
         } catch (ApiException error) {
             Log.e("BrAPIServiceV2", "API Exception", error);
+        }
+    }
+
+    @Override
+    public void getObservationLevels(String programDbId, SuccessFunction<List<BrapiObservationLevel>> successFn, FailureFunction<ApiError> failFn) {
+        BrapiV2ApiCallBack<BrAPIObservationLevelListResponse> callBack = new BrapiV2ApiCallBack<BrAPIObservationLevelListResponse>() {
+            @Override
+            public void onSuccess(BrAPIObservationLevelListResponse brAPIObservationLevelListResponse, int i, Map<String, List<String>> map) {
+                List<BrapiObservationLevel> observationLevels = new ArrayList<>();
+                Collections.sort(brAPIObservationLevelListResponse.getResult().getData(), Comparator.comparing(BrAPIObservationUnitHierarchyLevel::getLevelOrder));
+
+                for (BrAPIObservationUnitHierarchyLevel level : brAPIObservationLevelListResponse.getResult().getData()) {
+                    observationLevels.add(new BrapiObservationLevel().setObservationLevelName(level.getLevelName()));
+                }
+
+                successFn.apply(observationLevels);
+            }
+
+            @Override
+            public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                Log.e("BrAPIServiceV2", "Error fetching observation levels", error);
+                failFn.apply(new ApiError().setErrorCode(ApiErrorCode.processErrorCode(error.getCode())).setResponseBody(error.getResponseBody()));
+            }
+        };
+
+        try {
+            observationUnitsApi.observationlevelsGetAsync(null, null, programDbId, 0, 1000, callBack);
+        } catch (ApiException e) {
+            Log.e("BrAPIServiceV2", "Error sending BrAPI Request to fetch observation levels", e);
         }
     }
 
@@ -401,15 +438,17 @@ public class BrAPIServiceV2 implements BrAPIService{
     }
 
     public void getPlotDetails(final String studyDbId,
-                               final Function<BrapiStudyDetails, Void> function,
+                               BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
-            final Integer[] recursiveCounter = {0};
             final Integer pageSize = Integer.parseInt(context.getSharedPreferences("Settings", 0)
                     .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
+
+            ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
+            queryParams.studyDbId(studyDbId).observationUnitLevelName(observationLevel.getObservationLevelName()).page(0).pageSize(pageSize);
 
             BrapiV2ApiCallBack<BrAPIObservationUnitListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationUnitListResponse>() {
                 @Override
@@ -423,20 +462,18 @@ public class BrAPIServiceV2 implements BrAPIService{
                     //every time
                     mapAttributeValues(study, response.getResult().getData());
 
-                    recursiveCounter[0] = recursiveCounter[0] + 1;
+                    queryParams.page(queryParams.page() + 1);
 
                     // Stop after 50 iterations (for safety)
                     // Stop if the current page is the last page according to the server
                     // Stop if there are no more contents
-                    if((recursiveCounter[0] > 50)
+                    if((queryParams.page() > 50)
                             || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
                             || (response.getResult().getData().size() == 0)){
                         // Stop recursive loop
                         function.apply(study);
                     }else {
                         try {
-                            ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
-                            queryParams.studyDbId(studyDbId).observationUnitLevelName("plot").page(recursiveCounter[0]).pageSize(pageSize);
                             observationUnitsApi.observationunitsGetAsync(queryParams, this);
                         } catch (ApiException error) {
                             failFunction.apply(error.getCode());
@@ -453,8 +490,6 @@ public class BrAPIServiceV2 implements BrAPIService{
 
             };
 
-            ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
-            queryParams.studyDbId(studyDbId).observationUnitLevelName("plot").page(0).pageSize(pageSize);
             observationUnitsApi.observationunitsGetAsync(queryParams, callback);
 
         } catch (ApiException error) {
@@ -900,9 +935,11 @@ public class BrAPIServiceV2 implements BrAPIService{
         }
     }
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails) {
+    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId) {
 
         DataHelper dataHelper = new DataHelper(context);
+
+        String observationLevel = selectedObservationLevel.getObservationLevelName().substring(0, 1).toUpperCase() + selectedObservationLevel.getObservationLevelName().substring(1);
         try {
             FieldObject field = new FieldObject();
             field.setExp_name(studyDetails.getStudyName());
@@ -919,9 +956,8 @@ public class BrAPIServiceV2 implements BrAPIService{
             }
 
             field.setUnique_id("ObservationUnitDbId");
-            field.setPrimary_id("Row");
-            field.setSecondary_id("Column");
-            field.setExp_sort("Plot");
+            field.setPrimary_id(primaryId);
+            field.setSecondary_id(secondaryId);
 
             // Do a pre-check to see if the field exists so we can show an error
             Integer FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
@@ -934,7 +970,7 @@ public class BrAPIServiceV2 implements BrAPIService{
 
             // Construct our map to check for uniques
             for (List<String> dataRow : studyDetails.getValues()) {
-                Integer idColumn = studyDetails.getAttributes().indexOf("Plot");
+                Integer idColumn = studyDetails.getAttributes().indexOf(observationLevel);
                 checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
             }
 

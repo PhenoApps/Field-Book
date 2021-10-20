@@ -27,6 +27,7 @@ import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.Companion.ACTION
 import com.fieldbook.tracker.location.gnss.NmeaParser
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
+import com.fieldbook.tracker.utilities.PrefsConstants
 import org.json.JSONObject
 
 /**
@@ -204,7 +205,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         if (latitude.isNotBlank() && longitude.isNotBlank()) {
 
-            val studyDbId = prefs.getInt("SelectedFieldExpId", 0).toString()
+            val studyDbId = prefs.getInt(PrefsConstants.SELECTED_FIELD_ID, 0).toString()
 
             //geo json object : elevation (stored in obs. units, used in navigation)
             //geo json has properties map for additional info

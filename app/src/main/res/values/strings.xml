@@ -48,6 +48,7 @@
 
     <!-- Fields Activity  -->
     <string name="fields_delete_study">Delete field</string>
+    <string name="fields_update_sort_study">Update Sorting</string>
     <string name="fields_delete_study_confirmation">Are you sure you want to delete this field? This will delete all data from this field.</string>
     <string name="fields_study_exists_message">This field already exists.</string>
     <string name="fields_select_study">Select or import a field.</string>
@@ -58,11 +59,22 @@
     <string name="fields_options">Options</string>
     <string name="fields_study_statistics">Statistics</string>
     <string name="fields_sort">Sort</string>
+    <string name="fields_sort_update">Unit Sorting</string>
     <string name="fields_delete">Delete</string>
     <string name="fields_filter">Filter</string>
     <string name="fields_reimport">Reimport</string>
     <string name="fields_archive">Archive</string>
     <string name="fields_toolbar_add_field">Import Field</string>
+    <string name="sort_dialog_primary">Primary order</string>
+    <string name="sort_dialog_secondary">Secondary order</string>
+    <string name="sort_dialog_tertiary">Tertiary order</string>
+    <string name="sort_dialog_error_missing_primary">Please choose a primary order</string>
+    <string name="sort_dialog_error_missing_secondary">Please choose a secondary order</string>
+    <string name="sort_dialog_error_duplicates">Ordering choices cannot be duplicated</string>
+    <string name="sort_dialog_saved">Sorting updated</string>
+    <string name="dialog_save_error_title">Save Error</string>
+    <string name="sort_dialog_error_saving">Error updating sorting</string>
+    <string name="sort_placeholder">Choose an option</string>
 
     <!-- Settings Activity  -->
     <string name="settings_fields">Fields</string>
@@ -406,10 +418,11 @@
     <string name="import_source_ask">Always ask</string>
 
     <string name="import_dialog_title_fields">Import field</string>
+    <string name="import_dialog_title_brapi_fields">BrAPI Field Import</string>
     <string name="import_dialog_title_traits">Import traits</string>
     <string name="import_dialog_unique">Unique identifier</string>
-    <string name="import_dialog_primary">Primary order</string>
-    <string name="import_dialog_secondary">Secondary order</string>
+    <string name="import_dialog_primary">Primary identifier</string>
+    <string name="import_dialog_secondary">Secondary identifier</string>
     <string name="import_dialog_importing">Please wait…</string>
 
     <string name="import_error_general">Error importing</string>
@@ -495,10 +508,11 @@
 
     <string name="brapi_load_data_button">Load Fields</string>
     <string name="brapi_load_traits_button">Load Traits</string>
-    <string name="brapi_save_data_button">Save Field</string>
+    <string name="brapi_save_data_button">Preview Field</string>
     <string name="brapi_study_name">Name</string>
     <string name="brapi_study_description">Description</string>
     <string name="brapi_study_location">Location</string>
+    <string name="brapi_observation_level">Observation Level</string>
     <string name="brapi_study_num_plots"> Plots</string>
     <string name="brapi_study_num_traits"> Traits</string>
     <string name="brapi_not_found">ERROR: Target system does not support this operation via BrAPI.</string>

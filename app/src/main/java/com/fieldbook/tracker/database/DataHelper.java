@@ -11,15 +11,12 @@ import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
-import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
@@ -31,6 +28,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 
 import org.threeten.bp.OffsetDateTime;
@@ -52,8 +50,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.fieldbook.tracker.activities.ConfigActivity.dt;
 
 /**
  * All database related functions are here
@@ -320,7 +316,7 @@ public class DataHelper {
      */
     public List<Observation> getUserTraitObservations() {
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserTraitObservations(exp_id);
 
@@ -367,7 +363,7 @@ public class DataHelper {
      */
     public List<FieldBookImage> getUserTraitImageObservations() {
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserTraitImageObservations(exp_id, missingPhoto);
 
@@ -1198,7 +1194,7 @@ public class DataHelper {
      */
     public HashMap getUserDetail(String plotId) {
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserDetail(exp_id, plotId);
 
@@ -1317,7 +1313,8 @@ public class DataHelper {
             }
         }
 
-        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId();
+        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId(context.getSharedPreferences("Settings", 0)
+                .getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         int[] data = new int[result.length];
 
@@ -2175,7 +2172,7 @@ public class DataHelper {
 
         SharedPreferences.Editor edit = ep.edit();
 
-        edit.putInt("SelectedFieldExpId", -1).apply();
+        edit.putInt(PrefsConstants.SELECTED_FIELD_ID, -1).apply();
         edit.putString("ImportUniqueName", "");
         edit.putString("ImportFirstName", "");
         edit.putString("ImportSecondName", "");
@@ -2558,7 +2555,7 @@ public class DataHelper {
                 
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
-                ep2.edit().putInt("SelectedFieldExpId", -1).apply();
+                ep2.edit().putInt(PrefsConstants.SELECTED_FIELD_ID, -1).apply();
             }
         }
     }

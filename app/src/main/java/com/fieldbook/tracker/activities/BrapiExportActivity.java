@@ -15,10 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
-import com.fieldbook.tracker.brapi.ApiError;
+import com.fieldbook.tracker.brapi.ApiErrorCode;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
-import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
@@ -450,13 +449,13 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private UploadError processErrorCode(Integer code) {
         UploadError retVal;
-        ApiError apiError = ApiError.processErrorCode(code);
+        ApiErrorCode apiErrorCode = ApiErrorCode.processErrorCode(code);
 
-        if (apiError == null) {
+        if (apiErrorCode == null) {
             return UploadError.API_CALLBACK_ERROR;
         }
 
-        switch (apiError) {
+        switch (apiErrorCode) {
             case FORBIDDEN:
                 // Warn that they do not have permissions to push traits
                 retVal = UploadError.API_PERMISSION_ERROR;
