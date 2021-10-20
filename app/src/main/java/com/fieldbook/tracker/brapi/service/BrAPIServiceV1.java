@@ -903,15 +903,13 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         //TODO: Check these out and make sure they match with fieldbook data types.
         switch (dataType) {
             case "Nominal":
+            case "Ordinal": // All Field Book categories are ordered, so this works
                 return "categorical";
             case "Date":
                 return "date";
             case "Numerical":
             case "Duration":
                 return "numeric";
-            case "Ordinal":
-                // All Field Book categories are ordered, so this works
-                return "categorical";
             case "Code": // Not the ideal solution for this conversion
             case "Text":
             default:

@@ -80,7 +80,6 @@ public class BrapiActivity extends AppCompatActivity {
                 baseURLText.setText(brapiBaseURL);
 
                 loadToolbar();
-//                loadStudiesList();
                 loadObservationLevels();
             } else {
                 Toast.makeText(getApplicationContext(), R.string.brapi_must_configure_url, Toast.LENGTH_SHORT).show();
@@ -100,7 +99,7 @@ public class BrapiActivity extends AppCompatActivity {
 
     private void loadToolbar() {
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("BrAPI Field Import");
+            getSupportActionBar().setTitle(R.string.import_dialog_title_brapi_fields);
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
@@ -192,13 +191,11 @@ public class BrapiActivity extends AppCompatActivity {
     private void loadObservationLevels() {
         brAPIService.getObservationLevels(programDbId, input -> {
             this.observationLevels = input;
-//            brapiLoadDialog.setObservationLevels(input);
             runOnUiThread(() -> {
                 setupObservationLevelsSpinner();
                 loadStudiesList();
             });
         }, failureInput -> {
-//            brapiLoadDialog.setObservationLevels(new ArrayList<>());
         });
     }
 

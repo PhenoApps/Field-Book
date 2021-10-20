@@ -198,7 +198,6 @@ public class FieldAdapter extends BaseAdapter {
                     DialogUtils.styleDialogs(alert);
                 } else if (item.getItemId() == R.id.sort) {
                     AlertDialog alert = showSortDialog(position);
-//                    alert.show();
                     DialogUtils.styleDialogs(alert);
                 }
 

@@ -418,6 +418,7 @@
     <string name="import_source_ask">Always ask</string>
 
     <string name="import_dialog_title_fields">Import field</string>
+    <string name="import_dialog_title_brapi_fields">BrAPI Field Import</string>
     <string name="import_dialog_title_traits">Import traits</string>
     <string name="import_dialog_unique">Unique identifier</string>
     <string name="import_dialog_primary">Primary identifier</string>
