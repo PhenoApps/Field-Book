@@ -69,7 +69,7 @@ import io.swagger.client.model.StudySummary;
 import io.swagger.client.model.TrialSummary;
 import io.swagger.client.model.TrialsResponse;
 
-public class BrAPIServiceV1 implements BrAPIService {
+public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService {
     private final Context context;
     private final ImagesApi imagesApi;
     private final StudiesApi studiesApi;
@@ -91,29 +91,6 @@ public class BrAPIServiceV1 implements BrAPIService {
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
-    }
-
-    private Integer getTimeoutValue(Context context) {
-        String timeoutString = context.getSharedPreferences("Settings", 0)
-                .getString(GeneralKeys.BRAPI_TIMEOUT, "120");
-
-        int timeout = 120;
-
-        try {
-            if (timeoutString != null) {
-                timeout = Integer.parseInt(timeoutString);
-            }
-        } catch (NumberFormatException nfe) {
-            String message = nfe.getLocalizedMessage();
-            if (message != null) {
-                Log.d("FieldBookError", nfe.getLocalizedMessage());
-            } else {
-                Log.d("FieldBookError", "Timeout Preference number format error.");
-            }
-            nfe.printStackTrace();
-        }
-
-        return timeout;
     }
 
     @Override
@@ -970,7 +947,6 @@ public class BrAPIServiceV1 implements BrAPIService {
             field.setUnique_id("observationUnitDbId");
             field.setPrimary_id(primaryId);
             field.setSecondary_id(secondaryId);
-            field.setExp_sort(observationLevel);
 
             // Do a pre-check to see if the field exists so we can show an error
             Integer FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());

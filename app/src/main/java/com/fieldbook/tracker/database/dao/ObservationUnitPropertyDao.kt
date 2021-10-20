@@ -2,6 +2,7 @@ package com.fieldbook.tracker.database.dao
 
 import android.database.Cursor
 import android.database.MatrixCursor
+import android.util.Log
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
@@ -16,18 +17,31 @@ class ObservationUnitPropertyDao {
 //        }
 
         fun getAllRangeId(exp_id:Int): Array<Int> = withDatabase { db ->
-            var sortCols = db.query(
-                Study.tableName,
-                select = arrayOf("study_sort_name"),
-                where = "${Study.PK} = ?",
-                whereArgs = arrayOf(exp_id.toString()),
-                orderBy = Study.PK
-            ).toFirst().get("study_sort_name")
+            var sortCols: String? = try {
+                val toString = db.query(
+                    Study.tableName,
+                    select = arrayOf("study_sort_name"),
+                    where = "${Study.PK} = ?",
+                    whereArgs = arrayOf(exp_id.toString()),
+                    orderBy = Study.PK
+                ).toFirst()["study_sort_name"].toString()
 
-            if(sortCols != null) {
-                sortCols = "$sortCols, id"
+                if(toString == "null") {
+                    null
+                } else {
+                    toString
+                }
+            } catch (e: Exception) {
+                Log.e("ObsUnitPropertyDao", "Error fetching sort order for study", e)
+                null
+            }
+
+            sortCols = if(sortCols != null && sortCols != "") {
+                val sortColsSplit = sortCols.split(',')
+                val sortColsList = sortColsSplit.map{ "cast($it as integer),$it" }.toList()
+                "${sortColsList.joinToString ( "," )}, id"
             } else {
-                sortCols = "id"
+                "id"
             }
 
             val table = db.query(sObservationUnitPropertyViewName,
@@ -107,13 +121,11 @@ class ObservationUnitPropertyDao {
             var data: Array<String?>? = null
 
             if (cursor.moveToFirst()) {
-//                val i = cursor.columnCount - 1
-                data = arrayOfNulls(cursor.columnCount)
+                data = arrayOfNulls(cursor.columnCount - 1)
                 var k = 0
                 for (j in 0 until cursor.columnCount) {
                     if (cursor.getColumnName(j) != "id") {
-                        data[k] = cursor.getColumnName(j).replace("//", "/")
-                        k += 1
+                        data[k++] = cursor.getColumnName(j).replace("//", "/")
                     }
                 }
             }
@@ -133,13 +145,11 @@ class ObservationUnitPropertyDao {
             var data: Array<String?>? = null
 
             if (cursor.moveToFirst()) {
-//                val i = cursor.columnCount - 1
-                data = arrayOfNulls(cursor.columnCount)
+                data = arrayOfNulls(cursor.columnCount - 1)
                 var k = 0
                 for (j in 0 until cursor.columnCount) {
                     if (cursor.getColumnName(j) != "id") {
-                        data[k] = cursor.getColumnName(j)
-                        k += 1
+                        data[k++] = cursor.getColumnName(j)
                     }
                 }
             }

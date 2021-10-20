@@ -74,7 +74,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class BrAPIServiceV2 implements BrAPIService{
+public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
     private final Context context;
     private final BrAPIClient apiClient;
@@ -89,7 +89,7 @@ public class BrAPIServiceV2 implements BrAPIService{
     public BrAPIServiceV2(Context context) {
         this.context = context;
         // Make timeout longer. Set it to 60 seconds for now
-        this.apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), 60000);
+        this.apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), getTimeoutValue(context) * 1000);
 
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
@@ -958,7 +958,6 @@ public class BrAPIServiceV2 implements BrAPIService{
             field.setUnique_id("ObservationUnitDbId");
             field.setPrimary_id(primaryId);
             field.setSecondary_id(secondaryId);
-            field.setExp_sort(observationLevel);
 
             // Do a pre-check to see if the field exists so we can show an error
             Integer FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
