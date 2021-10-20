@@ -21,14 +21,14 @@ class ObservationDao {
 
     companion object {
 
-//        fun getAll(): Array<ObservationModel> = withDatabase { db ->
-//
-//            db.query(Observation.tableName)
-//                .toTable()
-//                .map { ObservationModel(it) }
-//                .toTypedArray()
-//
-//        } ?: emptyArray()
+        fun getAll(studyId: String): Array<ObservationModel> = withDatabase { db ->
+
+            db.query(Observation.tableName, where = "${Study.FK} = ?", whereArgs = arrayOf(studyId))
+                .toTable()
+                .map { ObservationModel(it) }
+                .toTypedArray()
+
+        } ?: emptyArray()
 
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
@@ -132,10 +132,10 @@ class ObservationDao {
         private fun getStringVal(row: Map<String, Any?>?, column: String?) : String? {
             if(row != null && column != null){
                 if (row[column] != null){
-                    return row[column].toString();
+                    return row[column].toString()
                 }
             }
-            return null;
+            return null
         }
 
         fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->

@@ -56,7 +56,7 @@ public class DateTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init() {
-        date = "2000-01-01";
+        date = getPrefs().getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, "2000-01-01");
         month = findViewById(R.id.mth);
         day = findViewById(R.id.day);
         addDayBtn = findViewById(R.id.addDateBtn);
@@ -69,13 +69,26 @@ public class DateTraitLayout extends BaseTraitLayout {
          * When the calendar view visibility button is pressed it starts the date picker dialog.
          */
         calendarVisibilityBtn.setOnClickListener((View) -> {
-            DialogFragment newFragment = new DatePickerFragment(dateFormat, date, (year, month, day) -> {
+            DialogFragment newFragment = new DatePickerFragment(dateFormat, date, (y, m, d) -> {
 
                 Calendar calendar = Calendar.getInstance();
 
-                calendar.set(year, month, day);
+                calendar.set(y, m, d);
 
                 updateViewDate(calendar);
+
+                //set blue if updated, display color if new
+                if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
+                    month.setTextColor(Color.BLUE);
+                    day.setTextColor(Color.BLUE);
+                } else {
+                    //set month/day text and color
+                    month.setTextColor(Color.parseColor(getDisplayColor()));
+                    day.setTextColor(Color.parseColor(getDisplayColor()));
+                }
+
+                //save date to db
+                updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
 
                 return true;
             });
@@ -151,8 +164,16 @@ public class DateTraitLayout extends BaseTraitLayout {
 
         date = dateFormat.format(calendar.getTime());
 
+        String dayOfMonth = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
+        String monthText = Integer.toString(calendar.get(Calendar.MONTH) + 1);
+        String yearText = Integer.toString(calendar.get(Calendar.YEAR));
+
+        getPrefs().edit()
+                .putString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, yearText + "-" + monthText + "-" + dayOfMonth)
+                .apply();
+
         //Set text
-        day.setText(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)));
+        day.setText(dayOfMonth);
         month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
 
         // Change text color
@@ -172,7 +193,7 @@ public class DateTraitLayout extends BaseTraitLayout {
         getEtCurVal().setVisibility(View.GONE);
 
         final Calendar c = Calendar.getInstance();
-        date = dateFormat.format(c.getTime());
+        date = getPrefs().getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, dateFormat.format(c.getTime()));
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && !getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
             if (getNewTraits().get(getCurrentTrait().getTrait()).toString().length() < 4 && getNewTraits().get(getCurrentTrait().getTrait()).toString().length() > 0) {

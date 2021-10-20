@@ -15,25 +15,14 @@
         android:layout_gravity="center_vertical|end"
         android:checked="false"
         android:scaleX="1.1"
-        android:scaleY="1.1" />
-
-    <ImageView
-        android:id="@+id/popupMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|left"
-        android:paddingTop="3dp"
-        android:src="@drawable/ic_more_vert" />
-
-    <View
-        android:id="@+id/spacer1"
-        android:layout_width="10dp"
-        android:layout_height="wrap_content" />
+        android:scaleY="1.1"
+        android:layout_marginRight="15dp"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_weight="1">
 
         <TextView
             android:id="@+id/field_name"
@@ -89,7 +78,6 @@
                 android:textSize="@dimen/text_size_small" />
         </LinearLayout>
 
-
         <TextView
             android:id="@+id/field_count"
             android:layout_width="wrap_content"
@@ -100,5 +88,16 @@
             android:textColor="@color/main_details"
             android:textSize="@dimen/text_size_small" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/popupMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical|right"
+        android:paddingTop="3dp"
+        android:paddingRight="20dp"
+        android:paddingLeft="10dp"
+        android:src="@drawable/ic_more_vert"
+        android:scaleType="fitCenter"/>
 
 </LinearLayout>

@@ -20,6 +20,7 @@ public class TraitObject {
     private Boolean visible;
     private String externalDbId;
     private String traitDataSource;
+    private String additionalInfo;
 
     public String getTrait() {
         return trait;
@@ -115,6 +116,14 @@ public class TraitObject {
 
     public void setTraitDataSource(String traitDataSource) {
         this.traitDataSource = traitDataSource;
+    }
+
+    public String getAdditionalInfo() {
+        return additionalInfo;
+    }
+
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
     }
 
     public boolean isValidValue(final String s) {

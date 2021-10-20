@@ -54,6 +54,7 @@ import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -292,7 +293,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
 
-        if (!ep.getBoolean("ImportFieldFinished", false) || ep.getInt("SelectedFieldExpId", -1) == -1) {
+        if (!ep.getBoolean("ImportFieldFinished", false) || ep.getInt(PrefsConstants.SELECTED_FIELD_ID, -1) == -1) {
             Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
             return -1;
         } else if (traits.length == 0) {
@@ -537,7 +538,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void exportBrAPI() {
         // Get our active field
-        Integer activeFieldId = ep.getInt("SelectedFieldExpId", -1);
+        Integer activeFieldId = ep.getInt(PrefsConstants.SELECTED_FIELD_ID, -1);
         FieldObject activeField;
         if (activeFieldId != -1) {
             activeField = dt.getFieldObject(activeFieldId);
@@ -966,7 +967,7 @@ public class ConfigActivity extends AppCompatActivity {
 
             if (!fail) {
                 showCitationDialog();
-                dt.updateExpTable(false, false, true, ep.getInt("SelectedFieldExpId", 0));
+                dt.updateExpTable(false, false, true, ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
             }
 
             if (fail) {
