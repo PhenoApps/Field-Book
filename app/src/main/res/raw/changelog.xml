@@ -12,6 +12,7 @@
         <new>Observation level can now be selected for BrAPI imported fields</new>
         <new>Primary/Secondary ID can now be selected for BrAPI imported fields</new>
         <new>Use Label or Value for BrAPI categorical traits</new>
+        <new>Skip entries setting can be across single or all traits</new>
         <info>Improved calendar picker behavior</info>
         <info>Increased required minimum Android version to 5.1</info>
         <info>Primary/Secondary Order are now referred to internally as Primary/Secondary ID</info>

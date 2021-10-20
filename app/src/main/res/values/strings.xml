@@ -249,8 +249,11 @@
     <string name="preferences_general_title">General</string>
     <string name="preferences_general_use_day_number">Use day of year</string>
     <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
-    <string name="preferences_general_skip_entries_with_data">Skip entries with data</string>
-    <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the current trait</string>
+    <string name="preferences_general_skip_entries_with_data">Skip entries across active trait</string>
+    <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the active trait</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Skip entries across all traits</string>
+    <string name="preferences_general_skip_entries_across_all_traits_description">Skip entries that have data for all traits</string>
+    <string name="preferences_general_skip_entries_disabled">Disabled</string>
     <string name="preferences_general_share_disable">Disable file sharing</string>
     <string name="preferences_general_share_disable_description">When files are exported, the share dialog will not be displayed</string>
     <string name="preferences_general_barcode_camera">Move to entry via barcode</string>
@@ -627,6 +630,7 @@
     <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device.</string>
     <string name="preferences_general_flip_flop_arrows_description">Swaps the trait and plot arrow functions</string>
     <string name="preferences_general_flip_flop_arrows">Flip Flop Arrows</string>
+    <string name="activity_collect_all_obs_made">Observations completed.</string>
     <string name="pref_behavior_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_enable_summary">Enables usage of device location to navigate fields.</string>
     <string name="pref_geonav_enable_title">Enable GeoNav</string>
