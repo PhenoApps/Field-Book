@@ -46,6 +46,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
@@ -283,17 +284,18 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     /**
-     * Checks if the return value of getTraitColumnsAsString is null or empty.
+     * Checks if there are any visible traits in trait editor.
+     * Also checks if a field is selected.
      * @return -1 when the conditions fail, otherwise it returns 1
      */
     private int checkTraitsExist() {
 
-        String traits = dt.getTraitColumnsAsString();
+        String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
 
         if (!ep.getBoolean("ImportFieldFinished", false) || ep.getInt("SelectedFieldExpId", -1) == -1) {
             Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
             return -1;
-        } else if (traits == null || traits.isEmpty()) {
+        } else if (traits.length == 0) {
             Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing));
             return -1;
         }

@@ -1196,7 +1196,7 @@ public class DataHelper {
      * Returns saved data based on plot_id
      * v1.6 - Amended to consider both trait and format
      */
-    public HashMap getUserDetail(String plotId) {
+    public HashMap<String, String> getUserDetail(String plotId) {
 
         String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
 
@@ -2410,9 +2410,15 @@ public class DataHelper {
                 do {
                     TraitObject o = new TraitObject();
 
+                    String traitName = cursor.getString(1);
+                    String format = cursor.getString(2);
+
+                    //v5.1.0 bugfix branch update, Android getString can return null.
+                    if (traitName == null || format == null) continue;
+
                     o.setId(cursor.getString(0));
-                    o.setTrait(cursor.getString(1));
-                    o.setFormat(cursor.getString(2));
+                    o.setTrait(traitName);
+                    o.setFormat(format);
                     o.setDefaultValue(cursor.getString(3));
                     o.setMinimum(cursor.getString(4));
                     o.setMaximum(cursor.getString(5));

@@ -50,8 +50,8 @@ class ObservationVariableDao {
         private fun Map<String, Any?>.toTraitObject() = if (this.isEmpty()) {null} else { TraitObject().also {
 
             it.id = this[ObservationVariable.PK].toString()
-            it.trait = this["observation_variable_name"].toString()
-            it.format = this["observation_variable_field_book_format"].toString()
+            it.trait = this["observation_variable_name"] as? String ?: ""
+            it.format = this["observation_variable_field_book_format"] as? String ?: ""
             it.defaultValue = this["default_value"].toString()
             it.details = this["observation_variable_details"].toString()
 

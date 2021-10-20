@@ -273,20 +273,28 @@ public class CollectActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Is used to ensure the UI entered data is within the bounds of the trait's min/max
+     * @return boolean flag false when data is out of bounds, true otherwise
+     */
     private boolean validateData() {
         final String strValue = etCurVal.getText().toString();
         final TraitObject currentTrait = traitBox.getCurrentTrait();
+
+        if (currentTrait == null) return false;
+
         final String trait = currentTrait.getTrait();
 
         if (traitBox.existsNewTraits()
                 && traitBox.getCurrentTrait() != null
-                && etCurVal.getText().toString().length() > 0
+                && strValue.length() > 0
                 && !traitBox.getCurrentTrait().isValidValue(etCurVal.getText().toString())) {
 
-            if (strValue.length() > 0 && currentTrait.isOver(strValue)) {
+            //checks if the trait is numerical and within the bounds (otherwise returns false)
+            if (currentTrait.isOver(strValue)) {
                 Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_maximum_value)
                         + ": " + currentTrait.getMaximum());
-            } else if (strValue.length() > 0 && currentTrait.isUnder(strValue)) {
+            } else if (currentTrait.isUnder(strValue)) {
                 Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_minimum_value)
                         + ": " + currentTrait.getMinimum());
             }
@@ -353,7 +361,7 @@ public class CollectActivity extends AppCompatActivity {
                 if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
                     if (currentTrait.getFormat().equals("photo")) {
                         // I want to use abstract method
-                        Map newTraits = traitBox.getNewTraits();
+                        Map<String, String> newTraits = traitBox.getNewTraits();
                         PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                         traitPhoto.brapiDelete(newTraits);
                     } else {
@@ -1086,11 +1094,11 @@ public class CollectActivity extends AppCompatActivity {
         return dt.getTraitExists(ID, trait.getTrait(), trait.getFormat());
     }
 
-    public Map getNewTraits() {
+    public Map<String, String> getNewTraits() {
         return traitBox.getNewTraits();
     }
 
-    public void setNewTraits(Map newTraits) {
+    public void setNewTraits(Map<String, String> newTraits) {
         traitBox.setNewTraits(newTraits);
     }
 
@@ -1167,21 +1175,26 @@ public class CollectActivity extends AppCompatActivity {
     ///// class TraitBox /////
     // traitLeft, traitType, and traitRight
     private class TraitBox {
-        private CollectActivity parent;
+        private final CollectActivity parent;
         private String[] prefixTraits;
         private TraitObject currentTrait;
 
-        private Spinner traitType;
-        private TextView traitDetails;
-        private ImageView traitLeft;
-        private ImageView traitRight;
+        private final Spinner traitType;
+        private final TextView traitDetails;
+        private final ImageView traitLeft;
+        private final ImageView traitRight;
 
-        private Map newTraits;  // { trait name: value }
+        /**
+         * New traits is a map of observations where the key is the trait name
+         * and the value is the observation value. This is updated whenever
+         * a new plot id is navigated to.
+         */
+        private Map<String, String> newTraits;  // { trait name: value }
 
         TraitBox(CollectActivity parent_) {
             parent = parent_;
             prefixTraits = null;
-            newTraits = new HashMap();
+            newTraits = new HashMap<>();
 
             traitType = findViewById(R.id.traitType);
 
@@ -1312,16 +1325,21 @@ public class CollectActivity extends AppCompatActivity {
             traitBox.setSelection(traitPosition);
         }
 
-        public Map getNewTraits() {
+        public Map<String, String> getNewTraits() {
             return newTraits;
         }
 
+        /**
+         * Called when navigating between plots in collect activity.
+         * New Traits hashmap of <trait name to observation value> stores data for the currently
+         * selected plot id.
+         * @param plotID the new plot id we are transitioning to
+         */
         void setNewTraits(final String plotID) {
-
-            newTraits = (HashMap) dt.getUserDetail(plotID).clone();
+            newTraits = dt.getUserDetail(plotID);
         }
 
-        void setNewTraits(Map newTraits) {
+        void setNewTraits(Map<String, String> newTraits) {
             this.newTraits = newTraits;
         }
 
@@ -1386,6 +1404,12 @@ public class CollectActivity extends AppCompatActivity {
             return data.toString();
         }
 
+        /**
+         * Deletes all observation variables named traitName from the db.
+         * Also removes the trait from "newTraits"
+         * @param traitName the observation variable name
+         * @param plotID the unique plot identifier to remove the observations from
+         */
         public void remove(String traitName, String plotID) {
             if (newTraits.containsKey(traitName))
                 newTraits.remove(traitName);

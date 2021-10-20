@@ -37,7 +37,6 @@ import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
 import org.brapi.v2.model.core.BrAPITrial;
-import org.brapi.v2.model.core.request.BrAPITrialSearchRequest;
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudySingleResponse;
@@ -55,6 +54,7 @@ import org.brapi.v2.model.pheno.response.BrAPIImageSingleResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
+import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponseResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -558,7 +558,11 @@ public class BrAPIServiceV2 implements BrAPIService{
                         List<BrAPIObservationVariable> brapiTraitList = response.getResult().getData();
                         final Pair<List<TraitObject>, Integer> traitsResult = mapTraits(brapiTraitList);
 
-                        function.apply(traitsResult.first, traitsResult.second);
+                        if (traitsResult != null) {
+                            function.apply(traitsResult.first, traitsResult.second);
+                        } else {
+                            failFunction.apply(new ApiException("Traits failed to parse").getCode());
+                        }
                     }
                 }
 
@@ -702,27 +706,42 @@ public class BrAPIServiceV2 implements BrAPIService{
                 @Override
                 public void onSuccess(BrAPIObservationVariableListResponse response, int i, Map<String, List<String>> map) {
                     //every time
-                    study.getTraits().addAll(mapTraits(response.getResult().getData()).first);
-                    recursiveCounter[0] = recursiveCounter[0] + 1;
+                    BrAPIObservationVariableListResponseResult result = response.getResult();
 
-                    int page = response.getMetadata().getPagination().getCurrentPage();
+                    if (result != null) {
 
-                    // Stop after 50 iterations (for safety)
-                    // Stop if the current page is the last page according to the server
-                    // Stop if there are no more contents
-                    if((recursiveCounter[0] > 50)
-                            || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
-                            || (response.getResult().getData().size() == 0)){
-                        // Stop recursive loop
-                        function.apply(study);
-                    }else {
-                        try {
-                            VariableQueryParams queryParams = new VariableQueryParams();
-                            queryParams.studyDbId(studyDbId).page(recursiveCounter[0]).pageSize(pageSize);
-                            traitsApi.variablesGetAsync(queryParams, this);
-                        } catch (ApiException error) {
-                            failFunction.apply(error.getCode());
-                            Log.e("BrAPIServiceV2", "API Exception", error);
+                        List<BrAPIObservationVariable> data = result.getData();
+
+                        if (data != null) {
+
+                            Pair<List<TraitObject>, Integer> traitResult = mapTraits(data);
+
+                            if (traitResult != null) {
+
+                                study.getTraits().addAll(traitResult.first);
+                                recursiveCounter[0] = recursiveCounter[0] + 1;
+
+                                int page = response.getMetadata().getPagination().getCurrentPage();
+
+                                // Stop after 50 iterations (for safety)
+                                // Stop if the current page is the last page according to the server
+                                // Stop if there are no more contents
+                                if((recursiveCounter[0] > 50)
+                                        || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
+                                        || (response.getResult().getData().size() == 0)){
+                                    // Stop recursive loop
+                                    function.apply(study);
+                                }else {
+                                    try {
+                                        VariableQueryParams queryParams = new VariableQueryParams();
+                                        queryParams.studyDbId(studyDbId).page(recursiveCounter[0]).pageSize(pageSize);
+                                        traitsApi.variablesGetAsync(queryParams, this);
+                                    } catch (ApiException error) {
+                                        failFunction.apply(error.getCode());
+                                        Log.e("BrAPIServiceV2", "API Exception", error);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -746,14 +765,8 @@ public class BrAPIServiceV2 implements BrAPIService{
 
     private Pair<List<TraitObject>, Integer> mapTraits(List<BrAPIObservationVariable> variables) {
         List<TraitObject> traits = new ArrayList<>();
-        Integer variablesMissingTrait = 0;
+        int variablesMissingTrait = 0;
         for (BrAPIObservationVariable var : variables) {
-
-            // Skip the trait if there brapi trait field isn't present
-            if (var.getTrait() == null) {
-                variablesMissingTrait += 1;
-                continue;
-            }
 
             TraitObject trait = new TraitObject();
             trait.setDefaultValue(var.getDefaultValue());
@@ -761,6 +774,13 @@ public class BrAPIServiceV2 implements BrAPIService{
             // Get the synonyms for easier reading. Set it as the trait name.
             String synonym = var.getSynonyms().size() > 0 ? var.getSynonyms().get(0) : null;
             trait.setTrait(getPrioritizedValue(synonym, var.getObservationVariableName()));
+
+            //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
+            // Skip the trait if there brapi trait field isn't present
+            if (var.getTrait() == null || trait.getTrait() == null) {
+                variablesMissingTrait += 1;
+                continue;
+            }
 
             trait.setDetails(var.getTrait().getTraitDescription());
             // Get database id of external system to sync to enabled pushing through brAPI
@@ -869,7 +889,7 @@ public class BrAPIServiceV2 implements BrAPIService{
             field.setExp_sort("Plot");
 
             // Do a pre-check to see if the field exists so we can show an error
-            Integer FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
+            int FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
             if (FieldUniqueStatus != -1) {
                 return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
             }
@@ -879,7 +899,7 @@ public class BrAPIServiceV2 implements BrAPIService{
 
             // Construct our map to check for uniques
             for (List<String> dataRow : studyDetails.getValues()) {
-                Integer idColumn = studyDetails.getAttributes().indexOf("Plot");
+                int idColumn = studyDetails.getAttributes().indexOf("Plot");
                 checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
             }
 
@@ -892,7 +912,7 @@ public class BrAPIServiceV2 implements BrAPIService{
             // All checks finished, insert our data.
             int expId = dataHelper.createField(field, studyDetails.getAttributes());
 
-            Boolean fail = false;
+            boolean fail = false;
             String failMessage = "";
 
             // We want the saving of plots and traits wrap together in a transaction
