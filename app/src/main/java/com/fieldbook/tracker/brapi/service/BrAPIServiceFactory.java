@@ -15,6 +15,7 @@ public class BrAPIServiceFactory {
             brAPIService = new BrAPIServiceV2(context);
         else
             brAPIService = new BrAPIServiceV1(context);
+        brAPIService.authorizeClient();
 
         return brAPIService;
     }

@@ -95,4 +95,19 @@
         <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
         <item>@string/preferences_brapi_oidc_flow_old_custom</item>
     </string-array>
+
+    <string-array name="pref_collect_customize_labelval">
+        <item>value</item>
+        <item>label</item>
+    </string-array>
+
+    <string-array name="pref_collect_customize_labelval_default">
+        <item>value</item>
+        <item>label</item>
+    </string-array>
+
+    <string-array name="pref_collect_labelval_customize_title">
+        <item>@string/preferences_appearance_collect_labelval_customize_value</item>
+        <item>@string/preferences_appearance_collect_labelval_customize_label</item>
+    </string-array>
 </resources>

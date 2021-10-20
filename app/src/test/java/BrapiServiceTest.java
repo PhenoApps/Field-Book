@@ -3,13 +3,13 @@ import android.os.Build;
 
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
-import com.fieldbook.tracker.objects.TraitObject;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,10 +22,6 @@ import org.threeten.bp.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-
-import io.swagger.client.ApiException;
-import io.swagger.client.model.Image;
-import io.swagger.client.model.NewObservationDbIdsObservations;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -51,11 +47,7 @@ public class BrapiServiceTest {
     @Before
     public void setUp() throws Exception {
         // Instantiate our brapi service class
-<<<<<<< HEAD
         this.brAPIService = new BrAPIServiceV1(null);
-=======
-        this.brAPIService = new BrAPIService(brapiBaseUrl, null, null);
->>>>>>> develop
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap missingImage = Bitmap.createBitmap(100, 100, conf);
     }
@@ -151,7 +143,7 @@ public class BrapiServiceTest {
         final String brapiToken = "Bearer YYYY";
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getPlotDetails(studyDbId, new Function<BrapiStudyDetails, Void>() {
+        this.brAPIService.getPlotDetails(studyDbId, new BrapiObservationLevel().setObservationLevelName("plot"), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(BrapiStudyDetails input) {
                 // Check that we are getting some results back
@@ -193,17 +185,14 @@ public class BrapiServiceTest {
         BrapiPaginationManager pageMan = new BrapiPaginationManager(0, 1000);
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getOntology(pageMan, new Function<List<TraitObject>, Void>() {
-            @Override
-            public Void apply(List<TraitObject> input) {
+        this.brAPIService.getOntology(pageMan, (traitObjects, integer) -> {
                 // Check that we are getting some results back
-                BrapiServiceTest.this.checkGetOntologyResult = input.size() > 0;
+                BrapiServiceTest.this.checkGetOntologyResult = traitObjects.size() > 0;
 
                 // Notify the countdown that we are finish
                 signal.countDown();
 
                 return null;
-            }
         }, new Function<Integer, Void>() {
             @Override
             public Void apply(Integer input) {
@@ -283,7 +272,7 @@ public class BrapiServiceTest {
         testObservations.add(testObservation);
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.putObservations(testObservations, new Function<List<Observation>, Void>() {
+        this.brAPIService.updateObservations(testObservations,  new Function<List<Observation>, Void>() {
                     @Override
                     public Void apply(final List<Observation> observationDbIds) {
 

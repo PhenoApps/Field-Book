@@ -670,7 +670,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                         break;
                     case 2:
                         intent.setClassName(thisActivity, BrapiTraitActivity.class.getName());
-                        startActivityForResult(intent, 1);
+                        startActivityForResult(intent, 2);
                         break;
                 }
                 importDialog.dismiss();
@@ -893,11 +893,15 @@ public class TraitEditorActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 mChosenFile = data.getStringExtra("result");
                 mHandler.post(importCSV);
+            } else {
+                Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
+            }
+        }
 
-                brapiDialogShown = mAdapter.infoDialogShown;
-                if (!brapiDialogShown) {
-                    brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, ConfigActivity.dt, null, true);
-                }
+        if (requestCode == 2) {
+            brapiDialogShown = mAdapter.infoDialogShown;
+            if (!brapiDialogShown) {
+                brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, ConfigActivity.dt, null, true);
             }
         }
 

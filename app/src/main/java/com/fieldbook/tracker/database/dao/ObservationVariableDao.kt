@@ -170,7 +170,9 @@ class ObservationVariableDao {
 
         fun getAllTraitsForExport(): Cursor {
 
-            val requiredFields = getTraitPropertyColumns()
+            val requiredFields = arrayOf("trait", "format", "defaultValue", "minimum",
+                "maximum", "details", "categories", "isVisible", "realPosition")
+            //val requiredFields = getTraitPropertyColumns()
             //trait,format,defaultValue,minimum,maximum,details,categories,isVisible,realPosition
             return MatrixCursor(requiredFields).also { cursor ->
                 val traits = getAllTraitObjects()
@@ -208,6 +210,7 @@ class ObservationVariableDao {
                     externalDbId = it["external_db_id"] as? String ?: ""
                     realPosition = (it["position"] as? Int ?: -1)
                     visible = (it["visible"] as String).toBoolean()
+                    additionalInfo = it["additional_info"] as? String ?: ""
 
                     //initialize these to the empty string or else they will be null
                     maximum = ""
@@ -262,6 +265,7 @@ class ObservationVariableDao {
                             put("default_value", t.defaultValue)
                             put("visible", t.visible.toString())
                             put("position", t.realPosition)
+                            put("additional_info", t.additionalInfo)
                         })
 
                 ObservationVariableValueDao.insert(

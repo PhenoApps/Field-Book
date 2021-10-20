@@ -2,6 +2,8 @@ package com.fieldbook.tracker.database.dao
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
+import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
@@ -65,7 +67,22 @@ class StudyDao {
 
         fun deleteField(exp_id: Int) = withDatabase { db ->
 
-            db.delete(Study.tableName, "${Study.PK} = ?", arrayOf(exp_id.toString()))
+            try {
+
+                db.rawQuery("PRAGMA foreign_keys=OFF", null)
+                db.delete(ObservationUnit.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
+                db.delete(ObservationUnitValue.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
+                db.delete(ObservationUnitAttribute.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
+                db.delete(Study.tableName, "${Study.PK} = ?", arrayOf(exp_id.toString()))
+                db.rawQuery("PRAGMA foreign_keys=ON", null)
+
+            } catch (e: SQLiteException) {
+
+                e.printStackTrace()
+
+                Log.d("StudyDao", "error during field deletion")
+
+            }
 
         }
 
@@ -105,6 +122,7 @@ class StudyDao {
             it.primary_id = this["study_primary_id_name"].toString()
             it.secondary_id = this["study_secondary_id_name"].toString()
             it.date_import = this["date_import"].toString()
+            it.exp_sort = this["study_sort_name"].toString()
             it.date_edit = when (val date = this["date_edit"]?.toString()) {
                 null, "null" -> ""
                 else -> date
@@ -145,7 +163,8 @@ class StudyDao {
                             "date_import",
                             "date_edit",
                             "date_export",
-                            "study_source"),
+                            "study_source",
+                            "study_sort_name"),
                     where = "${Study.PK} = ?",
                     whereArgs = arrayOf(exp_id.toString()),
                     orderBy = Study.PK).toFirst().toFieldObject()
@@ -182,8 +201,12 @@ class StudyDao {
                     }).toInt()
 
                     try {
+                        //TODO remove when we handle primary/secondary ids better
+                        val actualColumns = columns.toMutableList()
                         //insert observation unit attributes using columns parameter
-                        columns.forEach {
+                        if (e.primary_id !in columns) actualColumns += e.primary_id
+                        if (e.secondary_id !in columns) actualColumns += e.secondary_id
+                        actualColumns.forEach {
                             db.insert(ObservationUnitAttribute.tableName, null, contentValuesOf(
                                     "observation_unit_attribute_name" to it,
                                     Study.FK to rowid
@@ -223,11 +246,32 @@ class StudyDao {
             val primaryIndex = columns.indexOf(names.primary)
             val secondaryIndex = columns.indexOf(names.secondary)
 
+            //TODO remove when we handle primary/secondary ids better
+            //check if data size matches the columns size, on mismatch fill with dummy data
+            //mainly fixes issues with BrAPI when xtype/ytype and row/col values are not given
+            val actualData = if (data.size != columns.size) {
+                val tempData = data.toMutableList()
+                for (i in 0..(columns.size - data.size))
+                    tempData += "NA"
+                tempData
+            } else data
+
+            val geoCoordinatesColumnName = "geo_coordinates"
+            var geoCoordinates = ""
+            val geoCoordinatesIndex: Int
+            if (geoCoordinatesColumnName in columns) {
+                geoCoordinatesIndex = columns.indexOf(geoCoordinatesColumnName)
+                if (geoCoordinatesIndex > -1) {
+                    geoCoordinates = data[geoCoordinatesIndex]
+                }
+            }
+            
             val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
                     Study.FK to exp_id,
-                    "observation_unit_db_id" to data[uniqueIndex],
-                    "primary_id" to data[primaryIndex],
-                    "secondary_id" to data[secondaryIndex]))
+                    "observation_unit_db_id" to actualData[uniqueIndex],
+                    "primary_id" to if (primaryIndex < 0) "NA" else actualData[primaryIndex],
+                    "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex],
+                     "geo_coordinates" to geoCoordinates))
 
             columns.forEachIndexed { index, it ->
 
@@ -237,10 +281,33 @@ class StudyDao {
                         Study.FK to exp_id,
                         ObservationUnit.FK to rowid,
                         ObservationUnitAttribute.FK to attrId,
-                        "observation_unit_value_name" to data[index]
+                        "observation_unit_value_name" to actualData[index]
                 ))
             }
 
+            if (primaryIndex < 0) {
+
+                val attrId = ObservationUnitAttributeDao.getIdByName("Row")
+
+                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                    Study.FK to exp_id,
+                    ObservationUnit.FK to rowid,
+                    ObservationUnitAttribute.FK to attrId,
+                    "observation_unit_value_name" to "NA"
+                ))
+            }
+
+            if (secondaryIndex < 0) {
+
+                val attrId = ObservationUnitAttributeDao.getIdByName("Column")
+
+                db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
+                    Study.FK to exp_id,
+                    ObservationUnit.FK to rowid,
+                    ObservationUnitAttribute.FK to attrId,
+                    "observation_unit_value_name" to "NA"
+                ))
+            }
         }
 
         private fun updateImportDate(db: SQLiteDatabase, exp_id: Int) {
@@ -296,6 +363,16 @@ class StudyDao {
             if (modifyDate) modifyDate(db, exp_id)
 
             if (updateExportDate) updateExportDate(db, exp_id)
+        }
+
+        fun updateStudySort(sort: String?, exp_id: Int) = withDatabase { db ->
+            var contentVals = ContentValues();
+            if(sort == null) {
+                contentVals.putNull("study_sort_name")
+            } else {
+                contentVals.put("study_sort_name", sort)
+            }
+            db.update(Study.tableName, contentVals, "${Study.PK} = ?", arrayOf("$exp_id"))
         }
 
         /**

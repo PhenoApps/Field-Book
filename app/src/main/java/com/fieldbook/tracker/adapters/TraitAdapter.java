@@ -136,6 +136,9 @@ public class TraitAdapter extends BaseAdapter {
             case "zebra label print":
                 holder.format.setBackgroundResource(R.drawable.ic_trait_labelprint);
                 break;
+            case "gnss":
+                holder.format.setBackgroundResource(R.drawable.ic_trait_gnss);
+                break;
             default:
                 holder.format.setBackgroundResource(R.drawable.ic_reorder);
                 break;

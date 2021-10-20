@@ -1,24 +1,19 @@
 package com.fieldbook.tracker.brapi.service;
 
-        import android.app.Activity;
-        import android.app.PendingIntent;
-        import android.content.ActivityNotFoundException;
         import android.content.Context;
-        import android.content.Intent;
         import android.content.SharedPreferences;
-        import android.net.Uri;
         import android.util.Log;
         import android.util.Patterns;
         import android.widget.Toast;
 
-        import androidx.annotation.Nullable;
         import androidx.arch.core.util.Function;
-        import androidx.browser.customtabs.CustomTabsIntent;
 
         import com.fieldbook.tracker.R;
         import com.fieldbook.tracker.brapi.ApiError;
+        import com.fieldbook.tracker.brapi.ApiErrorCode;
         import com.fieldbook.tracker.brapi.BrapiAuthDialog;
         import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+        import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
         import com.fieldbook.tracker.brapi.model.BrapiProgram;
         import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
         import com.fieldbook.tracker.brapi.model.BrapiTrial;
@@ -26,19 +21,14 @@ package com.fieldbook.tracker.brapi.service;
         import com.fieldbook.tracker.brapi.model.Observation;
         import com.fieldbook.tracker.preferences.GeneralKeys;
         import com.fieldbook.tracker.objects.TraitObject;
-        import com.fieldbook.tracker.preferences.PreferencesActivity;
         import com.fieldbook.tracker.utilities.Constants;
-
-        import net.openid.appauth.AuthorizationException;
-        import net.openid.appauth.AuthorizationRequest;
-        import net.openid.appauth.AuthorizationService;
-        import net.openid.appauth.AuthorizationServiceConfiguration;
-        import net.openid.appauth.ResponseTypeValues;
-        import net.openid.appauth.browser.CustomTabManager;
+        import com.fieldbook.tracker.utilities.FailureFunction;
+        import com.fieldbook.tracker.utilities.SuccessFunction;
 
         import java.net.MalformedURLException;
         import java.net.URL;
         import java.util.List;
+        import java.util.function.BiFunction;
 
 public interface BrAPIService {
 
@@ -106,10 +96,10 @@ public interface BrAPIService {
     }
 
     public static void handleConnectionError(Context context, int code) {
-        ApiError apiError = ApiError.processErrorCode(code);
+        ApiErrorCode apiErrorCode = ApiErrorCode.processErrorCode(code);
         String toastMsg = "";
 
-        switch (apiError) {
+        switch (apiErrorCode) {
             case UNAUTHORIZED:
                 // Start the login process
                 BrapiAuthDialog brapiAuth = new BrapiAuthDialog(context);
@@ -142,9 +132,9 @@ public interface BrAPIService {
 
     public void getStudyDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getPlotDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
+    public void getPlotDetails(final String studyDbId, BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
-    public void getOntology(BrapiPaginationManager paginationManager, final Function<List<TraitObject>, Void> function, final Function<Integer, Void> failFunction);
+    public void getOntology(BrapiPaginationManager paginationManager, final BiFunction<List<TraitObject>, Integer, Void> function, final Function<Integer, Void> failFunction);
 
     public void createObservations(List<Observation> observations,
                                    final Function<List<Observation>, Void> function,
@@ -168,7 +158,9 @@ public interface BrAPIService {
 
     public void getTraits(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
-    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails);
+    public BrapiControllerResponse saveStudyDetails(BrapiStudyDetails studyDetails, BrapiObservationLevel selectedObservationLevel, String primaryId, String secondaryId);
 
     public void authorizeClient();
+
+    void getObservationLevels(String programDbId, final SuccessFunction<List<BrapiObservationLevel>> successFn, final FailureFunction<ApiError> failFn);
 }

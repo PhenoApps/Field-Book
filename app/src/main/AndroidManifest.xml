@@ -7,6 +7,7 @@
         android:name="android.hardware.location"
         android:required="false" />
 
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -27,6 +28,7 @@
         android:smallScreens="true"
         android:xlargeScreens="true" />
 
+    <!-- this tools:replace is required for tableview -->
     <application
         android:name="androidx.multidex.MultiDexApplication"
         android:hardwareAccelerated="true"
@@ -35,6 +37,7 @@
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
+        tools:replace="android:label"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".activities.ConfigActivity"
@@ -61,10 +64,10 @@
             android:theme="@style/ActivityDialog"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".activities.DatagridActivity"
+            android:name=".activities.DataGridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:theme="@style/ActivityDialog" />
+            android:theme="@style/AppTheme"/>
         <activity
             android:name=".activities.BrapiActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"

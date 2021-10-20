@@ -99,6 +99,18 @@
                     android:textStyle="bold" />
 
             </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/trait_date_calendar_visibility_btn"
+                android:layout_width="110dp"
+                android:layout_height="55dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="15dp"
+                android:contentDescription="@string/trait_date_calendar_picker_content_description"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_event_black_24dp" />
+
         </LinearLayout>
     </LinearLayout>
 </com.fieldbook.tracker.traits.DateTraitLayout>
