@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,7 +25,15 @@ import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.Preconditions;
 import net.openid.appauth.ResponseTypeValues;
+import net.openid.appauth.connectivity.ConnectionBuilder;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class BrapiAuthActivity extends AppCompatActivity {
 
@@ -80,6 +89,8 @@ public class BrapiAuthActivity extends AppCompatActivity {
         }
     }
 
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(GeneralKeys.BRAPI_TOKEN, null);
@@ -89,6 +100,20 @@ public class BrapiAuthActivity extends AppCompatActivity {
             String clientId = "fieldbook";
             Uri redirectURI = Uri.parse("https://fieldbook.phenoapps.org/");
             Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
+            ConnectionBuilder builder = new ConnectionBuilder() {
+                @NonNull
+                @NotNull
+                @Override
+                public HttpURLConnection openConnection(@NonNull @NotNull Uri uri) throws IOException {
+//                    Preconditions.checkNotNull(uri, "url must not be null");
+                    Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
+                            "scheme or uri must be http or https");
+                    HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
+//                    conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
+//                    conn.setReadTimeout(READ_TIMEOUT_MS);
+                    conn.setInstanceFollowRedirects(false);
+                    return conn;                }
+            };
 
             AuthorizationServiceConfiguration.fetchFromUrl(oidcConfigURI,
                     new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
@@ -123,7 +148,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
                         }
 
-                    });
+                    }, builder);
         } catch (Exception ex) {
             authError(ex);
         }
