@@ -635,4 +635,10 @@
     <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>
     <string name="printer_success">Print success</string>
     <string name="bluetooth_printer_choose_device_title">Choose bluetooth device to print from.</string>
+    <string name="pref_geonav_compass_title">Use Compass</string>
+    <string name="pref_geonav_compass_summary">When enabled the user can point at plots relative to their position to select them. When disabled the selection is based on distance.</string>
+    <string name="pref_geonav_log_summary">Write GeoNav steps to a log file in \n storage/geonav/log.txt</string>
+    <string name="pref_geonav_log_title">GeoNav Log</string>
+    <string name="act_collect_geonav_first_location_found">Rover communications established.</string>
+    <string name="gnss_trait_averaging_switch_text">Average</string>
 </resources>

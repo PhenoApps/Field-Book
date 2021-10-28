@@ -42,15 +42,17 @@ public class GPSTracker extends Service implements LocationListener {
 
     public GPSTracker(Context context) {
         this.mContext = context;
-        getLocation();
+        getLocation(MIN_DISTANCE_CHANGE_FOR_UPDATES, MIN_TIME_BW_UPDATES);
     }
 
-    public GPSTracker(Context context, GPSTrackerListener listener) {
-        this(context);
+    public GPSTracker(Context context, GPSTrackerListener listener, long minDistance, long minTime) {
+        this.mContext = context;
         this.mListener = listener;
+
+        getLocation(minDistance, minTime);
     }
 
-    public Location getLocation() {
+    private Location getLastLocation(long minDistance, long minTime) {
         try {
             locationManager = (LocationManager) mContext
                     .getSystemService(LOCATION_SERVICE);
@@ -70,8 +72,8 @@ public class GPSTracker extends Service implements LocationListener {
                 if (isNetworkEnabled) {
                     locationManager.requestLocationUpdates(
                             LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                            minTime,
+                            minDistance, this);
                     Log.d("Network", "Network");
                     if (locationManager != null) {
                         location = locationManager
@@ -87,8 +89,8 @@ public class GPSTracker extends Service implements LocationListener {
                         if (location == null) {
                             locationManager.requestLocationUpdates(
                                     LocationManager.GPS_PROVIDER,
-                                    MIN_TIME_BW_UPDATES,
-                                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                                    minTime,
+                                    minDistance, this);
                             Log.d("GPS Enabled", "GPS Enabled");
                             if (locationManager != null) {
                                 location = locationManager
@@ -108,6 +110,14 @@ public class GPSTracker extends Service implements LocationListener {
         }
 
         return location;
+    }
+
+    public Location getLocation() {
+        return getLastLocation(MIN_DISTANCE_CHANGE_FOR_UPDATES, MIN_TIME_BW_UPDATES);
+    }
+
+    public Location getLocation(long minDistance, long minTime) {
+        return getLastLocation(minDistance, minTime);
     }
 
     /**

@@ -31,24 +31,35 @@ class ConnectThread(device: BluetoothDevice, private val handler: Handler) : Thr
 
     override fun run() {
 
+        var success = true
+
+        //attempt connection until thread is cancelled,
+        // sometimes connection to socket fails after closing in previous activity
         try {
+
             // Connect to the remote device through the socket. This call blocks
             // until it succeeds or throws an exception.
             mmSocket?.connect()
-        } catch (connectException: IOException) {
-            // Unable to connect; close the socket and return.
-            try {
-                mmSocket?.close()
-            } catch (closeException: IOException) {
-                Log.e(TAG, "Could not close the client socket", closeException)
-            }
 
-            return
+        } catch (connectException: IOException) {
+
+            connectException.printStackTrace()
+
+            val readMsg = handler.obtainMessage(
+                GNSSResponseReceiver.MESSAGE_OUTPUT_FAIL, 0, -1, "fail")
+
+            readMsg.sendToTarget()
+
+            cancel()
+
+            success = false
         }
 
-        mmSocket?.let { sock ->
-            mConnectedThread = ConnectedThread(sock, handler)
-            mConnectedThread?.start()
+        if (success) {
+            mmSocket?.let { sock ->
+                mConnectedThread = ConnectedThread(sock, handler)
+                mConnectedThread?.start()
+            }
         }
     }
 
@@ -58,6 +69,8 @@ class ConnectThread(device: BluetoothDevice, private val handler: Handler) : Thr
         mConnectedThread?.cancel()
 
         mmSocket?.close()
+
+        this.handler.removeCallbacksAndMessages(null)
 
     } catch (e: IOException) {
 
