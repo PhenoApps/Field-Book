@@ -21,7 +21,14 @@ import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;import android.text.Editable;
+import android.os.Message;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+
+import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -78,7 +85,10 @@ import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
+import com.fieldbook.tracker.utilities.SnackbarUtils;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -94,6 +104,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -328,20 +339,28 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
+    /**
+     * Is used to ensure the UI entered data is within the bounds of the trait's min/max
+     * @return boolean flag false when data is out of bounds, true otherwise
+     */
     private boolean validateData() {
         final String strValue = etCurVal.getText().toString();
         final TraitObject currentTrait = traitBox.getCurrentTrait();
+
+        if (currentTrait == null) return false;
+
         final String trait = currentTrait.getTrait();
 
         if (traitBox.existsNewTraits()
                 && traitBox.getCurrentTrait() != null
-                && etCurVal.getText().toString().length() > 0
+                && strValue.length() > 0
                 && !traitBox.getCurrentTrait().isValidValue(etCurVal.getText().toString())) {
 
-            if (strValue.length() > 0 && currentTrait.isOver(strValue)) {
+            //checks if the trait is numerical and within the bounds (otherwise returns false)
+            if (currentTrait.isOver(strValue)) {
                 Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_maximum_value)
                         + ": " + currentTrait.getMaximum());
-            } else if (strValue.length() > 0 && currentTrait.isUnder(strValue)) {
+            } else if (currentTrait.isUnder(strValue)) {
                 Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_minimum_value)
                         + ": " + currentTrait.getMinimum());
             }
@@ -403,12 +422,12 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             public void onClick(View v) {
 
                 // if a brapi observation that has been synced, don't allow deleting
-                String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+                String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
                 TraitObject currentTrait = traitBox.getCurrentTrait();
                 if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
                     if (currentTrait.getFormat().equals("photo")) {
                         // I want to use abstract method
-                        Map newTraits = traitBox.getNewTraits();
+                        Map<String, String> newTraits = traitBox.getNewTraits();
                         PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                         traitPhoto.brapiDelete(newTraits);
                     } else {
@@ -779,7 +798,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
 
         traitBox.update(parent, value);
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         Observation observation = dt.getObservation(exp_id, rangeBox.getPlotID(), parent);
         String observationDbId = observation.getDbId();
@@ -813,7 +832,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             return;
         }
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
         TraitObject trait = traitBox.getCurrentTrait();
         if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), trait.getTrait())) {
             brapiDelete(parent, true);
@@ -1719,11 +1738,38 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         return dt.getTraitExists(ID, trait.getTrait(), trait.getFormat());
     }
 
-    public Map getNewTraits() {
+    /**
+     * Iterates over all traits for the given ID and returns the trait's index which is missing
+     * @param traitIndex current trait index
+     * @param ID the plot identifier
+     * @return index of the trait missing or -1 if all traits exist
+     */
+    public int existsAllTraits(final int traitIndex, final int ID) {
+        final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
+        final String[] formats = VisibleObservationVariableDao.Companion.getFormat();
+        for (int i = 0; i < traits.length; i++) {
+            if (i != traitIndex
+                    && !dt.getTraitExists(ID, traits[i], formats[i])) return i;
+        }
+        return -1;
+    }
+
+    public List<Integer> getNonExistingTraits(final int ID) {
+        final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
+        final String[] formats = VisibleObservationVariableDao.Companion.getFormat();
+        final ArrayList<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < traits.length; i++) {
+            if (!dt.getTraitExists(ID, traits[i], formats[i]))
+                indices.add(i);
+        }
+        return indices;
+    }
+
+    public Map<String, String> getNewTraits() {
         return traitBox.getNewTraits();
     }
 
-    public void setNewTraits(Map newTraits) {
+    public void setNewTraits(Map<String, String> newTraits) {
         traitBox.setNewTraits(newTraits);
     }
 
@@ -1788,7 +1834,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         TraitObject trait = getCurrentTrait();
 
-        String studyId = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String studyId = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         dt.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
@@ -1809,21 +1855,26 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     ///// class TraitBox /////
     // traitLeft, traitType, and traitRight
     private class TraitBox {
-        private CollectActivity parent;
+        private final CollectActivity parent;
         private String[] prefixTraits;
         private TraitObject currentTrait;
 
-        private Spinner traitType;
-        private TextView traitDetails;
-        private ImageView traitLeft;
-        private ImageView traitRight;
+        private final Spinner traitType;
+        private final TextView traitDetails;
+        private final ImageView traitLeft;
+        private final ImageView traitRight;
 
-        private Map newTraits;  // { trait name: value }
+        /**
+         * New traits is a map of observations where the key is the trait name
+         * and the value is the observation value. This is updated whenever
+         * a new plot id is navigated to.
+         */
+        private Map<String, String> newTraits;  // { trait name: value }
 
         TraitBox(CollectActivity parent_) {
             parent = parent_;
             prefixTraits = null;
-            newTraits = new HashMap();
+            newTraits = new HashMap<>();
 
             traitType = findViewById(R.id.traitType);
 
@@ -1954,16 +2005,21 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             traitBox.setSelection(traitPosition);
         }
 
-        public Map getNewTraits() {
+        public Map<String, String> getNewTraits() {
             return newTraits;
         }
 
+        /**
+         * Called when navigating between plots in collect activity.
+         * New Traits hashmap of <trait name to observation value> stores data for the currently
+         * selected plot id.
+         * @param plotID the new plot id we are transitioning to
+         */
         void setNewTraits(final String plotID) {
-
-            newTraits = (HashMap) dt.getUserDetail(plotID).clone();
+            newTraits = dt.getUserDetail(plotID);
         }
 
-        void setNewTraits(Map newTraits) {
+        void setNewTraits(Map<String, String> newTraits) {
             this.newTraits = newTraits;
         }
 
@@ -2028,11 +2084,17 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             return data.toString();
         }
 
+        /**
+         * Deletes all observation variables named traitName from the db.
+         * Also removes the trait from "newTraits"
+         * @param traitName the observation variable name
+         * @param plotID the unique plot identifier to remove the observations from
+         */
         public void remove(String traitName, String plotID) {
             if (newTraits.containsKey(traitName))
                 newTraits.remove(traitName);
 
-            String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+            String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
             dt.deleteTrait(exp_id, plotID, traitName);
         }
@@ -2616,41 +2678,179 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             return movePaging(pos, 1, false);
         }
 
+        private void chooseNextTrait(int pos, int step) {
+            List<Integer> nextTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
+            if (!nextTrait.isEmpty()) {
+                if (step < 0) {
+                    traitBox.setSelection(Collections.max(nextTrait));
+                } else traitBox.setSelection(Collections.min(nextTrait));
+            }
+        }
+
+        private int getTraitIndex(String[] traits) {
+            String currentTraitName = traitBox.currentTrait.getTrait();
+            int traitIndex = 0;
+            for (int i = 0; i < traits.length; i++) {
+                if (currentTraitName.equals(traits[i])) {
+                    traitIndex = i;
+                    break;
+                }
+            }
+            return traitIndex;
+        }
+
+        private int checkSkipTraits(String[] traits, int step, int pos, boolean cyclic, boolean skipMode) {
+
+            //edge case where we are on the last position
+            //check for missing traits dependent on step for last position
+            //if all traits are observed or the only unobserved is to the left, move to pos 1
+            if (step == 1 && pos == rangeID.length) {
+                if (!skipMode) {
+                    int currentTrait = getTraitIndex(traits);
+                    int nextTrait = parent.existsAllTraits(currentTrait, rangeID[pos - 1]);
+                    if (nextTrait != -1) { //check if this trait is "next" if not then move to 1
+                        if (nextTrait > currentTrait) {
+                            traitBox.setSelection(nextTrait);
+                            return rangeID.length;
+                        } else { //when moving to one, select the non existing trait
+                            List<Integer> nextTraitOnFirst = parent.getNonExistingTraits(rangeID[0]);
+                            if (!nextTraitOnFirst.isEmpty()) {
+                                traitBox.setSelection(Collections.min(nextTraitOnFirst));
+                                return 1;
+                            }
+                        } //if all traits exist for 1 then just follow the main loop
+                    }
+                }
+            }
+
+            final int prevPos = pos;
+            //first loop is used to detect if all observations are completed
+            boolean firstLoop = true;
+            //this keeps track of the previous loops position
+            //while prevPos keeps track of what position this function was called with.
+            int localPrev;
+            while (true) {
+
+                //get the index of the currently selected trait
+                int traitIndex = getTraitIndex(traits);
+
+                localPrev = pos;
+                pos = moveSimply(pos, step);
+
+                //if we wrap around the entire range then observations are completed
+                //notify the user and just go to the first range id.
+                if (!firstLoop && prevPos == localPrev) {
+                    Toast.makeText(CollectActivity.this,
+                            R.string.activity_collect_all_obs_made, Toast.LENGTH_SHORT).show();
+                    return 1;
+                }
+                firstLoop = false;
+
+                // absorb the differece
+                // between single click and repeated clicks
+                if (cyclic) {
+                    if (pos == prevPos) {
+                        return pos;
+                    } else if (pos == 1) {
+                        pos = rangeID.length;
+                    } else if (pos == rangeID.length) {
+                        pos = 1;
+                    }
+                } else {
+                    if (pos == 1 || pos == prevPos) {
+                        if (!skipMode) {
+                            List<Integer> nextTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
+                            if (!nextTrait.isEmpty()) {
+                                if (step < 0) {
+                                    traitBox.setSelection(Collections.max(nextTrait));
+                                } else traitBox.setSelection(Collections.min(nextTrait));
+                                return pos;
+                            }
+                        }
+                    }
+                }
+
+                if (skipMode) {
+                    if (!parent.existsTrait(rangeID[pos - 1])) {
+                        return pos;
+                    }
+                } else {
+
+                    //check all traits for the currently selected range id
+                    //this returns the missing trait index or -1 if they all are observed
+                    int nextTrait = parent.existsAllTraits(traitIndex, rangeID[localPrev - 1]);
+                    //if we press right, but a trait to the left is missing, go to next plot
+                    //similarly if we press left, but a trait to the right is missing, go to previous
+                    //check if pressing left/right will skip an unobserved trait
+                    //if it does, force it to the next plot and set the traitBox to the first unobserved
+                    //boolean skipped = Math.abs(prevPos - localPrev) > 1;
+                    if (nextTrait < traitIndex && step > 0) {
+
+                        //check which trait is missing in the next position
+                        List<Integer> nextPlotTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
+
+                        //if no trait is missing, loop
+                        if (!nextPlotTrait.isEmpty()) { //otherwise set the selection and return position
+
+                            //we are moving to the right, so set the left most trait
+                            traitBox.setSelection(
+                                    Collections.min(nextPlotTrait)
+                            );
+
+                            return pos;
+                        }
+
+                    } else if ((nextTrait == -1 || nextTrait > traitIndex) && step < 0) {
+
+                        //check which trait is missing in the next position
+                        List<Integer> nextPlotTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
+
+                        //if no trait is missing, loop
+                        if (!nextPlotTrait.isEmpty()) { //otherwise set the selection and return position
+
+                            //moving to the left so set the right most trait
+                            traitBox.setSelection(
+                                    Collections.max(nextPlotTrait)
+                            );
+
+                            return pos;
+                        }
+                    //otherwise, set the selection to the missing trait and return the current pos
+                    } else if (nextTrait > -1) {
+
+                        traitBox.setSelection(nextTrait);
+
+                        return localPrev;
+                    }
+                }
+            }
+        }
+
         private int movePaging(int pos, int step, boolean cyclic) {
             // If ignore existing data is enabled, then skip accordingly
             final SharedPreferences ep = parent.getPreference();
 
-            if (ep.getBoolean(GeneralKeys.HIDE_ENTRIES_WITH_DATA, false)) {
-                if (step == 1 && pos == rangeID.length) {
-                    return 1;
+            final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
+
+            //three options: 1. disabled 2. skip active trait 3. skip but check all traits
+            String skipMode = ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1");
+
+            switch (skipMode) {
+
+                case "2" : {
+
+                    return checkSkipTraits(traits, step, pos, cyclic, true);
+
                 }
 
-                final int prevPos = pos;
-                TraitObject trait = parent.getTraitBox().getCurrentTrait();
-                while (true) {
-                    pos = moveSimply(pos, step);
-                    // absorb the differece
-                    // between single click and repeated clicks
-                    if (cyclic) {
-                        if (pos == prevPos) {
-                            return pos;
-                        } else if (pos == 1) {
-                            pos = rangeID.length;
-                        } else if (pos == rangeID.length) {
-                            pos = 1;
-                        }
-                    } else {
-                        if (pos == 1 || pos == prevPos) {
-                            return pos;
-                        }
-                    }
+                case "3" : {
 
-                    if (!parent.existsTrait(rangeID[pos - 1])) {
-                        return pos;
-                    }
+                    return checkSkipTraits(traits, step, pos, cyclic, false);
+
                 }
-            } else {
-                return moveSimply(pos, step);
+
+                default : return moveSimply(pos, step);
+
             }
         }
 

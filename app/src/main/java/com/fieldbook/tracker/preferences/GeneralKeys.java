@@ -14,6 +14,7 @@ public class GeneralKeys {
     public static final String APPLICATION_THEME                    = "APPLICATION_THEME";
     public static final String SAVED_DATA_COLOR                     = "SAVED_DATA_COLOR";
     public static final String RESTORE_DEFAULT_THEME                = "RESTORE_DEFAULT_THEME";
+    public static final String LABELVAL_CUSTOMIZE                   = "LABELVAL_CUSTOMIZE";
 
     // Profile
     public static final String PROFILE_NAME_FIRST                   = "FirstName";
@@ -34,7 +35,7 @@ public class GeneralKeys {
     public static final String UNIQUE_CAMERA                        = "BarcodeScan";
     public static final String UNIQUE_TEXT                          = "JumpToPlot";
     public static final String DATAGRID_SETTING                     = "DataGrid";
-    public static final String HIDE_ENTRIES_WITH_DATA               = "IgnoreExisting";
+    public static final String HIDE_ENTRIES_WITH_DATA               = "com.fieldbook.tracker.HIDE_ENTRIES";
     public static final String USE_DAY_OF_YEAR                      = "UseDay";
     public static final String DISABLE_SHARE                        = "DisableShare";
 
@@ -70,6 +71,9 @@ public class GeneralKeys {
     public static final String GEONAV_COMPASS                       = GEONAV_PREFIX + "GEONAV_COMPASS";
     public static final String GEONAV_LOG                           = GEONAV_PREFIX + "GEONAV_LOG";
     // @formatter:on
+
+    //Calendar Trait
+    public static final String CALENDAR_LAST_SAVED_DATE             = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
 
     private GeneralKeys() {
 

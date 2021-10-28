@@ -80,6 +80,20 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/preferences_brapi_traits_title"
+        app:iconSpaceReserved="false">
+        <ListPreference
+            android:defaultValue="@array/pref_collect_customize_labelval_default"
+            android:dialogTitle="@string/preferences_appearance_collect_labelval_customize"
+            android:entries="@array/pref_collect_labelval_customize_title"
+            android:entryValues="@array/pref_collect_customize_labelval"
+            android:icon="@drawable/ic_view_list_black_24dp"
+            android:key="LABELVAL_CUSTOMIZE"
+            android:summary="@string/preferences_appearance_collect_labelval_customize_description"
+            android:title="@string/preferences_appearance_collect_labelval_customize" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="brapi_server_list"
         android:title="@string/preferences_brapi_servers_title"
         app:iconSpaceReserved="false"

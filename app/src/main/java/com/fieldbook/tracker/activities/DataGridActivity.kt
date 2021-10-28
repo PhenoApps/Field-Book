@@ -98,7 +98,19 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
         dataGridGroup = binding.dataGridGroup
         mTableView = binding.tableView
 
-        loadGridData()
+        //if something goes wrong finish the activity
+        try {
+
+            loadGridData()
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+
+            setResult(RESULT_CANCELED)
+
+            finish()
+        }
 
     }
 
@@ -118,81 +130,87 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
      */
     private fun loadGridData() {
 
-        val ep = getSharedPreferences("Settings", 0)
+        val ep = getSharedPreferences("Settings", MODE_PRIVATE)
 
-        val columns = arrayOf(ep.getString("ImportUniqueName", "") ?: "")
+        val uniqueName = ep.getString("ImportUniqueName", "") ?: ""
 
-        //background processing
-        scope.launch {
+        if (uniqueName.isNotBlank()) {
 
-            //query database for visible traits
-            mTraits = ConfigActivity.dt.visibleTrait
+            //background processing
+            scope.launch {
 
-            //expensive database call
-            val cursor = ConfigActivity.dt.convertDatabaseToTable(columns, mTraits)
+                //query database for visible traits
+                mTraits = ConfigActivity.dt.visibleTrait
 
-            cursor.moveToPosition(-1)
+                //expensive database call, only asks for the unique name plot attr and all visible traits
+                val cursor = ConfigActivity.dt.convertDatabaseToTable(arrayOf(uniqueName), mTraits)
 
-            cursor.moveToFirst()
+                if (cursor.moveToFirst()) {
 
-            mPlotIds = arrayListOf()
+                    mPlotIds = arrayListOf()
 
-            val dataMap = arrayListOf<List<CellData>>()
+                    val dataMap = arrayListOf<List<CellData>>()
 
-            //iterate over cursor results and populate lists of plot ids and related trait values
-            val rows: Int = cursor.count
+                    do { //iterate over cursor results and populate lists of plot ids and related trait values
 
-            for (i in 0 until rows) {
+                        //unique name column is always the first column
+                        val uniqueIndex = cursor.getColumnIndex(cursor.getColumnName(0))
 
-                val plotId = cursor.getString(cursor.getColumnIndex(cursor.getColumnName(0)))
+                        if (uniqueIndex > -1) { //if it doesn't exist skip this row
 
-                val dataList = arrayListOf<CellData>()
+                            val plotId = cursor.getString(uniqueIndex)
 
-                mPlotIds.add(plotId)
+                            val dataList = arrayListOf<CellData>()
 
-                mTraits.forEachIndexed { _, variable ->
+                            mPlotIds.add(plotId) //add unique name row header
 
-                    val index = cursor.getColumnIndex(variable)
+                            mTraits.forEachIndexed { _, variable ->
 
-                    val value = cursor.getString(index) ?: ""
+                                val index = cursor.getColumnIndex(variable)
 
-                    dataList.add(CellData(value, plotId))
+                                if (index > -1) {
 
+                                    val value = cursor.getString(index) ?: ""
+
+                                    //data list is a trait row in the data grid
+                                    dataList.add(CellData(value, plotId))
+                                }
+                            }
+
+                            dataMap.add(dataList)
+                        }
+
+                    } while (cursor.moveToNext())
+
+                    mAdapter = DataGridAdapter()
+
+                    runOnUiThread {
+
+                        mTableView.setHasFixedWidth(true)
+
+                        mTableView.tableViewListener = this@DataGridActivity
+
+                        mTableView.isShowHorizontalSeparators = false
+
+                        mTableView.isShowVerticalSeparators = false
+
+                        mTableView.setAdapter(mAdapter)
+
+                        mAdapter.setAllItems(mTraits.map { HeaderData(it, it) },
+                            mPlotIds.map { HeaderData(it, it) },
+                            dataMap.toList())
+                    }
+
+                    cursor.close() //always remember to close your cursor! :)
+
+                    //update the ui after background processing ends
+                    runOnUiThread {
+
+                        dataGridGroup.visibility = View.VISIBLE
+
+                        progressBar.visibility = View.GONE
+                    }
                 }
-
-                dataMap.add(dataList)
-
-                cursor.moveToNext()
-
-            }
-
-            mAdapter = DataGridAdapter()
-
-            runOnUiThread {
-
-                mTableView.setHasFixedWidth(true)
-
-                mTableView.tableViewListener = this@DataGridActivity
-
-                mTableView.isShowHorizontalSeparators = false
-
-                mTableView.isShowVerticalSeparators = false
-
-                mTableView.setAdapter(mAdapter)
-
-                mAdapter.setAllItems(mTraits.map { HeaderData(it, it) },
-                    mPlotIds.map { HeaderData(it, it) },
-                    dataMap.toList())
-            }
-
-            cursor.close() //always remember to close your cursor! :)
-
-            //update the ui after background processing ends
-            runOnUiThread {
-
-                dataGridGroup.visibility = View.VISIBLE
-
-                progressBar.visibility = View.GONE
             }
         }
     }

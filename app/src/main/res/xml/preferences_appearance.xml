@@ -66,5 +66,6 @@
             android:key="QuickGoTo"
             android:summary="@string/preferences_appearance_quickgoto_description"
             android:title="@string/preferences_appearance_quickgoto" />
+
     </PreferenceCategory>
 </PreferenceScreen>

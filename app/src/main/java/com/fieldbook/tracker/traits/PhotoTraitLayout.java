@@ -37,6 +37,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.adapters.GalleryImageAdapter;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.File;
@@ -102,7 +103,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
     public void loadLayoutWork() {
 
-        String exp_id = Integer.toString(getPrefs().getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(getPrefs().getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         // Always set to null as default, then fill in with trait value
         photoLocation = new ArrayList<>();
@@ -260,7 +261,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
             newTraits.put(parent, value);
 
-            String exp_id = Integer.toString(getPrefs().getInt("SelectedFieldExpId", 0));
+            String exp_id = Integer.toString(getPrefs().getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
             //Observation observation = ConfigActivity.dt.getObservation(getCRange().plot_id, parent);
             Observation observation = ConfigActivity.dt.getObservationByValue(exp_id, getCRange().plot_id, parent, value);
@@ -282,7 +283,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
     private void deletePhotoWarning(final Boolean brapiDelete, final Map newTraits) {
 
-        String exp_id = Integer.toString(getPrefs().getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(getPrefs().getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 

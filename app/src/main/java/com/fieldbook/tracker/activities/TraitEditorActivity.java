@@ -670,7 +670,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                         break;
                     case 2:
                         intent.setClassName(thisActivity, BrapiTraitActivity.class.getName());
-                        startActivityForResult(intent, 1);
+                        startActivityForResult(intent, 2);
                         break;
                 }
                 importDialog.dismiss();
@@ -893,13 +893,15 @@ public class TraitEditorActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 mChosenFile = data.getStringExtra("result");
                 mHandler.post(importCSV);
-
-                brapiDialogShown = mAdapter.infoDialogShown;
-                if (!brapiDialogShown) {
-                    brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, ConfigActivity.dt, null, true);
-                }
             } else {
                 Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        if (requestCode == 2) {
+            brapiDialogShown = mAdapter.infoDialogShown;
+            if (!brapiDialogShown) {
+                brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, ConfigActivity.dt, null, true);
             }
         }
 
@@ -1078,7 +1080,9 @@ public class TraitEditorActivity extends AppCompatActivity {
                 while (data != null) {
                     data = cr.readNext();
 
-                    if (data != null) {
+                    //if trait format or name is null then don't import
+                    if (data != null && data.length > 1
+                            && data[0] != null && data[1] != null) {
                         TraitObject t = new TraitObject();
                         t.setTrait(data[0]);
                         t.setFormat(data[1]);

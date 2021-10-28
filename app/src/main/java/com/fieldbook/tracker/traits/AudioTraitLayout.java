@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class AudioTraitLayout extends BaseTraitLayout {
 
@@ -78,6 +79,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
             controlButton.setImageResource(buttonState.getImageId());
             audioRecordingText.setText("NA");
         } else {
+            Map<String, String> observations = getNewTraits();
             File recordingLocation = new File(getNewTraits().get(getCurrentTrait().getTrait()).toString());
             if (recordingLocation.exists()) {
                 this.recordingLocation = recordingLocation;
@@ -130,7 +132,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         @Override
         public void onClick(View view) {
-            ((CollectActivity) getContext()).setNewTraits((HashMap) ConfigActivity.dt.getUserDetail(getCRange().plot_id).clone());
+            ((CollectActivity) getContext()).setNewTraits(ConfigActivity.dt.getUserDetail(getCRange().plot_id));
 
             boolean enableNavigation = true;
             switch (buttonState) {
@@ -189,7 +191,6 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         private void startRecording() {
             try {
-                deleteRecording();
                 removeTrait(getCurrentTrait().getTrait());
                 audioRecordingText.setText("");
                 prepareRecorder();

@@ -2,6 +2,8 @@ package com.fieldbook.tracker.objects;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 /**
  * Simple wrapper class for trait data
  */
@@ -18,12 +20,13 @@ public class TraitObject {
     private Boolean visible;
     private String externalDbId;
     private String traitDataSource;
+    private String additionalInfo;
 
     public String getTrait() {
         return trait;
     }
 
-    public void setTrait(String trait) {
+    public void setTrait(@NonNull String trait) {
         this.trait = trait;
     }
 
@@ -31,7 +34,7 @@ public class TraitObject {
         return format;
     }
 
-    public void setFormat(String format) {
+    public void setFormat(@NonNull String format) {
         this.format = format;
     }
 
@@ -113,6 +116,14 @@ public class TraitObject {
 
     public void setTraitDataSource(String traitDataSource) {
         this.traitDataSource = traitDataSource;
+    }
+
+    public String getAdditionalInfo() {
+        return additionalInfo;
+    }
+
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
     }
 
     public boolean isValidValue(final String s) {

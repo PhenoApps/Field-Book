@@ -3,13 +3,13 @@ import android.os.Build;
 
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
-import com.fieldbook.tracker.objects.TraitObject;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,10 +22,6 @@ import org.threeten.bp.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-
-import io.swagger.client.ApiException;
-import io.swagger.client.model.Image;
-import io.swagger.client.model.NewObservationDbIdsObservations;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -147,7 +143,7 @@ public class BrapiServiceTest {
         final String brapiToken = "Bearer YYYY";
 
         // Call our get study details endpoint with the same parsing that our classes use.
-        this.brAPIService.getPlotDetails(studyDbId, new Function<BrapiStudyDetails, Void>() {
+        this.brAPIService.getPlotDetails(studyDbId, new BrapiObservationLevel().setObservationLevelName("plot"), new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(BrapiStudyDetails input) {
                 // Check that we are getting some results back
