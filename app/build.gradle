@@ -100,9 +100,7 @@ dependencies {
     implementation 'com.google.zxing:core:3.3.3'
 
     implementation 'com.github.phenoapps:phenolib:0.9.26'
-    //implementation 'com.github.breeding-insight:brapi:v0.1.0'
-
-    implementation "org.brapi:brapi-java-client:2.0.1"
+    implementation 'com.github.breeding-insight:brapi:2.0.3'
 
     implementation 'org.jsoup:jsoup:1.8.1'
     implementation 'net.sourceforge.jexcelapi:jxl:2.6.10'
@@ -121,8 +119,7 @@ dependencies {
 
     implementation 'net.openid:appauth:0.9.0'
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava' //google messed up some packages, this package is temporary until the issue is fixed (Feb 2021)
-    
-    implementation "androidx.core:core-ktx:1.6.0"
+
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
 
     kapt 'com.android.databinding:compiler:3.1.4'

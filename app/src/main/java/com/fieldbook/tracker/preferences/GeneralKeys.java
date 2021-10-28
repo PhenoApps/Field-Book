@@ -68,6 +68,8 @@ public class GeneralKeys {
     public static final String PAIR_BLUETOOTH                       = GEONAV_PREFIX + "PAIR_BLUETOOTH";
     public static final String PAIRED_DEVICE_ADDRESS                = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS";
     public static final String GEONAV_AUTO                          = GEONAV_PREFIX + "GEONAV_AUTO";
+    public static final String GEONAV_COMPASS                       = GEONAV_PREFIX + "GEONAV_COMPASS";
+    public static final String GEONAV_LOG                           = GEONAV_PREFIX + "GEONAV_LOG";
     // @formatter:on
 
     //Calendar Trait
