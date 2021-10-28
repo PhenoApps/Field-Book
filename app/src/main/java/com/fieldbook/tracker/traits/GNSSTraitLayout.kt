@@ -278,53 +278,46 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         val adapter = BluetoothAdapter.getDefaultAdapter()
         if (adapter.isEnabled) {
 
-            //if the user already paired an external unit then show a list to connect from
-            if (adapter.bondedDevices.isNotEmpty()) {
+            //create a dialog with the paired devices
+            val pairedDevices = adapter.bondedDevices
 
-                //create a dialog with the paired devices
-                val pairedDevices = adapter.bondedDevices
-                if (pairedDevices.isNotEmpty()) {
+            //create table of names -> bluetooth devices, when the item is selected we can retrieve the device
+            val bluetoothMap = HashMap<String, BluetoothDevice>()
+            for (bd in pairedDevices) {
+                bluetoothMap[bd.name] = bd
+            }
 
-                    //create table of names -> bluetooth devices, when the item is selected we can retrieve the device
-                    val bluetoothMap = HashMap<String, BluetoothDevice>()
-                    for (bd in pairedDevices) {
-                        bluetoothMap[bd.name] = bd
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
+
+            val internalGpsString = context.getString(R.string.pref_behavior_geonav_internal_gps_choice)
+
+            //add internal gps to device choice
+            val devices = pairedDevices.map { it.name }.toTypedArray() +
+                    arrayOf(internalGpsString)
+
+            //when a device is chosen, start a connect thread
+            builder.setSingleChoiceItems(devices, -1) { dialog, which ->
+
+                val value = devices[which]
+
+                if (value != null) {
+
+                    val chosenDevice = pairedDevices.find { it.name == value }
+
+                    if (chosenDevice == null) {
+                        //register the location listener
+                        //update no matter the distance change and every 10s
+                        mGpsTracker = GPSTracker(context, this, 0, 10000)
                     }
 
-                    val builder = AlertDialog.Builder(context)
-                    builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
+                    setupCommunicationsUi(chosenDevice)
 
-                    val internalGpsString = context.getString(R.string.pref_behavior_geonav_internal_gps_choice)
-
-                    //add internal gps to device choice
-                    val devices = pairedDevices.map { it.name }.toTypedArray() +
-                            arrayOf(internalGpsString)
-
-                    //when a device is chosen, start a connect thread
-                    builder.setSingleChoiceItems(devices, -1) { dialog, which ->
-
-                        val value = devices[which]
-
-                        if (value != null) {
-
-                            val chosenDevice = pairedDevices.find { it.name == value }
-
-                            if (chosenDevice == null) {
-                                //register the location listener
-                                //update no matter the distance change and every 10s
-                                mGpsTracker = GPSTracker(context, this, 0, 10000)
-                            }
-
-                            setupCommunicationsUi(chosenDevice)
-
-                            dialog.dismiss()
-                        }
-                    }
-
-                    builder.show()
+                    dialog.dismiss()
                 }
+            }
 
-            } else Toast.makeText(context, R.string.gnss_no_paired_device, Toast.LENGTH_SHORT).show()
+            builder.show()
 
         } else context.startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
     }
