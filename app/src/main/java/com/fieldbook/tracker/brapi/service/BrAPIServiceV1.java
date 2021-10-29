@@ -962,6 +962,10 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             // Check that there are not duplicate unique ids in the database
             HashMap<String, String> checkMap = new HashMap<>();
 
+            if (studyDetails.getValues().isEmpty()) {
+                return new BrapiControllerResponse(false, this.noPlots);
+            }
+            
             // Construct our map to check for uniques
             for (List<String> dataRow : studyDetails.getValues()) {
                 Integer idColumn = studyDetails.getAttributes().indexOf(observationLevel);
