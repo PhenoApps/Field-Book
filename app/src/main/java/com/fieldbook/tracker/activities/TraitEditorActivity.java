@@ -76,6 +76,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -525,16 +526,19 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     private void changeAllVisibility() {
         boolean globalVis = ep.getBoolean("allTraitsVisible", false);
-        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
+        List<TraitObject> allTraits = ConfigActivity.dt.getAllTraitObjects();
 
-        if (allTraits == null) {
+        if (allTraits.isEmpty()) {
             Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing_modify));
             return;
         }
 
-        for (String allTrait : allTraits) {
-            ConfigActivity.dt.updateTraitVisibility(allTrait, globalVis);
-            Log.d("Field", allTrait);
+        //issue #305 fix toggles visibility even when all are un-toggled
+        globalVis = !allTraits.stream().allMatch(TraitObject::getVisible);
+
+        for (TraitObject allTrait : allTraits) {
+            ConfigActivity.dt.updateTraitVisibility(allTrait.getTrait(), globalVis);
+            Log.d("Field", allTrait.getTrait());
         }
 
         globalVis = !globalVis;
