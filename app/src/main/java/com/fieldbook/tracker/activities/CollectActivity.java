@@ -813,6 +813,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
                 ep.getString("Location", ""), "", exp_id, observationDbId,
                 lastSyncedTime);
+
+        //update the info bar in case a variable is used
+        infoBarAdapter.notifyItemRangeChanged(0, infoBarAdapter.getItemCount());
     }
 
     private void brapiDelete(String parent, Boolean hint) {

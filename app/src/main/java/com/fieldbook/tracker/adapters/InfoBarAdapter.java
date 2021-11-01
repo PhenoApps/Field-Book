@@ -19,6 +19,18 @@ import android.widget.TextView;
 
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.database.dao.ObservationDao;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.utilities.PrefsConstants;
+import com.fieldbook.tracker.views.DynamicWidthSpinner;
+
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHolder> {
 
@@ -39,7 +51,7 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
 
     public void configureDropdownArray(String plotId) {
         this.plotId = plotId;
-        selectorsView.setHasFixedSize(true);
+        selectorsView.setHasFixedSize(false);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this.context);
         selectorsView.setLayoutManager(layoutManager);
@@ -62,7 +74,7 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
 
-        Spinner spinner = holder.mTextView.findViewById(R.id.selectorSpinner);
+        DynamicWidthSpinner spinner = holder.mTextView.findViewById(R.id.selectorSpinner);
         TextView text = holder.mTextView.findViewById(R.id.selectorText);
         configureSpinner(spinner, text, position);
         configureText(text);
@@ -78,7 +90,7 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
         return this.context.getSharedPreferences("Settings", 0);
     }
 
-    private void configureSpinner(final Spinner spinner, final TextView text, final int position) {
+    private void configureSpinner(final DynamicWidthSpinner spinner, final TextView text, final int position) {
 
         final String[] prefixTraits = dataHelper.getRangeColumnNames();
 
