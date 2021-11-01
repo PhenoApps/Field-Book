@@ -50,8 +50,8 @@ class ObservationVariableDao {
         private fun Map<String, Any?>.toTraitObject() = if (this.isEmpty()) {null} else { TraitObject().also {
 
             it.id = this[ObservationVariable.PK].toString()
-            it.trait = this["observation_variable_name"].toString()
-            it.format = this["observation_variable_field_book_format"].toString()
+            it.trait = this["observation_variable_name"] as? String ?: ""
+            it.format = this["observation_variable_field_book_format"] as? String ?: ""
             it.defaultValue = this["default_value"].toString()
             it.details = this["observation_variable_details"].toString()
 
@@ -210,6 +210,7 @@ class ObservationVariableDao {
                     externalDbId = it["external_db_id"] as? String ?: ""
                     realPosition = (it["position"] as? Int ?: -1)
                     visible = (it["visible"] as String).toBoolean()
+                    additionalInfo = it["additional_info"] as? String ?: ""
 
                     //initialize these to the empty string or else they will be null
                     maximum = ""
@@ -264,6 +265,7 @@ class ObservationVariableDao {
                             put("default_value", t.defaultValue)
                             put("visible", t.visible.toString())
                             put("position", t.realPosition)
+                            put("additional_info", t.additionalInfo)
                         })
 
                 ObservationVariableValueDao.insert(

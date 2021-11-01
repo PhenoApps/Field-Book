@@ -9,6 +9,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.hardware.GeomagneticField;
+
+import androidx.annotation.NonNull;
 
 public class GPSTracker extends Service implements LocationListener {
 
@@ -28,13 +31,28 @@ public class GPSTracker extends Service implements LocationListener {
     Location location; // location
     double latitude; // latitude
     double longitude; // longitude
+    double altitude;
+    float declination;
+
+    GPSTrackerListener mListener = null;
+
+    public interface GPSTrackerListener {
+        void onLocationChanged(@NonNull Location location);
+    }
 
     public GPSTracker(Context context) {
         this.mContext = context;
-        getLocation();
+        getLocation(MIN_DISTANCE_CHANGE_FOR_UPDATES, MIN_TIME_BW_UPDATES);
     }
 
-    public Location getLocation() {
+    public GPSTracker(Context context, GPSTrackerListener listener, long minDistance, long minTime) {
+        this.mContext = context;
+        this.mListener = listener;
+
+        getLocation(minDistance, minTime);
+    }
+
+    private Location getLastLocation(long minDistance, long minTime) {
         try {
             locationManager = (LocationManager) mContext
                     .getSystemService(LOCATION_SERVICE);
@@ -54,8 +72,8 @@ public class GPSTracker extends Service implements LocationListener {
                 if (isNetworkEnabled) {
                     locationManager.requestLocationUpdates(
                             LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                            minTime,
+                            minDistance, this);
                     Log.d("Network", "Network");
                     if (locationManager != null) {
                         location = locationManager
@@ -71,8 +89,8 @@ public class GPSTracker extends Service implements LocationListener {
                         if (location == null) {
                             locationManager.requestLocationUpdates(
                                     LocationManager.GPS_PROVIDER,
-                                    MIN_TIME_BW_UPDATES,
-                                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                                    minTime,
+                                    minDistance, this);
                             Log.d("GPS Enabled", "GPS Enabled");
                             if (locationManager != null) {
                                 location = locationManager
@@ -92,6 +110,14 @@ public class GPSTracker extends Service implements LocationListener {
         }
 
         return location;
+    }
+
+    public Location getLocation() {
+        return getLastLocation(MIN_DISTANCE_CHANGE_FOR_UPDATES, MIN_TIME_BW_UPDATES);
+    }
+
+    public Location getLocation(long minDistance, long minTime) {
+        return getLastLocation(minDistance, minTime);
     }
 
     /**
@@ -117,6 +143,33 @@ public class GPSTracker extends Service implements LocationListener {
     }
 
     /**
+     * Function to get the alittude
+     */
+    public double getAltitude() {
+        if (location != null) {
+            altitude = location.getAltitude();
+        }
+
+        return altitude;
+    }
+
+    /**
+     * Function to get the declination.
+     * Angle between true north and magnetic north
+     */
+    public float getDeclination() {
+        if (location != null) {
+            declination = new GeomagneticField(
+                (float) getLatitude(),
+                (float) getLongitude(),
+                (float) getAltitude(),
+                System.currentTimeMillis()).getDeclination();
+        }
+
+        return declination;
+    }
+
+    /**
      * Function to check GPS/wifi enabled
      *
      * @return boolean
@@ -127,6 +180,14 @@ public class GPSTracker extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
+        if (mListener != null) {
+
+            if (location != null) {
+
+                mListener.onLocationChanged(location);
+
+            }
+        }
     }
 
     @Override

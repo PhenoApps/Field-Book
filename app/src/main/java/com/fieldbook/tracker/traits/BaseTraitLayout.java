@@ -43,7 +43,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     public abstract void setNaTraitsText();
 
-    public Map getNewTraits() {
+    public Map<String, String> getNewTraits() {
         return ((CollectActivity) getContext()).getNewTraits();
     }
 

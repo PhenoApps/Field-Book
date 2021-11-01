@@ -12,13 +12,16 @@ abstract class GNSSResponseReceiver : BroadcastReceiver() {
     companion object {
 
         const val MESSAGE_OUTPUT_CODE = 333
+        const val MESSAGE_OUTPUT_FAIL = 332
 
         const val MESSAGE_STRING_EXTRA_KEY = "org.phenoapps.tracker.fieldbook.gnss.GNSS_OUTPUT"
 
-        const val ACTION_BROADCAST_GNSS = "org.phenoapps.tracker.fieldbook.gnss.ACTION_BROADCAST_GNSS"
+        const val ACTION_BROADCAST_GNSS_ROVER = "org.phenoapps.tracker.fieldbook.gnss.ACTION_BROADCAST_GNSS_ROVER"
+
+        const val ACTION_BROADCAST_GNSS_TRAIT = "org.phenoapps.tracker.fieldbook.gnss.ACTION_BROADCAST_GNSS_TRAIT"
     }
 
-    internal abstract fun onGNSSParsed(parser: NmeaParser)
+    abstract fun onGNSSParsed(parser: NmeaParser)
 
     override fun onReceive(context: Context, intent: Intent) {
 

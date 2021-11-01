@@ -21,6 +21,8 @@ public class Constants extends Application {
 
     public static final String FIELDEXPORTPATH = "/field_export";
 
+    public static final String GEONAV_LOG_PATH = "/geonav";
+
     public static final String BACKUPPATH = "/database";
 
     public static final String UPDATEPATH = "/updates";

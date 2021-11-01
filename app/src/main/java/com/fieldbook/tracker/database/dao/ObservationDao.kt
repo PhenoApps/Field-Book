@@ -21,14 +21,14 @@ class ObservationDao {
 
     companion object {
 
-//        fun getAll(): Array<ObservationModel> = withDatabase { db ->
-//
-//            db.query(Observation.tableName)
-//                .toTable()
-//                .map { ObservationModel(it) }
-//                .toTypedArray()
-//
-//        } ?: emptyArray()
+        fun getAll(studyId: String): Array<ObservationModel> = withDatabase { db ->
+
+            db.query(Observation.tableName, where = "${Study.FK} = ?", whereArgs = arrayOf(studyId))
+                .toTable()
+                .map { ObservationModel(it) }
+                .toTypedArray()
+
+        } ?: emptyArray()
 
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
@@ -132,10 +132,10 @@ class ObservationDao {
         private fun getStringVal(row: Map<String, Any?>?, column: String?) : String? {
             if(row != null && column != null){
                 if (row[column] != null){
-                    return row[column].toString();
+                    return row[column].toString()
                 }
             }
-            return null;
+            return null
         }
 
         fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
@@ -275,7 +275,7 @@ class ObservationDao {
                             ObservationUnit.FK),
                     where = "${ObservationUnit.FK} LIKE ? AND ${Study.FK} LIKE ?",
                     whereArgs = arrayOf(plotId, expId))
-                    .toTable().map { it["observation_variable_name"].toString() to it["value"].toString() }
+                    .toTable().map { (it["observation_variable_name"] as? String ?: "") to it["value"].toString() }
                     .toTypedArray())
 
         } ?: hashMapOf()
@@ -313,6 +313,12 @@ class ObservationDao {
             }
         }
 
+        /**
+         * Deletes all observations for a given variable on a plot.
+         * @param id: the study id
+         * @param rid: the unique plot name
+         * @param parent: the observation variable (trait) name
+         */
         fun deleteTrait(id: String, rid: String, parent: String) = withDatabase { db ->
             db.delete(Observation.tableName,
                     "${Study.FK} = ? AND ${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ?",

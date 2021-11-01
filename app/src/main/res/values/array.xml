@@ -73,6 +73,19 @@
         <item>brapi</item>
     </string-array>
 
+    <!-- Yes, they are entry entries -->
+    <string-array name="pref_behavior_skip_entries_entries">
+        <item>@string/preferences_general_skip_entries_disabled</item>
+        <item>@string/preferences_general_skip_entries_with_data</item>
+        <item>@string/preferences_general_skip_entries_across_all_traits</item>
+    </string-array>
+
+    <string-array name="pref_behavior_skip_entries_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
     <string-array name="pref_brapi_version">
         <item>@string/preferences_brapi_version_v1</item>
         <item>@string/preferences_brapi_version_v2</item>
@@ -81,5 +94,20 @@
     <string-array name="pref_brapi_oidc_flow">
         <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
         <item>@string/preferences_brapi_oidc_flow_old_custom</item>
+    </string-array>
+
+    <string-array name="pref_collect_customize_labelval">
+        <item>value</item>
+        <item>label</item>
+    </string-array>
+
+    <string-array name="pref_collect_customize_labelval_default">
+        <item>value</item>
+        <item>label</item>
+    </string-array>
+
+    <string-array name="pref_collect_labelval_customize_title">
+        <item>@string/preferences_appearance_collect_labelval_customize_value</item>
+        <item>@string/preferences_appearance_collect_labelval_customize_label</item>
     </string-array>
 </resources>

@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.brapi;
 
 import android.app.Activity;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -11,19 +12,25 @@ import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener {
 
@@ -41,6 +48,9 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             new BrapiLoadDialog.ImportRunnableTask().execute(0);
         }
     };
+    private BrapiObservationLevel selectedObservationLevel;
+    private String selectedPrimary;
+    private String selectedSecondary;
 
     public BrapiLoadDialog(@NonNull Context context) {
         super(context);
@@ -70,8 +80,24 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         // Set our OK button to be disabled until we are finished loading
         saveBtn.setVisibility(View.GONE);
         studyDetails = new BrapiStudyDetails();
+        ((TextView) findViewById(R.id.studyNumPlotsLbl)).setText(makePlural(this.selectedObservationLevel.getObservationLevelName()));
         buildStudyDetails();
         loadStudy();
+    }
+
+    private String makePlural(String observationLevelName) {
+        if(Locale.getDefault().getLanguage().equals("en")) {
+            StringBuilder plural = new StringBuilder(observationLevelName.substring(0, 1).toUpperCase());
+            if (observationLevelName.endsWith("y")) {
+                plural.append(observationLevelName.substring(1, observationLevelName.length() - 1)).append("ies");
+            } else {
+                plural.append(observationLevelName.substring(1)).append("s");
+            }
+
+            return plural.toString();
+        } else {
+            return observationLevelName;
+        }
     }
 
     private void buildStudyDetails() {
@@ -111,7 +137,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             }
         });
 
-        brAPIService.getPlotDetails(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
+        brAPIService.getPlotDetails(study.getStudyDbId(), selectedObservationLevel, new Function<BrapiStudyDetails, Void>() {
             @Override
             public Void apply(final BrapiStudyDetails study) {
 
@@ -140,7 +166,10 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                     @Override
                     public void run() {
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        Toast.makeText(context, context.getString(R.string.brapi_plot_detail_error), Toast.LENGTH_LONG).show();
+                        new AlertDialog.Builder(context).setTitle(R.string.dialog_save_error_title)
+                                .setPositiveButton(R.string.okButtonText, (dialogInterface, i) -> {
+                                    ((Activity) context).finish();
+                                }).setMessage(R.string.brapi_plot_detail_error).create().show();
                     }
                 });
                 return null;
@@ -207,6 +236,45 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             ((TextView) findViewById(R.id.studyNumPlotsValue)).setText(this.studyDetails.getNumberOfPlots().toString());
         if (this.studyDetails.getTraits() != null)
             ((TextView) findViewById(R.id.studyNumTraitsValue)).setText(String.valueOf(this.studyDetails.getTraits().size()));
+
+
+        if(this.studyDetails.getAttributes() != null && !this.studyDetails.getAttributes().isEmpty()) {
+            ArrayAdapter<String> keyOptions = new ArrayAdapter<String>(this.context,
+                    android.R.layout.simple_spinner_dropdown_item, studyDetails.getAttributes());
+
+            Spinner primary = findViewById(R.id.studyPrimaryKey);
+            primary.setAdapter(keyOptions);
+            primary.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
+                    selectedPrimary = studyDetails.getAttributes().get(index);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+
+            Spinner secondary = findViewById(R.id.studySecondaryKey);
+            secondary.setAdapter(keyOptions);
+            secondary.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
+                    selectedSecondary = studyDetails.getAttributes().get(index);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+
+            if(studyDetails.getAttributes().contains("Row") || studyDetails.getAttributes().contains("Column")) {
+                primary.setSelection(studyDetails.getAttributes().indexOf("Row"));
+                secondary.setSelection(studyDetails.getAttributes().indexOf("Column"));
+            }
+        }
     }
 
     private Boolean checkAllLoadsFinished() {
@@ -245,6 +313,10 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
     }
 
+    public void setObservationLevel(BrapiObservationLevel selectedObservationLevel) {
+        this.selectedObservationLevel = selectedObservationLevel;
+    }
+
     // Mimics the class used in the csv field importer to run the saving
     // task in a different thread from the UI thread so the app doesn't freeze up.
     private class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
@@ -268,7 +340,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         protected Integer doInBackground(Integer... params) {
             try {
 
-                brapiControllerResponse = brAPIService.saveStudyDetails(studyDetails);
+                brapiControllerResponse = brAPIService.saveStudyDetails(studyDetails, selectedObservationLevel, selectedPrimary, selectedSecondary);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -283,18 +355,23 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             if (dialog.isShowing())
                 dialog.dismiss();
 
-            // Finish our BrAPI import activity
-            ((Activity) context).finish();
-
+            AlertDialog.Builder alertDialogBuilder = null;
             // Display our message.
             if (!brapiControllerResponse.status) {
+                alertDialogBuilder = new AlertDialog.Builder(context);
+                alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
+                        .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
+                            // Finish our BrAPI import activity
+                            ((Activity) context).finish();
+                        });
+
                 if (brapiControllerResponse.message == BrAPIService.notUniqueFieldMessage) {
-                    Toast.makeText(context, R.string.fields_study_exists_message, Toast.LENGTH_LONG).show();
+                    alertDialogBuilder.setMessage(R.string.fields_study_exists_message);
                 } else if (brapiControllerResponse.message == BrAPIService.notUniqueIdMessage) {
-                    Toast.makeText(context, R.string.import_error_unique, Toast.LENGTH_LONG).show();
+                    alertDialogBuilder.setMessage(R.string.import_error_unique);
                 } else {
                     Log.e("error-ope", brapiControllerResponse.message);
-                    Toast.makeText(context, R.string.brapi_save_field_error, Toast.LENGTH_LONG).show();
+                    alertDialogBuilder.setMessage(R.string.brapi_save_field_error);
                 }
             }
 
@@ -302,7 +379,22 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             // an error in the saveStudyDetails code outside of that handling.
             if (fail) {
                 Log.e("error-opef", brapiControllerResponse.message);
-                Toast.makeText(context, R.string.brapi_study_incompatible, Toast.LENGTH_LONG).show();
+                alertDialogBuilder = new AlertDialog.Builder(context);
+                alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
+                        .setPositiveButton(R.string.okButtonText, (dialogInterface, i) -> {
+                            // Finish our BrAPI import activity
+                            ((Activity) context).finish();
+                        });
+                alertDialogBuilder.setMessage(R.string.brapi_study_incompatible);
+            }
+
+            if(alertDialogBuilder == null) {
+                // Finish our BrAPI import activity
+                ((Activity) context).finish();
+            } else {
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+                DialogUtils.styleDialogs(alertDialog);
             }
 
         }

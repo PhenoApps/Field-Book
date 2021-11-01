@@ -2,30 +2,40 @@ package com.fieldbook.tracker.adapters;
 
 import androidx.appcompat.app.AlertDialog;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
+import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
+import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Loads data on field manager screen
@@ -33,15 +43,25 @@ import java.util.ArrayList;
 
 public class FieldAdapter extends BaseAdapter {
 
+    private static final int PRIMARY = 0;
+    private static final int SECONDARY = 1;
+    private static final int TERTIARY = 2;
+    private final String PLACEHOLDER_OPTION;
+
     private LayoutInflater mLayoutInflater;
     private ArrayList<FieldObject> list;
-    private Context context;
+    private final Context context;
     private SharedPreferences ep;
+    private String selectedPrimary;
+    private String selectedSecondary;
+    private String selectedTertiary;
 
     public FieldAdapter(Context context, ArrayList<FieldObject> list) {
         this.context = context;
         mLayoutInflater = LayoutInflater.from(context);
         this.list = list;
+
+        PLACEHOLDER_OPTION = context.getString(R.string.sort_placeholder);
     }
 
     public int getCount() {
@@ -66,13 +86,13 @@ public class FieldAdapter extends BaseAdapter {
         boolean has_contents = item != null;
         if (has_contents) {
             ed.putString("FieldFile", item.getExp_name());
-            ed.putInt("SelectedFieldExpId", item.getExp_id());
+            ed.putInt(PrefsConstants.SELECTED_FIELD_ID, item.getExp_id());
             ed.putString("ImportUniqueName", item.getUnique_id());
             ed.putString("ImportFirstName", item.getPrimary_id());
             ed.putString("ImportSecondName", item.getSecondary_id());
         } else {
             ed.putString("FieldFile", null);
-            ed.putInt("SelectedFieldExpId", -1);
+            ed.putInt(PrefsConstants.SELECTED_FIELD_ID, -1);
             ed.putString("ImportUniqueName", null);
             ed.putString("ImportFirstName", null);
             ed.putString("ImportSecondName", null);
@@ -156,7 +176,7 @@ public class FieldAdapter extends BaseAdapter {
             // Do it when clicking ":"
             @Override
             public void onClick(final View view) {
-                PopupMenu popup = new PopupMenu(FieldEditorActivity.thisActivity, view);
+                PopupMenu popup = new PopupMenu(context, view);
                 //Inflating the Popup using xml file
                 popup.getMenuInflater().inflate(R.menu.menu_field_listitem, popup.getMenu());
 
@@ -172,12 +192,12 @@ public class FieldAdapter extends BaseAdapter {
             // Do it when selecting Delete or Statistics
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                final Activity thisActivity = FieldEditorActivity.thisActivity;
-                final String strDel = thisActivity.getString(R.string.fields_delete);
-
-                if (item.getTitle().equals(strDel)) {
+                if (item.getItemId() == R.id.delete) {
                     AlertDialog alert = createDeleteItemAlertDialog(position);
                     alert.show();
+                    DialogUtils.styleDialogs(alert);
+                } else if (item.getItemId() == R.id.sort) {
+                    AlertDialog alert = showSortDialog(position);
                     DialogUtils.styleDialogs(alert);
                 }
 
@@ -195,7 +215,7 @@ public class FieldAdapter extends BaseAdapter {
 
                 ConfigActivity.dt.deleteField(getItem(position).getExp_id());
 
-                if (getItem(position).getExp_id() == ep.getInt("SelectedFieldExpId", -1)) {
+                if (getItem(position).getExp_id() == ep.getInt(PrefsConstants.SELECTED_FIELD_ID, -1)) {
                     setEditorItem(ep, null);
                 }
 
@@ -203,6 +223,133 @@ public class FieldAdapter extends BaseAdapter {
                 CollectActivity.reloadData = true;
             }
         };
+    }
+
+    private AlertDialog showSortDialog(final int position) {
+
+        FieldObject field = getItem(position);
+        List<String> ouAttributes = new ArrayList<>();
+        ouAttributes.add(PLACEHOLDER_OPTION);
+        ouAttributes.addAll(Arrays.asList(ObservationUnitAttributeDao.Companion.getAllNames(field.getExp_id())));
+        ArrayAdapter<String> sortOptions = new ArrayAdapter<>(context,
+                android.R.layout.simple_spinner_dropdown_item, ouAttributes);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
+
+        builder.setTitle(context.getString(R.string.fields_update_sort_study));
+        builder.setView(R.layout.dialog_sort);
+
+        builder.setPositiveButton(context.getString(R.string.dialog_save), null);
+        builder.setNegativeButton(context.getString(R.string.dialog_cancel), (dialog, which) -> Log.d("FieldActivity", "Cancel Clicked"));
+
+        AlertDialog alert = builder.create();
+
+        // workaround to prevent positiveButton built in onClick listener from auto dismissing the dialog
+        alert.setOnShowListener(dialogInterface -> {
+            ((AlertDialog) dialogInterface).getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+
+                Integer errorMessage = null;
+
+                if(!selectedPrimary.equals(PLACEHOLDER_OPTION) || !selectedSecondary.equals(PLACEHOLDER_OPTION) || !selectedTertiary.equals(PLACEHOLDER_OPTION)) {
+                    if (selectedPrimary.equals(PLACEHOLDER_OPTION)) {
+                        errorMessage = R.string.sort_dialog_error_missing_primary;
+                    } else if (selectedSecondary.equals(PLACEHOLDER_OPTION) && !selectedTertiary.equals(PLACEHOLDER_OPTION)) {
+                        errorMessage = R.string.sort_dialog_error_missing_secondary;
+                    } else if (selectedPrimary.equals(selectedSecondary)
+                            || selectedPrimary.equals(selectedTertiary)
+                            || (selectedSecondary.equals(selectedTertiary) && !selectedTertiary.equals(PLACEHOLDER_OPTION))) {
+                        errorMessage = R.string.sort_dialog_error_duplicates;
+                    }
+                }
+
+                if(errorMessage != null) {
+                    TextView errorMessageView = alert.findViewById(R.id.sortError);
+                    errorMessageView.setText(errorMessage);
+                    errorMessageView.setVisibility(View.VISIBLE);
+                } else {
+                    String sort = null;
+
+                    if(!selectedPrimary.equals(PLACEHOLDER_OPTION)) {
+                        sort = selectedPrimary;
+                    }
+
+                    if(!selectedSecondary.equals(PLACEHOLDER_OPTION)) {
+                        sort += "," + selectedSecondary;
+                    }
+
+                    if(!selectedTertiary.equals(PLACEHOLDER_OPTION)) {
+                        sort += "," + selectedTertiary;
+                    }
+
+                    FieldObject fieldObject = getItem(position);
+                    fieldObject.setExp_sort(sort);
+                    try {
+                        StudyDao.Companion.updateStudySort(sort, fieldObject.getExp_id());
+                        if (ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
+                            ConfigActivity.dt.switchField(fieldObject.getExp_id());
+                            CollectActivity.reloadData = true;
+                        }
+                        Toast toast = Toast.makeText(context, R.string.sort_dialog_saved, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+                        toast.show();
+                    } catch (Exception e) {
+                        Log.e("FieldAdapter", "Error updating sorting", e);
+
+                        new AlertDialog.Builder(context).setTitle(R.string.dialog_save_error_title)
+                                .setPositiveButton(R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
+                                .setMessage(R.string.sort_dialog_error_saving)
+                                .create()
+                                .show();
+                    }
+                    FieldEditorActivity.loadData();
+                    alert.dismiss();
+                }
+            });
+
+        });
+
+        alert.show();
+
+        String[] selectedVals = new String[]{PLACEHOLDER_OPTION, PLACEHOLDER_OPTION, PLACEHOLDER_OPTION}; //preventing NPEs
+
+        if(field.getExp_sort() != null) {
+            String[] split = field.getExp_sort().split(",");
+            System.arraycopy(split, 0, selectedVals, 0, split.length);
+        }
+
+        createSortOptionSelectedListener(R.id.primarySpin, alert, sortOptions, PRIMARY, selectedVals);
+        createSortOptionSelectedListener(R.id.secondarySpin, alert, sortOptions, SECONDARY, selectedVals);
+        createSortOptionSelectedListener(R.id.tertiarySpin, alert, sortOptions, TERTIARY, selectedVals);
+
+        return alert;
+    }
+
+    private void createSortOptionSelectedListener(int spinnerId, AlertDialog alert, ArrayAdapter<String> sortOptions, int spinnerType, String[] selectedVals) {
+        Spinner spinner = alert.findViewById(spinnerId);
+        spinner.setAdapter(sortOptions);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
+                switch (spinnerType) {
+                    case PRIMARY:
+                        selectedPrimary = sortOptions.getItem(index);
+                        break;
+                    case SECONDARY:
+                        selectedSecondary = sortOptions.getItem(index);
+                        break;
+                    case TERTIARY:
+                        selectedTertiary = sortOptions.getItem(index);
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        spinner.setSelection(sortOptions.getPosition(selectedVals[spinnerType]));
     }
 
     private AlertDialog createDeleteItemAlertDialog(final int position) {
@@ -227,7 +374,7 @@ public class FieldAdapter extends BaseAdapter {
         setEditorItem(ep, selectedField);
 
         SharedPreferences.Editor ed = ep.edit();
-        ed.putInt("SelectedFieldExpId", selectedField.getExp_id());
+        ed.putInt(PrefsConstants.SELECTED_FIELD_ID, selectedField.getExp_id());
         ed.apply();
 
         ConfigActivity.dt.switchField(selectedField.getExp_id());

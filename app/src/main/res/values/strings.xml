@@ -48,6 +48,7 @@
 
     <!-- Fields Activity  -->
     <string name="fields_delete_study">Delete field</string>
+    <string name="fields_update_sort_study">Update Sorting</string>
     <string name="fields_delete_study_confirmation">Are you sure you want to delete this field? This will delete all data from this field.</string>
     <string name="fields_study_exists_message">This field already exists.</string>
     <string name="fields_select_study">Select or import a field.</string>
@@ -58,11 +59,22 @@
     <string name="fields_options">Options</string>
     <string name="fields_study_statistics">Statistics</string>
     <string name="fields_sort">Sort</string>
+    <string name="fields_sort_update">Unit Sorting</string>
     <string name="fields_delete">Delete</string>
     <string name="fields_filter">Filter</string>
     <string name="fields_reimport">Reimport</string>
     <string name="fields_archive">Archive</string>
     <string name="fields_toolbar_add_field">Import Field</string>
+    <string name="sort_dialog_primary">Primary order</string>
+    <string name="sort_dialog_secondary">Secondary order</string>
+    <string name="sort_dialog_tertiary">Tertiary order</string>
+    <string name="sort_dialog_error_missing_primary">Please choose a primary order</string>
+    <string name="sort_dialog_error_missing_secondary">Please choose a secondary order</string>
+    <string name="sort_dialog_error_duplicates">Ordering choices cannot be duplicated</string>
+    <string name="sort_dialog_saved">Sorting updated</string>
+    <string name="dialog_save_error_title">Save Error</string>
+    <string name="sort_dialog_error_saving">Error updating sorting</string>
+    <string name="sort_placeholder">Choose an option</string>
 
     <!-- Settings Activity  -->
     <string name="settings_fields">Fields</string>
@@ -180,6 +192,11 @@
     <string name="preferences_appearance_toolbar_customize_summary">Summary</string>
     <string name="preferences_appearance_toolbar_customize_lock">Lock</string>
 
+    <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
+    <string name="preferences_appearance_collect_labelval_customize_description">Display values or labels on the collect screen</string>
+    <string name="preferences_appearance_collect_labelval_customize_value">Value</string>
+    <string name="preferences_appearance_collect_labelval_customize_label">Label</string>
+
     <string name="preferences_behavior_title">Behavior</string>
     <string name="preferences_behavior_volume_buttons_navigate">Map volume keys to entry navigation</string>
     <string name="preferences_behavior_volume_buttons_navigate_description">Volume keys go to next or previous entry</string>
@@ -232,8 +249,11 @@
     <string name="preferences_general_title">General</string>
     <string name="preferences_general_use_day_number">Use day of year</string>
     <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
-    <string name="preferences_general_skip_entries_with_data">Skip entries with data</string>
-    <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the current trait</string>
+    <string name="preferences_general_skip_entries_with_data">Skip entries across active trait</string>
+    <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the active trait</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Skip entries across all traits</string>
+    <string name="preferences_general_skip_entries_across_all_traits_description">Skip entries that have data for all traits</string>
+    <string name="preferences_general_skip_entries_disabled">Disabled</string>
     <string name="preferences_general_share_disable">Disable file sharing</string>
     <string name="preferences_general_share_disable_description">When files are exported, the share dialog will not be displayed</string>
     <string name="preferences_general_barcode_camera">Move to entry via barcode</string>
@@ -282,7 +302,7 @@
     <string name="trait_delete_warning_photo">Are you sure you want to delete this photo?</string>
 
     <string name="trait_date_calendar_picker_content_description">Button that opens a calendar picker.</string>
-  
+
     <!-- Tutorial -->
     <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">Would you like to enable the tutorial? This setting can be changed in the Settings.</string>
@@ -401,10 +421,11 @@
     <string name="import_source_ask">Always ask</string>
 
     <string name="import_dialog_title_fields">Import field</string>
+    <string name="import_dialog_title_brapi_fields">BrAPI Field Import</string>
     <string name="import_dialog_title_traits">Import traits</string>
     <string name="import_dialog_unique">Unique identifier</string>
-    <string name="import_dialog_primary">Primary order</string>
-    <string name="import_dialog_secondary">Secondary order</string>
+    <string name="import_dialog_primary">Primary identifier</string>
+    <string name="import_dialog_secondary">Secondary identifier</string>
     <string name="import_dialog_importing">Please wait…</string>
 
     <string name="import_error_general">Error importing</string>
@@ -490,10 +511,11 @@
 
     <string name="brapi_load_data_button">Load Fields</string>
     <string name="brapi_load_traits_button">Load Traits</string>
-    <string name="brapi_save_data_button">Save Field</string>
+    <string name="brapi_save_data_button">Preview Field</string>
     <string name="brapi_study_name">Name</string>
     <string name="brapi_study_description">Description</string>
     <string name="brapi_study_location">Location</string>
+    <string name="brapi_observation_level">Observation Level</string>
     <string name="brapi_study_num_plots"> Plots</string>
     <string name="brapi_study_num_traits"> Traits</string>
     <string name="brapi_not_found">ERROR: Target system does not support this operation via BrAPI.</string>
@@ -608,9 +630,42 @@
     <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device.</string>
     <string name="preferences_general_flip_flop_arrows_description">Swaps the trait and plot arrow functions</string>
     <string name="preferences_general_flip_flop_arrows">Flip Flop Arrows</string>
+    <string name="activity_collect_all_obs_made">Observations completed.</string>
+    <string name="pref_behavior_geonav_category_title">GeoNav</string>
+    <string name="pref_geonav_enable_summary">Enables usage of device location to navigate fields.</string>
+    <string name="pref_geonav_enable_title">Enable GeoNav</string>
+    <string name="pref_geonav_search_angle_summary">GeoNav creates a cone in front of the user to detect which field to select.</string>
+    <string name="pref_geonav_search_angle_title">GeoNav Search Angle</string>
+    <string name="pref_geonav_update_interval_summary">The number of seconds between location updates.</string>
+    <string name="pref_geonav_update_interval_title">Update Interval</string>
+    <string name="pref_geonav_pair">Pair Device</string>
+    <string name="activity_collect_sensor_manager_failed">Failed to start sensor manager</string>
+    <string name="activity_collect_geomagnetic_noise_detected">Interference detected, the compass might not be accurate</string>
+    <string name="activity_collect_geonav_starting">Starting GeoNav search.</string>
+    <string name="pref_behavior_geonav_internal_gps_choice">Internal GPS</string>
+    <string name="activity_collect_geonav_navigate">Navigate</string>
+    <string name="menu_collect_start_geo_nav_title">Start GeoNav</string>
+    <string name="activity_collect_found_plot">Navigated to plot in vicinity</string>
+    <string name="menu_fields_plot_by_distance_title">Select plot by distance</string>
+    <string name="activity_field_editor_no_field_found">No coordinates could be found.</string>
+    <string name="activity_field_editor_switch_field">"Switch to field %s"</string>
+    <string name="activity_field_editor_switch_field_action">Switch</string>
+    <string name="activity_field_editor_no_location_yet">No location found yet.</string>
+    <string name="activity_field_editor_switch_field_same">Closest field already selected.</string>
+    <string name="gps">GPS</string>
     <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
     <string name="act_field_editor_no_suitable_columns_error">Import file has no suitable columns to choose from.</string>
     <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>
     <string name="printer_success">Print success</string>
     <string name="bluetooth_printer_choose_device_title">Choose bluetooth device to print from.</string>
+    <string name="pref_geonav_compass_title">Use Compass</string>
+    <string name="pref_geonav_compass_summary">When enabled the user can point at plots relative to their position to select them. When disabled the selection is based on distance.</string>
+    <string name="pref_geonav_log_summary">Write GeoNav steps to a log file in \n storage/geonav/log.txt</string>
+    <string name="pref_geonav_log_title">GeoNav Log</string>
+    <string name="act_collect_geonav_first_location_found">Rover communications established.</string>
+    <string name="gnss_trait_averaging_switch_text">Average</string>
+    <string name="act_field_editor_failed_to_read_columns">Field Book could not load the file.</string>
+    <string name="trait_counter_layout_failed">Counter failed to save, please recreate this trait.</string>
+    <string name="dialog_date_picker_neutral_button">Today</string>
+    <string name="preferences_brapi_traits_title">BrAPI Variables</string>
 </resources>

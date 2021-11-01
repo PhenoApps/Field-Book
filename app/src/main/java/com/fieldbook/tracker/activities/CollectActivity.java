@@ -1,17 +1,34 @@
 package com.fieldbook.tracker.activities;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;import android.content.Context;
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
+import android.hardware.GeomagneticField;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;import android.text.Editable;
+import android.os.Message;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+
+import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -39,12 +56,21 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
+import com.fieldbook.tracker.database.dao.ObservationUnitDao;
+import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.location.GPSTracker;
+import com.fieldbook.tracker.location.gnss.ConnectThread;
+import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver;
+import com.fieldbook.tracker.location.gnss.NmeaParser;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.LayoutCollections;
@@ -58,30 +84,46 @@ import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.GeodeticUtils;
+import com.fieldbook.tracker.utilities.SnackbarUtils;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.jetbrains.annotations.NotNull;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import kotlin.Pair;
 
 import static com.fieldbook.tracker.activities.ConfigActivity.dt;
+import static com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.ACTION_BROADCAST_GNSS_ROVER;
 
 /**
  * All main screen logic resides here
  */
 
 @SuppressLint("ClickableViewAccessibility")
-public class CollectActivity extends AppCompatActivity {
+public class CollectActivity extends AppCompatActivity implements SensorEventListener, GPSTracker.GPSTrackerListener {
 
     public static boolean searchReload;
     public static String searchRange;
@@ -90,6 +132,9 @@ public class CollectActivity extends AppCompatActivity {
     public static boolean partialReload;
     public static Activity thisActivity;
     public static String TAG = "Field Book";
+    public static String GEOTAG = "GeoNav";
+
+    private FileWriter mGeoNavLogWriter = null;
 
     ImageButton deleteValue;
     ImageButton missingValue;
@@ -139,6 +184,26 @@ public class CollectActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * GeoNav sensors and variables
+     */
+    private Boolean mGeoNavActivated = false;
+    private float[] mGravity;
+    private float[] mGeomagneticField;
+    private Float mDeclination = null;
+    private GPSTracker mGpsTracker;
+    private Double mAzimuth = null;
+    private Timer mScheduler = null;
+    private boolean mNotWarnedInterference = true;
+    private LocalBroadcastManager mLocalBroadcastManager = null;
+    private ConnectThread mConnectThread = null;
+    private Location mExternalLocation = null;
+    private Location mInternalLocation = null;
+    private double mTeslas = .0;
+    private double mLastGeoNavTime = 0L;
+    private boolean mFirstLocationFound = false;
+    private BluetoothDevice mLastDevice = null;
+
     private TextWatcher cvText;
     private InputMethodManager imm;
     private Boolean dataLocked = false;
@@ -178,6 +243,7 @@ public class CollectActivity extends AppCompatActivity {
         ConfigActivity.dt.open();
 
         loadScreen();
+
     }
 
     private void initCurrentVals() {
@@ -273,20 +339,28 @@ public class CollectActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Is used to ensure the UI entered data is within the bounds of the trait's min/max
+     * @return boolean flag false when data is out of bounds, true otherwise
+     */
     private boolean validateData() {
         final String strValue = etCurVal.getText().toString();
         final TraitObject currentTrait = traitBox.getCurrentTrait();
+
+        if (currentTrait == null) return false;
+
         final String trait = currentTrait.getTrait();
 
         if (traitBox.existsNewTraits()
                 && traitBox.getCurrentTrait() != null
-                && etCurVal.getText().toString().length() > 0
+                && strValue.length() > 0
                 && !traitBox.getCurrentTrait().isValidValue(etCurVal.getText().toString())) {
 
-            if (strValue.length() > 0 && currentTrait.isOver(strValue)) {
+            //checks if the trait is numerical and within the bounds (otherwise returns false)
+            if (currentTrait.isOver(strValue)) {
                 Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_maximum_value)
                         + ": " + currentTrait.getMaximum());
-            } else if (strValue.length() > 0 && currentTrait.isUnder(strValue)) {
+            } else if (currentTrait.isUnder(strValue)) {
                 Utils.makeToast(getApplicationContext(),getString(R.string.trait_error_minimum_value)
                         + ": " + currentTrait.getMinimum());
             }
@@ -348,12 +422,12 @@ public class CollectActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 // if a brapi observation that has been synced, don't allow deleting
-                String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+                String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
                 TraitObject currentTrait = traitBox.getCurrentTrait();
                 if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
                     if (currentTrait.getFormat().equals("photo")) {
                         // I want to use abstract method
-                        Map newTraits = traitBox.getNewTraits();
+                        Map<String, String> newTraits = traitBox.getNewTraits();
                         PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                         traitPhoto.brapiDelete(newTraits);
                     } else {
@@ -511,6 +585,8 @@ public class CollectActivity extends AppCompatActivity {
 
         updateLastOpenedTime();
 
+        stopGeoNav();
+
         super.onPause();
     }
 
@@ -522,6 +598,58 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         super.onDestroy();
+    }
+
+    /**
+     * Called in onResume and stopped in onPause
+     * Starts a file in storage/geonav/log.txt
+     */
+    private void setupGeoNavLogger() {
+
+        if (ep.getBoolean(GeneralKeys.GEONAV_LOG, false)) {
+
+            try {
+
+                File geonavFolder = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH)
+                        + Constants.GEONAV_LOG_PATH);
+
+                String interval = ep.getString(GeneralKeys.UPDATE_INTERVAL, "0");
+                String address = ep.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
+                        .replaceAll(":", "-")
+                        .replaceAll("\\s", "_");
+                String thetaPref = ep.getString(GeneralKeys.SEARCH_ANGLE, "0");
+
+                File file = new File(geonavFolder, "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv");
+
+                if (!geonavFolder.exists()) {
+
+                    if (geonavFolder.mkdir()) {
+
+                        Log.d(TAG, "GeoNav Logger started successfully.");
+
+                        mGeoNavLogWriter = new FileWriter(file, true);
+
+                    } else {
+
+                        Log.d(TAG, "GeoNav Logger start failed.");
+                    }
+
+                } else {
+
+                    mGeoNavLogWriter = new FileWriter(file, true);
+
+                }
+
+            } catch (IOException io) {
+
+                io.printStackTrace();
+
+            } catch (SecurityException se) {
+
+                se.printStackTrace();
+
+            }
+        }
     }
 
     @Override
@@ -578,6 +706,18 @@ public class CollectActivity extends AppCompatActivity {
             if (rangeID != null) {
                 moveToSearch("search", rangeID, searchRange, searchPlot, null, -1);
             }
+        }
+
+        ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
+
+        if (ep.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+
+            setupLocalBroadcastManager();
+
+            //setup logger whenever activity resumes
+            setupGeoNavLogger();
+
+            startGeoNav();
         }
 
         checkLastOpened();
@@ -658,7 +798,7 @@ public class CollectActivity extends AppCompatActivity {
         }
 
         traitBox.update(parent, value);
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         Observation observation = dt.getObservation(exp_id, rangeBox.getPlotID(), parent);
         String observationDbId = observation.getDbId();
@@ -692,7 +832,7 @@ public class CollectActivity extends AppCompatActivity {
             return;
         }
 
-        String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
         TraitObject trait = traitBox.getCurrentTrait();
         if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), trait.getTrait())) {
             brapiDelete(parent, true);
@@ -731,6 +871,12 @@ public class CollectActivity extends AppCompatActivity {
         systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(GeneralKeys.NEXT_ENTRY_NO_DATA, false));
         systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
         systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
+
+        //added in geonav 310 only make goenav switch visible if preference is set
+        MenuItem geoNavEnable = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
+        geoNavEnable.setVisible(ep.getBoolean(GeneralKeys.ENABLE_GEONAV, false));
+//        View actionView = MenuItemCompat.getActionView(geoNavEnable);
+//        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
 
         customizeToolbarIcons();
 
@@ -843,8 +989,511 @@ public class CollectActivity extends AppCompatActivity {
             case android.R.id.home:
                 finish();
                 break;
+            /*
+             * Toggling the geo nav icon turns the automatic plot navigation on/off.
+             * If geonav is enabled, collect activity will auto move to the plot in user's vicinity
+             */
+            case R.id.action_act_collect_geonav_sw:
+
+                Log.d(GEOTAG, "Menu item clicked.");
+
+                mGeoNavActivated = !mGeoNavActivated;
+                MenuItem navItem = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
+                if (mGeoNavActivated) {
+
+                    navItem.setIcon(R.drawable.ic_explore_black_24dp);
+
+                    ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, true).apply();
+
+                }
+                else {
+
+                    navItem.setIcon(R.drawable.ic_explore_off_black_24dp);
+
+                    ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply();
+
+                }
+
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Called when the toolbar enable geonav icon is set to true.
+     * Begins listening for sensor events to obtain an azimuth for the user.
+     * Starts a timer (with interval defined in the preferences) that runs the IZ algorithm.
+     */
+    public void startGeoNav() {
+
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+        if (sensorManager != null) {
+
+            sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_UI);
+            sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_UI);
+
+            //set update interval from the preferences can be 1s, 5s or 10s
+            String interval = ep.getString(GeneralKeys.UPDATE_INTERVAL, "1");
+            long period = 1000L;
+            switch (interval) {
+                case "1": {
+                    period = 1000L;
+                    break;
+                }
+                case "5": {
+                    period = 5000L;
+                    break;
+                }
+                case "10": {
+                    period = 10000L;
+                    break;
+                }
+            }
+
+            //find the mac address of the device, if not found then start the internal GPS
+            String address = ep.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "");
+            String internalGps = getString(R.string.pref_behavior_geonav_internal_gps_choice);
+            boolean internal = true;
+
+            if (address == null || address.isEmpty() || address.equals(internalGps)) {
+
+                //update no matter the distance change and every 10s
+                mGpsTracker = new GPSTracker(this, this, 0, 10000);
+
+            } else {
+
+                BluetoothDevice device = getDeviceByAddress(address);
+
+                if (device != null) {
+
+                    setupCommunicationsUi(device);
+
+                }
+
+                internal = false;
+            }
+
+            //start the timer and schedule the IZ algorithm
+            mScheduler = new Timer();
+
+            final boolean internalFlag = internal;
+            mScheduler.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    runImpactZoneAlgorithm(internalFlag);
+                }
+            }, 2000L, period);
+
+            GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, "UTC, primary, secondary, start latitude, start longitude, end latitude, end longitude, azimuth, teslas, bearing, distance, thetaCheck, closest\n");
+
+        } else {
+
+            Toast.makeText(this, R.string.activity_collect_sensor_manager_failed,
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * This handler is used within the connect thread to broadcast messages.
+     */
+    private final Handler mHandler = new Handler(msg -> {
+
+        String nmea = (String) msg.obj;
+
+        if (nmea != null) {
+
+            if (msg.what == GNSSResponseReceiver.MESSAGE_OUTPUT_CODE) {
+
+                if (mLocalBroadcastManager != null) {
+
+                    Intent broadcastNmea = new Intent(ACTION_BROADCAST_GNSS_ROVER);
+                    broadcastNmea.putExtra(GNSSResponseReceiver.MESSAGE_STRING_EXTRA_KEY, nmea);
+
+                    mLocalBroadcastManager.sendBroadcast(broadcastNmea);
+                }
+
+            } else if (msg.what == GNSSResponseReceiver.MESSAGE_OUTPUT_FAIL) {
+
+                if (mLastDevice != null) {
+                    setupCommunicationsUi(mLastDevice);
+                }
+            }
+
+        } else return false;
+
+        return true;
+    });
+
+    /**
+     * A simple search function to find the bluetooth device correlated to the given address.
+     * @param address the mac address that belongs to a given paired device
+     * @return the paired device, could be null if the address is not in the paired list
+     */
+    @Nullable
+    private BluetoothDevice getDeviceByAddress(String address) {
+
+        BluetoothDevice device = null;
+
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (adapter.isEnabled()) {
+
+            Set<BluetoothDevice> paired = adapter.getBondedDevices();
+            if (!paired.isEmpty()) {
+
+                for (BluetoothDevice d : paired) {
+
+                    if (d.getAddress().equals(address)) {
+
+                        device = d;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        return device;
+    }
+
+    /**
+     * Starts the connect thread which messages the LBM with nmea messages.
+     * @param device the paired device that has been chosen in the preferences.
+     */
+    private void setupCommunicationsUi(BluetoothDevice device) {
+
+        BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+
+        mLastDevice = device;
+
+        mConnectThread = new ConnectThread(device, mHandler);
+
+        mConnectThread.start();
+
+    }
+
+    private final GNSSResponseReceiver mGnssResponseReceiver = new GNSSResponseReceiver() {
+        @Override
+        public void onGNSSParsed(@NotNull NmeaParser parser) {
+
+            double time = Double.parseDouble(parser.getUtc());
+
+            //only update the gps if it is a newly parsed coordinate
+            if (time > mLastGeoNavTime) {
+
+                if (!mFirstLocationFound) {
+                    mFirstLocationFound = true;
+                    playSound("cycle");
+                    Utils.makeToast(CollectActivity.this, getString(R.string.act_collect_geonav_first_location_found));
+                }
+
+                mLastGeoNavTime = time;
+                String lat = GeodeticUtils.Companion.truncateFixQuality(parser.getLatitude(), parser.getFix());
+                String lng = GeodeticUtils.Companion.truncateFixQuality(parser.getLongitude(), parser.getFix());
+                String alt = parser.getAltitude();
+                int altLength = alt.length();
+                alt = alt.substring(0, altLength - 1); //drop the "M"
+
+                //always log external gps updates
+                GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, time + ",null,null," + lat + "," + lng + ",null,null,null,null,null,null,null,null\n");
+
+                mExternalLocation = new Location("GeoNav Rover");
+
+                //initialize the double values, attempt to parse the strings, if impossible then don't update the coordinate.
+                double latValue = Double.NaN;
+                double lngValue = Double.NaN;
+                double altValue = Double.NaN;
+                try {
+
+                    latValue = Double.parseDouble(lat);
+                    lngValue = Double.parseDouble(lng);
+                    altValue = Double.parseDouble(alt);
+
+                } catch (NumberFormatException nfe) {
+
+                    nfe.printStackTrace();
+                }
+
+                if (!Double.isNaN(latValue) && !Double.isNaN(lngValue)) {
+
+                    mExternalLocation.setTime((long) time);
+                    mExternalLocation.setLatitude(latValue);
+                    mExternalLocation.setLongitude(lngValue);
+                    mExternalLocation.setAltitude(altValue);
+                }
+            }
+        }
+    };
+
+    /**
+     * When an external gps unit is used, a local bm must be setup to
+     * communicate between the activity and the connect thread.
+     */
+    private void setupLocalBroadcastManager() {
+
+        //initialize lbm and create a filter to broadcast nmea strings
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_BROADCAST_GNSS_ROVER);
+
+        /*
+         * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
+         * The parser parameter is a model for the parsed message, and is used to populate the
+         * trait layout UI.
+         */
+        mLocalBroadcastManager.registerReceiver(mGnssResponseReceiver, filter);
+    }
+
+    /**
+     * This function is called periodically based on preferences, if the geonav enable
+     * switch is true in the toolbar. The function takes a parameter to determine whether
+     * the internal or an external gps is used. The internal gps uses the GPSTracker class,
+     * while the external GPS location is populated with NMEA data parsed from a communications
+     * thread with a paired bluetooth device (chosen in the Settings under Behavior/GeoNav).
+     * @param internal the flag determining what gps data to use
+     */
+    private void runImpactZoneAlgorithm(boolean internal) {
+
+        //the angle of the IZ algorithm to use, see Geodetic util class for more details
+        String thetaPref = ep.getString(GeneralKeys.SEARCH_ANGLE, "0");
+        double theta = 22.5;
+        switch (thetaPref) {
+            case "22.5": {
+                theta = 22.5;
+                break;
+            }
+            case "45": {
+                theta = 45.0;
+                break;
+            }
+            case "67.5": {
+                theta = 67.5;
+                break;
+            }
+            case "90": {
+                theta = 90.0;
+                break;
+            }
+        }
+
+        boolean isCompass = ep.getBoolean(GeneralKeys.GEONAV_COMPASS, true);
+
+        //user must have a valid pointing direction before attempting the IZ
+        if (mAzimuth != null) {
+
+            //initialize the start position and fill with external or internal GPS coordinates
+            Location start = new Location("start location");
+            if (internal && mInternalLocation != null) {
+
+                start = mInternalLocation;
+
+            } else if (!internal) {
+
+                start = mExternalLocation;
+            }
+
+            //get current field id
+            int studyId = ep.getInt("SelectedFieldExpId", 0);
+
+            dt.open();
+
+            //find all observation units within the field
+            ObservationUnitModel[] units = ObservationUnitDao.Companion.getAll(studyId);
+            List<ObservationUnitModel> coordinates = new ArrayList<>();
+
+            //add all units that have non null coordinates.
+            for (ObservationUnitModel model : units) {
+                if (model.getGeo_coordinates() != null && !model.getGeo_coordinates().isEmpty()) {
+                    coordinates.add(model);
+                }
+            }
+
+            //run the algorithm and time how long it takes
+            //long toc = System.currentTimeMillis();
+
+            if (start != null) {
+
+                Pair<ObservationUnitModel, Double> target = GeodeticUtils.Companion
+                        .impactZoneSearch(mGeoNavLogWriter, start,
+                                coordinates.toArray(new ObservationUnitModel[] {}),
+                                mAzimuth, theta, mTeslas, isCompass);
+
+                //long tic = System.currentTimeMillis();
+
+                //if we received a result then show it to the user, create a button to navigate to the plot
+                if (target.getFirst() != null) {
+
+                    String id = target.getFirst().getObservation_unit_db_id();
+
+                    if (!id.equals(rangeBox.cRange.plot_id)) {
+
+                        thisActivity.runOnUiThread(() -> {
+
+                            if (ep.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
+
+                                moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
+
+                                Toast.makeText(this, R.string.activity_collect_found_plot, Toast.LENGTH_SHORT).show();
+
+                            } else {
+
+                                Snackbar mySnackbar = Snackbar.make(findViewById(R.id.layout_main),
+                                    id, Snackbar.LENGTH_LONG);
+
+                                mySnackbar.setAction(R.string.activity_collect_geonav_navigate, (view) -> {
+
+                                    //when navigate button is pressed use rangeBox to go to the plot id
+                                    moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
+
+                                });
+
+                                mySnackbar.show();
+                            }
+
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Called when the toolbar GeoNav Enable icon is switched to off, or the activity is paused.
+     * Simply stops listening to the sensor manager and stops the geonav timer.
+     */
+    public void stopGeoNav() {
+
+        ((SensorManager) getSystemService(SENSOR_SERVICE)).unregisterListener(this);
+
+        ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
+
+        if (mScheduler != null) {
+            mScheduler.purge();
+            mScheduler.cancel();
+            mScheduler = null;
+        }
+
+        //flush and close geo nav log writer
+        try {
+            if (mGeoNavLogWriter != null) {
+                mGeoNavLogWriter.flush();
+                mGeoNavLogWriter.close();
+            }
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+
+        if (mLocalBroadcastManager != null) {
+            mLocalBroadcastManager.unregisterReceiver(mGnssResponseReceiver);
+            mLocalBroadcastManager = null;
+        }
+
+        if (mConnectThread != null) mConnectThread.cancel();
+    }
+
+    /**
+     * Sensor data listener for the collect activity.
+     * This is used to find the direction the user is facing.
+     * It is possible that the sensors are experiencing nosie and the hardware should be calibrated.
+     * TODO: add calibration image on first event or when noise is detected.
+     * For Android hardware it is necessary to calibrate before the first event should be accepted.
+     * A global flag mNotWarnedInterference is used to defer the interference notification if already seen.
+     * @param event the sensor event, could be magnetic or accelerometer
+     */
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        if (event != null && event.sensor != null) {
+
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                mGravity = GeodeticUtils.Companion.lowPassFilter(event.values.clone(), mGravity);
+            } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                mGeomagneticField = GeodeticUtils.Companion.lowPassFilter(event.values.clone(), mGeomagneticField);
+            }
+
+            if (mGravity != null && mGeomagneticField != null) {
+
+                mTeslas = calculateNoise(mGeomagneticField);
+
+                if ((mTeslas < 25 || mTeslas > 65) && mNotWarnedInterference) {
+                    mNotWarnedInterference = false;
+                    Toast.makeText(this, R.string.activity_collect_geomagnetic_noise_detected,
+                            Toast.LENGTH_SHORT).show();
+                }
+
+                float[] R = new float[9];
+                float[] I = new float[9];
+
+                if (SensorManager.getRotationMatrix(R, I, mGravity, mGeomagneticField)) {
+
+                    float[] orientation = new float[3];
+
+                    SensorManager.getOrientation(R, orientation);
+
+                    /*
+                     * values[0]: Azimuth, angle of rotation about the -z axis.
+                     * This value represents the angle between the device's y axis and the magnetic north pole.
+                     * When facing north, this angle is 0, when facing south, this angle is π.
+                     * Likewise, when facing east, this angle is π/2, and when facing west, this angle is -π/2.
+                     * The range of values is -π to π.
+                     */
+                    mAzimuth = Math.toDegrees(orientation[0]);
+                    mAzimuth = (mAzimuth + 360) % 360;
+
+                    //"${(Math.toDegrees(orientation[0].toDouble()).toInt() + 360) % 360}"
+
+                    if (mExternalLocation != null) {
+
+                        mDeclination = new GeomagneticField(
+                                (float) mExternalLocation.getLatitude(),
+                                (float) mExternalLocation.getLongitude(),
+                                (float) mExternalLocation.getAltitude(),
+                                System.currentTimeMillis()).getDeclination();
+
+                    } else if (mInternalLocation != null) {
+
+                        mDeclination = new GeomagneticField(
+                                (float) mInternalLocation.getLatitude(),
+                                (float) mInternalLocation.getLongitude(),
+                                (float) mInternalLocation.getAltitude(),
+                                System.currentTimeMillis()).getDeclination();
+
+                    }
+
+                    //if the declination has been found, correct the direction
+                    if (mDeclination != null) {
+
+                        mAzimuth += mDeclination.intValue();
+
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    /**
+     * Aggregates the vectors of the field array to create a constant.
+     * This output is used in a threshold to determine whether the geomagnetic field
+     * is experiencing noise.
+     * @param field the geomagnetic vectors x, y, z
+     * @return the square root of the summation of all squared vectors
+     */
+    private Double calculateNoise(float[] field) {
+
+        double sum = 0.0;
+
+        for (float xyz : field) {
+            sum += Math.pow(xyz, 2);
+        }
+
+        return Math.sqrt(sum);
     }
 
     void lockData(boolean lock) {
@@ -891,8 +1540,11 @@ public class CollectActivity extends AppCompatActivity {
         builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                IntentIntegrator integrator = new IntentIntegrator(thisActivity);
-                integrator.initiateScan();
+                new IntentIntegrator(thisActivity)
+                        .setPrompt(getString(R.string.main_barcode_text))
+                        .setBeepEnabled(true)
+                        .setRequestCode(98)
+                        .initiateScan();
             }
         });
 
@@ -1086,11 +1738,38 @@ public class CollectActivity extends AppCompatActivity {
         return dt.getTraitExists(ID, trait.getTrait(), trait.getFormat());
     }
 
-    public Map getNewTraits() {
+    /**
+     * Iterates over all traits for the given ID and returns the trait's index which is missing
+     * @param traitIndex current trait index
+     * @param ID the plot identifier
+     * @return index of the trait missing or -1 if all traits exist
+     */
+    public int existsAllTraits(final int traitIndex, final int ID) {
+        final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
+        final String[] formats = VisibleObservationVariableDao.Companion.getFormat();
+        for (int i = 0; i < traits.length; i++) {
+            if (i != traitIndex
+                    && !dt.getTraitExists(ID, traits[i], formats[i])) return i;
+        }
+        return -1;
+    }
+
+    public List<Integer> getNonExistingTraits(final int ID) {
+        final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
+        final String[] formats = VisibleObservationVariableDao.Companion.getFormat();
+        final ArrayList<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < traits.length; i++) {
+            if (!dt.getTraitExists(ID, traits[i], formats[i]))
+                indices.add(i);
+        }
+        return indices;
+    }
+
+    public Map<String, String> getNewTraits() {
         return traitBox.getNewTraits();
     }
 
-    public void setNewTraits(Map newTraits) {
+    public void setNewTraits(Map<String, String> newTraits) {
         traitBox.setNewTraits(newTraits);
     }
 
@@ -1155,7 +1834,7 @@ public class CollectActivity extends AppCompatActivity {
 
         TraitObject trait = getCurrentTrait();
 
-        String studyId = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+        String studyId = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
         dt.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
@@ -1164,24 +1843,38 @@ public class CollectActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+
+        mInternalLocation = location;
+
+        //always log location updates
+        GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, location.getTime() + ",null,null," + location.getLatitude() + "," + location.getLongitude() + ",null,null,null,null,null,null,null,null\n");
+    }
+
     ///// class TraitBox /////
     // traitLeft, traitType, and traitRight
     private class TraitBox {
-        private CollectActivity parent;
+        private final CollectActivity parent;
         private String[] prefixTraits;
         private TraitObject currentTrait;
 
-        private Spinner traitType;
-        private TextView traitDetails;
-        private ImageView traitLeft;
-        private ImageView traitRight;
+        private final Spinner traitType;
+        private final TextView traitDetails;
+        private final ImageView traitLeft;
+        private final ImageView traitRight;
 
-        private Map newTraits;  // { trait name: value }
+        /**
+         * New traits is a map of observations where the key is the trait name
+         * and the value is the observation value. This is updated whenever
+         * a new plot id is navigated to.
+         */
+        private Map<String, String> newTraits;  // { trait name: value }
 
         TraitBox(CollectActivity parent_) {
             parent = parent_;
             prefixTraits = null;
-            newTraits = new HashMap();
+            newTraits = new HashMap<>();
 
             traitType = findViewById(R.id.traitType);
 
@@ -1312,16 +2005,21 @@ public class CollectActivity extends AppCompatActivity {
             traitBox.setSelection(traitPosition);
         }
 
-        public Map getNewTraits() {
+        public Map<String, String> getNewTraits() {
             return newTraits;
         }
 
+        /**
+         * Called when navigating between plots in collect activity.
+         * New Traits hashmap of <trait name to observation value> stores data for the currently
+         * selected plot id.
+         * @param plotID the new plot id we are transitioning to
+         */
         void setNewTraits(final String plotID) {
-
-            newTraits = (HashMap) dt.getUserDetail(plotID).clone();
+            newTraits = dt.getUserDetail(plotID);
         }
 
-        void setNewTraits(Map newTraits) {
+        void setNewTraits(Map<String, String> newTraits) {
             this.newTraits = newTraits;
         }
 
@@ -1386,11 +2084,17 @@ public class CollectActivity extends AppCompatActivity {
             return data.toString();
         }
 
+        /**
+         * Deletes all observation variables named traitName from the db.
+         * Also removes the trait from "newTraits"
+         * @param traitName the observation variable name
+         * @param plotID the unique plot identifier to remove the observations from
+         */
         public void remove(String traitName, String plotID) {
             if (newTraits.containsKey(traitName))
                 newTraits.remove(traitName);
 
-            String exp_id = Integer.toString(ep.getInt("SelectedFieldExpId", 0));
+            String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
             dt.deleteTrait(exp_id, plotID, traitName);
         }
@@ -1974,41 +2678,179 @@ public class CollectActivity extends AppCompatActivity {
             return movePaging(pos, 1, false);
         }
 
+        private void chooseNextTrait(int pos, int step) {
+            List<Integer> nextTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
+            if (!nextTrait.isEmpty()) {
+                if (step < 0) {
+                    traitBox.setSelection(Collections.max(nextTrait));
+                } else traitBox.setSelection(Collections.min(nextTrait));
+            }
+        }
+
+        private int getTraitIndex(String[] traits) {
+            String currentTraitName = traitBox.currentTrait.getTrait();
+            int traitIndex = 0;
+            for (int i = 0; i < traits.length; i++) {
+                if (currentTraitName.equals(traits[i])) {
+                    traitIndex = i;
+                    break;
+                }
+            }
+            return traitIndex;
+        }
+
+        private int checkSkipTraits(String[] traits, int step, int pos, boolean cyclic, boolean skipMode) {
+
+            //edge case where we are on the last position
+            //check for missing traits dependent on step for last position
+            //if all traits are observed or the only unobserved is to the left, move to pos 1
+            if (step == 1 && pos == rangeID.length) {
+                if (!skipMode) {
+                    int currentTrait = getTraitIndex(traits);
+                    int nextTrait = parent.existsAllTraits(currentTrait, rangeID[pos - 1]);
+                    if (nextTrait != -1) { //check if this trait is "next" if not then move to 1
+                        if (nextTrait > currentTrait) {
+                            traitBox.setSelection(nextTrait);
+                            return rangeID.length;
+                        } else { //when moving to one, select the non existing trait
+                            List<Integer> nextTraitOnFirst = parent.getNonExistingTraits(rangeID[0]);
+                            if (!nextTraitOnFirst.isEmpty()) {
+                                traitBox.setSelection(Collections.min(nextTraitOnFirst));
+                                return 1;
+                            }
+                        } //if all traits exist for 1 then just follow the main loop
+                    }
+                }
+            }
+
+            final int prevPos = pos;
+            //first loop is used to detect if all observations are completed
+            boolean firstLoop = true;
+            //this keeps track of the previous loops position
+            //while prevPos keeps track of what position this function was called with.
+            int localPrev;
+            while (true) {
+
+                //get the index of the currently selected trait
+                int traitIndex = getTraitIndex(traits);
+
+                localPrev = pos;
+                pos = moveSimply(pos, step);
+
+                //if we wrap around the entire range then observations are completed
+                //notify the user and just go to the first range id.
+                if (!firstLoop && prevPos == localPrev) {
+                    Toast.makeText(CollectActivity.this,
+                            R.string.activity_collect_all_obs_made, Toast.LENGTH_SHORT).show();
+                    return 1;
+                }
+                firstLoop = false;
+
+                // absorb the differece
+                // between single click and repeated clicks
+                if (cyclic) {
+                    if (pos == prevPos) {
+                        return pos;
+                    } else if (pos == 1) {
+                        pos = rangeID.length;
+                    } else if (pos == rangeID.length) {
+                        pos = 1;
+                    }
+                } else {
+                    if (pos == 1 || pos == prevPos) {
+                        if (!skipMode) {
+                            List<Integer> nextTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
+                            if (!nextTrait.isEmpty()) {
+                                if (step < 0) {
+                                    traitBox.setSelection(Collections.max(nextTrait));
+                                } else traitBox.setSelection(Collections.min(nextTrait));
+                                return pos;
+                            }
+                        }
+                    }
+                }
+
+                if (skipMode) {
+                    if (!parent.existsTrait(rangeID[pos - 1])) {
+                        return pos;
+                    }
+                } else {
+
+                    //check all traits for the currently selected range id
+                    //this returns the missing trait index or -1 if they all are observed
+                    int nextTrait = parent.existsAllTraits(traitIndex, rangeID[localPrev - 1]);
+                    //if we press right, but a trait to the left is missing, go to next plot
+                    //similarly if we press left, but a trait to the right is missing, go to previous
+                    //check if pressing left/right will skip an unobserved trait
+                    //if it does, force it to the next plot and set the traitBox to the first unobserved
+                    //boolean skipped = Math.abs(prevPos - localPrev) > 1;
+                    if (nextTrait < traitIndex && step > 0) {
+
+                        //check which trait is missing in the next position
+                        List<Integer> nextPlotTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
+
+                        //if no trait is missing, loop
+                        if (!nextPlotTrait.isEmpty()) { //otherwise set the selection and return position
+
+                            //we are moving to the right, so set the left most trait
+                            traitBox.setSelection(
+                                    Collections.min(nextPlotTrait)
+                            );
+
+                            return pos;
+                        }
+
+                    } else if ((nextTrait == -1 || nextTrait > traitIndex) && step < 0) {
+
+                        //check which trait is missing in the next position
+                        List<Integer> nextPlotTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
+
+                        //if no trait is missing, loop
+                        if (!nextPlotTrait.isEmpty()) { //otherwise set the selection and return position
+
+                            //moving to the left so set the right most trait
+                            traitBox.setSelection(
+                                    Collections.max(nextPlotTrait)
+                            );
+
+                            return pos;
+                        }
+                    //otherwise, set the selection to the missing trait and return the current pos
+                    } else if (nextTrait > -1) {
+
+                        traitBox.setSelection(nextTrait);
+
+                        return localPrev;
+                    }
+                }
+            }
+        }
+
         private int movePaging(int pos, int step, boolean cyclic) {
             // If ignore existing data is enabled, then skip accordingly
             final SharedPreferences ep = parent.getPreference();
 
-            if (ep.getBoolean(GeneralKeys.HIDE_ENTRIES_WITH_DATA, false)) {
-                if (step == 1 && pos == rangeID.length) {
-                    return 1;
+            final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
+
+            //three options: 1. disabled 2. skip active trait 3. skip but check all traits
+            String skipMode = ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1");
+
+            switch (skipMode) {
+
+                case "2" : {
+
+                    return checkSkipTraits(traits, step, pos, cyclic, true);
+
                 }
 
-                final int prevPos = pos;
-                TraitObject trait = parent.getTraitBox().getCurrentTrait();
-                while (true) {
-                    pos = moveSimply(pos, step);
-                    // absorb the differece
-                    // between single click and repeated clicks
-                    if (cyclic) {
-                        if (pos == prevPos) {
-                            return pos;
-                        } else if (pos == 1) {
-                            pos = rangeID.length;
-                        } else if (pos == rangeID.length) {
-                            pos = 1;
-                        }
-                    } else {
-                        if (pos == 1 || pos == prevPos) {
-                            return pos;
-                        }
-                    }
+                case "3" : {
 
-                    if (!parent.existsTrait(rangeID[pos - 1])) {
-                        return pos;
-                    }
+                    return checkSkipTraits(traits, step, pos, cyclic, false);
+
                 }
-            } else {
-                return moveSimply(pos, step);
+
+                default : return moveSimply(pos, step);
+
             }
         }
 

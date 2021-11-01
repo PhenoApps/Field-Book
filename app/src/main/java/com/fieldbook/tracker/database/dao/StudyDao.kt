@@ -122,6 +122,7 @@ class StudyDao {
             it.primary_id = this["study_primary_id_name"].toString()
             it.secondary_id = this["study_secondary_id_name"].toString()
             it.date_import = this["date_import"].toString()
+            it.exp_sort = this["study_sort_name"].toString()
             it.date_edit = when (val date = this["date_edit"]?.toString()) {
                 null, "null" -> ""
                 else -> date
@@ -162,7 +163,8 @@ class StudyDao {
                             "date_import",
                             "date_edit",
                             "date_export",
-                            "study_source"),
+                            "study_source",
+                            "study_sort_name"),
                     where = "${Study.PK} = ?",
                     whereArgs = arrayOf(exp_id.toString()),
                     orderBy = Study.PK).toFirst().toFieldObject()
@@ -254,11 +256,22 @@ class StudyDao {
                 tempData
             } else data
 
+            val geoCoordinatesColumnName = "geo_coordinates"
+            var geoCoordinates = ""
+            val geoCoordinatesIndex: Int
+            if (geoCoordinatesColumnName in columns) {
+                geoCoordinatesIndex = columns.indexOf(geoCoordinatesColumnName)
+                if (geoCoordinatesIndex > -1) {
+                    geoCoordinates = data[geoCoordinatesIndex]
+                }
+            }
+            
             val rowid = db.insert(ObservationUnit.tableName, null, contentValuesOf(
                     Study.FK to exp_id,
                     "observation_unit_db_id" to actualData[uniqueIndex],
                     "primary_id" to if (primaryIndex < 0) "NA" else actualData[primaryIndex],
-                    "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex]))
+                    "secondary_id" to if (secondaryIndex < 0) "NA" else actualData[secondaryIndex],
+                     "geo_coordinates" to geoCoordinates))
 
             columns.forEachIndexed { index, it ->
 
@@ -350,6 +363,16 @@ class StudyDao {
             if (modifyDate) modifyDate(db, exp_id)
 
             if (updateExportDate) updateExportDate(db, exp_id)
+        }
+
+        fun updateStudySort(sort: String?, exp_id: Int) = withDatabase { db ->
+            var contentVals = ContentValues();
+            if(sort == null) {
+                contentVals.putNull("study_sort_name")
+            } else {
+                contentVals.put("study_sort_name", sort)
+            }
+            db.update(Study.tableName, contentVals, "${Study.PK} = ?", arrayOf("$exp_id"))
         }
 
         /**
