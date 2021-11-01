@@ -980,6 +980,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 Intent i = new Intent();
                 i.setClassName(CollectActivity.this,
                         DataGridActivity.class.getName());
+                i.putExtra("plot_id", rangeBox.paging);
+                i.putExtra("trait", traitBox.currentTrait.getRealPosition());
                 startActivityForResult(i, 2);
                 break;
             case R.id.lockData:
