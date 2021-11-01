@@ -171,6 +171,11 @@ public class DragSortController extends SimpleFloatViewManager implements View.O
     }
 
     /**
+     * @return boolean value whether controller is currently dragging.
+     */
+    public boolean getDragging() { return mDragging; }
+
+    /**
      * One of {CLICK_REMOVE}, {FLING_RIGHT_REMOVE},
      * {FLING_LEFT_REMOVE},
      * {SLIDE_RIGHT_REMOVE}, or {SLIDE_LEFT_REMOVE}.
