@@ -669,4 +669,5 @@
     <string name="dialog_date_picker_neutral_button">Today</string>
     <string name="preferences_brapi_traits_title">BrAPI Variables</string>
     <string name="act_collect_no_plots">This study has no plots saved.</string>
+    <string name="act_trait_editor_menu_click_while_dragging">Please finish dragging.</string>
 </resources>
