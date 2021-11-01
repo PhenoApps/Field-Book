@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,11 +30,20 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.utilities.ZipUtil;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.UUID;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -99,7 +109,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
         intent.setClassName(getActivity(),
                 FileExploreActivity.class.getName());
         intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH);
-        intent.putExtra("include", new String[]{"db"});
+        intent.putExtra("include", new String[]{"db", "zip"});
         intent.putExtra("title", getString(R.string.database_import));
         startActivityForResult(intent, 2);
     }
@@ -131,13 +141,44 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
         @Override
         protected Integer doInBackground(Integer... params) {
-            try {
-                dt.importDatabase(mChosenFile);
-            } catch (Exception e) {
-                Log.d("Database", e.toString());
-                e.printStackTrace();
-                fail = true;
+
+            //first check if the file to import is just a .db file
+
+            if (mChosenFile.endsWith(".db")) { //if it is import it old-style
+
+                try {
+
+                    dt.importDatabase(mChosenFile);
+
+                } catch (Exception e) {
+
+                    Log.d("Database", e.toString());
+
+                    e.printStackTrace();
+
+                    fail = true;
+                }
+            } else if (mChosenFile.endsWith(".zip")) { //otherwise unzip and import prefs as well
+
+                String internalDbPath = DataHelper.getDatabasePath(context);
+
+                File zipInputFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH)
+                        + Constants.BACKUPPATH + "/" + mChosenFile);
+
+                try {
+
+                    ZipUtil.Companion.unzip(context,
+                            context.getContentResolver().openInputStream(Uri.fromFile(zipInputFile)),
+                            new FileOutputStream(internalDbPath));
+
+                } catch (IOException io) {
+
+                    io.printStackTrace();
+
+                }
+
             }
+
             return 0;
         }
 
@@ -217,19 +258,47 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
         @Override
         protected Integer doInBackground(Integer... params) {
+
+            //get database path and shared preferences path
+            String dbPath = DataHelper.getDatabasePath(context);
+
+            //create the file the contents will be zipped to
+            File zipFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + exportFileString + ".zip");
+
+            //zip files into stream
             try {
-                dt.exportDatabase(exportFileString);
-            } catch (Exception e) {
+
+                File tempOutput = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + UUID.randomUUID());
+
+                FileOutputStream fileStream = new FileOutputStream(tempOutput);
+
+                ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+
+                OutputStream zipOutput = context.getContentResolver().openOutputStream(Uri.fromFile(zipFile));
+
+                SharedPreferences prefs = context.getSharedPreferences("Settings", Context.MODE_PRIVATE);
+
+                objectStream.writeObject(prefs.getAll());
+
+                ZipUtil.Companion.zip(new String[] {dbPath, tempOutput.getPath()}, zipOutput);
+
+                objectStream.close();
+
+                fileStream.close();
+
+                if (!tempOutput.delete()) {
+
+                    throw new IOException();
+                }
+
+            } catch (IOException e) {
+
                 e.printStackTrace();
-                error = "" + e.getMessage();
-                fail = true;
+
             }
 
-            File exportedDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + exportFileString + ".db");
-            File exportedSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + exportFileString + ".db_sharedpref.xml");
-
-            Utils.scanFile(getContext(), exportedDb);
-            Utils.scanFile(getContext(), exportedSp);
+            //use media scanner on the output
+            Utils.scanFile(getContext(), zipFile);
 
             return 0;
         }
