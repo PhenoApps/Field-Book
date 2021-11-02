@@ -12,7 +12,7 @@ class ObservationUnitAttributeDao {
             db.query(ObservationUnitAttribute.tableName,
                     where = "${Study.FK} = ?",
                     whereArgs = arrayOf(eid.toString())).toTable()
-                .map { it["observation_unit_attribute_name"] as String }
+                .map { it["observation_unit_attribute_name"] as? String ?: "" }
                 .filter { it.isNotBlank() && it.isNotEmpty() }
                 .toTypedArray()
         } ?: emptyArray()

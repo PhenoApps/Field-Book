@@ -76,6 +76,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -214,6 +215,8 @@ public class TraitEditorActivity extends AppCompatActivity {
             new ImportCSVTask().execute(0);
         }
     };
+
+    private DragSortController mController;
 
     // Helper function to load data
     public static void loadData() {
@@ -384,14 +387,14 @@ public class TraitEditorActivity extends AppCompatActivity {
         traitList.setDropListener(onDrop);
         traitList.setRemoveListener(onRemove);
 
-        DragSortController controller = new DragSortController(traitList);
-        controller.setDragHandleId(R.id.dragSort);
-        controller.setRemoveEnabled(false);
-        controller.setSortEnabled(true);
-        controller.setDragInitMode(1);
+        mController = new DragSortController(traitList);
+        mController.setDragHandleId(R.id.dragSort);
+        mController.setRemoveEnabled(false);
+        mController.setSortEnabled(true);
+        mController.setDragInitMode(1);
 
-        traitList.setFloatViewManager(controller);
-        traitList.setOnTouchListener(controller);
+        traitList.setFloatViewManager(mController);
+        traitList.setOnTouchListener(mController);
         traitList.setDragEnabled(true);
 
         LayoutInflater inflater = this.getLayoutInflater();
@@ -480,61 +483,74 @@ public class TraitEditorActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()) {
-            case R.id.help:
-                TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description))
-                                //Todo add overflow menu action
-                        );
+        if (!mController.getDragging()) {
 
-                if (ConfigActivity.dt.getTraitColumnData("trait") != null) {
-                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0,4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
-                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0,2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
-                }
+            switch (item.getItemId()) {
+                case R.id.help:
+                    TapTargetSequence sequence = new TapTargetSequence(this)
+                            .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description))
+                                    //Todo add overflow menu action
+                            );
 
-                sequence.start();
-                break;
+                    if (ConfigActivity.dt.getTraitColumnData("trait") != null) {
+                        sequence.target(traitsTapTargetRect(traitsListItemLocation(0,4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
+                        sequence.target(traitsTapTargetRect(traitsListItemLocation(0,2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
+                    }
 
-            case R.id.deleteTrait:
-                showDeleteTraitDialog();
-                break;
+                    sequence.start();
+                    break;
 
-            case R.id.sortTrait:
-                sortDialog();
-                break;
+                case R.id.deleteTrait:
+                    showDeleteTraitDialog();
+                    break;
 
-            case R.id.importexport:
-                importExportDialog();
-                break;
+                case R.id.sortTrait:
+                    sortDialog();
+                    break;
 
-            case R.id.addTrait:
-                showCreateTraitDialog();
-                break;
+                case R.id.importexport:
+                    importExportDialog();
+                    break;
 
-            case R.id.toggleTrait:
-                changeAllVisibility();
-                break;
+                case R.id.addTrait:
+                    showCreateTraitDialog();
+                    break;
 
-            case android.R.id.home:
-                CollectActivity.reloadData = true;
-                finish();
-                break;
+                case R.id.toggleTrait:
+                    changeAllVisibility();
+                    break;
+
+                case android.R.id.home:
+                    CollectActivity.reloadData = true;
+                    finish();
+                    break;
+            }
+
+            return super.onOptionsItemSelected(item);
+
+        } else {
+
+            Utils.makeToast(thisActivity, getString(R.string.act_trait_editor_menu_click_while_dragging));
+
+            return false;
         }
-        return super.onOptionsItemSelected(item);
     }
 
     private void changeAllVisibility() {
         boolean globalVis = ep.getBoolean("allTraitsVisible", false);
-        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
+        List<TraitObject> allTraits = ConfigActivity.dt.getAllTraitObjects();
 
-        if (allTraits == null) {
+        if (allTraits.isEmpty()) {
             Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing_modify));
             return;
         }
 
-        for (String allTrait : allTraits) {
-            ConfigActivity.dt.updateTraitVisibility(allTrait, globalVis);
-            Log.d("Field", allTrait);
+        //issue #305 fix toggles visibility even when all are un-toggled
+        globalVis = !allTraits.stream().allMatch(TraitObject::getVisible);
+
+        for (TraitObject allTrait : allTraits) {
+            ConfigActivity.dt.updateTraitVisibility(allTrait.getTrait(), globalVis);
+            Log.d("Field", allTrait.getTrait());
         }
 
         globalVis = !globalVis;

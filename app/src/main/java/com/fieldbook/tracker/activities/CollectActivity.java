@@ -980,6 +980,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 Intent i = new Intent();
                 i.setClassName(CollectActivity.this,
                         DataGridActivity.class.getName());
+                i.putExtra("plot_id", rangeBox.paging);
+                i.putExtra("trait", traitBox.currentTrait.getRealPosition());
                 startActivityForResult(i, 2);
                 break;
             case R.id.lockData:
@@ -2529,13 +2531,25 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             setAllRangeID();
             if (rangeID != null) {
 
-                updateCurrentRange(rangeID[0]);
+                //if the study has no plots this would cause an AIOB exception
+                if (rangeID.length > 0) {
 
-                //TODO NullPointerException
-                lastRange = cRange.range;
-                display();
+                    updateCurrentRange(rangeID[0]);
 
-                traitBox.setNewTraits(cRange.plot_id);
+                    //TODO NullPointerException
+                    lastRange = cRange.range;
+                    display();
+
+                    traitBox.setNewTraits(cRange.plot_id);
+
+                } else { //if no fields, print a message and finish with result canceled
+
+                    Utils.makeToast(thisActivity, getString(R.string.act_collect_no_plots));
+
+                    setResult(RESULT_CANCELED);
+
+                    finish();
+                }
             }
         }
 
