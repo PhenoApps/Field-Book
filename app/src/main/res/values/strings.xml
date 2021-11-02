@@ -668,4 +668,7 @@
     <string name="trait_counter_layout_failed">Counter failed to save, please recreate this trait.</string>
     <string name="dialog_date_picker_neutral_button">Today</string>
     <string name="preferences_brapi_traits_title">BrAPI Variables</string>
+    <string name="menu_action_header_view_data_grid_title">Update Row Headers</string>
+    <string name="dialog_data_grid_header_picker_title">Choose Row Headers</string>
+    <string name="dialog_data_grid_header_picker_message">This will change what is displayed on the left-most column of the data grid.</string>
 </resources>
