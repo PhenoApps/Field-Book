@@ -183,20 +183,23 @@ class ObservationDao {
 
         } ?: emptyList()
 
+        /**
+         * This function is used in the Collect activity.
+         * Brapi observations have an extra lastTimeSynced field that is compared with the observed time stamp.
+         * If the observation is synced or edited the value is replaced with NA and a warning is shown.
+         */
         fun isBrapiSynced(exp_id: String, rid: String, parent: String): Boolean = withDatabase {
 
             getObservation(exp_id, rid, parent)?.let { observation ->
 
                 observation.status in arrayOf(
-                        com.fieldbook.tracker.brapi.model.BrapiObservation.Status.SYNCED,
-                        com.fieldbook.tracker.brapi.model.BrapiObservation.Status.EDITED)
-
+                    com.fieldbook.tracker.brapi.model.BrapiObservation.Status.SYNCED,
+                    com.fieldbook.tracker.brapi.model.BrapiObservation.Status.EDITED)
 
             }
 
-            false
-
         } ?: false
+
         /**
          * In this case parent is the variable name and trait is the format
          */
@@ -280,21 +283,26 @@ class ObservationDao {
 
         } ?: hashMapOf()
 
-        /*
-        plotId is actually uniqueName
-        parent is trait/variable name
+        /**
+         * Should be used for observations imported via BrAPI.
+         * This function builds a BrAPI observation that has a specific last synced time field.
+         *
+         * @param exp_id the field identifier
+         * @param plotId the unique name of the currently selected field
+         * @param parent the variable name of the observation
          */
         fun getObservation(exp_id: String, plotId: String, parent: String): BrapiObservation? = withDatabase { db ->
 
             BrapiObservation().apply {
 
                 db.query(Observation.tableName,
-                        arrayOf(Observation.PK, ObservationUnit.FK, "observation_db_id", "last_synced_time"),
+                        arrayOf(Observation.PK, ObservationUnit.FK, "observation_db_id", "observation_time_stamp", "last_synced_time"),
                         where = "${Study.FK} = ? AND observation_variable_name LIKE ? AND ${ObservationUnit.FK} LIKE ?",
                         whereArgs = arrayOf(exp_id, parent, plotId)).toTable().forEach {
 
                     dbId = getStringVal(it, "observation_db_id")
                     unitDbId = getStringVal(it, ObservationUnit.FK)
+                    setTimestamp(getStringVal(it, "observation_time_stamp"))
                     setLastSyncedTime(getStringVal(it,"last_synced_time"))
                 }
             }
