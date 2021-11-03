@@ -5,6 +5,8 @@
         versionName="v5.2">
         <new>Datagrid focuses on current entry/trait</new>
         <new>Database export now exports to single zipped file</new>
+        <new>Resuming collection now navigates to the last selected trait</new>
+        <bugfix>Numerous bug fixes</bugfix>
     </release>
 
     <release
