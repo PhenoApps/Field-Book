@@ -75,6 +75,9 @@ public class GeneralKeys {
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE             = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
 
+    //Dialog Export
+    public static final String DIALOG_EXPORT_BUNDLE_CHECKED         = "com.fieldbook.tracker.DIALOG_EXPORT_BUNDLE_CHECKED";
+
     private GeneralKeys() {
 
     }

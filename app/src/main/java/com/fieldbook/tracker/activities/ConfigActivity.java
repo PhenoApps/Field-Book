@@ -46,6 +46,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -57,6 +58,7 @@ import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 
+import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
@@ -66,7 +68,9 @@ import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -589,7 +593,9 @@ public class ConfigActivity extends AppCompatActivity {
         allTraits = layout.findViewById(R.id.allTraits);
         activeTraits = layout.findViewById(R.id.activeTraits);
         CheckBox checkOverwrite = layout.findViewById(R.id.overwrite);
+        CheckBox checkBundle = layout.findViewById(R.id.dialog_export_bundle_data_cb);
 
+        checkBundle.setChecked(ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false));
         checkOverwrite.setChecked(ep.getBoolean("Overwrite", false));
         checkDB.setChecked(ep.getBoolean("EXPORT_FORMAT_DATABASE", false));
         checkExcel.setChecked(ep.getBoolean("EXPORT_FORMAT_TABLE", false));
@@ -661,6 +667,7 @@ public class ConfigActivity extends AppCompatActivity {
                 ed.putBoolean("EXPORT_FORMAT_TABLE", checkExcel.isChecked());
                 ed.putBoolean("EXPORT_FORMAT_DATABASE", checkDB.isChecked());
                 ed.putBoolean("Overwrite", checkOverwrite.isChecked());
+                ed.putBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, checkBundle.isChecked());
                 ed.apply();
 
                 File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH);
@@ -885,6 +892,10 @@ public class ConfigActivity extends AppCompatActivity {
 
         @Override
         protected Integer doInBackground(Integer... params) {
+
+            //flag telling if the user checked the media bundle option
+            boolean bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false);
+
             String[] newRanges = newRange.toArray(new String[newRange.size()]);
             String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
 
@@ -909,52 +920,128 @@ public class ConfigActivity extends AppCompatActivity {
 //                return (0);
 //            }
 
+            //separate files for table and database
+            File dbFile = null;
+            File tableFile = null;
+
+            //check if export database has been selected
             if (checkDbBool) {
                 if (exportData.getCount() > 0) {
                     try {
-                        File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH,
+                        dbFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH,
                                 exportFileString + "_database.csv");
 
-                        if (file.exists()) {
-                            file.delete();
+                        if (dbFile.exists()) {
+                            dbFile.delete();
                         }
 
-                        FileWriter fw = new FileWriter(file);
+                        FileWriter fw = new FileWriter(dbFile);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
                         csvWriter.writeDatabaseFormat(newRange);
 
                         System.out.println(exportFileString);
-                        shareFile(file);
+
                     } catch (Exception e) {
                         fail = true;
                     }
                 }
             }
 
+            //check if export table has been selected
             if (checkExcelBool) {
                 if (exportData.getCount() > 0) {
                     try {
-                        File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH,
+                        tableFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH,
                                 exportFileString + "_table.csv");
 
-                        if (file.exists()) {
-                            file.delete();
+                        if (tableFile.exists()) {
+                            tableFile.delete();
                         }
 
-                        FileWriter fw = new FileWriter(file);
+                        FileWriter fw = new FileWriter(tableFile);
 
                         exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
-                        shareFile(file);
+
                     } catch (Exception e) {
                         fail = true;
                     }
                 }
             }
 
+            //if the export did not fail, create a zip file with the exported files
+            if (!fail) {
+
+                //if bundle is checked, zip the files with the media dir for the given study
+                if (bundleChecked) {
+
+                    //query selected study to get the study name
+                    int studyId = ep.getInt("SelectedFieldExpId", 0);
+
+                    //study name is the same as the media directory in plot_data
+                    String studyName = StudyDao.Companion.getFieldObject(studyId).getExp_name();
+
+                    //create media dir directory from fieldBook/plot_data/studyName path
+                    File mediaDir = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH)
+                            + Constants.PLOTDATAPATH + "/" + studyName);
+
+                    //create zip file output from user created name
+                    File zipFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH,
+                            exportFileString + ".zip");
+
+                    //add media folders and database or export files to zip file
+                    ArrayList<String> paths = new ArrayList<>();
+
+                    if (dbFile != null) paths.add(dbFile.getPath());
+                    if (tableFile != null) paths.add(tableFile.getPath());
+                    paths.add(mediaDir.getPath());
+
+                    zipFiles(paths, zipFile);
+
+                    if (dbFile != null) dbFile.delete();
+                    if (tableFile != null) tableFile.delete();
+
+                    //share the zip file
+                    shareFile(zipFile);
+
+                } else { //if not bundling media data, create zip of the table or database files
+
+                    File zipFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH,
+                            exportFileString + ".zip");
+
+                    ArrayList<String> paths = new ArrayList<>();
+
+                    if (dbFile != null) paths.add(dbFile.getPath());
+                    if (tableFile != null) paths.add(tableFile.getPath());
+
+                    zipFiles(paths, zipFile);
+
+                    if (dbFile != null) dbFile.delete();
+                    if (tableFile != null) tableFile.delete();
+
+                    shareFile(zipFile);
+                }
+            }
+
             return 0;
+        }
+
+        private void zipFiles(ArrayList<String> paths, File zipFile) {
+
+            try {
+
+                FileOutputStream fos = new FileOutputStream(zipFile);
+
+                ZipUtil.Companion.zip(paths.toArray(new String[] {}), fos);
+
+                fos.close();
+
+            } catch (IOException io) {
+
+                io.printStackTrace();
+            }
         }
 
         @Override
