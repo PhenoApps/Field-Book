@@ -23,6 +23,7 @@ import android.os.Handler;
 
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
+import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
@@ -78,6 +79,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -1093,6 +1096,27 @@ public class TraitEditorActivity extends AppCompatActivity {
                     ConfigActivity.dt.deleteTraitsTable();
                 }
 
+                //get variable with largest real position
+                Optional<TraitObject> maxPosition = ObservationVariableDao.Companion.getAllTraitObjects().stream()
+                        .max(Comparator.comparingInt(TraitObject::getRealPosition));
+
+                //by default start from zero
+                int positionOffset = 0;
+
+                //if there are other traits, set offset to the max
+                if (maxPosition.isPresent()) {
+
+                    try {
+
+                        positionOffset = maxPosition.get().getRealPosition();
+
+                    } catch (NoSuchElementException e) {
+
+                        e.printStackTrace();
+
+                    }
+                }
+
                 while (data != null) {
                     data = cr.readNext();
 
@@ -1108,7 +1132,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                         t.setDetails(data[5]);
                         t.setCategories(data[6]);
                         //t.visible = data[7].toLowerCase();
-                        t.setRealPosition(Integer.parseInt(data[8]));
+                        t.setRealPosition(positionOffset + Integer.parseInt(data[8]));
                         if (data[7].toLowerCase().equals("true")) {
                             t.setVisible(true);
                         } else {

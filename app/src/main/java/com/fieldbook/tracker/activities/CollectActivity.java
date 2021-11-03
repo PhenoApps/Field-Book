@@ -66,6 +66,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
+import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.location.gnss.ConnectThread;
@@ -109,6 +110,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -587,6 +590,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         stopGeoNav();
 
+        //save the last used trait
+        ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.currentTrait.getTrait()).apply();
+
         super.onPause();
     }
 
@@ -721,6 +727,46 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
 
         checkLastOpened();
+
+        navigateToLastOpenedTrait();
+    }
+
+    /**
+     * LAST_USED_TRAIT is a preference saved in CollectActivity.onPause
+     *
+     * This function is called to use that preference and navigate to the corresponding trait.
+     */
+    private void navigateToLastOpenedTrait() {
+
+        //navigate to the last used trait using preferences
+        String trait = ep.getString(GeneralKeys.LAST_USED_TRAIT, null);
+
+        if (trait != null) {
+
+            //get all traits, filter the preference trait and check it's visibility
+            ArrayList<TraitObject> traits = ObservationVariableDao.Companion.getAllTraitObjects();
+
+            try {
+
+                Optional<TraitObject> result = traits.stream().filter((t) -> t.getTrait().equals(trait)).findFirst();
+
+                if (result.isPresent()) {
+
+                    TraitObject resultObj = result.get();
+
+                    if (resultObj.getVisible()) {
+
+                        traitBox.setSelection(resultObj.getRealPosition()-1);
+
+                    }
+                }
+
+            } catch (NoSuchElementException e) {
+
+                e.printStackTrace();
+
+            }
+        }
     }
 
     /**
