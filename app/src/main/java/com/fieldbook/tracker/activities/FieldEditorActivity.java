@@ -226,7 +226,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 FileExploreActivity.class.getName());
 
         intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDIMPORTPATH);
-        intent.putExtra("include", new String[]{"csv", "xls"});
+        intent.putExtra("include", new String[]{"csv", "xls", "xlsx"});
         intent.putExtra("title", getString(R.string.import_dialog_title_fields));
         startActivityForResult(intent, 1);
     }
@@ -574,7 +574,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 extension = chosenFile.substring(i+1);
             }
 
-            if(!extension.equals("csv") && !extension.equals("xls")) {
+            if(!extension.equals("csv") && !extension.equals("xls") && !extension.equals("xlsx")) {
                 Toast.makeText(FieldEditorActivity.thisActivity, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
                 return;
             }
