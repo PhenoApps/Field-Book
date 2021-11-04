@@ -78,6 +78,9 @@ public class GeneralKeys {
     //Data grid
     public static final String DATAGRID_PREFIX_TRAIT                = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
 
+    //Collect Activity
+    public static final String LAST_USED_TRAIT                      = "com.fieldbook.tracker.LAST_USED_TRAIT";
+
     private GeneralKeys() {
 
     }

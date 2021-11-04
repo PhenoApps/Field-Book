@@ -34,6 +34,7 @@ public interface BrAPIService {
 
     public static String notUniqueFieldMessage = "not_unique";
     public static String notUniqueIdMessage = "not_unique_id";
+    public static String noPlots = "no_plots";
 
     // Helper functions for brapi configurations
     public static Boolean isLoggedIn(Context context) {

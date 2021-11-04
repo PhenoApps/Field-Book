@@ -102,18 +102,21 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
         dataGridGroup = binding.dataGridGroup
         mTableView = binding.tableView
 
-        initialize()
+        initialize(plotId = intent.extras?.getInt("plot_id"),
+            trait = intent.extras?.getInt("trait"))
     }
 
     /**
      * Runs the data grid loading.
      */
-    private fun initialize(prefixTrait: String? = null) {
+    private fun initialize(prefixTrait: String? = null,
+                           plotId: Int? = null,
+                           trait: Int? = null) {
 
         //if something goes wrong finish the activity
         try {
 
-            loadGridData(prefixTrait)
+            loadGridData(prefixTrait, plotId, trait)
 
         } catch (e: Exception) {
 
@@ -166,7 +169,9 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
      * Uses the convertDatabaseToTable query to create a spreadsheet of values.
      * Columns returned are plot_id followed by all traits.
      */
-    private fun loadGridData(prefixTrait: String? = null) {
+    private fun loadGridData(prefixTrait: String? = null,
+                             plotId: Int? = null,
+                             trait: Int? = null) {
 
         val ep = getSharedPreferences("Settings", MODE_PRIVATE)
 
@@ -234,7 +239,8 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
                     } while (cursor.moveToNext())
 
-                    mAdapter = DataGridAdapter()
+                    //send trait/plot indices to highlight the cell
+                    mAdapter = DataGridAdapter((trait ?: 1) - 1, (plotId ?: 1) - 1)
 
                     runOnUiThread {
 
@@ -251,6 +257,15 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
                         mAdapter.setAllItems(mTraits.map { HeaderData(it, it) },
                             mRowHeaders.map { HeaderData(it, it) },
                             dataMap.toList())
+
+                        //scroll to the position of the current trait/plot id
+                        if (plotId != null && trait != null) {
+
+                            mTableView.scrollToColumnPosition(trait - 1)
+
+                            mTableView.scrollToRowPosition(plotId - 1)
+
+                        }
                     }
 
                     cursor.close() //always remember to close your cursor! :)
