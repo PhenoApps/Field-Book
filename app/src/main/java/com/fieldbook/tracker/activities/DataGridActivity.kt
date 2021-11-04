@@ -175,10 +175,14 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
         val ep = getSharedPreferences("Settings", MODE_PRIVATE)
 
-        val uniqueHeader = ep.getString("ImportUniqueName", "")
+        val uniqueHeader = ep.getString("ImportUniqueName", "") ?: ""
 
         //if row header was not chosen, then use the preference unique name
-        val rowHeader = prefixTrait ?: ep.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
+        var rowHeader = prefixTrait ?: ep.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
+
+        if (rowHeader !in ObservationUnitPropertyDao.getRangeColumnNames()) {
+            rowHeader = uniqueHeader
+        }
 
         //if rowHeader was updated, update the preference
         ep.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, rowHeader).apply()
