@@ -16,6 +16,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.DataGridAdapter
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
 import kotlinx.coroutines.*
 import java.util.*
@@ -78,6 +79,7 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
      */
     private lateinit var mAdapter: DataGridAdapter
     private lateinit var mRowHeaders: ArrayList<String>
+    private lateinit var mPlotIds: ArrayList<String>
     private lateinit var mTraits: Array<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -168,8 +170,13 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
         val ep = getSharedPreferences("Settings", MODE_PRIVATE)
 
+        val uniqueHeader = ep.getString("ImportUniqueName", "")
+
         //if row header was not chosen, then use the preference unique name
-        val rowHeader = prefixTrait ?: ep.getString("ImportUniqueName", "") ?: ""
+        val rowHeader = prefixTrait ?: ep.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
+
+        //if rowHeader was updated, update the preference
+        ep.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, rowHeader).apply()
 
         if (rowHeader.isNotBlank()) {
 
@@ -180,11 +187,13 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
                 mTraits = ConfigActivity.dt.visibleTrait
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
-                val cursor = ConfigActivity.dt.convertDatabaseToTable(arrayOf(rowHeader), mTraits)
+                val cursor = ConfigActivity.dt.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
 
                 if (cursor.moveToFirst()) {
 
                     mRowHeaders = arrayListOf()
+
+                    mPlotIds = arrayListOf()
 
                     val dataMap = arrayListOf<List<CellData>>()
 
@@ -204,6 +213,8 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
                             val dataList = arrayListOf<CellData>()
 
                             mRowHeaders.add(header) //add unique name row header
+
+                            mPlotIds.add(plotId)
 
                             mTraits.forEachIndexed { _, variable ->
 
@@ -259,7 +270,7 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
     override fun onCellClicked(cellView: RecyclerView.ViewHolder, column: Int, row: Int) {
 
         //populate plotId clicked from parameters and global store
-        val plotId = mRowHeaders[row]
+        val plotId = mPlotIds[row]
 
         //this is the onlick handler which displays a quick message and sets the intent result / finishes
         Utils.makeToast(applicationContext, plotId)
