@@ -14,8 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.database.DataHelper;
@@ -30,19 +28,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import com.fieldbook.tracker.database.dao.ObservationDao;
-import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.utilities.PrefsConstants;
-
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHolder> {
 
