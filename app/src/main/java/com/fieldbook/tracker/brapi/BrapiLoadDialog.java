@@ -365,10 +365,12 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                             ((Activity) context).finish();
                         });
 
-                if (brapiControllerResponse.message == BrAPIService.notUniqueFieldMessage) {
+                if (brapiControllerResponse.message.equals(BrAPIService.notUniqueFieldMessage)) {
                     alertDialogBuilder.setMessage(R.string.fields_study_exists_message);
-                } else if (brapiControllerResponse.message == BrAPIService.notUniqueIdMessage) {
+                } else if (brapiControllerResponse.message.equals(BrAPIService.notUniqueIdMessage)) {
                     alertDialogBuilder.setMessage(R.string.import_error_unique);
+                } else if (brapiControllerResponse.message.equals(BrAPIService.noPlots)) {
+                    alertDialogBuilder.setMessage(R.string.act_collect_no_plots);
                 } else {
                     Log.e("error-ope", brapiControllerResponse.message);
                     alertDialogBuilder.setMessage(R.string.brapi_save_field_error);
