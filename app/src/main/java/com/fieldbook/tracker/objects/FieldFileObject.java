@@ -5,6 +5,7 @@ import com.fieldbook.tracker.utilities.CSVReader;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -352,6 +353,7 @@ public class FieldFileObject {
 
         public String[] readNext() {
 
+            DataFormatter fmt = new DataFormatter();
             ArrayList<XSSFRow> rows = new ArrayList<>();
             XSSFSheet sheet = wb.getSheetAt(0);
 
@@ -366,7 +368,7 @@ public class FieldFileObject {
             ArrayList<String> data = new ArrayList<>();
             for (Iterator<Cell> it = rows.get(currentRow).cellIterator(); it.hasNext();) {
                 XSSFCell cell = (XSSFCell) it.next();
-                data.add(getCellStringValue(cell));
+                data.add(fmt.formatCellValue(cell));
             }
 
             currentRow += 1;
