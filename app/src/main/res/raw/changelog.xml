@@ -7,6 +7,7 @@
         <new>Database export now exports to single zipped file</new>
         <new>Resuming collection now navigates to the last selected trait</new>
         <new>Support for XLSX files</new>
+        <new>New sound for missing barcodes when navigating</new>
         <bugfix>Numerous bug fixes</bugfix>
     </release>
 

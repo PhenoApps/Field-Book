@@ -413,7 +413,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             public void onClick(View v) {
                 new IntentIntegrator(thisActivity)
                         .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(true)
+                        .setBeepEnabled(false)
                         .setRequestCode(99)
                         .initiateScan();
             }
@@ -1026,7 +1026,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             case R.id.barcodeScan:
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(true)
+                        .setBeepEnabled(false)
                         .setRequestCode(98)
                         .initiateScan();
                 break;
@@ -1601,7 +1601,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             public void onClick(DialogInterface dialogInterface, int i) {
                 new IntentIntegrator(thisActivity)
                         .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(true)
+                        .setBeepEnabled(false)
                         .setRequestCode(98)
                         .initiateScan();
             }
