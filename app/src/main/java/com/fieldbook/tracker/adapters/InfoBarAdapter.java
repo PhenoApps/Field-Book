@@ -32,6 +32,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.fieldbook.tracker.database.dao.ObservationDao;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.utilities.PrefsConstants;
+
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHolder> {
 
@@ -93,30 +104,59 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
 
     private void configureSpinner(final DynamicWidthSpinner spinner, final TextView text, final int position) {
 
-        final String[] prefixTraits = dataHelper.getRangeColumnNames();
+        String expId = Integer.toString(getSharedPref().getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
-        ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(this.context, R.layout.custom_spinnerlayout, prefixTraits);
+        //the prefix obs. unit. traits s.a plot_id, row, column, defined by the user
+        String[] prefixTraits = dataHelper.getRangeColumnNames();
+
+        //the observation variable traits
+        String[] obsTraits = dataHelper.getAllTraitObjects().stream().map(TraitObject::getTrait).toArray(String[]::new);
+
+        //combine the traits to be viewed within info bars
+        final String[] allTraits = ArrayUtils.addAll(prefixTraits, obsTraits);
+
+        ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(this.context, R.layout.custom_spinnerlayout, allTraits);
 
         spinner.setAdapter(prefixArrayAdapter);
 
-        int spinnerPosition = prefixArrayAdapter.getPosition(getSharedPref().getString("DROP" + position, prefixTraits[0]));
+        int spinnerPosition = prefixArrayAdapter.getPosition(getSharedPref().getString("DROP" + position, allTraits[0]));
         spinner.setSelection(spinnerPosition);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int pos, long arg3) {
                 try {
-                    String[] traitTextArray = dataHelper.getDropDownRange(prefixTraits[pos], plotId);
 
-                    if (traitTextArray == null || traitTextArray.length == 0) {
-                        text.setText(context.getString(R.string.main_infobar_data_missing));
-                    } else {
-                        text.setText(traitTextArray[0]);
+                    //when an item is selected, check if its a prefix trait or a variable and populate the info bar values
+                    String infoTrait = allTraits[pos];
+
+                    ArrayList<String> infoBarValues = null;
+                    if (Arrays.asList(prefixTraits).contains(infoTrait)) { //get data from obs. properties (range)
+
+                        infoBarValues = new ArrayList<>(Arrays.asList(dataHelper.getDropDownRange(infoTrait, plotId)));
+
+                    } else if (Arrays.asList(obsTraits).contains(infoTrait)) { //get data from observations
+
+                        infoBarValues = new ArrayList<>(Collections.singletonList(
+                                ObservationDao.Companion.getUserDetail(expId, plotId).get(infoTrait)));
                     }
 
-                    getSharedPref().edit().putString("DROP" + position, prefixTraits[pos]).apply();
+                    if (infoBarValues == null || infoBarValues.size() == 0) {
+
+                        text.setText(context.getString(R.string.main_infobar_data_missing));
+
+                    } else {
+
+                        text.setText(infoBarValues.get(0));
+
+                    }
+
+                    getSharedPref().edit().putString("DROP" + position, allTraits[pos]).apply();
+
                 } catch (Exception e) {
+
                     e.printStackTrace();
+
                 }
 
                 spinner.requestFocus();
