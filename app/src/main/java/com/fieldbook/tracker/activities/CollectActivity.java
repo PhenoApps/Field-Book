@@ -483,8 +483,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
      * Moves to specific plot/range/plot_id
      * @param type the type of search, search, plot, range or id
      * @param rangeID the array of range ids
-     * @param range the range to search for
-     * @param plot the plot to serach for
+     * @param range the primary id
+     * @param plot the secondary id
      * @param data data to search for
      * @param trait the trait to navigate to
      * @return true if the search was successful, false otherwise
@@ -497,6 +497,18 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         // search moveto
         if (type.equals("search")) {
+            for (int j = 1; j <= rangeID.length; j++) {
+                rangeBox.setRangeByIndex(j - 1);
+
+                if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
+                    moveToResultCore(j);
+                    return true;
+                }
+            }
+        }
+
+        // new type to skip the toast message and keep previous functionality
+        if (type.equals("quickgoto")) {
             for (int j = 1; j <= rangeID.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
@@ -548,7 +560,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
         }
 
-        Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+        if (!type.equals("quickgoto"))
+            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
 
         return false;
     }
@@ -2261,8 +2274,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         private TextView rangeName;
         private TextView plotName;
 
+        //edit text used for quick goto feature range = primary id
         private EditText range;
+        //edit text used for quick goto feature plot = secondary id
         private EditText plot;
+
         private TextView tvRange;
         private TextView tvPlot;
 
@@ -2270,6 +2286,12 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         private ImageView rangeRight;
 
         private Handler repeatHandler;
+
+        /**
+         * Variables to track Quick Goto searching
+         */
+        private boolean rangeEdited = false;
+        private boolean plotEdited = false;
 
         /**
          * unique plot names used in range queries
@@ -2407,13 +2429,46 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             return s;
         }
 
+        /**
+         * This listener is used in the QuickGoto feature.
+         * This listens to the primary/secondary edit text's in the rangebox.
+         * When the soft keyboard enter key action is pressed (IME_ACTION_DONE)
+         * this will use the moveToSearch function.
+         * First it will search for both primary/secondary ids if they have both been changed.
+         * If one has not been changed or a plot is not found for both terms then it defaults to
+         * a search with whatever was changed last.
+         * @param edit the edit text to assign this listener to
+         * @param searchType the type used in moveToSearch, either plot or range
+         */
         private OnEditorActionListener createOnEditorListener(final EditText edit, final String searchType) {
             return new OnEditorActionListener() {
                 public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                     // do not do bit check on event, crashes keyboard
                     if (actionId == EditorInfo.IME_ACTION_DONE) {
                         try {
-                            moveToSearch(searchType, rangeID, null, null, view.getText().toString(), -1);
+
+                            //if both quick goto et's have been changed, attempt a search with them
+                            if (rangeBox.rangeEdited && rangeBox.plotEdited) {
+
+                                //if the search fails back-down to the original search
+                                if (!moveToSearch("quickgoto", rangeID,
+                                        rangeBox.range.getText().toString(),
+                                        rangeBox.plot.getText().toString(), null, -1)) {
+
+                                    moveToSearch(searchType, rangeID, null, null, view.getText().toString(), -1);
+
+                                }
+
+                            } else { //original search if only one has changed
+
+                                moveToSearch(searchType, rangeID, null, null, view.getText().toString(), -1);
+
+                            }
+
+                            //reset the changed flags
+                            rangeBox.rangeEdited = false;
+                            rangeBox.plotEdited = false;
+
                             InputMethodManager imm = parent.getIMM();
                             imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
                         } catch (Exception ignore) {
@@ -2656,12 +2711,38 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             ed.apply();
         }
 
+        private TextWatcher createTextWatcher(String type) {
+            return new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                    if (type.equals("range")) rangeEdited = true;
+                    else plotEdited = true;
+                }
+            };
+        }
+
         void switchVisibility(boolean textview) {
             if (textview) {
                 tvRange.setVisibility(TextView.GONE);
                 tvPlot.setVisibility(TextView.GONE);
                 range.setVisibility(EditText.VISIBLE);
                 plot.setVisibility(EditText.VISIBLE);
+
+                //when the et's are visible create text watchers to listen for changes
+                range.addTextChangedListener(createTextWatcher("range"));
+                plot.addTextChangedListener(createTextWatcher("plot"));
+
             } else {
                 tvRange.setVisibility(TextView.VISIBLE);
                 tvPlot.setVisibility(TextView.VISIBLE);
