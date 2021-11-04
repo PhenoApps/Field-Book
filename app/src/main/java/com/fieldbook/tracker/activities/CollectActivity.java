@@ -211,6 +211,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private InputMethodManager imm;
     private Boolean dataLocked = false;
 
+    //variable used to skip the navigate to last used trait in onResume
+    private boolean mSkipLastUsedTrait = false;
+
     public static void disableViews(ViewGroup layout) {
         layout.setEnabled(false);
         for (int i = 0; i < layout.getChildCount(); i++) {
@@ -728,7 +731,13 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         checkLastOpened();
 
-        navigateToLastOpenedTrait();
+        if (!mSkipLastUsedTrait) {
+
+            mSkipLastUsedTrait = false;
+
+            navigateToLastOpenedTrait();
+
+        }
     }
 
     /**
@@ -1721,6 +1730,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
                     moveToSearch("id", rangeID, null, null, inputPlotId, trait);
+                    mSkipLastUsedTrait = true;
                 }
                 break;
             case 98:
