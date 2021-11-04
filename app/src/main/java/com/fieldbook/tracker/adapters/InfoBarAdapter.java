@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -63,9 +64,9 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
     @Override
     public InfoBarAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
-        LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
+        View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.selector_dropdown, parent, false);
-        return new ViewHolder(v);
+        return new ViewHolder((ConstraintLayout) v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -151,9 +152,9 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
     // you provide access to all the views for a data item in a view holder
     static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        LinearLayout mTextView;
+        ConstraintLayout mTextView;
 
-        ViewHolder(LinearLayout v) {
+        ViewHolder(ConstraintLayout v) {
             super(v);
             mTextView = v;
         }
