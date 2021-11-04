@@ -416,7 +416,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             public void onClick(View v) {
                 new IntentIntegrator(thisActivity)
                         .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(true)
+                        .setBeepEnabled(false)
                         .setRequestCode(99)
                         .initiateScan();
             }
@@ -482,11 +482,20 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
-    // Moves to specific plot/range/plot_id
-    private void moveToSearch(String type, int[] rangeID, String range, String plot, String data, int trait) {
+    /**
+     * Moves to specific plot/range/plot_id
+     * @param type the type of search, search, plot, range or id
+     * @param rangeID the array of range ids
+     * @param range the range to search for
+     * @param plot the plot to serach for
+     * @param data data to search for
+     * @param trait the trait to navigate to
+     * @return true if the search was successful, false otherwise
+     */
+    private boolean moveToSearch(String type, int[] rangeID, String range, String plot, String data, int trait) {
 
         if (rangeID == null) {
-            return;
+            return false;
         }
 
         // search moveto
@@ -496,7 +505,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                 if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
                     moveToResultCore(j);
-                    return;
+                    return true;
                 }
             }
         }
@@ -508,7 +517,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                 if (rangeBox.getCRange().plot.equals(data)) {
                     moveToResultCore(j);
-                    return;
+                    return true;
                 }
             }
         }
@@ -520,7 +529,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                 if (rangeBox.getCRange().range.equals(data)) {
                     moveToResultCore(j);
-                    return;
+                    return true;
                 }
             }
         }
@@ -537,12 +546,14 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                         moveToResultCore(j);
                     } else moveToResultCore(j, trait);
 
-                    return;
+                    return true;
                 }
             }
         }
 
         Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+
+        return false;
     }
 
     private void moveToResultCore(int j) {
@@ -1024,7 +1035,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             case R.id.barcodeScan:
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(true)
+                        .setBeepEnabled(false)
                         .setRequestCode(98)
                         .initiateScan();
                 break;
@@ -1599,7 +1610,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             public void onClick(DialogInterface dialogInterface, int i) {
                 new IntentIntegrator(thisActivity)
                         .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(true)
+                        .setBeepEnabled(false)
                         .setRequestCode(98)
                         .initiateScan();
             }
@@ -1739,7 +1750,12 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     inputPlotId = plotSearchResult.getContents();
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
-                    moveToSearch("id", rangeID, null, null, inputPlotId, -1);
+                    boolean success = moveToSearch("id", rangeID, null, null, inputPlotId, -1);
+
+                    //play success or error sound if the plotId was not found
+                    if (success) {
+                        playSound("hero_simple_celebration");
+                    } else playSound("alert_error");
                 }
                 break;
             case 99:
