@@ -24,6 +24,7 @@ import java.util.Iterator;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 
+//TODO when merged with xlsx edit getColumnSet
 public class FieldFileObject {
     public static FieldFileBase create(final String path) {
         switch (getExtension(path)) {
@@ -138,15 +139,18 @@ public class FieldFileObject {
                     columns = cr.readNext();
 
                     if (columns != null) {
-                        if (check.containsKey(columns[idColPosition])) {
-                            cr.close();
-                            return new HashMap<>();
-                        } else {
-                            check.put(columns[idColPosition], columns[idColPosition]);
-                        }
+                        String unique = columns[idColPosition];
+                        if (!unique.isEmpty()) {
+                            if (check.containsKey(unique)) {
+                                cr.close();
+                                return new HashMap<>();
+                            } else {
+                                check.put(unique, unique);
+                            }
 
-                        if (columns[idColPosition].contains("/") || columns[idColPosition].contains("\\")) {
-                            specialCharactersFail = true;
+                            if (unique.contains("/") || unique.contains("\\")) {
+                                specialCharactersFail = true;
+                            }
                         }
                     }
                 }
@@ -234,14 +238,16 @@ public class FieldFileObject {
             for (int s = 0; s < wb.getSheet(0).getRows(); s++) {
                 String value = wb.getSheet(0).getCell(idColPosition, s).getContents();
 
-                if (check.containsKey(value)) {
-                    return new HashMap<>();
-                } else {
-                    check.put(value, value);
-                }
+                if (!value.isEmpty()) {
+                    if (check.containsKey(value)) {
+                        return new HashMap<>();
+                    } else {
+                        check.put(value, value);
+                    }
 
-                if (value.contains("/") || value.contains("\\")) {
-                    specialCharactersFail = true;
+                    if (value.contains("/") || value.contains("\\")) {
+                        specialCharactersFail = true;
+                    }
                 }
             }
             return check;
