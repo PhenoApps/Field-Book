@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities;
 
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -113,27 +114,17 @@ public class BrapiAuthActivity extends AppCompatActivity {
             Uri redirectURI = Uri.parse("https://fieldbook.phenoapps.org/");
             Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
 
-            ConnectionBuilder builder = new ConnectionBuilder() {
-                @NonNull
-                @NotNull
-                @Override
-                public HttpURLConnection openConnection(@NonNull @NotNull Uri uri) throws IOException {
+            ConnectionBuilder builder = uri -> {
 //                    Preconditions.checkNotNull(uri, "url must not be null");
-                    Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
-                            "scheme or uri must be http or https");
-                    HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
+                Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
+                        "scheme or uri must be http or https");
+                HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
 //                    conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
 //                    conn.setReadTimeout(READ_TIMEOUT_MS);
-                    conn.setInstanceFollowRedirects(false);
-                    return conn;                }
+                conn.setInstanceFollowRedirects(false);
+                return conn;
             };
 
-            //oidc requires using https or this will cause app to crash within their AuthorizationService code, maybe bug?
-            if (oidcConfigURI.toString().contains("http://")) {
-
-                Utils.makeToast(this, getString(R.string.act_brapi_auth_http_used));
-
-            }
             AuthorizationServiceConfiguration.fetchFromUrl(oidcConfigURI,
                     new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
                         public void onFetchConfigurationCompleted(
