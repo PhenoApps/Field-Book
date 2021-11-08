@@ -68,10 +68,15 @@ public class GeneralKeys {
     public static final String PAIR_BLUETOOTH                       = GEONAV_PREFIX + "PAIR_BLUETOOTH";
     public static final String PAIRED_DEVICE_ADDRESS                = GEONAV_PREFIX + "PAIRED_DEVICE_ADDRESS";
     public static final String GEONAV_AUTO                          = GEONAV_PREFIX + "GEONAV_AUTO";
+    public static final String GEONAV_COMPASS                       = GEONAV_PREFIX + "GEONAV_COMPASS";
+    public static final String GEONAV_LOG                           = GEONAV_PREFIX + "GEONAV_LOG";
     // @formatter:on
 
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE             = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
+
+    //Collect Activity
+    public static final String LAST_USED_TRAIT                      = "com.fieldbook.tracker.LAST_USED_TRAIT";
 
     private GeneralKeys() {
 

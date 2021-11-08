@@ -2275,7 +2275,7 @@ public class DataHelper {
 
     }
 
-    private String getDatabasePath(Context context) {
+    public static String getDatabasePath(Context context) {
         return context.getDatabasePath(DATABASE_NAME).getPath();
     }
 

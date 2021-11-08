@@ -70,10 +70,24 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:icon="@drawable/ic_explore_black_24dp"
+            android:icon="@drawable/ic_map_search"
             android:key="com.fieldbook.tracker.geonav.ENABLE_GEONAV"
             android:summary="@string/pref_geonav_enable_summary"
             android:title="@string/pref_geonav_enable_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_explore_black_24dp"
+            android:key="com.fieldbook.tracker.geonav.GEONAV_COMPASS"
+            android:summary="@string/pref_geonav_compass_summary"
+            android:title="@string/pref_geonav_compass_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_script_text_outline"
+            android:key="com.fieldbook.tracker.geonav.GEONAV_LOG"
+            android:summary="@string/pref_geonav_log_summary"
+            android:title="@string/pref_geonav_log_title" />
 
         <ListPreference
             android:defaultValue="0"

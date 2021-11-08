@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.activities;
 
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -9,7 +8,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,12 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.Utils;
 
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
-import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.Preconditions;
@@ -44,11 +41,14 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
         SharedPreferences sp = getSharedPreferences("Settings", 0);
         // Start our login process
-        String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
-        if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
-            authorizeBrAPI(sp, this);
-        }else if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
-            authorizeBrAPI_OLD(sp, this);
+        //when coming back from deep link this check keeps app from auto-re-authenticating
+        if (getIntent() != null && getIntent().getData() == null) {
+            String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+            if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
+                authorizeBrAPI(sp, this);
+            }else if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
+                authorizeBrAPI_OLD(sp, this);
+            }
         }
     }
 
@@ -69,7 +69,6 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
         if (data != null) {
             // authorization completed
-
             String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
             if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
                 checkBrapiAuth(data);
@@ -81,11 +80,24 @@ public class BrapiAuthActivity extends AppCompatActivity {
             // coming from a deep link if it is coming from deep link on pause and resume.
             getIntent().setData(null);
 
+            setResult(RESULT_OK);
+
             finish();
+
         } else if (ex != null) {
+
             // authorization completed in error
             authError(ex);
+
             finish();
+
+        } else { //returning from deep link with null data should finish activity
+            //otherwise the progress bar hangs
+
+            getIntent().setData(null);
+
+            finish();
+
         }
     }
 
@@ -100,6 +112,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
             String clientId = "fieldbook";
             Uri redirectURI = Uri.parse("https://fieldbook.phenoapps.org/");
             Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
+
             ConnectionBuilder builder = new ConnectionBuilder() {
                 @NonNull
                 @NotNull
@@ -115,6 +128,12 @@ public class BrapiAuthActivity extends AppCompatActivity {
                     return conn;                }
             };
 
+            //oidc requires using https or this will cause app to crash within their AuthorizationService code, maybe bug?
+            if (oidcConfigURI.toString().contains("http://")) {
+
+                Utils.makeToast(this, getString(R.string.act_brapi_auth_http_used));
+
+            }
             AuthorizationServiceConfiguration.fetchFromUrl(oidcConfigURI,
                     new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
                         public void onFetchConfigurationCompleted(
@@ -143,14 +162,19 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
                             authService.performAuthorizationRequest(
                                     authRequest,
-                                    PendingIntent.getActivity(context, 0, responseIntent, 0),
                                     PendingIntent.getActivity(context, 0, responseIntent, 0));
 
                         }
 
                     }, builder);
+
         } catch (Exception ex) {
+
             authError(ex);
+
+            setResult(RESULT_CANCELED);
+
+            finish();
         }
     }
 

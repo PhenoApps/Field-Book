@@ -18,7 +18,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -62,14 +61,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
-import androidx.core.view.MenuItemCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
-import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
-import com.fieldbook.tracker.database.models.ObservationModel;
+import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.location.gnss.ConnectThread;
@@ -105,12 +102,16 @@ import org.jetbrains.annotations.NotNull;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -118,14 +119,14 @@ import java.util.TimerTask;
 import kotlin.Pair;
 
 import static com.fieldbook.tracker.activities.ConfigActivity.dt;
-import static com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.ACTION_BROADCAST_GNSS;
+import static com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.ACTION_BROADCAST_GNSS_ROVER;
 
 /**
  * All main screen logic resides here
  */
 
 @SuppressLint("ClickableViewAccessibility")
-public class CollectActivity extends AppCompatActivity implements SensorEventListener {
+public class CollectActivity extends AppCompatActivity implements SensorEventListener, GPSTracker.GPSTrackerListener {
 
     public static boolean searchReload;
     public static String searchRange;
@@ -135,6 +136,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     public static Activity thisActivity;
     public static String TAG = "Field Book";
     public static String GEOTAG = "GeoNav";
+
+    private FileWriter mGeoNavLogWriter = null;
 
     ImageButton deleteValue;
     ImageButton missingValue;
@@ -190,7 +193,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private Boolean mGeoNavActivated = false;
     private float[] mGravity;
     private float[] mGeomagneticField;
-    private LocationManager mLocationManager;
     private Float mDeclination = null;
     private GPSTracker mGpsTracker;
     private Double mAzimuth = null;
@@ -199,6 +201,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private LocalBroadcastManager mLocalBroadcastManager = null;
     private ConnectThread mConnectThread = null;
     private Location mExternalLocation = null;
+    private Location mInternalLocation = null;
+    private double mTeslas = .0;
+    private double mLastGeoNavTime = 0L;
+    private boolean mFirstLocationFound = false;
+    private BluetoothDevice mLastDevice = null;
 
     private TextWatcher cvText;
     private InputMethodManager imm;
@@ -406,7 +413,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             public void onClick(View v) {
                 new IntentIntegrator(thisActivity)
                         .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(true)
+                        .setBeepEnabled(false)
                         .setRequestCode(99)
                         .initiateScan();
             }
@@ -472,11 +479,20 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
-    // Moves to specific plot/range/plot_id
-    private void moveToSearch(String type, int[] rangeID, String range, String plot, String data, int trait) {
+    /**
+     * Moves to specific plot/range/plot_id
+     * @param type the type of search, search, plot, range or id
+     * @param rangeID the array of range ids
+     * @param range the range to search for
+     * @param plot the plot to serach for
+     * @param data data to search for
+     * @param trait the trait to navigate to
+     * @return true if the search was successful, false otherwise
+     */
+    private boolean moveToSearch(String type, int[] rangeID, String range, String plot, String data, int trait) {
 
         if (rangeID == null) {
-            return;
+            return false;
         }
 
         // search moveto
@@ -486,7 +502,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                 if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
                     moveToResultCore(j);
-                    return;
+                    return true;
                 }
             }
         }
@@ -498,7 +514,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                 if (rangeBox.getCRange().plot.equals(data)) {
                     moveToResultCore(j);
-                    return;
+                    return true;
                 }
             }
         }
@@ -510,7 +526,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                 if (rangeBox.getCRange().range.equals(data)) {
                     moveToResultCore(j);
-                    return;
+                    return true;
                 }
             }
         }
@@ -527,12 +543,14 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                         moveToResultCore(j);
                     } else moveToResultCore(j, trait);
 
-                    return;
+                    return true;
                 }
             }
         }
 
         Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+
+        return false;
     }
 
     private void moveToResultCore(int j) {
@@ -583,6 +601,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         stopGeoNav();
 
+        //save the last used trait
+        ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.currentTrait.getTrait()).apply();
+
         super.onPause();
     }
 
@@ -593,9 +614,59 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             rangeBox.saveLastPlot();
         }
 
-        stopGeoNav();
-
         super.onDestroy();
+    }
+
+    /**
+     * Called in onResume and stopped in onPause
+     * Starts a file in storage/geonav/log.txt
+     */
+    private void setupGeoNavLogger() {
+
+        if (ep.getBoolean(GeneralKeys.GEONAV_LOG, false)) {
+
+            try {
+
+                File geonavFolder = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH)
+                        + Constants.GEONAV_LOG_PATH);
+
+                String interval = ep.getString(GeneralKeys.UPDATE_INTERVAL, "0");
+                String address = ep.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
+                        .replaceAll(":", "-")
+                        .replaceAll("\\s", "_");
+                String thetaPref = ep.getString(GeneralKeys.SEARCH_ANGLE, "0");
+
+                File file = new File(geonavFolder, "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv");
+
+                if (!geonavFolder.exists()) {
+
+                    if (geonavFolder.mkdir()) {
+
+                        Log.d(TAG, "GeoNav Logger started successfully.");
+
+                        mGeoNavLogWriter = new FileWriter(file, true);
+
+                    } else {
+
+                        Log.d(TAG, "GeoNav Logger start failed.");
+                    }
+
+                } else {
+
+                    mGeoNavLogWriter = new FileWriter(file, true);
+
+                }
+
+            } catch (IOException io) {
+
+                io.printStackTrace();
+
+            } catch (SecurityException se) {
+
+                se.printStackTrace();
+
+            }
+        }
     }
 
     @Override
@@ -654,16 +725,59 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
         }
 
-        setupLocalBroadcastManager();
-
         ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
 
         if (ep.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+
+            setupLocalBroadcastManager();
+
+            //setup logger whenever activity resumes
+            setupGeoNavLogger();
 
             startGeoNav();
         }
 
         checkLastOpened();
+
+        navigateToLastOpenedTrait();
+    }
+
+    /**
+     * LAST_USED_TRAIT is a preference saved in CollectActivity.onPause
+     *
+     * This function is called to use that preference and navigate to the corresponding trait.
+     */
+    private void navigateToLastOpenedTrait() {
+
+        //navigate to the last used trait using preferences
+        String trait = ep.getString(GeneralKeys.LAST_USED_TRAIT, null);
+
+        if (trait != null) {
+
+            //get all traits, filter the preference trait and check it's visibility
+            ArrayList<TraitObject> traits = ObservationVariableDao.Companion.getAllTraitObjects();
+
+            try {
+
+                Optional<TraitObject> result = traits.stream().filter((t) -> t.getTrait().equals(trait)).findFirst();
+
+                if (result.isPresent()) {
+
+                    TraitObject resultObj = result.get();
+
+                    if (resultObj.getVisible()) {
+
+                        traitBox.setSelection(resultObj.getRealPosition()-1);
+
+                    }
+                }
+
+            } catch (NoSuchElementException e) {
+
+                e.printStackTrace();
+
+            }
+        }
     }
 
     /**
@@ -912,7 +1026,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             case R.id.barcodeScan:
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(true)
+                        .setBeepEnabled(false)
                         .setRequestCode(98)
                         .initiateScan();
                 break;
@@ -923,6 +1037,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 Intent i = new Intent();
                 i.setClassName(CollectActivity.this,
                         DataGridActivity.class.getName());
+                i.putExtra("plot_id", rangeBox.paging);
+                i.putExtra("trait", traitBox.currentTrait.getRealPosition());
                 startActivityForResult(i, 2);
                 break;
             case R.id.lockData:
@@ -967,38 +1083,32 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
      * Begins listening for sensor events to obtain an azimuth for the user.
      * Starts a timer (with interval defined in the preferences) that runs the IZ algorithm.
      */
-    private void startGeoNav() {
-
-        Log.d(GEOTAG, "Starting GeoNav search.");
+    public void startGeoNav() {
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
         if (sensorManager != null) {
 
-            Log.d(GEOTAG, "Sensor manager registering.");
-
             sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_UI);
             sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_UI);
 
             //set update interval from the preferences can be 1s, 5s or 10s
-            String interval = ep.getString(GeneralKeys.UPDATE_INTERVAL, "0");
+            String interval = ep.getString(GeneralKeys.UPDATE_INTERVAL, "1");
             long period = 1000L;
             switch (interval) {
-                case "0": {
+                case "1": {
                     period = 1000L;
                     break;
                 }
-                case "1": {
+                case "5": {
                     period = 5000L;
                     break;
                 }
-                case "2": {
+                case "10": {
                     period = 10000L;
                     break;
                 }
             }
-
-            Log.d(GEOTAG, "Geo Preference chose interval: " + period);
 
             //find the mac address of the device, if not found then start the internal GPS
             String address = ep.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "");
@@ -1007,7 +1117,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             if (address == null || address.isEmpty() || address.equals(internalGps)) {
 
-                mGpsTracker = new GPSTracker(this);
+                //update no matter the distance change and every 10s
+                mGpsTracker = new GPSTracker(this, this, 0, 10000);
 
             } else {
 
@@ -1033,9 +1144,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 }
             }, 2000L, period);
 
-        } else {
+            GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, "UTC, primary, secondary, start latitude, start longitude, end latitude, end longitude, azimuth, teslas, bearing, distance, thetaCheck, closest\n");
 
-            Log.d(GEOTAG, "Sensor manager unsuccessfully registered.");
+        } else {
 
             Toast.makeText(this, R.string.activity_collect_sensor_manager_failed,
                     Toast.LENGTH_SHORT).show();
@@ -1055,12 +1166,17 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                 if (mLocalBroadcastManager != null) {
 
-                    Intent broadcastNmea = new Intent(ACTION_BROADCAST_GNSS);
+                    Intent broadcastNmea = new Intent(ACTION_BROADCAST_GNSS_ROVER);
                     broadcastNmea.putExtra(GNSSResponseReceiver.MESSAGE_STRING_EXTRA_KEY, nmea);
 
                     mLocalBroadcastManager.sendBroadcast(broadcastNmea);
                 }
 
+            } else if (msg.what == GNSSResponseReceiver.MESSAGE_OUTPUT_FAIL) {
+
+                if (mLastDevice != null) {
+                    setupCommunicationsUi(mLastDevice);
+                }
             }
 
         } else return false;
@@ -1106,38 +1222,40 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
      */
     private void setupCommunicationsUi(BluetoothDevice device) {
 
+        BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+
+        mLastDevice = device;
+
         mConnectThread = new ConnectThread(device, mHandler);
 
         mConnectThread.start();
 
     }
 
-    /**
-     * When an external gps unit is used, a local bm must be setup to
-     * communicate between the activity and the connect thread.
-     */
-    private void setupLocalBroadcastManager() {
+    private final GNSSResponseReceiver mGnssResponseReceiver = new GNSSResponseReceiver() {
+        @Override
+        public void onGNSSParsed(@NotNull NmeaParser parser) {
 
-        //initialize lbm and create a filter to broadcast nmea strings
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+            double time = Double.parseDouble(parser.getUtc());
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_BROADCAST_GNSS);
+            //only update the gps if it is a newly parsed coordinate
+            if (time > mLastGeoNavTime) {
 
-        /*
-         * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
-         * The parser parameter is a model for the parsed message, and is used to populate the
-         * trait layout UI.
-         */
-        mLocalBroadcastManager.registerReceiver(new GNSSResponseReceiver() {
-            @Override
-            public void onGNSSParsed(@NotNull NmeaParser parser) {
+                if (!mFirstLocationFound) {
+                    mFirstLocationFound = true;
+                    playSound("cycle");
+                    Utils.makeToast(CollectActivity.this, getString(R.string.act_collect_geonav_first_location_found));
+                }
 
+                mLastGeoNavTime = time;
                 String lat = GeodeticUtils.Companion.truncateFixQuality(parser.getLatitude(), parser.getFix());
                 String lng = GeodeticUtils.Companion.truncateFixQuality(parser.getLongitude(), parser.getFix());
                 String alt = parser.getAltitude();
                 int altLength = alt.length();
-                alt = alt.substring(0, altLength-1); //drop the "M"
+                alt = alt.substring(0, altLength - 1); //drop the "M"
+
+                //always log external gps updates
+                GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, time + ",null,null," + lat + "," + lng + ",null,null,null,null,null,null,null,null\n");
 
                 mExternalLocation = new Location("GeoNav Rover");
 
@@ -1158,12 +1276,33 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                 if (!Double.isNaN(latValue) && !Double.isNaN(lngValue)) {
 
+                    mExternalLocation.setTime((long) time);
                     mExternalLocation.setLatitude(latValue);
                     mExternalLocation.setLongitude(lngValue);
                     mExternalLocation.setAltitude(altValue);
                 }
             }
-        }, filter);
+        }
+    };
+
+    /**
+     * When an external gps unit is used, a local bm must be setup to
+     * communicate between the activity and the connect thread.
+     */
+    private void setupLocalBroadcastManager() {
+
+        //initialize lbm and create a filter to broadcast nmea strings
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_BROADCAST_GNSS_ROVER);
+
+        /*
+         * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
+         * The parser parameter is a model for the parsed message, and is used to populate the
+         * trait layout UI.
+         */
+        mLocalBroadcastManager.registerReceiver(mGnssResponseReceiver, filter);
     }
 
     /**
@@ -1180,40 +1319,44 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         String thetaPref = ep.getString(GeneralKeys.SEARCH_ANGLE, "0");
         double theta = 22.5;
         switch (thetaPref) {
-            case "0": {
+            case "22.5": {
                 theta = 22.5;
                 break;
             }
-            case "1": {
+            case "45": {
                 theta = 45.0;
                 break;
             }
-            case "2": {
+            case "67.5": {
                 theta = 67.5;
                 break;
             }
-            case "3": {
+            case "90": {
                 theta = 90.0;
                 break;
             }
         }
 
-        Log.d(GEOTAG, "Impact Zone angle: " + theta);
+        boolean isCompass = ep.getBoolean(GeneralKeys.GEONAV_COMPASS, true);
 
         //user must have a valid pointing direction before attempting the IZ
         if (mAzimuth != null) {
 
             //initialize the start position and fill with external or internal GPS coordinates
             Location start = new Location("start location");
-            if (internal && mGpsTracker != null && mGpsTracker.canGetLocation()) {
-                start.setLongitude(mGpsTracker.getLongitude());
-                start.setLatitude(mGpsTracker.getLatitude());
+            if (internal && mInternalLocation != null) {
+
+                start = mInternalLocation;
+
             } else if (!internal) {
+
                 start = mExternalLocation;
             }
 
             //get current field id
             int studyId = ep.getInt("SelectedFieldExpId", 0);
+
+            dt.open();
 
             //find all observation units within the field
             ObservationUnitModel[] units = ObservationUnitDao.Companion.getAll(studyId);
@@ -1227,19 +1370,16 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
 
             //run the algorithm and time how long it takes
-            long toc = System.currentTimeMillis();
-            Log.d(GEOTAG, "Impact Zone searching " + coordinates.size() + " locations.");
+            //long toc = System.currentTimeMillis();
 
             if (start != null) {
 
                 Pair<ObservationUnitModel, Double> target = GeodeticUtils.Companion
-                        .impactZoneSearch(start,
+                        .impactZoneSearch(mGeoNavLogWriter, start,
                                 coordinates.toArray(new ObservationUnitModel[] {}),
-                                mAzimuth, theta);
+                                mAzimuth, theta, mTeslas, isCompass);
 
-                long tic = System.currentTimeMillis();
-
-                Log.d(GEOTAG, "Impact search took: " + (tic-toc)*10e-9);
+                //long tic = System.currentTimeMillis();
 
                 //if we received a result then show it to the user, create a button to navigate to the plot
                 if (target.getFirst() != null) {
@@ -1273,14 +1413,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                         });
                     }
-
-                    Log.d(TAG, "Found target " + id);
                 }
             }
-
-        } else {
-
-            Log.d(TAG, "Waiting for location...");
         }
     }
 
@@ -1288,7 +1422,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
      * Called when the toolbar GeoNav Enable icon is switched to off, or the activity is paused.
      * Simply stops listening to the sensor manager and stops the geonav timer.
      */
-    private void stopGeoNav() {
+    public void stopGeoNav() {
 
         ((SensorManager) getSystemService(SENSOR_SERVICE)).unregisterListener(this);
 
@@ -1299,6 +1433,23 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             mScheduler.cancel();
             mScheduler = null;
         }
+
+        //flush and close geo nav log writer
+        try {
+            if (mGeoNavLogWriter != null) {
+                mGeoNavLogWriter.flush();
+                mGeoNavLogWriter.close();
+            }
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+
+        if (mLocalBroadcastManager != null) {
+            mLocalBroadcastManager.unregisterReceiver(mGnssResponseReceiver);
+            mLocalBroadcastManager = null;
+        }
+
+        if (mConnectThread != null) mConnectThread.cancel();
     }
 
     /**
@@ -1316,16 +1467,16 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         if (event != null && event.sensor != null) {
 
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                mGravity = event.values;
+                mGravity = GeodeticUtils.Companion.lowPassFilter(event.values.clone(), mGravity);
             } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-                mGeomagneticField = event.values;
+                mGeomagneticField = GeodeticUtils.Companion.lowPassFilter(event.values.clone(), mGeomagneticField);
             }
 
             if (mGravity != null && mGeomagneticField != null) {
 
-                double teslas = calculateNoise(mGeomagneticField);
+                mTeslas = calculateNoise(mGeomagneticField);
 
-                if ((teslas < 25 || teslas > 65) && mNotWarnedInterference) {
+                if ((mTeslas < 25 || mTeslas > 65) && mNotWarnedInterference) {
                     mNotWarnedInterference = false;
                     Toast.makeText(this, R.string.activity_collect_geomagnetic_noise_detected,
                             Toast.LENGTH_SHORT).show();
@@ -1347,25 +1498,34 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                      * Likewise, when facing east, this angle is π/2, and when facing west, this angle is -π/2.
                      * The range of values is -π to π.
                      */
-                    mAzimuth = (orientation[0] * 360 / (2 * Math.PI));
+                    mAzimuth = Math.toDegrees(orientation[0]);
+                    mAzimuth = (mAzimuth + 360) % 360;
 
-                    if (mGpsTracker != null) {
+                    //"${(Math.toDegrees(orientation[0].toDouble()).toInt() + 360) % 360}"
 
-                        mDeclination = mGpsTracker.getDeclination();
-
-                    } else if (mExternalLocation != null) {
+                    if (mExternalLocation != null) {
 
                         mDeclination = new GeomagneticField(
                                 (float) mExternalLocation.getLatitude(),
                                 (float) mExternalLocation.getLongitude(),
                                 (float) mExternalLocation.getAltitude(),
                                 System.currentTimeMillis()).getDeclination();
+
+                    } else if (mInternalLocation != null) {
+
+                        mDeclination = new GeomagneticField(
+                                (float) mInternalLocation.getLatitude(),
+                                (float) mInternalLocation.getLongitude(),
+                                (float) mInternalLocation.getAltitude(),
+                                System.currentTimeMillis()).getDeclination();
+
                     }
 
                     //if the declination has been found, correct the direction
                     if (mDeclination != null) {
 
                         mAzimuth += mDeclination.intValue();
+
                     }
                 }
             }
@@ -1441,7 +1601,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             public void onClick(DialogInterface dialogInterface, int i) {
                 new IntentIntegrator(thisActivity)
                         .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(true)
+                        .setBeepEnabled(false)
                         .setRequestCode(98)
                         .initiateScan();
             }
@@ -1580,7 +1740,12 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     inputPlotId = plotSearchResult.getContents();
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
-                    moveToSearch("id", rangeID, null, null, inputPlotId, -1);
+                    boolean success = moveToSearch("id", rangeID, null, null, inputPlotId, -1);
+
+                    //play success or error sound if the plotId was not found
+                    if (success) {
+                        playSound("hero_simple_celebration");
+                    } else playSound("alert_error");
                 }
                 break;
             case 99:
@@ -1740,6 +1905,15 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 ep.getString("Location", ""), "", studyId, "",
                 null);
 
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+
+        mInternalLocation = location;
+
+        //always log location updates
+        GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, location.getTime() + ",null,null," + location.getLatitude() + "," + location.getLongitude() + ",null,null,null,null,null,null,null,null\n");
     }
 
     ///// class TraitBox /////
@@ -2419,13 +2593,25 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             setAllRangeID();
             if (rangeID != null) {
 
-                updateCurrentRange(rangeID[0]);
+                //if the study has no plots this would cause an AIOB exception
+                if (rangeID.length > 0) {
 
-                //TODO NullPointerException
-                lastRange = cRange.range;
-                display();
+                    updateCurrentRange(rangeID[0]);
 
-                traitBox.setNewTraits(cRange.plot_id);
+                    //TODO NullPointerException
+                    lastRange = cRange.range;
+                    display();
+
+                    traitBox.setNewTraits(cRange.plot_id);
+
+                } else { //if no fields, print a message and finish with result canceled
+
+                    Utils.makeToast(thisActivity, getString(R.string.act_collect_no_plots));
+
+                    setResult(RESULT_CANCELED);
+
+                    finish();
+                }
             }
         }
 

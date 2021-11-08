@@ -80,6 +80,10 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             ArrayList<String> nonEmptyColumns = new ArrayList<>();
             ArrayList<Integer> nonEmptyIndices = new ArrayList<>();
 
+            int uniqueIndex = -1;
+            int primaryIndex = -1;
+            int secondaryIndex = -1;
+
             //match and delete special characters from header line
             for (int i = 0; i < columns.length; i++) {
 
@@ -90,9 +94,21 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                 }
 
+                //populate an array of indices that have a non empty column
+                //later we will only add data rows with the non empty columns
+                //also find the unique/primary/secondary indices
+                //later we will skip the rows if these are not present
                 if (!columns[i].isEmpty()) {
                     nonEmptyColumns.add(columns[i]);
                     nonEmptyIndices.add(i);
+
+                    if (columns[i].equals(unique)) {
+                        uniqueIndex = i;
+                    } else if (columns[i].equals(primary)) {
+                        primaryIndex = i;
+                    } else if (columns[i].equals(secondary)) {
+                        secondaryIndex = i;
+                    }
                 }
             }
 
@@ -105,24 +121,40 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
             DataHelper.db.beginTransaction();
 
-            try {
-                while (true) {
-                    data = mFieldFile.readNext();
-                    if (data == null)
-                        break;
+            //start iterating over all the rows of the csv file only if we found the u/p/s indices
+            if (uniqueIndex > -1 && primaryIndex > -1 && secondaryIndex > -1) {
 
-                    ArrayList<String> nonEmptyData = new ArrayList<>();
-                    for (int j = 0; j < data.length; j++) {
-                        if (nonEmptyIndices.contains(j)) {
-                            nonEmptyData.add(data[j]);
+                try {
+                    while (true) {
+                        data = mFieldFile.readNext();
+                        if (data == null)
+                            break;
+
+                        //only load the row if it contains u/p/s data
+                        int rowSize = data.length;
+
+                        //ensure next check won't cause an AIOB
+                        if (rowSize > uniqueIndex && rowSize > primaryIndex && rowSize > secondaryIndex) {
+
+                            //check that all u/p/s strings are not empty
+                            if (!data[uniqueIndex].isEmpty() && !data[primaryIndex].isEmpty()
+                                    && !data[secondaryIndex].isEmpty()) {
+
+                                ArrayList<String> nonEmptyData = new ArrayList<>();
+                                for (int j = 0; j < data.length; j++) {
+                                    if (nonEmptyIndices.contains(j)) {
+                                        nonEmptyData.add(data[j]);
+                                    }
+                                }
+                                ConfigActivity.dt.createFieldData(exp_id, nonEmptyColumns, nonEmptyData);
+                            }
                         }
                     }
-                    ConfigActivity.dt.createFieldData(exp_id, nonEmptyColumns, nonEmptyData);
-                }
 
-                DataHelper.db.setTransactionSuccessful();
-            } finally {
-                DataHelper.db.endTransaction();
+                    DataHelper.db.setTransactionSuccessful();
+                } finally {
+                    DataHelper.db.endTransaction();
+                }
             }
 
             mFieldFile.close();
