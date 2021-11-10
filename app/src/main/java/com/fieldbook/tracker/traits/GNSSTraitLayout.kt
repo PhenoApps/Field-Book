@@ -20,6 +20,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.dao.ObservationUnitDao
+import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
@@ -239,19 +240,53 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                     val averageJson = GeoJSON(geometry = Geometry(coordinates = arrayOf(avgLat, avgLng)),
                         properties = mapOf("altitude" to elevation))
 
-                    ObservationUnitDao.updateObservationUnit(unit, averageJson.toJson().toString())
+                    //averaging is updating the location, so ask the user
+                    alertLocationUpdate {
+
+                        val coordinates = "$newLat; $newLng"
+
+                        ObservationUnitDao.updateObservationUnit(unit, averageJson.toJson().toString())
+
+                        etCurVal.setText(coordinates)
+
+                        updateTrait(currentTrait.trait, "gnss", coordinates)
+                    }
+
+                } else { //no location has been observed so don't ask the user
+
+                    val coordinates = "$newLat; $newLng"
+
+                    ObservationUnitDao.updateObservationUnit(unit, geoJson.toJson().toString())
+
+                    etCurVal.setText(coordinates)
+
+                    updateTrait(currentTrait.trait, "gnss", coordinates)
+                }
+
+            } else { //no averaging, so check if there is an observations and ask to update or not
+
+                val coordinates = "$newLat; $newLng"
+
+                if (etCurVal.text.isNotBlank()) {
+
+                    alertLocationUpdate {
+
+                        ObservationUnitDao.updateObservationUnit(unit, geoJson.toJson().toString())
+
+                        etCurVal.setText(coordinates)
+
+                        updateTrait(currentTrait.trait, "gnss", coordinates)
+                    }
 
                 } else {
 
                     ObservationUnitDao.updateObservationUnit(unit, geoJson.toJson().toString())
+
+                    etCurVal.setText(coordinates)
+
+                    updateTrait(currentTrait.trait, "gnss", coordinates)
                 }
-
-            } else { //otherwise overwrite the value
-
-                ObservationUnitDao.updateObservationUnit(unit, geoJson.toJson().toString())
-
             }
-
 
 //observations: store whatever the hell we want - Trevor circa 2021
 //            val fbJson = JSONObject(mapOf("latitude" to latitude,
@@ -260,11 +295,19 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 //                    "accuracy" to accTextView.text
 //                    "utc" to utcTextView.text,
 //                    "satellites" to satTextView.text))
-
-            val coordinates = "$newLat; $newLng"
-            etCurVal.setText(coordinates)
-            updateTrait(currentTrait.trait, "gnss", coordinates)
         }
+    }
+
+    private fun alertLocationUpdate(f: () -> Unit) {
+
+        AlertDialog.Builder(context)
+            .setTitle(R.string.trait_gnss_geo_coord_update_dialog_title)
+            .setMessage(R.string.trait_gnss_geo_coord_update_dialog_message)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+
+                f()
+
+            }.show()
     }
 
     /**
