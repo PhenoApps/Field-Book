@@ -99,7 +99,7 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.3.3'
 
-    implementation 'com.github.phenoapps:phenolib:0.9.26'
+    implementation 'com.github.phenoapps:phenolib:0.9.28'
     implementation 'com.github.breeding-insight:brapi:2.0.3'
 
     implementation 'org.jsoup:jsoup:1.8.1'
