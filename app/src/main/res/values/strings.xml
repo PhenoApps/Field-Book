@@ -671,4 +671,14 @@
     <string name="act_trait_editor_menu_click_while_dragging">Please finish dragging.</string>
     <string name="act_brapi_auth_http_used">URLs must use https</string>
     <string name="act_collect_no_plots">This study has no plots saved.</string>
+    <string name="preference_geonav_title">GeoNav</string>
+    <string name="pref_geonav_method_distance">Distance</string>
+    <string name="pref_geonav_method_trapezoid">Trapezoidal</string>
+    <string name="pref_geonav_search_method_summary">The method used to search for plots in GeoNav.</string>
+    <string name="pref_geonav_search_method_title">Search Method</string>
+    <string name="pref_behavior_geonav_parameters_category_title">Parameters</string>
+    <string name="pref_geonav_search_trapezoid_d1_summary">The distance defining the shorter base of the trapezoid.</string>
+    <string name="pref_geonav_search_trapezoid_d1_title">Trapezoid Base</string>
+    <string name="pref_geonav_search_trapezoid_d2_summary">The distance from the user to the opposite end of the trapezoid.</string>
+    <string name="pref_geonav_search_trapezoid_d2_title">Trapezoid Distance</string>
 </resources>

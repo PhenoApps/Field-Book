@@ -30,6 +30,12 @@
         app:fragment="com.fieldbook.tracker.preferences.BehaviorPreferencesFragment" />
 
     <Preference
+        android:icon="@drawable/ic_map_search"
+        android:key="pref_key_geonav_settings"
+        android:title="@string/preference_geonav_title"
+        app:fragment="com.fieldbook.tracker.preferences.GeoNavPreferencesFragment" />
+
+    <Preference
         android:icon="@drawable/ic_pref_sounds"
         android:key="pref_key_sounds_settings"
         android:title="@string/preferences_sounds"
