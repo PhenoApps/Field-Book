@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.utilities
 
 import android.location.Location
+import android.util.Log
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.traits.GNSSTraitLayout
 import com.google.gson.Gson
@@ -67,14 +68,17 @@ class GeodeticUtils {
 
                     geonav.flush()
 
-                } catch (io: IOException) {
-
-                    io.printStackTrace()
-
-                }
+                } catch (io: IOException) { }
             }
         }
 
+        fun randomCoordinates(n: Int) = arrayListOf<ObservationUnitModel>().apply {
+            for (i in 0..n) {
+                //add(ObservationUnitModel(hashMapOf("observation_unit_db_id" to "hi", "primary_id" to "-1", "geo_coordinates" to "92.15322342; -123.41235234")))
+                add(ObservationUnitModel(hashMapOf("observation_unit_db_id" to "hi", "primary_id" to "-1", "geo_coordinates" to GNSSTraitLayout.GeoJSON(geometry = GNSSTraitLayout.Geometry(coordinates = arrayOf("92.1515124", "-123.141533"))).toJson().toString())))
+
+            }
+        }
         /**
          * Finds the closest location within a list of locations to the user. The location
          * must also be within the field of view of the user. Shown in the diagram below,
