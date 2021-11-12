@@ -27,6 +27,7 @@ import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.Companion.ACTION_BROADCAST_GNSS_TRAIT
 import com.fieldbook.tracker.location.gnss.NmeaParser
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.fieldbook.tracker.utilities.PrefsConstants
@@ -172,14 +173,34 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         setupChooseBluetoothDevice()
 
+    }
+
+    /**
+     * Persists switch state and interval choice.
+     */
+    private fun setupAveragingUi() {
+
         val chipGroup = findViewById<ChipGroup>(R.id.gnss_trait_averaging_chip_group)
         val averageSwitch = findViewById<SwitchCompat>(R.id.gnss_trait_averaging_switch)
+        val checked = prefs.getBoolean(GeneralKeys.GEONAV_AVERAGING, false)
 
         averageSwitch.setOnCheckedChangeListener { _, isChecked ->
+
+            prefs.edit().putBoolean(GeneralKeys.GEONAV_AVERAGING, isChecked).apply()
 
             chipGroup.visibility = if (isChecked) View.VISIBLE else View.INVISIBLE
         }
 
+        averageSwitch.isChecked = checked
+
+        chipGroup.visibility = if (checked) View.VISIBLE else View.INVISIBLE
+
+        val chipId = prefs.getInt(GeneralKeys.GEONAV_AVERAGING_INTERVAL, R.id.gnss_trait_5s_chip)
+        chipGroup.check(chipId)
+
+        chipGroup.setOnCheckedChangeListener { _, checkedId ->
+            prefs.edit().putInt(GeneralKeys.GEONAV_AVERAGING_INTERVAL, checkedId).apply()
+        }
     }
 
     /**
@@ -495,8 +516,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             mConnectThread.start()
         }
 
-        val avgSwitch = findViewById<SwitchCompat>(R.id.gnss_trait_averaging_switch)
-
         //make connected UI visible
         val connectGroup = findViewById<Group>(R.id.gnss_group)
         connectGroup.visibility = View.VISIBLE
@@ -533,10 +552,14 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                 mGpsTracker = null
             }
 
-            avgSwitch.isChecked = false
+            val chipGroup = findViewById<ChipGroup>(R.id.gnss_trait_averaging_chip_group)
+            chipGroup.visibility = View.GONE
 
             setupChooseBluetoothDevice()
         }
+
+        setupAveragingUi()
+
     }
 
     private fun clearUi() {
