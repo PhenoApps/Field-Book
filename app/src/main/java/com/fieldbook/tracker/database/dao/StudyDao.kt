@@ -261,7 +261,7 @@ class StudyDao {
             val geoCoordinatesIndex: Int
             if (geoCoordinatesColumnName in columns) {
                 geoCoordinatesIndex = columns.indexOf(geoCoordinatesColumnName)
-                if (geoCoordinatesIndex > -1) {
+                if (geoCoordinatesIndex > -1 && geoCoordinatesIndex < data.size) {
                     geoCoordinates = data[geoCoordinatesIndex]
                 }
             }
