@@ -235,7 +235,6 @@
             app:layout_constraintHorizontal_weight="1" />
 
         <androidx.appcompat.widget.SwitchCompat
-            android:theme="@style/Theme.MaterialComponents.Light"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
@@ -262,15 +261,6 @@
 
             <com.google.android.material.chip.Chip
                 style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:id="@+id/gnss_trait_manual_chip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checkable="true"
-                android:checked="true"
-                android:text="@string/trait_gnss_chip_manual_text"/>
-
-            <com.google.android.material.chip.Chip
-                style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:id="@+id/gnss_trait_5s_chip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -286,6 +276,15 @@
                 android:checkable="true"
                 android:checked="false"
                 android:text="@string/trait_gnss_chip_10s_text"/>
+
+            <com.google.android.material.chip.Chip
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:id="@+id/gnss_trait_manual_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="true"
+                android:checked="true"
+                android:text="@string/trait_gnss_chip_manual_text"/>
 
         </com.google.android.material.chip.ChipGroup>
 
