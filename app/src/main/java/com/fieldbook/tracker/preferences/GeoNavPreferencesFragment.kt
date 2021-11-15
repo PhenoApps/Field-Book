@@ -8,6 +8,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.content.Intent
 import androidx.preference.*
@@ -16,11 +17,20 @@ import java.util.HashMap
 
 class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
     Preference.OnPreferenceChangeListener {
+
     private var mPairDevicePref: Preference? = null
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+
+    private val mPrefs by lazy {
         preferenceManager.sharedPreferencesName = "Settings"
+        preferenceManager.sharedPreferencesMode = MODE_PRIVATE
+        preferenceManager.sharedPreferences
+    }
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+
         setPreferencesFromResource(R.xml.preferences_geonav, rootKey)
-        (this.activity as PreferencesActivity?)!!.supportActionBar!!.title = getString(R.string.preferences_behavior_title)
+
+        (this.activity as PreferencesActivity?)!!.supportActionBar!!.title = getString(R.string.preferences_geonav_title)
 
         //add click action on pair rover device to search for bt devices
         mPairDevicePref = findPreference(GeneralKeys.PAIR_BLUETOOTH)
@@ -36,10 +46,56 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
         geoNavMethod?.setOnPreferenceChangeListener { preference, newValue ->
 
-            preferenceManager.sharedPreferences.edit()
+            mPrefs.edit()
                 .putString(GeneralKeys.GEONAV_SEARCH_METHOD, newValue as? String ?: "0").apply()
 
+            updateMethodSummaryText()
             updateParametersVisibility()
+
+            true
+        }
+
+        val trapBase = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D1)
+        val trapDst = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D2)
+        val trapAngle = findPreference<ListPreference>(GeneralKeys.SEARCH_ANGLE)
+        val updateInterval = findPreference<ListPreference>(GeneralKeys.UPDATE_INTERVAL)
+
+        updateInterval?.setOnPreferenceChangeListener { _, newValue ->
+
+            mPrefs.edit()
+                .putString(GeneralKeys.UPDATE_INTERVAL, newValue as? String ?: "0").apply()
+
+            updateParametersSummaryText()
+
+            true
+        }
+
+        trapBase?.setOnPreferenceChangeListener { _, newValue ->
+
+            mPrefs.edit()
+                .putString(GeneralKeys.GEONAV_PARAMETER_D1, newValue as? String ?: "0.001").apply()
+
+            updateParametersSummaryText()
+
+            true
+        }
+
+        trapDst?.setOnPreferenceChangeListener { _, newValue ->
+
+            mPrefs.edit()
+                .putString(GeneralKeys.GEONAV_PARAMETER_D2, newValue as? String ?: "0.01").apply()
+
+            updateParametersSummaryText()
+
+            true
+        }
+
+        trapAngle?.setOnPreferenceChangeListener { _, newValue ->
+
+            mPrefs.edit()
+                .putString(GeneralKeys.SEARCH_ANGLE, newValue as? String ?: "22.5").apply()
+
+            updateParametersSummaryText()
 
             true
         }
@@ -47,16 +103,45 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
 
     override fun onResume() {
         super.onResume()
+        updateParametersSummaryText()
+        updateMethodSummaryText()
         updateDeviceAddressSummary()
         updateParametersVisibility()
+    }
+
+    private fun updateParametersSummaryText() {
+
+        val d1 = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")
+        val d2 = mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")
+        val theta = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
+        val interval = mPrefs.getString(GeneralKeys.UPDATE_INTERVAL, "0")
+
+        val trapBase = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D1)
+        val trapDst = findPreference<EditTextPreference>(GeneralKeys.GEONAV_PARAMETER_D2)
+        val trapAngle = findPreference<ListPreference>(GeneralKeys.SEARCH_ANGLE)
+        val updateInterval = findPreference<ListPreference>(GeneralKeys.UPDATE_INTERVAL)
+
+        trapBase?.summary = getString(R.string.pref_geonav_search_trapezoid_d1_summary, d1)
+        trapDst?.summary = getString(R.string.pref_geonav_search_trapezoid_d2_summary, d2)
+        trapAngle?.summary = getString(R.string.pref_geonav_search_angle_summary, theta)
+        updateInterval?.summary = getString(R.string.pref_geonav_update_interval_summary, interval)
+    }
+
+    private fun updateMethodSummaryText() {
+
+        val method = if (mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD,
+            getString(R.string.pref_geonav_method_distance)) == "0") getString(R.string.pref_geonav_method_distance)
+            else getString(R.string.pref_geonav_method_trapezoid)
+
+        findPreference<ListPreference>(GeneralKeys.GEONAV_SEARCH_METHOD)?.summary =
+            getString(R.string.pref_geonav_search_method_summary, method)
     }
 
     private fun updateParametersVisibility() {
 
         val geoNavCat = findPreference<PreferenceCategory>(GeneralKeys.GEONAV_PARAMETERS_CATEGORY)
 
-        when (preferenceManager.sharedPreferences
-            .getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0")) {
+        when (mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0")) {
 
             "0" -> { //distance based
 
@@ -75,8 +160,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
      */
     private fun updateDeviceAddressSummary() {
         if (mPairDevicePref != null) {
-            val address = preferenceManager!!.sharedPreferences
-                .getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
+            val address = mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
             mPairDevicePref!!.summary = address
         }
     }
@@ -126,8 +210,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
                     if (device != null) {
                         address = device.address
                     }
-                    preferenceManager!!.sharedPreferences
-                        .edit().putString(GeneralKeys.PAIRED_DEVICE_ADDRESS, address)
+                    mPrefs.edit().putString(GeneralKeys.PAIRED_DEVICE_ADDRESS, address)
                         .apply()
                     updateDeviceAddressSummary()
                     dialog.dismiss()

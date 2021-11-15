@@ -2,9 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
-        android:title="@string/pref_behavior_geonav_category_title"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory app:iconSpaceReserved="false">
 
         <CheckBoxPreference
             android:defaultValue="false"
