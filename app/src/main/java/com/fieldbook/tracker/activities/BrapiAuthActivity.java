@@ -115,13 +115,30 @@ public class BrapiAuthActivity extends AppCompatActivity {
             Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
 
             ConnectionBuilder builder = uri -> {
-//                    Preconditions.checkNotNull(uri, "url must not be null");
+                Preconditions.checkNotNull(uri, "url must not be null");
                 Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
                         "scheme or uri must be http or https");
                 HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
 //                    conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
 //                    conn.setReadTimeout(READ_TIMEOUT_MS);
-                conn.setInstanceFollowRedirects(false);
+                conn.setInstanceFollowRedirects(true);
+
+                // normally, 3xx is redirect
+                int status = conn.getResponseCode();
+                if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                            || status == HttpURLConnection.HTTP_MOVED_PERM
+                            || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                    // get redirect url from "location" header field
+                    String newUrl = conn.getHeaderField("Location");
+                    // get the cookie if need, for login
+                    String cookies = conn.getHeaderField("Set-Cookie");
+                    // open the new connnection again
+                    conn = (HttpURLConnection) new URL(newUrl).openConnection();
+                    conn.setRequestProperty("Cookie", cookies);
+                }else{
+                    conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
+                }
+
                 return conn;
             };
 
