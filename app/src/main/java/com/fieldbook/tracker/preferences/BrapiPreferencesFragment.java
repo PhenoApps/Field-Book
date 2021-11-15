@@ -84,6 +84,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiOIDCFlow = findPreference(GeneralKeys.BRAPI_OIDC_FLOW);
         brapiOIDCFlow.setOnPreferenceChangeListener(this);
 
+        String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
+        String oidcUrl = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
+        brapiURLPreference.setText(url);
+        brapiOIDCURLPreference.setText(oidcUrl);
+
 //        EditTextPreference brapiPaginationPreference = (EditTextPreference) findPreference(GeneralKeys.BRAPI_PAGE_SIZE);
 //        brapiPaginationPreference.setSummary(prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
 //        brapiPaginationPreference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
@@ -179,14 +184,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     @Override
     public void onResume() {
         super.onResume();
-//        setBaseURLSummary();
+        setBaseURLSummary();
         setButtonView();
     }
 
-//    private void setBaseURLSummary() {
-//        String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
-//        brapiURLPreference.setSummary(url);
-//    }
+    private void setBaseURLSummary() {
+        String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, "https://test-server.brapi.org");
+        brapiURLPreference.setSummary(url);
+    }
 
     private void brapiAuth() {
         String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
@@ -203,7 +208,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if(oidcFlow != null)
             brapiOIDCFlow.setValue(oidcFlow);
 
-//        setBaseURLSummary();
+        setBaseURLSummary();
         brapiAuth();
     }
 
