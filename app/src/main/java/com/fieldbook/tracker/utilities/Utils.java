@@ -81,20 +81,27 @@ public class Utils extends Application {
     }
 
     public static void createDir(Context context, String path) {
-        File dir = new File(path);
-        File blankFile = new File(path + "/.fieldbook");
 
-        if (!dir.exists()) {
-            dir.mkdirs();
+        if (path != null) {
+            File dir = new File(path);
+            File blankFile = new File(path + "/.fieldbook");
 
-            try {
-                blankFile.getParentFile().mkdirs();
-                blankFile.createNewFile();
-                Utils.scanFile(context, blankFile);
-            } catch (IOException e) {
-                Log.d("CreateDir", e.toString());
+            if (!dir.exists()) {
+                dir.mkdirs();
+
+                try {
+                    blankFile.getParentFile().mkdirs();
+                    blankFile.createNewFile();
+                    Utils.scanFile(context, blankFile);
+                } catch (IOException e) {
+                    Log.d("CreateDir", e.toString());
+                }
             }
+        } else {
+
+            makeToast(context, context.getString(R.string.error_making_directory));
         }
+
     }
 
     public static void createDirs(Context context, String basePath) {

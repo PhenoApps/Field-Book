@@ -226,7 +226,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 FileExploreActivity.class.getName());
 
         intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDIMPORTPATH);
-        intent.putExtra("include", new String[]{"csv", "xls"});
+        intent.putExtra("include", new String[]{"csv", "xls", "xlsx"});
         intent.putExtra("title", getString(R.string.import_dialog_title_fields));
         startActivityForResult(intent, 1);
     }
@@ -574,7 +574,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 extension = chosenFile.substring(i+1);
             }
 
-            if(!extension.equals("csv") && !extension.equals("xls")) {
+            if(!extension.equals("csv") && !extension.equals("xls") && !extension.equals("xlsx")) {
                 Toast.makeText(FieldEditorActivity.thisActivity, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
                 return;
             }
@@ -607,7 +607,16 @@ public class FieldEditorActivity extends AppCompatActivity {
         Utils.createDir(this, ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY,Constants.MPATH) + Constants.PLOTDATAPATH + "/" + fieldFile.getStem() + "/photos");
         Utils.createDir(this, ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY,Constants.MPATH) + Constants.PLOTDATAPATH + "/" + fieldFile.getStem() + "/photos/.thumbnails");
 
-        loadFile(fieldFile);
+        try {
+
+            loadFile(fieldFile);
+
+        } catch (Exception exp) {
+
+            Utils.makeToast(this, getString(R.string.act_field_editor_load_file_failed));
+
+            exp.printStackTrace();
+        }
     }
 
     /**
@@ -620,6 +629,11 @@ public class FieldEditorActivity extends AppCompatActivity {
     private void loadFile(FieldFileObject.FieldFileBase fieldFile) {
 
         String[] importColumns = fieldFile.getColumns();
+
+        if (fieldFile.getOpenFailed()) {
+            Utils.makeToast(this, getString(R.string.act_field_editor_file_open_failed));
+            return;
+        }
 
         //in some cases getColumns is returning null, so print an error message to the user
         if (importColumns != null) {
@@ -635,9 +649,8 @@ public class FieldEditorActivity extends AppCompatActivity {
 
             //define flag to let the user know characters were replaced at the end of the loop
             boolean hasSpecialCharacters = false;
-            for (int i = 0; i < importColumns.length; i++) {
+            for (String s : importColumns) {
 
-                String s = importColumns[i];
                 boolean added = false;
 
                 //replace the special characters, only add to the actual list if it is not empty
@@ -652,7 +665,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                 if (list.contains(s.toLowerCase())) {
 
-                    Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_name) + " \"" + s + "\"");
+                    Utils.makeToast(getApplicationContext(), getString(R.string.import_error_column_name) + " \"" + s + "\"");
 
                     return;
                 }
@@ -704,12 +717,9 @@ public class FieldEditorActivity extends AppCompatActivity {
                 .setCancelable(true)
                 .setView(layout);
 
-        builder.setPositiveButton(getString(R.string.dialog_import), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (checkImportColumnNames()) {
-                    mHandler.post(importRunnable);
-                }
+        builder.setPositiveButton(getString(R.string.dialog_import), (dialogInterface, i) -> {
+            if (checkImportColumnNames()) {
+                mHandler.post(importRunnable);
             }
         });
 
