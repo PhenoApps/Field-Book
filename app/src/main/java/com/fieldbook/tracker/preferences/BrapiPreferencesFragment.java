@@ -245,14 +245,18 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         return super.onPreferenceTreeClick(preference);
     }
 
+    private void updateUrls(String newValue) {
+        SharedPreferences sp = prefMgr.getSharedPreferences();
+        String oldBaseUrl = sp.getString(GeneralKeys.BRAPI_BASE_URL, "");
+        String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
+        String newOidcUrl = oldOidcUrl.replaceFirst(oldBaseUrl, newValue);
+        setServer(newValue, newOidcUrl, null);
+    }
+
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference.equals(brapiURLPreference)) {
-            SharedPreferences sp = prefMgr.getSharedPreferences();
-            String oldBaseUrl = sp.getString(GeneralKeys.BRAPI_BASE_URL, "");
-            String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
-            String newOidcUrl = oldOidcUrl.replaceFirst(oldBaseUrl, newValue.toString());
-            setServer(newValue.toString(), newOidcUrl, null);
+            updateUrls(newValue.toString());
         }
 
         if (preference.equals(brapiOIDCFlow)) {
@@ -322,7 +326,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 if(resultCode == RESULT_OK) {
                     IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     String scannedBarcode = plotDataResult.getContents();
-                    brapiURLPreference.setText(scannedBarcode);
+                    updateUrls(scannedBarcode);
                     brapiAuth();
                 }
                 break;
