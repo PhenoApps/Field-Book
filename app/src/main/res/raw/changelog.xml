@@ -9,6 +9,8 @@
         <new>Support for XLSX files</new>
         <new>New sound for missing barcodes when navigating</new>
         <info>Improved import file sanitation</info>
+        <info>Added warnings for failed file imports</info>
+        <bugfix>Quick GoTo can now use both primary/secondary ID</bugfix>
         <bugfix>Numerous bug fixes</bugfix>
     </release>
 

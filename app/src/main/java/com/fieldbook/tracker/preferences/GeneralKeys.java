@@ -79,6 +79,9 @@ public class GeneralKeys {
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE             = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
 
+    //Data grid
+    public static final String DATAGRID_PREFIX_TRAIT                = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
+
     //Collect Activity
     public static final String LAST_USED_TRAIT                      = "com.fieldbook.tracker.LAST_USED_TRAIT";
 
