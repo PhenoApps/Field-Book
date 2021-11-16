@@ -61,32 +61,53 @@ class ZipUtil {
 
                 parents.removeLast()
 
-            } else try {
+            } else writeZipEntry(output, file, parents.joinToString("/") { it })
+        }
 
-                val bufferSize = 8192 //default buffersize for BufferedWriter
+        private fun writeZipEntry(output: ZipOutputStream, file: File, parentDir: String) {
 
-                val fi = FileInputStream(file)
+            try {
 
-                val origin = BufferedInputStream(fi, bufferSize)
+                if (!file.isDirectory) {
 
-                val data = ByteArray(bufferSize)
-
-                origin.use {
-
-                    val path = file.path
-
-                    val entry = ZipEntry(path.substring(path.lastIndexOf("/") + 1))
+                    val entry = ZipEntry("$parentDir/${file.name}")
 
                     output.putNextEntry(entry)
 
-                    var count: Int
+                    val bufferSize = 8192 //default buffersize for BufferedWriter
 
-                    while (it.read(data, 0, bufferSize).also { count = it } != -1) {
+                    val fi = FileInputStream(file)
 
-                        output.write(data, 0, count)
+                    val origin = BufferedInputStream(fi, bufferSize)
 
+                    val data = ByteArray(bufferSize)
+
+                    origin.use {
+
+                        var count: Int
+
+                        while (it.read(data, 0, bufferSize).also { count = it } != -1) {
+
+                            output.write(data, 0, count)
+
+                        }
                     }
+
+                    fi.close()
+
+                    output.closeEntry()
+
+                } else {
+
+                    val path = file.name
+
+                    val entry = ZipEntry("$parentDir/$path/")
+
+                    output.putNextEntry(entry)
+
+                    output.closeEntry()
                 }
+
             } catch (io: IOException) {
 
                 io.printStackTrace()
