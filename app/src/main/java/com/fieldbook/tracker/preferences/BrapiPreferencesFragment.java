@@ -327,7 +327,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     String scannedBarcode = plotDataResult.getContents();
                     updateUrls(scannedBarcode);
-                    brapiAuth();
                 }
                 break;
         }
