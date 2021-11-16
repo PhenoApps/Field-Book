@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
@@ -1161,7 +1162,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 }
             }, 2000L, period);
 
-            GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, "UTC, primary, secondary, start latitude, start longitude, end latitude, end longitude, azimuth, teslas, bearing, distance, thetaCheck, closest\n");
+            GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas, bearing, distance, closest, unique id, primary id, secondary id\n");
 
         } else {
 
@@ -1272,7 +1273,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 alt = alt.substring(0, altLength - 1); //drop the "M"
 
                 //always log external gps updates
-                GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, time + ",null,null," + lat + "," + lng + ",null,null,null,null,null,null,null,null\n");
+                GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, lat + "," + lng + "," + time + ",null,null,null,null,null,null,null,null,null,null\n");
 
                 mExternalLocation = new Location("GeoNav Rover");
 
@@ -1354,7 +1355,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
         }
 
-        boolean isCompass = ep.getBoolean(GeneralKeys.GEONAV_COMPASS, true);
+        String geoNavMethod = ep.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0");
+        double d1 = Double.parseDouble(ep.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001"));
+        double d2 = Double.parseDouble(ep.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01"));
 
         //user must have a valid pointing direction before attempting the IZ
         if (mAzimuth != null) {
@@ -1394,7 +1397,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 Pair<ObservationUnitModel, Double> target = GeodeticUtils.Companion
                         .impactZoneSearch(mGeoNavLogWriter, start,
                                 coordinates.toArray(new ObservationUnitModel[] {}),
-                                mAzimuth, theta, mTeslas, isCompass);
+                                mAzimuth, theta, mTeslas, geoNavMethod, d1, d2);
 
                 //long tic = System.currentTimeMillis();
 
@@ -1417,6 +1420,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                                 Snackbar mySnackbar = Snackbar.make(findViewById(R.id.layout_main),
                                     id, Snackbar.LENGTH_LONG);
+
+                                mySnackbar.setTextColor(Color.BLACK);
+                                mySnackbar.setBackgroundTint(Color.WHITE);
+                                mySnackbar.setActionTextColor(Color.BLACK);
 
                                 mySnackbar.setAction(R.string.activity_collect_geonav_navigate, (view) -> {
 
@@ -1930,8 +1937,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         mInternalLocation = location;
 
+        //put check to only print after IZ stops
+
         //always log location updates
-        GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, location.getTime() + ",null,null," + location.getLatitude() + "," + location.getLongitude() + ",null,null,null,null,null,null,null,null\n");
+        GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, location.getLatitude() + "," + location.getLongitude() + "," + location.getTime() + ",null,null,null,null,null,null,null,null,null,null\n");
     }
 
     ///// class TraitBox /////
