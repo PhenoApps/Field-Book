@@ -1,6 +1,6 @@
 # Field Book <a href="https://play.google.com/store/apps/details?id=com.fieldbook.tracker"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="50"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-28-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-29-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Field Book is a simple app for taking phenotypic notes. Collecting data in the field has traditionally been a laborious process requiring writing notes by hand followed by transcription. Field Book was created to replace paper field books and to enable increased collection speed with greater data integrity.
@@ -19,7 +19,7 @@ Development of Field Book has been supported by the [Collaborative Crop Research
     <td align="center"><a href="https://github.com/BrapiCoordinatorSelby"><img src="https://avatars.githubusercontent.com/u/32845555?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peter Selby</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=BrapiCoordinatorSelby" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/timparsons"><img src="https://avatars.githubusercontent.com/u/3004635?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Tim Parsons</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=timparsons" title="Code">💻</a> <a href="https://github.com/PhenoApps/Field-Book/pulls?q=is%3Apr+reviewed-by%3Atimparsons" title="Reviewed Pull Requests">👀</a></td>
     <td align="center"><a href="https://github.com/nickpalladino"><img src="https://avatars.githubusercontent.com/u/53413353?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nick</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=nickpalladino" title="Code">💻</a> <a href="https://github.com/PhenoApps/Field-Book/pulls?q=is%3Apr+reviewed-by%3Anickpalladino" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/PhenoApps/Field-Book/issues?q=author%3Anickpalladino" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/ctucker3"><img src="https://avatars.githubusercontent.com/u/17887341?v=4" width="100px;" alt=""/><br /><sub><b>Chris Tucker</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=ctucker3" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/ctucker3"><img src="https://avatars.githubusercontent.com/u/17887341?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Chris Tucker</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=ctucker3" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/chaneylc"><img src="https://avatars.githubusercontent.com/u/5421632?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Chaney Courtney</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=chaneylc" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/dmeidlin"><img src="https://avatars.githubusercontent.com/u/14339308?v=4?s=100" width="100px;" alt=""/><br /><sub><b>dmeidlin</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=dmeidlin" title="Code">💻</a></td>
   </tr>
@@ -50,10 +50,14 @@ Development of Field Book has been supported by the [Collaborative Crop Research
     <td align="center"><img src="https://raw.githubusercontent.com/PhenoApps/Field-Book/master/.github/blank-profile.png?s=100" width="100px;" alt=""/><br /><sub><b>Alice Brunazzi</b></sub><br /><a href="#translation" title="Translation">🌍</a></td>
     <td align="center"><a href="https://www.ar-php.org/"><img src="https://avatars.githubusercontent.com/u/11270404?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Khaled Al-Shamaa</b></sub></a><br /><a href="#translation-khaled-alshamaa" title="Translation">🌍</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/HMS17"><img src="https://avatars.githubusercontent.com/u/84345306?v=4?s=100" width="100px;" alt=""/><br /><sub><b>HMS17</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=HMS17" title="Code">💻</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## Develop
