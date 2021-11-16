@@ -105,6 +105,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -210,6 +211,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private TextWatcher cvText;
     private InputMethodManager imm;
     private Boolean dataLocked = false;
+
+    //variable used to skip the navigate to last used trait in onResume
+    private boolean mSkipLastUsedTrait = false;
 
     public static void disableViews(ViewGroup layout) {
         layout.setEnabled(false);
@@ -752,7 +756,13 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         checkLastOpened();
 
-        navigateToLastOpenedTrait();
+        if (!mSkipLastUsedTrait) {
+
+            mSkipLastUsedTrait = false;
+
+            navigateToLastOpenedTrait();
+
+        }
     }
 
     /**
@@ -768,24 +778,13 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         if (trait != null) {
 
             //get all traits, filter the preference trait and check it's visibility
-            ArrayList<TraitObject> traits = ObservationVariableDao.Companion.getAllTraitObjects();
+            String[] traits = dt.getVisibleTrait();
 
             try {
 
-                Optional<TraitObject> result = traits.stream().filter((t) -> t.getTrait().equals(trait)).findFirst();
+                traitBox.setSelection(Arrays.asList(traits).indexOf(trait));
 
-                if (result.isPresent()) {
-
-                    TraitObject resultObj = result.get();
-
-                    if (resultObj.getVisible()) {
-
-                        traitBox.setSelection(resultObj.getRealPosition()-1);
-
-                    }
-                }
-
-            } catch (NoSuchElementException e) {
+            } catch (NullPointerException e) {
 
                 e.printStackTrace();
 
@@ -1745,6 +1744,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
                     moveToSearch("id", rangeID, null, null, inputPlotId, trait);
+                    mSkipLastUsedTrait = true;
                 }
                 break;
             case 98:
