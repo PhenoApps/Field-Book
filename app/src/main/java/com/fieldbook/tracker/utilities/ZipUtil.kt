@@ -16,13 +16,19 @@ class ZipUtil {
         @Throws(IOException::class)
         fun zip(files: Array<String>, zipFile: OutputStream?) {
 
+            val parents = arrayListOf<String>()
+
+            parents.add("Output")
+
             ZipOutputStream(BufferedOutputStream(zipFile)).use { output ->
+
+                output.putNextEntry(ZipEntry("Output/"))
 
                 for (i in files.indices) {
 
                     val file = File(files[i])
 
-                    addZipEntry(output, file)
+                    addZipEntry(output, file, parents)
                 }
             }
         }
@@ -34,18 +40,26 @@ class ZipUtil {
          * @param output: the final zip output file
          * @param file: the directory or file to create a new zip entry
          */
-        private fun addZipEntry(output: ZipOutputStream, file: File) {
+        private fun addZipEntry(output: ZipOutputStream, file: File, parents: ArrayList<String>) {
 
             if (file.isHidden) return
 
             if (file.isDirectory) {
 
+                val parent = parents.joinToString("/") { it }
+
+                parents.add(file.name)
+
+                writeZipEntry(output, file, parent)
+
                 file.listFiles { dir, name ->
 
-                    addZipEntry(output, File(dir, name))
+                    addZipEntry(output, File(dir, name), parents)
 
                     true
                 }
+
+                parents.removeLast()
 
             } else try {
 
