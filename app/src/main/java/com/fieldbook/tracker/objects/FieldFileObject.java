@@ -76,6 +76,10 @@ public class FieldFileObject {
             return f;
         }
 
+        public boolean getOpenFailed() {
+            return openFail;
+        }
+
         abstract public boolean isCSV();
 
         abstract public boolean isExcel();
