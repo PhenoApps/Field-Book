@@ -27,6 +27,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     int idColPosition;
     SharedPreferences mPrefs;
 
+    int lineFail = -1;
     boolean fail;
     boolean uniqueFail;
 
@@ -124,6 +125,8 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             //start iterating over all the rows of the csv file only if we found the u/p/s indices
             if (uniqueIndex > -1 && primaryIndex > -1 && secondaryIndex > -1) {
 
+                int line = 0;
+
                 try {
                     while (true) {
                         data = mFieldFile.readNext();
@@ -149,11 +152,24 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                                 ConfigActivity.dt.createFieldData(exp_id, nonEmptyColumns, nonEmptyData);
                             }
                         }
+
+                        line++;
                     }
 
                     DataHelper.db.setTransactionSuccessful();
+
+                } catch (Exception e) {
+
+                    lineFail = line;
+
+                    e.printStackTrace();
+
+                    throw e;
+
                 } finally {
+
                     DataHelper.db.endTransaction();
+
                 }
             }
 
@@ -194,6 +210,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             ed.apply();
         }
         if (fail) {
+            Utils.makeToast(context, context.getString(R.string.import_runnable_create_field_data_failed, lineFail));
             //makeToast(getString(R.string.import_error_general));
         } else if (uniqueFail && context != null) {
             Utils.makeToast(context,context.getString(R.string.import_error_unique));
@@ -213,8 +230,27 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             CollectActivity.reloadData = true;
             FieldEditorActivity.loadData();
 
-            ConfigActivity.dt.open();
-            ConfigActivity.dt.switchField(result);
+            try {
+
+                ConfigActivity.dt.open();
+
+                ConfigActivity.dt.switchField(result);
+
+            } catch (Exception e) {
+
+                if (context != null) {
+
+                    Utils.makeToast(context, context.getString(R.string.import_runnable_db_failed_to_switch));
+
+                }
+
+                ed.putBoolean("ImportFieldFinished", false);
+                ed.putInt("SelectedFieldExpId", -1);
+                ed.apply();
+
+                e.printStackTrace();
+
+            }
         }
     }
 

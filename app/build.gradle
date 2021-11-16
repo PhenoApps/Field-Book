@@ -122,6 +122,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
 
+    implementation 'math.geom2d:javaGeom:0.11.1'
+
     kapt 'com.android.databinding:compiler:3.1.4'
 
     testImplementation 'androidx.test:core:1.4.0'
