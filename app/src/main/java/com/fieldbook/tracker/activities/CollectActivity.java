@@ -348,6 +348,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
     /**
      * Is used to ensure the UI entered data is within the bounds of the trait's min/max
+     *
+     * Added a check to return NA as valid for BrAPI data.
+     *
      * @return boolean flag false when data is out of bounds, true otherwise
      */
     private boolean validateData() {
@@ -355,6 +358,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         final TraitObject currentTrait = traitBox.getCurrentTrait();
 
         if (currentTrait == null) return false;
+
+        if (strValue.equals("NA")) return true;
 
         final String trait = currentTrait.getTrait();
 
