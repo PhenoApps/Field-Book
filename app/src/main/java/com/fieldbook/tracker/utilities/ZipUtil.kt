@@ -1,12 +1,18 @@
 package com.fieldbook.tracker.utilities
 
+import android.content.Context
+import android.content.Context.MODE_PRIVATE
+import android.util.Log
 import java.io.*
 import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 class ZipUtil {
 
     companion object {
+
+        const val DATABASE_NAME = "fieldbook.db"
 
         /**
          * Improved zip function that handles folders recursively.
@@ -111,6 +117,77 @@ class ZipUtil {
             } catch (io: IOException) {
 
                 io.printStackTrace()
+            }
+        }
+
+        //the expected zip file format contains two files
+        //1. fieldbook.db this can be directly copied to the data dir
+        //2. preferences_backup needs to:
+        //  a. read and converted to a map <string to any (which is only boolean or string)>
+        //  b. preferences should be cleared of the old values
+        //  c. iterate over the converted map and populate the preferences
+        @Throws(IOException::class)
+        fun unzip(ctx: Context, zipFile: InputStream?, databaseStream: OutputStream) {
+
+            try {
+
+                ZipInputStream(zipFile).use { zin ->
+
+                    var ze: ZipEntry? = null
+
+                    while (zin.nextEntry.also { ze = it } != null) {
+
+                        when (ze?.name) {
+
+                            null -> throw IOException()
+
+                            DATABASE_NAME -> {
+
+                                databaseStream.use { output ->
+
+                                    zin.copyTo(output)
+
+                                }
+                            }
+
+                            else -> {
+
+                                val prefs = ctx.getSharedPreferences("Settings", MODE_PRIVATE)
+
+                                ObjectInputStream(zin).use { objectStream ->
+
+                                    val prefMap = objectStream.readObject() as Map<*, *>
+
+                                    with (prefs.edit()) {
+
+                                        clear()
+
+                                        //keys are always string, do a quick map to type cast
+                                        //put values into preferences based on their types
+                                        prefMap.entries.map { it.key as String to it.value }
+                                            .forEach {
+
+                                                val key = it.first
+
+                                                when (val x = it.second) {
+
+                                                    is Boolean -> putBoolean(key, x)
+
+                                                    is String -> putString(key, x)
+                                                }
+                                            }
+
+                                        apply()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                Log.e("FileUtil", "Unzip exception", e)
 
             }
         }
