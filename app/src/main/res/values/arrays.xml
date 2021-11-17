@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="pref_geonav_search_methods">
+        <item>@string/pref_geonav_method_distance</item>
+        <item>@string/pref_geonav_method_trapezoid</item>
+    </string-array>
+    <string-array name="pref_geonav_search_methods_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
     <string-array name="pref_geonav_search_angles">
         <item>22.5°</item>
         <item>45°</item>
