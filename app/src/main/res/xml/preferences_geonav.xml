@@ -5,6 +5,7 @@
     <PreferenceCategory app:iconSpaceReserved="false">
 
         <CheckBoxPreference
+            android:persistent="true"
             android:defaultValue="false"
             android:icon="@drawable/ic_map_search"
             android:key="com.fieldbook.tracker.geonav.ENABLE_GEONAV"

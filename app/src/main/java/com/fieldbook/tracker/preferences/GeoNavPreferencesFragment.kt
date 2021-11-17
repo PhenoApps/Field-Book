@@ -21,9 +21,7 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
     private var mPairDevicePref: Preference? = null
 
     private val mPrefs by lazy {
-        preferenceManager.sharedPreferencesName = "Settings"
-        preferenceManager.sharedPreferencesMode = MODE_PRIVATE
-        preferenceManager.sharedPreferences
+        PreferenceManager.getDefaultSharedPreferences(context)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
