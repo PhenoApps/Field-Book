@@ -22,6 +22,7 @@ import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -209,6 +210,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private double mLastGeoNavTime = 0L;
     private boolean mFirstLocationFound = false;
     private BluetoothDevice mLastDevice = null;
+    public static HandlerThread mAverageHandler = new HandlerThread("averaging");
     private SharedPreferences mPrefs = null;
 
     private TextWatcher cvText;
@@ -630,6 +632,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         //save the last used trait
         ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.currentTrait.getTrait()).apply();
 
+        mAverageHandler.quit();
+
         super.onPause();
     }
 
@@ -772,6 +776,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             navigateToLastOpenedTrait();
 
         }
+
+        mAverageHandler = new HandlerThread("averaging");
+        mAverageHandler.start();
+        mAverageHandler.getLooper();
     }
 
     /**
@@ -1942,8 +1950,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     public void onLocationChanged(@NonNull Location location) {
 
         mInternalLocation = location;
-
-        //put check to only print after IZ stops
 
         //always log location updates
         GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, location.getLatitude() + "," + location.getLongitude() + "," + location.getTime() + ",null,null,null,null,null,null,null,null,null,null\n");

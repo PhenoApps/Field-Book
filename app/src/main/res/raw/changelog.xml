@@ -6,6 +6,7 @@
         <new>Datagrid focuses on current entry/trait</new>
         <new>Database export now exports to single zipped file</new>
         <new>Resuming collection now navigates to the last selected trait</new>
+        <new>Option to average points over time in GNSS trait</new>
         <new>Support for XLSX files</new>
         <new>New sound for missing barcodes when navigating</new>
         <new>InfoBars adjust based on prefix size</new>

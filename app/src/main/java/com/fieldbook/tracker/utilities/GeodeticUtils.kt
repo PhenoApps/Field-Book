@@ -69,11 +69,7 @@ class GeodeticUtils {
 
                     geonav.flush()
 
-                } catch (io: IOException) {
-
-                    io.printStackTrace()
-
-                }
+                } catch (io: IOException) { }
             }
         }
 

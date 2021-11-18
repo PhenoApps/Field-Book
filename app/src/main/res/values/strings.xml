@@ -693,4 +693,13 @@
     <string name="act_field_editor_file_open_failed">File failed to open.</string>
     <string name="import_runnable_db_failed_to_switch">Database failed to switch fields.</string>
     <string name="import_runnable_create_field_data_failed">Failed to create field data for line %d in file.</string>
+    <string name="trait_gnss_geo_coord_update_dialog_title">Coordinate Update Warning</string>
+    <string name="trait_gnss_geo_coord_update_dialog_message">You have a saved coordinate
+        for this unit, are you sure you want to update it?
+    </string>
+    <string name="trait_gnss_chip_manual_text">Manual</string>
+    <string name="trait_gnss_chip_10s_text">10s</string>
+    <string name="trait_gnss_chip_5s_text">5s</string>
+    <string name="gnss_trait_averaging_dialog_title">Collecting coordinates</string>
+    <string name="gnss_trait_averaging_dialog_message">Please wait while the incoming locations are being averaged…</string>
 </resources>
