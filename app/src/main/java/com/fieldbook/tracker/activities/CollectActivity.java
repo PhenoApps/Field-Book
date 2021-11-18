@@ -22,10 +22,12 @@ import android.location.Location;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
@@ -208,6 +210,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private double mLastGeoNavTime = 0L;
     private boolean mFirstLocationFound = false;
     private BluetoothDevice mLastDevice = null;
+    public static HandlerThread mAverageHandler = new HandlerThread("averaging");
+    private SharedPreferences mPrefs = null;
 
     private TextWatcher cvText;
     private InputMethodManager imm;
@@ -243,6 +247,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         ep = getSharedPreferences("Settings", 0);
         if (ConfigActivity.dt == null) {    // when resume
             ConfigActivity.dt = new DataHelper(this);
@@ -627,6 +632,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         //save the last used trait
         ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.currentTrait.getTrait()).apply();
 
+        mAverageHandler.quit();
+
         super.onPause();
     }
 
@@ -646,18 +653,18 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
      */
     private void setupGeoNavLogger() {
 
-        if (ep.getBoolean(GeneralKeys.GEONAV_LOG, false)) {
+        if (mPrefs.getBoolean(GeneralKeys.GEONAV_LOG, false)) {
 
             try {
 
                 File geonavFolder = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH)
                         + Constants.GEONAV_LOG_PATH);
 
-                String interval = ep.getString(GeneralKeys.UPDATE_INTERVAL, "0");
-                String address = ep.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
+                String interval = mPrefs.getString(GeneralKeys.UPDATE_INTERVAL, "1");
+                String address = mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
                         .replaceAll(":", "-")
                         .replaceAll("\\s", "_");
-                String thetaPref = ep.getString(GeneralKeys.SEARCH_ANGLE, "0");
+                String thetaPref = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "22.5");
 
                 File file = new File(geonavFolder, "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv");
 
@@ -748,9 +755,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
         }
 
-        ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
+        mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
 
-        if (ep.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+        if (mPrefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
 
             setupLocalBroadcastManager();
 
@@ -769,6 +776,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             navigateToLastOpenedTrait();
 
         }
+
+        mAverageHandler = new HandlerThread("averaging");
+        mAverageHandler.start();
+        mAverageHandler.getLooper();
     }
 
     /**
@@ -952,7 +963,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         //added in geonav 310 only make goenav switch visible if preference is set
         MenuItem geoNavEnable = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
-        geoNavEnable.setVisible(ep.getBoolean(GeneralKeys.ENABLE_GEONAV, false));
+        geoNavEnable.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false));
 //        View actionView = MenuItemCompat.getActionView(geoNavEnable);
 //        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
 
@@ -1083,14 +1094,14 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                     navItem.setIcon(R.drawable.ic_explore_black_24dp);
 
-                    ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, true).apply();
+                    mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, true).apply();
 
                 }
                 else {
 
                     navItem.setIcon(R.drawable.ic_explore_off_black_24dp);
 
-                    ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply();
+                    mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply();
 
                 }
 
@@ -1114,7 +1125,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_UI);
 
             //set update interval from the preferences can be 1s, 5s or 10s
-            String interval = ep.getString(GeneralKeys.UPDATE_INTERVAL, "1");
+            String interval = mPrefs.getString(GeneralKeys.UPDATE_INTERVAL, "1");
             long period = 1000L;
             switch (interval) {
                 case "1": {
@@ -1132,7 +1143,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
 
             //find the mac address of the device, if not found then start the internal GPS
-            String address = ep.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "");
+            String address = mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "");
             String internalGps = getString(R.string.pref_behavior_geonav_internal_gps_choice);
             boolean internal = true;
 
@@ -1337,7 +1348,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private void runImpactZoneAlgorithm(boolean internal) {
 
         //the angle of the IZ algorithm to use, see Geodetic util class for more details
-        String thetaPref = ep.getString(GeneralKeys.SEARCH_ANGLE, "0");
+        String thetaPref = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "0");
         double theta = 22.5;
         switch (thetaPref) {
             case "22.5": {
@@ -1358,9 +1369,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
         }
 
-        String geoNavMethod = ep.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0");
-        double d1 = Double.parseDouble(ep.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001"));
-        double d2 = Double.parseDouble(ep.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01"));
+        String geoNavMethod = mPrefs.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0");
+        double d1 = Double.parseDouble(mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001"));
+        double d2 = Double.parseDouble(mPrefs.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01"));
 
         //user must have a valid pointing direction before attempting the IZ
         if (mAzimuth != null) {
@@ -1413,7 +1424,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                         thisActivity.runOnUiThread(() -> {
 
-                            if (ep.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
+                            if (mPrefs.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
 
                                 moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
 
@@ -1453,7 +1464,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         ((SensorManager) getSystemService(SENSOR_SERVICE)).unregisterListener(this);
 
-        ep.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
+        mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
 
         if (mScheduler != null) {
             mScheduler.purge();
@@ -1939,8 +1950,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     public void onLocationChanged(@NonNull Location location) {
 
         mInternalLocation = location;
-
-        //put check to only print after IZ stops
 
         //always log location updates
         GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, location.getLatitude() + "," + location.getLongitude() + "," + location.getTime() + ",null,null,null,null,null,null,null,null,null,null\n");

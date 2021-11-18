@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.preferences;
 
+import static android.app.Activity.RESULT_OK;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -25,10 +27,18 @@ import com.fieldbook.tracker.activities.BrapiAuthActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.traits.BaseTraitLayout;
+import com.fieldbook.tracker.utilities.Utils;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog;
+import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialogFragmentCompat;
+
 public class BrapiPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+
+    private static final String DIALOG_FRAGMENT_TAG = "com.tracker.fieldbook.preferences.BRAPI_DIALOG_FRAGMENT";
 
     private static final String BRAPI_BASE_URL = "BRAPI_BASE_URL";
     private Context context;
@@ -36,8 +46,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private PreferenceCategory brapiPrefCategory;
     private Preference brapiAuthButton;
     private Preference brapiLogoutButton;
-    private EditTextPreference brapiURLPreference;
-    private EditTextPreference brapiOIDCURLPreference;
+    private NeutralButtonEditTextDialog brapiURLPreference;
+    private NeutralButtonEditTextDialog brapiOIDCURLPreference;
     private ListPreference brapiOIDCFlow;
     private Preference brapiServerBarcode;
     private Preference brapiServerCassavabase;
@@ -84,6 +94,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiOIDCURLPreference = findPreference(GeneralKeys.BRAPI_OIDC_URL);
         brapiOIDCFlow = findPreference(GeneralKeys.BRAPI_OIDC_FLOW);
         brapiOIDCFlow.setOnPreferenceChangeListener(this);
+
+        String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
+        String oidcUrl = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
+        brapiURLPreference.setText(url);
+        brapiOIDCURLPreference.setText(oidcUrl);
 
 //        EditTextPreference brapiPaginationPreference = (EditTextPreference) findPreference(GeneralKeys.BRAPI_PAGE_SIZE);
 //        brapiPaginationPreference.setSummary(prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
@@ -180,20 +195,20 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     @Override
     public void onResume() {
         super.onResume();
-//        setBaseURLSummary();
+        setBaseURLSummary();
         setButtonView();
     }
 
+    private void setBaseURLSummary() {
+        String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, "https://test-server.brapi.org");
+        brapiURLPreference.setSummary(url);
+    }
+  
     @Override
     public void onPause() {
         super.onPause();
         if (mBrapiHttpWarningDialog.isShowing()) mBrapiHttpWarningDialog.cancel();
     }
-
-//    private void setBaseURLSummary() {
-//        String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
-//        brapiURLPreference.setSummary(url);
-//    }
 
     private void startAuth() {
         String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
@@ -223,7 +238,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if(oidcFlow != null)
             brapiOIDCFlow.setValue(oidcFlow);
 
-//        setBaseURLSummary();
+        setBaseURLSummary();
         brapiAuth();
     }
 
@@ -260,15 +275,18 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         return super.onPreferenceTreeClick(preference);
     }
 
+    private void updateUrls(String newValue) {
+        SharedPreferences sp = prefMgr.getSharedPreferences();
+        String oldBaseUrl = sp.getString(GeneralKeys.BRAPI_BASE_URL, "");
+        String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
+        String newOidcUrl = oldOidcUrl.replaceFirst(oldBaseUrl, newValue);
+        setServer(newValue, newOidcUrl, null);
+    }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference.equals(brapiURLPreference)) {
-            SharedPreferences sp = prefMgr.getSharedPreferences();
-            String oldBaseUrl = sp.getString(GeneralKeys.BRAPI_BASE_URL, "");
-            String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
-            String newOidcUrl = oldOidcUrl.replaceFirst(oldBaseUrl, newValue.toString());
-            setServer(newValue.toString(), newOidcUrl, null);
+            updateUrls(newValue.toString());
         }
 
         if (preference.equals(brapiOIDCFlow)) {
@@ -327,6 +345,88 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
                 brapiAuth();
                 break;
+            case 98: //barcode scan result for oidc url
+                if(resultCode == RESULT_OK) {
+                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    String scannedBarcode = plotDataResult.getContents();
+                    brapiOIDCURLPreference.setText(scannedBarcode);
+                }
+                break;
+            case 99: //barcode scan result for brapi url
+                if(resultCode == RESULT_OK) {
+                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                    String scannedBarcode = plotDataResult.getContents();
+                    updateUrls(scannedBarcode);
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onDisplayPreferenceDialog(Preference preference) {
+        // check if dialog is already showing
+        if (getFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG) != null) {
+            return;
+        }
+
+        final DialogFragment f;
+
+        if (preference instanceof NeutralButtonEditTextDialog) {
+
+            f = NeutralButtonEditTextDialogFragmentCompat.Companion.newInstance(preference.getKey(), (dialog, text) -> {
+
+                //neutral edit text callback
+                //change request code for brapi url vs oidc url
+                if (preference.getKey().equals(brapiURLPreference.getKey())) {
+                    new IntentIntegrator(getActivity())
+                            .setPrompt(getString(R.string.main_barcode_text))
+                            .setBeepEnabled(false)
+                            .setRequestCode(99)
+                            .initiateScan();
+                } else {
+                    new IntentIntegrator(getActivity())
+                            .setPrompt(getString(R.string.main_barcode_text))
+                            .setBeepEnabled(false)
+                            .setRequestCode(98)
+                            .initiateScan();
+                }
+
+                if (dialog != null)
+                    dialog.dismiss();
+
+                return null;
+            }, (dialog, text) -> {
+
+                //positive edit text callback
+                if (preference.getKey().equals(brapiURLPreference.getKey())) {
+                    brapiURLPreference.setText(text);
+                    brapiAuth();
+                } else {
+                    brapiOIDCURLPreference.setText(text);
+                }
+
+                if (dialog != null)
+                    dialog.dismiss();
+
+                return null;
+            }, (dialog, text) -> {
+
+                //negative edit text callback
+                if (dialog != null)
+                    dialog.dismiss();
+
+                return null;
+            });
+
+        } else {
+            f = null;
+        }
+
+        if (f != null) {
+            f.setTargetFragment(this, 0);
+            f.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+        } else {
+            super.onDisplayPreferenceDialog(preference);
         }
     }
 }
