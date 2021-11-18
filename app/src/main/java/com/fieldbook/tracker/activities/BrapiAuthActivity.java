@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities;
 
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,7 +23,15 @@ import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.Preconditions;
 import net.openid.appauth.ResponseTypeValues;
+import net.openid.appauth.connectivity.ConnectionBuilder;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class BrapiAuthActivity extends AppCompatActivity {
 
@@ -92,6 +102,8 @@ public class BrapiAuthActivity extends AppCompatActivity {
         }
     }
 
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(GeneralKeys.BRAPI_TOKEN, null);
@@ -102,50 +114,67 @@ public class BrapiAuthActivity extends AppCompatActivity {
             Uri redirectURI = Uri.parse("https://fieldbook.phenoapps.org/");
             Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
 
-            //oidc requires using https or this will cause app to crash within their AuthorizationService code, maybe bug?
-            if (oidcConfigURI.toString().contains("https://")) {
+            ConnectionBuilder builder = uri -> {
+                Preconditions.checkNotNull(uri, "url must not be null");
+                Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
+                        "scheme or uri must be http or https");
+                HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
+//                    conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
+//                    conn.setReadTimeout(READ_TIMEOUT_MS);
+                conn.setInstanceFollowRedirects(true);
 
-                AuthorizationServiceConfiguration.fetchFromUrl(oidcConfigURI,
-                        new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
-                            public void onFetchConfigurationCompleted(
-                                    @Nullable AuthorizationServiceConfiguration serviceConfig,
-                                    @Nullable AuthorizationException ex) {
-                                if (ex != null) {
-                                    Log.e("BrAPIService", "failed to fetch configuration", ex);
-                                    authError(ex);
-                                    finish();
-                                    return;
-                                }
+                // normally, 3xx is redirect
+                int status = conn.getResponseCode();
+                if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                            || status == HttpURLConnection.HTTP_MOVED_PERM
+                            || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                    // get redirect url from "location" header field
+                    String newUrl = conn.getHeaderField("Location");
+                    // get the cookie if need, for login
+                    String cookies = conn.getHeaderField("Set-Cookie");
+                    // open the new connnection again
+                    conn = (HttpURLConnection) new URL(newUrl).openConnection();
+                    conn.setRequestProperty("Cookie", cookies);
+                }else{
+                    conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
+                }
 
-                                AuthorizationRequest.Builder authRequestBuilder =
-                                        new AuthorizationRequest.Builder(
-                                                serviceConfig, // the authorization service configuration
-                                                clientId, // the client ID, typically pre-registered and static
-                                                ResponseTypeValues.TOKEN, // the response_type value: we want a token
-                                                redirectURI); // the redirect URI to which the auth response is sent
+                return conn;
+            };
 
-                                AuthorizationRequest authRequest = authRequestBuilder.setPrompt("login").build();
-
-                                AuthorizationService authService = new AuthorizationService(context);
-
-                                Intent responseIntent = new Intent(context, BrapiAuthActivity.class);
-                                responseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                                authService.performAuthorizationRequest(
-                                        authRequest,
-                                        PendingIntent.getActivity(context, 0, responseIntent, 0));
-
+            AuthorizationServiceConfiguration.fetchFromUrl(oidcConfigURI,
+                    new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+                        public void onFetchConfigurationCompleted(
+                                @Nullable AuthorizationServiceConfiguration serviceConfig,
+                                @Nullable AuthorizationException ex) {
+                            if (ex != null) {
+                                Log.e("BrAPIService", "failed to fetch configuration", ex);
+                                authError(ex);
+                                finish();
+                                return;
                             }
 
-                        });
-            } else {
+                            AuthorizationRequest.Builder authRequestBuilder =
+                                    new AuthorizationRequest.Builder(
+                                            serviceConfig, // the authorization service configuration
+                                            clientId, // the client ID, typically pre-registered and static
+                                            ResponseTypeValues.TOKEN, // the response_type value: we want a token
+                                            redirectURI); // the redirect URI to which the auth response is sent
 
-                Utils.makeToast(this, getString(R.string.act_brapi_auth_http_used));
+                            AuthorizationRequest authRequest = authRequestBuilder.setPrompt("login").build();
 
-                setResult(RESULT_CANCELED);
+                            AuthorizationService authService = new AuthorizationService(context);
 
-                finish();
-            }
+                            Intent responseIntent = new Intent(context, BrapiAuthActivity.class);
+                            responseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                            authService.performAuthorizationRequest(
+                                    authRequest,
+                                    PendingIntent.getActivity(context, 0, responseIntent, 0));
+
+                        }
+
+                    }, builder);
 
         } catch (Exception ex) {
 
