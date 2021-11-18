@@ -1,7 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
 import static android.app.Activity.RESULT_OK;
-
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -57,6 +57,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private Preference brapiServerDefaultTest;
     private String barcodeResult;
 
+    //alert dialog displays messages when oidc or brapi urls have http
+    private AlertDialog mBrapiHttpWarningDialog = null;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -66,6 +69,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+
+        mBrapiHttpWarningDialog = new AlertDialog.Builder(context)
+                .setTitle(R.string.act_brapi_auth_http_warning_title)
+                .setMessage(R.string.act_brapi_auth_http_warning_message)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    startAuth();
+                    dialog.dismiss();
+                }).create();
 
         prefMgr = getPreferenceManager();
         prefMgr.setSharedPreferencesName("Settings");
@@ -192,14 +203,33 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         String url = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, "https://test-server.brapi.org");
         brapiURLPreference.setSummary(url);
     }
+  
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mBrapiHttpWarningDialog.isShowing()) mBrapiHttpWarningDialog.cancel();
+    }
 
-    private void brapiAuth() {
+    private void startAuth() {
         String brapiHost = prefMgr.getSharedPreferences().getString(BRAPI_BASE_URL, null);
         if (brapiHost != null) {
             Intent intent = new Intent();
             intent.setClassName(context, BrapiAuthActivity.class.getName());
             startActivity(intent);
         }
+    }
+
+    private void brapiAuth() {
+
+        if (brapiOIDCURLPreference.getText().contains("http://")
+            || brapiURLPreference.getText().contains("http://")) {
+
+                if (mBrapiHttpWarningDialog != null
+                    && !mBrapiHttpWarningDialog.isShowing()) {
+                    mBrapiHttpWarningDialog.show();
+                }
+
+        } else startAuth();
     }
 
     private void setServer(String url, String oidcUrl, String oidcFlow) {
