@@ -313,14 +313,40 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                 val pointsToAverage = arrayListOf<Pair<Double, Double>>()
                 val info = AverageInfo(unit, location, pointsToAverage, latLength, lngLength)
                 if (avgDuration > -1L) {
-                    mProgressDialog?.show()
-                    startAverageTimer(info, avgDuration)
+
+                    if (location != null) {
+
+                        //averaging is updating the location, so ask the user
+                        alertLocationUpdate {
+                            mProgressDialog?.show()
+                            startAverageTimer(info, avgDuration)
+                        }
+
+                    } else { //no location has been observed so don't ask the user
+
+                        mProgressDialog?.show()
+                        startAverageTimer(info, avgDuration)
+
+                    }
+
                 } else {
-                    val original = (location?.latitude ?: 0.0) to (location?.longitude ?: 0.0)
-                    val current = newLat to newLng
-                    pointsToAverage.add(original)
-                    pointsToAverage.add(current)
-                    averagePoints(info)
+
+                    if (location != null) {
+
+                        //averaging is updating the location, so ask the user
+                        alertLocationUpdate {
+                            val original = (location.latitude) to (location.longitude)
+                            val current = newLat to newLng
+                            pointsToAverage.add(original)
+                            pointsToAverage.add(current)
+                            averagePoints(info)
+                        }
+
+                    } else { //no location has been observed so don't ask the user
+
+                        updateCoordinateObservation(unit, geoJson)
+
+                    }
                 }
 
             } else { //no averaging, so check if there is an observations and ask to update or not
@@ -413,22 +439,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             coordinates = arrayOf(avgPoint.first.toString(), avgPoint.second.toString())),
             properties = mapOf("altitude" to (location?.altitude?.toString() ?: "")))
 
-        CollectActivity.thisActivity.runOnUiThread {
-
-            if (location != null) {
-
-                //averaging is updating the location, so ask the user
-                alertLocationUpdate {
-
-                    updateCoordinateObservation(unit, averageJson)
-                }
-
-            } else { //no location has been observed so don't ask the user
-
-                updateCoordinateObservation(unit, averageJson)
-
-            }
-        }
+        updateCoordinateObservation(unit, averageJson)
     }
 
     private fun alertLocationUpdate(f: () -> Unit) {
