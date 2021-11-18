@@ -1,6 +1,6 @@
 package com.fieldbook.tracker.activities;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -9,22 +9,29 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.Utils;
 
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
-import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.Preconditions;
 import net.openid.appauth.ResponseTypeValues;
+import net.openid.appauth.connectivity.ConnectionBuilder;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class BrapiAuthActivity extends AppCompatActivity {
 
@@ -35,11 +42,14 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
         SharedPreferences sp = getSharedPreferences("Settings", 0);
         // Start our login process
-        String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
-        if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
-            authorizeBrAPI(sp, this);
-        }else if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
-            authorizeBrAPI_OLD(sp, this);
+        //when coming back from deep link this check keeps app from auto-re-authenticating
+        if (getIntent() != null && getIntent().getData() == null) {
+            String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+            if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
+                authorizeBrAPI(sp, this);
+            }else if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
+                authorizeBrAPI_OLD(sp, this);
+            }
         }
     }
 
@@ -60,7 +70,6 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
         if (data != null) {
             // authorization completed
-
             String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
             if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
                 checkBrapiAuth(data);
@@ -72,14 +81,29 @@ public class BrapiAuthActivity extends AppCompatActivity {
             // coming from a deep link if it is coming from deep link on pause and resume.
             getIntent().setData(null);
 
+            setResult(RESULT_OK);
+
             finish();
+
         } else if (ex != null) {
+
             // authorization completed in error
             authError(ex);
+
             finish();
+
+        } else { //returning from deep link with null data should finish activity
+            //otherwise the progress bar hangs
+
+            getIntent().setData(null);
+
+            finish();
+
         }
     }
 
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(GeneralKeys.BRAPI_TOKEN, null);
@@ -89,6 +113,34 @@ public class BrapiAuthActivity extends AppCompatActivity {
             String clientId = "fieldbook";
             Uri redirectURI = Uri.parse("https://fieldbook.phenoapps.org/");
             Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
+
+            ConnectionBuilder builder = uri -> {
+                Preconditions.checkNotNull(uri, "url must not be null");
+                Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
+                        "scheme or uri must be http or https");
+                HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
+//                    conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
+//                    conn.setReadTimeout(READ_TIMEOUT_MS);
+                conn.setInstanceFollowRedirects(true);
+
+                // normally, 3xx is redirect
+                int status = conn.getResponseCode();
+                if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                            || status == HttpURLConnection.HTTP_MOVED_PERM
+                            || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                    // get redirect url from "location" header field
+                    String newUrl = conn.getHeaderField("Location");
+                    // get the cookie if need, for login
+                    String cookies = conn.getHeaderField("Set-Cookie");
+                    // open the new connnection again
+                    conn = (HttpURLConnection) new URL(newUrl).openConnection();
+                    conn.setRequestProperty("Cookie", cookies);
+                }else{
+                    conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
+                }
+
+                return conn;
+            };
 
             AuthorizationServiceConfiguration.fetchFromUrl(oidcConfigURI,
                     new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
@@ -118,14 +170,19 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
                             authService.performAuthorizationRequest(
                                     authRequest,
-                                    PendingIntent.getActivity(context, 0, responseIntent, 0),
                                     PendingIntent.getActivity(context, 0, responseIntent, 0));
 
                         }
 
-                    });
+                    }, builder);
+
         } catch (Exception ex) {
+
             authError(ex);
+
+            setResult(RESULT_CANCELED);
+
+            finish();
         }
     }
 
