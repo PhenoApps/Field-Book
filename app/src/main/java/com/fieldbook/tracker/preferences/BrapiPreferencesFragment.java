@@ -292,13 +292,13 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if (preference.equals(brapiOIDCFlow)) {
             PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("brapi_oidc_settings");
 
-            if(brapiOIDCFlow.getValue().equalsIgnoreCase("Original Field Book Custom")) {
+            if(newValue.equals("OAuth2 Implicit Grant")) {
                 preferenceCategory.addPreference(brapiOIDCURLPreference);
             } else {
                 preferenceCategory.removePreference(brapiOIDCURLPreference);
             }
 
-            Log.d("Field Book",brapiOIDCFlow.getValue().toString());
+            Log.d("Field Book", brapiOIDCFlow.getValue());
         }
 
         return true;
