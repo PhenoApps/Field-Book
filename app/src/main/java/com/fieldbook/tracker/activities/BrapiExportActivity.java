@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -30,8 +31,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Semaphore;
 
 public class BrapiExportActivity extends AppCompatActivity {
+    private static final String TAG = BrapiExportActivity.class.getName();
 
     private BrAPIService brAPIService;
     private DataHelper dataHelper;
@@ -64,6 +67,11 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     }
 
+    //testing constructor
+    public BrapiExportActivity(DataHelper dataHelper) {
+        this.dataHelper = dataHelper;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +82,9 @@ public class BrapiExportActivity extends AppCompatActivity {
                 requestWindowFeature(Window.FEATURE_NO_TITLE);
                 setContentView(R.layout.dialog_brapi_export);
 
-                this.dataHelper = new DataHelper(this);
+                if(this.dataHelper == null) {
+                    this.dataHelper = new DataHelper(this);
+                }
 
                 brAPIService = BrAPIServiceFactory.getBrAPIService(this);
 
@@ -185,31 +195,32 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private void sendData() {
 
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (numNewObservations > 0) {
-                    createObservations();
-                }else{
-                    createObservationsComplete = true;
-                    uploadComplete();
+        AsyncTask.execute(() -> {
+            if (numNewObservations > 0) {
+                try {
+                    createObservationsChunked();
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "Saving observations was interrupted", e);
                 }
+            }else{
+                createObservationsComplete = true;
+                uploadComplete();
+            }
 
-                if (numEditedObservations > 0) {
-                    updateObservations();
-                }else{
-                    updateObservationsComplete = true;
-                    uploadComplete();
-                }
+            if (numEditedObservations > 0) {
+                updateObservations();
+            }else{
+                updateObservationsComplete = true;
+                uploadComplete();
+            }
 
-                if (numNewImages > 0) {
-                    loadNewImages();
-                    postImages(imagesNew);
-                }
-                if (numEditedImages > 0 || numIncompleteImages > 0) {
-                    loadEditedIncompleteImages();
-                    putImages();
-                }
+            if (numNewImages > 0) {
+                loadNewImages();
+                postImages(imagesNew);
+            }
+            if (numEditedImages > 0 || numIncompleteImages > 0) {
+                loadEditedIncompleteImages();
+                putImages();
             }
         });
     }
@@ -258,24 +269,76 @@ public class BrapiExportActivity extends AppCompatActivity {
                         });
                         return null;
                     }
-                }, new Function<Integer, Void>() {
+                }, code -> {
 
-                    @Override
-                    public Void apply(final Integer code) {
+                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            createObservationsError = processErrorCode(code);
+                            createObservationsComplete = true;
+                            uploadComplete();
+                        }
+                    });
 
-                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                createObservationsError = processErrorCode(code);
-                                createObservationsComplete = true;
-                                uploadComplete();
-                            }
-                        });
-
-                        return null;
-                    }
+                    return null;
                 }
         );
+    }
+
+    private void createObservationsChunked() throws InterruptedException {
+        int chunkSize = 500; //TODO change to pageSize
+
+        List<List<Observation>> chunkedObservationLists = new ArrayList<>();
+
+        List<Observation> currentChunk = new ArrayList<>();
+        for (int i = 0; i < newObservations.size(); i++) {
+            if (i % chunkSize == 0 && i != 0) {
+                chunkedObservationLists.add(currentChunk);
+                currentChunk = new ArrayList<>();
+            }
+
+            currentChunk.add(newObservations.get(i));
+        }
+
+        if(currentChunk.size() > 0) {
+            chunkedObservationLists.add(currentChunk);
+        }
+
+        /*
+         Allow for up to two parallel write calls to happen at a time.
+         May be worth enhancing this to be more dynamic based on the device specs
+         */
+        Semaphore requestSemaphore = new Semaphore(2);
+
+        for (int chunkNum = 0; chunkNum < chunkedObservationLists.size(); chunkNum++) {
+            List<Observation> chunkedObservations = chunkedObservationLists.get(chunkNum);
+            int finalChunkNum = chunkNum+1;
+
+            requestSemaphore.acquire();
+
+            Log.d(TAG,"Starting chunk " + finalChunkNum + "/" + chunkedObservationLists.size());
+            brAPIService.createObservations(chunkedObservations, input -> {
+                Log.d(TAG,"Finished chunk " + finalChunkNum + "/" + chunkedObservationLists.size());
+                (BrapiExportActivity.this).runOnUiThread(() -> {
+                    processCreateObservationsResponse(chunkedObservations);
+                    processResponse(input, chunkedObservations);
+
+                    numNewObservations -= input.size();
+                    numSyncedObservations += input.size();
+
+                    ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));
+                    ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
+                });
+                requestSemaphore.release();
+                return null;
+            }, input -> {
+                Log.d(TAG,"Finished chunk " + finalChunkNum + "/" + chunkedObservationLists.size());
+                Log.e(TAG,"error with chunk "+finalChunkNum+": " + input);
+                createObservationsError = createObservationsError == null ? processErrorCode(input) : createObservationsError;
+                requestSemaphore.release();
+                return null;
+            });
+        }
     }
 
     private void updateObservations() {
