@@ -145,6 +145,9 @@ public interface BrAPIService {
                                    final Function<List<Observation>, Void> function,
                                    final Function<Integer, Void> failFunction);
 
+    void createObservationsChunked(List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
+    void updateObservationsChunked(List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
+
     /*
     public void postObservations(List<Observation> observations,
                                final Function<List<Observation>, Void> function,
