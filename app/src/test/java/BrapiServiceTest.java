@@ -499,7 +499,7 @@ public class BrapiServiceTest {
         try {
             signal.await();
 
-            assertNotNull(postImageMetaDataResponse[0]);
+            assertNotNull("No images were saved", postImageMetaDataResponse[0]);
 
         } catch (InterruptedException e) {
             fail(e.toString());
