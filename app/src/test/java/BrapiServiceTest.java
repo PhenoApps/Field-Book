@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.swagger.client.ApiClient;
@@ -136,8 +137,11 @@ public class BrapiServiceTest {
 
         // Wait for our callback and evaluate how we did
         try {
-            signal.await();
-            assertTrue(checkGetStudiesResult.get());
+            if(signal.await(5, TimeUnit.MINUTES)) {
+                assertTrue(checkGetStudiesResult.get());
+            } else {
+                fail("Async action timed out");
+            }
         } catch (InterruptedException e) {
             fail(e.toString());
         }
@@ -176,8 +180,11 @@ public class BrapiServiceTest {
 
         // Wait for our callback and evaluate how we did
         try {
-            signal.await();
-            assertTrue(checkGetStudyDetailsResult.get());
+            if(signal.await(5, TimeUnit.MINUTES)) {
+                assertTrue(checkGetStudyDetailsResult.get());
+            } else {
+                fail("Async action timed out");
+            }
         } catch (InterruptedException e) {
             fail(e.toString());
         }
@@ -217,8 +224,11 @@ public class BrapiServiceTest {
 
         // Wait for our callback and evaluate how we did
         try {
-            signal.await();
-            assertTrue(checkGetPlotDetailsResult.get());
+            if(signal.await(5, TimeUnit.MINUTES)) {
+                assertTrue(checkGetPlotDetailsResult.get());
+            } else {
+                fail("Async action timed out");
+            }
         } catch (InterruptedException e) {
             fail(e.toString());
         }
@@ -257,8 +267,11 @@ public class BrapiServiceTest {
 
         // Wait for our callback and evaluate how we did
         try {
-            signal.await();
-            assertTrue(checkGetOntologyResult.get());
+            if(signal.await(5, TimeUnit.MINUTES)) {
+                assertTrue(checkGetOntologyResult.get());
+            } else {
+                fail("Async action timed out");
+            }
         } catch (InterruptedException e) {
             fail(e.toString());
         }
@@ -298,8 +311,11 @@ public class BrapiServiceTest {
 
         // Wait for our callback and evaluate how we did
         try {
-            signal.await();
-            assertTrue(checkGetTraitsResult.get());
+            if(signal.await(5, TimeUnit.MINUTES)) {
+                assertTrue(checkGetTraitsResult.get());
+            } else {
+                fail("Async action timed out");
+            }
         } catch (InterruptedException e) {
             fail(e.toString());
         }
@@ -358,13 +374,14 @@ public class BrapiServiceTest {
 
         // Wait for our callback and evaluate how we did
         try {
-            signal.await();
+            if(signal.await(5, TimeUnit.MINUTES)) {
+                assertEquals(1, putObservationsResponse.size());
 
-            assertEquals(1, putObservationsResponse.size());
-
-            assertEquals(testObservations.get(0).getDbId(), putObservationsResponse.get(0).getDbId());
-            assertEquals(variableDbId, putObservationsResponse.get(0).getVariableDbId());
-
+                assertEquals(testObservations.get(0).getDbId(), putObservationsResponse.get(0).getDbId());
+                assertEquals(variableDbId, putObservationsResponse.get(0).getVariableDbId());
+            } else {
+                fail("Async action timed out");
+            }
         } catch (InterruptedException e) {
             fail(e.toString());
         }
@@ -445,19 +462,20 @@ public class BrapiServiceTest {
 
         // Wait for our callback and evaluate how we did
         try {
-            signal.await();
+            if(signal.await(5, TimeUnit.MINUTES)) {
+                assertFalse("No observations were saved", observationResponses.isEmpty());
+                assertEquals("Not all of the observations were saved", numObs, observationResponses.size());
 
-            assertFalse("No observations were saved", observationResponses.isEmpty());
-            assertEquals("Not all of the observations were saved", numObs, observationResponses.size());
-
-            for(Observation o : testObservations) {
-                Observation responseObs = observationResponses.get(o.getUnitDbId());
-                assertNotNull(responseObs);
-                assertNotNull(responseObs.getDbId());
-                assertTrue(responseObs.getDbId().trim().length() > 0);
-                assertEquals(o.getVariableDbId(), responseObs.getVariableDbId());
+                for(Observation o : testObservations) {
+                    Observation responseObs = observationResponses.get(o.getUnitDbId());
+                    assertNotNull(responseObs);
+                    assertNotNull(responseObs.getDbId());
+                    assertTrue(responseObs.getDbId().trim().length() > 0);
+                    assertEquals(o.getVariableDbId(), responseObs.getVariableDbId());
+                }
+            } else {
+                fail("Async action timed out");
             }
-
         } catch (InterruptedException e) {
             fail(e.toString());
         }
@@ -497,9 +515,11 @@ public class BrapiServiceTest {
 
         // Wait for our callback and evaluate how we did
         try {
-            signal.await();
-
-            assertNotNull("No images were saved", postImageMetaDataResponse[0]);
+            if(signal.await(1, TimeUnit.MINUTES)) {
+                assertNotNull("No images were saved", postImageMetaDataResponse[0]);
+            } else {
+                fail("Async action timed out");
+            }
 
         } catch (InterruptedException e) {
             fail(e.toString());
