@@ -40,3 +40,9 @@ jobs:
         run: chmod +x ./gradlew
       - name: Build with Gradle
         run: ./gradlew test
+      - name: Publish Report Artifact
+          uses: actions/upload-artifact@v2
+          if: always()
+          with:
+            name: field-book-test-results-${{ github.run_number }}
+            path: ${{ github.workspace }}/reports/tests/*
