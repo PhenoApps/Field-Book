@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractBrAPIService implements BrAPIService {
 
@@ -57,9 +58,10 @@ public abstract class AbstractBrAPIService implements BrAPIService {
          */
         Semaphore requestSemaphore = new Semaphore(2);
         AtomicBoolean failed = new AtomicBoolean(false);
+        AtomicInteger completedChunks = new AtomicInteger(0);
         for (int chunkNum = 0; chunkNum < chunkedItemLists.size(); chunkNum++) {
             List<T> chunk = chunkedItemLists.get(chunkNum);
-            int finalChunkNum = chunkNum+1;
+            int currentChunkNum = chunkNum+1;
 
             try {
                 requestSemaphore.acquire();
@@ -74,15 +76,15 @@ public abstract class AbstractBrAPIService implements BrAPIService {
                 return; //break out of the loop and don't let any more requests be sent.  This could be removed if the UI is updated to keep track of multiple failures
             }
 
-            Log.d(TAG,"Starting chunk " + finalChunkNum + "/" + chunkedItemLists.size());
+            Log.d(TAG,"Starting chunk " + currentChunkNum + "/" + chunkedItemLists.size());
             processFn.apply(chunk, input -> {
-                Log.d(TAG,"Finished chunk " + finalChunkNum + "/" + chunkedItemLists.size());
-                uploadProgressCallback.apply(input, finalChunkNum, chunk, (finalChunkNum + 1) == chunkedItemLists.size());
+                Log.d(TAG,"Finished chunk " + currentChunkNum + "/" + chunkedItemLists.size());
+                uploadProgressCallback.apply(input, currentChunkNum, chunk, completedChunks.incrementAndGet() == chunkedItemLists.size());
                 requestSemaphore.release();
                 return null;
             }, error -> {
-                Log.d(TAG,"Finished chunk " + finalChunkNum + "/" + chunkedItemLists.size());
-                Log.e(TAG,"error with chunk "+finalChunkNum+": " + error);
+                Log.d(TAG,"Finished chunk " + currentChunkNum + "/" + chunkedItemLists.size());
+                Log.e(TAG,"error with chunk "+currentChunkNum+": " + error);
                 failFn.apply(error);
                 failed.set(true);
                 requestSemaphore.release();
