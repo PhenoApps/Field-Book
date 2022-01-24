@@ -34,6 +34,8 @@ public class PreferencesFragment extends BasePreferenceFragment {
         config.index(R.xml.preferences_theme);
         config.index(R.xml.preferences_behavior);
         config.index(R.xml.preferences_brapi);
+        config.index(R.xml.preferences_geonav);
+        config.index(R.xml.preferences_vuzix);
         config.index(R.xml.preferences_database);
         config.index(R.xml.preferences_general);
         config.index(R.xml.preferences_profile);

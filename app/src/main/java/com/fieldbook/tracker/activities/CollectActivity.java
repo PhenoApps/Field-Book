@@ -1,15 +1,18 @@
 package com.fieldbook.tracker.activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -26,6 +29,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -68,8 +72,10 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
+import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.location.gnss.ConnectThread;
@@ -94,6 +100,10 @@ import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 
+import com.fieldbook.tracker.vuzix.DataMonitor;
+import com.fieldbook.tracker.vuzix.DataTransferService;
+import com.fieldbook.tracker.vuzix.VuzixController;
+import com.fieldbook.tracker.vuzix.VuzixManager;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 
@@ -101,6 +111,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.threeten.bp.OffsetDateTime;
 
@@ -119,6 +130,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Stream;
 
 import kotlin.Pair;
 
@@ -130,7 +142,8 @@ import static com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.ACTION_BR
  */
 
 @SuppressLint("ClickableViewAccessibility")
-public class CollectActivity extends AppCompatActivity implements SensorEventListener, GPSTracker.GPSTrackerListener {
+public class CollectActivity extends AppCompatActivity
+        implements SensorEventListener, GPSTracker.GPSTrackerListener, VuzixController {
 
     public static boolean searchReload;
     public static String searchRange;
@@ -220,6 +233,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     //variable used to skip the navigate to last used trait in onResume
     private boolean mSkipLastUsedTrait = false;
 
+    private VuzixManager mVuzixManager = null;
+
     public static void disableViews(ViewGroup layout) {
         layout.setEnabled(false);
         for (int i = 0; i < layout.getChildCount(); i++) {
@@ -256,6 +271,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         ConfigActivity.dt.open();
 
         loadScreen();
+
 
     }
 
@@ -590,6 +606,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         initWidgets(false);
+
     }
 
     /**
@@ -610,6 +627,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         traitBox.setSelection(traitIndex);
 
         initWidgets(false);
+
     }
 
     @Override
@@ -630,9 +648,15 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         stopGeoNav();
 
         //save the last used trait
-        ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.currentTrait.getTrait()).apply();
+        if (traitBox.currentTrait != null)
+            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.currentTrait.getTrait()).apply();
 
         mAverageHandler.quit();
+
+        if (mVuzixManager != null) {
+            mVuzixManager.unregister();
+            mVuzixManager = null;
+        }
 
         super.onPause();
     }
@@ -642,6 +666,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         //save last plot id
         if (ep.getBoolean("ImportFieldFinished", false)) {
             rangeBox.saveLastPlot();
+        }
+
+        if (mVuzixManager != null) {
+            mVuzixManager.unregister();
+            mVuzixManager = null;
         }
 
         super.onDestroy();
@@ -780,6 +809,13 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         mAverageHandler = new HandlerThread("averaging");
         mAverageHandler.start();
         mAverageHandler.getLooper();
+
+        if (mPrefs.getBoolean(GeneralKeys.VUZIX_ENABLE, false)) {
+
+            mVuzixManager = new VuzixManager(this);
+
+            mVuzixManager.register();
+        }
     }
 
     /**
@@ -1571,6 +1607,16 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
@@ -1740,6 +1786,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             default:
                 return super.dispatchKeyEvent(event);
         }
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1955,6 +2006,147 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, location.getLatitude() + "," + location.getLongitude() + "," + location.getTime() + ",null,null,null,null,null,null,null,null,null,null\n");
     }
 
+    //region Vuzix Interface Implementation
+    @NonNull
+    @Override
+    public Context getContext() {
+        return this;
+    }
+
+    @NonNull
+    @Override
+    public String getStudyId() {
+        return Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+    }
+
+    @NonNull
+    @Override
+    public String[] getPrefixData() {
+
+        String expId = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+
+        ArrayList<String> data = new ArrayList<>();
+
+        int numBars = ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2);
+
+        //the prefix obs. unit. traits s.a plot_id, row, column, defined by the user
+        String[] prefixes = dt.getRangeColumnNames();
+
+        //the observation variable traits
+        String[] obsTraits = dt.getAllTraitObjects().stream().map(TraitObject::getTrait).toArray(String[]::new);
+
+        //combine the traits to be viewed within info bars
+        final String[] allTraits = ArrayUtils.addAll(prefixes, obsTraits);
+
+        String plotId = rangeBox.getPlotID();
+
+        List<String> traits = Arrays.asList(obsTraits);
+
+        if (numBars > 0) {
+
+            String firstPrefix = ep.getString("DROP" + 0, allTraits[0]);
+
+            data.add(firstPrefix);
+
+            //check if the prefix is a trait, then grab its value from db call
+            if (traits.contains(firstPrefix)) {
+
+                HashMap<String, String> vals = ObservationDao.Companion.getUserDetail(expId, plotId);
+                if (vals.containsKey(firstPrefix)) {
+                    data.add(vals.get(firstPrefix));
+                } else data.add("None");
+
+            } else {
+
+                data.add(getPrefixValue(prefixes, firstPrefix, plotId));
+
+            }
+        }
+
+        if (numBars > 1) {
+
+            String secondPrefix = ep.getString("DROP" + 1, allTraits[0]);
+
+            data.add(secondPrefix);
+
+            if (traits.contains(secondPrefix)) {
+
+                HashMap<String, String> vals = ObservationDao.Companion.getUserDetail(expId, plotId);
+                if (vals.containsKey(secondPrefix)) {
+                    data.add(vals.get(secondPrefix));
+                } else data.add("None");
+
+            } else {
+
+                data.add(getPrefixValue(prefixes, secondPrefix, plotId));
+
+            }
+        }
+
+        return data.toArray(new String[] {});
+    }
+
+    private String getPrefixValue(String[] traits, String prefix, String plotId) {
+
+        //check if the prefix is a trait, then grab its value from db call
+        if (Arrays.asList(traits).contains(prefix)) {
+
+            List<String> values = Arrays.asList(dt.getDropDownRange(prefix, plotId));
+
+            if (values.size() > 0) {
+               return values.get(0);
+            }
+        }
+
+        return "";
+    }
+
+    @NonNull
+    @Override
+    public String getUniqueName() {
+        return rangeBox.uniqueName;
+    }
+
+    @NonNull
+    @Override
+    public String getPlotId() {
+        return rangeBox.getPlotID();
+    }
+
+    @NonNull
+    @Override
+    public String getEditTextCurrentValue() {
+        return etCurVal.getText().toString();
+    }
+
+    @Override
+    public void moveTrait(@NonNull String dir) {
+        traitBox.moveTrait(dir);
+    }
+
+    @Override
+    public void movePlot(@NonNull String dir) {
+        if (dir.equals("right")) rangeBox.moveEntryRight();
+        else rangeBox.moveEntryLeft();
+    }
+
+    @Override
+    public void selectTrait(int index) {
+        traitBox.setSelection(index);
+    }
+
+    @Override
+    public void setEditTextCurrentValue(@NonNull String value) {
+
+        if (getCurrentTrait().getFormat() != null) {
+            etCurVal.setText(value);
+            updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
+            BaseTraitLayout btl = traitLayouts.getTraitLayout(getCurrentTrait().getFormat());
+            btl.loadLayout();
+        }
+    }
+    //endregion
+
     ///// class TraitBox /////
     // traitLeft, traitType, and traitRight
     private class TraitBox {
@@ -1975,6 +2167,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         private Map<String, String> newTraits;  // { trait name: value }
 
         TraitBox(CollectActivity parent_) {
+
             parent = parent_;
             prefixTraits = null;
             newTraits = new HashMap<>();
@@ -2276,6 +2469,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
 
             traitType.setSelection(pos);
+
         }
 
         public void update(String parent, String value) {
@@ -2724,6 +2918,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             tvRange.setText(cRange.range);
             tvPlot.setText(cRange.plot);
+
         }
 
         void rightClick() {

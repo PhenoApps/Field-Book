@@ -76,6 +76,14 @@ public class GeneralKeys {
     public static final String GEONAV_PARAMETER_D1                  = GEONAV_PREFIX + "parameters.trapezoid.D1";
     public static final String GEONAV_PARAMETER_D2                  = GEONAV_PREFIX + "parameters.trapezoid.D2";
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
+
+    //Vuzix
+    private static final String VUZIX_PREFIX                        = "com.fieldbook.tracker.vuzix.";
+    public static final String VUZIX_ENABLE                         = VUZIX_PREFIX + "ENABLE_VUZIX";
+    public static final String VUZIX_INTERVAL                       = VUZIX_PREFIX + "UPDATE_INTERVAL";
+    public static final String VUZIX_DEVICE                         = VUZIX_PREFIX + "PAIRED_DEVICE_ADDRESS";
+    public static final String VUZIX_PAIR                           = VUZIX_PREFIX + "PAIR_VUZIX";
+
     // @formatter:on
 
     //Calendar Trait

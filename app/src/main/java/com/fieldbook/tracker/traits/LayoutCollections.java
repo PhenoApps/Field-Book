@@ -30,9 +30,14 @@ public class LayoutCollections {
         }
     }
 
-    public BaseTraitLayout getTraitLayout(final String trait) {
+    /**
+     * Get Trait layout
+     * @param traitFormat to search for e.g percent, text, ...
+     * @return returns the layout trait class for the given format
+     */
+    public BaseTraitLayout getTraitLayout(final String traitFormat) {
         for (BaseTraitLayout layout : traitLayouts) {
-            if (layout.isTraitType(trait)) {
+            if (layout.isTraitType(traitFormat)) {
                 return layout;
             }
         }

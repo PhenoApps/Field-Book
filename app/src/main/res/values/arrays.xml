@@ -30,4 +30,14 @@
         <item>5</item>
         <item>10</item>
     </string-array>
+    <string-array name="pref_vuzix_update_intervals">
+        <item>1s</item>
+        <item>5s</item>
+        <item>10s</item>
+    </string-array>
+    <string-array name="pref_vuzix_update_interval_values">
+        <item>1</item>
+        <item>5</item>
+        <item>10</item>
+    </string-array>
 </resources>

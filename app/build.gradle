@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId "com.fieldbook.tracker"
-        minSdkVersion 21
+        minSdkVersion 22
         targetSdkVersion 29
         versionCode = 510
         versionName = '5.1.0'
@@ -122,7 +122,12 @@ dependencies {
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
 
+    //vuzix connectivity
+    implementation 'com.vuzix:connectivity-sdk:1.1'
+
     implementation 'math.geom2d:javaGeom:0.11.1'
+    implementation 'com.vuzix:sdk-speechrecognitionservice:1.91'
+    implementation 'com.google.android.gms:play-services-nearby:18.0.0'
 
     kapt 'com.android.databinding:compiler:3.1.4'
 

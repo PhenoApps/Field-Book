@@ -701,4 +701,15 @@
     <string name="trait_gnss_chip_5s_text">5s</string>
     <string name="gnss_trait_averaging_dialog_title">Collecting coordinates</string>
     <string name="gnss_trait_averaging_dialog_message">Please wait while the incoming locations are being averaged…</string>
+    <string name="nearby_advertise_fail">Something went wrong advertisting this device.</string>
+    <string name="nearby_advertise_success">Advertising success.</string>
+    <string name="nearby_connection_unknown_error">An unknown error occurred trying to connect to nearby device.</string>
+    <string name="nearby_connection_error">An error occurred trying to connect to nearby device.</string>
+    <string name="nearby_connection_rejected">Nearby connection was rejected.</string>
+    <string name="preference_ar_title">Vuzix</string>
+    <string name="pref_vuzix_enable_summary">Enables augmented reality Field Book navigation through Vuzix hardware.</string>
+    <string name="pref_vuzix_enable_title">Enable Vuzix</string>
+    <string name="pref_vuzix_update_interval_summary">The time between UI updates is %ss.</string>
+    <string name="preferences_vuzix_title">Vuzix</string>
+    <string name="menu_collect_start_vuzix_title">Vuzix Enable</string>
 </resources>

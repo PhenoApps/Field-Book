@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_emoticon_cool"
+        android:key="com.fieldbook.tracker.vuzix.ENABLE_VUZIX"
+        android:persistent="true"
+        android:summary="@string/pref_vuzix_enable_summary"
+        android:title="@string/pref_vuzix_enable_title" />
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/pref_vuzix_update_intervals"
+        android:entryValues="@array/pref_vuzix_update_interval_values"
+        android:icon="@drawable/ic_hourglass_empty_black_24dp"
+        android:key="com.fieldbook.tracker.vuzix.UPDATE_INTERVAL"
+        android:summary="@string/pref_vuzix_update_interval_summary"
+        android:title="@string/pref_geonav_update_interval_title" />
+
+    <Preference
+        android:icon="@drawable/ic_bluetooth_black_24dp"
+        android:key="com.fieldbook.tracker.vuzix.PAIR_VUZIX"
+        android:title="@string/pref_geonav_pair" />
+
+</PreferenceScreen>

@@ -308,6 +308,21 @@ class ObservationDao {
             }
         }
 
+        /**
+         * Should be used for observations imported via BrAPI.
+         * This function builds a BrAPI observation that has a specific last synced time field.
+         *
+         * @param exp_id the field identifier
+         * @param plotId the unique name of the currently selected field
+         * @param parent the variable name of the observation
+         */
+        fun getFieldBookObservation(exp_id: String, plotId: String, parent: String): ObservationModel? = withDatabase { db ->
+
+            ObservationModel(db.query(Observation.tableName,
+                    where = "${Study.FK} = ? AND observation_variable_name LIKE ? AND ${ObservationUnit.FK} LIKE ?",
+                    whereArgs = arrayOf(exp_id, parent, plotId)).toFirst())
+        }
+
         fun getObservationByValue(expId: String, plotId: String, parent: String, value: String): BrapiObservation? = withDatabase { db ->
 
             BrapiObservation().apply {
