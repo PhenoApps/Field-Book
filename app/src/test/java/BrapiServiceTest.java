@@ -28,8 +28,12 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import org.brapi.client.v2.ApiResponse;
 import org.brapi.client.v2.BrAPIClient;
+import org.brapi.client.v2.model.queryParams.phenotype.ObservationQueryParams;
 import org.brapi.client.v2.modules.phenotype.ObservationUnitsApi;
+import org.brapi.client.v2.modules.phenotype.ObservationsApi;
+import org.brapi.v2.model.pheno.BrAPIObservation;
 import org.brapi.v2.model.pheno.BrAPIObservationUnit;
+import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +46,7 @@ import org.threeten.bp.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -55,6 +60,7 @@ import io.swagger.client.ApiException;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.model.NewObservationUnitDbIdsResponse;
 import io.swagger.client.model.NewObservationUnitRequest;
+import io.swagger.client.model.ObservationsResponse;
 
 @RunWith(ParameterizedRobolectricTestRunner.class)
 @Config(sdk = {Build.VERSION_CODES.P})
@@ -388,11 +394,215 @@ public class BrapiServiceTest {
     }
 
     @Test
-    public void checkPostObservationsChunked() throws ApiException, org.brapi.client.v2.model.exceptions.ApiException {
-        int numObs = 1;
+    public void checkPostObservationsChunkedMultipleChunks() throws ApiException, org.brapi.client.v2.model.exceptions.ApiException {
+        postObservationsChunked(1000);
+    }
+
+    @Test
+    public void checkPostObservationsChunkedSingleChunk() throws ApiException, org.brapi.client.v2.model.exceptions.ApiException {
+        postObservationsChunked(1);
+    }
+
+    private void postObservationsChunked(int numObs) throws ApiException, org.brapi.client.v2.model.exceptions.ApiException {
         Map<String, Observation> observationResponses = new ConcurrentHashMap<>();
         final CountDownLatch signal = new CountDownLatch(1);
 
+        List<String> ouIds = generateObservationUnits(numObs);
+
+        List<Observation> testObservations = new ArrayList<>();
+        for(int i = 0; i < numObs; i++) {
+            Observation testObservation = new Observation();
+            testObservation.setDbId(UUID.randomUUID().toString());
+            testObservation.setCollector(UUID.randomUUID().toString());
+            testObservation.setTimestamp(OffsetDateTime.now());
+            testObservation.setUnitDbId(ouIds.get(i));
+            testObservation.setVariableDbId(variableDbId);
+            testObservation.setValue(UUID.randomUUID().toString());
+            testObservation.setStudyId(studyDbId);
+
+            testObservations.add(testObservation);
+        }
+
+        try {
+            // Call our get study details endpoint with the same parsing that our classes use.
+            this.brAPIService.createObservationsChunked(testObservations, (input, completedChunkNum, chunks, done) -> {
+                for (Observation o : input) {
+                    observationResponses.put(o.getUnitDbId(), o);
+                }
+                if (done) {
+                    signal.countDown();
+                }
+            }, failure -> {
+                signal.countDown();
+                fail("There were failures saving the data via BrAPI");
+                return null;
+            });
+        } catch (Exception e) {
+            signal.countDown();
+        }
+
+        // Wait for our callback and evaluate how we did
+        try {
+            if(signal.await(5, TimeUnit.MINUTES)) {
+                assertFalse("No observations were saved", observationResponses.isEmpty());
+                assertEquals("Not all of the observations were saved", numObs, observationResponses.size());
+
+                for(Observation o : testObservations) {
+                    Observation responseObs = observationResponses.get(o.getUnitDbId());
+                    assertNotNull(responseObs);
+                    assertNotNull(responseObs.getDbId());
+                    assertTrue(responseObs.getDbId().trim().length() > 0);
+                    assertEquals(o.getVariableDbId(), responseObs.getVariableDbId());
+                }
+            } else {
+                fail("Async action timed out");
+            }
+        } catch (InterruptedException e) {
+            fail(e.toString());
+        }
+    }
+
+    @Test
+    public void checkPutObservationsChunkedMultipleChunks() throws ApiException, org.brapi.client.v2.model.exceptions.ApiException {
+        putObservationsChunked(1000);
+    }
+
+    @Test
+    public void checkPutObservationsChunkedSingleChunk() throws ApiException, org.brapi.client.v2.model.exceptions.ApiException {
+        putObservationsChunked(1);
+    }
+
+    private void putObservationsChunked(int numObs) throws ApiException, org.brapi.client.v2.model.exceptions.ApiException {
+        Map<String, Observation> createdObservations = new ConcurrentHashMap<>();
+        final CountDownLatch createSignal = new CountDownLatch(1);
+        final CountDownLatch updateSignal = new CountDownLatch(1);
+
+        List<String> ouIds = generateObservationUnits(numObs);
+
+        List<Observation> testObservations = new ArrayList<>();
+        for(int i = 0; i < numObs; i++) {
+            Observation testObservation = new Observation();
+            testObservation.setDbId(UUID.randomUUID().toString());
+            testObservation.setCollector(UUID.randomUUID().toString());
+            testObservation.setTimestamp(OffsetDateTime.now());
+            testObservation.setUnitDbId(ouIds.get(i));
+            testObservation.setVariableDbId(variableDbId);
+            testObservation.setValue(UUID.randomUUID().toString());
+            testObservation.setStudyId(studyDbId);
+
+            testObservations.add(testObservation);
+        }
+
+        try {
+            // Call our get study details endpoint with the same parsing that our classes use.
+            this.brAPIService.createObservationsChunked(testObservations, (input, completedChunkNum, chunks, done) -> {
+                for (Observation o : input) {
+                    createdObservations.put(o.getUnitDbId(), o);
+                }
+                if (done) {
+                    createSignal.countDown();
+                }
+            }, failure -> {
+                createSignal.countDown();
+                fail("There were failures saving the data via BrAPI");
+                return null;
+            });
+        } catch (Exception e) {
+            createSignal.countDown();
+        }
+
+        try {
+            if(createSignal.await(5, TimeUnit.MINUTES)) {
+                for(Observation o : testObservations) {
+                    if(createdObservations.containsKey(o.getUnitDbId())) {
+                        o.setDbId(createdObservations.get(o.getUnitDbId()).getDbId());
+                        o.setValue(o.getValue() + "-updated");
+
+                        createdObservations.put(o.getUnitDbId(), o);
+                    } else {
+                        fail("observation was not created");
+                    }
+                }
+
+                try {
+                    // Call our get study details endpoint with the same parsing that our classes use.
+                    this.brAPIService.updateObservationsChunked(new ArrayList<>(createdObservations.values()), (input, completedChunkNum, chunks, done) -> {
+                        if (done) {
+                            updateSignal.countDown();
+                        }
+                    }, failure -> {
+                        updateSignal.countDown();
+                        fail("There were failures saving the data via BrAPI");
+                        return null;
+                    });
+                } catch (Exception e) {
+                    updateSignal.countDown();
+                }
+            }
+        } catch (InterruptedException e) {
+            fail("Async action timed out");
+        }
+
+        // Wait for our callback and evaluate how we did
+        try {
+            if(updateSignal.await(5, TimeUnit.MINUTES)) {
+                Map<String, Observation> updatedObservations = new HashMap<>();
+                if(brapiVersion.equals("V1")) {
+                    ApiClient apiClient = new ApiClient().setBasePath(BRAPI_URL+"/brapi/v1");
+                    apiClient.setReadTimeout(1000 * 1000);
+                    StudiesApi obsAPI = new StudiesApi(apiClient);
+                    ObservationsResponse observationsResponse = obsAPI.studiesStudyDbIdObservationsGet(studyDbId, null, 0, 100000, brapiToken);
+                    for(io.swagger.client.model.Observation o : observationsResponse.getResult().getData()) {
+                        if(createdObservations.containsKey(o.getObservationUnitDbId())) {
+                            Observation obs = new Observation();
+                            obs.setDbId(o.getObservationDbId());
+                            obs.setUnitDbId(o.getObservationUnitDbId());
+                            obs.setVariableDbId(o.getObservationVariableDbId());
+                            obs.setValue(o.getValue());
+
+                            updatedObservations.put(obs.getUnitDbId(), obs);
+                        }
+                    }
+                } else {
+                    BrAPIClient brAPIClient = new BrAPIClient(BRAPI_URL+"/brapi/v2", 1000 * 1000);
+                    brAPIClient.authenticate(t -> brapiToken);
+                    ObservationsApi obsAPI = new ObservationsApi(brAPIClient);
+                    ObservationQueryParams observationQueryParams = new ObservationQueryParams().studyDbId(studyDbId);
+                    observationQueryParams.pageSize(100000);
+                    ApiResponse<BrAPIObservationListResponse> ouResp = obsAPI.observationsGet(observationQueryParams);
+                    for(BrAPIObservation o : ouResp.getBody().getResult().getData()) {
+                        if(createdObservations.containsKey(o.getObservationUnitDbId())) {
+                            Observation obs = new Observation();
+                            obs.setDbId(o.getObservationDbId());
+                            obs.setUnitDbId(o.getObservationUnitDbId());
+                            obs.setVariableDbId(o.getObservationVariableDbId());
+                            obs.setValue(o.getValue());
+
+                            updatedObservations.put(obs.getUnitDbId(), obs);
+                        }
+                    }
+                }
+
+                assertFalse("No observations were saved", updatedObservations.isEmpty());
+                assertEquals("Not all of the observations were saved", numObs, updatedObservations.size());
+
+                for(Observation o : testObservations) {
+                    Observation responseObs = updatedObservations.get(o.getUnitDbId());
+                    assertNotNull(responseObs);
+                    assertNotNull(responseObs.getDbId());
+                    assertTrue(responseObs.getDbId().trim().length() > 0);
+                    assertEquals(o.getVariableDbId(), responseObs.getVariableDbId());
+                    assertEquals("Value was not updated", o.getValue(), responseObs.getValue());
+                }
+            } else {
+                fail("Async action timed out");
+            }
+        } catch (InterruptedException e) {
+            fail(e.toString());
+        }
+    }
+
+    private List<String> generateObservationUnits(int numObs) throws org.brapi.client.v2.model.exceptions.ApiException, ApiException {
         List<String> ouIds = new ArrayList<>();
         if(brapiVersion.equals("V1")) {
             ApiClient apiClient = new ApiClient().setBasePath(BRAPI_URL+"/brapi/v1");
@@ -425,60 +635,7 @@ public class BrapiServiceTest {
             }
         }
 
-        List<Observation> testObservations = new ArrayList<>();
-        for(int i = 0; i < numObs; i++) {
-            Observation testObservation = new Observation();
-            testObservation.setDbId(UUID.randomUUID().toString());
-            testObservation.setCollector(UUID.randomUUID().toString());
-            testObservation.setTimestamp(OffsetDateTime.now());
-            testObservation.setUnitDbId(ouIds.get(i));
-            testObservation.setVariableDbId(variableDbId);
-            testObservation.setValue(UUID.randomUUID().toString());
-            testObservation.setStudyId(studyDbId);
-
-            testObservations.add(testObservation);
-        }
-
-        try {
-            // Call our get study details endpoint with the same parsing that our classes use.
-            this.brAPIService.createObservationsChunked(testObservations, (input, completedChunkNum, chunks, done) -> {
-                System.out.println("a chunk was saved: " + completedChunkNum);
-                for (Observation o : input) {
-                    observationResponses.put(o.getUnitDbId(), o);
-                }
-                if (done) {
-                    System.out.println("got the done signal");
-                    signal.countDown();
-                }
-            }, failure -> {
-                System.out.println("Error occurred: " + failure);
-                signal.countDown();
-                fail("There were failures saving the data via BrAPI");
-                return null;
-            });
-        } catch (Exception e) {
-            signal.countDown();
-        }
-
-        // Wait for our callback and evaluate how we did
-        try {
-            if(signal.await(5, TimeUnit.MINUTES)) {
-                assertFalse("No observations were saved", observationResponses.isEmpty());
-                assertEquals("Not all of the observations were saved", numObs, observationResponses.size());
-
-                for(Observation o : testObservations) {
-                    Observation responseObs = observationResponses.get(o.getUnitDbId());
-                    assertNotNull(responseObs);
-                    assertNotNull(responseObs.getDbId());
-                    assertTrue(responseObs.getDbId().trim().length() > 0);
-                    assertEquals(o.getVariableDbId(), responseObs.getVariableDbId());
-                }
-            } else {
-                fail("Async action timed out");
-            }
-        } catch (InterruptedException e) {
-            fail(e.toString());
-        }
+        return ouIds;
     }
 
     @Test
