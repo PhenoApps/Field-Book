@@ -1088,7 +1088,6 @@ public class NewTraitDialog extends DialogFragment {
             for (int i = 0; i < size(); ++i) {
                 array[i] = traitFormatList.get(i).getLocalString();
             }
-            ;
             return array;
         }
 

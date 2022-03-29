@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/help"
         android:icon="@drawable/ic_tb_help"
-        android:showAsAction="always"
+        app:showAsAction="always"
         android:title="@string/tutorial_dialog_title" />
     <item
         android:id="@+id/changelog"
         android:icon="@drawable/ic_tb_changelog"
-        android:showAsAction="always"
+        app:showAsAction="always"
         android:title="@string/changelog_title" />
 </menu>
 

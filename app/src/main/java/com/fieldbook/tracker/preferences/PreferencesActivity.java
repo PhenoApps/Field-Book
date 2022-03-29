@@ -3,9 +3,7 @@ package com.fieldbook.tracker.preferences;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.Preference;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -14,8 +12,6 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.service.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
 public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, SearchPreferenceResultListener {
 

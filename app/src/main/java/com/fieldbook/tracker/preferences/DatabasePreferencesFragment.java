@@ -1,5 +1,8 @@
 package com.fieldbook.tracker.preferences;
 
+import static android.app.Activity.RESULT_OK;
+import static com.fieldbook.tracker.activities.ConfigActivity.dt;
+
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -18,49 +21,45 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
-import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-import static android.app.Activity.RESULT_OK;
-import static com.fieldbook.tracker.activities.ConfigActivity.dt;
-
 public class DatabasePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+
+    private static int REQUEST_FILE_EXPLORE_CODE = 2;
 
     PreferenceManager prefMgr;
     Context context;
-    private Preference databaseImport;
-    private Preference databaseExport;
-    private Preference databaseDelete;
     private AlertDialog dbSaveDialog;
     private EditText exportFile;
-    private String mChosenFile = "";
+    private DocumentFile mChosenFile = null;
     private String exportFileString = "";
     public static Handler mHandler = new Handler();
     private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 9980;
@@ -77,9 +76,9 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.database_dialog_title));
 
-        databaseImport = findPreference("pref_database_import");
-        databaseExport = findPreference("pref_database_export");
-        databaseDelete = findPreference("pref_database_delete");
+        Preference databaseImport = findPreference("pref_database_import");
+        Preference databaseExport = findPreference("pref_database_export");
+        Preference databaseDelete = findPreference("pref_database_delete");
 
         databaseImport.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
@@ -103,28 +102,34 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
         });
     }
 
+    //TODO make static function that creates intent in FileExplorer to check that uri is valid and sent to result key
     private void showDatabaseImportDialog() {
-        Intent intent = new Intent();
-
-        intent.setClassName(getActivity(),
-                FileExploreActivity.class.getName());
-        intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH);
-        intent.putExtra("include", new String[]{"db", "zip"});
-        intent.putExtra("title", getString(R.string.database_import));
-        startActivityForResult(intent, 2);
+        DocumentFile databaseDir = DocumentTreeUtil.Companion.getDirectory(context, R.string.dir_database);
+        if (databaseDir != null && databaseDir.exists()) {
+            Intent intent = new Intent();
+            intent.setClassName(getActivity(), FileExploreActivity.class.getName());
+            intent.putExtra("path", databaseDir.getUri().toString());
+            intent.putExtra("include", new String[]{"db", "zip"});
+            intent.putExtra("title", getString(R.string.database_import));
+            startActivityForResult(intent, REQUEST_FILE_EXPLORE_CODE);
+        }
     }
 
-
-    public Runnable importDB = new Runnable() {
-        public void run() {
-            new ImportDBTask().execute(0);
-        }
-    };
+    private void invokeImportDatabase(DocumentFile docFile) {
+        mHandler.post(() -> {
+           new ImportDBTask(docFile).execute(0);
+        });
+    }
 
     public class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {
         boolean fail;
         ProgressDialog dialog;
+        DocumentFile file = null;
         //todo add a success toast/dialog/something
+
+        public ImportDBTask(DocumentFile file) {
+            this.file = file;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -142,41 +147,50 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
         @Override
         protected Integer doInBackground(Integer... params) {
 
-            //first check if the file to import is just a .db file
+            if (mChosenFile != null && mChosenFile.getName() != null) {
 
-            if (mChosenFile.endsWith(".db")) { //if it is import it old-style
+                //first check if the file to import is just a .db file
+                if (mChosenFile.getName().endsWith(".db")) { //if it is import it old-style
 
-                try {
+                    try {
 
-                    dt.importDatabase(mChosenFile);
+                        dt.importDatabase(mChosenFile);
 
-                } catch (Exception e) {
+                    } catch (Exception e) {
 
-                    Log.d("Database", e.toString());
+                        Log.d("Database", e.toString());
 
-                    e.printStackTrace();
+                        e.printStackTrace();
 
-                    fail = true;
+                        fail = true;
+                    }
+                } else if (mChosenFile.getName().endsWith(".zip")) { //otherwise unzip and import prefs as well
+
+                    String internalDbPath = DataHelper.getDatabasePath(context);
+
+                    try {
+
+                        ZipUtil.Companion.unzip(context,
+                                context.getContentResolver().openInputStream(mChosenFile.getUri()),
+                                new FileOutputStream(internalDbPath));
+
+                        SharedPreferences.Editor edit = ep.edit();
+
+                        edit.putInt(PrefsConstants.SELECTED_FIELD_ID, -1);
+                        edit.putString(PrefsConstants.UNIQUE_NAME, "");
+                        edit.putString(PrefsConstants.PRIMARY_NAME, "");
+                        edit.putString(PrefsConstants.SECONDARY_NAME, "");
+                        edit.putBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, false);
+                        edit.apply();
+
+                        dt.open();
+
+                    } catch (IOException io) {
+
+                        io.printStackTrace();
+
+                    }
                 }
-            } else if (mChosenFile.endsWith(".zip")) { //otherwise unzip and import prefs as well
-
-                String internalDbPath = DataHelper.getDatabasePath(context);
-
-                File zipInputFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH)
-                        + Constants.BACKUPPATH + "/" + mChosenFile);
-
-                try {
-
-                    ZipUtil.Companion.unzip(context,
-                            context.getContentResolver().openInputStream(Uri.fromFile(zipInputFile)),
-                            new FileOutputStream(internalDbPath));
-
-                } catch (IOException io) {
-
-                    io.printStackTrace();
-
-                }
-
             }
 
             return 0;
@@ -262,43 +276,52 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
             //get database path and shared preferences path
             String dbPath = DataHelper.getDatabasePath(context);
 
-            //create the file the contents will be zipped to
-            File zipFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + exportFileString + ".zip");
+            DocumentFile databaseDir = DocumentTreeUtil.Companion.getDirectory(context, R.string.dir_database);
 
-            //zip files into stream
-            try {
+            if (databaseDir != null && databaseDir.exists()) {
 
-                File tempOutput = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + UUID.randomUUID());
+                //create the file the contents will be zipped to
+                DocumentFile zipFile = databaseDir.createFile("*/*", exportFileString + ".zip");
 
-                FileOutputStream fileStream = new FileOutputStream(tempOutput);
+                if (zipFile != null && zipFile.exists()) {
 
-                ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+                    //zip files into stream
+                    try {
 
-                OutputStream zipOutput = context.getContentResolver().openOutputStream(Uri.fromFile(zipFile));
+                        String tempName = UUID.randomUUID().toString();
+                        DocumentFile tempOutput = databaseDir.createFile("*/*", tempName);
+                        OutputStream tempStream = DocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_database, tempName);
 
-                SharedPreferences prefs = context.getSharedPreferences("Settings", Context.MODE_PRIVATE);
+                        ObjectOutputStream objectStream = new ObjectOutputStream(tempStream);
 
-                objectStream.writeObject(prefs.getAll());
+                        OutputStream zipOutput = context.getContentResolver().openOutputStream(zipFile.getUri());
 
-                ZipUtil.Companion.zip(new String[] {dbPath, tempOutput.getPath()}, zipOutput);
+                        SharedPreferences prefs = context.getSharedPreferences("Settings", Context.MODE_PRIVATE);
 
-                objectStream.close();
+                        objectStream.writeObject(prefs.getAll());
 
-                fileStream.close();
+                        objectStream.close();
 
-                if (!tempOutput.delete()) {
+                        if (tempStream != null) {
+                            tempStream.close();
+                        }
 
-                    throw new IOException();
+                        ZipUtil.Companion.zip(context,
+                                new DocumentFile[] { DocumentFile.fromFile(new File(dbPath)), tempOutput },
+                                zipOutput);
+
+                        if (tempOutput != null && !tempOutput.delete()) {
+
+                            throw new IOException();
+                        }
+
+                    } catch (IOException e) {
+
+                        e.printStackTrace();
+
+                    }
                 }
-
-            } catch (IOException e) {
-
-                e.printStackTrace();
-
             }
-
-            //use media scanner on the output
-            Utils.scanFile(getContext(), zipFile);
 
             return 0;
         }
@@ -403,11 +426,13 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 2) {
+        if (requestCode == REQUEST_FILE_EXPLORE_CODE) {
             if (resultCode == RESULT_OK) {
-                mChosenFile = data.getStringExtra("result");
-                mChosenFile = mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.length());
-                mHandler.post(importDB);
+                if (getContext() != null) {
+                    mChosenFile = DocumentFile.fromSingleUri(getContext(),
+                            Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY)));
+                    invokeImportDatabase(mChosenFile);
+                }
             }
         }
     }
@@ -427,12 +452,14 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
     @AfterPermissionGranted(PERMISSIONS_REQUEST_DATABASE_IMPORT)
     public void importDatabaseFilePermission() {
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(getContext(), perms)) {
-            showDatabaseImportDialog();
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
-                    PERMISSIONS_REQUEST_DATABASE_IMPORT, perms);
+        if (getContext() != null) {
+            if (EasyPermissions.hasPermissions(getContext(), perms)) {
+                showDatabaseImportDialog();
+            } else {
+                // Do not have permissions, request them now
+                EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
+                        PERMISSIONS_REQUEST_DATABASE_IMPORT, perms);
+            }
         }
     }
 }

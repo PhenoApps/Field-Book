@@ -1,21 +1,15 @@
 package com.fieldbook.tracker.preferences;
 
 import static android.app.Activity.RESULT_OK;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.Selection;
 import android.util.Log;
-import android.widget.EditText;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
-import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
@@ -24,12 +18,6 @@ import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.BrapiAuthActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.brapi.service.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiControllerResponse;
-import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.traits.BaseTraitLayout;
-import com.fieldbook.tracker.utilities.Utils;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -49,13 +37,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private NeutralButtonEditTextDialog brapiURLPreference;
     private NeutralButtonEditTextDialog brapiOIDCURLPreference;
     private ListPreference brapiOIDCFlow;
-    private Preference brapiServerBarcode;
-    private Preference brapiServerCassavabase;
-    private Preference brapiServerT3wheat;
-    private Preference brapiServerT3oat;
-    private Preference brapiServerT3barley;
-    private Preference brapiServerDefaultTest;
-    private String barcodeResult;
 
     //alert dialog displays messages when oidc or brapi urls have http
     private AlertDialog mBrapiHttpWarningDialog = null;
@@ -118,12 +99,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 //            }
 //        });
 
-        brapiServerBarcode = findPreference("brapi_server_barcode");
-        brapiServerCassavabase = findPreference("brapi_server_cassavabase");
-        brapiServerT3wheat = findPreference("brapi_server_t3_wheat");
-        brapiServerT3oat = findPreference("brapi_server_t3_oat");
-        brapiServerT3barley = findPreference("brapi_server_t3_barley");
-        brapiServerDefaultTest = findPreference("brapi_server_default");
+        Preference brapiServerBarcode = findPreference("brapi_server_barcode");
+        Preference brapiServerCassavabase = findPreference("brapi_server_cassavabase");
+        Preference brapiServerT3wheat = findPreference("brapi_server_t3_wheat");
+        Preference brapiServerT3oat = findPreference("brapi_server_t3_oat");
+        Preference brapiServerT3barley = findPreference("brapi_server_t3_barley");
+        Preference brapiServerDefaultTest = findPreference("brapi_server_default");
 
 //        brapiPaginationPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 //            @Override
@@ -337,7 +318,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 Log.d("Field Book","test");
 
                 IntentResult urlDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                barcodeResult = urlDataResult.getContents();
+                String barcodeResult = urlDataResult.getContents();
 
                 SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
                 editor.putString(GeneralKeys.BRAPI_BASE_URL, barcodeResult);

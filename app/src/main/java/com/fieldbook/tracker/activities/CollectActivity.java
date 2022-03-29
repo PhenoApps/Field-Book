@@ -1,9 +1,13 @@
 package com.fieldbook.tracker.activities;
 
+import static com.fieldbook.tracker.activities.ConfigActivity.dt;
+import static com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.ACTION_BROADCAST_GNSS_ROVER;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,22 +24,18 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -56,47 +56,42 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
-import android.view.Menu;
-import android.view.MenuInflater;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.documentfile.provider.DocumentFile;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.adapters.InfoBarAdapter;
+import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
-import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.location.gnss.ConnectThread;
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver;
 import com.fieldbook.tracker.location.gnss.NmeaParser;
+import com.fieldbook.tracker.objects.RangeObject;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
-import com.fieldbook.tracker.traits.LayoutCollections;
-import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.model.Observation;
-import com.fieldbook.tracker.adapters.InfoBarAdapter;
-import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
-import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.objects.RangeObject;
+import com.fieldbook.tracker.traits.LayoutCollections;
+import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
-import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
-import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
-
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
-
 import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -104,9 +99,9 @@ import com.google.zxing.integration.android.IntentResult;
 import org.jetbrains.annotations.NotNull;
 import org.threeten.bp.OffsetDateTime;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -114,16 +109,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import kotlin.Pair;
-
-import static com.fieldbook.tracker.activities.ConfigActivity.dt;
-import static com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.ACTION_BROADCAST_GNSS_ROVER;
 
 /**
  * All main screen logic resides here
@@ -131,6 +123,8 @@ import static com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.ACTION_BR
 
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends AppCompatActivity implements SensorEventListener, GPSTracker.GPSTrackerListener {
+
+    public static final int REQUEST_FILE_EXPLORER_CODE = 1;
 
     public static boolean searchReload;
     public static String searchRange;
@@ -141,7 +135,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     public static String TAG = "Field Book";
     public static String GEOTAG = "GeoNav";
 
-    private FileWriter mGeoNavLogWriter = null;
+    private OutputStreamWriter mGeoNavLogWriter = null;
 
     ImageButton deleteValue;
     ImageButton missingValue;
@@ -198,7 +192,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private float[] mGravity;
     private float[] mGeomagneticField;
     private Float mDeclination = null;
-    private GPSTracker mGpsTracker;
     private Double mAzimuth = null;
     private Timer mScheduler = null;
     private boolean mNotWarnedInterference = true;
@@ -248,7 +241,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         super.onCreate(savedInstanceState);
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        ep = getSharedPreferences("Settings", 0);
+        ep = getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0);
         if (ConfigActivity.dt == null) {    // when resume
             ConfigActivity.dt = new DataHelper(this);
         }
@@ -616,11 +609,29 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     public void onPause() {
         // Backup database
         try {
-            dt.exportDatabase("backup");
-            File exportedDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db");
-            File exportedSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
-            Utils.scanFile(CollectActivity.this, exportedDb);
-            Utils.scanFile(CollectActivity.this, exportedSp);
+//            dt.exportDatabase("backup");
+//            File exportedDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db");
+//            File exportedSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
+
+            DocumentFile databaseDir = DocumentTreeUtil.Companion.getDirectory(this, R.string.dir_database);
+            if (databaseDir != null) {
+
+                Executor executor = Executors.newFixedThreadPool(2);
+                executor.execute(() -> {
+
+                    try {
+
+                        dt.exportDatabase(this,"backup");
+
+                    } catch (IOException io) {
+                        io.printStackTrace();
+                    }
+
+                });
+            }
+
+//            Utils.scanFile(CollectActivity.this, exportedDb);
+//            Utils.scanFile(CollectActivity.this, exportedSp);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -640,7 +651,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     @Override
     public void onDestroy() {
         //save last plot id
-        if (ep.getBoolean("ImportFieldFinished", false)) {
+        if (ep.getBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, false)) {
             rangeBox.saveLastPlot();
         }
 
@@ -657,34 +668,38 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             try {
 
-                File geonavFolder = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH)
-                        + Constants.GEONAV_LOG_PATH);
+                ContentResolver resolver = getContentResolver();
 
-                String interval = mPrefs.getString(GeneralKeys.UPDATE_INTERVAL, "1");
-                String address = mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
-                        .replaceAll(":", "-")
-                        .replaceAll("\\s", "_");
-                String thetaPref = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "22.5");
+                if (resolver != null) {
 
-                File file = new File(geonavFolder, "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv");
+                    DocumentFile geoNavFolder = DocumentTreeUtil.Companion.getDirectory(this, R.string.dir_geonav);
 
-                if (!geonavFolder.exists()) {
+                    if (geoNavFolder != null && geoNavFolder.exists()) {
 
-                    if (geonavFolder.mkdir()) {
+                        String interval = mPrefs.getString(GeneralKeys.UPDATE_INTERVAL, "1");
+                        String address = mPrefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "")
+                                .replaceAll(":", "-")
+                                .replaceAll("\\s", "_");
+                        String thetaPref = mPrefs.getString(GeneralKeys.SEARCH_ANGLE, "22.5");
 
-                        Log.d(TAG, "GeoNav Logger started successfully.");
+                        String fileName = "log_" + interval + "_" + address + "_" + thetaPref + "_" + System.nanoTime() + ".csv";
 
-                        mGeoNavLogWriter = new FileWriter(file, true);
+                        DocumentFile geoNavLogFile = geoNavFolder.createFile("*/csv", fileName);
 
-                    } else {
+                        if (geoNavLogFile != null && geoNavLogFile.exists()) {
 
-                        Log.d(TAG, "GeoNav Logger start failed.");
+                            OutputStream outputStream = resolver.openOutputStream(geoNavLogFile.getUri());
+
+                            Log.d(TAG, "GeoNav Logger started successfully.");
+
+                            mGeoNavLogWriter = new OutputStreamWriter(outputStream);
+
+                        } else {
+
+                            Log.d(TAG, "GeoNav Logger start failed.");
+
+                        }
                     }
-
-                } else {
-
-                    mGeoNavLogWriter = new FileWriter(file, true);
-
                 }
 
             } catch (IOException io) {
@@ -939,7 +954,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private void customizeToolbarIcons() {
-        Set<String> entries = ep.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<String>());
+        Set<String> entries = ep.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
 
         if (systemMenu != null) {
             systemMenu.findItem(R.id.search).setVisible(entries.contains("search"));
@@ -1042,12 +1057,14 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 break;
 
             case R.id.resources:
-                intent.setClassName(CollectActivity.this,
-                        FileExploreActivity.class.getName());
-                intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY,Constants.MPATH) + Constants.RESOURCEPATH);
-                intent.putExtra("exclude", new String[]{"fieldbook"});
-                intent.putExtra("title", getString(R.string.main_toolbar_resources));
-                startActivityForResult(intent, 1);
+                DocumentFile dir = DocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
+                if (dir != null && dir.exists()) {
+                    intent.setClassName(CollectActivity.this, FileExploreActivity.class.getName());
+                    intent.putExtra("path", dir.getUri().toString());
+                    intent.putExtra("exclude", new String[]{"fieldbook"});
+                    intent.putExtra("title", getString(R.string.main_toolbar_resources));
+                    startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+                }
                 break;
             case R.id.nextEmptyPlot:
                 nextEmptyPlot();
@@ -1150,7 +1167,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             if (address == null || address.isEmpty() || address.equals(internalGps)) {
 
                 //update no matter the distance change and every 10s
-                mGpsTracker = new GPSTracker(this, this, 0, 10000);
+                GPSTracker mGpsTracker = new GPSTracker(this, this, 0, 10000);
 
             } else {
 
@@ -1746,19 +1763,25 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case 1:
+            case REQUEST_FILE_EXPLORER_CODE:
                 if (resultCode == RESULT_OK) {
-                    String mChosenFileString = data.getStringExtra("result");
-                    File mChosenFile = new File(mChosenFileString);
+                    try {
 
-                    String suffix = mChosenFileString.substring(mChosenFileString.lastIndexOf('.') + 1).toLowerCase();
+                        String resultString = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
+                        Uri resultUri = Uri.parse(resultString);
 
-                    String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
-                    Intent open = new Intent(Intent.ACTION_VIEW);
-                    open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    open.setDataAndType(FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", mChosenFile), mime);
+                        String suffix = resultString.substring(resultString.lastIndexOf('.') + 1).toLowerCase();
 
-                    startActivity(open);
+                        String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+                        Intent open = new Intent(Intent.ACTION_VIEW);
+                        open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        open.setDataAndType(resultUri, mime);
+
+                        startActivity(open);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                 } else {
                     Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
                 }

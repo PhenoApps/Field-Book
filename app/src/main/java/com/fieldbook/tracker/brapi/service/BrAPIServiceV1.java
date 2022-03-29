@@ -64,7 +64,6 @@ import io.swagger.client.model.ProgramsResponse;
 import io.swagger.client.model.StudiesResponse;
 import io.swagger.client.model.Study;
 import io.swagger.client.model.StudyObservationVariablesResponse;
-import io.swagger.client.model.StudyObservationVariablesResponseResult;
 import io.swagger.client.model.StudyResponse;
 import io.swagger.client.model.StudySummary;
 import io.swagger.client.model.TrialSummary;
@@ -76,7 +75,6 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     private final StudiesApi studiesApi;
     private final ProgramsApi programsApi;
     private final TrialsApi trialsApi;
-    private final PhenotypesApi phenotypesApi;
     private final ObservationsApi observationsApi;
     private final ObservationVariablesApi traitsApi;
 
@@ -90,7 +88,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         this.programsApi = new ProgramsApi(apiClient);
         this.trialsApi = new TrialsApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
-        this.phenotypesApi = new PhenotypesApi(apiClient);
+        PhenotypesApi phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
     }
 

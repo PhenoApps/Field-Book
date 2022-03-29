@@ -1,9 +1,5 @@
 package com.fieldbook.tracker.preferences;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-
 public class GeneralKeys {
     // @formatter:off
 
@@ -41,8 +37,9 @@ public class GeneralKeys {
 
     // Files and Naming
     public static final String DEFAULT_STORAGE_LOCATION_PREFERENCE  = "DEFAULT_STORAGE_LOCATION_PREFERENCE";
+
+    //TODO check usages of default storage dir
     public static final String DEFAULT_STORAGE_LOCATION_DIRECTORY   = "DEFAULT_STORAGE_LOCATION_DIRECTORY";
-    public static final String DEFAULT_STORAGE_LOCATION_URI         = "DEFAULT_STORAGE_LOCATION_URI";
     public static final String FILE_NAME_FORMAT                     = "FILE_NAME_FORMAT";
     public static final String PHOTO_NAME_FORMAT                    = "PHOTO_NAME_FORMAT";
 

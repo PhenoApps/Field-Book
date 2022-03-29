@@ -8,10 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.BrapiTraitActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-
-import io.swagger.client.model.Metadata;
 
 public class BrapiPaginationManager {
 

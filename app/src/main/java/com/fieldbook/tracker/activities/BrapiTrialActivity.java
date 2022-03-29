@@ -134,8 +134,7 @@ public class BrapiTrialActivity extends AppCompatActivity {
             else
                 itemDataList.add(trial.getTrialDbId());
         }
-        ListAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
-        return adapter;
+        return new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
     }
 
     public void buttonClicked(View view) {

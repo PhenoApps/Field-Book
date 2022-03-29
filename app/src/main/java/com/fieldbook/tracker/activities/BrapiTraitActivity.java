@@ -201,9 +201,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 itemDataList.add(trait.getId());
         }
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, itemDataList);
-
-        return arrayAdapter;
+        return new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, itemDataList);
     }
 
     // Button event for load and save traits

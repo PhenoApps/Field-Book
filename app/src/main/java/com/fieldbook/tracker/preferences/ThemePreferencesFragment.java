@@ -4,16 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 
-import androidx.fragment.app.DialogFragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.h6ah4i.android.preference.NumberPickerPreferenceCompat;
-import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
 
 public class ThemePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 

@@ -209,9 +209,7 @@ public class BrapiActivity extends AppCompatActivity {
                 itemDataList.add(study.getStudyDbId());
         }
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
-
-        return arrayAdapter;
+        return (ArrayAdapter<String>) new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
     }
 
     public void buttonClicked(View view) {

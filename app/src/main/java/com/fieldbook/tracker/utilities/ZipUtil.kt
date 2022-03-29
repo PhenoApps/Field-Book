@@ -3,6 +3,7 @@ package com.fieldbook.tracker.utilities
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import java.io.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -20,7 +21,7 @@ class ZipUtil {
          * @param zipFile: the output file the zip is written to
          */
         @Throws(IOException::class)
-        fun zip(files: Array<String>, zipFile: OutputStream?) {
+        fun zip(ctx: Context, files: Array<DocumentFile>, zipFile: OutputStream?) {
 
             val parents = arrayListOf<String>()
 
@@ -30,11 +31,10 @@ class ZipUtil {
 
                 output.putNextEntry(ZipEntry("Output/"))
 
-                for (i in files.indices) {
+                files.forEach { f ->
 
-                    val file = File(files[i])
+                    addZipEntry(ctx, output, f, parents)
 
-                    addZipEntry(output, file, parents)
                 }
             }
         }
@@ -46,62 +46,66 @@ class ZipUtil {
          * @param output: the final zip output file
          * @param file: the directory or file to create a new zip entry
          */
-        private fun addZipEntry(output: ZipOutputStream, file: File, parents: ArrayList<String>) {
+        private fun addZipEntry(ctx: Context, output: ZipOutputStream, file: DocumentFile, parents: ArrayList<String>) {
 
-            if (file.isHidden) return
+            if (file.name?.startsWith(".") == true) return
 
             if (file.isDirectory) {
 
                 val parent = parents.joinToString("/") { it }
 
-                parents.add(file.name)
+                file.name?.let { fileName ->
 
-                writeZipEntry(output, file, parent)
+                    parents.add(fileName)
 
-                file.listFiles { dir, name ->
+                    writeZipEntry(ctx, output, file, parent)
 
-                    addZipEntry(output, File(dir, name), parents)
+                    file.listFiles().forEach { child ->
 
-                    true
+                        addZipEntry(ctx, output, child, parents)
+
+                    }
+
+                    parents.removeLast()
+
                 }
 
-                parents.removeLast()
-
-            } else writeZipEntry(output, file, parents.joinToString("/") { it })
+            } else writeZipEntry(ctx, output, file, parents.joinToString("/") { it })
         }
 
-        private fun writeZipEntry(output: ZipOutputStream, file: File, parentDir: String) {
+        private fun writeZipEntry(ctx: Context, output: ZipOutputStream, file: DocumentFile, parentDir: String) {
 
             try {
 
                 if (!file.isDirectory) {
 
-                    val entry = ZipEntry("$parentDir/${file.name}")
+                    ctx.contentResolver?.openInputStream(file.uri)?.let { inputStream ->
 
-                    output.putNextEntry(entry)
+                        val entry = ZipEntry("$parentDir/${file.name}")
 
-                    val bufferSize = 8192 //default buffersize for BufferedWriter
+                        output.putNextEntry(entry)
 
-                    val fi = FileInputStream(file)
+                        val bufferSize = 8192 //default buffersize for BufferedWriter
 
-                    val origin = BufferedInputStream(fi, bufferSize)
+                        val origin = BufferedInputStream(inputStream, bufferSize)
 
-                    val data = ByteArray(bufferSize)
+                        val data = ByteArray(bufferSize)
 
-                    origin.use {
+                        origin.use {
 
-                        var count: Int
+                            var count: Int
 
-                        while (it.read(data, 0, bufferSize).also { count = it } != -1) {
+                            while (it.read(data, 0, bufferSize).also { count = it } != -1) {
 
-                            output.write(data, 0, count)
+                                output.write(data, 0, count)
 
+                            }
                         }
+
+                        inputStream.close()
+
+                        output.closeEntry()
                     }
-
-                    fi.close()
-
-                    output.closeEntry()
 
                 } else {
 
@@ -139,9 +143,9 @@ class ZipUtil {
 
                         when (ze?.name) {
 
-                            null -> throw IOException()
+                            "Output/" -> continue
 
-                            DATABASE_NAME -> {
+                            "Output/$DATABASE_NAME" -> {
 
                                 databaseStream.use { output ->
 
@@ -149,6 +153,8 @@ class ZipUtil {
 
                                 }
                             }
+
+                            null -> throw IOException()
 
                             else -> {
 

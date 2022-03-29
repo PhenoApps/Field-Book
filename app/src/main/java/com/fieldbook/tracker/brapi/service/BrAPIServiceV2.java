@@ -61,7 +61,6 @@ import org.brapi.v2.model.pheno.response.BrAPIObservationLevelListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
-import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponseResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

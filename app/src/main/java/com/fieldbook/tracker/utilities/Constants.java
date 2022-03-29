@@ -4,8 +4,6 @@ import android.Manifest;
 import android.app.Application;
 import android.os.Environment;
 
-import java.io.File;
-
 public class Constants extends Application {
     public static final String TAG = "Field Book";
 

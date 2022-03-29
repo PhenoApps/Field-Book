@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView style="@style/TextAppearance.MaterialComponents.Headline4"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="16dp"
+        android:id="@+id/frag_storage_migrator_title_tv"
+        android:text="@string/frag_storage_migrator_title"/>
+
+    <TextView style="@style/TextAppearance.MaterialComponents.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/frag_storage_migrator_title_tv"
+        android:id="@+id/frag_storage_migrator_summary_tv"
+        android:layout_margin="16dp"
+        android:text="@string/frag_storage_migrator_summary"/>
+
+    <Button style="@style/TextAppearance.MaterialComponents.Button"
+        android:text="@string/migrate"
+        android:background="@color/colorAccent"
+        android:id="@+id/frag_storage_migrator_choose_dir_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/frag_storage_migrator_skip_btn"
+        android:layout_margin="16dp"/>
+
+    <Button style="@style/TextAppearance.MaterialComponents.Button"
+        android:text="@string/skip"
+        android:background="@color/colorAccent"
+        android:id="@+id/frag_storage_migrator_skip_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="16dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

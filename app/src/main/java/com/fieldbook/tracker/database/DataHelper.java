@@ -10,10 +10,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Log;
 
-import com.fieldbook.tracker.activities.ConfigActivity;
+import androidx.documentfile.provider.DocumentFile;
+
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
@@ -22,14 +25,12 @@ import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
-import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.PrefsConstants;
-import com.fieldbook.tracker.utilities.Utils;
 
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
@@ -666,7 +667,7 @@ public class DataHelper {
     }
 
     public void updateImages(List<FieldBookImage> images) {
-        ArrayList<String> ids = new ArrayList<String>();
+        ArrayList<String> ids = new ArrayList<>();
 
         db.beginTransaction();
         String sql = "UPDATE user_traits SET observation_db_id = ?, last_synced_time = ? WHERE id = ?";
@@ -1124,7 +1125,7 @@ public class DataHelper {
     /**
      * Returns all traits regardless of visibility, but as a hashmap
      */
-    public HashMap getTraitVisibility() {
+    public HashMap<String, String> getTraitVisibility() {
 
         return ObservationVariableDao.Companion.getTraitVisibility();
 
@@ -1495,7 +1496,7 @@ public class DataHelper {
      * Returns list of files associated with a specific plot
      */
 
-    public ArrayList<String> getPlotPhotos(String exp_id, String plot, String trait) {
+    public ArrayList<Uri> getPlotPhotos(String exp_id, String plot, String trait) {
 
         return ObservationDao.Companion.getPlotPhotos(exp_id, plot, trait);
 
@@ -2141,66 +2142,111 @@ public class DataHelper {
      * Import database
      */
 
-    public void importDatabase(String filename) throws IOException {
+    public void importDatabase(DocumentFile file) {
         String internalDbPath = getDatabasePath(this.context);
         String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
 
         close();
 
-        Log.w("File to copy", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + filename);
+        String fileName = file.getName();
 
-        File newDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + filename);
-        File oldDb = new File(internalDbPath);
+        if (fileName != null) {
 
-        File newSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + filename + "_sharedpref.xml");
-        File oldSp = new File(internalSpPath);
+            Log.w("File to copy", file.getName());
 
-        try {
-            copyFile(newDb, oldDb);
-            copyFile(newSp, oldSp);
-        } catch (IOException e) {
-            Log.d("Database",e.toString());
+            int extIndex = fileName.indexOf(".");
+            String stemName = fileName.substring(0, extIndex);
+            DocumentFile parent = file.getParentFile();
+
+            if (parent != null && parent.exists()) {
+
+                DocumentFile newSharedPrefsFile = parent.createFile("*/*", stemName + "_sharedpref.xml");
+
+                File oldDb = new File(internalDbPath);
+                File oldSp = new File(internalSpPath);
+
+                try {
+
+                    DocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
+
+                    DocumentTreeUtil.Companion.copy(context, newSharedPrefsFile, DocumentFile.fromFile(oldSp));
+
+                } catch (Exception e) {
+
+                    Log.d("Database", e.toString());
+                    
+                }
+
+                open();
+
+                if (!isTableExists(Migrator.Study.tableName)) {
+
+                    Migrator.Companion.migrateSchema(db, getAllTraitObjects());
+
+                }
+
+                SharedPreferences.Editor edit = ep.edit();
+
+                edit.putInt(PrefsConstants.SELECTED_FIELD_ID, -1);
+                edit.putString(PrefsConstants.UNIQUE_NAME, "");
+                edit.putString(PrefsConstants.PRIMARY_NAME, "");
+                edit.putString(PrefsConstants.SECONDARY_NAME, "");
+                edit.putBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, false);
+                edit.apply();
+            }
         }
-
-        open();
-
-        if (!isTableExists("studies")) {
-
-            Migrator.Companion.migrateSchema(db, getAllTraitObjects());
-
-        }
-
-        SharedPreferences.Editor edit = ep.edit();
-
-        edit.putInt(PrefsConstants.SELECTED_FIELD_ID, -1).apply();
-        edit.putString("ImportUniqueName", "");
-        edit.putString("ImportFirstName", "");
-        edit.putString("ImportSecondName", "");
-        edit.putBoolean("ImportFieldFinished", false);
-        edit.apply();
     }
 
     /**
      * Export database
+     * TODO add documentation
      */
-    public void exportDatabase(String filename) throws IOException {
+    public void exportDatabase(Context ctx, String filename) throws IOException {
         String internalDbPath = getDatabasePath(this.context);
         String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
+
         close();
 
         try {
-            File newDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + filename + ".db");
-            File oldDb = new File(internalDbPath);
 
-            File newSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + filename + ".db_sharedpref.xml");
+            File oldDb = new File(internalDbPath);
             File oldSp = new File(internalSpPath);
 
-            copyFile(oldDb, newDb);
-            copyFile(oldSp, newSp);
-        } catch (IOException e) {
+            DocumentFile databaseDir = DocumentTreeUtil.Companion.getDirectory(ctx, R.string.dir_database);
+
+            if (databaseDir != null) {
+
+                String dbFileName = filename + ".db";
+                String prefFileName = filename + ".db_sharedpref.xml";
+
+                DocumentFile dbDoc = databaseDir.findFile(dbFileName);
+                DocumentFile prefDoc = databaseDir.findFile(prefFileName);
+                if (dbDoc != null && dbDoc.exists()) {
+                    dbDoc.delete();
+                }
+
+                if (prefDoc != null && prefDoc.exists()) {
+                    prefDoc.delete();
+                }
+
+                DocumentFile backupDatabaseFile = databaseDir.createFile("*/*", dbFileName);
+                DocumentFile backupPreferenceFile = databaseDir.createFile("*/*", prefFileName);
+
+                if (backupDatabaseFile != null && backupPreferenceFile != null) {
+
+                    DocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
+                    DocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldSp), backupPreferenceFile);
+                }
+            }
+
+        } catch (Exception e) {
+
             Log.e(TAG, e.getMessage());
+
         } finally {
+
             open();
+
         }
     }
 
@@ -2216,7 +2262,6 @@ public class DataHelper {
             }
         }
     }
-
 
     /**
      * V2 - Helper function to copy multiple files from asset to SDCard
@@ -2338,7 +2383,7 @@ public class DataHelper {
         DataHelper helper;
         OpenHelper(DataHelper helper) {
             super(helper.context, DATABASE_NAME, null, DATABASE_VERSION);
-            ep2 = helper.context.getSharedPreferences("Settings", 0);
+            ep2 = helper.context.getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0);
             this.helper = helper;
         }
 
@@ -2492,7 +2537,13 @@ public class DataHelper {
                 }
 
                 // plots into plots
-                String cur2 = "SELECT " + TICK + ep2.getString("ImportUniqueName", "") + TICK + ", " + TICK + ep2.getString("ImportFirstName", "") + TICK + ", " + TICK + ep2.getString("ImportSecondName", "") + TICK + " from range";
+                String cur2 = "SELECT " + TICK + ep2.getString(PrefsConstants.UNIQUE_NAME, "")
+                        + TICK + ", " + TICK
+                        + ep2.getString(PrefsConstants.PRIMARY_NAME, "")
+                        + TICK + ", " + TICK
+                        + ep2.getString(PrefsConstants.SECONDARY_NAME, "")
+                        + TICK + " from range";
+
                 Cursor cursor2 = db.rawQuery(cur2, null);
 
                 if (cursor2.moveToFirst()) {
@@ -2549,11 +2600,11 @@ public class DataHelper {
                 // Backup database
                 try {
                     helper.open();
-                    helper.exportDatabase("backup_v8");
-                    File exportedDb = new File(ep2.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup_v8.db");
-                    File exportedSp = new File(ep2.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup_v8.db_sharedpref.xml");
-                    Utils.scanFile(helper.context, exportedDb);
-                    Utils.scanFile(helper.context, exportedSp);
+                    helper.exportDatabase(helper.context, "backup_v8");
+//                    File exportedDb = new File(ep2.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup_v8.db");
+//                    File exportedSp = new File(ep2.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup_v8.db_sharedpref.xml");
+//                    Utils.scanFile(helper.context, exportedDb);
+//                    Utils.scanFile(helper.context, exportedSp);
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e(TAG, e.getMessage());

@@ -1,18 +1,10 @@
 package com.fieldbook.tracker.traits;
 
-import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.ResultReceiver;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -22,15 +14,13 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.utilities.BluetoothUtil;
 
 import java.text.SimpleDateFormat;

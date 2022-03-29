@@ -161,7 +161,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                 String[] catList = getCategoryList();
 
-                List<String> list = new ArrayList<String>(Arrays.asList(catList));
+                List<String> list = new ArrayList<>(Arrays.asList(catList));
                 list.remove(category);
                 catList = list.toArray(new String[0]);
 
@@ -269,10 +269,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
 class CategoricalTraitAdapter extends RecyclerView.Adapter<CategoricalTraitViewHolder> {
 
-    private Context mContext;
-
     CategoricalTraitAdapter(Context context) {
-        mContext = context;
     }
 
     @Override

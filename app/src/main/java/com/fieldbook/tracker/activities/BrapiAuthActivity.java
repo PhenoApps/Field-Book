@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.activities;
 
-import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -11,13 +10,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.Utils;
 
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
@@ -27,9 +24,6 @@ import net.openid.appauth.Preconditions;
 import net.openid.appauth.ResponseTypeValues;
 import net.openid.appauth.connectivity.ConnectionBuilder;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 

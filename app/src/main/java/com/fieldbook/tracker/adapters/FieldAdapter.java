@@ -43,6 +43,8 @@ import java.util.List;
 
 public class FieldAdapter extends BaseAdapter {
 
+    private static final String TAG = "FieldAdapter";
+
     private static final int PRIMARY = 0;
     private static final int SECONDARY = 1;
     private static final int TERTIARY = 2;
@@ -85,27 +87,27 @@ public class FieldAdapter extends BaseAdapter {
         SharedPreferences.Editor ed = ep.edit();
         boolean has_contents = item != null;
         if (has_contents) {
-            ed.putString("FieldFile", item.getExp_name());
+            ed.putString(PrefsConstants.FIELD_FILE, item.getExp_name());
             ed.putInt(PrefsConstants.SELECTED_FIELD_ID, item.getExp_id());
-            ed.putString("ImportUniqueName", item.getUnique_id());
-            ed.putString("ImportFirstName", item.getPrimary_id());
-            ed.putString("ImportSecondName", item.getSecondary_id());
+            ed.putString(PrefsConstants.UNIQUE_NAME, item.getUnique_id());
+            ed.putString(PrefsConstants.PRIMARY_NAME, item.getPrimary_id());
+            ed.putString(PrefsConstants.SECONDARY_NAME, item.getSecondary_id());
         } else {
-            ed.putString("FieldFile", null);
+            ed.putString(PrefsConstants.FIELD_FILE, null);
             ed.putInt(PrefsConstants.SELECTED_FIELD_ID, -1);
-            ed.putString("ImportUniqueName", null);
-            ed.putString("ImportFirstName", null);
-            ed.putString("ImportSecondName", null);
+            ed.putString(PrefsConstants.UNIQUE_NAME, null);
+            ed.putString(PrefsConstants.PRIMARY_NAME, null);
+            ed.putString(PrefsConstants.SECONDARY_NAME, null);
         }
-        ed.putBoolean("ImportFieldFinished", has_contents);
-        ed.putString("lastplot", null);
+        ed.putBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, has_contents);
+        ed.putString(PrefsConstants.LAST_PLOT, null);
         ed.apply();
     }
 
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
 
-        ep = context.getSharedPreferences("Settings", 0);
+        ep = context.getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0);
 
         ViewHolder holder;
         if (convertView == null) {
@@ -153,18 +155,12 @@ public class FieldAdapter extends BaseAdapter {
         holder.editDate.setText(editDate);
         holder.exportDate.setText(exportDate);
 
-        holder.active.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fieldClick(getItem(position));
-            }
-        });
+        holder.active.setOnClickListener(v -> fieldClick(getItem(position)));
 
-        if (ep.getString("FieldFile", "").contentEquals(holder.fieldName.getText())) {
-            holder.active.setChecked(true);
-        } else {
-            holder.active.setChecked(false);
-        }
+        if (ep.getInt(PrefsConstants.SELECTED_FIELD_EXP_ID, -1) != -1) {
+            holder.active.setChecked(ep.getString(PrefsConstants.FIELD_FILE, "")
+                    .contentEquals(holder.fieldName.getText()));
+        } else holder.active.setChecked(false);
 
         holder.menuPopup.setOnClickListener(makeMenuPopListener(position));
 
@@ -293,7 +289,7 @@ public class FieldAdapter extends BaseAdapter {
                         toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
                         toast.show();
                     } catch (Exception e) {
-                        Log.e("FieldAdapter", "Error updating sorting", e);
+                        Log.e(TAG, "Error updating sorting", e);
 
                         new AlertDialog.Builder(context).setTitle(R.string.dialog_save_error_title)
                                 .setPositiveButton(R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
@@ -383,8 +379,8 @@ public class FieldAdapter extends BaseAdapter {
 
         // Check if this is a BrAPI field and show BrAPI info dialog if so
         if (selectedField.getExp_source() != null &&
-                selectedField.getExp_source() != "" &&
-                selectedField.getExp_source() != "local") {
+                !selectedField.getExp_source().equals("") &&
+                !selectedField.getExp_source().equals("local")) {
 
             BrapiInfoDialog brapiInfo = new BrapiInfoDialog(context,
                     context.getResources().getString(R.string.brapi_info_message));

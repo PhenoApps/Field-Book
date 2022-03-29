@@ -3,18 +3,15 @@ package com.fieldbook.tracker.brapi;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.BrapiAuthActivity;
-import com.fieldbook.tracker.brapi.service.BrAPIService;
 
 
 public class BrapiAuthDialog extends Dialog implements android.view.View.OnClickListener {
