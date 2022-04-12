@@ -266,8 +266,8 @@
     <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
 
     <string name="preferences_general_system_title">System Defaults</string>
-    <string name="preferences_general_files_base_directory_title">Root Directory</string>
-    <string name="preferences_general_files_base_directory_description">Choose the root directory for Field Book</string>
+    <string name="preferences_general_files_base_directory_title">Define storage location</string>
+    <string name="preferences_general_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
 
@@ -710,7 +710,7 @@
     <string name="pref_storage_definer_summary">Choose a location on your system to save files to.</string>
     <string name="migrate">Migrate</string>
     <string name="frag_storage_migrator_title">Storage Migrator</string>
-    <string name="frag_storage_migrator_summary">Coordinate files were not found. Choosing migrate will allow you to select your old Coordinate folder to transfer the data.</string>
+    <string name="frag_storage_migrator_summary">Field Book files were not found. Choosing migrate will allow you to select your old folder to transfer the data.</string>
     <string name="skip">Skip</string>
     <string name="document_tree_undefined">Would you like to define the Field Book folder?</string>
     <string name="error_dtu_dir_not_created">Directory %s could not be created.</string>

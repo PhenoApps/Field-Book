@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.provider.OpenableColumns
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.documentfile.provider.DocumentFile
@@ -24,6 +25,39 @@ class DocumentTreeUtil {
     companion object {
 
         const val TAG = "DocumentTreeUtil"
+
+        fun Uri.getStem(context: Context?): String {
+            var stem = getFileStem()
+            if (scheme == "content") {
+                try {
+                    context?.contentResolver?.query(this, null, null, null, null).use { c ->
+                        if (c != null && c.moveToFirst()) {
+                            val index: Int = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                            if (index > 0) {
+                                stem = c.getString(index)
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            if (stem.contains(".")) {
+                val dotIndex = stem.lastIndexOf(".")
+                stem = stem.substring(0, dotIndex)
+            }
+            return stem
+        }
+
+        private fun Uri.getFileStem(): String {
+            val path = toString()
+            //uri separated by query param separator %2F, not encoded with keys
+            val token = "%2F"
+            val tokenSize = token.length
+            val first = path.lastIndexOf(token) + tokenSize
+            val last = path.lastIndexOf(".")
+            return path.substring(first, last)
+        }
 
         /**
          * Creates the root directory structure for FB. Also copies assets over to the defined

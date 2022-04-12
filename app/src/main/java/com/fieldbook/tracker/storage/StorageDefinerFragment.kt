@@ -13,6 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.createFieldBookFolders
 import java.util.concurrent.Executors
@@ -43,11 +44,6 @@ class StorageDefinerFragment: Fragment(R.layout.fragment_storage_definer) {
 
                 with (context?.contentResolver) {
 
-//                    val lastPermitted = if (this?.persistedUriPermissions != null
-//                        && this.persistedUriPermissions.isNotEmpty()) {
-//                        this.persistedUriPermissions.first().uri
-//                    } else null
-
                     //add new uri to persistable that the user just picked
                     this?.takePersistableUriPermission(nonNulluri, flags)
 
@@ -62,10 +58,8 @@ class StorageDefinerFragment: Fragment(R.layout.fragment_storage_definer) {
                         }
                     }
 
+                    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                     DocumentFile.fromTreeUri(ctx, nonNulluri)?.let { root ->
-
-//                        val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
-//                        if (prefs.getBoolean(DocumentTreeUtil.MIGRATE_ASK_KEY, true)) {
 
                         val executor = Executors.newFixedThreadPool(2)
                         executor.execute {
@@ -73,32 +67,25 @@ class StorageDefinerFragment: Fragment(R.layout.fragment_storage_definer) {
                         }
                         executor.shutdown()
                         executor.awaitTermination(10000, TimeUnit.MILLISECONDS)
-                        //copy the HTPG.xml file to the newly defined folder
-                        //copy FB sample files into sample directories s.a in coordinate:
-//                            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-//
-//                                root.createDirectory(ctx.getString(R.string.FolderExport))
-//                                root.createDirectory(ctx.getString(R.string.FolderTemplate))?.let { templates ->
-//
-//                                    templates.createFile("*/*", "HTPG.xml")?.uri?.let { uri ->
-//
-//                                        ctx.contentResolver.openOutputStream(uri)?.let { output ->
-//
-//                                            ctx.resources.openRawResource(R.raw.htpg).copyTo(output)
-//
-//                                        }
-//                                    }
-//                                }
-//                            }
 
-//                            prefs.edit().putBoolean(DocumentTreeUtil.MIGRATE_ASK_KEY, false).apply()
-//                            activity?.setResult(Activity.RESULT_OK)
-//                            activity?.finish()
+                        val hiddenFbFile = root.findFile(".fieldbook")
+                        if (hiddenFbFile == null || !hiddenFbFile.exists()) {
 
-                        findNavController().navigate(StorageDefinerFragmentDirections
-                            .actionStorageDefinerToStorageMigrator())
+                            if (prefs.getBoolean("FIRST_MIGRATE", true)) {
 
+                                prefs.edit().putBoolean("FIRST_MIGRATE", false).apply()
+                                activity?.setResult(Activity.RESULT_OK)
+                                activity?.finish()
 
+                            } else findNavController().navigate(StorageDefinerFragmentDirections
+                                .actionStorageDefinerToStorageMigrator())
+
+                        } else {
+
+                            activity?.setResult(Activity.RESULT_OK)
+                            activity?.finish()
+
+                        }
                     }
                 }
             }

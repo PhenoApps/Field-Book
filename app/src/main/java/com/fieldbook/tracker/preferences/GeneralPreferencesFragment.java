@@ -57,30 +57,22 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
         return false;
     }
+
     @Override
-    public void onActivityResult(int requestCode, int resultCode,
-                                 Intent resultData) {
-        if (requestCode == REQUEST_STORAGE_DEFINER_CODE && resultCode == Activity.RESULT_OK) {
+    public void onResume() {
+        super.onResume();
 
-            if (resultData != null) {
+        if (DocumentTreeUtil.Companion.isEnabled(context)) {
 
-                //get directory name
-                DocumentFile root = DocumentTreeUtil.Companion.getRoot(context);
+            //get directory name
+            DocumentFile root = DocumentTreeUtil.Companion.getRoot(context);
 
-                if (root != null && root.exists()) {
+            if (root != null && root.exists()) {
 
-                    String path = root.getUri().toString();
+                String path = DocumentTreeUtil.Companion.getStem(root.getUri(), context);
 
-                    defaultStorageLocation.setSummary(path);
+                defaultStorageLocation.setSummary(path);
 
-                    //save summary to preference
-                    SharedPreferences.Editor editor = prefMgr.getSharedPreferences().edit();
-                    editor.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, path);
-                    editor.apply();
-
-                    DocumentTreeUtil.Companion.createFieldBookFolders(root, context);
-
-                }
             }
         }
     }

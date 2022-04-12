@@ -1,35 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Warning / error below for showAsAction should be ignored until Toolbar is replaced with AppCompatToolbar-->
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/help"
         android:icon="@drawable/ic_tb_help"
-        app:showAsAction="always"
+        android:showAsAction="always"
         android:title="@string/tutorial_dialog_title" />
     <item
         android:id="@+id/toggleTrait"
         android:icon="@drawable/ic_tb_toggle_all"
-        app:showAsAction="always"
+        android:showAsAction="always"
         android:title="@string/traits_sort_visibility" />
     <item
         android:id="@+id/addTrait"
         android:icon="@drawable/ic_tb_add_circle"
-        app:showAsAction="always"
+        android:showAsAction="always"
         android:title="@string/traits_toolbar_add_trait" />
     <item
         android:id="@+id/sortTrait"
         android:icon="@drawable/ic_tb_sort"
-        app:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:title="@string/traits_toolbar_sort" />
     <item
         android:id="@+id/deleteTrait"
         android:icon="@drawable/ic_tb_delete"
-        app:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:title="@string/traits_toolbar_delete_all" />
     <item
         android:id="@+id/importexport"
         android:icon="@drawable/ic_tb_import_export"
-        app:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:title="@string/traits_toolbar_import_export" />
 </menu>
 
