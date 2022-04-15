@@ -11,14 +11,23 @@ Contents
    :caption: Setup
 
    storage
-   settings
 
 .. toctree::
    :maxdepth: 2
    :caption: Function
 
+   fields
+   traits
    collect
    export
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Extra
+   settings
+   brapi
+   geonav
+   barcodes
 
 .. toctree::
    :maxdepth: 2
