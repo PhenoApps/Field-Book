@@ -1,7 +1,7 @@
 Storage
 =======
 
-After installing and opening the app, you will be asked to define a 'Storage location' on the device. Although this is an optional step, selecting this directory will greatly simplify the export process by keeping all exported files organized.
+After installing and opening the app, you will be asked to define a 'Storage location' on the device. Selecting this directory is necessary to simplifying how data is managed within Field Book.
 
 If you skip defining the 'Storage location' directory, you will be required to select an export location and name for each file that is exported from Coordinate. The selected 'Storage location' can be changed in the :doc:`/settings`.
 
