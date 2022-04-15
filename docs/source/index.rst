@@ -24,6 +24,7 @@ Contents
 .. toctree::
    :maxdepth: 2
    :caption: Extra
+
    settings
    brapi
    geonav
