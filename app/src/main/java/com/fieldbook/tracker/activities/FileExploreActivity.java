@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +41,9 @@ public class FileExploreActivity extends AppCompatActivity {
             return 1;
         } else {
             // Alphabetic order otherwise
-            return f1.toString().compareToIgnoreCase(f2.toString());
+            String f1Name = DocumentTreeUtil.Companion.getStem(f1.getUri(), this);
+            String f2Name = DocumentTreeUtil.Companion.getStem(f2.getUri(), this);
+            return f1Name.compareToIgnoreCase(f2Name);
         }
     };
     // Check if the first level of the directory structure is the one showing
