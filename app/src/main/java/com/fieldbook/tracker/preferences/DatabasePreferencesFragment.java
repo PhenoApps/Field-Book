@@ -56,7 +56,6 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
     Context context;
     private AlertDialog dbSaveDialog;
     private EditText exportFile;
-    private DocumentFile mChosenFile = null;
     private String exportFileString = "";
     public static Handler mHandler = new Handler();
     private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 9980;
@@ -144,14 +143,14 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
         @Override
         protected Integer doInBackground(Integer... params) {
 
-            if (mChosenFile != null && mChosenFile.getName() != null) {
+            if (file != null && file.getName() != null) {
 
                 //first check if the file to import is just a .db file
-                if (mChosenFile.getName().endsWith(".db")) { //if it is import it old-style
+                if (file.getName().endsWith(".db")) { //if it is import it old-style
 
                     try {
 
-                        dt.importDatabase(mChosenFile);
+                        dt.importDatabase(file);
 
                     } catch (Exception e) {
 
@@ -161,14 +160,14 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                         fail = true;
                     }
-                } else if (mChosenFile.getName().endsWith(".zip")) { //otherwise unzip and import prefs as well
+                } else if (file.getName().endsWith(".zip")) { //otherwise unzip and import prefs as well
 
                     String internalDbPath = DataHelper.getDatabasePath(context);
 
                     try {
 
                         ZipUtil.Companion.unzip(context,
-                                context.getContentResolver().openInputStream(mChosenFile.getUri()),
+                                context.getContentResolver().openInputStream(file.getUri()),
                                 new FileOutputStream(internalDbPath));
 
                         SharedPreferences.Editor edit = ep.edit();
@@ -426,9 +425,8 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
         if (requestCode == REQUEST_FILE_EXPLORE_CODE) {
             if (resultCode == RESULT_OK) {
                 if (getContext() != null) {
-                    mChosenFile = DocumentFile.fromSingleUri(getContext(),
-                            Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY)));
-                    invokeImportDatabase(mChosenFile);
+                    invokeImportDatabase(DocumentFile.fromSingleUri(getContext(),
+                            Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY))));
                 }
             }
         }
