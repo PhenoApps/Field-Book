@@ -991,22 +991,33 @@ public class ConfigActivity extends AppCompatActivity {
 
                     if (exportDir != null && exportDir.exists()) {
 
-                        DocumentFile zipFile = exportDir.createFile("*/*", zipFileName);
+                        if (checkDbBool && checkExcelBool) {
 
-                        OutputStream output = DocumentTreeUtil.Companion.getFileOutputStream(
-                                ConfigActivity.this, R.string.dir_field_export, zipFileName);
+                            DocumentFile zipFile = exportDir.createFile("*/*", zipFileName);
 
-                        ArrayList<DocumentFile> paths = new ArrayList<>();
+                            OutputStream output = DocumentTreeUtil.Companion.getFileOutputStream(
+                                    ConfigActivity.this, R.string.dir_field_export, zipFileName);
 
-                        if (dbFile != null) paths.add(dbFile);
-                        if (tableFile != null) paths.add(tableFile);
+                            ArrayList<DocumentFile> paths = new ArrayList<>();
 
-                        zipFiles(ConfigActivity.this, paths, output);
+                            if (dbFile != null) paths.add(dbFile);
+                            if (tableFile != null) paths.add(tableFile);
 
-                        if (dbFile != null) dbFile.delete();
-                        if (tableFile != null) tableFile.delete();
+                            zipFiles(ConfigActivity.this, paths, output);
 
-                        shareFile(zipFile);
+                            if (dbFile != null) dbFile.delete();
+                            if (tableFile != null) tableFile.delete();
+
+                            shareFile(zipFile);
+
+                        } else if (checkDbBool) {
+
+                            shareFile(dbFile);
+
+                        } else if (checkExcelBool) {
+
+                            shareFile(tableFile);
+                        }
                     }
                 }
             }

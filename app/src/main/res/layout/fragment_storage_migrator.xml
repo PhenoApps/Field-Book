@@ -26,7 +26,7 @@
 
     <Button style="@style/TextAppearance.MaterialComponents.Button"
         android:text="@string/migrate"
-        android:background="@color/main_colorAccent"
+        android:background="@color/main_primaryDark"
         android:id="@+id/frag_storage_migrator_choose_dir_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
 
     <Button style="@style/TextAppearance.MaterialComponents.Button"
         android:text="@string/skip"
-        android:background="@color/main_colorAccent"
+        android:background="@color/main_primaryDark"
         android:id="@+id/frag_storage_migrator_skip_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
