@@ -88,7 +88,6 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         this.programsApi = new ProgramsApi(apiClient);
         this.trialsApi = new TrialsApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
-        PhenotypesApi phenotypesApi = new PhenotypesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
     }
 
