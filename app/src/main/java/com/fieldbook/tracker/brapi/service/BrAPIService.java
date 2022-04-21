@@ -92,6 +92,37 @@ public interface BrAPIService {
         return baseURL + path;
     }
 
+    static int checkPreference(Context context, String key, String defaultValue) {
+        String prefValueString = context.getSharedPreferences("Settings", 0)
+                .getString(key, defaultValue);
+
+        int value = Integer.parseInt(defaultValue);
+
+        try {
+            if (prefValueString != null) {
+                value = Integer.parseInt(prefValueString);
+            }
+        } catch (NumberFormatException nfe) {
+            String message = nfe.getLocalizedMessage();
+            if (message != null) {
+                Log.d("FieldBookError", nfe.getLocalizedMessage());
+            } else {
+                Log.d("FieldBookError", "Preference number format error.");
+            }
+            nfe.printStackTrace();
+        }
+
+        return value;
+    }
+
+    static Integer getTimeoutValue(Context context) {
+        return checkPreference(context, GeneralKeys.BRAPI_TIMEOUT, "120");
+    }
+
+    static int getChunkSize(Context context) {
+        return checkPreference(context, GeneralKeys.BRAPI_CHUNK_SIZE, "500");
+    }
+
     public static boolean isConnectionError(int code) {
         return code == 401 || code == 403 || code == 404;
     }
@@ -145,8 +176,8 @@ public interface BrAPIService {
                                    final Function<List<Observation>, Void> function,
                                    final Function<Integer, Void> failFunction);
 
-    void createObservationsChunked(List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
-    void updateObservationsChunked(List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
+    void createObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
+    void updateObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
 
     /*
     public void postObservations(List<Observation> observations,

@@ -59,6 +59,7 @@ public class GeneralKeys {
     public static final String BRAPI_VERSION                        = "BRAPI_VERSION";
     public static final String BRAPI_PAGE_SIZE                      = "BRAPI_PAGE_SIZE";
     public static final String BRAPI_TIMEOUT                        = "BRAPI_TIMEOUT";
+    public static final String BRAPI_CHUNK_SIZE                     = "BRAPI_CHUNK_SIZE";
 
     //GeoNav
     private static final String GEONAV_PREFIX                       = "com.fieldbook.tracker.geonav.";

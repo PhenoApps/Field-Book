@@ -85,7 +85,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     public BrAPIServiceV1(Context context) {
         this.context = context;
         ApiClient apiClient = new ApiClient().setBasePath(BrAPIService.getBrapiUrl(context));
-        apiClient.setReadTimeout(getTimeoutValue(context) * 1000);
+        apiClient.setReadTimeout(BrAPIService.getTimeoutValue(context) * 1000);
 
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);

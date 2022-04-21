@@ -17,6 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.brapi.ApiErrorCode;
+import com.fieldbook.tracker.brapi.service.AbstractBrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
@@ -254,7 +255,8 @@ public class BrapiExportActivity extends AppCompatActivity {
     }
 
     private void createObservations() throws InterruptedException {
-        brAPIService.createObservationsChunked(newObservations, (input, completedChunkNum, chunks, done) -> {
+        int chunkSize = BrAPIService.getChunkSize(this);
+        brAPIService.createObservationsChunked(chunkSize, newObservations, (input, completedChunkNum, chunks, done) -> {
             (BrapiExportActivity.this).runOnUiThread(() -> {
                 processCreateObservationsResponse(chunks);
                 processResponse(input, chunks);
@@ -280,7 +282,8 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private void updateObservations() {
 
-        brAPIService.updateObservationsChunked(editedObservations, (input, completedChunkNum, chunks, done) -> {
+        int chunkSize = BrAPIService.getChunkSize(this);
+        brAPIService.updateObservationsChunked(chunkSize, editedObservations, (input, completedChunkNum, chunks, done) -> {
             (BrapiExportActivity.this).runOnUiThread(() -> {
                 processUpdateObservationsResponse(chunks);
                 processResponse(input, chunks);

@@ -424,8 +424,9 @@ public class BrapiServiceTest {
         }
 
         try {
+            int testChunkSize = 500;
             // Call our get study details endpoint with the same parsing that our classes use.
-            this.brAPIService.createObservationsChunked(testObservations, (input, completedChunkNum, chunks, done) -> {
+            this.brAPIService.createObservationsChunked(testChunkSize, testObservations, (input, completedChunkNum, chunks, done) -> {
                 for (Observation o : input) {
                     observationResponses.put(o.getUnitDbId(), o);
                 }
@@ -493,9 +494,11 @@ public class BrapiServiceTest {
             testObservations.add(testObservation);
         }
 
+        int testChunkSize = 500;
+
         try {
             // Call our get study details endpoint with the same parsing that our classes use.
-            this.brAPIService.createObservationsChunked(testObservations, (input, completedChunkNum, chunks, done) -> {
+            this.brAPIService.createObservationsChunked(testChunkSize, testObservations, (input, completedChunkNum, chunks, done) -> {
                 for (Observation o : input) {
                     createdObservations.put(o.getUnitDbId(), o);
                 }
@@ -526,7 +529,7 @@ public class BrapiServiceTest {
 
                 try {
                     // Call our get study details endpoint with the same parsing that our classes use.
-                    this.brAPIService.updateObservationsChunked(new ArrayList<>(createdObservations.values()), (input, completedChunkNum, chunks, done) -> {
+                    this.brAPIService.updateObservationsChunked(testChunkSize, new ArrayList<>(createdObservations.values()), (input, completedChunkNum, chunks, done) -> {
                         if (done) {
                             updateSignal.countDown();
                         }

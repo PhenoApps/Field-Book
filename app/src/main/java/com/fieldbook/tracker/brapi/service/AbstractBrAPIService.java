@@ -18,39 +18,16 @@ public abstract class AbstractBrAPIService implements BrAPIService {
 
     private static final String TAG = AbstractBrAPIService.class.getName();
 
-    protected Integer getTimeoutValue(Context context) {
-        String timeoutString = context.getSharedPreferences("Settings", 0)
-                .getString(GeneralKeys.BRAPI_TIMEOUT, "120");
-
-        int timeout = 120;
-
-        try {
-            if (timeoutString != null) {
-                timeout = Integer.parseInt(timeoutString);
-            }
-        } catch (NumberFormatException nfe) {
-            String message = nfe.getLocalizedMessage();
-            if (message != null) {
-                Log.d("FieldBookError", nfe.getLocalizedMessage());
-            } else {
-                Log.d("FieldBookError", "Timeout Preference number format error.");
-            }
-            nfe.printStackTrace();
-        }
-
-        return timeout;
+    public void createObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn) {
+        saveChunks(chunkSize, observations, uploadProgressCallback, failFn, this::createObservations);
     }
 
-    public void createObservationsChunked(List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn) {
-        saveChunks(observations, uploadProgressCallback, failFn, this::createObservations);
+    public void updateObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn) {
+        saveChunks(chunkSize, observations, uploadProgressCallback, failFn, this::updateObservations);
     }
 
-    public void updateObservationsChunked(List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn) {
-        saveChunks(observations, uploadProgressCallback, failFn, this::updateObservations);
-    }
-
-    private <T> void saveChunks(List<T> items, BrAPIChunkedUploadProgressCallback<T> uploadProgressCallback, Function<Integer, Void> failFn, SaveChunkFunction<T> processFn) {
-        List<List<T>> chunkedItemLists = createChunks(items);
+    private <T> void saveChunks(int chunkSize, List<T> items, BrAPIChunkedUploadProgressCallback<T> uploadProgressCallback, Function<Integer, Void> failFn, SaveChunkFunction<T> processFn) {
+        List<List<T>> chunkedItemLists = createChunks(chunkSize, items);
 
         /*
          Allow for up to two parallel write calls to happen at a time.
@@ -93,8 +70,8 @@ public abstract class AbstractBrAPIService implements BrAPIService {
         }
     }
 
-    protected <T> List<List<T>> createChunks(List<T> items) {
-        return createChunks(items, 500); //TODO use pageSize for chunk?
+    protected <T> List<List<T>> createChunks(int chunkSize, List<T> items) {
+        return createChunks(items, chunkSize);
     }
 
     protected <T> List<List<T>> createChunks(List<T> items, int chunkSize) {

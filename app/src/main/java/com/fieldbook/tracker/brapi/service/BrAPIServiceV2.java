@@ -90,7 +90,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public BrAPIServiceV2(Context context) {
         this.context = context;
         // Make timeout longer. Set it to 60 seconds for now
-        this.apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), getTimeoutValue(context) * 1000);
+        this.apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), BrAPIService.getTimeoutValue(context) * 1000);
 
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
