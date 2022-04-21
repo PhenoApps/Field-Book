@@ -468,9 +468,13 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
                 DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
 
+                String plot = getCRange().plot_id;
+
+                List<DocumentFile> locations = DocumentTreeUtil.Companion.getPlotMedia(photosDir, plot, ".jpg");
+
                 if (photosDir != null) {
                     // Do not take photos if limit is reached
-                    if (m == 0 || photosDir.length() < m) {
+                    if (m == 0 || locations.size() < m) {
                         takePicture();
                     } else
                         Utils.makeToast(getContext(),getContext().getString(R.string.traits_create_photo_maximum));
