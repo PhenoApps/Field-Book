@@ -759,7 +759,9 @@ public class DataHelper {
      */
     public Cursor getExportDBData(String[] fieldList, String[] traits) {
 
-        return ObservationUnitPropertyDao.Companion.getExportDbData(ep.getString(GeneralKeys.UNIQUE_NAME, ""), fieldList, traits);
+        return ObservationUnitPropertyDao.Companion.getExportDbData(
+                ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
+                ep.getString(GeneralKeys.UNIQUE_NAME, ""), fieldList, traits);
 
 //        String fields = arrayToString("range", fieldList);
 //        String activeTraits = arrayToLikeString(traits);
@@ -797,7 +799,9 @@ public class DataHelper {
      */
     public Cursor convertDatabaseToTable(String[] col, String[] traits) {
 
-        return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(ep.getString(GeneralKeys.UNIQUE_NAME, ""), col, traits);
+        return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
+                ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
+                ep.getString(GeneralKeys.UNIQUE_NAME, ""), col, traits);
 
 //        String query;
 //        String[] rangeArgs = new String[col.length];
@@ -2174,7 +2178,7 @@ public class DataHelper {
                 } catch (Exception e) {
 
                     Log.d("Database", e.toString());
-                    
+
                 }
 
                 open();

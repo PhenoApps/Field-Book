@@ -68,7 +68,7 @@ public class DateTraitLayout extends BaseTraitLayout {
          * When the calendar view visibility button is pressed it starts the date picker dialog.
          */
         calendarVisibilityBtn.setOnClickListener((View) -> {
-            DialogFragment newFragment = new DatePickerFragment(dateFormat, date, (y, m, d) -> {
+            DialogFragment newFragment = new DatePickerFragment(dateFormat, (y, m, d) -> {
 
                 Calendar calendar = Calendar.getInstance();
 
@@ -192,7 +192,7 @@ public class DateTraitLayout extends BaseTraitLayout {
         getEtCurVal().setVisibility(View.GONE);
 
         final Calendar c = Calendar.getInstance();
-        date = getPrefs().getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, dateFormat.format(c.getTime()));
+        date = dateFormat.format(c.getTime());
 
         if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && !getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
             if (getNewTraits().get(getCurrentTrait().getTrait()).toString().length() < 4 && getNewTraits().get(getCurrentTrait().getTrait()).toString().length() > 0) {

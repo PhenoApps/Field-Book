@@ -73,6 +73,7 @@ class StudyDao {
                 db.delete(ObservationUnit.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
                 db.delete(ObservationUnitValue.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
                 db.delete(ObservationUnitAttribute.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
+                db.update(Observation.tableName, contentValuesOf(Study.FK to Integer.parseInt("-$exp_id")), "${Study.FK} = ?", arrayOf(exp_id.toString()))
                 db.delete(Study.tableName, "${Study.PK} = ?", arrayOf(exp_id.toString()))
                 db.rawQuery("PRAGMA foreign_keys=ON", null)
 
