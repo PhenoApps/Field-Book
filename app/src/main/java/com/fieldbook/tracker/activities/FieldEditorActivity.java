@@ -41,9 +41,9 @@ import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
-import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -121,7 +121,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
         loadData();
 
@@ -132,7 +132,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ep = getSharedPreferences("Settings", 0);
+        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setContentView(R.layout.activity_fields);
 
@@ -148,7 +148,7 @@ public class FieldEditorActivity extends AppCompatActivity {
             ConfigActivity.dt = new DataHelper(this);
         }
         ConfigActivity.dt.open();
-        ConfigActivity.dt.updateExpTable(false, true, false, ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        ConfigActivity.dt.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
@@ -261,7 +261,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         new MenuInflater(FieldEditorActivity.this).inflate(R.menu.menu_fields, menu);
 
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
 
         return true;
     }
@@ -441,7 +441,7 @@ public class FieldEditorActivity extends AppCompatActivity {
 
                     int studyId = model.getStudy_id();
 
-                    if (studyId == ep.getInt(PrefsConstants.SELECTED_FIELD_EXP_ID, -1)) {
+                    if (studyId == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
 
                         Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
                                 getString(R.string.activity_field_editor_switch_field_same),
@@ -592,14 +592,14 @@ public class FieldEditorActivity extends AppCompatActivity {
                     String fieldFileName = fieldFile.getStem();
 
                     Editor e = ep.edit();
-                    e.putString(PrefsConstants.FIELD_FILE, fieldFileName);
+                    e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
                     e.apply();
 
                     if (ConfigActivity.dt.checkFieldName(fieldFileName) >= 0) {
                         Utils.makeToast(getApplicationContext(),getString(R.string.fields_study_exists_message));
                         SharedPreferences.Editor ed = ep.edit();
-                        ed.putString(PrefsConstants.FIELD_FILE, null);
-                        ed.putBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, false);
+                        ed.putString(GeneralKeys.FIELD_FILE, null);
+                        ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
                         ed.apply();
                         return;
                     }
@@ -712,9 +712,9 @@ public class FieldEditorActivity extends AppCompatActivity {
         primary = layout.findViewById(R.id.primarySpin);
         secondary = layout.findViewById(R.id.secondarySpin);
 
-        setSpinner(unique, columns, PrefsConstants.UNIQUE_NAME);
-        setSpinner(primary, columns, PrefsConstants.PRIMARY_NAME);
-        setSpinner(secondary, columns, PrefsConstants.SECONDARY_NAME);
+        setSpinner(unique, columns, GeneralKeys.UNIQUE_NAME);
+        setSpinner(primary, columns, GeneralKeys.PRIMARY_NAME);
+        setSpinner(secondary, columns, GeneralKeys.SECONDARY_NAME);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
         builder.setTitle(R.string.import_dialog_title_fields)

@@ -30,8 +30,8 @@ import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.PrefsConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,27 +87,27 @@ public class FieldAdapter extends BaseAdapter {
         SharedPreferences.Editor ed = ep.edit();
         boolean has_contents = item != null;
         if (has_contents) {
-            ed.putString(PrefsConstants.FIELD_FILE, item.getExp_name());
-            ed.putInt(PrefsConstants.SELECTED_FIELD_ID, item.getExp_id());
-            ed.putString(PrefsConstants.UNIQUE_NAME, item.getUnique_id());
-            ed.putString(PrefsConstants.PRIMARY_NAME, item.getPrimary_id());
-            ed.putString(PrefsConstants.SECONDARY_NAME, item.getSecondary_id());
+            ed.putString(GeneralKeys.FIELD_FILE, item.getExp_name());
+            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, item.getExp_id());
+            ed.putString(GeneralKeys.UNIQUE_NAME, item.getUnique_id());
+            ed.putString(GeneralKeys.PRIMARY_NAME, item.getPrimary_id());
+            ed.putString(GeneralKeys.SECONDARY_NAME, item.getSecondary_id());
         } else {
-            ed.putString(PrefsConstants.FIELD_FILE, null);
-            ed.putInt(PrefsConstants.SELECTED_FIELD_ID, -1);
-            ed.putString(PrefsConstants.UNIQUE_NAME, null);
-            ed.putString(PrefsConstants.PRIMARY_NAME, null);
-            ed.putString(PrefsConstants.SECONDARY_NAME, null);
+            ed.putString(GeneralKeys.FIELD_FILE, null);
+            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+            ed.putString(GeneralKeys.UNIQUE_NAME, null);
+            ed.putString(GeneralKeys.PRIMARY_NAME, null);
+            ed.putString(GeneralKeys.SECONDARY_NAME, null);
         }
-        ed.putBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, has_contents);
-        ed.putString(PrefsConstants.LAST_PLOT, null);
+        ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, has_contents);
+        ed.putString(GeneralKeys.LAST_PLOT, null);
         ed.apply();
     }
 
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
 
-        ep = context.getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0);
+        ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         ViewHolder holder;
         if (convertView == null) {
@@ -157,8 +157,8 @@ public class FieldAdapter extends BaseAdapter {
 
         holder.active.setOnClickListener(v -> fieldClick(getItem(position)));
 
-        if (ep.getInt(PrefsConstants.SELECTED_FIELD_EXP_ID, -1) != -1) {
-            holder.active.setChecked(ep.getString(PrefsConstants.FIELD_FILE, "")
+        if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
+            holder.active.setChecked(ep.getString(GeneralKeys.FIELD_FILE, "")
                     .contentEquals(holder.fieldName.getText()));
         } else holder.active.setChecked(false);
 
@@ -211,7 +211,7 @@ public class FieldAdapter extends BaseAdapter {
 
                 ConfigActivity.dt.deleteField(getItem(position).getExp_id());
 
-                if (getItem(position).getExp_id() == ep.getInt(PrefsConstants.SELECTED_FIELD_ID, -1)) {
+                if (getItem(position).getExp_id() == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
                     setEditorItem(ep, null);
                 }
 
@@ -281,7 +281,7 @@ public class FieldAdapter extends BaseAdapter {
                     fieldObject.setExp_sort(sort);
                     try {
                         StudyDao.Companion.updateStudySort(sort, fieldObject.getExp_id());
-                        if (ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
+                        if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
                             ConfigActivity.dt.switchField(fieldObject.getExp_id());
                             CollectActivity.reloadData = true;
                         }
@@ -370,7 +370,7 @@ public class FieldAdapter extends BaseAdapter {
         setEditorItem(ep, selectedField);
 
         SharedPreferences.Editor ed = ep.edit();
-        ed.putInt(PrefsConstants.SELECTED_FIELD_ID, selectedField.getExp_id());
+        ed.putInt(GeneralKeys.SELECTED_FIELD_ID, selectedField.getExp_id());
         ed.apply();
 
         ConfigActivity.dt.switchField(selectedField.getExp_id());

@@ -34,7 +34,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_brapi_auth);
 
-        SharedPreferences sp = getSharedPreferences("Settings", 0);
+        SharedPreferences sp = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         // Start our login process
         //when coming back from deep link this check keeps app from auto-re-authenticating
         if (getIntent() != null && getIntent().getData() == null) {
@@ -58,7 +58,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        SharedPreferences sp = getSharedPreferences("Settings", 0);
+        SharedPreferences sp = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
         Uri data = getIntent().getData();
 
@@ -223,7 +223,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
             return;
         }
 
-        SharedPreferences preferences = getSharedPreferences("Settings", 0);
+        SharedPreferences preferences = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         SharedPreferences.Editor editor = preferences.edit();
         if (status == 200) {
             String token = data.getQueryParameter("token");
@@ -250,7 +250,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
     public void checkBrapiAuth(Uri data) {
 
-            SharedPreferences preferences = getSharedPreferences("Settings", 0);
+            SharedPreferences preferences = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
             SharedPreferences.Editor editor = preferences.edit();
             data = Uri.parse(data.toString().replaceFirst("#", "?"));
             String token = data.getQueryParameter("access_token");

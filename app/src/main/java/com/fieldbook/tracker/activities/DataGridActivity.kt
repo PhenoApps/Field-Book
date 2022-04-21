@@ -173,9 +173,9 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
                              plotId: Int? = null,
                              trait: Int? = null) {
 
-        val ep = getSharedPreferences("Settings", MODE_PRIVATE)
+        val ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
 
-        val uniqueHeader = ep.getString("ImportUniqueName", "") ?: ""
+        val uniqueHeader = ep.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
         //if row header was not chosen, then use the preference unique name
         var rowHeader = prefixTrait ?: ep.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""

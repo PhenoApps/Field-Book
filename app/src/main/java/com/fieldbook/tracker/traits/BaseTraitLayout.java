@@ -11,7 +11,7 @@ import android.widget.LinearLayout;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.utilities.PrefsConstants;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 
 import java.util.Map;
 
@@ -52,7 +52,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public SharedPreferences getPrefs() {
-        return getContext().getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0);
+        return getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
     }
 
     public RangeObject getCRange() {
@@ -68,7 +68,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public String getDisplayColor() {
-        String hexColor = String.format("#%06X", (0xFFFFFF & getPrefs().getInt("SAVED_DATA_COLOR", Color.parseColor("#d50000"))));
+        String hexColor = String.format("#%06X", (0xFFFFFF & getPrefs().getInt(GeneralKeys.SAVED_DATA_COLOR, Color.parseColor("#d50000"))));
 
         return hexColor;
     }

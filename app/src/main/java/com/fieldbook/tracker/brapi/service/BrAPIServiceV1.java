@@ -126,7 +126,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     }
 
     private String getBrapiToken() {
-        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
+        SharedPreferences preferences = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         return "Bearer " + preferences.getString(GeneralKeys.BRAPI_TOKEN, "");
     }
 
@@ -437,7 +437,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
                                final Function<Integer, Void> failFunction) {
         try {
             final AtomicInteger currentPage = new AtomicInteger(0);
-            final Integer pageSize = Integer.parseInt(context.getSharedPreferences("Settings", 0)
+            final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                     .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setValues(new ArrayList<>());

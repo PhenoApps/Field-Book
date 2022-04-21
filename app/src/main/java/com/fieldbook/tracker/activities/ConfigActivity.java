@@ -54,7 +54,6 @@ import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
-import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -122,7 +121,7 @@ public class ConfigActivity extends AppCompatActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
 
         invalidateOptionsMenu();
@@ -136,7 +135,7 @@ public class ConfigActivity extends AppCompatActivity {
         dt = new DataHelper(this);
         dt.open();
 
-        ep = getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0);
+        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         invalidateOptionsMenu();
         loadScreen();
@@ -144,12 +143,12 @@ public class ConfigActivity extends AppCompatActivity {
         // request permissions
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
-        if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
-            ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
+        if (ep.getInt(GeneralKeys.UPDATE_VERSION, -1) < Utils.getVersion(this)) {
+            ep.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
             showChangelog(true, false);
         }
 
-        if (!ep.contains("FirstRun")) {
+        if (!ep.contains(GeneralKeys.FIRST_RUN)) {
             // do things on the first run
             //this will grant FB access to the chosen folder
             //preference and activity is handled through this utility call
@@ -163,7 +162,7 @@ public class ConfigActivity extends AppCompatActivity {
             entries.add("lockData");
 
             ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE,entries);
-            ed.putBoolean("FirstRun",false);
+            ed.putBoolean(GeneralKeys.FIRST_RUN,false);
             ed.apply();
         }
 
@@ -234,7 +233,7 @@ public class ConfigActivity extends AppCompatActivity {
 
                     if (checkTraitsExist() < 0) return;
 
-                    String exporter = ep.getString("EXPORT_SOURCE_DEFAULT", "ask");
+                    String exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask");
 
                     switch (exporter) {
                         case "ask":
@@ -270,8 +269,8 @@ public class ConfigActivity extends AppCompatActivity {
 
         SharedPreferences.Editor ed = ep.edit();
 
-        if (!ep.getBoolean("TipsConfigured", false)) {
-            ed.putBoolean("TipsConfigured", true);
+        if (!ep.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
+            ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
             ed.apply();
             showTipsDialog();
             loadSampleDataDialog();
@@ -287,8 +286,8 @@ public class ConfigActivity extends AppCompatActivity {
 
         String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
 
-        if (!ep.getBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, false)
-                || ep.getInt(PrefsConstants.SELECTED_FIELD_ID, -1) == -1) {
+        if (!ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
+                || ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
             Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
             return -1;
         } else if (traits.length == 0) {
@@ -379,8 +378,8 @@ public class ConfigActivity extends AppCompatActivity {
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
-                ed.putBoolean("Tips", true);
-                ed.putBoolean("TipsConfigured", true);
+                ed.putBoolean(GeneralKeys.TIPS, true);
+                ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
                 ed.apply();
 
                 dialog.dismiss();
@@ -397,7 +396,7 @@ public class ConfigActivity extends AppCompatActivity {
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
-                ed.putBoolean("TipsConfigured", true);
+                ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
                 ed.apply();
 
                 dialog.dismiss();
@@ -506,7 +505,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void exportBrAPI() {
         // Get our active field
-        int activeFieldId = ep.getInt(PrefsConstants.SELECTED_FIELD_ID, -1);
+        int activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         FieldObject activeField;
         if (activeFieldId != -1) {
             activeField = dt.getFieldObject(activeFieldId);
@@ -560,18 +559,18 @@ public class ConfigActivity extends AppCompatActivity {
         CheckBox checkBundle = layout.findViewById(R.id.dialog_export_bundle_data_cb);
 
         checkBundle.setChecked(ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false));
-        checkOverwrite.setChecked(ep.getBoolean(PrefsConstants.EXPORT_OVERWRITE, false));
-        checkDB.setChecked(ep.getBoolean(PrefsConstants.EXPORT_FORMAT_DATABSE, false));
-        checkExcel.setChecked(ep.getBoolean(PrefsConstants.EXPORT_FORMAT_TABLE, false));
-        onlyUnique.setChecked(ep.getBoolean(PrefsConstants.EXPORT_COLUMNS_UNIQUE,false));
-        allColumns.setChecked(ep.getBoolean(PrefsConstants.EXPORT_COLUMNS_ALL,false));
-        allTraits.setChecked(ep.getBoolean(PrefsConstants.EXPORT_TRAITS_ALL,false));
-        activeTraits.setChecked(ep.getBoolean(PrefsConstants.EXPORT_TRAITS_ACTIVE,false));
+        checkOverwrite.setChecked(ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false));
+        checkDB.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABSE, false));
+        checkExcel.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, false));
+        onlyUnique.setChecked(ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE,false));
+        allColumns.setChecked(ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL,false));
+        allTraits.setChecked(ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL,false));
+        activeTraits.setChecked(ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE,false));
 
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
-        fFile = ep.getString(PrefsConstants.FIELD_FILE, "");
+        fFile = ep.getString(GeneralKeys.FIELD_FILE, "");
 
         if (fFile.length() > 4 & fFile.toLowerCase().endsWith(".csv")) {
             fFile = fFile.substring(0, fFile.length() - 4);
@@ -618,13 +617,13 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             Editor ed = ep.edit();
-            ed.putBoolean(PrefsConstants.EXPORT_COLUMNS_UNIQUE, onlyUnique.isChecked());
-            ed.putBoolean(PrefsConstants.EXPORT_COLUMNS_ALL, allColumns.isChecked());
-            ed.putBoolean(PrefsConstants.EXPORT_TRAITS_ALL, allTraits.isChecked());
-            ed.putBoolean(PrefsConstants.EXPORT_TRAITS_ACTIVE, activeTraits.isChecked());
-            ed.putBoolean(PrefsConstants.EXPORT_FORMAT_TABLE, checkExcel.isChecked());
-            ed.putBoolean(PrefsConstants.EXPORT_FORMAT_DATABSE, checkDB.isChecked());
-            ed.putBoolean(PrefsConstants.EXPORT_OVERWRITE, checkOverwrite.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, onlyUnique.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, allColumns.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_TRAITS_ALL, allTraits.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, activeTraits.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, checkExcel.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_FORMAT_DATABSE, checkDB.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_OVERWRITE, checkOverwrite.isChecked());
             ed.putBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, checkBundle.isChecked());
             ed.apply();
 
@@ -633,7 +632,7 @@ public class ConfigActivity extends AppCompatActivity {
             newRange = new ArrayList<>();
 
             if (onlyUnique.isChecked()) {
-                newRange.add(ep.getString(PrefsConstants.UNIQUE_NAME, ""));
+                newRange.add(ep.getString(GeneralKeys.UNIQUE_NAME, ""));
             }
 
             if (allColumns.isChecked()) {
@@ -656,7 +655,7 @@ public class ConfigActivity extends AppCompatActivity {
             checkDbBool = checkDB.isChecked();
             checkExcelBool = checkExcel.isChecked();
 
-            if (ep.getBoolean(PrefsConstants.EXPORT_OVERWRITE, false)) {
+            if (ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
                 exportFileString = getOverwriteFile(exportFile.getText().toString());
             } else {
                 exportFileString = exportFile.getText().toString();
@@ -706,7 +705,7 @@ public class ConfigActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         return true;
     }
 
@@ -938,7 +937,7 @@ public class ConfigActivity extends AppCompatActivity {
                 if (bundleChecked) {
 
                     //query selected study to get the study name
-                    int studyId = ep.getInt(PrefsConstants.SELECTED_FIELD_EXP_ID, 0);
+                    int studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
                     //study name is the same as the media directory in plot_data
                     FieldObject fieldObject = StudyDao.Companion.getFieldObject(studyId);
@@ -1039,7 +1038,7 @@ public class ConfigActivity extends AppCompatActivity {
 
             if (!fail) {
                 showCitationDialog();
-                dt.updateExpTable(false, false, true, ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+                dt.updateExpTable(false, false, true, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
             }
 
             if (fail) {
@@ -1097,7 +1096,7 @@ public class ConfigActivity extends AppCompatActivity {
                 Utils.makeToast(getApplicationContext(),getString(R.string.import_error_general));
             }
 
-            SharedPreferences prefs = getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
+            SharedPreferences prefs = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
             SharedPreferences.Editor editor = prefs.edit();
             editor.apply();
 

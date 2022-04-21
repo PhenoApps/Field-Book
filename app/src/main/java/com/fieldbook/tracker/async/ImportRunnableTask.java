@@ -13,7 +13,7 @@ import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
-import com.fieldbook.tracker.utilities.PrefsConstants;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.lang.ref.WeakReference;
@@ -40,7 +40,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
         mContext = new WeakReference<>(context);
 
-        this.mPrefs = context.getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
+        this.mPrefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
         this.idColPosition = idColPosition;
         this.unique = unique;
         this.primary = primary;
@@ -203,8 +203,8 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         if (fail | uniqueFail | mFieldFile.hasSpecialCharacters()) {
             ConfigActivity.dt.deleteField(result);
             SharedPreferences.Editor ed = mPrefs.edit();
-            ed.putString(PrefsConstants.FIELD_FILE, null);
-            ed.putBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, false);
+            ed.putString(GeneralKeys.FIELD_FILE, null);
+            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
             ed.apply();
         }
         if (fail) {
@@ -217,11 +217,11 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         } else {
             SharedPreferences.Editor ed = mPrefs.edit();
 
-            ed.putString(PrefsConstants.UNIQUE_NAME, unique);
-            ed.putString(PrefsConstants.PRIMARY_NAME, primary);
-            ed.putString(PrefsConstants.SECONDARY_NAME, secondary);
-            ed.putBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, true);
-            ed.putInt(PrefsConstants.SELECTED_FIELD_EXP_ID, result);
+            ed.putString(GeneralKeys.UNIQUE_NAME, unique);
+            ed.putString(GeneralKeys.PRIMARY_NAME, primary);
+            ed.putString(GeneralKeys.SECONDARY_NAME, secondary);
+            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true);
+            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, result);
 
             ed.apply();
 
@@ -242,8 +242,8 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                 }
 
-                ed.putBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, false);
-                ed.putInt(PrefsConstants.SELECTED_FIELD_EXP_ID, -1);
+                ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+                ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
                 ed.apply();
 
                 e.printStackTrace();

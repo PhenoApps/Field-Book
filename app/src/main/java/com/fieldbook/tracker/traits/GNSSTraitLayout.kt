@@ -30,7 +30,6 @@ import com.fieldbook.tracker.location.gnss.NmeaParser
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
-import com.fieldbook.tracker.utilities.PrefsConstants
 import com.google.android.material.chip.ChipGroup
 import org.json.JSONObject
 import kotlin.collections.HashMap
@@ -278,7 +277,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         if (latitude.isNotBlank() && longitude.isNotBlank()) {
 
-            val studyDbId = prefs.getInt(PrefsConstants.SELECTED_FIELD_ID, 0).toString()
+            val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
             //geo json object : elevation (stored in obs. units, used in navigation)
             //geo json has properties map for additional info
@@ -609,7 +608,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     //delete the obs and the obs.unit geo coord (only if obs exists)
     override fun deleteTraitListener() {
 
-        val studyDbId = prefs.getInt("SelectedFieldExpId", 0).toString()
+        val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
         val observation = ObservationDao.getObservation(studyDbId, cRange.plot_id, currentTrait.trait)
 

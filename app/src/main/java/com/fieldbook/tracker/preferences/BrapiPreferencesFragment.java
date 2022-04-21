@@ -60,7 +60,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 }).create();
 
         prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName("Settings");
+        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
 

@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.preferences.GeneralKeys
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
@@ -243,8 +244,8 @@ class DocumentTreeUtil {
 
             if (context != null) {
 
-                val prefs = context.getSharedPreferences("Settings", 0)
-                val field = prefs.getString(PrefsConstants.FIELD_FILE, "") ?: ""
+                val prefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+                val field = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
 
                 if (field.isNotBlank()) {
                     val plotDataDirName = context.getString(R.string.dir_plot_data)

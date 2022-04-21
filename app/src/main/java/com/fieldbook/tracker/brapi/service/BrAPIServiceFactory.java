@@ -8,7 +8,7 @@ public class BrAPIServiceFactory {
 
     public static BrAPIService getBrAPIService(Context context){
 
-        String version = context.getSharedPreferences("Settings", 0)
+        String version = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                 .getString(GeneralKeys.BRAPI_VERSION, "V1");
         BrAPIService brAPIService;
         if(version.equals("V2"))

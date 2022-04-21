@@ -32,9 +32,9 @@ import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.adapters.GalleryImageAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
-import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.io.ByteArrayOutputStream;
@@ -271,7 +271,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
             newTraits.put(parent, value);
 
-            String exp_id = Integer.toString(getPrefs().getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+            String exp_id = Integer.toString(getPrefs().getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
             Observation observation = ConfigActivity.dt.getObservationByValue(exp_id, getCRange().plot_id, parent, value);
 
@@ -281,8 +281,8 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                     parent,
                     trait,
                     newValue == null ? value : newValue,
-                    getPrefs().getString("FirstName", "") + " " + getPrefs().getString("LastName", ""),
-                    getPrefs().getString("Location", ""),
+                    getPrefs().getString(GeneralKeys.FIRST_NAME, "") + " " + getPrefs().getString(GeneralKeys.LAST_NAME, ""),
+                    getPrefs().getString(GeneralKeys.LOCATION, ""),
                     "",
                     exp_id,
                     observation.getDbId(),
@@ -292,7 +292,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
     private void deletePhotoWarning(final Boolean brapiDelete, final Map newTraits) {
 
-        String exp_id = Integer.toString(getPrefs().getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        String exp_id = Integer.toString(getPrefs().getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 

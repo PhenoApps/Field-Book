@@ -21,6 +21,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BluetoothUtil;
 
 import java.text.SimpleDateFormat;
@@ -378,7 +379,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
             if (item.equals("date")) {
                 value = dateFormat.format(calendar.getTime());
             } else if (item.equals("trial_name")) {
-                value = getPrefs().getString("FieldFile", "");
+                value = getPrefs().getString(GeneralKeys.FIELD_FILE, "");
             } else if (item.equals("blank")) {
                 value = "";
             } else {

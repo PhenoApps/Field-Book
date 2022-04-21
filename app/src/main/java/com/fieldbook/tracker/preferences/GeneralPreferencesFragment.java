@@ -1,9 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.documentfile.provider.DocumentFile;
@@ -26,7 +24,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName("Settings");
+        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_general, rootKey);
 

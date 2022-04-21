@@ -23,7 +23,7 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.utilities.PrefsConstants;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.text.SimpleDateFormat;
@@ -729,8 +729,8 @@ public class BrapiExportActivity extends AppCompatActivity {
             }
         }
 
-        SharedPreferences ep = this.getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0);
-        String field = ep.getString(PrefsConstants.FIELD_FILE, "");
+        SharedPreferences ep = this.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+        String field = ep.getString(GeneralKeys.FIELD_FILE, "");
 
         ((TextView) findViewById(R.id.brapistudyValue)).setText(field);
         ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));

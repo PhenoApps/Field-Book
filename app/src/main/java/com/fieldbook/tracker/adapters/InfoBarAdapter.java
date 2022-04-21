@@ -20,7 +20,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.utilities.PrefsConstants;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.views.DynamicWidthSpinner;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -84,12 +84,12 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
     }
 
     private SharedPreferences getSharedPref() {
-        return this.context.getSharedPreferences("Settings", 0);
+        return this.context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
     }
 
     private void configureSpinner(final DynamicWidthSpinner spinner, final TextView text, final int position) {
 
-        String expId = Integer.toString(getSharedPref().getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        String expId = Integer.toString(getSharedPref().getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         //the prefix obs. unit. traits s.a plot_id, row, column, defined by the user
         String[] prefixTraits = dataHelper.getRangeColumnNames();

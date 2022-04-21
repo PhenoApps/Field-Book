@@ -88,7 +88,6 @@ import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
-import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -241,7 +240,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         super.onCreate(savedInstanceState);
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        ep = getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0);
+        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         if (ConfigActivity.dt == null) {    // when resume
             ConfigActivity.dt = new DataHelper(this);
         }
@@ -433,7 +432,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             public void onClick(View v) {
 
                 // if a brapi observation that has been synced, don't allow deleting
-                String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+                String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
                 TraitObject currentTrait = traitBox.getCurrentTrait();
                 if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
                     if (currentTrait.getFormat().equals("photo")) {
@@ -651,7 +650,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     @Override
     public void onDestroy() {
         //save last plot id
-        if (ep.getBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, false)) {
+        if (ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)) {
             rangeBox.saveLastPlot();
         }
 
@@ -720,7 +719,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         // Update menu item visibility
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
             systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_TEXT, false));
             systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(GeneralKeys.NEXT_ENTRY_NO_DATA, false));
             systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
@@ -748,10 +747,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             traitBox.setSelection(0);
 
             // try to go to last saved plot
-            if (ep.getString("lastplot", null) != null) {
+            if (ep.getString(GeneralKeys.LAST_PLOT, null) != null) {
                 rangeBox.setAllRangeID();
                 int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, ep.getString("lastplot", null), -1);
+                moveToSearch("id", rangeID, null, null, ep.getString(GeneralKeys.LAST_PLOT, null), -1);
             }
 
         } else if (partialReload) {
@@ -830,20 +829,22 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
      */
     private void checkLastOpened() {
 
-        long lastOpen = ep.getLong("LastTimeAppOpened", 0L);
+        long lastOpen = ep.getLong(GeneralKeys.LAST_TIME_OPENED, 0L);
         long systemTime = System.nanoTime();
 
         long nanosInOneDay = (long) 1e9*3600*24;
 
         if (lastOpen != 0L && systemTime - lastOpen > nanosInOneDay) {
 
-            boolean verify = ep.getBoolean("VerifyUserEvery24Hours", true);
+            boolean verify = ep.getBoolean(GeneralKeys.VERIFY_USER, true);
 
             if (verify) {
 
-                if(ep.getString("FirstName","").length() > 0 || ep.getString("LastName","").length() > 0) {
+                String firstName = ep.getString(GeneralKeys.FIRST_NAME,"");
+                String lastName = ep.getString(GeneralKeys.LAST_NAME,"");
+                if(firstName.length() > 0 || lastName.length() > 0) {
                     //person presumably has been set
-                    showAskCollectorDialog(getString(R.string.activity_collect_dialog_verify_collector) + " " + ep.getString("FirstName","") + " " + ep.getString("LastName","") + "?",
+                    showAskCollectorDialog(getString(R.string.activity_collect_dialog_verify_collector) + " " + firstName + " " + lastName + "?",
                             getString(R.string.activity_collect_dialog_verify_yes_button),
                             getString(R.string.activity_collect_dialog_neutral_button),
                             getString(R.string.activity_collect_dialog_verify_no_button));
@@ -861,7 +862,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private void updateLastOpenedTime() {
-        ep.edit().putLong("LastTimeAppOpened", System.nanoTime()).apply();
+        ep.edit().putLong(GeneralKeys.LAST_TIME_OPENED, System.nanoTime()).apply();
     }
 
     private void showAskCollectorDialog(String message, String positive, String neutral, String negative) {
@@ -874,7 +875,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 //yes, don't ask again button
                 .setNeutralButton(neutral, (DialogInterface dialog, int which) -> {
                     dialog.dismiss();
-                    ep.edit().putBoolean("VerifyUserEvery24Hours", false).apply();
+                    ep.edit().putBoolean(GeneralKeys.VERIFY_USER, false).apply();
                 })
                 //no (navigates to the person preference)
                 .setNegativeButton(negative, (DialogInterface dialog, int which) -> {
@@ -899,7 +900,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
 
         traitBox.update(parent, value);
-        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         Observation observation = dt.getObservation(exp_id, rangeBox.getPlotID(), parent);
         String observationDbId = observation.getDbId();
@@ -911,8 +912,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         dt.deleteTrait(exp_id, rangeBox.getPlotID(), parent);
 
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
-                ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
-                ep.getString("Location", ""), "", exp_id, observationDbId,
+                ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
+                ep.getString(GeneralKeys.LOCATION, ""), "", exp_id, observationDbId,
                 lastSyncedTime);
 
         //update the info bar in case a variable is used
@@ -936,7 +937,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             return;
         }
 
-        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         TraitObject trait = traitBox.getCurrentTrait();
         if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), trait.getTrait())) {
             brapiDelete(parent, true);
@@ -970,7 +971,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         systemMenu = menu;
 
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_TEXT, false));
         systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(GeneralKeys.NEXT_ENTRY_NO_DATA, false));
         systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
@@ -1405,7 +1406,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
 
             //get current field id
-            int studyId = ep.getInt("SelectedFieldExpId", 0);
+            int studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
             dt.open();
 
@@ -1960,11 +1961,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         TraitObject trait = getCurrentTrait();
 
-        String studyId = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         dt.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
-                ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),
-                ep.getString("Location", ""), "", studyId, "",
+                ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
+                ep.getString(GeneralKeys.LOCATION, ""), "", studyId, "",
                 null);
 
     }
@@ -2006,7 +2007,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             //determine trait button function based on user-preferences
             //issues217 introduces the ability to swap trait and plot arrows
-            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            boolean flipFlopArrows = ep.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false);
             if (flipFlopArrows) {
                 traitLeft = findViewById(R.id.rangeLeft);
                 traitRight = findViewById(R.id.rangeRight);
@@ -2220,7 +2221,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             if (newTraits.containsKey(traitName))
                 newTraits.remove(traitName);
 
-            String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+            String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
             dt.deleteTrait(exp_id, plotID, traitName);
         }
@@ -2360,9 +2361,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             cRange.range = "";
             lastRange = "";
 
-            firstName = ep.getString("ImportFirstName", "");
-            secondName = ep.getString("ImportSecondName", "");
-            uniqueName = ep.getString("ImportUniqueName", "");
+            firstName = ep.getString(GeneralKeys.PRIMARY_NAME, "");
+            secondName = ep.getString(GeneralKeys.SECONDARY_NAME, "");
+            uniqueName = ep.getString(GeneralKeys.UNIQUE_NAME, "");
 
             initAndPlot();
         }
@@ -2405,7 +2406,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             //determine range button function based on user-preferences
             //issues217 introduces the ability to swap trait and plot arrows
-            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            boolean flipFlopArrows = ep.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false);
             if (flipFlopArrows) {
                 rangeLeft = findViewById(R.id.traitLeft);
                 rangeRight = findViewById(R.id.traitRight);
@@ -2458,7 +2459,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             rangeName.setOnTouchListener(new OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    Utils.makeToast(getApplicationContext(),ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)));
+                    Utils.makeToast(getApplicationContext(),ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
                     return false;
                 }
             });
@@ -2466,7 +2467,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             plotName.setOnTouchListener(new OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    Utils.makeToast(getApplicationContext(),ep.getString("ImportSecondName", getString(R.string.search_results_dialog_range)));
+                    Utils.makeToast(getApplicationContext(),ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_range)));
                     return false;
                 }
             });
@@ -2554,7 +2555,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             Runnable actionLeft = createRunnable("left");
 
             //change click-arrow based on preferences
-            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            boolean flipFlopArrows = ep.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false);
             if (flipFlopArrows) {
                 return createOnTouchListener(rangeLeft, actionLeft,
                         R.drawable.main_trait_left_arrow_pressed,
@@ -2570,7 +2571,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             Runnable actionRight = createRunnable("right");
 
             //change click-arrow based on preferences
-            boolean flipFlopArrows = ep.getBoolean("FLIP_FLOP_ARROWS", false);
+            boolean flipFlopArrows = ep.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false);
             if (flipFlopArrows) {
                 return createOnTouchListener(rangeRight, actionRight,
                         R.drawable.main_trait_right_pressed,
@@ -2756,7 +2757,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         private void saveLastPlot() {
             final SharedPreferences ep = parent.getPreference();
             Editor ed = ep.edit();
-            ed.putString("lastplot", cRange.plot_id);
+            ed.putString(GeneralKeys.LAST_PLOT, cRange.plot_id);
             ed.apply();
         }
 
@@ -2802,8 +2803,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         public void setName(int maxLen) {
             final SharedPreferences ep = parent.getPreference();
-            String primaryName = ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)) + ":";
-            String secondaryName = ep.getString("ImportSecondName", getString(R.string.search_results_dialog_plot)) + ":";
+            String primaryName = ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)) + ":";
+            String secondaryName = ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)) + ":";
             rangeName.setText(truncate(primaryName, maxLen));
             plotName.setText(truncate(secondaryName, maxLen));
         }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
+import com.fieldbook.tracker.preferences.GeneralKeys
 import java.io.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -158,7 +159,7 @@ class ZipUtil {
 
                             else -> {
 
-                                val prefs = ctx.getSharedPreferences("Settings", MODE_PRIVATE)
+                                val prefs = ctx.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
 
                                 ObjectInputStream(zin).use { objectStream ->
 

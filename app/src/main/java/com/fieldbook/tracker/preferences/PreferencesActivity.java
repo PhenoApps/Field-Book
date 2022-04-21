@@ -34,12 +34,12 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
 
         //parse passed bundle and check if the person should be updated.
         Bundle extras = getIntent().getExtras();
-        if (extras != null && extras.getBoolean("PersonUpdate", false)) {
+        if (extras != null && extras.getBoolean(GeneralKeys.PERSON_UPDATE, false)) {
 
             //starts fragment with bundle that tells the fragment to open the person setting
             Fragment profile = new ProfilePreferencesFragment();
             Bundle personUpdate = new Bundle();
-            personUpdate.putBoolean("PersonUpdate", true);
+            personUpdate.putBoolean(GeneralKeys.PERSON_UPDATE, true);
             profile.setArguments(personUpdate);
             getSupportFragmentManager().beginTransaction()
                     .replace(android.R.id.content, profile).commit();

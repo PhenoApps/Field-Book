@@ -8,7 +8,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 public abstract class AbstractBrAPIService implements BrAPIService {
 
     protected Integer getTimeoutValue(Context context) {
-        String timeoutString = context.getSharedPreferences("Settings", 0)
+        String timeoutString = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                 .getString(GeneralKeys.BRAPI_TIMEOUT, "120");
 
         int timeout = 120;

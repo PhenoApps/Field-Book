@@ -29,8 +29,8 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
-import com.fieldbook.tracker.utilities.PrefsConstants;
 
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
@@ -84,7 +84,7 @@ public class DataHelper {
     public DataHelper(Context context) {
         try {
             this.context = context;
-            ep = context.getSharedPreferences("Settings", 0);
+            ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
             openHelper = new OpenHelper(this);
             db = openHelper.getWritableDatabase();
@@ -317,7 +317,7 @@ public class DataHelper {
      */
     public List<Observation> getUserTraitObservations() {
 
-        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserTraitObservations(exp_id);
 
@@ -364,7 +364,7 @@ public class DataHelper {
      */
     public List<FieldBookImage> getUserTraitImageObservations() {
 
-        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserTraitImageObservations(exp_id, missingPhoto);
 
@@ -759,7 +759,7 @@ public class DataHelper {
      */
     public Cursor getExportDBData(String[] fieldList, String[] traits) {
 
-        return ObservationUnitPropertyDao.Companion.getExportDbData(ep.getString("ImportUniqueName", ""), fieldList, traits);
+        return ObservationUnitPropertyDao.Companion.getExportDbData(ep.getString(GeneralKeys.UNIQUE_NAME, ""), fieldList, traits);
 
 //        String fields = arrayToString("range", fieldList);
 //        String activeTraits = arrayToLikeString(traits);
@@ -797,7 +797,7 @@ public class DataHelper {
      */
     public Cursor convertDatabaseToTable(String[] col, String[] traits) {
 
-        return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(ep.getString("ImportUniqueName", ""), col, traits);
+        return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(ep.getString(GeneralKeys.UNIQUE_NAME, ""), col, traits);
 
 //        String query;
 //        String[] rangeArgs = new String[col.length];
@@ -1195,7 +1195,7 @@ public class DataHelper {
      */
     public HashMap<String, String> getUserDetail(String plotId) {
 
-        String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserDetail(exp_id, plotId);
 
@@ -1273,7 +1273,7 @@ public class DataHelper {
      */
     public boolean getTraitExists(int id, String parent, String trait) {
 
-        return ObservationVariableDao.Companion.getTraitExists(ep.getString("ImportUniqueName", ""), id, parent, trait);
+        return ObservationVariableDao.Companion.getTraitExists(ep.getString(GeneralKeys.UNIQUE_NAME, ""), id, parent, trait);
 
 //        boolean haveData = false;
 //
@@ -1314,8 +1314,8 @@ public class DataHelper {
             }
         }
 
-        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId(context.getSharedPreferences("Settings", 0)
-                .getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+                .getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         int[] data = new int[result.length];
 
@@ -1443,8 +1443,8 @@ public class DataHelper {
      */
     public String getRangeFromId(String plot_id) {
         try {
-            Cursor cursor = db.query(RANGE, new String[]{TICK + ep.getString("ImportFirstName", "") + TICK},
-                    TICK + ep.getString("ImportUniqueName", "") + TICK + " like ? ", new String[]{plot_id},
+            Cursor cursor = db.query(RANGE, new String[]{TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK},
+                    TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " like ? ", new String[]{plot_id},
                     null, null, null);
 
             String myList = null;
@@ -1538,7 +1538,7 @@ public class DataHelper {
         if (trait.length() == 0)
             return null;
 
-        return ObservationUnitPropertyDao.Companion.getDropDownRange(ep.getString("ImportUniqueName", ""), trait, plotId);
+        return ObservationUnitPropertyDao.Companion.getDropDownRange(ep.getString(GeneralKeys.UNIQUE_NAME, ""), trait, plotId);
 
 //        try {
 //            Cursor cursor = db.query(RANGE, new String[]{TICK + trait + TICK},
@@ -1619,8 +1619,8 @@ public class DataHelper {
      */
     public String getPlotFromId(String plot_id) {
         try {
-            Cursor cursor = db.query(RANGE, new String[]{TICK + ep.getString("ImportSecondName", "") + TICK},
-                    TICK + ep.getString("ImportUniqueName", "") + TICK + " like ?", new String[]{plot_id},
+            Cursor cursor = db.query(RANGE, new String[]{TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK},
+                    TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " like ?", new String[]{plot_id},
                     null, null, null);
 
             String myList = null;
@@ -1974,7 +1974,7 @@ public class DataHelper {
         //TODO lastplot is effectively erased when fields are switched, change this to persist and save each field's last plot.
         //potentially use preference map or db column
 
-        ep.edit().remove("lastplot").apply();
+        ep.edit().remove(GeneralKeys.LAST_PLOT).apply();
         //ep.edit().putString("lastplot", null).apply();
 
         //delete the old table
@@ -2187,11 +2187,11 @@ public class DataHelper {
 
                 SharedPreferences.Editor edit = ep.edit();
 
-                edit.putInt(PrefsConstants.SELECTED_FIELD_ID, -1);
-                edit.putString(PrefsConstants.UNIQUE_NAME, "");
-                edit.putString(PrefsConstants.PRIMARY_NAME, "");
-                edit.putString(PrefsConstants.SECONDARY_NAME, "");
-                edit.putBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, false);
+                edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+                edit.putString(GeneralKeys.UNIQUE_NAME, "");
+                edit.putString(GeneralKeys.PRIMARY_NAME, "");
+                edit.putString(GeneralKeys.SECONDARY_NAME, "");
+                edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
                 edit.apply();
             }
         }
@@ -2383,7 +2383,7 @@ public class DataHelper {
         DataHelper helper;
         OpenHelper(DataHelper helper) {
             super(helper.context, DATABASE_NAME, null, DATABASE_VERSION);
-            ep2 = helper.context.getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0);
+            ep2 = helper.context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
             this.helper = helper;
         }
 
@@ -2518,7 +2518,7 @@ public class DataHelper {
 
                 // add current range info to exp_index
                 db.execSQL("insert into " + EXP_INDEX + "(exp_name, exp_alias, unique_id, primary_id, secondary_id) values (?,?,?,?,?)",
-                        new String[]{ep2.getString("FieldFile", ""), ep2.getString("FieldFile", ""), ep2.getString("ImportUniqueName", ""), ep2.getString("ImportFirstName", ""), ep2.getString("ImportSecondName", "")});
+                        new String[]{ep2.getString(GeneralKeys.FIELD_FILE, ""), ep2.getString(GeneralKeys.FIELD_FILE, ""), ep2.getString(GeneralKeys.UNIQUE_NAME, ""), ep2.getString(GeneralKeys.PRIMARY_NAME, ""), ep2.getString(GeneralKeys.SECONDARY_NAME, "")});
 
                 // convert current range table to plots
                 Cursor cursor = db.rawQuery("SELECT * from range", null);
@@ -2537,11 +2537,11 @@ public class DataHelper {
                 }
 
                 // plots into plots
-                String cur2 = "SELECT " + TICK + ep2.getString(PrefsConstants.UNIQUE_NAME, "")
+                String cur2 = "SELECT " + TICK + ep2.getString(GeneralKeys.UNIQUE_NAME, "")
                         + TICK + ", " + TICK
-                        + ep2.getString(PrefsConstants.PRIMARY_NAME, "")
+                        + ep2.getString(GeneralKeys.PRIMARY_NAME, "")
                         + TICK + ", " + TICK
-                        + ep2.getString(PrefsConstants.SECONDARY_NAME, "")
+                        + ep2.getString(GeneralKeys.SECONDARY_NAME, "")
                         + TICK + " from range";
 
                 Cursor cursor2 = db.rawQuery(cur2, null);
@@ -2567,7 +2567,7 @@ public class DataHelper {
                         attId = attribute_id.getInt(0);
                     }
 
-                    String att_val = "select range." + "'" + columnName + "'" + ", plots.plot_id from range inner join plots on range." + "'" + ep2.getString("ImportUniqueName", "") + "'" + "=plots.unique_id";
+                    String att_val = "select range." + "'" + columnName + "'" + ", plots.plot_id from range inner join plots on range." + "'" + ep2.getString(GeneralKeys.UNIQUE_NAME, "") + "'" + "=plots.unique_id";
                     Cursor attribute_val = db.rawQuery(att_val, null);
 
                     if (attribute_val.moveToFirst()) {
@@ -2612,7 +2612,7 @@ public class DataHelper {
                 
                 Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
 
-                ep2.edit().putInt(PrefsConstants.SELECTED_FIELD_ID, -1).apply();
+                ep2.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
             }
         }
     }

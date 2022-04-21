@@ -26,11 +26,10 @@ import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
-import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -259,10 +258,10 @@ public class TraitEditorActivity extends AppCompatActivity {
         // If we run into an error, do not warn the user since this is just a helper dialog
         try {
             // Check if this is a non-BrAPI field
-            String fieldName = context.getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0)
-                    .getString(PrefsConstants.FIELD_FILE, "");
-            String fieldSource = context.getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0)
-                    .getString(PrefsConstants.FIELD_SOURCE, "");
+            String fieldName = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+                    .getString(GeneralKeys.FIELD_FILE, "");
+            String fieldSource = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+                    .getString(GeneralKeys.FIELD_SOURCE, "");
 
             if (!fieldName.equals("") && !fieldSource.equals("local") && !fieldSource.equals("")) {
 
@@ -348,7 +347,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
 
         loadData();
@@ -359,7 +358,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ep = getSharedPreferences(PrefsConstants.SHARED_PREF_FILE_NAME, 0);
+        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setContentView(R.layout.activity_traits);
 
@@ -426,7 +425,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         new MenuInflater(TraitEditorActivity.this).inflate(R.menu.menu_traits, menu);
 
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
 
         return true;
     }
@@ -533,7 +532,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void changeAllVisibility() {
-        boolean globalVis = ep.getBoolean("allTraitsVisible", false);
+        boolean globalVis = ep.getBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, false);
         List<TraitObject> allTraits = ConfigActivity.dt.getAllTraitObjects();
 
         if (allTraits.isEmpty()) {
@@ -552,7 +551,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         globalVis = !globalVis;
 
         Editor ed = ep.edit();
-        ed.putBoolean("allTraitsVisible", globalVis);
+        ed.putBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, globalVis);
         ed.apply();
         loadData();
     }
@@ -608,7 +607,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     public void loadTraitFilePermission() {
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(this, perms)) {
-            if (ep.getBoolean("TraitsExported", false)) {
+            if (ep.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)) {
                 showFileDialog();
             } else {
                 checkTraitExportDialog();
@@ -827,7 +826,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 exportTable(exportFile.getText().toString());
                 Editor ed = ep.edit();
-                ed.putBoolean("TraitsExported", true);
+                ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, true);
                 ed.apply();
             }
         });
@@ -1178,7 +1177,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Integer result) {
             Editor ed = ep.edit();
-            ed.putBoolean("CreateTraitFinished", true);
+            ed.putBoolean(GeneralKeys.CREATE_TRAIT_FINISHED, true);
             ed.apply();
 
             loadData();

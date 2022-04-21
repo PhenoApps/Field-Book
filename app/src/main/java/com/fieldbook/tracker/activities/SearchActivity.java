@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.SearchAdapter;
 import com.fieldbook.tracker.objects.SearchData;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.Arrays;
@@ -59,7 +60,7 @@ public class SearchActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ep = getSharedPreferences("Settings", 0);
+        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setContentView(R.layout.activity_search);
 
@@ -89,8 +90,8 @@ public class SearchActivity extends AppCompatActivity {
 
                 try {
                     // Create the sql query based on user selection
-                    String sql1 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString("ImportFirstName", "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString("ImportSecondName", "") + TICK + " from ObservationUnitProperty where ObservationUnitProperty.id is not null ";
-                    String sql2 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString("ImportFirstName", "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString("ImportSecondName", "") + TICK + " from observation_variables, ObservationUnitProperty, observations where observations.observation_unit_id = ObservationUnitProperty." + TICK + ep.getString("ImportUniqueName", "") + TICK + " and observations.observation_variable_name = observation_variables.observation_variable_name and observations.observation_variable_field_book_format = observation_variables.observation_variable_field_book_format ";
+                    String sql1 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from ObservationUnitProperty where ObservationUnitProperty.id is not null ";
+                    String sql2 = "select ObservationUnitProperty.id, ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.PRIMARY_NAME, "") + TICK + "," + " ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.SECONDARY_NAME, "") + TICK + " from observation_variables, ObservationUnitProperty, observations where observations.observation_unit_id = ObservationUnitProperty." + TICK + ep.getString(GeneralKeys.UNIQUE_NAME, "") + TICK + " and observations.observation_variable_name = observation_variables.observation_variable_name and observations.observation_variable_field_book_format = observation_variables.observation_variable_field_book_format ";
 
                     String sql = "";
 
@@ -211,8 +212,8 @@ public class SearchActivity extends AppCompatActivity {
                     TextView primaryTitle = layout.findViewById(R.id.range);
                     TextView secondaryTitle = layout.findViewById(R.id.plot);
 
-                    primaryTitle.setText(ep.getString("ImportFirstName", getString(R.string.search_results_dialog_range)));
-                    secondaryTitle.setText(ep.getString("ImportSecondName", getString(R.string.search_results_dialog_plot)));
+                    primaryTitle.setText(ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
+                    secondaryTitle.setText(ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)));
 
                     Button closeBtn = layout.findViewById(R.id.closeBtn);
                     ListView myList = layout.findViewById(R.id.myList);

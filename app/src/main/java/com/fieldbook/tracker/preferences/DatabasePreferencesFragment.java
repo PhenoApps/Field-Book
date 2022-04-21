@@ -32,7 +32,6 @@ import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
-import com.fieldbook.tracker.utilities.PrefsConstants;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 
@@ -45,8 +44,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -69,8 +66,8 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName("Settings");
-        ep = getContext().getSharedPreferences("Settings", 0);
+        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
+        ep = getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setPreferencesFromResource(R.xml.preferences_database, rootKey);
 
@@ -176,11 +173,11 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                         SharedPreferences.Editor edit = ep.edit();
 
-                        edit.putInt(PrefsConstants.SELECTED_FIELD_ID, -1);
-                        edit.putString(PrefsConstants.UNIQUE_NAME, "");
-                        edit.putString(PrefsConstants.PRIMARY_NAME, "");
-                        edit.putString(PrefsConstants.SECONDARY_NAME, "");
-                        edit.putBoolean(PrefsConstants.IMPORT_FIELD_FINISHED, false);
+                        edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+                        edit.putString(GeneralKeys.UNIQUE_NAME, "");
+                        edit.putString(GeneralKeys.PRIMARY_NAME, "");
+                        edit.putString(GeneralKeys.SECONDARY_NAME, "");
+                        edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
                         edit.apply();
 
                         dt.open();
@@ -296,7 +293,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                         OutputStream zipOutput = context.getContentResolver().openOutputStream(zipFile.getUri());
 
-                        SharedPreferences prefs = context.getSharedPreferences("Settings", Context.MODE_PRIVATE);
+                        SharedPreferences prefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
 
                         objectStream.writeObject(prefs.getAll());
 

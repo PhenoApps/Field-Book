@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.createFieldBookFolders
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -71,9 +72,9 @@ class StorageDefinerFragment: Fragment(R.layout.fragment_storage_definer) {
                         val hiddenFbFile = root.findFile(".fieldbook")
                         if (hiddenFbFile == null || !hiddenFbFile.exists()) {
 
-                            if (prefs.getBoolean("FIRST_MIGRATE", true)) {
+                            if (prefs.getBoolean(GeneralKeys.FIRST_MIGRATE, true)) {
 
-                                prefs.edit().putBoolean("FIRST_MIGRATE", false).apply()
+                                prefs.edit().putBoolean(GeneralKeys.FIRST_MIGRATE, false).apply()
                                 activity?.setResult(Activity.RESULT_OK)
                                 activity?.finish()
 

@@ -24,6 +24,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -231,8 +232,8 @@ public class NewTraitDialog extends DialogFragment {
         }
 
         SharedPreferences.Editor ed = ep.edit();
-        ed.putBoolean("CreateTraitFinished", true);
-        ed.putBoolean("TraitsExported", false);
+        ed.putBoolean(GeneralKeys.CREATE_TRAIT_FINISHED, true);
+        ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false);
         ed.apply();
 
         // Display our BrAPI dialog if it has not been show already
