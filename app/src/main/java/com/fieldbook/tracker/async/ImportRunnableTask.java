@@ -92,7 +92,6 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                 if (DataHelper.hasSpecialChars(header)) {
                     columns[i] = DataHelper.replaceSpecialChars(header);
-
                 }
 
                 //populate an array of indices that have a non empty column
@@ -100,15 +99,18 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                 //also find the unique/primary/secondary indices
                 //later we will skip the rows if these are not present
                 if (!columns[i].isEmpty()) {
-                    nonEmptyColumns.add(columns[i]);
-                    nonEmptyIndices.add(i);
 
-                    if (columns[i].equals(unique)) {
-                        uniqueIndex = i;
-                    } else if (columns[i].equals(primary)) {
-                        primaryIndex = i;
-                    } else if (columns[i].equals(secondary)) {
-                        secondaryIndex = i;
+                    if (!nonEmptyColumns.contains(columns[i])) {
+                        nonEmptyColumns.add(columns[i]);
+                        nonEmptyIndices.add(i);
+
+                        if (columns[i].equals(unique)) {
+                            uniqueIndex = i;
+                        } else if (columns[i].equals(primary)) {
+                            primaryIndex = i;
+                        } else if (columns[i].equals(secondary)) {
+                            secondaryIndex = i;
+                        }
                     }
                 }
             }
