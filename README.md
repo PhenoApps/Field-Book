@@ -61,12 +61,6 @@ Development of Field Book has been supported by the [Collaborative Crop Research
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## Develop
-To compile Field Book:
-
-1. Generate a GitHub personal access token that includes `read:packages` scope.
-2. Create a local.properties file in the root Field Book project directory.
-3. Add parameters `GITHUB_USERNAME` and `GITHUB_TOKEN` with your specific information.
-
 To submit code to Field Book:
 
 1. Merge the develop branch with your feature branch and resolve any conflicts.
