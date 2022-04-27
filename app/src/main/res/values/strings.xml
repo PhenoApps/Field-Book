@@ -214,6 +214,8 @@
     <string name="preferences_behavior_disable_entry_arrow_right">Right</string>
     <string name="preferences_behavior_disable_entry_arrow_both">Both</string>
     <string name="preferences_behavior_disable_entry_arrow_neither">Neither</string>
+    <string name="preferences_behavior_repeat_observations_description">Enables collecting repeat observations. When unchecked, collecting again on a unit will overwrite the previous observation.</string>
+    <string name="preferences_behavior_repeat_observations">Enable Repeated Observations</string>
 
     <string name="preferences_brapi_core_title">Configuration</string>
     <string name="preferences_brapi_advanced_title">Advanced Auth Settings</string>
