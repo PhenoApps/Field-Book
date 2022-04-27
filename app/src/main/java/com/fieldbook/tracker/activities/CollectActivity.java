@@ -804,10 +804,14 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
+        //Determine if repeated observations or overwrite
+        Boolean repeatObs = ep.getBoolean(GeneralKeys.REPEAT_OBSERVATIONS, false);
 
-        // Always remove existing trait before inserting again
+        // If no repeated measures, remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        dt.deleteTrait(exp_id, rangeBox.getPlotID(), parent);
+        if (!repeatObs) {
+            dt.deleteTrait(exp_id, rangeBox.getPlotID(), parent);
+        }
 
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
                 ep.getString("FirstName", "") + " " + ep.getString("LastName", ""),

@@ -64,6 +64,13 @@
         android:summary="@string/preferences_general_flip_flop_arrows_description"
         android:title="@string/preferences_general_flip_flop_arrows" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_repeat"
+        android:key="REPEAT_OBSERVATIONS"
+        android:summary="@string/preferences_behavior_repeat_observations_description"
+        android:title="@string/preferences_behavior_repeat_observations" />
+
     <PreferenceCategory
         android:title="@string/pref_behavior_geonav_category_title"
         app:iconSpaceReserved="false">
