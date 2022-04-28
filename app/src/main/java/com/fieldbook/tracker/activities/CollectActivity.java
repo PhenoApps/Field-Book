@@ -166,6 +166,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
      * Trait-related elements
      */
     private EditText etCurVal;
+    private ImageView newReplicate;
+    private Boolean replicateInProgress;
     public final Handler myGuiHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -262,6 +264,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private void initCurrentVals() {
         // Current value display
         etCurVal = findViewById(R.id.etCurVal);
+        newReplicate = findViewById(R.id.repeated_values_add_btn);
+        replicateInProgress = false;
 
         etCurVal.setOnEditorActionListener(new OnEditorActionListener() {
             public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
@@ -274,6 +278,22 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
         });
 
+        newReplicate.setOnClickListener(new OnClickListener() {
+          public void onClick(View arg0){
+              final TraitObject trait = traitBox.getCurrentTrait();
+              addRepeatedMeasure(trait.getTrait(), trait.getFormat());
+          }
+        });
+
+        //TODO may move elsewhere, likely want to package into separate method once full
+        // display of repeated observations available
+        Boolean repeatObs = ep.getBoolean(GeneralKeys.REPEAT_OBSERVATIONS, false);
+        if (repeatObs) {
+            newReplicate.setVisibility(View.VISIBLE);
+        } else {
+            newReplicate.setVisibility(View.GONE);
+        }
+
         // Validates the text entered for text format
         cvText = new TextWatcher() {
             public void afterTextChanged(Editable en) {
@@ -282,10 +302,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     if (traitBox.existsNewTraits() & trait != null)
                         updateTrait(trait.getTrait(), trait.getFormat(), en.toString());
                 } else {
-                    if (traitBox.existsNewTraits() & trait != null)
+                    if (traitBox.existsNewTraits() & trait != null) {
                         removeTrait(trait.getTrait());
+                    }
                 }
-                //tNum.setSelection(tNum.getText().length());
             }
 
             public void beforeTextChanged(CharSequence arg0, int arg1,
@@ -384,7 +404,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
 
             removeTrait(trait);
-            etCurVal.getText().clear();
+            etCurVal.getText().clear(); //TODO may need to change with replicates and move back to previous replicate instead
 
             playSound("error");
 
@@ -874,10 +894,31 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     }
 
     /**
+     * Helper function to add repeated trait measure
+     */
+    public void addRepeatedMeasure(String parent, String trait) {
+        //Two conflicting factors that will require other changes to resolve
+        //Uservalue can't be null or errors
+        //Uservalue can't be empty string or for text values the observation is deleted
+        updateTrait(parent, trait, "", true);
+        //Sets the text to null for display
+        //Because null, doesn't trigger a second updateTrait in TextWatcher
+        etCurVal.setText(null);
+    }
+
+    /**
      * Helper function update user data in the memory based hashmap as well as
      * the database
      */
-    public void updateTrait(String parent, String trait, String value) {
+    public void updateTrait(String parent, String trait, String value){
+        updateTrait(parent, trait, value, false);
+    }
+
+    /**
+     * Helper function update user data in the memory based hashmap as well as
+     * the database
+     */
+    public void updateTrait(String parent, String trait, String value, Boolean newReplicate) {
 
         if (rangeBox.isEmpty()) {
             return;
@@ -897,6 +938,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         // Based on plot_id, prevent duplicates
         if (!repeatObs) {
             dt.deleteTrait(exp_id, rangeBox.getPlotID(), parent);
+        } else if (!newReplicate) {
+            dt.deleteTraitByReplicate(exp_id, rangeBox.getPlotID(), parent); //for now current and max replicate are the same, in the future update
         }
 
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
@@ -906,6 +949,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         //update the info bar in case a variable is used
         infoBarAdapter.notifyItemRangeChanged(0, infoBarAdapter.getItemCount());
+        //oops now crashes on click
     }
 
     private void brapiDelete(String parent, Boolean hint) {
@@ -1971,6 +2015,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         private final ImageView traitLeft;
         private final ImageView traitRight;
 
+        private TextView replicateVal; //todo would be nice to have display
+
         /**
          * New traits is a map of observations where the key is the trait name
          * and the value is the observation value. This is updated whenever
@@ -2203,7 +2249,18 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
-            dt.deleteTrait(exp_id, plotID, traitName);
+            //hello
+            //Determine if repeated observations or overwrite
+            Boolean repeatObs = ep.getBoolean(GeneralKeys.REPEAT_OBSERVATIONS, false);
+
+            //If repeat observations, only want to remove the one trait, not all replicates
+            if (!repeatObs) {
+                dt.deleteTrait(exp_id, plotID, traitName);
+            } else {
+                dt.deleteTraitByReplicate(exp_id, plotID, traitName);
+                //TODO If previous replicate, want to display its value
+                //traitBox.getCurrentTrait().
+            }
         }
 
         public void remove(TraitObject trait, String plotID) {

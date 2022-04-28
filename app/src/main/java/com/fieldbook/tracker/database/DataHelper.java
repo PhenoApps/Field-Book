@@ -1660,6 +1660,14 @@ public class DataHelper {
 
     /**
      * Helper function
+     */
+    public void deleteTraitByReplicate(String exp_id, String rid, String parent) {
+
+        ObservationDao.Companion.deleteTraitByReplicate(exp_id, rid, parent);
+    }
+
+    /**
+     * Helper function
      * v2 - Delete trait
      */
     public void deleteTrait(String id) {

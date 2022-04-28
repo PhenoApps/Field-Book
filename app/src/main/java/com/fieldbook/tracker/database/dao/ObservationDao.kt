@@ -333,6 +333,20 @@ class ObservationDao {
                     arrayOf(id, rid, parent))
         }
 
+        /**
+         * Deletes all observations for a given variable on a plot for the highest replicate
+         * TODO In future will modify to retrieve for current replicate
+         * @param id: the study id
+         * @param rid: the unique plot name
+         * @param parent: the observation variable (trait) name
+         */
+        fun deleteTraitByReplicate(id: String, rid: String, parent: String) = withDatabase { db ->
+            val rep = getRep(rid, parent).toString();
+            db.delete(Observation.tableName,
+                    "${Study.FK} = ? AND ${ObservationUnit.FK} LIKE ? AND observation_variable_name LIKE ? AND rep = ?",
+                    arrayOf(id, rid, parent, rep))
+        }
+
         fun deleteTraitByValue(expId: String, rid: String, parent: String, value: String) = withDatabase { db ->
 
             db.delete(Observation.tableName,
