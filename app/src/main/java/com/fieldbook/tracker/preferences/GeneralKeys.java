@@ -71,10 +71,25 @@ public class GeneralKeys {
     public static final String GEONAV_AUTO                          = GEONAV_PREFIX + "GEONAV_AUTO";
     public static final String GEONAV_COMPASS                       = GEONAV_PREFIX + "GEONAV_COMPASS";
     public static final String GEONAV_LOG                           = GEONAV_PREFIX + "GEONAV_LOG";
+    public static final String GEONAV_AVERAGING                     = GEONAV_PREFIX + "GEONAV_AVERAGING";
+    public static final String GEONAV_AVERAGING_INTERVAL            = GEONAV_PREFIX + "GEONAV_AVERAGIN_INTERVAL";
+    public static final String GEONAV_PARAMETERS_CATEGORY           = GEONAV_PREFIX + "parameters.CATEGORY_KEY";
+    public static final String GEONAV_PARAMETER_D1                  = GEONAV_PREFIX + "parameters.trapezoid.D1";
+    public static final String GEONAV_PARAMETER_D2                  = GEONAV_PREFIX + "parameters.trapezoid.D2";
+    public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
     // @formatter:on
 
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE             = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
+
+    //Dialog Export
+    public static final String DIALOG_EXPORT_BUNDLE_CHECKED         = "com.fieldbook.tracker.DIALOG_EXPORT_BUNDLE_CHECKED";
+
+    //Data grid
+    public static final String DATAGRID_PREFIX_TRAIT                = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
+
+    //Collect Activity
+    public static final String LAST_USED_TRAIT                      = "com.fieldbook.tracker.LAST_USED_TRAIT";
 
     private GeneralKeys() {
 

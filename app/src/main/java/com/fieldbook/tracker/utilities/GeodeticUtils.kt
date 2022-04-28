@@ -1,9 +1,13 @@
 package com.fieldbook.tracker.utilities
 
 import android.location.Location
+import android.util.Log
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.traits.GNSSTraitLayout
+import com.github.filosganga.geogson.model.LineString
 import com.google.gson.Gson
+import math.geom2d.Point2D
+import math.geom2d.line.Line2D
 import java.io.FileWriter
 import java.io.IOException
 import java.lang.NumberFormatException
@@ -14,7 +18,7 @@ class GeodeticUtils {
     companion object {
 
         /**
-         * GeoNav log is a user preference within Settings/Behavior/GeoNav
+         * GeoNav log is a user preference within Settings/GeoNav
          * When enabled, a log file is created each time GeoNav begins.
          * The filename contains parameters for the GeoNav function:
          *      "log_interval_address_theta_systemTime.csv"
@@ -27,24 +31,20 @@ class GeodeticUtils {
          *  Newlines should be manually added using writeGeoNavLog(log, "\n")
          *
          *  File headers are the following:
-         *  UTC, primary, secondary, start latitude, start longitude, end latitude, end longitude,
-         *      azimuth, teslas, bearing, distance, thetaCheck, closest
+         *  "start latitude, start longitude, UTC, end latitude, end longitude, azimuth, teslas,
+         *      bearing, distance, closest, unique id, primary id, secondary id
          *  UTC: time given by the GPS, refers to the time the start location was received
-         *  primary/secondary: the primary/secondary ids of the current iteration
+         *  primary/secondary/unique: the primary/secondary/unique ids of the current iteration
          *  start: the lat/lng coordinates of the rover
          *  end: the lat/lng coordinates of the target
          *  azimuth: the direction the user is facing in degrees from 0-360 like a compass
          *  teslas: the amount of noise calculated from the device's sensors
          *  bearing: the angle between the start and end coordinates
          *  distance: the distance between the start and end coordinates
-         *  thetaCheck: true if end lies within the theta threshold of the start's azimuth
-         *  closest: true if this is the closest point
-         *      e.g: In the below example 1,1 is the first closest, but is updated by 1,2
-         *           therefore, 1,2 is the closest point. 1,5 is within the theta threshold,
-         *           but it is further away than 1,2.
-         *      191438,1,1,...,true,true
-         *      191438,1,2,...,true,true
-         *      191438,1,5,...,true,false
+         *  closest: either 0, 1, or 2.
+         *      0: not closest or within the trapezoid
+         *      1: updated to closest and within trapezoid
+         *      2: the closest point that IZ returns
          *
          *  The file is populated by (1) device coordinate updates
          *  and (2) for each iteration of the impact zone algorithm.
@@ -56,6 +56,8 @@ class GeodeticUtils {
          *  (2) IZ lines look like:
          *  191438,1,1,39.19216,-96.62184,39.19222656,-96.62168695,326.4154145186235,56.7287763993025,null,15.124376606431571,false,false
          *      note: the bearing can be null if the compass setting is disabled
+         *
+         *  (1) and (2) are a bit outdated in terms of column order (look at the headers above for most up to date)
          */
         fun writeGeoNavLog(log: FileWriter?, line: String) {
 
@@ -67,13 +69,24 @@ class GeodeticUtils {
 
                     geonav.flush()
 
-                } catch (io: IOException) {
-
-                    io.printStackTrace()
-
-                }
+                } catch (io: IOException) { }
             }
         }
+
+        //Represents what we print to the log
+        data class IzString(val startTime: Long, val uniqueId: String, val primaryId: String, val secondaryId: String,
+            val startLat: Double, val startLng: Double, val endLat: Double, val endLng: Double, val azimuth: Double,
+            val teslas: Double, var bearing: Double?, val distance: Double, var closest: Int) {
+            override fun toString(): String {
+                return "$startLat,$startLng,$startTime,$endLat,$endLng,$azimuth,$teslas,$bearing,$distance,$closest,\"${uniqueId.escape()}\",\"${primaryId.escape()}\",\"${secondaryId.escape()}\"\n"
+            }
+        }
+
+        private fun String.escape() = this.replace("\"", "\"\"")
+
+        private const val NOT_CLOSEST = 0
+        private const val CLOSEST_UPDATE = 1
+        private const val CLOSEST_FINAL = 2
 
         /**
          * Finds the closest location within a list of locations to the user. The location
@@ -99,11 +112,15 @@ class GeodeticUtils {
                              azimuth: Double,
                              theta: Double,
                              teslas: Double,
-                             isCompass: Boolean = true): Pair<ObservationUnitModel?, Double> {
+                             geoNavMethod: String,
+                             d1: Double,
+                             d2: Double): Pair<ObservationUnitModel?, Double> {
 
             //greedy algorithm to find closest point, first point is set to inf
             var closestDistance = Double.MAX_VALUE
             var closestPoint: ObservationUnitModel? = null
+
+            val izLogArray = arrayListOf<IzString>()
 
             coordinates.forEach { coordinate ->
 
@@ -111,57 +128,99 @@ class GeodeticUtils {
 
                 if (location != null) {
 
-                    writeGeoNavLog(log, "${start.time},${coordinate.primary_id},${coordinate.secondary_id},${start.latitude},${start.longitude},${location.latitude},${location.longitude},$azimuth,$teslas")
+                    val distance: Double = distanceHaversine(start, location)
 
-                    if (isCompass) {
+                    val bearing: Double = angleFromCoordinate(start.latitude, start.longitude, location.latitude, location.longitude)
 
-                        val bearing = checkThetaThreshold(start, location, azimuth, theta)
-                        val distance: Double = distanceHaversine(start, location)
+                    val loggedString = IzString(startTime = start.time, uniqueId = coordinate.observation_unit_db_id, primaryId = coordinate.primary_id, secondaryId = coordinate.secondary_id,
+                        startLat = start.latitude, startLng = start.longitude, endLat = location.latitude, endLng = location.longitude, azimuth = azimuth, teslas = teslas, bearing = bearing,
+                        distance = distance, closest = NOT_CLOSEST)
 
-                        if (bearing.first) {
-
-                            if (closestDistance > distance) {
-
-                                writeGeoNavLog(log, ",${bearing.second},$distance,true,true")
-                                closestDistance = distance
-                                closestPoint = coordinate
-
-                            } else {
-
-                                writeGeoNavLog(log, ",${bearing.second},$distance,true,false")
-                            }
-
-                        } else {
-
-                            writeGeoNavLog(log, ",${bearing.second},$distance,false,false")
-                        }
-
-                    } else {
-
-                        val distance: Double = distanceHaversine(start, location)
+                    if (geoNavMethod == "0") { //default distance based method
 
                         if (closestDistance > distance) {
 
-                            writeGeoNavLog(log, ",null,$distance,null,true")
-
+                            //update the closest value to updated
+                            loggedString.closest = CLOSEST_UPDATE
                             closestDistance = distance
                             closestPoint = coordinate
 
-                        } else {
+                        }
 
-                            writeGeoNavLog(log, ",null,$distance,null,false")
+                    } else { //trapezoidal method
 
+                        if (isInZone(start, location, azimuth, theta, d1, d2)) {
+
+                            if (closestDistance > distance) {
+
+                                loggedString.closest = CLOSEST_UPDATE
+                                closestDistance = distance
+                                closestPoint = coordinate
+
+                            }
                         }
                     }
 
-                    //write newline to log file after each iteration
-                    writeGeoNavLog(log, "\n")
+                    //add line to array, will updated the final closest after a full run
+                    izLogArray.add(loggedString)
                 }
             }
+
+            //after a full run of IZ, update the last CLOSEST_UPDATE to CLOSEST_FINAL
+            izLogArray.findLast { it.closest == CLOSEST_UPDATE }?.closest = CLOSEST_FINAL
+
+            //print the entire array to log
+            izLogArray.forEach { writeGeoNavLog(log, it.toString()) }
 
             return closestPoint to closestDistance
         }
 
+        private fun Location.toPoint2D() = Point2D(latitude, longitude)
+
+        /**
+         * Builds a trapezoid from the parameters and checks if location parameter is within the trapezoid.
+         *  w _______x
+         *  \        |
+         *   \      | d2
+         *   u\____|v
+         *      d1
+         */
+        private fun isInZone(start: Location, location: Location,
+                             azimuth: Double, theta: Double,
+                             distance1: Double, distance2: Double): Boolean {
+
+            //make a point s' that is a very small distance in front of start
+            val s1 = geodesicDestination(start, azimuth, 0.0001)
+
+            //create points u and v which are on the same latitude as s' but are distance1 apart
+            //creating this line improves finding nearby points vs using a cone which has a small
+            //area of interest near its vertex
+            val u = geodesicDestination(s1, (azimuth - 90.0) % 360.0, distance1/2.0)
+            val v = geodesicDestination(s1, (azimuth + 90.0) % 360.0, distance1/2.0)
+
+            //points w and x define the larger base of the trapezoid
+            val w = geodesicDestination(u, (azimuth - theta/2.0) % 360.0, distance2)
+            val x = geodesicDestination(v, (azimuth + theta/2.0) % 360.0, distance2)
+
+            //now form the line segments uv, uw, wx, and vx
+            //these are the lines of the trapezoid to check intersections with
+            val uv = Line2D(u.toPoint2D(), v.toPoint2D())
+            val uw = Line2D(u.toPoint2D(), w.toPoint2D())
+            val wx = Line2D(w.toPoint2D(), x.toPoint2D())
+            val vx = Line2D(v.toPoint2D(), x.toPoint2D())
+
+            //now the line of interest is start -> location which we will call sl
+            val sl = Line2D(start.toPoint2D(), location.toPoint2D())
+
+            //now check:
+            //1. sl should always intersect uv, which would make it inside the trapezoid
+            //2. sl should not intersect uw, wx, or xv which would be outside the trapezoid
+            //intersections are handled by Java2D library for line segments
+            return isIntersecting(sl, uv)
+                && !isIntersecting(sl, uw)
+                && !isIntersecting(sl, wx)
+                && !isIntersecting(sl, vx)
+        }
 
         /**
          * Geocoordinates in FB can be stored as GeoJson or semi colon delimited strings.
@@ -261,18 +320,21 @@ class GeodeticUtils {
             return R * c * 1000.0
         }
 
+        fun isIntersecting(u: Line2D, v: Line2D): Boolean = Line2D.intersects(u, v)
+
         fun geodesicDestination(start: Location, bearing: Double, distance: Double): Location {
             val latRads = Math.toRadians(start.latitude)
             val lngRads = Math.toRadians(start.longitude) //(Degrees * Math.PI) / 180.0;
             //final double bearing = azimuth;//location.getBearing(); //created weighted vector with bearing...?
+            val bearingRads = Math.toRadians(bearing)
             val R = 6371.0 //radius of the Earth
             val angDst = distance / R // d/R distance to point B over Earth's radius
             val lat2 = asin(
                 sin(latRads) * cos(angDst) +
-                        cos(latRads) * sin(angDst) * cos(bearing)
+                        cos(latRads) * sin(angDst) * cos(bearingRads)
             )
             val lng2 = lngRads + atan2(
-                sin(bearing) * sin(angDst) * cos(latRads),
+                sin(bearingRads) * sin(angDst) * cos(latRads),
                 cos(angDst) - sin(latRads) * sin(lat2)
             )
             val l = Location("end point")

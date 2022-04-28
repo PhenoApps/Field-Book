@@ -3,12 +3,13 @@ package com.fieldbook.tracker.traits
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
 import android.location.Location
 import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.util.AttributeSet
 import android.view.View
 import android.widget.*
@@ -20,15 +21,19 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.dao.ObservationUnitDao
+import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.Companion.ACTION_BROADCAST_GNSS_TRAIT
 import com.fieldbook.tracker.location.gnss.NmeaParser
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.fieldbook.tracker.utilities.PrefsConstants
+import com.google.android.material.chip.ChipGroup
 import org.json.JSONObject
+import kotlin.collections.HashMap
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -56,9 +61,56 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
     private var mLastDevice: BluetoothDevice? = null
 
+    private var mProgressDialog: AlertDialog? = null
+
+    private val mAverageResponseHandler = Handler(Looper.getMainLooper()) {
+
+        val info = it.obj as AverageInfo
+
+        if (!CollectActivity.thisActivity.isDestroyed)
+            averagePoints(info)
+
+        mProgressDialog?.dismiss()
+
+        true
+    }
+
     constructor(context: Context?) : super(context) {}
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {}
+
+    data class AverageInfo(var unit: ObservationUnitModel, var location: Location?,
+                           var points: List<Pair<Double, Double>>, val latLength: Int, val lngLength: Int)
+
+    private fun startAverageTimer(info: AverageInfo, period: Long) {
+
+        val runnable = Runnable {
+            val latTextView = findViewById<TextView>(R.id.latTextView)
+            val lngTextView = findViewById<TextView>(R.id.lngTextView)
+
+            val pointsToAverage = arrayListOf<Pair<Double, Double>>()
+            val startTime = System.nanoTime()
+            do {
+
+                val a = latTextView.text.toString().toDoubleOrNull() ?: 0.0
+                val b = lngTextView.text.toString().toDoubleOrNull() ?: 0.0
+
+                pointsToAverage.add(a to b)
+
+            } while ((System.nanoTime() - startTime) * 1e-9 < period * 1e-3)
+
+            mAverageResponseHandler.sendMessage(Message().apply {
+                obj = info.apply {
+                    points = pointsToAverage
+                }
+            })
+        }
+
+        if (CollectActivity.mAverageHandler.looper != null)
+            Handler(CollectActivity.mAverageHandler.looper).post(runnable)
+        else mProgressDialog?.dismiss()
+
+    }
 
     override fun setNaTraitsText() {}
 
@@ -68,6 +120,13 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     }
 
     private fun initialize() {
+
+        mProgressDialog = AlertDialog.Builder(context)
+            .setTitle(R.string.gnss_trait_averaging_dialog_title)
+            .setMessage(R.string.gnss_trait_averaging_dialog_message)
+            .setView(R.layout.dialog_gnss_trait_averaging)
+            .setCancelable(false)
+            .create()
 
         //initialize lbm and create a filter to broadcast nmea strings
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(context)
@@ -114,6 +173,34 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         setupChooseBluetoothDevice()
 
+    }
+
+    /**
+     * Persists switch state and interval choice.
+     */
+    private fun setupAveragingUi() {
+
+        val chipGroup = findViewById<ChipGroup>(R.id.gnss_trait_averaging_chip_group)
+        val averageSwitch = findViewById<SwitchCompat>(R.id.gnss_trait_averaging_switch)
+        val checked = prefs.getBoolean(GeneralKeys.GEONAV_AVERAGING, false)
+
+        averageSwitch.setOnCheckedChangeListener { _, isChecked ->
+
+            prefs.edit().putBoolean(GeneralKeys.GEONAV_AVERAGING, isChecked).apply()
+
+            chipGroup.visibility = if (isChecked) View.VISIBLE else View.INVISIBLE
+        }
+
+        averageSwitch.isChecked = checked
+
+        chipGroup.visibility = if (checked) View.VISIBLE else View.INVISIBLE
+
+        val chipId = prefs.getInt(GeneralKeys.GEONAV_AVERAGING_INTERVAL, R.id.gnss_trait_5s_chip)
+        chipGroup.check(chipId)
+
+        chipGroup.setOnCheckedChangeListener { _, checkedId ->
+            prefs.edit().putInt(GeneralKeys.GEONAV_AVERAGING_INTERVAL, checkedId).apply()
+        }
     }
 
     /**
@@ -199,59 +286,82 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                     properties = mapOf("altitude" to elevation))
 
             //save fix length to truncate the average later if needed
-            val fixLength = latitude.length
+            val latLength = latitude.length
             val lngLength = longitude.length
 
             //temporary variables to also update obs if obs units are averaged
-            var newLat = latitude.toDouble()
-            var newLng = longitude.toDouble()
+            val newLat = latitude.toDouble()
+            val newLng = longitude.toDouble()
 
             val unit = ObservationUnitDao.getAll(studyDbId.toInt()).first { it.observation_unit_db_id == cRange.plot_id }
 
             //check if the switch is enabled, then update obs units with average value
-            //averaging method chosen from http://www.geomidpoint.com/calculation.html
             if (averageSwitch.isChecked) {
 
+                val chipGroup = findViewById<ChipGroup>(R.id.gnss_trait_averaging_chip_group)
+
+                val avgDuration = when (chipGroup.checkedChipId) {
+                    R.id.gnss_trait_10s_chip -> 10000L
+                    R.id.gnss_trait_5s_chip -> 5000L
+                    else -> -1L
+                }
+
+                //the saved geo coordinate location
                 val location = GeodeticUtils.parseGeoCoordinate(unit.geo_coordinates)
 
-                if (location != null) {
+                //listen for the duration and append lat/lngs to an array
+                val pointsToAverage = arrayListOf<Pair<Double, Double>>()
+                val info = AverageInfo(unit, location, pointsToAverage, latLength, lngLength)
+                if (avgDuration > -1L) {
 
-                    newLat *= Math.PI / 180.0
-                    newLng *= Math.PI / 180.0
+                    if (location != null) {
 
-                    val oldLat = location.latitude * Math.PI / 180.0
-                    val oldLng = location.longitude * Math.PI / 180.0
+                        //averaging is updating the location, so ask the user
+                        alertLocationUpdate {
+                            mProgressDialog?.show()
+                            startAverageTimer(info, avgDuration)
+                        }
 
-                    val x = (cos(newLat)*cos(newLng) + cos(oldLat)*cos(oldLng)) / 2.0
-                    val y = (cos(newLat)*sin(newLng) + cos(oldLat)*sin(oldLng)) / 2.0
-                    val z = (sin(newLat) + sin(oldLat)) / 2.0
+                    } else { //no location has been observed so don't ask the user
 
-                    val avgDistance = sqrt(x*x+y*y)
-                    var avgLat = (atan2(z, avgDistance) * 180.0 / Math.PI).toString()
-                    var avgLng = (atan2(y, x) * 180.0 / Math.PI).toString()
+                        mProgressDialog?.show()
+                        startAverageTimer(info, avgDuration)
 
-                    if (avgLat.length > fixLength) avgLat = avgLat.substring(0, fixLength)
-                    if (avgLng.length > lngLength) avgLng = avgLng.substring(0, lngLength)
-
-                    newLat = avgLat.toDouble()
-                    newLng = avgLng.toDouble()
-
-                    val averageJson = GeoJSON(geometry = Geometry(coordinates = arrayOf(avgLat, avgLng)),
-                        properties = mapOf("altitude" to elevation))
-
-                    ObservationUnitDao.updateObservationUnit(unit, averageJson.toJson().toString())
+                    }
 
                 } else {
 
-                    ObservationUnitDao.updateObservationUnit(unit, geoJson.toJson().toString())
+                    if (location != null) {
+
+                        //averaging is updating the location, so ask the user
+                        alertLocationUpdate {
+                            val original = (location.latitude) to (location.longitude)
+                            val current = newLat to newLng
+                            pointsToAverage.add(original)
+                            pointsToAverage.add(current)
+                            averagePoints(info)
+                        }
+
+                    } else { //no location has been observed so don't ask the user
+
+                        updateCoordinateObservation(unit, geoJson)
+
+                    }
                 }
 
-            } else { //otherwise overwrite the value
+            } else { //no averaging, so check if there is an observations and ask to update or not
 
-                ObservationUnitDao.updateObservationUnit(unit, geoJson.toJson().toString())
+                if (etCurVal.text.isNotBlank()) {
+
+                    alertLocationUpdate {
+
+                        updateCoordinateObservation(unit, geoJson)
+
+                    }
+
+                } else updateCoordinateObservation(unit, geoJson)
 
             }
-
 
 //observations: store whatever the hell we want - Trevor circa 2021
 //            val fbJson = JSONObject(mapOf("latitude" to latitude,
@@ -260,11 +370,91 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 //                    "accuracy" to accTextView.text
 //                    "utc" to utcTextView.text,
 //                    "satellites" to satTextView.text))
-
-            val coordinates = "$newLat; $newLng"
-            etCurVal.setText(coordinates)
-            updateTrait(currentTrait.trait, "gnss", coordinates)
         }
+    }
+
+    private fun updateCoordinateObservation(unit: ObservationUnitModel, json: GeoJSON) {
+
+        val coordinates = "${json.geometry.coordinates[0]}; ${json.geometry.coordinates[1]}"
+
+        ObservationUnitDao.updateObservationUnit(unit, json.toJson().toString())
+
+        etCurVal.setText(coordinates)
+
+        updateTrait(currentTrait.trait, "gnss", coordinates)
+
+    }
+
+    /**
+     * Averages an array of coordinates
+     * using method chosen from http://www.geomidpoint.com/calculation.html
+     */
+    private fun averagePoints(info: AverageInfo) {
+
+        val points = info.points
+        val location = info.location
+        val unit = info.unit
+
+        val avgPoint = if (points.size > 1) {
+
+            //convert first point to radians
+            var avgLat = points[0].first * Math.PI / 180.0
+            var avgLng = points[0].second * Math.PI / 180.0
+
+            for (i in 1 until points.size) {
+
+                //convert the next coordinate to radians
+                val new = points[i]
+                val newLat = new.first * Math.PI / 180.0
+                val newLng = new.second * Math.PI / 180.0
+
+                //mid point averaging
+                val x = (cos(newLat)*cos(newLng) + cos(avgLat)*cos(avgLng)) / 2.0
+                val y = (cos(newLat)*sin(newLng) + cos(avgLat)*sin(avgLng)) / 2.0
+                val z = (sin(newLat) + sin(avgLat)) / 2.0
+
+                val avgDistance = sqrt(x*x+y*y)
+                avgLat = (atan2(z, avgDistance))
+                avgLng = (atan2(y, x))
+            }
+
+            //convert radians back to degrees
+            avgLat *= 180.0 / Math.PI
+            avgLng *= 180.0 / Math.PI
+
+            //truncate average result based on original location fix
+            avgLat = if (avgLat.toString().length > info.latLength)
+                avgLat.toString().substring(0 until info.latLength).toDouble()
+                else avgLat
+            avgLng = if (avgLng.toString().length > info.lngLength)
+                avgLng.toString().substring(0 until info.lngLength).toDouble()
+                else avgLng
+
+            //convert back to strings and truncate based on original quality
+            avgLat to avgLng
+
+        } else 0.0 to 0.0
+
+        val averageJson = GeoJSON(geometry = Geometry(
+            coordinates = arrayOf(avgPoint.first.toString(), avgPoint.second.toString())),
+            properties = mapOf("altitude" to (location?.altitude?.toString() ?: "")))
+
+        updateCoordinateObservation(unit, averageJson)
+    }
+
+    private fun alertLocationUpdate(f: () -> Unit) {
+
+        AlertDialog.Builder(context)
+            .setTitle(R.string.trait_gnss_geo_coord_update_dialog_title)
+            .setMessage(R.string.trait_gnss_geo_coord_update_dialog_message)
+            .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+
+                f()
+
+            }.show()
     }
 
     /**
@@ -279,53 +469,46 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         val adapter = BluetoothAdapter.getDefaultAdapter()
         if (adapter.isEnabled) {
 
-            //if the user already paired an external unit then show a list to connect from
-            if (adapter.bondedDevices.isNotEmpty()) {
+            //create a dialog with the paired devices
+            val pairedDevices = adapter.bondedDevices
 
-                //create a dialog with the paired devices
-                val pairedDevices = adapter.bondedDevices
-                if (pairedDevices.isNotEmpty()) {
+            //create table of names -> bluetooth devices, when the item is selected we can retrieve the device
+            val bluetoothMap = HashMap<String, BluetoothDevice>()
+            for (bd in pairedDevices) {
+                bluetoothMap[bd.name] = bd
+            }
 
-                    //create table of names -> bluetooth devices, when the item is selected we can retrieve the device
-                    val bluetoothMap = HashMap<String, BluetoothDevice>()
-                    for (bd in pairedDevices) {
-                        bluetoothMap[bd.name] = bd
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
+
+            val internalGpsString = context.getString(R.string.pref_behavior_geonav_internal_gps_choice)
+
+            //add internal gps to device choice
+            val devices = pairedDevices.map { it.name }.toTypedArray() +
+                    arrayOf(internalGpsString)
+
+            //when a device is chosen, start a connect thread
+            builder.setSingleChoiceItems(devices, -1) { dialog, which ->
+
+                val value = devices[which]
+
+                if (value != null) {
+
+                    val chosenDevice = pairedDevices.find { it.name == value }
+
+                    if (chosenDevice == null) {
+                        //register the location listener
+                        //update no matter the distance change and every 10s
+                        mGpsTracker = GPSTracker(context, this, 0, 10000)
                     }
 
-                    val builder = AlertDialog.Builder(context)
-                    builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
+                    setupCommunicationsUi(chosenDevice)
 
-                    val internalGpsString = context.getString(R.string.pref_behavior_geonav_internal_gps_choice)
-
-                    //add internal gps to device choice
-                    val devices = pairedDevices.map { it.name }.toTypedArray() +
-                            arrayOf(internalGpsString)
-
-                    //when a device is chosen, start a connect thread
-                    builder.setSingleChoiceItems(devices, -1) { dialog, which ->
-
-                        val value = devices[which]
-
-                        if (value != null) {
-
-                            val chosenDevice = pairedDevices.find { it.name == value }
-
-                            if (chosenDevice == null) {
-                                //register the location listener
-                                //update no matter the distance change and every 10s
-                                mGpsTracker = GPSTracker(context, this, 0, 10000)
-                            }
-
-                            setupCommunicationsUi(chosenDevice)
-
-                            dialog.dismiss()
-                        }
-                    }
-
-                    builder.show()
+                    dialog.dismiss()
                 }
+            }
 
-            } else Toast.makeText(context, R.string.gnss_no_paired_device, Toast.LENGTH_SHORT).show()
+            builder.show()
 
         } else context.startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
     }
@@ -380,8 +563,14 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
                 mGpsTracker = null
             }
 
+            val chipGroup = findViewById<ChipGroup>(R.id.gnss_trait_averaging_chip_group)
+            chipGroup.visibility = View.GONE
+
             setupChooseBluetoothDevice()
         }
+
+        setupAveragingUi()
+
     }
 
     private fun clearUi() {
