@@ -306,6 +306,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                         removeTrait(trait.getTrait());
                     }
                 }
+                //tNum.setSelection(tNum.getText().length());
             }
 
             public void beforeTextChanged(CharSequence arg0, int arg1,
@@ -897,14 +898,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
      * Helper function to add repeated trait measure
      */
     public void addRepeatedMeasure(String parent, String trait) {
-        //Two conflicting factors that will require other changes to resolve
-        //Uservalue can't be null or errors
-        //Uservalue can't be empty string or for text values the observation is deleted
+        //Uservalue can't be null or errors, so went with workarounds to handle empty string deletion logic
         updateTrait(parent, trait, "", true);
-        //Sets the text to null for display
-        //Because null, doesn't trigger a second updateTrait in TextWatcher...well in theory. less so now.
+        //Resets text for display
         replicateInProgress = true;
-        etCurVal.setText(null);
+        etCurVal.setText(""); //TODO need more effective way to refresh view
         replicateInProgress = false;
     }
 
@@ -942,7 +940,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             dt.deleteTrait(exp_id, rangeBox.getPlotID(), parent);
         } else if (!newReplicate) {
             dt.deleteTraitByReplicate(exp_id, rangeBox.getPlotID(), parent); //for now current and max replicate are the same, in the future update
-            //todo check if problem here
         }
 
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
@@ -952,7 +949,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         //update the info bar in case a variable is used
         infoBarAdapter.notifyItemRangeChanged(0, infoBarAdapter.getItemCount());
-        //oops now crashes on click
     }
 
     private void brapiDelete(String parent, Boolean hint) {
