@@ -9,6 +9,8 @@ Field Book uses custom layouts for different types of data to that allow rapid d
 
 Development of Field Book has been supported by the [Collaborative Crop Research Program][1] of The McKnight Foundation and the National Science Foundation under Grant No. (1543958).
 
+## [Translate](https://osij6hx.oneskyapp.com/collaboration/project?id=28259)
+
 ## Contributors
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
