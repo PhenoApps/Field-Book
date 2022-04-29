@@ -302,7 +302,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     if (traitBox.existsNewTraits() & trait != null)
                         updateTrait(trait.getTrait(), trait.getFormat(), en.toString());
                 } else {
-                    if (traitBox.existsNewTraits() & trait != null) {
+                    if (traitBox.existsNewTraits() & trait != null & !replicateInProgress) {
                         removeTrait(trait.getTrait());
                     }
                 }
@@ -902,8 +902,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         //Uservalue can't be empty string or for text values the observation is deleted
         updateTrait(parent, trait, "", true);
         //Sets the text to null for display
-        //Because null, doesn't trigger a second updateTrait in TextWatcher
+        //Because null, doesn't trigger a second updateTrait in TextWatcher...well in theory. less so now.
+        replicateInProgress = true;
         etCurVal.setText(null);
+        replicateInProgress = false;
     }
 
     /**
@@ -940,6 +942,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             dt.deleteTrait(exp_id, rangeBox.getPlotID(), parent);
         } else if (!newReplicate) {
             dt.deleteTraitByReplicate(exp_id, rangeBox.getPlotID(), parent); //for now current and max replicate are the same, in the future update
+            //todo check if problem here
         }
 
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
@@ -2249,7 +2252,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             String exp_id = Integer.toString(ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
 
-            //hello
             //Determine if repeated observations or overwrite
             Boolean repeatObs = ep.getBoolean(GeneralKeys.REPEAT_OBSERVATIONS, false);
 
@@ -2258,8 +2260,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 dt.deleteTrait(exp_id, plotID, traitName);
             } else {
                 dt.deleteTraitByReplicate(exp_id, plotID, traitName);
-                //TODO If previous replicate, want to display its value
-                //traitBox.getCurrentTrait().
+                //TODO In case of deleting on empty string, should display value of previous replicate
+                //etCurVal.setText(<highestReplicate>) or some reload perhaps?
             }
         }
 
