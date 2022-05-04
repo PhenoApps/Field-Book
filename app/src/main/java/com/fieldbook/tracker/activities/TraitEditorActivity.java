@@ -64,6 +64,8 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.dragsort.DragSortListView;
 import com.fieldbook.tracker.dragsort.DragSortController;
 
+import org.phenoapps.utils.BaseDocumentTreeUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -669,7 +671,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             Intent intent = new Intent();
             switch (which) {
                 case 0:
-                    DocumentFile traitDir = DocumentTreeUtil.Companion.getDirectory(thisActivity, R.string.dir_trait);
+                    DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(thisActivity, R.string.dir_trait);
                     if (traitDir != null && traitDir.exists()) {
                         intent.setClassName(thisActivity, FileExploreActivity.class.getName());
                         intent.putExtra("path", traitDir.getUri().toString());
@@ -715,7 +717,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         builder.setPositiveButton(getString(R.string.dialog_yes), (dialog, which) -> {
 
-            DocumentTreeUtil.Companion.getDirectory(thisActivity, R.string.dir_trait);
+            BaseDocumentTreeUtil.Companion.getDirectory(thisActivity, R.string.dir_trait);
 
             showExportDialog();
             dialog.dismiss();
@@ -912,7 +914,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             Uri content_describer = data.getData();
             String fileName = getFileName(content_describer);
 
-            DocumentFile traitDir = DocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
+            DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
             if (traitDir != null && traitDir.exists()) {
 
                 DocumentFile traitExportFile = traitDir.createFile("*/*", fileName);
@@ -922,7 +924,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                     InputStream in = null;
                     OutputStream out = null;
                     try {
-                        out = DocumentTreeUtil.Companion.getFileOutputStream(this, R.string.dir_trait, fileName);
+                        out = BaseDocumentTreeUtil.Companion.getFileOutputStream(this, R.string.dir_trait, fileName);
                         in = getContentResolver().openInputStream(content_describer);
                         byte[] buffer = new byte[1024];
                         int len;
@@ -990,7 +992,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         try {
 
-            DocumentFile traitDir = DocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
+            DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
 
             if (traitDir != null && traitDir.exists()) {
 
@@ -998,7 +1000,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 if (exportDoc != null && exportDoc.exists()) {
 
-                    OutputStream output = DocumentTreeUtil.Companion.getFileOutputStream(this, R.string.dir_trait, exportName);
+                    OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(this, R.string.dir_trait, exportName);
 
                     if (output != null) {
 
@@ -1090,7 +1092,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 String[] data;
                 String[] columns;
 
-                InputStream inputStream = DocumentTreeUtil.Companion.getUriInputStream(thisActivity, mChosenFile);
+                InputStream inputStream = BaseDocumentTreeUtil.Companion.getUriInputStream(thisActivity, mChosenFile);
                 InputStreamReader fr = new InputStreamReader(inputStream);
 
                 CSVReader cr = new CSVReader(fr);

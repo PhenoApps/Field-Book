@@ -63,6 +63,8 @@ import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
+import org.phenoapps.utils.BaseDocumentTreeUtil;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -166,7 +168,7 @@ public class ConfigActivity extends AppCompatActivity {
             ed.apply();
         }
 
-        if (!DocumentTreeUtil.Companion.isEnabled(this)) {
+        if (!BaseDocumentTreeUtil.Companion.isEnabled(this)) {
 
             startActivityForResult(new Intent(this, DefineStorageActivity.class),
                     REQUEST_STORAGE_DEFINER);
@@ -301,7 +303,7 @@ public class ConfigActivity extends AppCompatActivity {
     private String getOverwriteFile(String filename) {
         String[] fileArray;
 
-        DocumentFile exportDir = DocumentTreeUtil.Companion.getDirectory(this, R.string.dir_field_export);
+        DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_field_export);
 
         if (exportDir != null && exportDir.exists()) {
 
@@ -315,8 +317,8 @@ public class ConfigActivity extends AppCompatActivity {
             if (filename.contains(fFile)) {
                 for (String aFileArray : fileArray) {
 
-                    DocumentFile oldDoc = DocumentTreeUtil.Companion.getFile(this, R.string.dir_field_export, aFileArray);
-                    DocumentFile newDoc = DocumentTreeUtil.Companion.getFile(this, R.string.dir_archive, aFileArray);
+                    DocumentFile oldDoc = BaseDocumentTreeUtil.Companion.getFile(this, R.string.dir_field_export, aFileArray);
+                    DocumentFile newDoc = BaseDocumentTreeUtil.Companion.getFile(this, R.string.dir_archive, aFileArray);
 
                     if (checkDbBool) {
                         if (aFileArray.contains(fFile) && aFileArray.contains("database")) {
@@ -421,7 +423,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         builder.setPositiveButton(getString(R.string.dialog_yes), (dialog, which) -> {
             // Load database with sample data
-            DocumentFile sampleDatabase = DocumentTreeUtil.Companion.getFile(ConfigActivity.this,
+            DocumentFile sampleDatabase = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this,
                     R.string.dir_database, "sample.db");
             if (sampleDatabase != null && sampleDatabase.exists()) {
                 invokeDatabaseImport(sampleDatabase);
@@ -627,7 +629,7 @@ public class ConfigActivity extends AppCompatActivity {
             ed.putBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, checkBundle.isChecked());
             ed.apply();
 
-            DocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
+            BaseDocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
 
             newRange = new ArrayList<>();
 
@@ -788,15 +790,6 @@ public class ConfigActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == Constants.PERM_REQ) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                DocumentFile dir = DocumentTreeUtil.Companion.getRoot(this);
-                if (dir != null && dir.exists()) {
-                    DocumentTreeUtil.Companion.createFieldBookFolders(dir, this);
-                }
-            }
-        }
-
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
@@ -869,9 +862,9 @@ public class ConfigActivity extends AppCompatActivity {
 
                         String exportFileName = exportFileString + "_database.csv";
 
-                        dbFile = DocumentTreeUtil.Companion.getFile(ConfigActivity.this, R.string.dir_field_export, exportFileName);
+                        dbFile = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this, R.string.dir_field_export, exportFileName);
 
-                        DocumentFile exportDir = DocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
+                        DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
 
                         if (dbFile != null && dbFile.exists()) {
                             dbFile.delete();
@@ -880,7 +873,7 @@ public class ConfigActivity extends AppCompatActivity {
                             dbFile = exportDir.createFile("*/*", exportFileName);
                         }
 
-                        OutputStream output = DocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, exportFileName);
+                        OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, exportFileName);
 
                         if (output != null) {
                             OutputStreamWriter fw = new OutputStreamWriter(output);
@@ -903,9 +896,9 @@ public class ConfigActivity extends AppCompatActivity {
 
                         String tableFileName = exportFileString + "_table.csv";
 
-                        tableFile = DocumentTreeUtil.Companion.getFile(ConfigActivity.this, R.string.dir_field_export, tableFileName);
+                        tableFile = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this, R.string.dir_field_export, tableFileName);
 
-                        DocumentFile exportDir = DocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
+                        DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
 
                         if (tableFile != null && tableFile.exists()) {
                             tableFile.delete();
@@ -914,7 +907,7 @@ public class ConfigActivity extends AppCompatActivity {
                             tableFile = exportDir.createFile("*/*", tableFileName);
                         }
 
-                        OutputStream output = DocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, tableFileName);
+                        OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, tableFileName);
                         OutputStreamWriter fw = new OutputStreamWriter(output);
 
                         exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
@@ -947,20 +940,20 @@ public class ConfigActivity extends AppCompatActivity {
                         String studyName = fieldObject.getExp_name();
 
                         //create media dir directory from fieldBook/plot_data/studyName path
-                        DocumentFile mediaDir = DocumentTreeUtil.Companion.getFile(
+                        DocumentFile mediaDir = BaseDocumentTreeUtil.Companion.getFile(
                                 ConfigActivity.this, R.string.dir_plot_data, studyName);
 
                         if (mediaDir != null && mediaDir.exists()) {
 
                             //create zip file output from user created name
-                            DocumentFile exportDir = DocumentTreeUtil.Companion.getDirectory(
+                            DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(
                                     ConfigActivity.this, R.string.dir_field_export);
 
                             if (exportDir != null && exportDir.exists()) {
 
                                 DocumentFile zipFile = exportDir.createFile("*/*", zipFileName);
 
-                                OutputStream output = DocumentTreeUtil.Companion.getFileOutputStream(
+                                OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(
                                         ConfigActivity.this, R.string.dir_field_export, zipFileName);
 
                                 if (output != null) {
@@ -986,7 +979,7 @@ public class ConfigActivity extends AppCompatActivity {
 
                 } else { //if not bundling media data, create zip of the table or database files
 
-                    DocumentFile exportDir = DocumentTreeUtil.Companion.getDirectory(
+                    DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(
                             ConfigActivity.this, R.string.dir_field_export);
 
                     if (exportDir != null && exportDir.exists()) {
@@ -995,7 +988,7 @@ public class ConfigActivity extends AppCompatActivity {
 
                             DocumentFile zipFile = exportDir.createFile("*/*", zipFileName);
 
-                            OutputStream output = DocumentTreeUtil.Companion.getFileOutputStream(
+                            OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(
                                     ConfigActivity.this, R.string.dir_field_export, zipFileName);
 
                             ArrayList<DocumentFile> paths = new ArrayList<>();

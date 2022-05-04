@@ -32,6 +32,7 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
+import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 
@@ -2171,9 +2172,9 @@ public class DataHelper {
 
                 try {
 
-                    DocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
+                    BaseDocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
 
-                    DocumentTreeUtil.Companion.copy(context, newSharedPrefsFile, DocumentFile.fromFile(oldSp));
+                    BaseDocumentTreeUtil.Companion.copy(context, newSharedPrefsFile, DocumentFile.fromFile(oldSp));
 
                 } catch (Exception e) {
 
@@ -2216,7 +2217,7 @@ public class DataHelper {
             File oldDb = new File(internalDbPath);
             File oldSp = new File(internalSpPath);
 
-            DocumentFile databaseDir = DocumentTreeUtil.Companion.getDirectory(ctx, R.string.dir_database);
+            DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(ctx, R.string.dir_database);
 
             if (databaseDir != null) {
 
@@ -2238,8 +2239,8 @@ public class DataHelper {
 
                 if (backupDatabaseFile != null && backupPreferenceFile != null) {
 
-                    DocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
-                    DocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldSp), backupPreferenceFile);
+                    BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
+                    BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldSp), backupPreferenceFile);
                 }
             }
 

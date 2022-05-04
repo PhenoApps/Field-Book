@@ -96,6 +96,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
+import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.IOException;
@@ -612,7 +613,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 //            File exportedDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db");
 //            File exportedSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
 
-            DocumentFile databaseDir = DocumentTreeUtil.Companion.getDirectory(this, R.string.dir_database);
+            DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_database);
             if (databaseDir != null) {
 
                 Executor executor = Executors.newFixedThreadPool(2);
@@ -671,7 +672,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                 if (resolver != null) {
 
-                    DocumentFile geoNavFolder = DocumentTreeUtil.Companion.getDirectory(this, R.string.dir_geonav);
+                    DocumentFile geoNavFolder = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_geonav);
 
                     if (geoNavFolder != null && geoNavFolder.exists()) {
 
@@ -1058,7 +1059,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 break;
 
             case R.id.resources:
-                DocumentFile dir = DocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
+                DocumentFile dir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
                 if (dir != null && dir.exists()) {
                     intent.setClassName(CollectActivity.this, FileExploreActivity.class.getName());
                     intent.putExtra("path", dir.getUri().toString());

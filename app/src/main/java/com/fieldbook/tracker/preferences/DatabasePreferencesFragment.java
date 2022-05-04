@@ -35,6 +35,8 @@ import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 
+import org.phenoapps.utils.BaseDocumentTreeUtil;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -100,7 +102,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
     //TODO make static function that creates intent in FileExplorer to check that uri is valid and sent to result key
     private void showDatabaseImportDialog() {
-        DocumentFile databaseDir = DocumentTreeUtil.Companion.getDirectory(context, R.string.dir_database);
+        DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_database);
         if (databaseDir != null && databaseDir.exists()) {
             Intent intent = new Intent();
             intent.setClassName(getActivity(), FileExploreActivity.class.getName());
@@ -272,7 +274,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
             //get database path and shared preferences path
             String dbPath = DataHelper.getDatabasePath(context);
 
-            DocumentFile databaseDir = DocumentTreeUtil.Companion.getDirectory(context, R.string.dir_database);
+            DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_database);
 
             if (databaseDir != null && databaseDir.exists()) {
 
@@ -286,7 +288,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                         String tempName = UUID.randomUUID().toString();
                         DocumentFile tempOutput = databaseDir.createFile("*/*", tempName);
-                        OutputStream tempStream = DocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_database, tempName);
+                        OutputStream tempStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_database, tempName);
 
                         ObjectOutputStream objectStream = new ObjectOutputStream(tempStream);
 

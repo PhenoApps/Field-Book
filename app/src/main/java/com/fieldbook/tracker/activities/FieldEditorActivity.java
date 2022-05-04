@@ -49,6 +49,8 @@ import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.phenoapps.utils.BaseDocumentTreeUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -209,7 +211,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     public void loadLocal() {
 
         try {
-            DocumentFile importDir = DocumentTreeUtil.Companion.getDirectory(this, R.string.dir_field_import);
+            DocumentFile importDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_field_import);
             if (importDir != null && importDir.exists()) {
                 Intent intent = new Intent();
                 intent.setClassName(FieldEditorActivity.this, FileExploreActivity.class.getName());
@@ -533,7 +535,7 @@ public class FieldEditorActivity extends AppCompatActivity {
                 OutputStream out = null;
                 try {
                     in = getContentResolver().openInputStream(content_describer);
-                    out = DocumentTreeUtil.Companion.getFileOutputStream(this,
+                    out = BaseDocumentTreeUtil.Companion.getFileOutputStream(this,
                             R.string.dir_field_import, chosenFile);
                     if (out == null) throw new IOException();
                     byte[] buffer = new byte[1024];

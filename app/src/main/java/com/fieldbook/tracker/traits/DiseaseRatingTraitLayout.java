@@ -8,8 +8,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.Utils;
+
+import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -98,7 +99,7 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
         Scanner inFile1 = null;
 
         try {
-            InputStream severityInput = DocumentTreeUtil.Companion
+            InputStream severityInput = BaseDocumentTreeUtil.Companion
                     .getFileInputStream(getContext(), R.string.dir_trait, "severity.txt");
 
             if (severityInput != null) {

@@ -20,6 +20,8 @@ import androidx.documentfile.provider.DocumentFile;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
+import org.phenoapps.utils.BaseDocumentTreeUtil;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -41,8 +43,8 @@ public class FileExploreActivity extends AppCompatActivity {
             return 1;
         } else {
             // Alphabetic order otherwise
-            String f1Name = DocumentTreeUtil.Companion.getStem(f1.getUri(), this);
-            String f2Name = DocumentTreeUtil.Companion.getStem(f2.getUri(), this);
+            String f1Name = BaseDocumentTreeUtil.Companion.getStem(f1.getUri(), this);
+            String f2Name = BaseDocumentTreeUtil.Companion.getStem(f2.getUri(), this);
             return f1Name.compareToIgnoreCase(f2Name);
         }
     };

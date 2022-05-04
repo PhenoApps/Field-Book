@@ -1,128 +1,63 @@
 package com.fieldbook.tracker.storage
 
 import android.app.Activity
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
+import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
-import androidx.documentfile.provider.DocumentFile
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.createFieldBookFolders
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import com.fieldbook.tracker.activities.DefineStorageActivity
+import org.phenoapps.fragments.storage.PhenoLibStorageDefinerFragment
 
-@RequiresApi(Build.VERSION_CODES.KITKAT)
-class StorageDefinerFragment: Fragment(R.layout.fragment_storage_definer) {
+class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
 
-    private val mPermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-        result?.let { permissions ->
-            if (!permissions.containsValue(false)) {
-                //input is an optional uri that would define the folder to start from
-                mDocumentTree.launch(null)
-            } else {
-                activity?.setResult(Activity.RESULT_CANCELED)
-                activity?.finish()
-            }
-        }
-    }
+    override val buttonColor = Color.parseColor("#795548")
+    override val backgroundColor = Color.parseColor("#8BC34A")
 
-    private val mDocumentTree = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+    //default root folder name if user choose an incorrect root on older devices
+    override val defaultAppName: String = "fieldBook"
 
-        uri?.let { nonNulluri ->
+    //if this file exists the migrator will be skipped
+    override val migrateChecker: String = ".fieldbook"
 
-            context?.let { ctx ->
-
-                val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-
-                with (context?.contentResolver) {
-
-                    //add new uri to persistable that the user just picked
-                    this?.takePersistableUriPermission(nonNulluri, flags)
-
-                    //release old storage directory from persistable if it exists
-                    val oldPermitted = this?.persistedUriPermissions
-                    if (oldPermitted != null && oldPermitted.isNotEmpty()) {
-                        this?.persistedUriPermissions?.forEach {
-                            if (it.uri != nonNulluri) {
-                                releasePersistableUriPermission(it.uri,
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                            }
-                        }
-                    }
-
-                    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-                    DocumentFile.fromTreeUri(ctx, nonNulluri)?.let { root ->
-
-                        val executor = Executors.newFixedThreadPool(2)
-                        executor.execute {
-                            root.createFieldBookFolders(context)
-                        }
-                        executor.shutdown()
-                        executor.awaitTermination(10000, TimeUnit.MILLISECONDS)
-
-                        val hiddenFbFile = root.findFile(".fieldbook")
-                        if (hiddenFbFile == null || !hiddenFbFile.exists()) {
-
-                            if (prefs.getBoolean(GeneralKeys.FIRST_MIGRATE, true)) {
-
-                                prefs.edit().putBoolean(GeneralKeys.FIRST_MIGRATE, false).apply()
-                                activity?.setResult(Activity.RESULT_OK)
-                                activity?.finish()
-
-                            } else findNavController().navigate(StorageDefinerFragmentDirections
-                                .actionStorageDefinerToStorageMigrator())
-
-                        } else {
-
-                            activity?.setResult(Activity.RESULT_OK)
-                            activity?.finish()
-
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //define sample data and where to transfer
+    override val samples = mapOf(
+        AssetSample("field_import", "field_sample.csv") to R.string.dir_field_import,
+        AssetSample("field_import", "field_sample2.csv") to R.string.dir_field_import,
+        AssetSample("field_import", "field_sample3.csv") to R.string.dir_field_import,
+        AssetSample("field_import", "rtk_sample.csv") to R.string.dir_field_import,
+        AssetSample("trait", "trait_sample.trt") to R.string.dir_trait,
+        AssetSample("trait", "severity.txt") to R.string.dir_trait,
+        AssetSample("database", "sample.db") to R.string.dir_database,
+        AssetSample("database", "sample.db_sharedpref.xml") to R.string.dir_database)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val defineButton = view.findViewById<Button>(R.id.frag_storage_definer_choose_dir_btn)
-
-        defineButton?.setOnClickListener { _ ->
-
-            launchDefiner()
-
+        //define directories that should be created in root storage
+        context?.let { ctx ->
+            val archive = ctx.getString(R.string.dir_archive)
+            val db = ctx.getString(R.string.dir_database)
+            val fieldExport = ctx.getString(R.string.dir_field_export)
+            val fieldImport = ctx.getString(R.string.dir_field_import)
+            val geonav = ctx.getString(R.string.dir_geonav)
+            val plotData = ctx.getString(R.string.dir_plot_data)
+            val resources = ctx.getString(R.string.dir_resources)
+            val trait = ctx.getString(R.string.dir_trait)
+            val updates = ctx.getString(R.string.dir_updates)
+            directories = arrayOf(archive, db, fieldExport, fieldImport,
+                geonav, plotData, resources, trait, updates)
         }
     }
 
-    private fun launchDefiner() {
-        context?.let { ctx ->
+    override fun onTreeDefined(treeUri: Uri) {
+        (activity as DefineStorageActivity).enableBackButton(false)
+        super.onTreeDefined(treeUri)
+        (activity as DefineStorageActivity).enableBackButton(true)
+    }
 
-            //request runtime permissions for storage
-            if (ActivityCompat.checkSelfPermission(ctx,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(ctx,
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-
-                //input is an optional uri that would define the folder to start from
-                mDocumentTree.launch(null)
-
-            } else {
-
-                mPermissions.launch(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE))
-
-            }
-        }
+    override fun actionNoMigrate() {
+        activity?.setResult(Activity.RESULT_OK)
+        activity?.finish()
     }
 }

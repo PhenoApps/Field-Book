@@ -13,6 +13,8 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.DefineStorageActivity;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
+import org.phenoapps.utils.BaseDocumentTreeUtil;
+
 public class GeneralPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     private static final int REQUEST_STORAGE_DEFINER_CODE = 999;
@@ -60,14 +62,14 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
     public void onResume() {
         super.onResume();
 
-        if (DocumentTreeUtil.Companion.isEnabled(context)) {
+        if (BaseDocumentTreeUtil.Companion.isEnabled(context)) {
 
             //get directory name
-            DocumentFile root = DocumentTreeUtil.Companion.getRoot(context);
+            DocumentFile root = BaseDocumentTreeUtil.Companion.getRoot(context);
 
             if (root != null && root.exists()) {
 
-                String path = DocumentTreeUtil.Companion.getStem(root.getUri(), context);
+                String path = BaseDocumentTreeUtil.Companion.getStem(root.getUri(), context);
 
                 defaultStorageLocation.setSummary(path);
 

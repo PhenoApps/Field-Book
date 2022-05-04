@@ -4,9 +4,11 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.utilities.DocumentTreeUtil
+import org.phenoapps.utils.BaseDocumentTreeUtil
 
 class DefineStorageActivity: AppCompatActivity() {
+
+    private var mBackButtonEnabled = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -14,12 +16,18 @@ class DefineStorageActivity: AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
 
-        setResult(if (DocumentTreeUtil.isEnabled(this)) {
-            Activity.RESULT_OK
-        } else Activity.RESULT_CANCELED)
+        if (mBackButtonEnabled) {
+            super.onBackPressed()
+            setResult(if (BaseDocumentTreeUtil.isEnabled(this)) {
+                Activity.RESULT_OK
+            } else Activity.RESULT_CANCELED)
 
-        finish()
+            finish()
+        }
+    }
+
+    fun enableBackButton(enable: Boolean) {
+        mBackButtonEnabled = enable
     }
 }
