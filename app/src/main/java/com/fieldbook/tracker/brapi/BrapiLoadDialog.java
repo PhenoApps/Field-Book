@@ -80,9 +80,16 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         // Set our OK button to be disabled until we are finished loading
         saveBtn.setVisibility(View.GONE);
         studyDetails = new BrapiStudyDetails();
-        ((TextView) findViewById(R.id.studyNumPlotsLbl)).setText(makePlural(this.selectedObservationLevel.getObservationLevelName()));
+        updateNumPlotsLabel();
         buildStudyDetails();
         loadStudy();
+    }
+
+    private void updateNumPlotsLabel() {
+        if (selectedObservationLevel != null) {
+            ((TextView) findViewById(R.id.studyNumPlotsLbl)).setText(
+                    makePlural(this.selectedObservationLevel.getObservationLevelName()));
+        }
     }
 
     private String makePlural(String observationLevelName) {
@@ -357,7 +364,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
             AlertDialog.Builder alertDialogBuilder = null;
             // Display our message.
-            if (!brapiControllerResponse.status) {
+            if (brapiControllerResponse != null && !brapiControllerResponse.status) {
                 alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                         .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
@@ -380,7 +387,12 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             // This is an unhandled failed that we should not run into unless there is
             // an error in the saveStudyDetails code outside of that handling.
             if (fail) {
-                Log.e("error-opef", brapiControllerResponse.message);
+                if (brapiControllerResponse != null) {
+                    Log.e("error-opef", brapiControllerResponse.message);
+
+                } else {
+                    Log.e("error-opef", "unknown");
+                }
                 alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                         .setPositiveButton(R.string.okButtonText, (dialogInterface, i) -> {

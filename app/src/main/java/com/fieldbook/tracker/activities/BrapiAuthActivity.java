@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -162,9 +163,15 @@ public class BrapiAuthActivity extends AppCompatActivity {
                             Intent responseIntent = new Intent(context, BrapiAuthActivity.class);
                             responseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                            authService.performAuthorizationRequest(
-                                    authRequest,
-                                    PendingIntent.getActivity(context, 0, responseIntent, 0));
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                authService.performAuthorizationRequest(
+                                        authRequest,
+                                        PendingIntent.getActivity(context, 0, responseIntent, PendingIntent.FLAG_IMMUTABLE));
+                            } else {
+                                authService.performAuthorizationRequest(
+                                        authRequest,
+                                        PendingIntent.getActivity(context, 0, responseIntent, 0));
+                            }
 
                         }
 
