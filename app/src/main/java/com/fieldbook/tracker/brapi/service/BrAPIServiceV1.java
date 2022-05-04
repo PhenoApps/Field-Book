@@ -28,6 +28,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +46,6 @@ import io.swagger.client.api.ObservationsApi;
 import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ProgramsApi;
 import io.swagger.client.api.StudiesApi;
-
 import io.swagger.client.api.TrialsApi;
 import io.swagger.client.model.Image;
 import io.swagger.client.model.ImageResponse;
@@ -70,6 +71,8 @@ import io.swagger.client.model.TrialSummary;
 import io.swagger.client.model.TrialsResponse;
 
 public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService {
+    private static final String TAG = BrAPIServiceV1.class.getName();
+
     private final Context context;
     private final ImagesApi imagesApi;
     private final StudiesApi studiesApi;
@@ -81,7 +84,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     public BrAPIServiceV1(Context context) {
         this.context = context;
         ApiClient apiClient = new ApiClient().setBasePath(BrAPIService.getBrapiUrl(context));
-        apiClient.setReadTimeout(getTimeoutValue(context) * 1000);
+        apiClient.setReadTimeout(BrAPIService.getTimeoutValue(context) * 1000);
 
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
@@ -652,19 +655,28 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 
         try {
 
+            LocalDateTime start = LocalDateTime.now();
             BrapiV1ApiCallBack<NewObservationDbIdsResponse> callback = new BrapiV1ApiCallBack<NewObservationDbIdsResponse>() {
                 @Override
                 public void onSuccess(NewObservationDbIdsResponse observationsResponse, int i, Map<String, List<String>> map) {
+                    Log.d(TAG,"Save to Observations complete...took " + ChronoUnit.SECONDS.between(start, LocalDateTime.now()) + " seconds");
                     List<Observation> newObservations = new ArrayList<>();
-                    for(NewObservationDbIdsObservations obs: observationsResponse.getResult().getObservations()){
-                        newObservations.add(mapToObservation(obs));
+                    try {
+                        for (NewObservationDbIdsObservations obs : observationsResponse.getResult().getObservations()) {
+                            newObservations.add(mapToObservation(obs));
+                        }
+                        //write back to the db to store obsvdbid?
+                        function.apply(newObservations);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing response", e);
+                        failFunction.apply(0);
                     }
-                    function.apply(newObservations);
 
                 }
 
                 @Override
                 public void onFailure(ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
+                    Log.e(TAG, "Error in BrAPI call", e);
                     failFunction.apply(e.getCode());
                 }
             };
@@ -694,6 +706,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
                     NewObservationsRequest request = new NewObservationsRequest();
                     request.setObservations(request_observations);
 
+                    Log.d(TAG, "Starting call to save Observations");
                     observationsApi.studiesStudyDbIdObservationsPutAsync(study, request, getBrapiToken(), callback);
                 }
             }
@@ -962,7 +975,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             if (studyDetails.getValues().isEmpty()) {
                 return new BrapiControllerResponse(false, this.noPlots);
             }
-            
+
             // Construct our map to check for uniques
             for (List<String> dataRow : studyDetails.getValues()) {
                 Integer idColumn = studyDetails.getAttributes().indexOf(observationLevel);
