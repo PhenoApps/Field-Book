@@ -30,6 +30,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     int lineFail = -1;
     boolean fail;
     boolean uniqueFail;
+    boolean containsDuplicates = false;
 
     public ImportRunnableTask(Context context, FieldFileObject.FieldFileBase fieldFile,
                               int idColPosition, String unique, String primary, String secondary) {
@@ -111,7 +112,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                         } else if (columns[i].equals(secondary)) {
                             secondaryIndex = i;
                         }
-                    }
+                    } else containsDuplicates = true;
                 }
             }
 
@@ -210,6 +211,9 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             ed.putString("FieldFile", null);
             ed.putBoolean("ImportFieldFinished", false);
             ed.apply();
+        }
+        if (containsDuplicates) {
+            Utils.makeToast(context, context.getString(R.string.import_runnable_duplicates_skipped));
         }
         if (fail) {
             Utils.makeToast(context, context.getString(R.string.import_runnable_create_field_data_failed, lineFail));
