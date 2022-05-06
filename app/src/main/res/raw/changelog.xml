@@ -1,6 +1,6 @@
 <changelog>
     <release
-        date="2021-12-01"
+        date="2022-05-09"
         versionCode="520"
         versionName="v5.2">
         <new>Datagrid focuses on current entry/trait</new>
@@ -14,6 +14,7 @@
         <info>Improved import file sanitation</info>
         <info>Added warnings for failed file imports</info>
         <bugfix>Quick GoTo can now use both primary/secondary ID</bugfix>
+        <bugfix>Fixed a bug caused by duplicated import column names</bugfix>
         <bugfix>Numerous bug fixes</bugfix>
     </release>
 
