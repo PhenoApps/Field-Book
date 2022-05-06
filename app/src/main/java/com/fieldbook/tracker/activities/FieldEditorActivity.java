@@ -659,7 +659,8 @@ public class FieldEditorActivity extends AppCompatActivity {
                     hasSpecialCharacters = true;
                     added = true;
                     String replaced = DataHelper.replaceSpecialChars(s);
-                    if (!replaced.isEmpty()) actualColumns.add(replaced);
+                    if (!replaced.isEmpty() && !actualColumns.contains(replaced))
+                        actualColumns.add(replaced);
 
                 }
 
