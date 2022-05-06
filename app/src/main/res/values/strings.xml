@@ -702,4 +702,5 @@
     <string name="gnss_trait_averaging_dialog_title">Collecting coordinates</string>
     <string name="gnss_trait_averaging_dialog_message">Please wait while the incoming locations are being averaged…</string>
     <string name="import_runnable_duplicates_skipped">Duplicate columns found, only first instance will be used.</string>
+    <string name="brapi_chunk_size">Chunk Size</string>
 </resources>

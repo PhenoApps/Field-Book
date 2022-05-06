@@ -15,6 +15,7 @@
         <info>Added warnings for failed file imports</info>
         <bugfix>Quick GoTo can now use both primary/secondary ID</bugfix>
         <bugfix>Fixed a bug caused by duplicated import column names</bugfix>
+        <bugfix>Fixed an issue with NA date color</bugfix>
         <bugfix>Numerous bug fixes</bugfix>
     </release>
 
