@@ -9,7 +9,6 @@ import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.PrefsConstants
 import java.text.SimpleDateFormat
 import java.util.*
 

@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractBrAPIService implements BrAPIService {
 
+
     private static final String TAG = AbstractBrAPIService.class.getName();
 
     public void createObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn) {

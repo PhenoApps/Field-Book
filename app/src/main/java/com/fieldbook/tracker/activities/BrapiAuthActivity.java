@@ -1,23 +1,21 @@
 package com.fieldbook.tracker.activities;
 
-import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.Utils;
 
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
@@ -27,9 +25,6 @@ import net.openid.appauth.Preconditions;
 import net.openid.appauth.ResponseTypeValues;
 import net.openid.appauth.connectivity.ConnectionBuilder;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -40,7 +35,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_brapi_auth);
 
-        SharedPreferences sp = getSharedPreferences("Settings", 0);
+        SharedPreferences sp = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         // Start our login process
         //when coming back from deep link this check keeps app from auto-re-authenticating
         if (getIntent() != null && getIntent().getData() == null) {
@@ -64,7 +59,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        SharedPreferences sp = getSharedPreferences("Settings", 0);
+        SharedPreferences sp = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
         Uri data = getIntent().getData();
 
@@ -168,9 +163,15 @@ public class BrapiAuthActivity extends AppCompatActivity {
                             Intent responseIntent = new Intent(context, BrapiAuthActivity.class);
                             responseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                            authService.performAuthorizationRequest(
-                                    authRequest,
-                                    PendingIntent.getActivity(context, 0, responseIntent, 0));
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                authService.performAuthorizationRequest(
+                                        authRequest,
+                                        PendingIntent.getActivity(context, 0, responseIntent, PendingIntent.FLAG_IMMUTABLE));
+                            } else {
+                                authService.performAuthorizationRequest(
+                                        authRequest,
+                                        PendingIntent.getActivity(context, 0, responseIntent, 0));
+                            }
 
                         }
 
@@ -229,7 +230,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
             return;
         }
 
-        SharedPreferences preferences = getSharedPreferences("Settings", 0);
+        SharedPreferences preferences = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         SharedPreferences.Editor editor = preferences.edit();
         if (status == 200) {
             String token = data.getQueryParameter("token");
@@ -256,7 +257,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
 
     public void checkBrapiAuth(Uri data) {
 
-            SharedPreferences preferences = getSharedPreferences("Settings", 0);
+            SharedPreferences preferences = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
             SharedPreferences.Editor editor = preferences.edit();
             data = Uri.parse(data.toString().replaceFirst("#", "?"));
             String token = data.getQueryParameter("access_token");

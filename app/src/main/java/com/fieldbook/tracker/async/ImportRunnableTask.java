@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.text.Html;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
@@ -12,8 +13,9 @@ import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
-import java.io.File;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +41,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
         mContext = new WeakReference<>(context);
 
-        this.mPrefs = context.getSharedPreferences("Settings", Context.MODE_PRIVATE);
+        this.mPrefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
         this.idColPosition = idColPosition;
         this.unique = unique;
         this.primary = primary;
@@ -72,7 +74,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                 return 0;
             }
 
-            if (mFieldFile.hasSpecialCharasters()) {
+            if (mFieldFile.hasSpecialCharacters()) {
                 return 0;
             }
 
@@ -181,9 +183,6 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             ConfigActivity.dt.close();
             ConfigActivity.dt.open();
 
-            File newDir = new File(mFieldFile.getPath());
-            newDir.mkdirs();
-
             ConfigActivity.dt.updateExpTable(true, false, false, exp_id);
 
         } catch (Exception e) {
@@ -205,11 +204,11 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         if (dialog.isShowing())
             dialog.dismiss();
 
-        if (fail | uniqueFail | mFieldFile.hasSpecialCharasters()) {
+        if (fail | uniqueFail | mFieldFile.hasSpecialCharacters()) {
             ConfigActivity.dt.deleteField(result);
             SharedPreferences.Editor ed = mPrefs.edit();
-            ed.putString("FieldFile", null);
-            ed.putBoolean("ImportFieldFinished", false);
+            ed.putString(GeneralKeys.FIELD_FILE, null);
+            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
             ed.apply();
         }
         if (containsDuplicates) {
@@ -220,16 +219,16 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             //makeToast(getString(R.string.import_error_general));
         } else if (uniqueFail && context != null) {
             Utils.makeToast(context,context.getString(R.string.import_error_unique));
-        } else if (mFieldFile.hasSpecialCharasters()) {
+        } else if (mFieldFile.hasSpecialCharacters()) {
             Utils.makeToast(context,context.getString(R.string.import_error_unique_characters_illegal));
         } else {
             SharedPreferences.Editor ed = mPrefs.edit();
 
-            ed.putString("ImportUniqueName", unique);
-            ed.putString("ImportFirstName", primary);
-            ed.putString("ImportSecondName", secondary);
-            ed.putBoolean("ImportFieldFinished", true);
-            ed.putInt("SelectedFieldExpId", result);
+            ed.putString(GeneralKeys.UNIQUE_NAME, unique);
+            ed.putString(GeneralKeys.PRIMARY_NAME, primary);
+            ed.putString(GeneralKeys.SECONDARY_NAME, secondary);
+            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true);
+            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, result);
 
             ed.apply();
 
@@ -250,8 +249,8 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                 }
 
-                ed.putBoolean("ImportFieldFinished", false);
-                ed.putInt("SelectedFieldExpId", -1);
+                ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+                ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
                 ed.apply();
 
                 e.printStackTrace();

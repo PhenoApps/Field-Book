@@ -266,8 +266,8 @@
     <string name="preferences_general_feature_datagrid_description">Displays a spreadsheet of plots and traits showing collected data</string>
 
     <string name="preferences_general_system_title">System Defaults</string>
-    <string name="preferences_general_files_base_directory_title">Root Directory</string>
-    <string name="preferences_general_files_base_directory_description">Choose the root directory for Field Book</string>
+    <string name="preferences_general_files_base_directory_title">Define storage location</string>
+    <string name="preferences_general_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
 

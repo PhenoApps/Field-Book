@@ -3,6 +3,7 @@ package com.fieldbook.tracker.database.dao
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.brapi.model.FieldBookImage
@@ -259,12 +260,12 @@ class ObservationDao {
         /**
          * Should trait be observation_field_book_format?
          */
-        fun getPlotPhotos(expId: String, plot: String, trait: String): ArrayList<String> = withDatabase { db ->
+        fun getPlotPhotos(expId: String, plot: String, trait: String): ArrayList<Uri> = withDatabase { db ->
 
             ArrayList(db.query(Observation.tableName, arrayOf("value"),
                     where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_name LIKE ?",
                     whereArgs = arrayOf(expId, plot, trait)).toTable().map {
-                it["value"] as String
+                Uri.parse(it["value"] as String)
             })
 
         } ?: arrayListOf()
@@ -322,6 +323,16 @@ class ObservationDao {
         }
 
         /**
+         * Pattern match to find observation values that contain a Uri
+         */
+        fun getObservationByValue(value: String): ObservationModel? = withDatabase { db ->
+
+            ObservationModel(db.query(Observation.tableName,
+                where = "value LIKE ?",
+                whereArgs = arrayOf("%$value")).toFirst())
+        }
+
+        /**
          * Deletes all observations for a given variable on a plot.
          * @param id: the study id
          * @param rid: the unique plot name
@@ -358,6 +369,14 @@ class ObservationDao {
             }
         }
 
+        fun updateObservation(observation: ObservationModel) = withDatabase { db ->
+
+            db.update(Observation.tableName,
+                contentValuesOf(*observation.map.map { it.key to it.value }.toTypedArray()),
+                "internal_id_observation = ?",
+                arrayOf(observation.internal_id_observation.toString())
+                )
+        }
 
         //TODO
         fun updateImage(image: FieldBookImage, writeLastSyncedTime: Boolean) = withDatabase {

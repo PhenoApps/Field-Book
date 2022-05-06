@@ -21,7 +21,7 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat impl
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName("Settings");
+        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_appearance, rootKey);
         PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences_appearance, true);

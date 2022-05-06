@@ -10,6 +10,7 @@ import math.geom2d.Point2D
 import math.geom2d.line.Line2D
 import java.io.FileWriter
 import java.io.IOException
+import java.io.OutputStreamWriter
 import java.lang.NumberFormatException
 import kotlin.math.*
 
@@ -59,7 +60,7 @@ class GeodeticUtils {
          *
          *  (1) and (2) are a bit outdated in terms of column order (look at the headers above for most up to date)
          */
-        fun writeGeoNavLog(log: FileWriter?, line: String) {
+        fun writeGeoNavLog(log: OutputStreamWriter?, line: String) {
 
             log?.let { geonav ->
 
@@ -103,10 +104,9 @@ class GeodeticUtils {
          * @param start: the user's location
          * @param coordinates: the coordinate list to search from
          * @param theta: the field of view angle
-         * @param isCompass: whether the compass setting is enabled and if theta threshold should be used in algorithm
          * @return a object representing the returned location and it's distance
          **/
-        fun impactZoneSearch(log: FileWriter?,
+        fun impactZoneSearch(log: OutputStreamWriter?,
                              start: Location,
                              coordinates: Array<ObservationUnitModel>,
                              azimuth: Double,

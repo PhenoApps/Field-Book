@@ -1,9 +1,12 @@
 package com.fieldbook.tracker.objects;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
+
 import com.fieldbook.tracker.utilities.CSVReader;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -12,11 +15,9 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,20 +27,20 @@ import jxl.WorkbookSettings;
 
 //TODO when merged with xlsx edit getColumnSet
 public class FieldFileObject {
-    public static FieldFileBase create(final String path) {
-        switch (getExtension(path)) {
+    public static FieldFileBase create(final Context ctx, final Uri path, final InputStream inputStream) {
+        switch (getExtension(path.toString())) {
             case "csv":
-                return new FieldFileCSV(path);
+                return new FieldFileCSV(ctx, path);
             case "xls":
-                return new FieldFileExcel(path);
+                return new FieldFileExcel(ctx, path);
             case "xlsx":
-                return new FieldFileXlsx(path);
+                return new FieldFileXlsx(ctx, path);
             default:
-                return new FieldFileOther(path);
+                return new FieldFileOther(ctx, path);
         }
     }
 
-    private static String getExtension(final String path) {
+    public static String getExtension(final String path) {
         final int first = path.lastIndexOf(".") + 1;
         return path.substring(first).toLowerCase();
     }
@@ -47,25 +48,78 @@ public class FieldFileObject {
     public abstract static class FieldFileBase {
         boolean openFail;
         boolean specialCharactersFail;
-        private String path_;
+        private final Uri path_;
+        private final Context ctx;
 
-        FieldFileBase(final String path) {
+        FieldFileBase(final Context ctx, final Uri path) {
+            this.ctx = ctx;
             path_ = path;
             openFail = false;
             specialCharactersFail = false;
         }
 
-        public final String getPath() {
+        public final InputStream getInputStream() {
+            try {
+                return this.ctx.getContentResolver().openInputStream(this.path_);
+            } catch (IOException io) {
+                io.printStackTrace();
+            }
+            return null;
+        }
+
+        public final String getStringPath() { return path_.toString(); }
+
+        public final Uri getPath() {
             return path_;
         }
 
         public final String getStem() {
-            final int first = path_.lastIndexOf("/") + 1;
-            final int last = path_.lastIndexOf(".");
-            return path_.substring(first, last);
+
+            String stem = getFileStem();
+
+            if (path_.getScheme().equals("content")) {
+
+                try (Cursor c = ctx.getContentResolver().query(path_, null, null, null, null)) {
+
+                    if (c != null && c.moveToFirst()) {
+
+                        int index = c.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+
+                        if (index > 0) {
+
+                            stem = c.getString(index);
+
+                        }
+                    }
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+                }
+
+            }
+
+            if (stem.contains(".")) {
+
+                int dotIndex = stem.lastIndexOf(".");
+
+                stem = stem.substring(0, dotIndex);
+
+            }
+
+            return stem;
         }
 
-        public final boolean hasSpecialCharasters() {
+        public final String getFileStem() {
+            final String path = path_.toString();
+            //uri separated by query param separator %2F, not encoded with keys
+            final String token = "%2F";
+            final int tokenSize = token.length();
+            final int first = path.lastIndexOf(token) + tokenSize;
+            final int last = path.lastIndexOf(".");
+            return path.substring(first, last);
+        }
+
+        public final boolean hasSpecialCharacters() {
             return specialCharactersFail;
         }
 
@@ -103,8 +157,8 @@ public class FieldFileObject {
     public static class FieldFileCSV extends FieldFileBase {
         CSVReader cr;
 
-        FieldFileCSV(final String path) {
-            super(path);
+        FieldFileCSV(final Context ctx, final Uri path) {
+            super(ctx, path);
         }
 
         public boolean isCSV() {
@@ -122,8 +176,8 @@ public class FieldFileObject {
         public String[] getColumns() {
             try {
                 openFail = false;
-                FileReader fr = new FileReader(super.getPath());
-                CSVReader cr = new CSVReader(fr);
+                InputStreamReader isr = new InputStreamReader(super.getInputStream());
+                CSVReader cr = new CSVReader(isr);
                 return cr.readNext();
             } catch (Exception ignore) {
                 openFail = true;
@@ -135,8 +189,8 @@ public class FieldFileObject {
             try {
                 openFail = false;
                 HashMap<String, String> check = new HashMap<>();
-                FileReader fr = new FileReader(super.getPath());
-                CSVReader cr = new CSVReader(fr);
+                InputStreamReader isr = new InputStreamReader(super.getInputStream());
+                CSVReader cr = new CSVReader(isr);
                 String[] columns = cr.readNext();
 
                 while (columns != null) {
@@ -169,8 +223,8 @@ public class FieldFileObject {
         public void open() {
             try {
                 openFail = false;
-                FileReader fr = new FileReader(super.getPath());
-                cr = new CSVReader(fr);
+                InputStreamReader isr = new InputStreamReader(super.getInputStream());
+                cr = new CSVReader(isr);
             } catch (Exception e) {
                 openFail = true;
                 e.printStackTrace();
@@ -201,8 +255,8 @@ public class FieldFileObject {
         private Workbook wb;
         private int current_row;
 
-        FieldFileExcel(final String path) {
-            super(path);
+        FieldFileExcel(final Context ctx, final Uri path) {
+            super(ctx, path);
         }
 
         public boolean isCSV() {
@@ -223,17 +277,23 @@ public class FieldFileObject {
                 WorkbookSettings wbSettings = new WorkbookSettings();
                 wbSettings.setUseTemporaryFileDuringWrite(true);
 
-                wb = Workbook.getWorkbook(new File(super.getPath()), wbSettings);
-                String[] importColumns = new String[wb.getSheet(0).getColumns()];
+                InputStream is = super.getInputStream();
+                if (is != null) {
+                    wb = Workbook.getWorkbook(super.getInputStream(), wbSettings);
+                    String[] importColumns = new String[wb.getSheet(0).getColumns()];
 
-                for (int s = 0; s < wb.getSheet(0).getColumns(); s++) {
-                    importColumns[s] = wb.getSheet(0).getCell(s, 0).getContents();
+                    for (int s = 0; s < wb.getSheet(0).getColumns(); s++) {
+                        importColumns[s] = wb.getSheet(0).getCell(s, 0).getContents();
+                    }
+                    return importColumns;
                 }
-                return importColumns;
+
             } catch (Exception ignore) {
                 openFail = true;
                 return new String[0];
             }
+
+            return new String[0];
         }
 
         public HashMap<String, String> getColumnSet(int idColPosition) {
@@ -275,6 +335,7 @@ public class FieldFileObject {
         }
 
         public void close() {
+            //TODO check for memory leak
         }
     }
 
@@ -282,8 +343,8 @@ public class FieldFileObject {
         private XSSFWorkbook wb;
         private int currentRow;
 
-        FieldFileXlsx(String path) {
-            super(path);
+        FieldFileXlsx(final Context ctx, final Uri path) {
+            super(ctx, path);
         }
 
         @Override
@@ -306,7 +367,7 @@ public class FieldFileObject {
 
             try {
                 
-                wb = new XSSFWorkbook(new FileInputStream(getPath()));
+                wb = new XSSFWorkbook(super.getInputStream());
 
                 XSSFSheet sheet = wb.getSheetAt(0);
 
@@ -386,6 +447,7 @@ public class FieldFileObject {
         }
 
         public void close() {
+            //todo check for memory leak
         }
     }
 
@@ -411,8 +473,8 @@ public class FieldFileObject {
     }
 
     public static class FieldFileOther extends FieldFileBase {
-        FieldFileOther(final String path) {
-            super(path);
+        FieldFileOther(final Context ctx, final Uri path) {
+            super(ctx, path);
         }
 
         public boolean isCSV() {

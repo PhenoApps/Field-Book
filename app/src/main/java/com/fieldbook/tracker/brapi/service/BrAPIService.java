@@ -1,34 +1,34 @@
 package com.fieldbook.tracker.brapi.service;
 
-        import android.content.Context;
-        import android.content.SharedPreferences;
-        import android.util.Log;
-        import android.util.Patterns;
-        import android.widget.Toast;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
+import android.util.Patterns;
+import android.widget.Toast;
 
-        import androidx.arch.core.util.Function;
+import androidx.arch.core.util.Function;
 
-        import com.fieldbook.tracker.R;
-        import com.fieldbook.tracker.brapi.ApiError;
-        import com.fieldbook.tracker.brapi.ApiErrorCode;
-        import com.fieldbook.tracker.brapi.BrapiAuthDialog;
-        import com.fieldbook.tracker.brapi.BrapiControllerResponse;
-        import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
-        import com.fieldbook.tracker.brapi.model.BrapiProgram;
-        import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
-        import com.fieldbook.tracker.brapi.model.BrapiTrial;
-        import com.fieldbook.tracker.brapi.model.FieldBookImage;
-        import com.fieldbook.tracker.brapi.model.Observation;
-        import com.fieldbook.tracker.preferences.GeneralKeys;
-        import com.fieldbook.tracker.objects.TraitObject;
-        import com.fieldbook.tracker.utilities.Constants;
-        import com.fieldbook.tracker.utilities.FailureFunction;
-        import com.fieldbook.tracker.utilities.SuccessFunction;
+import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.ApiError;
+import com.fieldbook.tracker.brapi.ApiErrorCode;
+import com.fieldbook.tracker.brapi.BrapiAuthDialog;
+import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
+import com.fieldbook.tracker.brapi.model.BrapiProgram;
+import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
+import com.fieldbook.tracker.brapi.model.BrapiTrial;
+import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.utilities.FailureFunction;
+import com.fieldbook.tracker.utilities.SuccessFunction;
 
-        import java.net.MalformedURLException;
-        import java.net.URL;
-        import java.util.List;
-        import java.util.function.BiFunction;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.function.BiFunction;
 
 public interface BrAPIService {
 
@@ -39,7 +39,7 @@ public interface BrAPIService {
     // Helper functions for brapi configurations
     public static Boolean isLoggedIn(Context context) {
 
-        String auth_token = context.getSharedPreferences("Settings", 0)
+        String auth_token = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                 .getString(GeneralKeys.BRAPI_TOKEN, "");
 
         if (auth_token == null || auth_token == "") {
@@ -81,7 +81,7 @@ public interface BrAPIService {
     }
 
     public static String getBrapiUrl(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
+        SharedPreferences preferences = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         String baseURL = preferences.getString(GeneralKeys.BRAPI_BASE_URL, "");
         String version = preferences.getString(GeneralKeys.BRAPI_VERSION, "");
         String path;

@@ -1,32 +1,19 @@
 package com.fieldbook.tracker.preferences;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-
 public class GeneralKeys {
     // @formatter:off
 
     // Appearance
     public static final String TOOLBAR_CUSTOMIZE                    = "TOOLBAR_CUSTOMIZE";
-    public static final String LANGUAGE                             = "language";
     public static final String INFOBAR_NUMBER                       = "INFOBAR_NUMBER";
     public static final String APPLICATION_THEME                    = "APPLICATION_THEME";
-    public static final String SAVED_DATA_COLOR                     = "SAVED_DATA_COLOR";
     public static final String RESTORE_DEFAULT_THEME                = "RESTORE_DEFAULT_THEME";
-    public static final String LABELVAL_CUSTOMIZE                   = "LABELVAL_CUSTOMIZE";
-
-    // Profile
-    public static final String PROFILE_NAME_FIRST                   = "FirstName";
-    public static final String PROFILE_NAME_LAST                    = "LastName";
-    public static final String PROFILE_LOCATION                     = "Location";
 
     // Behavior
     public static final String RETURN_CHARACTER                     = "RETURN_CHARACTER";
     public static final String VOLUME_NAVIGATION                    = "VOLUME_NAVIGATION";
     public static final String CYCLING_TRAITS_ADVANCES              = "CycleTraits";
     public static final String DISABLE_ENTRY_ARROW_NO_DATA          = "DISABLE_ENTRY_ARROW_NO_DATA";
-    public static final String FLIP_FLOP_COLLECT_ARROWS             = "FLIP_FLOP_TRAIT_ARROWS";
 
     // General
     public static final String TUTORIAL_MODE                        = "Tips";
@@ -41,8 +28,9 @@ public class GeneralKeys {
 
     // Files and Naming
     public static final String DEFAULT_STORAGE_LOCATION_PREFERENCE  = "DEFAULT_STORAGE_LOCATION_PREFERENCE";
+
+    //TODO check usages of default storage dir
     public static final String DEFAULT_STORAGE_LOCATION_DIRECTORY   = "DEFAULT_STORAGE_LOCATION_DIRECTORY";
-    public static final String DEFAULT_STORAGE_LOCATION_URI         = "DEFAULT_STORAGE_LOCATION_URI";
     public static final String FILE_NAME_FORMAT                     = "FILE_NAME_FORMAT";
     public static final String PHOTO_NAME_FORMAT                    = "PHOTO_NAME_FORMAT";
 
@@ -79,17 +67,81 @@ public class GeneralKeys {
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
     // @formatter:on
 
-    //Calendar Trait
-    public static final String CALENDAR_LAST_SAVED_DATE             = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
+    public static final String FIRST_NAME = "FirstName";
+    public static final String LAST_NAME = "LastName";
+    public static final String LOCATION = "Location";
+    public static final String LATITUDE = "Latitude";
+    public static final String LONGITUDE = "Longitude";
+    public static final String PERSON_UPDATE = "PersonUpdate";
 
-    //Dialog Export
-    public static final String DIALOG_EXPORT_BUNDLE_CHECKED         = "com.fieldbook.tracker.DIALOG_EXPORT_BUNDLE_CHECKED";
+    public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
+    public static final String VERIFY_USER = "VerifyUserEvery24Hours";
+
+    public static final String FLIP_FLOP_ARROWS = "FLIP_FLOP_ARROWS";
+
+    public static final String CREATE_TRAIT_FINISHED = "CreateTraitFinished";
+    public static final String TRAITS_EXPORTED = "TraitsExported";
+    public static final String ALL_TRAITS_VISIBLE = "allTraitsVisible";
+    public static final String LAST_USED_TRAIT = "com.fieldbook.tracker.LAST_USED_TRAIT";
+
+    //themes
+    public static final String SAVED_DATA_COLOR = "SAVED_DATA_COLOR";
+
+    public static final String EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT";
+    public static final String FIRST_RUN = "FirstRun";
+    public static final String UPDATE_VERSION = "UpdateVersion";
+    public static final String REGION = "region";
+    public static final String TIPS = "Tips";
+    public static final String LANGUAGE = "language";
+    public static final String TIPS_CONFIGURED = "TipsConfigured";
+
+    //shared preferences file name
+    public static final String SHARED_PREF_FILE_NAME = "Settings";
+
+    //used to get the name of the currently selected field that is saved in preferences
+    //example: field_sample how to get: sharedPreferences.getString(Constants.FIELD_FILE, "")
+    public static final String FIELD_FILE = "FieldFile";
+
+    //key that saves where the field source is from local, brapi, etc.
+    public static final String FIELD_SOURCE = "ImportExpSource";
+
+    //used to get the current study table's integer primary key
+    public static final String SELECTED_FIELD_ID = "SelectedFieldExpId";
+
+    //next three are used to save/get the currently selected field's unique, primary and secondary keys
+    public static final String UNIQUE_NAME = "ImportUniqueName";
+    public static final String PRIMARY_NAME = "ImportFirstName";
+    public static final String SECONDARY_NAME = "ImportSecondName";
+
+    //flag saved in preferences to determine if import is completed
+    public static final String IMPORT_FIELD_FINISHED = "ImportFieldFinished";
+
+    //preference key to save the last plot during collect activity
+    public static final String LAST_PLOT = "lastplot";
+
+    //export flags
+    public static final String EXPORT_COLUMNS_UNIQUE = "EXPORT_COLUMNS_UNIQUE";
+    public static final String EXPORT_COLUMNS_ALL = "EXPORT_COLUMNS_ALL";
+    public static final String EXPORT_TRAITS_ALL = "EXPORT_TRAITS_ALL";
+    public static final String EXPORT_TRAITS_ACTIVE = "EXPORT_TRAITS_ACTIVE";
+    public static final String EXPORT_FORMAT_TABLE = "EXPORT_FORMAT_TABLE";
+    public static final String EXPORT_FORMAT_DATABSE = "EXPORT_FORMAT_DATABASE";
+    public static final String EXPORT_OVERWRITE = "Overwrite";
 
     //Data grid
-    public static final String DATAGRID_PREFIX_TRAIT                = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
+    public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
 
-    //Collect Activity
-    public static final String LAST_USED_TRAIT                      = "com.fieldbook.tracker.LAST_USED_TRAIT";
+    //Calendar Trait
+    public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
+
+    //Dialog Export
+    public static final String DIALOG_EXPORT_BUNDLE_CHECKED = "com.fieldbook.tracker.DIALOG_EXPORT_BUNDLE_CHECKED";
+
+    //storage definer / migrator
+    public static final String FIRST_MIGRATE = "FIRST_MIGRATE";
+
+    //categorical trait
+    public static final String LABELVAL_CUSTOMIZE = "LABELVAL_CUSTOMIZE";
 
     private GeneralKeys() {
 

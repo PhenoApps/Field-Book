@@ -43,13 +43,13 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName("Settings");
+        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_profile, rootKey);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_profile));
 
-        ep = getContext().getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
+        ep = getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
 
         profilePerson = findPreference("pref_profile_person");
         profileLocation = findPreference("pref_profile_location");
@@ -84,7 +84,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         if (arguments != null) {
 
-            boolean updatePerson = arguments.getBoolean("PersonUpdate", false);
+            boolean updatePerson = arguments.getBoolean(GeneralKeys.PERSON_UPDATE, false);
 
             if (updatePerson) {
 
@@ -93,7 +93,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             }
         }
 
-        ep.edit().putLong("LastTimeAppOpened", System.nanoTime()).apply();
+        ep.edit().putLong(GeneralKeys.LAST_TIME_OPENED, System.nanoTime()).apply();
 
     }
 
@@ -107,14 +107,14 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
 
-                SharedPreferences ep = getContext().getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
+                SharedPreferences ep = getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
 
                 SharedPreferences.Editor ed = ep.edit();
-                ed.putString("FirstName", "");
-                ed.putString("LastName", "");
-                ed.putString("Location", "");
-                ed.putString("Latitude", "");
-                ed.putString("Longitude", "");
+                ed.putString(GeneralKeys.FIRST_NAME, "");
+                ed.putString(GeneralKeys.LAST_NAME, "");
+                ed.putString(GeneralKeys.LOCATION, "");
+                ed.putString(GeneralKeys.LATITUDE, "");
+                ed.putString(GeneralKeys.LONGITUDE, "");
                 ed.apply();
 
                 updateSummaries();
@@ -139,8 +139,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         final EditText firstName = layout.findViewById(R.id.firstName);
         final EditText lastName = layout.findViewById(R.id.lastName);
 
-        firstName.setText(ep.getString("FirstName", ""));
-        lastName.setText(ep.getString("LastName", ""));
+        firstName.setText(ep.getString(GeneralKeys.FIRST_NAME, ""));
+        lastName.setText(ep.getString(GeneralKeys.LAST_NAME, ""));
 
         firstName.setSelectAllOnFocus(true);
         lastName.setSelectAllOnFocus(true);
@@ -154,8 +154,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             public void onClick(DialogInterface dialog, int which) {
                 SharedPreferences.Editor e = ep.edit();
 
-                e.putString("FirstName", firstName.getText().toString());
-                e.putString("LastName", lastName.getText().toString());
+                e.putString(GeneralKeys.FIRST_NAME, firstName.getText().toString());
+                e.putString(GeneralKeys.LAST_NAME, lastName.getText().toString());
 
                 e.apply();
                 updateSummaries();
@@ -195,8 +195,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         final EditText longitude = layout.findViewById(R.id.longitude);
         final EditText latitude = layout.findViewById(R.id.latitude);
 
-        longitude.setText(ep.getString("Longitude", ""));
-        latitude.setText(ep.getString("Latitude", ""));
+        longitude.setText(ep.getString(GeneralKeys.LONGITUDE, ""));
+        latitude.setText(ep.getString(GeneralKeys.LATITUDE, ""));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
 
@@ -208,11 +208,11 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
             public void onClick(DialogInterface dialog, int which) {
                 SharedPreferences.Editor e = ep.edit();
                 if (latitude.getText().toString().length() > 0 && longitude.getText().toString().length() > 0) {
-                    e.putString("Location", latitude.getText().toString() + " ; " + longitude.getText().toString());
-                    e.putString("Latitude", latitude.getText().toString());
-                    e.putString("Longitude", longitude.getText().toString());
+                    e.putString(GeneralKeys.LOCATION, latitude.getText().toString() + " ; " + longitude.getText().toString());
+                    e.putString(GeneralKeys.LATITUDE, latitude.getText().toString());
+                    e.putString(GeneralKeys.LONGITUDE, longitude.getText().toString());
                 } else {
-                    e.putString("Location", "null");
+                    e.putString(GeneralKeys.LOCATION, "null");
                 }
 
                 e.apply();
@@ -257,8 +257,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     private String personSummary() {
         String tagName = "";
 
-        if (ep.getString("FirstName", "").length() > 0 | ep.getString("LastName", "").length() > 0) {
-            tagName += ep.getString("FirstName", "") + " " + ep.getString("LastName", "");
+        if (ep.getString(GeneralKeys.FIRST_NAME, "").length() > 0 | ep.getString(GeneralKeys.LAST_NAME, "").length() > 0) {
+            tagName += ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, "");
         } else {
             tagName = "";
         }
@@ -269,8 +269,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     private String locationSummary() {
         String tagLocation = "";
 
-        if (ep.getString("Location", "").length() > 0) {
-            tagLocation += ep.getString("Location", "");
+        if (ep.getString(GeneralKeys.LOCATION, "").length() > 0) {
+            tagLocation += ep.getString(GeneralKeys.LOCATION, "");
         } else {
             tagLocation = "";
         }

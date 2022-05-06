@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Warning / error below for showAsAction should be ignored until Toolbar is replaced with AppCompatToolbar-->
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
@@ -30,17 +33,17 @@
         android:id="@+id/search"
         android:icon="@drawable/ic_tb_search"
         android:showAsAction="always"
-        android:title="@string/main_toolbar_search" />"
+        android:title="@string/main_toolbar_search" />
     <item
         android:id="@+id/resources"
         android:icon="@drawable/ic_tb_folder"
         android:showAsAction="always"
-        android:title="@string/main_toolbar_resources" />"
+        android:title="@string/main_toolbar_resources" />
     <item
         android:id="@+id/summary"
         android:icon="@drawable/ic_tb_details"
         android:showAsAction="always"
-        android:title="@string/preferences_appearance_toolbar_customize_summary" />"
+        android:title="@string/preferences_appearance_toolbar_customize_summary" />
     <item
         android:id="@+id/lockData"
         android:icon="@drawable/ic_tb_lock"

@@ -8,10 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.BrapiTraitActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-
-import io.swagger.client.model.Metadata;
 
 public class BrapiPaginationManager {
 
@@ -53,7 +50,7 @@ public class BrapiPaginationManager {
     }
 
     public Integer getDefaultPageSize(){
-        String pageSizeStr = context.getSharedPreferences("Settings", 0)
+        String pageSizeStr = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                 .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000");
 
         Integer pageSize = 1000;

@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.preference.Preference;
@@ -31,7 +30,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName("Settings");
+        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_behavior, rootKey);
 

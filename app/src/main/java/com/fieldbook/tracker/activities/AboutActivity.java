@@ -191,12 +191,9 @@ public class AboutActivity extends MaterialAboutActivity {
         try {
             packageManager.getPackageInfo(packageName, 0);
 
-            return new MaterialAboutItemOnClickAction() {
-                @Override
-                public void onClick() {
-                    Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
-                    startActivity(launchIntent);
-                }
+            return () -> {
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
+                startActivity(launchIntent);
             };
         } catch (PackageManager.NameNotFoundException e) {
             return ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://play.google.com/store/apps/details?id=" + packageName));

@@ -27,7 +27,6 @@ public class DateTraitLayout extends BaseTraitLayout {
     Button addDayBtn;
     Button minusDayBtn;
     ImageButton saveDayBtn;
-    private ImageButton calendarVisibilityBtn;
     private TextView month;
     private TextView day;
     private String date;
@@ -72,7 +71,7 @@ public class DateTraitLayout extends BaseTraitLayout {
         minusDayBtn = findViewById(R.id.minusDateBtn);
         saveDayBtn = findViewById(R.id.enterBtn);
 
-        calendarVisibilityBtn = findViewById(R.id.trait_date_calendar_visibility_btn);
+        ImageButton calendarVisibilityBtn = findViewById(R.id.trait_date_calendar_visibility_btn);
 
         /*
          * When the calendar view visibility button is pressed it starts the date picker dialog.
