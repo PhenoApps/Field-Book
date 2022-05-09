@@ -140,7 +140,7 @@
                     android:id="@+id/dialog_export_bundle_data_cb"
                     android:text="@string/dialog_export_bundle_data_cb_text"
                     android:textColor="#000000"
-                    android:textSize="16sp"/>
+                    android:textSize="@dimen/text_size_medium"/>
 
             </LinearLayout>
 

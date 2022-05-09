@@ -646,7 +646,7 @@
     <string name="activity_collect_geonav_navigate">Navigate</string>
     <string name="menu_collect_start_geo_nav_title">Start GeoNav</string>
     <string name="activity_collect_found_plot">Navigated to plot in vicinity</string>
-    <string name="menu_fields_plot_by_distance_title">Select plot by distance</string>
+    <string name="menu_fields_plot_by_distance_title">Select nearest field</string>
     <string name="activity_field_editor_no_field_found">No coordinates could be found.</string>
     <string name="activity_field_editor_switch_field">"Switch to field %s"</string>
     <string name="activity_field_editor_switch_field_action">Switch</string>

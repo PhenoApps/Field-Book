@@ -3,7 +3,9 @@
 <!-- Warning / error below for showAsAction should be ignored until Toolbar is replaced with AppCompatToolbar-->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="AppCompatResource">
     <item
         android:id="@+id/help"
         android:icon="@drawable/ic_tb_help"
