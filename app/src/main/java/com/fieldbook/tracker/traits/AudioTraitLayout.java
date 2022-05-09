@@ -2,7 +2,6 @@ package com.fieldbook.tracker.traits;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -12,20 +11,18 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.preference.PreferenceManager;
+import androidx.documentfile.provider.DocumentFile;
 
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.activities.ConfigActivity;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
-import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -33,7 +30,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
-    private File recordingLocation;
+    private Uri recordingLocation;
     private ImageButton controlButton;
     private ButtonState buttonState;
     private TextView audioRecordingText;
@@ -80,9 +77,10 @@ public class AudioTraitLayout extends BaseTraitLayout {
             audioRecordingText.setText("NA");
         } else {
             Map<String, String> observations = getNewTraits();
-            File recordingLocation = new File(getNewTraits().get(getCurrentTrait().getTrait()).toString());
-            if (recordingLocation.exists()) {
-                this.recordingLocation = recordingLocation;
+            String dbSavedLocation = getNewTraits().get(getCurrentTrait().getTrait()).toString();
+            DocumentFile file = DocumentFile.fromSingleUri(getContext(), Uri.parse(dbSavedLocation));
+            if (file != null && file.exists()) {
+                this.recordingLocation = file.getUri();
                 buttonState = ButtonState.WAITING_FOR_PLAYBACK;
                 controlButton.setImageResource(buttonState.getImageId());
                 audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
@@ -106,8 +104,12 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     // Delete recording
     private void deleteRecording() {
-        if (recordingLocation != null && recordingLocation.exists()) {
-            recordingLocation.delete();
+        if (recordingLocation != null) {
+            DocumentFile file = DocumentFile.fromSingleUri(getContext(), recordingLocation);
+
+            if (file != null && file.exists()) {
+                file.delete();
+            }
         }
     }
 
@@ -162,21 +164,19 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         private void startPlayback() {
             try {
-                mediaPlayer = MediaPlayer.create(getContext(), Uri.parse(recordingLocation.getAbsolutePath()));
-                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    public void onCompletion(MediaPlayer mp) {
-                        stopPlayback();
-                        buttonState = ButtonState.WAITING_FOR_PLAYBACK;
-                        controlButton.setImageResource(buttonState.getImageId());
-                        toggleNavigationButtoms(true);
-                    }
+                if (mediaPlayer != null) {
+                    mediaPlayer.stop();
+                    mediaPlayer.reset();
+                    mediaPlayer.release();
+                }
+                mediaPlayer = MediaPlayer.create(getContext(),recordingLocation);
+                mediaPlayer.setOnCompletionListener(mp -> {
+                    stopPlayback();
+                    buttonState = ButtonState.WAITING_FOR_PLAYBACK;
+                    controlButton.setImageResource(buttonState.getImageId());
+                    toggleNavigationButtoms(true);
                 });
-                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mediaPlayer) {
-                        mediaPlayer.start();
-                    }
-                });
+                mediaPlayer.setOnPreparedListener(MediaPlayer::start);
                 mediaPlayer.prepareAsync();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -205,10 +205,8 @@ public class AudioTraitLayout extends BaseTraitLayout {
         private void stopRecording() {
             try {
                 mediaRecorder.stop();
-                File storedAudio = new File(recordingLocation.getAbsolutePath());
-                Utils.scanFile(getContext(), storedAudio);
                 releaseRecorder();
-                updateTrait(getCurrentTrait().getTrait(), "audio", recordingLocation.getAbsolutePath());
+                updateTrait(getCurrentTrait().getTrait(), "audio", recordingLocation.toString());
                 audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -231,10 +229,13 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         // For audio trait type
         private void setRecordingLocation(String recordingName) {
-            String dirPath = getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/audio/";
-            File dir = new File(dirPath);
-            dir.mkdirs();
-            recordingLocation = new File(dirPath, recordingName + ".mp4");
+            DocumentFile audioDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "audio");
+            if (audioDir != null && audioDir.exists()) {
+                DocumentFile audioFile = audioDir.createFile("*/mp4", recordingName + ".mp4");
+                if (audioFile != null) {
+                    recordingLocation = audioFile.getUri();
+                }
+            }
         }
 
         // Make sure we're not recording music playing in the background; ask the
@@ -268,7 +269,12 @@ public class AudioTraitLayout extends BaseTraitLayout {
             }
 
             setRecordingLocation(mGeneratedName);
-            mediaRecorder.setOutputFile(recordingLocation.getAbsolutePath());
+            try {
+                FileDescriptor fd = getContext().getContentResolver().openFileDescriptor(recordingLocation, "rw").getFileDescriptor();
+                mediaRecorder.setOutputFile(fd);
+            } catch (FileNotFoundException | IllegalStateException e) {
+                e.printStackTrace();
+            }
 
             try {
                 mediaRecorder.prepare();

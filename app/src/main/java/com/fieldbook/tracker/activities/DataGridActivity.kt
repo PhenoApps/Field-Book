@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.*
 import android.widget.ProgressBar
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.databinding.DataBindingUtil
@@ -13,7 +14,9 @@ import com.evrencoskun.tableview.TableView
 import com.evrencoskun.tableview.listener.ITableViewListener
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.DataGridAdapter
+import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
 import kotlinx.coroutines.*
 import java.util.*
@@ -75,6 +78,7 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
      * Adapters/lists used to store grid information, also used for click events
      */
     private lateinit var mAdapter: DataGridAdapter
+    private lateinit var mRowHeaders: ArrayList<String>
     private lateinit var mPlotIds: ArrayList<String>
     private lateinit var mTraits: Array<String>
 
@@ -98,10 +102,21 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
         dataGridGroup = binding.dataGridGroup
         mTableView = binding.tableView
 
+        initialize(plotId = intent.extras?.getInt("plot_id"),
+            trait = intent.extras?.getInt("trait"))
+    }
+
+    /**
+     * Runs the data grid loading.
+     */
+    private fun initialize(prefixTrait: String? = null,
+                           plotId: Int? = null,
+                           trait: Int? = null) {
+
         //if something goes wrong finish the activity
         try {
 
-            loadGridData()
+            loadGridData(prefixTrait, plotId, trait)
 
         } catch (e: Exception) {
 
@@ -111,7 +126,13 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
             finish()
         }
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+
+        menuInflater.inflate(R.menu.menu_data_grid, menu)
+
+        return super.onCreateOptionsMenu(menu)
     }
 
     //finish activity when back button is pressed
@@ -120,7 +141,27 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
             android.R.id.home -> {
                 finish()
             }
+            R.id.menu_data_grid_action_header_view -> {
+
+                //get all available obs. property columns
+                val prefixTraits = ObservationUnitPropertyDao.getRangeColumns()
+
+                if (prefixTraits.isNotEmpty()) {
+
+                    //show a dialog to choose a prefix trait to be displayed
+                    AlertDialog.Builder(this)
+                        .setTitle(R.string.dialog_data_grid_header_picker_title)
+                        .setSingleChoiceItems(prefixTraits, 0) { dialog, which ->
+
+                            initialize(prefixTraits[which])
+
+                            dialog.dismiss()
+
+                        }.create().show()
+                }
+            }
         }
+
         return super.onOptionsItemSelected(item)
     }
 
@@ -128,13 +169,25 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
      * Uses the convertDatabaseToTable query to create a spreadsheet of values.
      * Columns returned are plot_id followed by all traits.
      */
-    private fun loadGridData() {
+    private fun loadGridData(prefixTrait: String? = null,
+                             plotId: Int? = null,
+                             trait: Int? = null) {
 
-        val ep = getSharedPreferences("Settings", MODE_PRIVATE)
+        val ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
 
-        val uniqueName = ep.getString("ImportUniqueName", "") ?: ""
+        val uniqueHeader = ep.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
-        if (uniqueName.isNotBlank()) {
+        //if row header was not chosen, then use the preference unique name
+        var rowHeader = prefixTrait ?: ep.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
+
+        if (rowHeader !in ObservationUnitPropertyDao.getRangeColumnNames()) {
+            rowHeader = uniqueHeader
+        }
+
+        //if rowHeader was updated, update the preference
+        ep.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, rowHeader).apply()
+
+        if (rowHeader.isNotBlank()) {
 
             //background processing
             scope.launch {
@@ -143,15 +196,19 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
                 mTraits = ConfigActivity.dt.visibleTrait
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
-                val cursor = ConfigActivity.dt.convertDatabaseToTable(arrayOf(uniqueName), mTraits)
+                val cursor = ConfigActivity.dt.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
 
                 if (cursor.moveToFirst()) {
+
+                    mRowHeaders = arrayListOf()
 
                     mPlotIds = arrayListOf()
 
                     val dataMap = arrayListOf<List<CellData>>()
 
                     do { //iterate over cursor results and populate lists of plot ids and related trait values
+
+                        val rowHeaderIndex = cursor.getColumnIndex(rowHeader)
 
                         //unique name column is always the first column
                         val uniqueIndex = cursor.getColumnIndex(cursor.getColumnName(0))
@@ -160,9 +217,13 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
                             val plotId = cursor.getString(uniqueIndex)
 
+                            val header = cursor.getString(rowHeaderIndex)
+
                             val dataList = arrayListOf<CellData>()
 
-                            mPlotIds.add(plotId) //add unique name row header
+                            mRowHeaders.add(header) //add unique name row header
+
+                            mPlotIds.add(plotId)
 
                             mTraits.forEachIndexed { _, variable ->
 
@@ -182,7 +243,8 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
                     } while (cursor.moveToNext())
 
-                    mAdapter = DataGridAdapter()
+                    //send trait/plot indices to highlight the cell
+                    mAdapter = DataGridAdapter((trait ?: 1) - 1, (plotId ?: 1) - 1)
 
                     runOnUiThread {
 
@@ -197,8 +259,17 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
                         mTableView.setAdapter(mAdapter)
 
                         mAdapter.setAllItems(mTraits.map { HeaderData(it, it) },
-                            mPlotIds.map { HeaderData(it, it) },
+                            mRowHeaders.map { HeaderData(it, it) },
                             dataMap.toList())
+
+                        //scroll to the position of the current trait/plot id
+                        if (plotId != null && trait != null) {
+
+                            mTableView.scrollToColumnPosition(trait - 1)
+
+                            mTableView.scrollToRowPosition(plotId - 1)
+
+                        }
                     }
 
                     cursor.close() //always remember to close your cursor! :)

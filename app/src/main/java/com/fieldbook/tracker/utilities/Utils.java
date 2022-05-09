@@ -3,7 +3,6 @@ package com.fieldbook.tracker.utilities;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Rect;
 import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -12,8 +11,6 @@ import android.view.Gravity;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.getkeepsafe.taptargetview.TapTarget;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +22,10 @@ public class Utils extends Application {
     // scanFile
     public static void scanFile(Context context, File filePath) {
         MediaScannerConnection.scanFile(context, new String[]{filePath.getAbsolutePath()}, null, null);
+    }
+
+    public static void scanFile(Context context, String path, String mimeType) {
+        MediaScannerConnection.scanFile(context, new String[] { path }, new String[] { mimeType }, null);
     }
 
     // get current app version
@@ -68,10 +69,7 @@ public class Utils extends Application {
 
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected())
-            return true;
-        else
-            return false;
+        return networkInfo != null && networkInfo.isConnected();
     }
 
     public static void makeToast(Context context, String message) {
@@ -81,20 +79,27 @@ public class Utils extends Application {
     }
 
     public static void createDir(Context context, String path) {
-        File dir = new File(path);
-        File blankFile = new File(path + "/.fieldbook");
 
-        if (!dir.exists()) {
-            dir.mkdirs();
+        if (path != null) {
+            File dir = new File(path);
+            File blankFile = new File(path + "/.fieldbook");
 
-            try {
-                blankFile.getParentFile().mkdirs();
-                blankFile.createNewFile();
-                Utils.scanFile(context, blankFile);
-            } catch (IOException e) {
-                Log.d("CreateDir", e.toString());
+            if (!dir.exists()) {
+                dir.mkdirs();
+
+                try {
+                    blankFile.getParentFile().mkdirs();
+                    blankFile.createNewFile();
+                    Utils.scanFile(context, blankFile);
+                } catch (IOException e) {
+                    Log.d("CreateDir", e.toString());
+                }
             }
+        } else {
+
+            makeToast(context, context.getString(R.string.error_making_directory));
         }
+
     }
 
     public static void createDirs(Context context, String basePath) {

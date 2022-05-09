@@ -61,7 +61,6 @@ import org.brapi.v2.model.pheno.response.BrAPIObservationLevelListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
-import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponseResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +89,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public BrAPIServiceV2(Context context) {
         this.context = context;
         // Make timeout longer. Set it to 60 seconds for now
-        this.apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), getTimeoutValue(context) * 1000);
+        this.apiClient = new BrAPIClient(BrAPIService.getBrapiUrl(context), BrAPIService.getTimeoutValue(context) * 1000);
 
         this.imagesApi = new ImagesApi(apiClient);
         this.studiesApi = new StudiesApi(apiClient);
@@ -104,7 +103,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     @Override
     public void authorizeClient(){
         try {
-            apiClient.authenticate(t -> context.getSharedPreferences("Settings", 0)
+            apiClient.authenticate(t -> context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                     .getString(GeneralKeys.BRAPI_TOKEN, null));
         } catch (ApiException error) {
             Log.e("BrAPIServiceV2", "API Exception", error);
@@ -129,7 +128,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             @Override
             public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
                 Log.e("BrAPIServiceV2", "Error fetching observation levels", error);
-                failFn.apply(new ApiError().setErrorCode(ApiErrorCode.processErrorCode(error.getCode())).setResponseBody(error.getResponseBody()));
+                ApiErrorCode e = ApiErrorCode.processErrorCode(error.getCode());
+                failFn.apply(new ApiError().setErrorCode(e).setResponseBody(error.getResponseBody()));
             }
         };
 
@@ -442,14 +442,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
-            final Integer pageSize = Integer.parseInt(context.getSharedPreferences("Settings", 0)
+            final Integer pageSize = Integer.parseInt(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                     .getString(GeneralKeys.BRAPI_PAGE_SIZE, "1000"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
 
             ObservationUnitQueryParams queryParams = new ObservationUnitQueryParams();
-            queryParams.studyDbId(studyDbId).observationUnitLevelName(observationLevel.getObservationLevelName()).page(0).pageSize(pageSize);
+            queryParams.studyDbId(studyDbId);
+            if (observationLevel != null && observationLevel.getObservationLevelName() != null) {
+                queryParams.observationUnitLevelName(observationLevel.getObservationLevelName());
+            } else queryParams.observationUnitLevelName("plot");
+            queryParams.page(0).pageSize(pageSize);
 
             BrapiV2ApiCallBack<BrAPIObservationUnitListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationUnitListResponse>() {
                 @Override
@@ -507,34 +511,37 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             Map<String, String> attributesMap = new HashMap<>();
 
             BrAPIObservationUnitPosition pos = unit.getObservationUnitPosition();
-            List<BrAPIObservationUnitLevelRelationship> levels = pos.getObservationLevelRelationships();
-            levels.add(pos.getObservationLevel());
-            for(BrAPIObservationUnitLevelRelationship level: levels){
-                if(level.getLevelName() != null) {
-                    String attributeName = level.getLevelName();
-                    attributeName = attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1).toLowerCase();
-                    attributesMap.put(attributeName, level.getLevelCode());
+            if (pos != null) {
+                List<BrAPIObservationUnitLevelRelationship> levels = pos.getObservationLevelRelationships();
+                levels.add(pos.getObservationLevel());
+                for(BrAPIObservationUnitLevelRelationship level: levels){
+                    if(level.getLevelName() != null) {
+                        String attributeName = level.getLevelName();
+                        attributeName = attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1).toLowerCase();
+                        attributesMap.put(attributeName, level.getLevelCode());
+                    }
                 }
+
+                if (pos.getPositionCoordinateX() != null){
+                    String rowColStr = getRowColStr(pos.getPositionCoordinateXType());
+                    if(rowColStr == null){
+                        rowColStr = "Row";
+                    }
+                    attributesMap.put(rowColStr, pos.getPositionCoordinateX());
+                }
+
+                if (pos.getPositionCoordinateY() != null){
+                    String rowColStr = getRowColStr(pos.getPositionCoordinateYType());
+                    if(rowColStr == null){
+                        rowColStr = "Column";
+                    }
+                    attributesMap.put(rowColStr, pos.getPositionCoordinateY());
+                }
+
+                if (pos.getEntryType() != null && pos.getEntryType().getBrapiValue() != null)
+                    attributesMap.put("EntryType", pos.getEntryType().getBrapiValue());
             }
 
-            if (pos.getPositionCoordinateX() != null){
-                String rowColStr = getRowColStr(pos.getPositionCoordinateXType());
-                if(rowColStr == null){
-                    rowColStr = "Row";
-                }
-                attributesMap.put(rowColStr, pos.getPositionCoordinateX());
-            }
-
-            if (pos.getPositionCoordinateY() != null){
-                String rowColStr = getRowColStr(pos.getPositionCoordinateYType());
-                if(rowColStr == null){
-                    rowColStr = "Column";
-                }
-                attributesMap.put(rowColStr, pos.getPositionCoordinateY());
-            }
-
-            if (pos.getEntryType() != null && pos.getEntryType().getBrapiValue() != null)
-                attributesMap.put("EntryType", pos.getEntryType().getBrapiValue());
             if (unit.getGermplasmName() != null)
                 attributesMap.put("Germplasm", unit.getGermplasmName());
             if (unit.getObservationUnitDbId() != null)
@@ -943,7 +950,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
         DataHelper dataHelper = new DataHelper(context);
 
-        String observationLevel = selectedObservationLevel.getObservationLevelName().substring(0, 1).toUpperCase() + selectedObservationLevel.getObservationLevelName().substring(1);
+        String observationLevel;
+        if (selectedObservationLevel == null) observationLevel = "Plot";
+        else observationLevel = selectedObservationLevel.getObservationLevelName().substring(0, 1).toUpperCase() + selectedObservationLevel.getObservationLevelName().substring(1);
         try {
             FieldObject field = new FieldObject();
             field.setExp_name(studyDetails.getStudyName());
@@ -971,6 +980,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             // Check that there are not duplicate unique ids in the database
             HashMap<String, String> checkMap = new HashMap<>();
+
+            if (studyDetails.getValues().isEmpty()) {
+                return new BrapiControllerResponse(false, this.noPlots);
+            }
 
             // Construct our map to check for uniques
             for (List<String> dataRow : studyDetails.getValues()) {

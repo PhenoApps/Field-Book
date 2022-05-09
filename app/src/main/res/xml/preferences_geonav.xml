@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_map_search"
+        android:key="com.fieldbook.tracker.geonav.ENABLE_GEONAV"
+        android:persistent="true"
+        android:summary="@string/pref_geonav_enable_summary"
+        android:title="@string/pref_geonav_enable_title" />
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/pref_geonav_search_methods"
+        android:entryValues="@array/pref_geonav_search_methods_values"
+        android:icon="@drawable/ic_function_variant"
+        android:key="com.fieldbook.tracker.geonav.SEARCH_METHOD"
+        android:summary="@string/pref_geonav_search_method_summary"
+        android:title="@string/pref_geonav_search_method_title" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_script_text_outline"
+        android:key="com.fieldbook.tracker.geonav.GEONAV_LOG"
+        android:summary="@string/pref_geonav_log_summary"
+        android:title="@string/pref_geonav_log_title" />
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/pref_geonav_update_intervals"
+        android:entryValues="@array/pref_geonav_update_interval_values"
+        android:icon="@drawable/ic_hourglass_empty_black_24dp"
+        android:key="com.fieldbook.tracker.geonav.UPDATE_INTERVAL"
+        android:summary="@string/pref_geonav_update_interval_summary"
+        android:title="@string/pref_geonav_update_interval_title" />
+
+    <Preference
+        android:icon="@drawable/ic_bluetooth_black_24dp"
+        android:key="com.fieldbook.tracker.geonav.PAIR_BLUETOOTH"
+        android:title="@string/pref_geonav_pair" />
+
+    <PreferenceCategory
+        android:key="com.fieldbook.tracker.geonav.parameters.CATEGORY_KEY"
+        android:title="@string/pref_behavior_geonav_parameters_category_title"
+        app:iconSpaceReserved="false"
+        app:isPreferenceVisible="false">
+
+        <EditTextPreference
+            android:defaultValue="0.001"
+            android:icon="@drawable/ic_map_marker_distance"
+            android:key="com.fieldbook.tracker.geonav.parameters.trapezoid.D1"
+            android:summary="@string/pref_geonav_search_trapezoid_d1_summary"
+            android:title="@string/pref_geonav_search_trapezoid_d1_title" />
+
+        <EditTextPreference
+            android:defaultValue="0.01"
+            android:icon="@drawable/ic_map_marker_distance"
+            android:key="com.fieldbook.tracker.geonav.parameters.trapezoid.D2"
+            android:summary="@string/pref_geonav_search_trapezoid_d2_summary"
+            android:title="@string/pref_geonav_search_trapezoid_d2_title" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/pref_geonav_search_angles"
+            android:entryValues="@array/pref_geonav_search_angle_values"
+            android:icon="@drawable/ic_compass_calibration_black_24dp"
+            android:key="com.fieldbook.tracker.geonav.SEARCH_ANGLE"
+            android:summary="@string/pref_geonav_search_angle_summary"
+            android:title="@string/pref_geonav_search_angle_title" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

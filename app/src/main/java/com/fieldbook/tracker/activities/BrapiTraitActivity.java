@@ -19,6 +19,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
@@ -201,9 +202,7 @@ public class BrapiTraitActivity extends AppCompatActivity {
                 itemDataList.add(trait.getId());
         }
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, itemDataList);
-
-        return arrayAdapter;
+        return new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, itemDataList);
     }
 
     // Button event for load and save traits
@@ -271,10 +270,10 @@ public class BrapiTraitActivity extends AppCompatActivity {
             }
         }
 
-        SharedPreferences ep = getSharedPreferences("Settings", 0);
+        SharedPreferences ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         SharedPreferences.Editor ed = ep.edit();
-        ed.putBoolean("CreateTraitFinished", true);
-        ed.putBoolean("TraitsExported", false);
+        ed.putBoolean(GeneralKeys.CREATE_TRAIT_FINISHED, true);
+        ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false);
         ed.apply();
 
         CollectActivity.reloadData = true;

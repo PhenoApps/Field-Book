@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -15,14 +16,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
+import com.fieldbook.tracker.brapi.service.AbstractBrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.text.SimpleDateFormat;
@@ -30,8 +35,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Semaphore;
 
 public class BrapiExportActivity extends AppCompatActivity {
+    private static final String TAG = BrapiExportActivity.class.getName();
 
     private BrAPIService brAPIService;
     private DataHelper dataHelper;
@@ -64,6 +71,11 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     }
 
+    //testing constructor
+    public BrapiExportActivity(DataHelper dataHelper) {
+        this.dataHelper = dataHelper;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +86,9 @@ public class BrapiExportActivity extends AppCompatActivity {
                 requestWindowFeature(Window.FEATURE_NO_TITLE);
                 setContentView(R.layout.dialog_brapi_export);
 
-                this.dataHelper = new DataHelper(this);
+                if(this.dataHelper == null) {
+                    this.dataHelper = new DataHelper(this);
+                }
 
                 brAPIService = BrAPIServiceFactory.getBrAPIService(this);
 
@@ -185,31 +199,32 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private void sendData() {
 
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (numNewObservations > 0) {
+        AsyncTask.execute(() -> {
+            if (numNewObservations > 0) {
+                try {
                     createObservations();
-                }else{
-                    createObservationsComplete = true;
-                    uploadComplete();
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "Saving observations was interrupted", e);
                 }
+            }else{
+                createObservationsComplete = true;
+                uploadComplete();
+            }
 
-                if (numEditedObservations > 0) {
-                    updateObservations();
-                }else{
-                    updateObservationsComplete = true;
-                    uploadComplete();
-                }
+            if (numEditedObservations > 0) {
+                updateObservations();
+            }else{
+                updateObservationsComplete = true;
+                uploadComplete();
+            }
 
-                if (numNewImages > 0) {
-                    loadNewImages();
-                    postImages(imagesNew);
-                }
-                if (numEditedImages > 0 || numIncompleteImages > 0) {
-                    loadEditedIncompleteImages();
-                    putImages();
-                }
+            if (numNewImages > 0) {
+                loadNewImages();
+                postImages(imagesNew);
+            }
+            if (numEditedImages > 0 || numIncompleteImages > 0) {
+                loadEditedIncompleteImages();
+                putImages();
             }
         });
     }
@@ -242,77 +257,60 @@ public class BrapiExportActivity extends AppCompatActivity {
         this.findViewById(R.id.saving_panel).setVisibility(View.GONE);
     }
 
-    private void createObservations() {
-        brAPIService.createObservations(newObservations,
-                new Function<List<Observation>, Void>() {
-                    @Override
-                    public Void apply(final List<Observation> observationDbIds) {
+    private void createObservations() throws InterruptedException {
+        int chunkSize = BrAPIService.getChunkSize(this);
+        brAPIService.createObservationsChunked(chunkSize, newObservations, (input, completedChunkNum, chunks, done) -> {
+            (BrapiExportActivity.this).runOnUiThread(() -> {
+                processCreateObservationsResponse(chunks);
+                processResponse(input, chunks);
 
-                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                processCreateObservationsResponse(observationDbIds);
-                                createObservationsComplete = true;
-                                uploadComplete();
-                            }
-                        });
-                        return null;
-                    }
-                }, new Function<Integer, Void>() {
+                numNewObservations -= input.size();
+                numSyncedObservations += input.size();
 
-                    @Override
-                    public Void apply(final Integer code) {
+                ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));
+                ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
 
-                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                createObservationsError = processErrorCode(code);
-                                createObservationsComplete = true;
-                                uploadComplete();
-                            }
-                        });
-
-                        return null;
-                    }
+                if(done) {
+                    createObservationsComplete = true;
+                    uploadComplete();
                 }
-        );
+            });
+        }, failureInput -> {
+            createObservationsError = createObservationsError == null ? processErrorCode(failureInput) : createObservationsError;
+            createObservationsComplete = true;
+            uploadComplete();
+            return null;
+        });
     }
 
     private void updateObservations() {
 
-        brAPIService.updateObservations(editedObservations,
-                new Function<List<Observation>, Void>() {
-                    @Override
-                    public Void apply(final List<Observation> observationDbIds) {
+        int chunkSize = BrAPIService.getChunkSize(this);
+        brAPIService.updateObservationsChunked(chunkSize, editedObservations, (input, completedChunkNum, chunks, done) -> {
+            (BrapiExportActivity.this).runOnUiThread(() -> {
+                processUpdateObservationsResponse(chunks);
+                processResponse(input, chunks);
 
-                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                processUpdateObservationsResponse(observationDbIds);
-                                updateObservationsComplete = true;
-                                uploadComplete();
-                            }
-                        });
-                        return null;
-                    }
-                }, new Function<Integer, Void>() {
+                numEditedObservations -= input.size();
+                numSyncedObservations += input.size();
 
-                    @Override
-                    public Void apply(final Integer code) {
+                ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));
+                ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
 
-                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateObservationsError = processErrorCode(code);
-                                updateObservationsComplete = true;
-                                uploadComplete();
-                            }
-                        });
-
-                        return null;
-                    }
+                if(done) {
+                    updateObservationsComplete = true;
+                    uploadComplete();
                 }
-        );
+            });
+        }, code -> {
+            (BrapiExportActivity.this).runOnUiThread(() -> {
+                updateObservationsError = processErrorCode(code);
+                updateObservationsComplete = true;
+                uploadComplete();
+            });
+
+            return null;
+        });
     }
 
     private void postImages(List<FieldBookImage> newImages) {
@@ -728,8 +726,8 @@ public class BrapiExportActivity extends AppCompatActivity {
             }
         }
 
-        SharedPreferences ep = this.getSharedPreferences("Settings", 0);
-        String field = ep.getString("FieldFile", "");
+        SharedPreferences ep = this.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+        String field = ep.getString(GeneralKeys.FIELD_FILE, "");
 
         ((TextView) findViewById(R.id.brapistudyValue)).setText(field);
         ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));

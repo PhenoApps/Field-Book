@@ -3,9 +3,7 @@ package com.fieldbook.tracker.preferences;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.Preference;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -14,8 +12,6 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.service.BrAPIService;
-import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 
 public class PreferencesActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, SearchPreferenceResultListener {
 
@@ -38,12 +34,12 @@ public class PreferencesActivity extends AppCompatActivity implements Preference
 
         //parse passed bundle and check if the person should be updated.
         Bundle extras = getIntent().getExtras();
-        if (extras != null && extras.getBoolean("PersonUpdate", false)) {
+        if (extras != null && extras.getBoolean(GeneralKeys.PERSON_UPDATE, false)) {
 
             //starts fragment with bundle that tells the fragment to open the person setting
             Fragment profile = new ProfilePreferencesFragment();
             Bundle personUpdate = new Bundle();
-            personUpdate.putBoolean("PersonUpdate", true);
+            personUpdate.putBoolean(GeneralKeys.PERSON_UPDATE, true);
             profile.setArguments(personUpdate);
             getSupportFragmentManager().beginTransaction()
                     .replace(android.R.id.content, profile).commit();

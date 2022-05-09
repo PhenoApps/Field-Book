@@ -35,7 +35,8 @@
                 lngHeader,lngTextView,
                 altHeader,altTextView,
                 hdopHeader,hdopTextView,
-                gnss_collect_button, disconnect_button, gnss_trait_averaging_switch"
+                gnss_collect_button, disconnect_button,
+                gnss_trait_averaging_switch"
             tools:visibility="visible" />
 
         <TextView
@@ -242,6 +243,50 @@
             android:text="@string/gnss_trait_averaging_switch_text"
             app:layout_constraintTop_toBottomOf="@id/disconnect_button"
             app:layout_constraintStart_toStartOf="parent"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:visibility="invisible"
+            android:theme="@style/Theme.MaterialComponents.Light"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:orientation="horizontal"
+            app:singleSelection="true"
+            app:singleLine="true"
+            app:layout_constraintStart_toEndOf="@id/gnss_trait_averaging_switch"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/disconnect_button"
+            android:id="@+id/gnss_trait_averaging_chip_group">
+
+            <com.google.android.material.chip.Chip
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:id="@+id/gnss_trait_5s_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="true"
+                android:checked="false"
+                android:text="@string/trait_gnss_chip_5s_text"/>
+
+            <com.google.android.material.chip.Chip
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:id="@+id/gnss_trait_10s_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="true"
+                android:checked="false"
+                android:text="@string/trait_gnss_chip_10s_text"/>
+
+            <com.google.android.material.chip.Chip
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:id="@+id/gnss_trait_manual_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="true"
+                android:checked="true"
+                android:text="@string/trait_gnss_chip_manual_text"/>
+
+        </com.google.android.material.chip.ChipGroup>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

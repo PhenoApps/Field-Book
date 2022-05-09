@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,10 +12,8 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.text.Html;
 import android.util.Log;
@@ -23,10 +22,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -36,37 +32,42 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import androidx.core.app.ActivityCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.FileProvider;
+import androidx.core.app.ActivityCompat;
+import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.brapi.service.BrAPIService;
+import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
+import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.PrefsConstants;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.Utils;
-
+import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
-
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
-import java.io.File;
-import java.io.FileWriter;
+import org.phenoapps.utils.BaseDocumentTreeUtil;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -87,12 +88,11 @@ public class ConfigActivity extends AppCompatActivity {
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
     private final int PERMISSIONS_REQUEST_MAKE_DIRS = 9930;
+    private final int REQUEST_STORAGE_DEFINER = 104;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     private SharedPreferences ep;
     private AlertDialog saveDialog;
-    private AlertDialog dbSaveDialog;
-    private String mChosenFile = "";
     private EditText exportFile;
     private String exportFileString = "";
     private String fFile;
@@ -109,22 +109,13 @@ public class ConfigActivity extends AppCompatActivity {
     private Menu systemMenu;
     ListView settingsList;
 
-    private Runnable exportData = new Runnable() {
-        public void run() {
-            new ExportDataTask().execute(0);
-        }
-    };
+    private final Runnable exportData = () -> new ExportDataTask().execute(0);
 
-    private Runnable importDB = new Runnable() {
-        public void run() {
-            new ImportDBTask().execute(0);
-        }
-    };
+    private void invokeDatabaseImport(DocumentFile doc) {
 
-    @Override
-    public void onDestroy() {
-        //ConfigActivity.dt.close();
-        super.onDestroy();
+        mHandler.post(() -> {
+            new ImportDBTask(doc).execute(0);
+        });
     }
 
     @Override
@@ -132,7 +123,7 @@ public class ConfigActivity extends AppCompatActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
 
         invalidateOptionsMenu();
@@ -146,7 +137,7 @@ public class ConfigActivity extends AppCompatActivity {
         dt = new DataHelper(this);
         dt.open();
 
-        ep = getSharedPreferences("Settings", 0);
+        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         invalidateOptionsMenu();
         loadScreen();
@@ -154,27 +145,33 @@ public class ConfigActivity extends AppCompatActivity {
         // request permissions
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
-        if (ep.getInt("UpdateVersion", -1) < Utils.getVersion(this)) {
-            ep.edit().putInt("UpdateVersion", Utils.getVersion(this)).apply();
+        if (ep.getInt(GeneralKeys.UPDATE_VERSION, -1) < Utils.getVersion(this)) {
+            ep.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
             showChangelog(true, false);
         }
 
-        if (!ep.contains("FirstRun")) {
+        if (!ep.contains(GeneralKeys.FIRST_RUN)) {
             // do things on the first run
-            Utils.createDirs(this, Constants.MPATH);
+            //this will grant FB access to the chosen folder
+            //preference and activity is handled through this utility call
 
             SharedPreferences.Editor ed = ep.edit();
 
-            Set<String> entries = ep.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<String>());
+            Set<String> entries = ep.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
             entries.add("search");
             entries.add("resources");
             entries.add("summary");
             entries.add("lockData");
 
             ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE,entries);
-            ed.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY,Constants.MPATH);
-            ed.putBoolean("FirstRun",false);
+            ed.putBoolean(GeneralKeys.FIRST_RUN,false);
             ed.apply();
+        }
+
+        if (!BaseDocumentTreeUtil.Companion.isEnabled(this)) {
+
+            startActivityForResult(new Intent(this, DefineStorageActivity.class),
+                    REQUEST_STORAGE_DEFINER);
         }
     }
 
@@ -213,61 +210,59 @@ public class ConfigActivity extends AppCompatActivity {
 
         Integer[] image_id = {R.drawable.ic_nav_drawer_fields, R.drawable.ic_nav_drawer_traits, R.drawable.ic_nav_drawer_collect_data, R.drawable.trait_date_save, R.drawable.ic_nav_drawer_settings, R.drawable.ic_tb_info};
 
-        settingsList.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int position, long arg3) {
-                Intent intent = new Intent();
-                switch (position) {
-                    case 0:
-                        intent.setClassName(ConfigActivity.this,
-                                FieldEditorActivity.class.getName());
-                        startActivity(intent);
+        settingsList.setOnItemClickListener((av, arg1, position, arg3) -> {
+            Intent intent = new Intent();
+            switch (position) {
+                case 0:
+                    intent.setClassName(ConfigActivity.this,
+                            FieldEditorActivity.class.getName());
+                    startActivity(intent);
 
-                        break;
-                    case 1:
-                        intent.setClassName(ConfigActivity.this,
-                                TraitEditorActivity.class.getName());
-                        startActivity(intent);
+                    break;
+                case 1:
+                    intent.setClassName(ConfigActivity.this,
+                            TraitEditorActivity.class.getName());
+                    startActivity(intent);
 
-                        break;
-                    case 2:
+                    break;
+                case 2:
 
-                        if (checkTraitsExist() < 0) return;
+                    if (checkTraitsExist() < 0) return;
 
-                        collectDataFilePermission();
-                        break;
-                    case 3:
+                    collectDataFilePermission();
+                    break;
+                case 3:
 
-                        if (checkTraitsExist() < 0) return;
+                    if (checkTraitsExist() < 0) return;
 
-                        String exporter = ep.getString("EXPORT_SOURCE_DEFAULT", "ask");
+                    String exporter = ep.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask");
 
-                        switch (exporter) {
-                            case "ask":
-                                showExportDialog();
-                                break;
-                            case "local":
-                                exportPermission();
-                                break;
-                            case "brapi":
-                                exportBrAPI();
-                                break;
-                            default:
-                                showExportDialog();
-                                break;
-                        }
+                    switch (exporter) {
+                        case "ask":
+                            showExportDialog();
+                            break;
+                        case "local":
+                            exportPermission();
+                            break;
+                        case "brapi":
+                            exportBrAPI();
+                            break;
+                        default:
+                            showExportDialog();
+                            break;
+                    }
 
-                        break;
-                    case 4:
-                        intent.setClassName(ConfigActivity.this,
-                                PreferencesActivity.class.getName());
-                        startActivity(intent);
-                        break;
-                    case 5:
-                        intent.setClassName(ConfigActivity.this,
-                                AboutActivity.class.getName());
-                        startActivity(intent);
-                        break;
-                }
+                    break;
+                case 4:
+                    intent.setClassName(ConfigActivity.this,
+                            PreferencesActivity.class.getName());
+                    startActivity(intent);
+                    break;
+                case 5:
+                    intent.setClassName(ConfigActivity.this,
+                            AboutActivity.class.getName());
+                    startActivity(intent);
+                    break;
             }
         });
 
@@ -276,8 +271,8 @@ public class ConfigActivity extends AppCompatActivity {
 
         SharedPreferences.Editor ed = ep.edit();
 
-        if (!ep.getBoolean("TipsConfigured", false)) {
-            ed.putBoolean("TipsConfigured", true);
+        if (!ep.getBoolean(GeneralKeys.TIPS_CONFIGURED, false)) {
+            ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
             ed.apply();
             showTipsDialog();
             loadSampleDataDialog();
@@ -293,7 +288,8 @@ public class ConfigActivity extends AppCompatActivity {
 
         String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
 
-        if (!ep.getBoolean("ImportFieldFinished", false) || ep.getInt(PrefsConstants.SELECTED_FIELD_ID, -1) == -1) {
+        if (!ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
+                || ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
             Utils.makeToast(getApplicationContext(),getString(R.string.warning_field_missing));
             return -1;
         } else if (traits.length == 0) {
@@ -306,62 +302,49 @@ public class ConfigActivity extends AppCompatActivity {
 
     private String getOverwriteFile(String filename) {
         String[] fileArray;
-        File dir = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH);
-        File[] files = dir.listFiles();
-        fileArray = new String[files.length];
-        for (int i = 0; i < files.length; ++i) {
-            fileArray[i] = files[i].getName();
-        }
 
-        if (filename.contains(fFile)) {
-            for (String aFileArray : fileArray) {
-                if (checkDbBool) {
-                    if (aFileArray.contains(fFile) && aFileArray.contains("database")) {
-                        File oldFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH, aFileArray);
-                        File newFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.ARCHIVEPATH, aFileArray);
-                        oldFile.renameTo(newFile);
-                        Utils.scanFile(ConfigActivity.this, oldFile);
-                        Utils.scanFile(ConfigActivity.this, newFile);
+        DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_field_export);
+
+        if (exportDir != null && exportDir.exists()) {
+
+            DocumentFile[] files = exportDir.listFiles();
+
+            fileArray = new String[files.length];
+            for (int i = 0; i < files.length; ++i) {
+                fileArray[i] = files[i].getName();
+            }
+
+            if (filename.contains(fFile)) {
+                for (String aFileArray : fileArray) {
+
+                    DocumentFile oldDoc = BaseDocumentTreeUtil.Companion.getFile(this, R.string.dir_field_export, aFileArray);
+                    DocumentFile newDoc = BaseDocumentTreeUtil.Companion.getFile(this, R.string.dir_archive, aFileArray);
+
+                    if (checkDbBool) {
+                        if (aFileArray.contains(fFile) && aFileArray.contains("database")) {
+                            if (newDoc != null && oldDoc != null) {
+                                if (newDoc.getName() != null) {
+                                    oldDoc.renameTo(newDoc.getName());
+                                }
+                            }
+                        }
                     }
-                }
 
-                if (checkExcelBool) {
-                    if (aFileArray.contains(fFile) && aFileArray.contains("table")) {
-                        File oldFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH, aFileArray);
-                        File newFile = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.ARCHIVEPATH, aFileArray);
-                        oldFile.renameTo(newFile);
-                        Utils.scanFile(ConfigActivity.this, oldFile);
-                        Utils.scanFile(ConfigActivity.this, newFile);
+                    if (checkExcelBool) {
+                        if (aFileArray.contains(fFile) && aFileArray.contains("table")) {
+                            if (newDoc != null && oldDoc != null) {
+                                if (newDoc.getName() != null) {
+                                    oldDoc.renameTo(newDoc.getName());
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+
 
         return filename;
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //TODO change all request codes
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Brapi authentication for exporting fields
-        if (requestCode == 5) {
-
-        }
-
-        if (requestCode == 4) {
-            if (resultCode == RESULT_OK) {
-
-            }
-        }
-
-        if (requestCode == 2) {
-            if (resultCode == RESULT_OK) {
-                mChosenFile = data.getStringExtra("result");
-                mChosenFile = mChosenFile.substring(mChosenFile.lastIndexOf("/") + 1, mChosenFile.length());
-                mHandler.post(importDB);
-            }
-        }
     }
 
     private void showCitationDialog() {
@@ -397,8 +380,8 @@ public class ConfigActivity extends AppCompatActivity {
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
-                ed.putBoolean("Tips", true);
-                ed.putBoolean("TipsConfigured", true);
+                ed.putBoolean(GeneralKeys.TIPS, true);
+                ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
                 ed.apply();
 
                 dialog.dismiss();
@@ -415,7 +398,7 @@ public class ConfigActivity extends AppCompatActivity {
         builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 Editor ed = ep.edit();
-                ed.putBoolean("TipsConfigured", true);
+                ed.putBoolean(GeneralKeys.TIPS_CONFIGURED, true);
                 ed.apply();
 
                 dialog.dismiss();
@@ -438,37 +421,31 @@ public class ConfigActivity extends AppCompatActivity {
         builder.setTitle(getString(R.string.startup_sample_data_title));
         builder.setMessage(getString(R.string.startup_sample_data_message));
 
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                // Load database with sample data
-                mChosenFile = "sample.db";
-                mHandler.post(importDB);
+        builder.setPositiveButton(getString(R.string.dialog_yes), (dialog, which) -> {
+            // Load database with sample data
+            DocumentFile sampleDatabase = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this,
+                    R.string.dir_database, "sample.db");
+            if (sampleDatabase != null && sampleDatabase.exists()) {
+                invokeDatabaseImport(sampleDatabase);
             }
         });
 
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton(getString(R.string.dialog_no), (dialog, which) -> dialog.dismiss());
 
         AlertDialog alert = builder.create();
         alert.show();
         DialogUtils.styleDialogs(alert);
     }
 
-
     /**
      * Scan file to update file list and share exported file
      */
-    private void shareFile(File filePath) {
-        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
-
+    private void shareFile(DocumentFile docFile) {
         if (!ep.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", filePath));
+            intent.putExtra(Intent.EXTRA_STREAM, docFile.getUri());
             try {
                 startActivity(Intent.createChooser(intent, "Sending File..."));
             } catch (Exception e) {
@@ -504,12 +481,7 @@ public class ConfigActivity extends AppCompatActivity {
                 .setCancelable(true)
                 .setView(layout);
 
-        builder.setPositiveButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
+        builder.setPositiveButton(getString(R.string.dialog_cancel), (dialogInterface, i) -> { /* do nothing */ });
 
         final AlertDialog exportDialog = builder.create();
         exportDialog.show();
@@ -520,25 +492,22 @@ public class ConfigActivity extends AppCompatActivity {
         params.height = LayoutParams.WRAP_CONTENT;
         exportDialog.getWindow().setAttributes(params);
 
-        exportSourceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                Intent intent = new Intent();
-                switch (which) {
-                    case 0:
-                        exportPermission();
-                        break;
-                    case 1:
-                        exportBrAPI();
-                        break;
-                }
-                exportDialog.dismiss();
+        exportSourceList.setOnItemClickListener((av, arg1, which, arg3) -> {
+            switch (which) {
+                case 0:
+                    exportPermission();
+                    break;
+                case 1:
+                    exportBrAPI();
+                    break;
             }
+            exportDialog.dismiss();
         });
     }
 
     private void exportBrAPI() {
         // Get our active field
-        Integer activeFieldId = ep.getInt(PrefsConstants.SELECTED_FIELD_ID, -1);
+        int activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         FieldObject activeField;
         if (activeFieldId != -1) {
             activeField = dt.getFieldObject(activeFieldId);
@@ -550,8 +519,8 @@ public class ConfigActivity extends AppCompatActivity {
 
         // Check that our field is a brapi field
         if (activeField.getExp_source() == null ||
-                activeField.getExp_source() == "" ||
-                activeField.getExp_source() == "local") {
+                activeField.getExp_source().equals("") ||
+                activeField.getExp_source().equals("local")) {
 
             Toast.makeText(ConfigActivity.this, R.string.brapi_field_not_selected, Toast.LENGTH_LONG).show();
             return;
@@ -589,19 +558,21 @@ public class ConfigActivity extends AppCompatActivity {
         allTraits = layout.findViewById(R.id.allTraits);
         activeTraits = layout.findViewById(R.id.activeTraits);
         CheckBox checkOverwrite = layout.findViewById(R.id.overwrite);
+        CheckBox checkBundle = layout.findViewById(R.id.dialog_export_bundle_data_cb);
 
-        checkOverwrite.setChecked(ep.getBoolean("Overwrite", false));
-        checkDB.setChecked(ep.getBoolean("EXPORT_FORMAT_DATABASE", false));
-        checkExcel.setChecked(ep.getBoolean("EXPORT_FORMAT_TABLE", false));
-        onlyUnique.setChecked(ep.getBoolean("EXPORT_COLUMNS_UNIQUE",false));
-        allColumns.setChecked(ep.getBoolean("EXPORT_COLUMNS_ALL",false));
-        allTraits.setChecked(ep.getBoolean("EXPORT_TRAITS_ALL",false));
-        activeTraits.setChecked(ep.getBoolean("EXPORT_TRAITS_ACTIVE",false));
+        checkBundle.setChecked(ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false));
+        checkOverwrite.setChecked(ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false));
+        checkDB.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABSE, false));
+        checkExcel.setChecked(ep.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, false));
+        onlyUnique.setChecked(ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE,false));
+        allColumns.setChecked(ep.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL,false));
+        allTraits.setChecked(ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL,false));
+        activeTraits.setChecked(ep.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE,false));
 
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
-        fFile = ep.getString("FieldFile", "");
+        fFile = ep.getString(GeneralKeys.FIELD_FILE, "");
 
         if (fFile.length() > 4 & fFile.toLowerCase().endsWith(".csv")) {
             fFile = fFile.substring(0, fFile.length() - 4);
@@ -617,12 +588,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         builder.setPositiveButton(getString(R.string.dialog_save), null);
 
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, i) -> dialog.dismiss());
 
         saveDialog = builder.create();
         saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -636,74 +602,78 @@ public class ConfigActivity extends AppCompatActivity {
 
         // Override positive button so it doesnt automatically dismiss dialog
         Button positiveButton = saveDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        positiveButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (!checkDB.isChecked() & !checkExcel.isChecked()) {
-                    Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_format));
-                    return;
-                }
-
-                if (!onlyUnique.isChecked() & !allColumns.isChecked()) {
-                    Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_column));
-                    return;
-                }
-
-                if (!activeTraits.isChecked() & !allTraits.isChecked()) {
-                    Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_trait));
-                    return;
-                }
-
-                Editor ed = ep.edit();
-                ed.putBoolean("EXPORT_COLUMNS_UNIQUE", onlyUnique.isChecked());
-                ed.putBoolean("EXPORT_COLUMNS_ALL", allColumns.isChecked());
-                ed.putBoolean("EXPORT_TRAITS_ALL", allTraits.isChecked());
-                ed.putBoolean("EXPORT_TRAITS_ACTIVE", activeTraits.isChecked());
-                ed.putBoolean("EXPORT_FORMAT_TABLE", checkExcel.isChecked());
-                ed.putBoolean("EXPORT_FORMAT_DATABASE", checkDB.isChecked());
-                ed.putBoolean("Overwrite", checkOverwrite.isChecked());
-                ed.apply();
-
-                File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH);
-                if (!file.exists()) {
-                    Utils.createDir(getBaseContext(), ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH);
-                }
-
-                newRange = new ArrayList<>();
-
-                if (onlyUnique.isChecked()) {
-                    newRange.add(ep.getString("ImportUniqueName", ""));
-                }
-
-                if (allColumns.isChecked()) {
-                    String[] columns = dt.getRangeColumns();
-                    Collections.addAll(newRange, columns);
-                }
-
-                exportTrait = new ArrayList<>();
-
-                if (activeTraits.isChecked()) {
-                    String[] traits = dt.getVisibleTrait();
-                    Collections.addAll(exportTrait, traits);
-                }
-
-                if (allTraits.isChecked()) {
-                    String[] traits = dt.getAllTraits();
-                    Collections.addAll(exportTrait, traits);
-                }
-
-                checkDbBool = checkDB.isChecked();
-                checkExcelBool = checkExcel.isChecked();
-
-                if (ep.getBoolean("Overwrite", false)) {
-                    exportFileString = getOverwriteFile(exportFile.getText().toString());
-                } else {
-                    exportFileString = exportFile.getText().toString();
-                }
-
-                saveDialog.dismiss();
-                mHandler.post(exportData);
+        positiveButton.setOnClickListener(arg0 -> {
+            if (!checkDB.isChecked() & !checkExcel.isChecked()) {
+                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_format));
+                return;
             }
+
+            if (!onlyUnique.isChecked() & !allColumns.isChecked()) {
+                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_column));
+                return;
+            }
+
+            if (!activeTraits.isChecked() & !allTraits.isChecked()) {
+                Utils.makeToast(getApplicationContext(),getString(R.string.export_error_missing_trait));
+                return;
+            }
+
+            Editor ed = ep.edit();
+            ed.putBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, onlyUnique.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, allColumns.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_TRAITS_ALL, allTraits.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, activeTraits.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_FORMAT_TABLE, checkExcel.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_FORMAT_DATABSE, checkDB.isChecked());
+            ed.putBoolean(GeneralKeys.EXPORT_OVERWRITE, checkOverwrite.isChecked());
+            ed.putBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, checkBundle.isChecked());
+            ed.apply();
+
+            BaseDocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
+
+            newRange = new ArrayList<>();
+
+            if (onlyUnique.isChecked()) {
+                newRange.add(ep.getString(GeneralKeys.UNIQUE_NAME, ""));
+            }
+
+            if (allColumns.isChecked()) {
+                String[] columns = dt.getRangeColumns();
+                Collections.addAll(newRange, columns);
+            }
+
+            exportTrait = new ArrayList<>();
+
+            if (activeTraits.isChecked()) {
+                String[] traits = dt.getVisibleTrait();
+                Collections.addAll(exportTrait, traits);
+            }
+
+            if (allTraits.isChecked()) {
+                String[] traits = dt.getAllTraits();
+                Collections.addAll(exportTrait, traits);
+            }
+
+            checkDbBool = checkDB.isChecked();
+            checkExcelBool = checkExcel.isChecked();
+
+            if (ep.getBoolean(GeneralKeys.EXPORT_OVERWRITE, false)) {
+                exportFileString = getOverwriteFile(exportFile.getText().toString());
+            } else {
+                exportFileString = exportFile.getText().toString();
+            }
+
+            saveDialog.dismiss();
+            mHandler.post(exportData);
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_STORAGE_DEFINER) {
+            if (resultCode != Activity.RESULT_OK) finish();
+        }
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_EXPORT_DATA)
@@ -733,22 +703,11 @@ public class ConfigActivity extends AppCompatActivity {
         }
     }
 
-    public void makeDirsPermission() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
-        if (EasyPermissions.hasPermissions(this, perms)) {
-            Utils.createDirs(this, null);
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_file_creation),
-                    PERMISSIONS_REQUEST_MAKE_DIRS, perms);
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         return true;
     }
 
@@ -828,17 +787,8 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == 100) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                String state = Environment.getExternalStorageState();
-                if (Environment.MEDIA_MOUNTED.equals(state)) {
-                    Utils.createDirs(this, null);
-                }
-            }
-        }
 
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
@@ -854,19 +804,12 @@ public class ConfigActivity extends AppCompatActivity {
         this.doubleBackToExitPressedOnce = true;
         Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
 
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce = false;
-            }
-        }, 2000);
+        new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
     }
 
     private class ExportDataTask extends AsyncTask<Integer, Integer, Integer> {
         boolean fail;
         boolean noData = false;
-        boolean tooManyTraits = false;
 
         ProgressDialog dialog;
 
@@ -885,6 +828,10 @@ public class ConfigActivity extends AppCompatActivity {
 
         @Override
         protected Integer doInBackground(Integer... params) {
+
+            //flag telling if the user checked the media bundle option
+            boolean bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false);
+
             String[] newRanges = newRange.toArray(new String[newRange.size()]);
             String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
 
@@ -904,57 +851,185 @@ public class ConfigActivity extends AppCompatActivity {
                 return (0);
             }
 
-//            if (exportTraits.length > 64) {
-//                tooManyTraits = true;
-//                return (0);
-//            }
+            //separate files for table and database
+            DocumentFile dbFile = null;
+            DocumentFile tableFile = null;
 
+            //check if export database has been selected
             if (checkDbBool) {
                 if (exportData.getCount() > 0) {
                     try {
-                        File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH,
-                                exportFileString + "_database.csv");
 
-                        if (file.exists()) {
-                            file.delete();
+                        String exportFileName = exportFileString + "_database.csv";
+
+                        dbFile = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this, R.string.dir_field_export, exportFileName);
+
+                        DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
+
+                        if (dbFile != null && dbFile.exists()) {
+                            dbFile.delete();
+                        }
+                        if (exportDir != null && exportDir.exists()) {
+                            dbFile = exportDir.createFile("*/*", exportFileName);
                         }
 
-                        FileWriter fw = new FileWriter(file);
-                        CSVWriter csvWriter = new CSVWriter(fw, exportData);
-                        csvWriter.writeDatabaseFormat(newRange);
+                        OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, exportFileName);
 
-                        System.out.println(exportFileString);
-                        shareFile(file);
+                        if (output != null) {
+                            OutputStreamWriter fw = new OutputStreamWriter(output);
+                            CSVWriter csvWriter = new CSVWriter(fw, exportData);
+                            csvWriter.writeDatabaseFormat(newRange);
+
+                            System.out.println(exportFileString);
+                        }
+
                     } catch (Exception e) {
                         fail = true;
                     }
                 }
             }
 
+            //check if export table has been selected
             if (checkExcelBool) {
                 if (exportData.getCount() > 0) {
                     try {
-                        File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH,
-                                exportFileString + "_table.csv");
 
-                        if (file.exists()) {
-                            file.delete();
+                        String tableFileName = exportFileString + "_table.csv";
+
+                        tableFile = BaseDocumentTreeUtil.Companion.getFile(ConfigActivity.this, R.string.dir_field_export, tableFileName);
+
+                        DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(ConfigActivity.this, R.string.dir_field_export);
+
+                        if (tableFile != null && tableFile.exists()) {
+                            tableFile.delete();
+                        }
+                        if (exportDir != null && exportDir.exists()) {
+                            tableFile = exportDir.createFile("*/*", tableFileName);
                         }
 
-                        FileWriter fw = new FileWriter(file);
+                        OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, tableFileName);
+                        OutputStreamWriter fw = new OutputStreamWriter(output);
 
                         exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
-                        shareFile(file);
+
                     } catch (Exception e) {
                         fail = true;
                     }
                 }
             }
 
+            //if the export did not fail, create a zip file with the exported files
+            if (!fail) {
+
+                String zipFileName = exportFileString + ".zip";
+
+                //if bundle is checked, zip the files with the media dir for the given study
+                if (bundleChecked) {
+
+                    //query selected study to get the study name
+                    int studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+
+                    //study name is the same as the media directory in plot_data
+                    FieldObject fieldObject = StudyDao.Companion.getFieldObject(studyId);
+
+                    if (fieldObject != null) {
+
+                        String studyName = fieldObject.getExp_name();
+
+                        //create media dir directory from fieldBook/plot_data/studyName path
+                        DocumentFile mediaDir = BaseDocumentTreeUtil.Companion.getFile(
+                                ConfigActivity.this, R.string.dir_plot_data, studyName);
+
+                        if (mediaDir != null && mediaDir.exists()) {
+
+                            //create zip file output from user created name
+                            DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(
+                                    ConfigActivity.this, R.string.dir_field_export);
+
+                            if (exportDir != null && exportDir.exists()) {
+
+                                DocumentFile zipFile = exportDir.createFile("*/*", zipFileName);
+
+                                OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(
+                                        ConfigActivity.this, R.string.dir_field_export, zipFileName);
+
+                                if (output != null) {
+
+                                    //add media folders and database or export files to zip file
+                                    ArrayList<DocumentFile> paths = new ArrayList<>();
+
+                                    if (dbFile != null) paths.add(dbFile);
+                                    if (tableFile != null) paths.add(tableFile);
+                                    paths.add(mediaDir);
+
+                                    zipFiles(ConfigActivity.this, paths, output);
+
+                                    if (dbFile != null && dbFile.exists()) dbFile.delete();
+                                    if (tableFile != null && tableFile.exists()) tableFile.delete();
+
+                                    //share the zip file
+                                    shareFile(zipFile);
+                                }
+                            }
+                        }
+                    }
+
+                } else { //if not bundling media data, create zip of the table or database files
+
+                    DocumentFile exportDir = BaseDocumentTreeUtil.Companion.getDirectory(
+                            ConfigActivity.this, R.string.dir_field_export);
+
+                    if (exportDir != null && exportDir.exists()) {
+
+                        if (checkDbBool && checkExcelBool) {
+
+                            DocumentFile zipFile = exportDir.createFile("*/*", zipFileName);
+
+                            OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(
+                                    ConfigActivity.this, R.string.dir_field_export, zipFileName);
+
+                            ArrayList<DocumentFile> paths = new ArrayList<>();
+
+                            if (dbFile != null) paths.add(dbFile);
+                            if (tableFile != null) paths.add(tableFile);
+
+                            zipFiles(ConfigActivity.this, paths, output);
+
+                            if (dbFile != null) dbFile.delete();
+                            if (tableFile != null) tableFile.delete();
+
+                            shareFile(zipFile);
+
+                        } else if (checkDbBool) {
+
+                            shareFile(dbFile);
+
+                        } else if (checkExcelBool) {
+
+                            shareFile(tableFile);
+                        }
+                    }
+                }
+            }
+
             return 0;
+        }
+
+        private void zipFiles(Context ctx, ArrayList<DocumentFile> paths, OutputStream outputStream) {
+
+            try {
+
+                ZipUtil.Companion.zip(ctx, paths.toArray(new DocumentFile[] {}), outputStream);
+
+                outputStream.close();
+
+            } catch (IOException io) {
+
+                io.printStackTrace();
+            }
         }
 
         @Override
@@ -967,7 +1042,7 @@ public class ConfigActivity extends AppCompatActivity {
 
             if (!fail) {
                 showCitationDialog();
-                dt.updateExpTable(false, false, true, ep.getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+                dt.updateExpTable(false, false, true, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
             }
 
             if (fail) {
@@ -977,17 +1052,17 @@ public class ConfigActivity extends AppCompatActivity {
             if (noData) {
                 Utils.makeToast(getApplicationContext(),getString(R.string.export_error_data_missing));
             }
-
-            if (tooManyTraits) {
-                //TODO add to strings
-                Utils.makeToast(getApplicationContext(),"Unfortunately, an SQLite limitation only allows 64 traits to be exported from Field Book at a time. Select fewer traits to export.");
-            }
         }
     }
 
     private class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {
         boolean fail;
         ProgressDialog dialog;
+        DocumentFile file = null;
+
+        public ImportDBTask(DocumentFile file) {
+            this.file = file;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -1005,7 +1080,9 @@ public class ConfigActivity extends AppCompatActivity {
         @Override
         protected Integer doInBackground(Integer... params) {
             try {
-                dt.importDatabase(mChosenFile);
+                if (this.file != null) {
+                    dt.importDatabase(this.file);
+                }
             } catch (Exception e) {
                 Log.d("Database", e.toString());
                 e.printStackTrace();
@@ -1023,7 +1100,7 @@ public class ConfigActivity extends AppCompatActivity {
                 Utils.makeToast(getApplicationContext(),getString(R.string.import_error_general));
             }
 
-            SharedPreferences prefs = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
+            SharedPreferences prefs = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
             SharedPreferences.Editor editor = prefs.edit();
             editor.apply();
 

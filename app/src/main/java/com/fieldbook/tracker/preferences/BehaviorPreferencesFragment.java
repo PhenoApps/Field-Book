@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.preference.Preference;
@@ -31,7 +30,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName("Settings");
+        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_behavior, rootKey);
 
@@ -153,52 +152,47 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
 
             Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
 
-            //if the user already paired an external unit then show a list to connect from
-            if (!adapter.getBondedDevices().isEmpty()) {
+            //create table of names -> bluetooth devices, when the item is selected we can retrieve the device
+            Map<String, BluetoothDevice> bluetoothMap = new HashMap<>();
+            List<String> names = new ArrayList<>();
 
-                //create table of names -> bluetooth devices, when the item is selected we can retrieve the device
-                Map<String, BluetoothDevice> bluetoothMap = new HashMap<>();
-                List<String> names = new ArrayList<>();
+            for (BluetoothDevice bd : pairedDevices) {
+                bluetoothMap.put(bd.getName(), bd);
+                names.add(bd.getName());
+            }
 
-                for (BluetoothDevice bd : pairedDevices) {
-                    bluetoothMap.put(bd.getName(), bd);
-                    names.add(bd.getName());
-                }
+            String internalGps = getString(R.string.pref_behavior_geonav_internal_gps_choice);
+            names.add(internalGps);
 
-                String internalGps = getString(R.string.pref_behavior_geonav_internal_gps_choice);
-                names.add(internalGps);
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(R.string.choose_paired_bluetooth_devices_title);
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle(R.string.choose_paired_bluetooth_devices_title);
+            //when a device is chosen, start a connect thread
+            builder.setSingleChoiceItems(names.toArray(new String[] {}), -1, (dialog, which) -> {
 
-                //when a device is chosen, start a connect thread
-                builder.setSingleChoiceItems(names.toArray(new String[] {}), -1, (dialog, which) -> {
+                String deviceName = names.get(which);
+                String address = internalGps;
 
-                    String deviceName = names.get(which);
-                    String address = internalGps;
+                if (deviceName != null) {
 
-                    if (deviceName != null) {
+                    @Nullable BluetoothDevice device = bluetoothMap.get(deviceName);
+                    if (device != null) {
 
-                        @Nullable BluetoothDevice device = bluetoothMap.get(deviceName);
-                        if (device != null) {
+                        address = device.getAddress();
 
-                            address = device.getAddress();
-
-                        }
-
-                        prefMgr.getSharedPreferences()
-                                .edit().putString(GeneralKeys.PAIRED_DEVICE_ADDRESS, address)
-                                .apply();
-
-                        updateDeviceAddressSummary();
-
-                        dialog.dismiss();
                     }
-                });
 
-                builder.show();
+                    prefMgr.getSharedPreferences()
+                            .edit().putString(GeneralKeys.PAIRED_DEVICE_ADDRESS, address)
+                            .apply();
 
-            } else Toast.makeText(context, R.string.gnss_no_paired_device, Toast.LENGTH_SHORT).show();
+                    updateDeviceAddressSummary();
+
+                    dialog.dismiss();
+                }
+            });
+
+            builder.show();
 
         } else context.startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
     }

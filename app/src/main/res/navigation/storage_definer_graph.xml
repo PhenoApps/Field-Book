@@ -1,0 +1,23 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/storage_definer"
+    android:id="@+id/storage_definer_graph">
+
+    <fragment
+        android:id="@+id/storage_definer"
+        android:name="com.fieldbook.tracker.storage.StorageDefinerFragment"
+        tools:layout="@layout/fragment_storage_definer"
+        android:label="Storage Definer" >
+        <action
+            android:id="@+id/action_storage_definer_to_storage_migrator"
+            app:destination="@id/storage_migrator" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/storage_migrator"
+        android:name="com.fieldbook.tracker.storage.StorageMigratorFragment"
+        tools:layout="@layout/fragment_storage_migrator"
+        android:label="Storage Migrator" />
+
+</navigation>

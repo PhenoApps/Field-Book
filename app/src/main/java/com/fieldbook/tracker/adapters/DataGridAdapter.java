@@ -18,6 +18,15 @@ import org.jetbrains.annotations.NotNull;
  */
 public class DataGridAdapter extends AbstractTableAdapter<DataGridActivity.HeaderData, DataGridActivity.HeaderData, DataGridActivity.CellData> {
 
+    private final int mSelectedCol;
+    private final int mSelectedRow;
+
+    public DataGridAdapter(int col, int row) {
+
+        mSelectedCol = col;
+        mSelectedRow = row;
+    }
+
      /**
       * This is sample CellViewHolder class
       * This viewHolder must be extended from AbstractViewHolder class instead of RecyclerView.ViewHolder.
@@ -80,6 +89,16 @@ public class DataGridAdapter extends AbstractTableAdapter<DataGridActivity.Heade
 
          if (cellItemModel != null) {
              viewHolder.textView.setText(cellItemModel.getValue());
+
+             if (columnPosition == mSelectedCol && rowPosition == mSelectedRow) {
+
+                 viewHolder.textView.setBackgroundResource(R.drawable.table_cell_highlighted);
+
+             } else {
+
+                 viewHolder.textView.setBackgroundResource(R.drawable.table_cell);
+
+             }
          }
 
          // If your TableView should have auto resize for cells & columns.

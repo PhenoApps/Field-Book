@@ -19,6 +19,7 @@ import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Map;
 
 public class DateTraitLayout extends BaseTraitLayout {
 
@@ -26,7 +27,6 @@ public class DateTraitLayout extends BaseTraitLayout {
     Button addDayBtn;
     Button minusDayBtn;
     ImageButton saveDayBtn;
-    private ImageButton calendarVisibilityBtn;
     private TextView month;
     private TextView day;
     private String date;
@@ -47,11 +47,19 @@ public class DateTraitLayout extends BaseTraitLayout {
     public void setNaTraitsText() {
         month.setText("");
         day.setText("NA");
+        //issue 413 apply the date saved preference color to NA values
+        forceDataSavedColor();
     }
 
     @Override
     public String type() {
         return "date";
+    }
+
+    //this will display text color as the preference color
+    private void forceDataSavedColor() {
+        month.setTextColor(Color.parseColor(getDisplayColor()));
+        day.setTextColor(Color.parseColor(getDisplayColor()));
     }
 
     @Override
@@ -63,13 +71,13 @@ public class DateTraitLayout extends BaseTraitLayout {
         minusDayBtn = findViewById(R.id.minusDateBtn);
         saveDayBtn = findViewById(R.id.enterBtn);
 
-        calendarVisibilityBtn = findViewById(R.id.trait_date_calendar_visibility_btn);
+        ImageButton calendarVisibilityBtn = findViewById(R.id.trait_date_calendar_visibility_btn);
 
         /*
          * When the calendar view visibility button is pressed it starts the date picker dialog.
          */
         calendarVisibilityBtn.setOnClickListener((View) -> {
-            DialogFragment newFragment = new DatePickerFragment(dateFormat, date, (y, m, d) -> {
+            DialogFragment newFragment = new DatePickerFragment(dateFormat, (y, m, d) -> {
 
                 Calendar calendar = Calendar.getInstance();
 
@@ -77,15 +85,8 @@ public class DateTraitLayout extends BaseTraitLayout {
 
                 updateViewDate(calendar);
 
-                //set blue if updated, display color if new
-                if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-                    month.setTextColor(Color.BLUE);
-                    day.setTextColor(Color.BLUE);
-                } else {
-                    //set month/day text and color
-                    month.setTextColor(Color.parseColor(getDisplayColor()));
-                    day.setTextColor(Color.parseColor(getDisplayColor()));
-                }
+                //this saves the date, so update text to display color
+                forceDataSavedColor();
 
                 //save date to db
                 updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
@@ -147,15 +148,16 @@ public class DateTraitLayout extends BaseTraitLayout {
                     e.printStackTrace();
                 }
 
-                if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
-                    updateTrait(getCurrentTrait().getTrait(), "date", String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
-                } else {
-                    updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
+                if (!day.getText().equals("NA")) { //issue 413, don't update NA when save button is pressed
+                    if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
+                        updateTrait(getCurrentTrait().getTrait(), "date", String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+                    } else {
+                        updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
+                    }
                 }
 
                 // Change the text color accordingly
-                month.setTextColor(Color.parseColor(getDisplayColor()));
-                day.setTextColor(Color.parseColor(getDisplayColor()));
+                forceDataSavedColor();
             }
         });
     }
@@ -193,40 +195,43 @@ public class DateTraitLayout extends BaseTraitLayout {
         getEtCurVal().setVisibility(View.GONE);
 
         final Calendar c = Calendar.getInstance();
-        date = getPrefs().getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, dateFormat.format(c.getTime()));
+        date = dateFormat.format(c.getTime());
 
-        if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && !getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
-            if (getNewTraits().get(getCurrentTrait().getTrait()).toString().length() < 4 && getNewTraits().get(getCurrentTrait().getTrait()).toString().length() > 0) {
+        final Map<String, String> observations = getNewTraits();
+        final String trait = getCurrentTrait().getTrait();
+        final String obsValue = observations.get(trait);
+
+        //first check if observation values is observed for this plot and the value is not NA
+        if (observations.containsKey(trait) && obsValue != null && !obsValue.equals("NA")) {
+
+            forceDataSavedColor();
+
+            //there is a FB preference to save dates as Day of year between 1-365
+            if (obsValue.length() < 4 && obsValue.length() > 0) {
                 Calendar calendar = Calendar.getInstance();
 
                 //convert day of year to yyyy-mm-dd string
-                date = getNewTraits().get(getCurrentTrait().getTrait()).toString();
+                date = obsValue;
                 calendar.set(Calendar.DAY_OF_YEAR, Integer.parseInt(date));
                 date = dateFormat.format(calendar.getTime());
-
-                //set month/day text and color
-                month.setTextColor(Color.parseColor(getDisplayColor()));
-                day.setTextColor(Color.parseColor(getDisplayColor()));
 
                 month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
                 day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
 
-            } else if (getNewTraits().get(getCurrentTrait().getTrait()).toString().contains(".")) {
+            } else if (obsValue.contains(".")) {
                 //convert from yyyy.mm.dd to yyyy-mm-dd
-                String[] oldDate = getNewTraits().get(getCurrentTrait().getTrait()).toString().split("\\.");
+                String[] oldDate = obsValue.split("\\.");
                 date = oldDate[0] + "-" + String.format("%02d", Integer.parseInt(oldDate[1])) + "-" + String.format("%02d", Integer.parseInt(oldDate[2]));
 
                 //set month/day text and color
                 month.setText(getMonthForInt(Integer.parseInt(oldDate[1]) - 1));
                 day.setText(oldDate[2]);
-                month.setTextColor(Color.parseColor(getDisplayColor()));
-                day.setTextColor(Color.parseColor(getDisplayColor()));
 
             } else {
                 Calendar calendar = Calendar.getInstance();
 
                 //new format
-                date = getNewTraits().get(getCurrentTrait().getTrait()).toString();
+                date = obsValue;
 
                 //Parse date
                 try {
@@ -238,14 +243,19 @@ public class DateTraitLayout extends BaseTraitLayout {
                 //set month/day text and color
                 month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
                 day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
-
-                month.setTextColor(Color.parseColor(getDisplayColor()));
-                day.setTextColor(Color.parseColor(getDisplayColor()));
             }
-        } else if (getNewTraits().containsKey(getCurrentTrait().getTrait()) && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
+
+        } else if (observations.containsKey(trait) && obsValue != null && obsValue.equals("NA")) {
+            //NA is saved as the date
+
             month.setText("");
+
             day.setText("NA");
-        } else {
+
+            forceDataSavedColor();
+
+        } else { //no date is saved
+
             month.setTextColor(Color.BLACK);
             day.setTextColor(Color.BLACK);
             month.setText(getMonthForInt(c.get(Calendar.MONTH)));

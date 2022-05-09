@@ -80,9 +80,16 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         // Set our OK button to be disabled until we are finished loading
         saveBtn.setVisibility(View.GONE);
         studyDetails = new BrapiStudyDetails();
-        ((TextView) findViewById(R.id.studyNumPlotsLbl)).setText(makePlural(this.selectedObservationLevel.getObservationLevelName()));
+        updateNumPlotsLabel();
         buildStudyDetails();
         loadStudy();
+    }
+
+    private void updateNumPlotsLabel() {
+        if (selectedObservationLevel != null) {
+            ((TextView) findViewById(R.id.studyNumPlotsLbl)).setText(
+                    makePlural(this.selectedObservationLevel.getObservationLevelName()));
+        }
     }
 
     private String makePlural(String observationLevelName) {
@@ -357,7 +364,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
             AlertDialog.Builder alertDialogBuilder = null;
             // Display our message.
-            if (!brapiControllerResponse.status) {
+            if (brapiControllerResponse != null && !brapiControllerResponse.status) {
                 alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                         .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
@@ -365,10 +372,12 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                             ((Activity) context).finish();
                         });
 
-                if (brapiControllerResponse.message == BrAPIService.notUniqueFieldMessage) {
+                if (brapiControllerResponse.message.equals(BrAPIService.notUniqueFieldMessage)) {
                     alertDialogBuilder.setMessage(R.string.fields_study_exists_message);
-                } else if (brapiControllerResponse.message == BrAPIService.notUniqueIdMessage) {
+                } else if (brapiControllerResponse.message.equals(BrAPIService.notUniqueIdMessage)) {
                     alertDialogBuilder.setMessage(R.string.import_error_unique);
+                } else if (brapiControllerResponse.message.equals(BrAPIService.noPlots)) {
+                    alertDialogBuilder.setMessage(R.string.act_collect_no_plots);
                 } else {
                     Log.e("error-ope", brapiControllerResponse.message);
                     alertDialogBuilder.setMessage(R.string.brapi_save_field_error);
@@ -378,7 +387,12 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             // This is an unhandled failed that we should not run into unless there is
             // an error in the saveStudyDetails code outside of that handling.
             if (fail) {
-                Log.e("error-opef", brapiControllerResponse.message);
+                if (brapiControllerResponse != null) {
+                    Log.e("error-opef", brapiControllerResponse.message);
+
+                } else {
+                    Log.e("error-opef", "unknown");
+                }
                 alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                         .setPositiveButton(R.string.okButtonText, (dialogInterface, i) -> {

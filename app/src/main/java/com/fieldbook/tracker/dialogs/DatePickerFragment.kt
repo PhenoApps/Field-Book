@@ -2,11 +2,13 @@ package com.fieldbook.tracker.dialogs
 
 import android.app.DatePickerDialog
 import android.app.Dialog
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.preferences.GeneralKeys
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -17,10 +19,13 @@ import java.util.*
  * This class also has an onSet callback which sends back the year, month and day to be saved.
  */
 class DatePickerFragment(val format: SimpleDateFormat,
-                         val date: String,
                          val onSet: (Int, Int, Int) -> Boolean) : DialogFragment(), DatePickerDialog.OnDateSetListener {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+
+        val date = context?.getSharedPreferences("Settings", Context.MODE_PRIVATE)
+            ?.getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, "2000-01-01") ?: "2000-01-01"
+
         // Use the current date as the default date in the picker
         val c = Calendar.getInstance()
 

@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -19,32 +18,33 @@ import android.text.Html;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Gallery;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.FileProvider;
+import androidx.documentfile.provider.DocumentFile;
 
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.activities.ConfigActivity;
+import com.fieldbook.tracker.adapters.GalleryImageAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.adapters.GalleryImageAdapter;
 import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.PrefsConstants;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.Utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -54,7 +54,6 @@ public class PhotoTraitLayout extends BaseTraitLayout {
     private Gallery photo;
     private GalleryImageAdapter photoAdapter;
     private String mCurrentPhotoPath;
-    private ArrayList<String> photoLocation;
     // Creates a new thread to do importing
     private Runnable importRunnable = new Runnable() {
         public void run() {
@@ -103,26 +102,35 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
     public void loadLayoutWork() {
 
-        String exp_id = Integer.toString(getPrefs().getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
-
         // Always set to null as default, then fill in with trait value
-        photoLocation = new ArrayList<>();
         drawables = new ArrayList<>();
 
-        File img = new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/" + "/photos/");
-        if (img.listFiles() != null) {
+        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
 
-            //TODO causes crash
-            photoLocation = ConfigActivity.dt.getPlotPhotos(exp_id, getCRange().plot_id, getCurrentTrait().getTrait());
+        if (photosDir != null) {
 
-            for (int i = 0; i < photoLocation.size(); i++) {
-                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(photoLocation.get(i))));
-            }
-        }
+            String plot = getCRange().plot_id;
 
-        if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            if (!img.exists()) {
-                img.mkdirs();
+            List<DocumentFile> locations = DocumentTreeUtil.Companion.getPlotMedia(photosDir, plot, ".jpg");
+
+            if (!locations.isEmpty()) {
+
+                for (DocumentFile imageFile : locations) {
+
+                    if (imageFile != null && imageFile.exists()) {
+
+                        String name = imageFile.getName();
+
+                        if (name != null) {
+
+                            if (name.contains(plot)) {
+
+                                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(imageFile.getUri())));
+
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -136,7 +144,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
         deletePhotoWarning(true, newTraits);
     }
 
-    private Bitmap displayScaledSavedPhoto(String path) {
+    private Bitmap displayScaledSavedPhoto(Uri path) {
         if (path == null) {
             String message = getContext().getString(R.string.trait_error_photo_missing);
             Toast.makeText(getContext().getApplicationContext(), message, Toast.LENGTH_SHORT).show();
@@ -147,9 +155,10 @@ public class PhotoTraitLayout extends BaseTraitLayout {
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inJustDecodeBounds = true;
 
-            BitmapFactory.decodeFile(path, bmOptions);
-            int photoW = bmOptions.outWidth;
-            int photoH = bmOptions.outHeight;
+            Bitmap bmp = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), path);
+
+            int photoW = bmp.getWidth();
+            int photoH = bmp.getHeight();
 
             int targetW;
             int targetH;
@@ -171,28 +180,26 @@ public class PhotoTraitLayout extends BaseTraitLayout {
             bmOptions.inSampleSize = scaleFactor;
             bmOptions.inPurgeable = true;
 
-            Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
-            Bitmap correctBmp = bitmap;
+            Bitmap correctBmp = null;
 
             try {
-                File f = new File(path);
-                ExifInterface exif = new ExifInterface(f.getPath());
-                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
-                int angle = 0;
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                File f = new File(getContext().getExternalMediaDirs()[0], "temp.jpg");
+                FileOutputStream fis = new FileOutputStream(f);
+                bos.writeTo(fis);
+                bos.close();
+                fis.close();
 
-                if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
-                    angle = 90;
-                } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
-                    angle = 180;
-                } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
-                    angle = 270;
-                }
-
+                //TODO check how to save EXIF to the media store, right now it is undefined
                 Matrix mat = new Matrix();
-                mat.postRotate(angle);
+                mat.postRotate(90);
 
-                correctBmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mat, true);
+                correctBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), mat, true);
+
+                f.delete();
+
             } catch (IOException e) {
                 Log.e(CollectActivity.TAG, "-- Error in setting image");
                 return BitmapFactory.decodeResource(getResources(), R.drawable.trait_photo_missing);
@@ -207,43 +214,47 @@ public class PhotoTraitLayout extends BaseTraitLayout {
         }
     }
 
-    private void displayPlotImage(String path) {
-        try {
-            Log.w("Display path", path);
+    private void displayPlotImage(Uri path) {
 
-            File f = new File(path);
+        try {
+
+            Log.w("Display path", path.toString());
+
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_VIEW);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.setDataAndType(FileProvider.getUriForFile(getContext(),
-                    getContext().getApplicationContext().getPackageName() + ".fileprovider", f), "image/*");
+            intent.setDataAndType(path, "image/*");
             getContext().startActivity(intent);
-        } catch (Exception ignore) {
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
         }
     }
 
     public void makeImage(TraitObject currentTrait, Map newTraits) {
-        File file = new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/",
-                mCurrentPhotoPath);
 
-        Utils.scanFile(getContext(), file.getAbsoluteFile());
+        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
 
-        photoLocation.add(file.getAbsolutePath());
+        if (photosDir != null) {
 
-        drawables.add(new BitmapDrawable(displayScaledSavedPhoto(file.getAbsolutePath())));
+            DocumentFile file = photosDir.findFile(mCurrentPhotoPath);
 
-        // Force Gallery to update
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri contentUri = FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".fileprovider", file);
-        mediaScanIntent.setData(contentUri);
-        getContext().sendBroadcast(mediaScanIntent);
+            if (file != null) {
 
-        updateTraitAllowDuplicates(currentTrait.getTrait(), "photo", file.getAbsolutePath(), null, newTraits);
+                Utils.scanFile(getContext(), file.getUri().toString(), "image/*");
 
-        photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(file.getUri())));
 
-        photo.setAdapter(photoAdapter);
-        photo.setSelection(photoAdapter.getCount() - 1);
+                updateTraitAllowDuplicates(currentTrait.getTrait(), "photo", mCurrentPhotoPath, null, newTraits);
+
+                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+
+                photo.setAdapter(photoAdapter);
+                photo.setSelection(photoAdapter.getCount() - 1);
+            }
+        }
     }
 
     private void updateTraitAllowDuplicates(String parent, String trait, String value, String newValue, Map newTraits) {
@@ -256,14 +267,12 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
             Log.d("Field Book", trait + " " + value);
 
-            if (newTraits.containsKey(parent))
-                newTraits.remove(parent);
+            newTraits.remove(parent);
 
             newTraits.put(parent, value);
 
-            String exp_id = Integer.toString(getPrefs().getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+            String exp_id = Integer.toString(getPrefs().getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-            //Observation observation = ConfigActivity.dt.getObservation(getCRange().plot_id, parent);
             Observation observation = ConfigActivity.dt.getObservationByValue(exp_id, getCRange().plot_id, parent, value);
 
             ConfigActivity.dt.deleteTraitByValue(exp_id, getCRange().plot_id, parent, value);
@@ -272,8 +281,8 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                     parent,
                     trait,
                     newValue == null ? value : newValue,
-                    getPrefs().getString("FirstName", "") + " " + getPrefs().getString("LastName", ""),
-                    getPrefs().getString("Location", ""),
+                    getPrefs().getString(GeneralKeys.FIRST_NAME, "") + " " + getPrefs().getString(GeneralKeys.LAST_NAME, ""),
+                    getPrefs().getString(GeneralKeys.LOCATION, ""),
                     "",
                     exp_id,
                     observation.getDbId(),
@@ -283,7 +292,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
     private void deletePhotoWarning(final Boolean brapiDelete, final Map newTraits) {
 
-        String exp_id = Integer.toString(getPrefs().getInt(PrefsConstants.SELECTED_FIELD_ID, 0));
+        String exp_id = Integer.toString(getPrefs().getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
@@ -301,34 +310,40 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                 }
 
                 if (photo.getCount() > 0) {
-                    String item = photoLocation.get(photo.getSelectedItemPosition());
+
+                    DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
+                    List<DocumentFile> photosList = DocumentTreeUtil.Companion.getPlotMedia(photosDir, getCRange().plot_id, ".jpg");
+
+                    int index = photo.getSelectedItemPosition();
+                    DocumentFile selected = photosList.get(index);
+                    Uri item = selected.getUri();
                     if (!brapiDelete) {
-                        photoLocation.remove(photo.getSelectedItemPosition());
+                        selected.delete();
+                        photosList.remove(index);
                         drawables.remove(photo.getSelectedItemPosition());
                     }
 
-                    File f = new File(item);
-                    f.delete();
-                    Utils.scanFile((Activity) getContext(), f);
+                    DocumentFile file = DocumentFile.fromSingleUri(getContext(), item);
+                    if (file != null && file.exists()) {
+                        file.delete();
+                    }
 
                     // Remove individual images
                     if (brapiDelete) {
-                        updateTraitAllowDuplicates(getCurrentTrait().getTrait(), "photo", item, "NA", newTraits);
-                        //ConfigActivity.dt.updateTraitByValue(getCRange().plot_id, getCurrentTrait().getTrait(), item, "NA");
+                        updateTraitAllowDuplicates(getCurrentTrait().getTrait(), "photo", item.toString(), "NA", newTraits);
                         loadLayout();
                     } else {
-                        ConfigActivity.dt.deleteTraitByValue(exp_id, getCRange().plot_id, getCurrentTrait().getTrait(), item);
+                        ConfigActivity.dt.deleteTraitByValue(exp_id, getCRange().plot_id, getCurrentTrait().getTrait(), item.toString());
                     }
 
                     // Only do a purge by trait when there are no more images left
                     if (!brapiDelete) {
-                        if (photoLocation.size() == 0)
+                        if (photosList.size() == 0)
                             removeTrait(getCurrentTrait().getTrait());
                     }
 
                     photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
 
-                    photo.setAdapter(photoAdapter);
                 } else {
                     // If an NA exists, delete it
                     ConfigActivity.dt.deleteTraitByValue(exp_id, getCRange().plot_id, getCurrentTrait().getTrait(), "NA");
@@ -336,8 +351,9 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
                     photoAdapter = new GalleryImageAdapter((Activity) getContext(), emptyList);
 
-                    photo.setAdapter(photoAdapter);
                 }
+
+                photo.setAdapter(photoAdapter);
             }
 
         });
@@ -356,28 +372,33 @@ public class PhotoTraitLayout extends BaseTraitLayout {
     }
 
     private void takePicture() {
+
         SimpleDateFormat timeStamp = new SimpleDateFormat(
                 "yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
 
-        File dir = new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/");
+        DocumentFile dir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
 
-        dir.mkdirs();
+        if (dir != null) {
 
-        String generatedName = getCRange().plot_id + "_" + getCurrentTrait().getTrait() + "_" + getRep() + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
-        mCurrentPhotoPath = generatedName;
+            String generatedName = getCRange().plot_id + "_" + getCurrentTrait().getTrait() + "_" + getRep() + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
 
-        Log.w("File", getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/" + generatedName);
+            mCurrentPhotoPath = generatedName;
 
-        // Save photo capture with timestamp as filename
-        File file = new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/photos/",
-                generatedName);
+            Log.w("File", dir.getUri() + generatedName);
 
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getContext().getPackageManager()) != null) {
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                    FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".fileprovider", file));
-            ((Activity) getContext()).startActivityForResult(takePictureIntent, 252);
+            DocumentFile file = dir.createFile("image/jpg", generatedName);
+
+            if (file != null) {
+
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                // Ensure that there's a camera activity to handle the intent
+                if (takePictureIntent.resolveActivity(getContext().getPackageManager()) != null) {
+
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, file.getUri());
+
+                    ((Activity) getContext()).startActivityForResult(takePictureIntent, 252);
+                }
+            }
         }
     }
 
@@ -413,24 +434,22 @@ public class PhotoTraitLayout extends BaseTraitLayout {
             if (dialog.isShowing())
                 dialog.dismiss();
 
-            File img = new File(getPrefs().getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.PLOTDATAPATH + "/" + getPrefs().getString("FieldFile", "") + "/" + "/photos/");
-            if (img.listFiles() != null) {
+            DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
 
-                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
-                photo.setAdapter(photoAdapter);
-                photo.setSelection(photo.getCount() - 1);
-                photo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            if (photosDir != null) {
 
-                    @Override
-                    public void onItemClick(AdapterView<?> arg0,
-                                            View arg1, int pos, long arg3) {
-                        displayPlotImage(photoLocation.get(photo.getSelectedItemPosition()));
-                    }
-                });
+                List<DocumentFile> photos = DocumentTreeUtil.Companion.getPlotMedia(photosDir, getCRange().plot_id, ".jpg");
 
-            } else {
-                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
-                photo.setAdapter(photoAdapter);
+                if (!photos.isEmpty()) {
+                    photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+                    photo.setAdapter(photoAdapter);
+                    photo.setSelection(photo.getCount() - 1);
+                    photo.setOnItemClickListener((arg0, arg1, pos, arg3) ->
+                            displayPlotImage(photos.get(pos).getUri()));
+                } else {
+                    photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+                    photo.setAdapter(photoAdapter);
+                }
             }
         }
     }
@@ -447,11 +466,20 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                     m = 0;
                 }
 
-                // Do not take photos if limit is reached
-                if (m == 0 || photoLocation.size() < m) {
-                    takePicture();
-                } else
-                    Utils.makeToast(getContext(),getContext().getString(R.string.traits_create_photo_maximum));
+                DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
+
+                String plot = getCRange().plot_id;
+
+                List<DocumentFile> locations = DocumentTreeUtil.Companion.getPlotMedia(photosDir, plot, ".jpg");
+
+                if (photosDir != null) {
+                    // Do not take photos if limit is reached
+                    if (m == 0 || locations.size() < m) {
+                        takePicture();
+                    } else
+                        Utils.makeToast(getContext(),getContext().getString(R.string.traits_create_photo_maximum));
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
                 Utils.makeToast(getContext(),getContext().getString(R.string.trait_error_hardware_missing));

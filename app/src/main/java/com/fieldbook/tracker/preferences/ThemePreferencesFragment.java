@@ -4,16 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 
-import androidx.fragment.app.DialogFragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.h6ah4i.android.preference.NumberPickerPreferenceCompat;
-import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
 
 public class ThemePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
@@ -24,7 +20,7 @@ public class ThemePreferencesFragment extends PreferenceFragmentCompat implement
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName("Settings");
+        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
 
         setPreferencesFromResource(R.xml.preferences_theme, rootKey);
 
@@ -36,8 +32,8 @@ public class ThemePreferencesFragment extends PreferenceFragmentCompat implement
 
             public boolean onPreferenceClick(Preference preference) {
 
-                SharedPreferences.Editor ed = getContext().getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS).edit();
-                ed.putInt("SAVED_DATA_COLOR", Color.parseColor("#d50000"));
+                SharedPreferences.Editor ed = getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS).edit();
+                ed.putInt(GeneralKeys.SAVED_DATA_COLOR, Color.parseColor("#d50000"));
                 ed.apply();
 
                 getParentFragmentManager()

@@ -108,27 +108,29 @@ public class BrapiActivity extends AppCompatActivity {
 
     private void setupObservationLevelsSpinner() {
 
-        selectedObservationLevel = observationLevels.get(0);
-        Spinner spinner = findViewById(R.id.studyObservationLevels);
-        List<String> levelOptionsList = new ArrayList<>();
-        for(BrapiObservationLevel level : observationLevels) {
-            levelOptionsList.add(level.getObservationLevelName());
+        if (!observationLevels.isEmpty()) {
+            selectedObservationLevel = observationLevels.get(0);
+            Spinner spinner = findViewById(R.id.studyObservationLevels);
+            List<String> levelOptionsList = new ArrayList<>();
+            for(BrapiObservationLevel level : observationLevels) {
+                levelOptionsList.add(level.getObservationLevelName());
+            }
+            ArrayAdapter<String> levelOptions = new ArrayAdapter<String>(this,
+                    android.R.layout.simple_spinner_dropdown_item, levelOptionsList);
+
+            spinner.setAdapter(levelOptions);
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
+                    selectedObservationLevel = observationLevels.get(index);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
         }
-        ArrayAdapter<String> levelOptions = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_dropdown_item, levelOptionsList);
-
-        spinner.setAdapter(levelOptions);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
-                selectedObservationLevel = observationLevels.get(index);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
     }
 
     private void loadStudiesList() {
@@ -209,9 +211,7 @@ public class BrapiActivity extends AppCompatActivity {
                 itemDataList.add(study.getStudyDbId());
         }
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
-
-        return arrayAdapter;
+        return (ArrayAdapter<String>) new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
     }
 
     public void buttonClicked(View view) {

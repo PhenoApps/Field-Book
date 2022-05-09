@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import android.app.ProgressDialog;
@@ -15,7 +16,6 @@ import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,10 +23,13 @@ import android.os.Handler;
 
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
+import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -46,7 +49,7 @@ import android.widget.LinearLayout.LayoutParams;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.FileProvider;
+import androidx.documentfile.provider.DocumentFile;
 
 import android.widget.ListView;
 import android.widget.Toast;
@@ -56,39 +59,43 @@ import android.view.MenuItem;
 
 import com.fieldbook.tracker.utilities.CSVReader;
 import com.fieldbook.tracker.utilities.CSVWriter;
-import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.dragsort.DragSortListView;
 import com.fieldbook.tracker.dragsort.DragSortController;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
+import org.phenoapps.utils.BaseDocumentTreeUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class TraitEditorActivity extends AppCompatActivity {
 
+    public static int REQUEST_CLOUD_FILE_CODE = 5;
+    public static int REQUEST_FILE_EXPLORER_CODE = 1;
+
     public static DragSortListView traitList;
     public static TraitAdapter mAdapter;
     public static boolean brapiDialogShown = false;
     public static Activity thisActivity;
-    private static Handler mHandler = new Handler();
-    private static String mChosenFile;
+    private static final Handler mHandler = new Handler();
+    private static Uri mChosenFile;
 
     private static SharedPreferences ep;
 
@@ -215,6 +222,8 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
     };
 
+    private DragSortController mController;
+
     // Helper function to load data
     public static void loadData() {
         try {
@@ -251,10 +260,10 @@ public class TraitEditorActivity extends AppCompatActivity {
         // If we run into an error, do not warn the user since this is just a helper dialog
         try {
             // Check if this is a non-BrAPI field
-            String fieldName = context.getSharedPreferences("Settings", 0)
-                    .getString("FieldFile", "");
-            String fieldSource = context.getSharedPreferences("Settings", 0)
-                    .getString("ImportExpSource", "");
+            String fieldName = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+                    .getString(GeneralKeys.FIELD_FILE, "");
+            String fieldSource = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
+                    .getString(GeneralKeys.FIELD_SOURCE, "");
 
             if (!fieldName.equals("") && !fieldSource.equals("local") && !fieldSource.equals("")) {
 
@@ -340,7 +349,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+            systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
 
         loadData();
@@ -351,7 +360,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ep = getSharedPreferences("Settings", 0);
+        ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setContentView(R.layout.activity_traits);
 
@@ -384,41 +393,33 @@ public class TraitEditorActivity extends AppCompatActivity {
         traitList.setDropListener(onDrop);
         traitList.setRemoveListener(onRemove);
 
-        DragSortController controller = new DragSortController(traitList);
-        controller.setDragHandleId(R.id.dragSort);
-        controller.setRemoveEnabled(false);
-        controller.setSortEnabled(true);
-        controller.setDragInitMode(1);
+        mController = new DragSortController(traitList);
+        mController.setDragHandleId(R.id.dragSort);
+        mController.setRemoveEnabled(false);
+        mController.setSortEnabled(true);
+        mController.setDragInitMode(1);
 
-        traitList.setFloatViewManager(controller);
-        traitList.setOnTouchListener(controller);
+        traitList.setFloatViewManager(mController);
+        traitList.setOnTouchListener(mController);
         traitList.setDragEnabled(true);
 
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_new_trait, null);
         traitDialog = new NewTraitDialog(layout, this);
 
-        traitListener = new AdapterView.OnItemClickListener() {
+        traitListener = (parent, view, position, id) -> {
 
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            // When a trait is selected, alter the layout of the edit dialog accordingly
 
-                // When a trait is selected, alter the layout of the edit dialog accordingly
+            TraitObject o = mAdapter.getItem(position);
+            traitDialog.setTraitObject(o);
 
-                TraitObject o = mAdapter.getItem(position);
-                traitDialog.setTraitObject(o);
-
-                loadData();
-                traitDialog.show(true);
-            }
+            loadData();
+            traitDialog.show(true);
         };
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCreateTraitDialog();
-            }
-        });
+        fab.setOnClickListener(v -> showCreateTraitDialog());
     }
 
     @Override
@@ -426,7 +427,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         new MenuInflater(TraitEditorActivity.this).inflate(R.menu.menu_traits, menu);
 
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean("Tips", false));
+        systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
 
         return true;
     }
@@ -435,8 +436,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         View v = traitList.getChildAt(item);
         final int[] location = new int[2];
         v.getLocationOnScreen(location);
-        Rect droidTarget = new Rect(location[0], location[1], location[0] + v.getWidth()/adjust, location[1] + v.getHeight());
-        return droidTarget;
+        return new Rect(location[0], location[1], location[0] + v.getWidth()/adjust, location[1] + v.getHeight());
     }
 
     private TapTarget traitsTapTargetRect(Rect item, String title, String desc) {
@@ -480,67 +480,80 @@ public class TraitEditorActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()) {
-            case R.id.help:
-                TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description))
-                                //Todo add overflow menu action
-                        );
+        if (!mController.getDragging()) {
 
-                if (ConfigActivity.dt.getTraitColumnData("trait") != null) {
-                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0,4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
-                    sequence.target(traitsTapTargetRect(traitsListItemLocation(0,2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
-                }
+            switch (item.getItemId()) {
+                case R.id.help:
+                    TapTargetSequence sequence = new TapTargetSequence(this)
+                            .targets(traitsTapTargetMenu(R.id.addTrait, getString(R.string.tutorial_traits_add_title), getString(R.string.tutorial_traits_add_description))
+                                    //Todo add overflow menu action
+                            );
 
-                sequence.start();
-                break;
+                    if (ConfigActivity.dt.getTraitColumnData("trait") != null) {
+                        sequence.target(traitsTapTargetRect(traitsListItemLocation(0,4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
+                        sequence.target(traitsTapTargetRect(traitsListItemLocation(0,2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
+                    }
 
-            case R.id.deleteTrait:
-                showDeleteTraitDialog();
-                break;
+                    sequence.start();
+                    break;
 
-            case R.id.sortTrait:
-                sortDialog();
-                break;
+                case R.id.deleteTrait:
+                    showDeleteTraitDialog();
+                    break;
 
-            case R.id.importexport:
-                importExportDialog();
-                break;
+                case R.id.sortTrait:
+                    sortDialog();
+                    break;
 
-            case R.id.addTrait:
-                showCreateTraitDialog();
-                break;
+                case R.id.importexport:
+                    importExportDialog();
+                    break;
 
-            case R.id.toggleTrait:
-                changeAllVisibility();
-                break;
+                case R.id.addTrait:
+                    showCreateTraitDialog();
+                    break;
 
-            case android.R.id.home:
-                CollectActivity.reloadData = true;
-                finish();
-                break;
+                case R.id.toggleTrait:
+                    changeAllVisibility();
+                    break;
+
+                case android.R.id.home:
+                    CollectActivity.reloadData = true;
+                    finish();
+                    break;
+            }
+
+            return super.onOptionsItemSelected(item);
+
+        } else {
+
+            Utils.makeToast(thisActivity, getString(R.string.act_trait_editor_menu_click_while_dragging));
+
+            return false;
         }
-        return super.onOptionsItemSelected(item);
     }
 
     private void changeAllVisibility() {
-        boolean globalVis = ep.getBoolean("allTraitsVisible", false);
-        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
+        boolean globalVis = ep.getBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, false);
+        List<TraitObject> allTraits = ConfigActivity.dt.getAllTraitObjects();
 
-        if (allTraits == null) {
+        if (allTraits.isEmpty()) {
             Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing_modify));
             return;
         }
 
-        for (String allTrait : allTraits) {
-            ConfigActivity.dt.updateTraitVisibility(allTrait, globalVis);
-            Log.d("Field", allTrait);
+        //issue #305 fix toggles visibility even when all are un-toggled
+        globalVis = !allTraits.stream().allMatch(TraitObject::getVisible);
+
+        for (TraitObject allTrait : allTraits) {
+            ConfigActivity.dt.updateTraitVisibility(allTrait.getTrait(), globalVis);
+            Log.d("Field", allTrait.getTrait());
         }
 
         globalVis = !globalVis;
 
         Editor ed = ep.edit();
-        ed.putBoolean("allTraitsVisible", globalVis);
+        ed.putBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, globalVis);
         ed.apply();
         loadData();
     }
@@ -596,7 +609,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     public void loadTraitFilePermission() {
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(this, perms)) {
-            if (ep.getBoolean("TraitsExported", false)) {
+            if (ep.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)) {
                 showFileDialog();
             } else {
                 checkTraitExportDialog();
@@ -654,37 +667,38 @@ public class TraitEditorActivity extends AppCompatActivity {
         params.height = LayoutParams.WRAP_CONTENT;
         importDialog.getWindow().setAttributes(params);
 
-        myList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View arg1, int which, long arg3) {
-                Intent intent = new Intent();
-                switch (which) {
-                    case 0:
+        myList.setOnItemClickListener((av, arg1, which, arg3) -> {
+            Intent intent = new Intent();
+            switch (which) {
+                case 0:
+                    DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(thisActivity, R.string.dir_trait);
+                    if (traitDir != null && traitDir.exists()) {
                         intent.setClassName(thisActivity, FileExploreActivity.class.getName());
-                        intent.putExtra("path", ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH);
+                        intent.putExtra("path", traitDir.getUri().toString());
                         intent.putExtra("include", new String[]{"trt"});
                         intent.putExtra("title", getString(R.string.traits_dialog_import));
-                        startActivityForResult(intent, 1);
-                        break;
-                    case 1:
-                        loadCloud();
-                        break;
-                    case 2:
-                        intent.setClassName(thisActivity, BrapiTraitActivity.class.getName());
-                        startActivityForResult(intent, 2);
-                        break;
-                }
-                importDialog.dismiss();
+                        startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+                    }
+                    break;
+                case 1:
+                    loadCloud();
+                    break;
+                case 2:
+                    intent.setClassName(thisActivity, BrapiTraitActivity.class.getName());
+                    startActivityForResult(intent, 2);
+                    break;
             }
+            importDialog.dismiss();
         });
     }
 
     private void loadCloud() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");;
+        intent.setType("*/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
 
         try {
-            startActivityForResult(Intent.createChooser(intent, "cloudFile"), 5);
+            startActivityForResult(Intent.createChooser(intent, "cloudFile"), REQUEST_CLOUD_FILE_CODE);
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(getApplicationContext(), "No suitable File Manager was found.", Toast.LENGTH_SHORT).show();
         }
@@ -701,26 +715,17 @@ public class TraitEditorActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this, R.style.AppAlertDialog);
         builder.setMessage(getString(R.string.traits_export_check));
 
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
+        builder.setPositiveButton(getString(R.string.dialog_yes), (dialog, which) -> {
 
-                File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH);
-                if (!file.exists()) {
-                    Utils.createDir(getBaseContext(),ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.FIELDEXPORTPATH);
-                }
+            BaseDocumentTreeUtil.Companion.getDirectory(thisActivity, R.string.dir_trait);
 
-                showExportDialog();
-                dialog.dismiss();
-            }
+            showExportDialog();
+            dialog.dismiss();
         });
 
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                showFileDialog();
-                dialog.dismiss();
-            }
-
+        builder.setNegativeButton(getString(R.string.dialog_no), (dialog, which) -> {
+            showFileDialog();
+            dialog.dismiss();
         });
 
         AlertDialog alert = builder.create();
@@ -823,7 +828,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 exportTable(exportFile.getText().toString());
                 Editor ed = ep.edit();
-                ed.putBoolean("TraitsExported", true);
+                ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, true);
                 ed.apply();
             }
         });
@@ -889,9 +894,9 @@ public class TraitEditorActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 1) {
+        if (requestCode == REQUEST_FILE_EXPLORER_CODE) {
             if (resultCode == RESULT_OK) {
-                mChosenFile = data.getStringExtra("result");
+                mChosenFile = Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY));
                 mHandler.post(importCSV);
             } else {
                 Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
@@ -905,67 +910,71 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
         }
 
-        if (requestCode == 5 && resultCode == RESULT_OK && data.getData() != null) {
+        if (requestCode == REQUEST_CLOUD_FILE_CODE && resultCode == RESULT_OK && data.getData() != null) {
             Uri content_describer = data.getData();
-            InputStream in = null;
-            OutputStream out = null;
-            try {
-                in = getContentResolver().openInputStream(content_describer);
-                out = new FileOutputStream(new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH + "/" + getFileName(content_describer)));
-                byte[] buffer = new byte[1024];
-                int len;
-                while ((len = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, len);
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (in != null) {
+            String fileName = getFileName(content_describer);
+
+            DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
+            if (traitDir != null && traitDir.exists()) {
+
+                DocumentFile traitExportFile = traitDir.createFile("*/*", fileName);
+
+                if (traitExportFile != null && traitExportFile.exists()) {
+
+                    InputStream in = null;
+                    OutputStream out = null;
                     try {
-                        in.close();
+                        out = BaseDocumentTreeUtil.Companion.getFileOutputStream(this, R.string.dir_trait, fileName);
+                        in = getContentResolver().openInputStream(content_describer);
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while ((len = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, len);
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } finally {
+                        if (in != null) {
+                            try {
+                                in.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        if (out != null){
+                            try {
+                                out.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
-                }
-                if (out != null){
-                    try {
-                        out.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+
+
+                    String extension = FieldFileObject.getExtension(fileName);
+
+                    if(!extension.equals("trt")) {
+                        Utils.makeToast(getApplicationContext(),getString(R.string.import_error_format_trait));
+                        return;
                     }
+
+                    mChosenFile = traitExportFile.getUri();
+                    mHandler.post(importCSV);
                 }
             }
-
-            final String chosenFile = ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH + "/" + getFileName(content_describer);
-
-            String extension = "";
-            int i = chosenFile.lastIndexOf('.');
-            if (i > 0) {
-                extension = chosenFile.substring(i+1);
-            }
-
-            if(!extension.equals("trt")) {
-                Utils.makeToast(getApplicationContext(),getString(R.string.import_error_format_trait));
-                return;
-            }
-
-            mChosenFile = chosenFile;
-            mHandler.post(importCSV);
         }
     }
 
     public String getFileName(Uri uri) {
         String result = null;
         if (uri.getScheme().equals("content")) {
-            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-            try {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (index > 0) {
+                        result = cursor.getString(index);
+                    }
                 }
-            } finally {
-                cursor.close();
             }
         }
         if (result == null) {
@@ -980,47 +989,65 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     // Helper function export data as CSV
     private void exportTable(String exportName) {
-        File backup = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH);
-        backup.mkdirs();
-
-        File file = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.TRAITPATH + "/" + exportName);
 
         try {
-            FileWriter fw = new FileWriter(file);
-            CSVWriter csvWriter = new CSVWriter(fw, ConfigActivity.dt.getAllTraitsForExport());
-            csvWriter.writeTraitFile(ConfigActivity.dt.getAllTraitsForExport().getColumnNames());
 
-            csvWriter.close();
-        } catch (Exception ignore) {
+            DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
+
+            if (traitDir != null && traitDir.exists()) {
+
+                DocumentFile exportDoc = traitDir.createFile("*/*", exportName);
+
+                if (exportDoc != null && exportDoc.exists()) {
+
+                    OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(this, R.string.dir_trait, exportName);
+
+                    if (output != null) {
+
+                        OutputStreamWriter osw = new OutputStreamWriter(output);
+                        CSVWriter csvWriter = new CSVWriter(osw, ConfigActivity.dt.getAllTraitsForExport());
+                        csvWriter.writeTraitFile(ConfigActivity.dt.getAllTraitsForExport().getColumnNames());
+
+                        csvWriter.close();
+                        osw.close();
+                        output.close();
+
+                        shareFile(exportDoc);
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
         }
-
-        shareFile(file);
     }
 
     /**
      * Scan file to update file list and share exported file
      */
-    private void shareFile(File filePath) {
-        MediaScannerConnection.scanFile(this, new String[]{filePath.getAbsolutePath()}, null, null);
-
-        if (!ep.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
-            Intent intent = new Intent();
-            intent.setAction(android.content.Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".fileprovider", filePath));
-            startActivity(Intent.createChooser(intent, "Sending File..."));
+    private void shareFile(DocumentFile docFile) {
+        if (docFile != null && docFile.exists()) {
+            if (!ep.getBoolean(GeneralKeys.DISABLE_SHARE, false)) {
+                Intent intent = new Intent();
+                intent.setAction(android.content.Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_STREAM, docFile.getUri());
+                startActivity(Intent.createChooser(intent, "Sending File..."));
+            }
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
-    private class ArrayIndexComparator implements Comparator<Integer> {
+    private static class ArrayIndexComparator implements Comparator<Integer> {
         private final String[] array;
 
         ArrayIndexComparator(String[] array) {
@@ -1065,7 +1092,8 @@ public class TraitEditorActivity extends AppCompatActivity {
                 String[] data;
                 String[] columns;
 
-                FileReader fr = new FileReader(mChosenFile);
+                InputStream inputStream = BaseDocumentTreeUtil.Companion.getUriInputStream(thisActivity, mChosenFile);
+                InputStreamReader fr = new InputStreamReader(inputStream);
 
                 CSVReader cr = new CSVReader(fr);
 
@@ -1075,6 +1103,27 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 if (ConfigActivity.dt.isTableExists(DataHelper.TRAITS)) {
                     ConfigActivity.dt.deleteTraitsTable();
+                }
+
+                //get variable with largest real position
+                Optional<TraitObject> maxPosition = ObservationVariableDao.Companion.getAllTraitObjects().stream()
+                        .max(Comparator.comparingInt(TraitObject::getRealPosition));
+
+                //by default start from zero
+                int positionOffset = 0;
+
+                //if there are other traits, set offset to the max
+                if (maxPosition.isPresent()) {
+
+                    try {
+
+                        positionOffset = maxPosition.get().getRealPosition();
+
+                    } catch (NoSuchElementException e) {
+
+                        e.printStackTrace();
+
+                    }
                 }
 
                 while (data != null) {
@@ -1092,12 +1141,8 @@ public class TraitEditorActivity extends AppCompatActivity {
                         t.setDetails(data[5]);
                         t.setCategories(data[6]);
                         //t.visible = data[7].toLowerCase();
-                        t.setRealPosition(Integer.parseInt(data[8]));
-                        if (data[7].toLowerCase().equals("true")) {
-                            t.setVisible(true);
-                        } else {
-                            t.setVisible(false);
-                        }
+                        t.setRealPosition(positionOffset + Integer.parseInt(data[8]));
+                        t.setVisible(data[7].equalsIgnoreCase("true"));
                         ConfigActivity.dt.insertTraits(t);
                     }
                 }
@@ -1112,12 +1157,16 @@ public class TraitEditorActivity extends AppCompatActivity {
                 } catch (Exception ignore) {
                 }
 
+                try {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 ConfigActivity.dt.close();
                 ConfigActivity.dt.open();
-
-                File newDir = new File(mChosenFile);
-
-                newDir.mkdirs();
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1130,7 +1179,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Integer result) {
             Editor ed = ep.edit();
-            ed.putBoolean("CreateTraitFinished", true);
+            ed.putBoolean(GeneralKeys.CREATE_TRAIT_FINISHED, true);
             ed.apply();
 
             loadData();

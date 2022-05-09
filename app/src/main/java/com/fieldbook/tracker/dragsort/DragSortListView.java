@@ -21,12 +21,6 @@
 
 package com.fieldbook.tracker.dragsort;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -36,7 +30,6 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Environment;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -54,6 +47,12 @@ import android.widget.ListView;
 import android.widget.WrapperListAdapter;
 
 import com.fieldbook.tracker.R;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ListView subclass that mediates drag and drop resorting of items.
@@ -404,7 +403,7 @@ public class DragSortListView extends ListView {
                     R.styleable.DragSortListView_collapsed_height, 1));
 
             mTrackDragSort = a.getBoolean(
-                    R.styleable.DragSortListView_track_drag_sort, false);
+                    R.styleable.DragSortListView_track_drag_sort, true);
 
             if (mTrackDragSort) {
                 mDragSortTracker = new DragSortTracker();
@@ -2328,7 +2327,7 @@ public class DragSortListView extends ListView {
 
         public HeightCache(int size) {
             mMap = new SparseIntArray(size);
-            mOrder = new ArrayList<Integer>(size);
+            mOrder = new ArrayList<>(size);
             mMaxSize = size;
         }
 
@@ -2774,8 +2773,8 @@ public class DragSortListView extends ListView {
         private boolean mTracking = false;
 
         public DragSortTracker() {
-            File root = Environment.getExternalStorageDirectory();
-            mFile = new File(root, "dslv_state.txt");
+
+            mFile = new File(getContext().getFilesDir(), "dslv_state.txt");
 
             if (!mFile.exists()) {
                 try {
@@ -2881,7 +2880,5 @@ public class DragSortListView extends ListView {
                 mTracking = false;
             }
         }
-
     }
-
 }

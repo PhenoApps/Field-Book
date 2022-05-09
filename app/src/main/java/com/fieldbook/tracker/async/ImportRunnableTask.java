@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.text.Html;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
@@ -12,8 +13,9 @@ import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
-import java.io.File;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +29,10 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     int idColPosition;
     SharedPreferences mPrefs;
 
+    int lineFail = -1;
     boolean fail;
     boolean uniqueFail;
+    boolean containsDuplicates = false;
 
     public ImportRunnableTask(Context context, FieldFileObject.FieldFileBase fieldFile,
                               int idColPosition, String unique, String primary, String secondary) {
@@ -37,7 +41,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
         mContext = new WeakReference<>(context);
 
-        this.mPrefs = context.getSharedPreferences("Settings", Context.MODE_PRIVATE);
+        this.mPrefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
         this.idColPosition = idColPosition;
         this.unique = unique;
         this.primary = primary;
@@ -70,7 +74,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                 return 0;
             }
 
-            if (mFieldFile.hasSpecialCharasters()) {
+            if (mFieldFile.hasSpecialCharacters()) {
                 return 0;
             }
 
@@ -80,6 +84,10 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             ArrayList<String> nonEmptyColumns = new ArrayList<>();
             ArrayList<Integer> nonEmptyIndices = new ArrayList<>();
 
+            int uniqueIndex = -1;
+            int primaryIndex = -1;
+            int secondaryIndex = -1;
+
             //match and delete special characters from header line
             for (int i = 0; i < columns.length; i++) {
 
@@ -87,12 +95,26 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                 if (DataHelper.hasSpecialChars(header)) {
                     columns[i] = DataHelper.replaceSpecialChars(header);
-
                 }
 
+                //populate an array of indices that have a non empty column
+                //later we will only add data rows with the non empty columns
+                //also find the unique/primary/secondary indices
+                //later we will skip the rows if these are not present
                 if (!columns[i].isEmpty()) {
-                    nonEmptyColumns.add(columns[i]);
-                    nonEmptyIndices.add(i);
+
+                    if (!nonEmptyColumns.contains(columns[i])) {
+                        nonEmptyColumns.add(columns[i]);
+                        nonEmptyIndices.add(i);
+
+                        if (columns[i].equals(unique)) {
+                            uniqueIndex = i;
+                        } else if (columns[i].equals(primary)) {
+                            primaryIndex = i;
+                        } else if (columns[i].equals(secondary)) {
+                            secondaryIndex = i;
+                        }
+                    } else containsDuplicates = true;
                 }
             }
 
@@ -105,33 +127,61 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
             DataHelper.db.beginTransaction();
 
-            try {
-                while (true) {
-                    data = mFieldFile.readNext();
-                    if (data == null)
-                        break;
+            //start iterating over all the rows of the csv file only if we found the u/p/s indices
+            if (uniqueIndex > -1 && primaryIndex > -1 && secondaryIndex > -1) {
 
-                    ArrayList<String> nonEmptyData = new ArrayList<>();
-                    for (int j = 0; j < data.length; j++) {
-                        if (nonEmptyIndices.contains(j)) {
-                            nonEmptyData.add(data[j]);
+                int line = 0;
+
+                try {
+                    while (true) {
+                        data = mFieldFile.readNext();
+                        if (data == null)
+                            break;
+
+                        //only load the row if it contains u/p/s data
+                        int rowSize = data.length;
+
+                        //ensure next check won't cause an AIOB
+                        if (rowSize > uniqueIndex && rowSize > primaryIndex && rowSize > secondaryIndex) {
+
+                            //check that all u/p/s strings are not empty
+                            if (!data[uniqueIndex].isEmpty() && !data[primaryIndex].isEmpty()
+                                    && !data[secondaryIndex].isEmpty()) {
+
+                                ArrayList<String> nonEmptyData = new ArrayList<>();
+                                for (int j = 0; j < data.length; j++) {
+                                    if (nonEmptyIndices.contains(j)) {
+                                        nonEmptyData.add(data[j]);
+                                    }
+                                }
+                                ConfigActivity.dt.createFieldData(exp_id, nonEmptyColumns, nonEmptyData);
+                            }
                         }
-                    }
-                    ConfigActivity.dt.createFieldData(exp_id, nonEmptyColumns, nonEmptyData);
-                }
 
-                DataHelper.db.setTransactionSuccessful();
-            } finally {
-                DataHelper.db.endTransaction();
+                        line++;
+                    }
+
+                    DataHelper.db.setTransactionSuccessful();
+
+                } catch (Exception e) {
+
+                    lineFail = line;
+
+                    e.printStackTrace();
+
+                    throw e;
+
+                } finally {
+
+                    DataHelper.db.endTransaction();
+
+                }
             }
 
             mFieldFile.close();
 
             ConfigActivity.dt.close();
             ConfigActivity.dt.open();
-
-            File newDir = new File(mFieldFile.getPath());
-            newDir.mkdirs();
 
             ConfigActivity.dt.updateExpTable(true, false, false, exp_id);
 
@@ -154,35 +204,58 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         if (dialog.isShowing())
             dialog.dismiss();
 
-        if (fail | uniqueFail | mFieldFile.hasSpecialCharasters()) {
+        if (fail | uniqueFail | mFieldFile.hasSpecialCharacters()) {
             ConfigActivity.dt.deleteField(result);
             SharedPreferences.Editor ed = mPrefs.edit();
-            ed.putString("FieldFile", null);
-            ed.putBoolean("ImportFieldFinished", false);
+            ed.putString(GeneralKeys.FIELD_FILE, null);
+            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
             ed.apply();
         }
+        if (containsDuplicates) {
+            Utils.makeToast(context, context.getString(R.string.import_runnable_duplicates_skipped));
+        }
         if (fail) {
+            Utils.makeToast(context, context.getString(R.string.import_runnable_create_field_data_failed, lineFail));
             //makeToast(getString(R.string.import_error_general));
         } else if (uniqueFail && context != null) {
             Utils.makeToast(context,context.getString(R.string.import_error_unique));
-        } else if (mFieldFile.hasSpecialCharasters()) {
+        } else if (mFieldFile.hasSpecialCharacters()) {
             Utils.makeToast(context,context.getString(R.string.import_error_unique_characters_illegal));
         } else {
             SharedPreferences.Editor ed = mPrefs.edit();
 
-            ed.putString("ImportUniqueName", unique);
-            ed.putString("ImportFirstName", primary);
-            ed.putString("ImportSecondName", secondary);
-            ed.putBoolean("ImportFieldFinished", true);
-            ed.putInt("SelectedFieldExpId", result);
+            ed.putString(GeneralKeys.UNIQUE_NAME, unique);
+            ed.putString(GeneralKeys.PRIMARY_NAME, primary);
+            ed.putString(GeneralKeys.SECONDARY_NAME, secondary);
+            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true);
+            ed.putInt(GeneralKeys.SELECTED_FIELD_ID, result);
 
             ed.apply();
 
             CollectActivity.reloadData = true;
             FieldEditorActivity.loadData();
 
-            ConfigActivity.dt.open();
-            ConfigActivity.dt.switchField(result);
+            try {
+
+                ConfigActivity.dt.open();
+
+                ConfigActivity.dt.switchField(result);
+
+            } catch (Exception e) {
+
+                if (context != null) {
+
+                    Utils.makeToast(context, context.getString(R.string.import_runnable_db_failed_to_switch));
+
+                }
+
+                ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+                ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+                ed.apply();
+
+                e.printStackTrace();
+
+            }
         }
     }
 

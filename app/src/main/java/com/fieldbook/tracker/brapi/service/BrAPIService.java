@@ -1,44 +1,45 @@
 package com.fieldbook.tracker.brapi.service;
 
-        import android.content.Context;
-        import android.content.SharedPreferences;
-        import android.util.Log;
-        import android.util.Patterns;
-        import android.widget.Toast;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
+import android.util.Patterns;
+import android.widget.Toast;
 
-        import androidx.arch.core.util.Function;
+import androidx.arch.core.util.Function;
 
-        import com.fieldbook.tracker.R;
-        import com.fieldbook.tracker.brapi.ApiError;
-        import com.fieldbook.tracker.brapi.ApiErrorCode;
-        import com.fieldbook.tracker.brapi.BrapiAuthDialog;
-        import com.fieldbook.tracker.brapi.BrapiControllerResponse;
-        import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
-        import com.fieldbook.tracker.brapi.model.BrapiProgram;
-        import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
-        import com.fieldbook.tracker.brapi.model.BrapiTrial;
-        import com.fieldbook.tracker.brapi.model.FieldBookImage;
-        import com.fieldbook.tracker.brapi.model.Observation;
-        import com.fieldbook.tracker.preferences.GeneralKeys;
-        import com.fieldbook.tracker.objects.TraitObject;
-        import com.fieldbook.tracker.utilities.Constants;
-        import com.fieldbook.tracker.utilities.FailureFunction;
-        import com.fieldbook.tracker.utilities.SuccessFunction;
+import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.ApiError;
+import com.fieldbook.tracker.brapi.ApiErrorCode;
+import com.fieldbook.tracker.brapi.BrapiAuthDialog;
+import com.fieldbook.tracker.brapi.BrapiControllerResponse;
+import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
+import com.fieldbook.tracker.brapi.model.BrapiProgram;
+import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
+import com.fieldbook.tracker.brapi.model.BrapiTrial;
+import com.fieldbook.tracker.brapi.model.FieldBookImage;
+import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.Constants;
+import com.fieldbook.tracker.utilities.FailureFunction;
+import com.fieldbook.tracker.utilities.SuccessFunction;
 
-        import java.net.MalformedURLException;
-        import java.net.URL;
-        import java.util.List;
-        import java.util.function.BiFunction;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.function.BiFunction;
 
 public interface BrAPIService {
 
     public static String notUniqueFieldMessage = "not_unique";
     public static String notUniqueIdMessage = "not_unique_id";
+    public static String noPlots = "no_plots";
 
     // Helper functions for brapi configurations
     public static Boolean isLoggedIn(Context context) {
 
-        String auth_token = context.getSharedPreferences("Settings", 0)
+        String auth_token = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
                 .getString(GeneralKeys.BRAPI_TOKEN, "");
 
         if (auth_token == null || auth_token == "") {
@@ -80,7 +81,7 @@ public interface BrAPIService {
     }
 
     public static String getBrapiUrl(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences("Settings", 0);
+        SharedPreferences preferences = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         String baseURL = preferences.getString(GeneralKeys.BRAPI_BASE_URL, "");
         String version = preferences.getString(GeneralKeys.BRAPI_VERSION, "");
         String path;
@@ -89,6 +90,37 @@ public interface BrAPIService {
         else
             path = Constants.BRAPI_PATH_V1;
         return baseURL + path;
+    }
+
+    static int checkPreference(Context context, String key, String defaultValue) {
+        String prefValueString = context.getSharedPreferences("Settings", 0)
+                .getString(key, defaultValue);
+
+        int value = Integer.parseInt(defaultValue);
+
+        try {
+            if (prefValueString != null) {
+                value = Integer.parseInt(prefValueString);
+            }
+        } catch (NumberFormatException nfe) {
+            String message = nfe.getLocalizedMessage();
+            if (message != null) {
+                Log.d("FieldBookError", nfe.getLocalizedMessage());
+            } else {
+                Log.d("FieldBookError", "Preference number format error.");
+            }
+            nfe.printStackTrace();
+        }
+
+        return value;
+    }
+
+    static Integer getTimeoutValue(Context context) {
+        return checkPreference(context, GeneralKeys.BRAPI_TIMEOUT, "120");
+    }
+
+    static int getChunkSize(Context context) {
+        return checkPreference(context, GeneralKeys.BRAPI_CHUNK_SIZE, "500");
     }
 
     public static boolean isConnectionError(int code) {
@@ -143,6 +175,9 @@ public interface BrAPIService {
     public void updateObservations(List<Observation> observations,
                                    final Function<List<Observation>, Void> function,
                                    final Function<Integer, Void> failFunction);
+
+    void createObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
+    void updateObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
 
     /*
     public void postObservations(List<Observation> observations,
