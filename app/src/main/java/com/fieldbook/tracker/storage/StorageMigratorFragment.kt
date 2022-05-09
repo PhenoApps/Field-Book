@@ -16,9 +16,9 @@ import org.phenoapps.fragments.storage.PhenoLibMigratorFragment
 
 class StorageMigratorFragment: PhenoLibMigratorFragment() {
 
-    override val migrateButtonColor = Color.parseColor("#795548")
-    override val skipButtonColor = Color.parseColor("#795548")
-    override val backgroundColor = Color.parseColor("#8BC34A")
+    override val backgroundColor = Color.parseColor("#FFFFFF")
+    override val migrateButtonColor = Color.parseColor("#8BC34A")
+    override val skipButtonColor = Color.parseColor("#8BC34A")
 
     override fun onUpdateUri(from: DocumentFile, to: DocumentFile) {
         from.updateUri(to)

@@ -11,8 +11,8 @@ import org.phenoapps.fragments.storage.PhenoLibStorageDefinerFragment
 
 class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
 
-    override val buttonColor = Color.parseColor("#795548")
-    override val backgroundColor = Color.parseColor("#8BC34A")
+    override val buttonColor = Color.parseColor("#8BC34A")
+    override val backgroundColor = Color.parseColor("#FFFFFF")
 
     //default root folder name if user choose an incorrect root on older devices
     override val defaultAppName: String = "fieldBook"
