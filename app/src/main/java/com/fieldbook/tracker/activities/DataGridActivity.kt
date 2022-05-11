@@ -180,6 +180,8 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
         //if row header was not chosen, then use the preference unique name
         var rowHeader = prefixTrait ?: ep.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
 
+        ConfigActivity.dt.open()
+
         if (rowHeader !in ObservationUnitPropertyDao.getRangeColumnNames()) {
             rowHeader = uniqueHeader
         }
