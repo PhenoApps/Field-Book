@@ -97,7 +97,7 @@
         android:title="@string/preferences_brapi_traits_title"
         app:iconSpaceReserved="false">
         <ListPreference
-            android:defaultValue="@array/pref_collect_customize_labelval_default"
+            android:defaultValue="@string/preferences_appearance_collect_labelval_customize_value"
             android:dialogTitle="@string/preferences_appearance_collect_labelval_customize"
             android:entries="@array/pref_collect_labelval_customize_title"
             android:entryValues="@array/pref_collect_customize_labelval"
