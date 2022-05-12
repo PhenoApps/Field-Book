@@ -3,15 +3,12 @@ package com.fieldbook.tracker.preferences
 import android.app.AlertDialog
 import android.os.Bundle
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.preferences.PreferencesActivity
-import com.fieldbook.tracker.preferences.GeneralKeys
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.content.Intent
 import androidx.preference.*
+import org.phenoapps.security.Security
 import java.util.ArrayList
 import java.util.HashMap
 
@@ -24,7 +21,11 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         PreferenceManager.getDefaultSharedPreferences(context)
     }
 
+    private val advisor by Security().secureBluetooth()
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+
+        advisor.initialize()
 
         setPreferencesFromResource(R.xml.preferences_geonav, rootKey)
 
@@ -35,7 +36,9 @@ class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
         if (mPairDevicePref != null) {
             mPairDevicePref!!.onPreferenceClickListener =
                 Preference.OnPreferenceClickListener { view: Preference? ->
-                    startDeviceChoiceDialog()
+                    advisor.connectWith {
+                        startDeviceChoiceDialog()
+                    }
                     true
                 }
         }
