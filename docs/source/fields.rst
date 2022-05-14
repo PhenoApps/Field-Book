@@ -4,7 +4,7 @@ Fields
 Design
 ------
 
-.. figure:: /_static/images/export/export_framed.png
+.. figure:: /_static/images/fields/fields_framed.png
    :width: 40%
    :align: center
    :alt: Export layout
@@ -29,7 +29,7 @@ To import files into Field Book, select the Fields and press the add button on t
 
 Managing
 --------
-.. figure:: /_static/images/export/fields_list_menu_framed.png
+.. figure:: /_static/images/fields/fields_list_menu_framed.png
    :width: 40%
    :align: center
    :alt: Sorting an existing field
