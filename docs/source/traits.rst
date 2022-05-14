@@ -5,7 +5,12 @@ Traits
    :align: center
    :alt: Traits layout with samples imported
 
-Data is collected in Field Book by creating traits. Different trait formats utilize different layouts and features to streamline how the data is collected. The traits screen allows for the management of the current traits within Field Book and lets the user create new traits or modify existing traits.
+   The Traits screen layout with sample data loaded.
+
+Data is collected in Field Book by creating traits. Different trait formats utilize different layouts that optimize how the data is collected. The traits screen lets you create new traits and manage existing traits.
+
+List Item Layout
+----------------
 
 Creating
 --------

@@ -14,11 +14,7 @@ After installing and opening the app, you will be asked to define a 'Storage loc
 Subdirectories
 --------------
 
-After installing and opening the app, you will be asked to define a 'Storage location' on the device. Selecting this directory is necessary to simplifying how data is managed within Field Book.
-
-If you skip defining the 'Storage location' directory, you will be required to select an export location and name for each file that is exported from Coordinate. The selected 'Storage location' can be changed in the :doc:`/settings`.
-
-Subdirectories within the 'Storage location' directory include: **field_import**, **field_export**, **plot_data**, **resources**, **database**, **trait**, and **archive**.
+Subdirectories that are created within the 'Storage location' directory include: **field_import**, **field_export**, **plot_data**, **resources**, **database**, **trait**, and **archive**.
 
 * **field_import**: contains files that can be imported into Field Book
 
