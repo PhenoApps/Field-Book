@@ -41,7 +41,7 @@ Delete
 
 Sort
 ~~~~~~~
-.. figure:: /_static/images/export/fields_list_sorting_framed.png
+.. figure:: /_static/images/fields/fields_list_sorting_framed.png
    :width: 40%
    :align: center
    :alt: Sorting an existing field
