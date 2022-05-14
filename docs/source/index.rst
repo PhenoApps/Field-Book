@@ -14,16 +14,17 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Fields
+   :caption: Structure
 
    fields
-   field-creation
+   traits
+   collect
+   export
 
 .. toctree::
    :maxdepth: 2
-   :caption: Traits
+   :caption: Trait Formats
 
-   traits
    trait-numeric
    trait-categorical
    trait-percent
@@ -37,13 +38,6 @@ Contents
    trait-audio
    trait-location
    trait-gnss
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Using Field Book
-
-   collect
-   export
 
 .. toctree::
    :maxdepth: 2
