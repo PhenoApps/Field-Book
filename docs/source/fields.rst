@@ -3,6 +3,12 @@ Fields
 
 Design
 ------
+
+.. figure:: /_static/images/export/export_framed.png
+   :width: 40%
+   :align: center
+   :alt: Export layout
+
 Field Book can load both CSV and XLS files. Filenames and column headers should exclude the following characters: / ?  < > \ * | ”.
  
 Field Book import files require three columns: a unique identifier, a primary order, and a secondary order. Each entry should be assigned a unique identifier. This unique ID is used internally to associate data with a specific entry and should be globally unique.
@@ -23,4 +29,19 @@ To import files into Field Book, select the Fields and press the add button on t
 
 Managing
 --------
+.. figure:: /_static/images/export/fields_list_menu_framed.png
+   :width: 40%
+   :align: center
+   :alt: Sorting an existing field
+
 Fields are selectable from the list of fields. Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries. Fields can be deleted from the sub menu in each row.
+
+Delete
+~~~~~~
+
+Sort
+~~~~~~~
+.. figure:: /_static/images/export/fields_list_sorting_framed.png
+   :width: 40%
+   :align: center
+   :alt: Sorting an existing field

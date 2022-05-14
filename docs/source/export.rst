@@ -2,6 +2,10 @@ Exporting Data
 ==============
 Collected data can be exported to CSV files. The Export dialog allows the user to customize how collected data is exported. Two different formats can be selected. The export file can include only the unique identifier or all field columns that were imported. The export file can contain all traits currently active or all traits for which data has been collected. The filename is automatically generated based on the current date and the name of the file that was imported into the app.
 
+.. figure:: /_static/images/export/export_framed.png
+   :width: 40%
+   :align: center
+   :alt: Export layout
 
 Options
 -------

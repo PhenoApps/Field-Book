@@ -1,5 +1,18 @@
 Storage
 =======
+Storage Location Definer
+------------------------
+.. figure:: /_static/images/storage_definer_framed.png
+   :width: 40%
+   :align: center
+   :alt: Storage location definer layout
+
+   Storage location definer layout
+
+After installing and opening the app, you will be asked to define a 'Storage location' on the device. In Field Book, this step is not optional. The selected 'Storage location' can be changed in the :doc:`/settings-general`.
+
+Subdirectories
+--------------
 
 After installing and opening the app, you will be asked to define a 'Storage location' on the device. Selecting this directory is necessary to simplifying how data is managed within Field Book.
 
