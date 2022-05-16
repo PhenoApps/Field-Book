@@ -1,10 +1,13 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +19,8 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.fieldbook.tracker.R;
@@ -23,6 +28,7 @@ import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BluetoothUtil;
+import com.fieldbook.tracker.utilities.Constants;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,6 +56,8 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
     private BluetoothUtil mBluetoothUtil;
 
+    private Activity mActivity = null;
+
     public LabelPrintTraitLayout(Context context) { super(context); }
 
     public LabelPrintTraitLayout(Context context, AttributeSet attrs) { super(context, attrs); }
@@ -65,6 +73,52 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     @Override
     public String type() {
         return "zebra label print";
+    }
+
+    @Override
+    public void init() {
+
+    }
+
+    private boolean checkPermissions(Activity act) {
+
+        boolean granted = false;
+
+        if (act != null) {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                boolean scan = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                        android.Manifest.permission.BLUETOOTH_SCAN);
+                boolean connect = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                        android.Manifest.permission.BLUETOOTH_CONNECT);
+                if (scan && connect) {
+                    granted = true;
+                } else {
+                    ActivityCompat.requestPermissions(act, new String[] { android.Manifest.permission.BLUETOOTH_CONNECT,
+                            android.Manifest.permission.BLUETOOTH_SCAN }, Constants.PERM_REQ);
+                }
+            } else {
+                boolean admin = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                        android.Manifest.permission.BLUETOOTH_ADMIN);
+                boolean bluetooth = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                        android.Manifest.permission.BLUETOOTH);
+                boolean fine = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION);
+                boolean coarse = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION);
+                if (admin && bluetooth && fine && coarse) {
+                    granted = true;
+                } else {
+                    ActivityCompat.requestPermissions(act, new String[] {
+                            android.Manifest.permission.BLUETOOTH_ADMIN,
+                            android.Manifest.permission.BLUETOOTH,
+                            android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION }, Constants.PERM_REQ);
+                }
+            }
+        }
+
+        return granted;
     }
 
     /**
@@ -97,7 +151,11 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     };
 
     @Override
-    public void init() {
+    public void init(Activity act) {
+
+        mActivity = act;
+
+        checkPermissions(act);
 
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mPrinterMessageReceiver,
                 new IntentFilter("printer_message"));
@@ -239,121 +297,128 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
          */
         ImageButton printLabel = findViewById(R.id.printLabelButton);
         printLabel.setOnClickListener(view -> {
-            HashMap<String, String> labelSizes = new HashMap<>();
-            labelSizes.put(labelSizeArray[0], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO180,120^BQ,,sizeb^FDMA,barcode^FS^XZ");
-            labelSizes.put(labelSizeArray[1], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO30,120^BQ,,sizeb^FDMA,barcode^FS^FO260,140^FB349,2,0,C,0^A0,size2,^FDtext2^FS^FO260,270^FB349,2,0,C,0^A0,size3,^FDtext3^FS^FO260,320^FB349,2,0,C,0^A0,size4,^FDtext4^FS^XZ");
-            labelSizes.put(labelSizeArray[2], "^XA^POI^PW406^LL0203^FO0,10^FB399,2,0,C,0^A0,size1,^FDtext1^FS^FO125,50^BQ,,sizeb^FDMA,barcode^FS^XZ");
-            labelSizes.put(labelSizeArray[3], "^XA^POI^PW406^LL0203^FO15,50^BQ,,sizeb^FDMA,barcode^FS^FO0,10^FB406,1,0,C,0^A0,size1,^FDtext1^FS^FO155,60^FB250,1,0,C,0^A0,size2,^FDtext2^FS^FO155,130^FB250,1,0,C,0^A0,size3,^FDtext3^FS^FO155,155^FB250,1,0,C,0^A0,size4,^FDtext4^FS^XZ");
 
-            //get and handle selected items from dropdowns
-            String size = labelsize.getSelectedItem().toString();
-            String text1 = getValueFromSpinner(textfield1, options);
-            String text2 = getValueFromSpinner(textfield2, options);
-            String text3 = getValueFromSpinner(textfield3, options);
-            String text4 = getValueFromSpinner(textfield4, options);
-            String barcode = getValueFromSpinner(barcodefield, options);
+            if (checkPermissions(mActivity)) {
+                HashMap<String, String> labelSizes = new HashMap<>();
+                labelSizes.put(labelSizeArray[0], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO180,120^BQ,,sizeb^FDMA,barcode^FS^XZ");
+                labelSizes.put(labelSizeArray[1], "^XA^POI^PW609^LL0406^FO0,25^FB599,2,0,C,0^A0,size1,^FDtext1^FS^FO30,120^BQ,,sizeb^FDMA,barcode^FS^FO260,140^FB349,2,0,C,0^A0,size2,^FDtext2^FS^FO260,270^FB349,2,0,C,0^A0,size3,^FDtext3^FS^FO260,320^FB349,2,0,C,0^A0,size4,^FDtext4^FS^XZ");
+                labelSizes.put(labelSizeArray[2], "^XA^POI^PW406^LL0203^FO0,10^FB399,2,0,C,0^A0,size1,^FDtext1^FS^FO125,50^BQ,,sizeb^FDMA,barcode^FS^XZ");
+                labelSizes.put(labelSizeArray[3], "^XA^POI^PW406^LL0203^FO15,50^BQ,,sizeb^FDMA,barcode^FS^FO0,10^FB406,1,0,C,0^A0,size1,^FDtext1^FS^FO155,60^FB250,1,0,C,0^A0,size2,^FDtext2^FS^FO155,130^FB250,1,0,C,0^A0,size3,^FDtext3^FS^FO155,155^FB250,1,0,C,0^A0,size4,^FDtext4^FS^XZ");
 
-            // Save selected options for next time
-            SharedPreferences.Editor ed = getPrefs().edit();
-            ed.putString("SIZE", size);
+                //get and handle selected items from dropdowns
+                String size = labelsize.getSelectedItem().toString();
+                String text1 = getValueFromSpinner(textfield1, options);
+                String text2 = getValueFromSpinner(textfield2, options);
+                String text3 = getValueFromSpinner(textfield3, options);
+                String text4 = getValueFromSpinner(textfield4, options);
+                String barcode = getValueFromSpinner(barcodefield, options);
 
-            if (textfield1 != null) {
-                ed.putString("TEXT", textfield1.getSelectedItem().toString());
-            }
-            if (textfield2 != null && textfield2.getSelectedItem() != null) {
-                ed.putString("TEXT2", textfield2.getSelectedItem().toString());
-            }
-            if (textfield3 != null && textfield3.getSelectedItem() != null) {
-                ed.putString("TEXT3", textfield3.getSelectedItem().toString());
-            }
-            if (textfield4 != null && textfield4.getSelectedItem() != null) {
-                ed.putString("TEXT4", textfield4.getSelectedItem().toString());
-            }
-            if (barcodefield != null && barcodefield.getSelectedItem() != null) {
-                ed.putString("BARCODE", barcodefield.getSelectedItem().toString());
-            }
-            if (labelcopies != null && labelcopies.getSelectedItem() != null) {
-                ed.putString("COPIES", labelcopies.getSelectedItem().toString());
-            }
-            ed.apply();
+                // Save selected options for next time
+                SharedPreferences.Editor ed = getPrefs().edit();
+                ed.putString("SIZE", size);
 
-            int length = barcode.length();
-            int barcode_size = 6;
+                if (textfield1 != null) {
+                    ed.putString("TEXT", textfield1.getSelectedItem().toString());
+                }
+                if (textfield2 != null && textfield2.getSelectedItem() != null) {
+                    ed.putString("TEXT2", textfield2.getSelectedItem().toString());
+                }
+                if (textfield3 != null && textfield3.getSelectedItem() != null) {
+                    ed.putString("TEXT3", textfield3.getSelectedItem().toString());
+                }
+                if (textfield4 != null && textfield4.getSelectedItem() != null) {
+                    ed.putString("TEXT4", textfield4.getSelectedItem().toString());
+                }
+                if (barcodefield != null && barcodefield.getSelectedItem() != null) {
+                    ed.putString("BARCODE", barcodefield.getSelectedItem().toString());
+                }
+                if (labelcopies != null && labelcopies.getSelectedItem() != null) {
+                    ed.putString("COPIES", labelcopies.getSelectedItem().toString());
+                }
+                ed.apply();
 
-            // Scale barcode based on label size and variable field length
-            switch (size) {
-                case "3\" x 2\" simple":
-                    barcode_size = 10 - (length / 15);
-                    break;
-                case "3\" x 2\" detailed":
-                    barcode_size = 9 - (length / 15);
-                    break;
-                case "2\" x 1\" simple":
-                case "2\" x 1\" detailed":
-                    barcode_size = 5 - (length / 15);
-                    break;
-                default:
-                    //Log.d(((MainActivity) getContext()).TAG, "Matched no sizes");
-                    break;
-            }
+                int length = barcode.length();
+                int barcode_size = 6;
 
-            int dotsAvailable1;
-            int dotsAvailable2;
-
-            // Scale text based on label size and variable field length
-            if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
-                dotsAvailable1 = 399;
-                dotsAvailable2 = 250;
-
-            } else {
-                dotsAvailable1 = 599;
-                dotsAvailable2 = 349;
-            }
-
-            String size1 = Integer.toString(dotsAvailable1 * 3 / (text1.length() + 13));
-            String size2 = Integer.toString(dotsAvailable2 * 2 / (text2.length() + 5));
-            String size3 = Integer.toString(dotsAvailable2 * 2 / (text3.length() + 5));
-            String size4 = Integer.toString(dotsAvailable2 * 2 / (text4.length() + 5));
-
-            // Replace placeholders in zpl code
-            String labelData = labelSizes.get(size);
-
-            if (labelData != null) {
-
-                labelData = labelData.replace("text1", text1);
-                labelData = labelData.replace("text2", text2);
-                labelData = labelData.replace("text3", text3);
-                labelData = labelData.replace("text4", text4);
-                labelData = labelData.replace("size1", size1);
-                labelData = labelData.replace("size2", size2);
-                labelData = labelData.replace("size3", size3);
-                labelData = labelData.replace("size4", size4);
-                labelData = labelData.replace("barcode", barcode);
-                labelData = labelData.replace("sizeb", Integer.toString(barcode_size));
-
-            }
-            //Log.d(((MainActivity) getContext()).TAG, labelData);
-
-            if (labelcopies != null) {
-
-                int copiespos = labelcopies.getSelectedItemPosition();
-
-                ArrayList<String> labels = new ArrayList<>();
-                for (int j = 0; j <= copiespos; j++) {
-
-                    labels.add(labelData);
+                // Scale barcode based on label size and variable field length
+                switch (size) {
+                    case "3\" x 2\" simple":
+                        barcode_size = 10 - (length / 15);
+                        break;
+                    case "3\" x 2\" detailed":
+                        barcode_size = 9 - (length / 15);
+                        break;
+                    case "2\" x 1\" simple":
+                    case "2\" x 1\" detailed":
+                        barcode_size = 5 - (length / 15);
+                        break;
+                    default:
+                        //Log.d(((MainActivity) getContext()).TAG, "Matched no sizes");
+                        break;
                 }
 
-                /*
-                 * As of v5.0.6 the app no longer requires the extra PrintConnect app.
-                 * This bluetooth utility class is used to connect with a paired printer and send print commands.
-                 * A local broadcast receiver is used to communicate with the print thread within this utility class.
-                 */
-                mBluetoothUtil.print(getContext(), size, labels);
+                int dotsAvailable1;
+                int dotsAvailable2;
+
+                // Scale text based on label size and variable field length
+                if (size.equals("2\" x 1\" simple") || size.equals("2\" x 1\" detailed")) {
+                    dotsAvailable1 = 399;
+                    dotsAvailable2 = 250;
+
+                } else {
+                    dotsAvailable1 = 599;
+                    dotsAvailable2 = 349;
+                }
+
+                String size1 = Integer.toString(dotsAvailable1 * 3 / (text1.length() + 13));
+                String size2 = Integer.toString(dotsAvailable2 * 2 / (text2.length() + 5));
+                String size3 = Integer.toString(dotsAvailable2 * 2 / (text3.length() + 5));
+                String size4 = Integer.toString(dotsAvailable2 * 2 / (text4.length() + 5));
+
+                // Replace placeholders in zpl code
+                String labelData = labelSizes.get(size);
+
+                if (labelData != null) {
+
+                    labelData = labelData.replace("text1", text1);
+                    labelData = labelData.replace("text2", text2);
+                    labelData = labelData.replace("text3", text3);
+                    labelData = labelData.replace("text4", text4);
+                    labelData = labelData.replace("size1", size1);
+                    labelData = labelData.replace("size2", size2);
+                    labelData = labelData.replace("size3", size3);
+                    labelData = labelData.replace("size4", size4);
+                    labelData = labelData.replace("barcode", barcode);
+                    labelData = labelData.replace("sizeb", Integer.toString(barcode_size));
+
+                }
+                //Log.d(((MainActivity) getContext()).TAG, labelData);
+
+                if (labelcopies != null) {
+
+                    int copiespos = labelcopies.getSelectedItemPosition();
+
+                    ArrayList<String> labels = new ArrayList<>();
+                    for (int j = 0; j <= copiespos; j++) {
+
+                        labels.add(labelData);
+                    }
+
+                    if (checkPermissions(mActivity)) {
+                        /*
+                         * As of v5.0.6 the app no longer requires the extra PrintConnect app.
+                         * This bluetooth utility class is used to connect with a paired printer and send print commands.
+                         * A local broadcast receiver is used to communicate with the print thread within this utility class.
+                         */
+                        mBluetoothUtil.print(getContext(), size, labels);
+                    }
+                }
+            } else {
+
+                Toast.makeText(getContext(), R.string.permission_ask_bluetooth, Toast.LENGTH_SHORT).show();
 
             }
         });
-
     }
 
     @Override
