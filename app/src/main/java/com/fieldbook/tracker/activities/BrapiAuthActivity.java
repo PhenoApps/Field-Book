@@ -30,10 +30,13 @@ import java.net.URL;
 
 public class BrapiAuthActivity extends AppCompatActivity {
 
+    private boolean activityStarting = false;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_brapi_auth);
+
+        activityStarting = true;
 
         SharedPreferences sp = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         // Start our login process
@@ -59,41 +62,46 @@ public class BrapiAuthActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        SharedPreferences sp = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
-        AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
-        Uri data = getIntent().getData();
+        if(activityStarting) {
+            // If the activity has just started, ignore the onResume code
+            activityStarting = false;
+        }else{
+            SharedPreferences sp = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+            AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
+            Uri data = getIntent().getData();
 
-        if (data != null) {
-            // authorization completed
-            String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
-            if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
-                checkBrapiAuth(data);
-            }else if(flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
-                checkBrapiAuth_OLD(data);
+            if (data != null) {
+                // authorization completed
+                String flow = sp.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+                if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))) {
+                    checkBrapiAuth(data);
+                } else if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
+                    checkBrapiAuth_OLD(data);
+                }
+
+                // Clear our data from our deep link so the app doesn't think it is
+                // coming from a deep link if it is coming from deep link on pause and resume.
+                getIntent().setData(null);
+
+                setResult(RESULT_OK);
+
+                finish();
+
+            } else if (ex != null) {
+
+                // authorization completed in error
+                authError(ex);
+
+                finish();
+
+            } else { //returning from deep link with null data should finish activity
+                //otherwise the progress bar hangs
+
+                getIntent().setData(null);
+
+                finish();
+
             }
-
-            // Clear our data from our deep link so the app doesn't think it is
-            // coming from a deep link if it is coming from deep link on pause and resume.
-            getIntent().setData(null);
-
-            setResult(RESULT_OK);
-
-            finish();
-
-        } else if (ex != null) {
-
-            // authorization completed in error
-            authError(ex);
-
-            finish();
-
-        } else { //returning from deep link with null data should finish activity
-            //otherwise the progress bar hangs
-
-            getIntent().setData(null);
-
-            finish();
-
         }
     }
 
