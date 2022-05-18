@@ -155,8 +155,6 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         mActivity = act;
 
-        checkPermissions(act);
-
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mPrinterMessageReceiver,
                 new IntentFilter("printer_message"));
 

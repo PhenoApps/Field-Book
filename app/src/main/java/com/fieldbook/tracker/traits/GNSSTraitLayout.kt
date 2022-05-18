@@ -263,8 +263,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         mActivity = act
 
-        checkPermissions(act)
-
         initialize()
     }
 
