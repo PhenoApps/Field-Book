@@ -1,7 +1,7 @@
 <changelog>
     <release
         date="2022-05-09"
-        versionCode="521"
+        versionCode="522"
         versionName="v5.2">
         <new>Datagrid focuses on current entry/trait</new>
         <new>Database export now exports to single zipped file</new>
