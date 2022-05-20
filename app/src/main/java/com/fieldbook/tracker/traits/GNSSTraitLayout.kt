@@ -1,12 +1,15 @@
 package com.fieldbook.tracker.traits
 
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -14,11 +17,15 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.Group
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.dao.ObservationUnitDao
 import com.fieldbook.tracker.database.models.ObservationUnitModel
@@ -28,10 +35,12 @@ import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.Companion.ACTION_BROADCAST_GNSS_TRAIT
 import com.fieldbook.tracker.location.gnss.NmeaParser
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.Constants
 import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.google.android.material.chip.ChipGroup
 import org.json.JSONObject
+import org.phenoapps.security.Security
 import kotlin.collections.HashMap
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -49,6 +58,8 @@ import kotlin.math.sqrt
  * the socket cannot be established.
  */
 class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
+
+    private var mActivity: Activity? = null
 
     //thread used to establish a connection with
     private lateinit var mConnectThread: ConnectThread
@@ -117,6 +128,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     override fun type(): String {
         return "gnss"
     }
+
+    override fun init() {}
 
     private fun initialize() {
 
@@ -202,10 +215,53 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         }
     }
 
+    private fun checkPermissions(act: Activity?): Boolean {
+
+        var granted = false
+
+        if (act != null) {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val scan = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                    android.Manifest.permission.BLUETOOTH_SCAN)
+                val connect = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                    android.Manifest.permission.BLUETOOTH_CONNECT)
+                if (scan && connect) {
+                    granted = true
+                } else {
+                    ActivityCompat.requestPermissions(act, arrayOf(android.Manifest.permission.BLUETOOTH_CONNECT,
+                        android.Manifest.permission.BLUETOOTH_SCAN), Constants.PERM_REQ)
+                }
+            } else {
+                val admin = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                    android.Manifest.permission.BLUETOOTH_ADMIN)
+                val bluetooth = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                    android.Manifest.permission.BLUETOOTH)
+                val fine = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                val coarse = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(act,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                if (admin && bluetooth && fine && coarse) {
+                    granted = true
+                } else {
+                    ActivityCompat.requestPermissions(act, arrayOf(
+                        android.Manifest.permission.BLUETOOTH_ADMIN,
+                        android.Manifest.permission.BLUETOOTH,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION), Constants.PERM_REQ)
+                }
+            }
+        }
+
+        return granted
+    }
+
     /**
      * This function is called to initialize the UI. All trait layouts are set to "gone" by default.
      */
-    override fun init() {
+    override fun init(act: Activity?) {
+
+        mActivity = act
 
         initialize()
     }
@@ -218,7 +274,15 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         // Get Location
         connectBtn.setOnClickListener {
-            findPairedDevice()
+            if (mActivity != null) {
+                if (checkPermissions(mActivity)) {
+                    findPairedDevice()
+                } else {
+                    Toast.makeText(context, R.string.permission_ask_bluetooth, Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(context, R.string.permission_ask_bluetooth, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

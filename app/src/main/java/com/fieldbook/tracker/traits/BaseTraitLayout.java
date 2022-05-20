@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -36,6 +37,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public abstract void init();
+
+    public void init(Activity act) { /* not implemented */ }
 
     public abstract void loadLayout();
 

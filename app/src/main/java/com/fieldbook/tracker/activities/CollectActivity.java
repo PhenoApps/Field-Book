@@ -641,7 +641,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         stopGeoNav();
 
         //save the last used trait
-        ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.currentTrait.getTrait()).apply();
+        if (traitBox.currentTrait != null)
+            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.currentTrait.getTrait()).apply();
 
         mAverageHandler.quit();
 
@@ -2084,6 +2085,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                 public void onItemSelected(AdapterView<?> arg0, View arg1,
                                            int arg2, long arg3) {
+
+                    dt.open();
 
                     // This updates the in memory hashmap from database
                     currentTrait = dt.getDetail(traitType.getSelectedItem()

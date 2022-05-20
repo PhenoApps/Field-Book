@@ -25,7 +25,9 @@ public class LayoutCollections {
         traitLayouts = new ArrayList<>();
         for (int traitID : traitIDs) {
             BaseTraitLayout layout = _activity.findViewById(traitID);
-            layout.init();
+            if (layout.type().equals("gnss")
+                || layout.type().equals("zebra label print")) layout.init(_activity);
+            else layout.init();
             traitLayouts.add(layout);
         }
     }
