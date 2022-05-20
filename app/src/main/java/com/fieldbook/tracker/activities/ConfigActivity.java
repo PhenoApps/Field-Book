@@ -126,6 +126,8 @@ public class ConfigActivity extends AppCompatActivity {
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
 
+        dt.open();
+
         invalidateOptionsMenu();
         loadScreen();
     }
@@ -285,6 +287,8 @@ public class ConfigActivity extends AppCompatActivity {
      * @return -1 when the conditions fail, otherwise it returns 1
      */
     private int checkTraitsExist() {
+
+        dt.open();
 
         String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
 

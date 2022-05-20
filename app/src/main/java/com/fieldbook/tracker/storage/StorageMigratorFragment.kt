@@ -3,6 +3,7 @@ package com.fieldbook.tracker.storage
 import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
@@ -29,13 +30,18 @@ class StorageMigratorFragment: PhenoLibMigratorFragment() {
         //the observation value for  the file path must be updated in the database
         if (parentFile?.exists() == true && parentFile?.name in arrayOf("audio", "photos")) {
             name?.let { name ->
-                ObservationDao.getObservationByValue(name)?.let { observation ->
-                    if (observation.map.isNotEmpty()) {
-                        ObservationDao.updateObservation(ObservationModel(
-                            observation.createMap().apply {
-                                this["value"] = docFile.uri.toString()
-                            }))
+                try {
+                    ObservationDao.getObservationByValue(name)?.let { observation ->
+                        if (observation.map.isNotEmpty()) {
+                            ObservationDao.updateObservation(ObservationModel(
+                                observation.createMap().apply {
+                                    this["value"] = docFile.uri.toString()
+                                }))
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.d("FieldBook", "Could not migrate ${docFile.uri}")
+                    e.printStackTrace()
                 }
             }
         }
