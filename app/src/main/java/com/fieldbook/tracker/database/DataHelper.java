@@ -1757,6 +1757,8 @@ public class DataHelper {
      */
     public String[] getRangeColumns() {
 
+        open();
+
         return ObservationUnitPropertyDao.Companion.getRangeColumns();
 
 //        Cursor cursor = db.rawQuery("SELECT * from range limit 1", null);

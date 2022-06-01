@@ -706,5 +706,6 @@
     <string name="brapi_chunk_size">Chunk Size</string>
 
     <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
+    <string name="act_collect_barcode_search_exists_in_other_field">Please switch to field %s</string>
 
 </resources>
