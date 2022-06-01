@@ -36,13 +36,15 @@
 
     </PreferenceCategory>
 
-    <CheckBoxPreference
-        android:defaultValue="false"
+    <ListPreference
         android:icon="@drawable/ic_tb_forward"
-        android:key="NextEmptyPlot"
+        android:key="com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR"
         android:summary="@string/preferences_general_feature_next_missing_description"
         android:title="@string/preferences_general_feature_next_missing"
-        app:allowDividerAbove="true" />
+        android:entries="@array/pref_general_skip_entries_entries"
+        android:entryValues="@array/pref_general_skip_entries_values"
+        app:allowDividerAbove="true"
+        android:defaultValue="1"/>
 
     <CheckBoxPreference
         android:defaultValue="false"
