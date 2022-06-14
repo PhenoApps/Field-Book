@@ -493,7 +493,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
     /**
      * Moves to specific plot/range/plot_id
-     * @param type the type of search, search, plot, range or id
+     * @param type the type of search, search, plot, range, id, barcode or quickgoto
      * @param rangeID the array of range ids
      * @param range the primary id
      * @param plot the secondary id
@@ -556,7 +556,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
 
         //move to plot id
-        if (type.equals("id")) {
+        if (type.equals("id") || type.equals("barcode")) {
             int rangeSize = rangeID.length;
             for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
@@ -572,7 +572,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
         }
 
-        if (!type.equals("quickgoto"))
+        if (!type.equals("quickgoto") && !type.equals("barcode"))
             Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
 
         return false;
@@ -1809,31 +1809,65 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     inputPlotId = plotSearchResult.getContents();
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
-                    boolean success = moveToSearch("id", rangeID, null, null, inputPlotId, -1);
+                    boolean success = moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
 
                     //play success or error sound if the plotId was not found
                     if (success) {
                         playSound("hero_simple_celebration");
                     } else {
                         boolean found = false;
-                        String fieldName = "";
+                        FieldObject studyObj = null;
                         ObservationUnitModel[] models = ObservationUnitDao.Companion.getAll();
                         for (ObservationUnitModel m : models) {
                             if (m.getObservation_unit_db_id().equals(inputPlotId)) {
 
                                 FieldObject study = StudyDao.Companion.getFieldObject(m.getStudy_id());
                                 if (study != null && study.getExp_name() != null) {
-                                    fieldName = study.getExp_name();
+                                    studyObj = study;
                                     found = true;
                                     break;
                                 }
                             }
                         }
 
-                        if (found) {
-                            Utils.makeToast(getApplicationContext(), getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName));
+                        if (found && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
+
+                            int studyId = studyObj.getExp_id();
+                            String fieldName = studyObj.getExp_name();
+
+                            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.layout_main),
+                                    getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName),
+                                    5000);
+
+                            mySnackbar.setTextColor(Color.BLACK);
+                            mySnackbar.setBackgroundTint(Color.WHITE);
+                            mySnackbar.setActionTextColor(Color.BLACK);
+
+                            mySnackbar.setAction(R.string.activity_collect_geonav_navigate, (view) -> {
+
+                                //updates obs. range view in database
+                                dt.switchField(studyId);
+
+                                //refresh collect activity UI
+                                rangeBox.reload();
+                                rangeBox.refresh();
+                                initWidgets(false);
+
+                                //update selected item in field adapter using preference
+                                ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
+
+                                playSound("hero_simple_celebration");
+
+                            });
+
+                            mySnackbar.show();
+
                         } else {
+
                             playSound("alert_error");
+
+                            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+
                         }
                     }
                 }
