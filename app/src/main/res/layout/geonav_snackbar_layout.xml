@@ -2,35 +2,47 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
-    android:background="@drawable/cell">
+    android:background="@drawable/cell_geonav_snackbar"
+    android:padding="4dp">
 
-    <TextView
-        android:text="1111111111111111111111111111111111111111"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:layout_width="0dp"
+    <ImageButton xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/geonav_snackbar_icn"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/geonav_snackbar_tv"
-        android:textSize="28sp"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/geonav_snackbar_btn"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
-    <ImageButton
         android:layout_margin="2dp"
         android:backgroundTint="#00ffffff"
+        android:scaleX="1.2"
+        android:scaleY="1.2"
+        android:src="@drawable/ic_explore_black_24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/geonav_snackbar_tv"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/geonav_snackbar_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="1111111111111111111111111111111111111111"
+        android:textSize="@dimen/text_size_large"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/geonav_snackbar_btn"
+        app:layout_constraintStart_toEndOf="@id/geonav_snackbar_icn"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/geonav_snackbar_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:scaleX="2"
-        android:scaleY="2"
+        android:layout_margin="2dp"
+        android:backgroundTint="#00ffffff"
+        android:scaleX="1.2"
+        android:scaleY="1.2"
         android:src="@drawable/ic_send_outline"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
