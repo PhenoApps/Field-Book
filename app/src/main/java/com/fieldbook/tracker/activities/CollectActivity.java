@@ -1837,7 +1837,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                             Snackbar mySnackbar = Snackbar.make(findViewById(R.id.layout_main),
                                     getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName),
-                                    5000);
+                                    8000);
 
                             mySnackbar.setTextColor(Color.BLACK);
                             mySnackbar.setBackgroundTint(Color.WHITE);
