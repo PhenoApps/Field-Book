@@ -65,6 +65,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
@@ -209,6 +210,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     public static HandlerThread mAverageHandler = new HandlerThread("averaging");
     private SharedPreferences mPrefs = null;
     private String lastPlotIdNav = null;
+    private Snackbar mGeoNavSnackbar = null;
 
     private TextWatcher cvText;
     private InputMethodManager imm;
@@ -1458,13 +1460,15 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                             } else {
 
-                                Snackbar mySnackbar = Snackbar.make(findViewById(R.id.layout_main),
+                                mGeoNavSnackbar = Snackbar.make(findViewById(R.id.traitHolder),
                                     id, Snackbar.LENGTH_INDEFINITE);
 
-                                Snackbar.SnackbarLayout snackLayout = (Snackbar.SnackbarLayout) mySnackbar.getView();
+                                Snackbar.SnackbarLayout snackLayout = (Snackbar.SnackbarLayout) mGeoNavSnackbar.getView();
                                 View snackView = getLayoutInflater().inflate(R.layout.geonav_snackbar_layout, null);
-                                snackView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+                                ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                                snackView.setLayoutParams(params);
                                 snackLayout.addView(snackView);
+                                snackLayout.setPadding(0, 0, 0, 0);
 
                                 TextView tv = snackView.findViewById(R.id.geonav_snackbar_tv);
                                 if (tv != null) {
@@ -1475,7 +1479,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                                 if (btn != null) {
                                     btn.setOnClickListener((v) -> {
 
-                                        mySnackbar.dismiss();
+                                        mGeoNavSnackbar.dismiss();
 
                                         lastPlotIdNav = null;
 
@@ -1484,9 +1488,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                                     });
                                 }
 
-                                mySnackbar.setBackgroundTint(Color.TRANSPARENT);
+                                mGeoNavSnackbar.setBackgroundTint(Color.TRANSPARENT);
 
-                                mySnackbar.show();
+                                mGeoNavSnackbar.show();
                             }
                         });
                     }
@@ -2334,6 +2338,14 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
+    private void resetGeoNavMessages() {
+        if (mGeoNavSnackbar != null) {
+            mGeoNavSnackbar.dismiss();
+            mGeoNavSnackbar = null;
+            lastPlotIdNav = null;
+        }
+    }
+
     ///// class RangeBox /////
 
     class RangeBox {
@@ -2873,6 +2885,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     parent.refreshMain();
                 }
             }
+
+            resetGeoNavMessages();
         }
 
         private void moveEntryRight() {
@@ -2898,6 +2912,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     parent.refreshMain();
                 }
             }
+
+            resetGeoNavMessages();
         }
 
         private int decrementPaging(int pos) {
