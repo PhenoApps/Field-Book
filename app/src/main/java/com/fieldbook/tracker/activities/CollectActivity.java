@@ -1853,6 +1853,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                                 rangeBox.refresh();
                                 initWidgets(false);
 
+                                //navigate to the plot
+                                moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
+
                                 //update selected item in field adapter using preference
                                 ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
 
