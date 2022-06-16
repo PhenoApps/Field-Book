@@ -1830,7 +1830,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     validateData();
                 }
                 break;
-            case 252:
+            case PhotoTraitLayout.PICTURE_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                     traitPhoto.makeImage(traitBox.getCurrentTrait(),

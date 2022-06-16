@@ -10,13 +10,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.Html;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Size;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Gallery;
@@ -24,6 +27,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.graphics.BitmapCompat;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
@@ -37,10 +41,15 @@ import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.Utils;
 
+import org.phenoapps.utils.BaseDocumentTreeUtil;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,16 +59,12 @@ import java.util.Map;
 
 public class PhotoTraitLayout extends BaseTraitLayout {
 
-    private ArrayList<Drawable> drawables;
+    public static final int PICTURE_REQUEST_CODE = 252;
+
+    private ArrayList<Bitmap> drawables;
     private Gallery photo;
     private GalleryImageAdapter photoAdapter;
     private String mCurrentPhotoPath;
-    // Creates a new thread to do importing
-    private Runnable importRunnable = new Runnable() {
-        public void run() {
-            new PhotoTraitLayout.LoadImagesRunnableTask().execute(0);
-        }
-    };
 
     public PhotoTraitLayout(Context context) {
         super(context);
@@ -95,9 +100,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
         getEtCurVal().setVisibility(EditText.GONE);
         getEtCurVal().setEnabled(false);
 
-        // Run saving task in the background so we can showing progress dialog
-        Handler mHandler = new Handler();
-        mHandler.post(importRunnable);
+        loadLayoutWork();
     }
 
     public void loadLayoutWork() {
@@ -105,7 +108,12 @@ public class PhotoTraitLayout extends BaseTraitLayout {
         // Always set to null as default, then fill in with trait value
         drawables = new ArrayList<>();
 
-        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
+        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "thumbnails");
+
+        //back down to the photos directory if thumbnails don't exist
+        if (photosDir == null || photosDir.listFiles().length == 0) {
+            generateThumbnails();
+        }
 
         if (photosDir != null) {
 
@@ -125,13 +133,97 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
                             if (name.contains(plot)) {
 
-                                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(imageFile.getUri())));
+                                Bitmap bmp = decodeBitmap(imageFile.getUri());
 
+                                if (bmp != null) {
+
+                                    drawables.add(bmp);
+
+                                }
                             }
                         }
                     }
                 }
             }
+
+            loadGallery();
+        }
+    }
+
+    private void loadGallery() {
+
+        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
+
+        if (photosDir != null) {
+
+            List<DocumentFile> photos = DocumentTreeUtil.Companion.getPlotMedia(photosDir, getCRange().plot_id, ".jpg");
+
+            if (!photos.isEmpty()) {
+                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+                photo.setAdapter(photoAdapter);
+                photo.setSelection(photo.getCount() - 1);
+                photo.setOnItemClickListener((arg0, arg1, pos, arg3) ->
+                        displayPlotImage(photos.get(pos).getUri()));
+            } else {
+                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+                photo.setAdapter(photoAdapter);
+            }
+        }
+    }
+
+    private Bitmap decodeBitmap(Uri uri) {
+        try {
+            InputStream input = getContext().getContentResolver().openInputStream(uri);
+            Bitmap bmp = BitmapFactory.decodeStream(input);
+            input.close();
+            return bmp;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void generateThumbnails() {
+
+        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
+
+        if (photosDir != null) {
+
+           DocumentFile[] files = photosDir.listFiles();
+           for (DocumentFile doc : files) {
+
+               createThumbnail(doc.getUri());
+           }
+        }
+    }
+
+    private void createThumbnail(Uri uri) {
+
+        //create thumbnail
+        try {
+
+            DocumentFile thumbsDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "thumbnails");
+
+            String name = BaseDocumentTreeUtil.Companion.getStem(uri, getContext());
+
+            if (thumbsDir != null) {
+
+                Bitmap bmp = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
+
+                bmp = Bitmap.createScaledBitmap(bmp, 256, 256, true);
+
+                DocumentFile thumbnail = thumbsDir.createFile("image/*", name + ".jpg");
+
+                if (thumbnail != null) {
+
+                    OutputStream output = getContext().getContentResolver().openOutputStream(thumbnail.getUri());
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 80, output);
+                    output.close();
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -142,76 +234,6 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
     public void brapiDelete(Map newTraits) {
         deletePhotoWarning(true, newTraits);
-    }
-
-    private Bitmap displayScaledSavedPhoto(Uri path) {
-        if (path == null) {
-            String message = getContext().getString(R.string.trait_error_photo_missing);
-            Toast.makeText(getContext().getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-            return null;
-        }
-
-        try {
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            bmOptions.inJustDecodeBounds = true;
-
-            Bitmap bmp = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), path);
-
-            int photoW = bmp.getWidth();
-            int photoH = bmp.getHeight();
-
-            int targetW;
-            int targetH;
-
-            if (photoW > photoH) {
-                // landscape
-                targetW = 800;
-                targetH = 600;
-            } else {
-                // portrait
-                targetW = 600;
-                targetH = 800;
-            }
-
-            int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-            // Decode the image file into a Bitmap sized to fill the View
-            bmOptions.inJustDecodeBounds = false;
-            bmOptions.inSampleSize = scaleFactor;
-            bmOptions.inPurgeable = true;
-
-            Bitmap correctBmp = null;
-
-            try {
-
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-                File f = new File(getContext().getExternalMediaDirs()[0], "temp.jpg");
-                FileOutputStream fis = new FileOutputStream(f);
-                bos.writeTo(fis);
-                bos.close();
-                fis.close();
-
-                //TODO check how to save EXIF to the media store, right now it is undefined
-                Matrix mat = new Matrix();
-                mat.postRotate(90);
-
-                correctBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), mat, true);
-
-                f.delete();
-
-            } catch (IOException e) {
-                Log.e(CollectActivity.TAG, "-- Error in setting image");
-                return BitmapFactory.decodeResource(getResources(), R.drawable.trait_photo_missing);
-            } catch (OutOfMemoryError oom) {
-                Log.e(CollectActivity.TAG, "-- OOM Error in setting image");
-            }
-
-            return correctBmp;
-
-        } catch (Exception e) {
-            return BitmapFactory.decodeResource(getResources(), R.drawable.trait_photo_missing);
-        }
     }
 
     private void displayPlotImage(Uri path) {
@@ -236,23 +258,27 @@ public class PhotoTraitLayout extends BaseTraitLayout {
     public void makeImage(TraitObject currentTrait, Map newTraits) {
 
         DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
+        DocumentFile thumbsDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "thumbnails");
 
-        if (photosDir != null) {
+        if (photosDir != null && thumbsDir != null) {
 
             DocumentFile file = photosDir.findFile(mCurrentPhotoPath);
 
             if (file != null) {
 
-                Utils.scanFile(getContext(), file.getUri().toString(), "image/*");
+                try {
 
-                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(file.getUri())));
+                    Utils.scanFile(getContext(), file.getUri().toString(), "image/*");
 
-                updateTraitAllowDuplicates(currentTrait.getTrait(), "photo", mCurrentPhotoPath, null, newTraits);
+                    createThumbnail(file.getUri());
 
-                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+                    updateTraitAllowDuplicates(currentTrait.getTrait(), "photo", mCurrentPhotoPath, null, newTraits);
 
-                photo.setAdapter(photoAdapter);
-                photo.setSelection(photoAdapter.getCount() - 1);
+                    loadLayoutWork();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -312,15 +338,19 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                 if (photo.getCount() > 0) {
 
                     DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
+                    DocumentFile thumbsDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "thumbnails");
+
                     List<DocumentFile> photosList = DocumentTreeUtil.Companion.getPlotMedia(photosDir, getCRange().plot_id, ".jpg");
+                    List<DocumentFile> thumbsList = DocumentTreeUtil.Companion.getPlotMedia(thumbsDir, getCRange().plot_id, ".jpg");
 
                     int index = photo.getSelectedItemPosition();
                     DocumentFile selected = photosList.get(index);
+                    DocumentFile thumbSelected = thumbsList.get(index);
                     Uri item = selected.getUri();
                     if (!brapiDelete) {
                         selected.delete();
+                        thumbSelected.delete();
                         photosList.remove(index);
-                        drawables.remove(photo.getSelectedItemPosition());
                     }
 
                     DocumentFile file = DocumentFile.fromSingleUri(getContext(), item);
@@ -342,18 +372,13 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                             removeTrait(getCurrentTrait().getTrait());
                     }
 
-                    photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
-
                 } else {
+
                     // If an NA exists, delete it
                     ConfigActivity.dt.deleteTraitByValue(exp_id, getCRange().plot_id, getCurrentTrait().getTrait(), "NA");
-                    ArrayList<Drawable> emptyList = new ArrayList<>();
-
-                    photoAdapter = new GalleryImageAdapter((Activity) getContext(), emptyList);
-
                 }
 
-                photo.setAdapter(photoAdapter);
+                loadLayoutWork();
             }
 
         });
@@ -396,7 +421,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, file.getUri());
 
-                    ((Activity) getContext()).startActivityForResult(takePictureIntent, 252);
+                    ((Activity) getContext()).startActivityForResult(takePictureIntent, PICTURE_REQUEST_CODE);
                 }
             }
         }
@@ -405,53 +430,6 @@ public class PhotoTraitLayout extends BaseTraitLayout {
     private String getRep() {
         int repInt = ConfigActivity.dt.getRep(getCRange().plot_id, getCurrentTrait().getTrait());
         return String.valueOf(repInt);
-    }
-
-    // Mimics the class used in the csv field importer to run the saving
-    // task in a different thread from the UI thread so the app doesn't freeze up.
-    private class LoadImagesRunnableTask extends AsyncTask<Integer, Integer, Integer> {
-
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = new ProgressDialog(getContext());
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html.fromHtml(getContext().getResources().getString(R.string.images_loading)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            loadLayoutWork();
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (dialog.isShowing())
-                dialog.dismiss();
-
-            DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
-
-            if (photosDir != null) {
-
-                List<DocumentFile> photos = DocumentTreeUtil.Companion.getPlotMedia(photosDir, getCRange().plot_id, ".jpg");
-
-                if (!photos.isEmpty()) {
-                    photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
-                    photo.setAdapter(photoAdapter);
-                    photo.setSelection(photo.getCount() - 1);
-                    photo.setOnItemClickListener((arg0, arg1, pos, arg3) ->
-                            displayPlotImage(photos.get(pos).getUri()));
-                } else {
-                    photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
-                    photo.setAdapter(photoAdapter);
-                }
-            }
-        }
     }
 
     private class PhotoTraitOnClickListener implements OnClickListener {
