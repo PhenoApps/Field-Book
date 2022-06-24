@@ -9,31 +9,49 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
+import com.fieldbook.tracker.adapters.CategoryAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapter;
+import com.fieldbook.tracker.database.Migrator;
+import com.fieldbook.tracker.database.dao.ObservationDao;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.fieldbook.tracker.activities.TraitEditorActivity.displayBrapiInfo;
 import static com.fieldbook.tracker.activities.TraitEditorActivity.loadData;
 
-public class NewTraitDialog extends DialogFragment {
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
+
+public class NewTraitDialog extends DialogFragment implements CategoryAdapter.CategoryListItemOnClick {
     private TraitEditorActivity originActivity;
     private AlertDialog createDialog;
 
@@ -50,13 +68,18 @@ public class NewTraitDialog extends DialogFragment {
     private EditText minimum;
     private EditText maximum;
     private EditText details;
-    private EditText categories;
+    private EditText categoryLabelEt;
+    private EditText categoryValueEt;
+    private RecyclerView categoriesRv;
+    private Button addCategoryButton;
     private TextView defTv;
     private ToggleButton bool;
     private LinearLayout defBox;
     private LinearLayout minBox;
     private LinearLayout maxBox;
     private LinearLayout categoryBox;
+
+    private ArrayList<BrAPIScaleValidValuesCategories> catList;
 
     private TraitFormat traitFormat;
 
@@ -111,8 +134,10 @@ public class NewTraitDialog extends DialogFragment {
         minimum = layout.findViewById(R.id.minimum);
         maximum = layout.findViewById(R.id.maximum);
         details = layout.findViewById(R.id.details);
-        categories = layout.findViewById(R.id.categories);
-
+        categoryLabelEt = layout.findViewById(R.id.categoryLabelEt);
+        categoryValueEt = layout.findViewById(R.id.categoryValueEt);
+        categoriesRv = layout.findViewById(R.id.dialog_new_trait_cat_rv);
+        addCategoryButton = layout.findViewById(R.id.dialog_new_trait_cat_btn);
         defBox = layout.findViewById(R.id.defbox);
         minBox = layout.findViewById(R.id.minbox);
         maxBox = layout.findViewById(R.id.maxbox);
@@ -130,6 +155,47 @@ public class NewTraitDialog extends DialogFragment {
                 R.layout.custom_spinnerlayout,
                 traitFormats.getLocalStringList());
         format.setAdapter(itemsAdapter);
+
+        categoriesRv.setLayoutManager(new LinearLayoutManager(TraitEditorActivity.thisActivity));
+        catList = new ArrayList<>();
+        CategoryAdapter catAdapter = new CategoryAdapter(this);
+        categoriesRv.setAdapter(catAdapter);
+
+        addCategoryButton.setOnClickListener((v) -> {
+            String label = categoryLabelEt.getText().toString();
+            String value = categoryValueEt.getText().toString();
+            if (!label.isEmpty()) {
+
+                ArrayList<String> labels = new ArrayList<>();
+                for (BrAPIScaleValidValuesCategories s : catList) {
+                    labels.add(s.getLabel());
+                }
+
+                if (!labels.contains(label)) {
+                    BrAPIScaleValidValuesCategories scale = new BrAPIScaleValidValuesCategories();
+                    scale.setLabel(label);
+                    scale.setValue(value);
+                    catList.add(scale);
+                    categoryLabelEt.setText("");
+                    categoryValueEt.setText("");
+                    updateCatAdapter();
+                }
+            }
+        });
+    }
+
+    private void updateCatAdapter() {
+
+        CategoryAdapter adapter = (CategoryAdapter) categoriesRv.getAdapter();
+
+        if (adapter != null) {
+            adapter.submitList(catList);
+        }
+
+        adapter.notifyDataSetChanged();
+
+        categoriesRv.setVisibility(View.GONE);
+        categoriesRv.setVisibility(View.VISIBLE);
 
     }
 
@@ -189,7 +255,8 @@ public class NewTraitDialog extends DialogFragment {
                     minimum.setText("");
                     maximum.setText("");
                     details.setText("");
-                    categories.setText("");
+                    categoryLabelEt.setText("");
+                    categoryValueEt.setText("");
                     bool.setChecked(false);
                     currentPosition = position;
                     format.setSelection(currentPosition);
@@ -227,6 +294,7 @@ public class NewTraitDialog extends DialogFragment {
             // TODO: Add the local trait data_source name into other trait editing/inserting db functions.
             t.setTraitDataSource("local");
             ConfigActivity.dt.insertTraits(t);
+
         } else {
             restoreDialogItemsByTraitObject(oldTrait);
         }
@@ -293,8 +361,10 @@ public class NewTraitDialog extends DialogFragment {
         minimum.setText("");
         maximum.setText("");
         details.setText("");
-        categories.setText("");
-
+        categoryLabelEt.setText("");
+        categoryValueEt.setText("");
+        catList = new ArrayList<>();
+        updateCatAdapter();
         edit = false;
 
         createVisible = true;
@@ -315,7 +385,16 @@ public class NewTraitDialog extends DialogFragment {
         t.setMinimum(minimum.getText().toString());
         t.setMaximum(maximum.getText().toString());
         t.setDetails(details.getText().toString());
-        t.setCategories(categories.getText().toString());
+        //t.setCategories(categoryLabelEt.getText().toString());
+
+        try {
+
+            t.setCategories(CategoryJsonUtil.Companion.encode(catList));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         t.setVisible(true);
         t.setRealPosition(pos);
         return t;
@@ -332,7 +411,7 @@ public class NewTraitDialog extends DialogFragment {
                 minimum.getText().toString(),
                 maximum.getText().toString(),
                 details.getText().toString(),
-                categories.getText().toString());
+                CategoryJsonUtil.Companion.encode(catList));
     }
 
     public void setTraitObject(TraitObject traitObject) {
@@ -347,7 +426,33 @@ public class NewTraitDialog extends DialogFragment {
         minimum.setText(traitObject.getMinimum());
         maximum.setText(traitObject.getMaximum());
         details.setText(traitObject.getDetails());
-        categories.setText(traitObject.getCategories());
+
+        catList = new ArrayList<>();
+        categoriesRv.setVisibility(View.GONE);
+        categoriesRv.setVisibility(View.VISIBLE);
+
+        try {
+
+            ArrayList<BrAPIScaleValidValuesCategories> json = CategoryJsonUtil.Companion.decode(traitObject.getCategories());
+
+            if (!json.isEmpty()) {
+
+                catList.addAll(json);
+
+            }
+
+        } catch (Exception e) {
+
+            List<String> labels = Arrays.asList(traitObject.getCategories().split("/"));
+            for (String l : labels) {
+                BrAPIScaleValidValuesCategories scale = new BrAPIScaleValidValuesCategories();
+                scale.setLabel(l);
+                scale.setValue(l);
+                catList.add(scale);
+            }
+        }
+
+        updateCatAdapter();
     }
 
     public void prepareFields(int index) {
@@ -403,7 +508,7 @@ public class NewTraitDialog extends DialogFragment {
             return (!minimum.getText().toString().equals(o.getMinimum())) ||
                     (!maximum.getText().toString().equals(o.getMaximum())) ||
                     (!details.getText().toString().equals(o.getDetails())) ||
-                    (!categories.getText().toString().equals(o.getCategories()));
+                    (!CategoryJsonUtil.Companion.encode(catList).equals(o.getCategories()));
 
         } else {
             if (trait.getText().toString().length() > 0 ||
@@ -411,7 +516,7 @@ public class NewTraitDialog extends DialogFragment {
                     minimum.getText().toString().length() > 0 ||
                     maximum.getText().toString().length() > 0 ||
                     details.getText().toString().length() > 0 ||
-                    categories.getText().toString().length() > 0)
+                    !CategoryJsonUtil.Companion.encode(catList).equals("[]")) //check that json string is not "[]"
                 return true;
 
             if (format.getSelectedItemPosition() == booleanIndex) {
@@ -430,6 +535,22 @@ public class NewTraitDialog extends DialogFragment {
     private void setBrAPIDialogShown(boolean b) {
         brapiDialogShown = b;
         originActivity.setBrAPIDialogShown(b);
+    }
+
+    @Override
+    public void onCategoryClick(@NonNull String label) {
+        BrAPIScaleValidValuesCategories scale = null;
+        for (BrAPIScaleValidValuesCategories s : catList) {
+            if (s.getLabel().equals(label)) {
+                scale = s;
+                break;
+            }
+        }
+
+        if (scale != null) {
+            catList.remove(scale);
+            updateCatAdapter();
+        }
     }
 
     private class ParameterObject {
@@ -695,28 +816,6 @@ public class NewTraitDialog extends DialogFragment {
         }
 
         public String ValidateItemsIndividual() {
-            final String strCategories = categories.getText().toString();
-            if (strCategories.length() == 0) {
-                return getResString(R.string.traits_create_warning_categories_required);
-            }
-
-            // check empty category
-            final String[] cats = strCategories.split("/");
-            for (String cat : cats) {
-                if (cat.length() == 0) {
-                    // temporary error message
-                    return "An empty category exists.";
-                }
-            }
-
-            // check duplication
-            for (int i = 0; i < cats.length; ++i) {
-                for (int j = i + 1; j < cats.length; ++j) {
-                    if (cats[i].equals(cats[j]))
-                        // temporary error message
-                        return "Categories have duplicates.";
-                }
-            }
             return "";
         }
     }

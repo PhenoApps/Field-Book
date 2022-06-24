@@ -22,6 +22,15 @@ class ObservationDao {
 
     companion object {
 
+        fun getAll(): Array<ObservationModel> = withDatabase { db ->
+
+            db.query(Observation.tableName)
+                .toTable()
+                .map { ObservationModel(it) }
+                .toTypedArray()
+
+        } ?: emptyArray()
+
         fun getAll(studyId: String): Array<ObservationModel> = withDatabase { db ->
 
             db.query(Observation.tableName, where = "${Study.FK} = ?", whereArgs = arrayOf(studyId))

@@ -2,6 +2,8 @@ package com.fieldbook.tracker.utilities;
 
 import android.database.Cursor;
 
+import com.fieldbook.tracker.objects.TraitObject;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -73,7 +75,7 @@ public class CSVWriter {
      * database, and so is passed in as a parameter
      * V2 - Range added, columns selectable
      */
-    public void writeDatabaseFormat(ArrayList<String> range) throws Exception {
+    public void writeDatabaseFormat(ArrayList<String> range, ArrayList<TraitObject> traits, Boolean showLabel) throws Exception {
         // Simply loop through all items
         if (curCSV.getCount() > 0) {
 
@@ -90,11 +92,33 @@ public class CSVWriter {
 
             curCSV.moveToPosition(-1);
 
+            String nextTrait = null;
             while (curCSV.moveToNext()) {
-                String arrStr[] = new String[labels.length];
+                String[] arrStr = new String[labels.length];
 
                 for (int i = 0; i < labels.length; i++) {
-                    arrStr[i] = curCSV.getString(i);
+
+                    String label = curCSV.getColumnName(i);
+                    String value = curCSV.getString(i);
+
+                    if (label.equals("trait")) {
+                        nextTrait = value;
+                    }
+
+                    if (label.equals("userValue")) {
+                        if (nextTrait != null) {
+
+                            try {
+                                value = CategoryJsonUtil.Companion.flattenMultiCategoryValue(
+                                        CategoryJsonUtil.Companion.decode(value), showLabel
+                                );
+                            } catch (Exception ignored) { }
+
+                        }
+                        nextTrait = null;
+                    }
+
+                    arrStr[i] = value;
                 }
 
                 writeNext(arrStr);
@@ -131,10 +155,29 @@ public class CSVWriter {
         close();
     }
 
+    private String searchForCategorical(Boolean showLabel, ArrayList<TraitObject> traits, String name, String value) {
+        for (TraitObject t : traits) {
+            if (t.getTrait().equals(name)) {
+                if (t.getFormat().equals("categorical") || t.getFormat().equals("multicat")
+                        || t.getFormat().equals("qualitative")) {
+                    try {
+                        return CategoryJsonUtil.Companion.flattenMultiCategoryValue(
+                                CategoryJsonUtil.Companion.decode(value), showLabel
+                        );
+                    } catch (Exception e) {
+                        return value;
+                    }
+
+                }
+            }
+        }
+        return value;
+    }
+
     /**
      * Generates data in an table style format
      */
-    public void writeTableFormat(String[] labels, int rangeTotal) throws Exception {
+    public void writeTableFormat(String[] labels, int rangeTotal, ArrayList<TraitObject> traits, Boolean showLabel) throws Exception {
         if (curCSV.getCount() > 0) {
 
             writeNext(labels);
@@ -143,14 +186,19 @@ public class CSVWriter {
 
             while (curCSV.moveToNext()) {
 
-                String arrStr[] = new String[labels.length];
+                String[] arrStr = new String[labels.length];
 
-                for (int k = 0; k < rangeTotal; k++)
-                    arrStr[k] = curCSV.getString(k);
+                for (int k = 0; k < rangeTotal; k++) {
+                    String traitName = curCSV.getColumnName(k);
+                    String value = searchForCategorical(showLabel, traits, traitName, curCSV.getString(k));
+                    arrStr[k] = value;
+                }
 
                 // Get matching values for every row in the Range table
                 for (int k = rangeTotal; k < labels.length; k++) {
-                    arrStr[k] = curCSV.getString(k);
+                    String traitName = curCSV.getColumnName(k);
+                    String value = searchForCategorical(showLabel, traits, traitName, curCSV.getString(k));
+                    arrStr[k] = value;
                 }
 
                 writeNext(arrStr);
