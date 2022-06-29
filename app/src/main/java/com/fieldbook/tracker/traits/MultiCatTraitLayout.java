@@ -124,9 +124,15 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
                     pressOnButton(button);
                     addCategory(category);
                 }
+
+                String value = getEtCurVal().getText().toString();
+
                 updateTrait(getCurrentTrait().getTrait(),
                         getCurrentTrait().getFormat(),
-                        getEtCurVal().getText().toString());
+                        value);
+
+                triggerTts(value);
+
             }
         };
     }

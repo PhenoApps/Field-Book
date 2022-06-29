@@ -83,4 +83,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
     public void removeTrait(String parent) {
         ((CollectActivity) getContext()).removeTrait(parent);
     }
+
+    public void triggerTts(String text) {
+        ((CollectActivity) getContext()).triggerTts(text);
+    }
 }

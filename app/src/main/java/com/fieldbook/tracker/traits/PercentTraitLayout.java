@@ -50,6 +50,7 @@ public class PercentTraitLayout extends BaseTraitLayout {
                     sb.setProgress(Integer.parseInt(getCurrentTrait().getMinimum()));
 
                 setCurrentValueText(sb.getProgress(), Color.parseColor(getDisplayColor()));
+                triggerTts(String.valueOf(sb.getProgress()));
             }
 
             public void onStartTrackingTouch(SeekBar arg0) {

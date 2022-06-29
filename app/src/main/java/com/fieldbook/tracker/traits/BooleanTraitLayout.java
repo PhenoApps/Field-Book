@@ -45,6 +45,9 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     @Override
     public void init() {
 
+        String on = getContext().getString(R.string.trait_boolean_on);
+        String off = getContext().getString(R.string.trait_boolean_off);
+
         threeStateSeekBar = findViewById(R.id.traitBooleanSeekBar);
         threeStateSeekBar.setOnSeekBarChangeListener(this);
 
@@ -52,10 +55,12 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
         ImageView offImageView = findViewById(R.id.offImage);
 
         onImageView.setOnClickListener((View v) -> {
+            triggerTts(on);
             threeStateSeekBar.setProgress(ThreeState.ON);
         });
 
         offImageView.setOnClickListener((View v) -> {
+            triggerTts(off);
             threeStateSeekBar.setProgress(ThreeState.OFF);
         });
 

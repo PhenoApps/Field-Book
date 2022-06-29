@@ -174,6 +174,8 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
                 v = rustButtons.get(view.getId()).getText().toString();
             }
 
+            triggerTts(v);
+
             if (getVisibility() == View.VISIBLE) {
                 if (getEtCurVal().getText().length() > 0
                         && !v.equals("/")

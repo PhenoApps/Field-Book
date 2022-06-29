@@ -169,9 +169,13 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                     removeCategory(cat);
                 }
 
+                String value = getEtCurVal().getText().toString();
+
                 updateTrait(getCurrentTrait().getTrait(),
                         getCurrentTrait().getFormat(),
-                        getEtCurVal().getText().toString());
+                        value);
+
+                triggerTts(value);
 
                 loadLayout(); //todo this is not the best way to do this
             }

@@ -59,6 +59,7 @@ public class LocationTraitLayout extends BaseTraitLayout {
                 }
                 getEtCurVal().setText(fullLocation);
                 updateTrait(getCurrentTrait().getTrait(), "location", fullLocation);
+                triggerTts(fullLocation);
             }
         });
     }

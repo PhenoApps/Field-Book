@@ -19,6 +19,7 @@ import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 public class DateTraitLayout extends BaseTraitLayout {
@@ -143,7 +144,11 @@ public class DateTraitLayout extends BaseTraitLayout {
 
                 //Parse date
                 try {
-                    calendar.setTime(dateFormat.parse(date));
+                    Date d = dateFormat.parse(date);
+                    if (d != null) {
+                        calendar.setTime(d);
+                        triggerTts(d.toString());
+                    }
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }

@@ -270,6 +270,12 @@
     <string name="preferences_general_system_title">System Defaults</string>
     <string name="preferences_general_files_base_directory_title">Define storage location</string>
     <string name="preferences_general_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
+
+    <string name="preferences_general_tts_title">Text to Speech</string>
+    <string name="preferences_general_tts_description">Enable TTS when data is entered in the Collect activity.</string>
+    <string name="preferences_general_tts_language_title">Choose Language</string>
+    <string name="preferences_general_tts_language_description">Choose a compatible TTS language.</string>
+
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
 
@@ -707,5 +713,12 @@
     <string name="brapi_chunk_size">Chunk Size</string>
 
     <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
+    <string name="trait_boolean_on">On</string>
+    <string name="trait_boolean_off">Off</string>
+    <string name="trait_photo_tts_success">Picture taken successfully.</string>
+    <string name="trait_photo_tts_fail">Picture trait failed.</string>
+    <string name="trait_print_label_success">Printing label.</string>
+    <string name="trait_gnss_internal_tts">Internal GPS</string>
+    <string name="trait_gnss_external_device_tts">External device %s chosen.</string>
 
 </resources>

@@ -102,17 +102,20 @@ public class NumericTraitLayout extends BaseTraitLayout {
         @Override
         public void onClick(View view) {
             final String curText = getEtCurVal().getText().toString();
+            String value = curText;
             if (view.getId() == R.id.k16) {        // Backspace Key Pressed
                 final int length = curText.length();
                 if (length > 0) {
-                    getEtCurVal().setText(curText.substring(0, length - 1));
-                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
+                    value = curText.substring(0, length - 1);
+                    getEtCurVal().setText(value);
+                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
                 }
             } else if (numberButtons.containsKey(view.getId())) {
-                final String v = numberButtons.get(view.getId()).getText().toString();
-                getEtCurVal().setText(curText + v);
-                updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
+                value = curText + numberButtons.get(view.getId()).getText().toString();
+                getEtCurVal().setText(value);
+                updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
             }
+            triggerTts(value);
         }
     }
 }

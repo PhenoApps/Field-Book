@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.DefineStorageActivity;
+import com.fieldbook.tracker.activities.LocaleChoiceActivity;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
@@ -118,6 +120,30 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
         return true;
     }
 
+    private void setupTtsPreference() {
+
+        CheckBoxPreference ttsEnabled = findPreference(GeneralKeys.TTS_LANGUAGE_ENABLED);
+        if (ttsEnabled != null) {
+            Preference ttsLanguage = findPreference(GeneralKeys.TTS_LANGUAGE);
+            if (ttsLanguage != null) {
+                ttsLanguage.setVisible(ttsEnabled.isChecked());
+
+                ttsLanguage.setOnPreferenceClickListener((v) -> {
+                    startActivity(new Intent(getContext(), LocaleChoiceActivity.class));
+                    return true;
+                });
+            }
+
+            ttsEnabled.setOnPreferenceChangeListener((preference, newValue) -> {
+
+                if (ttsLanguage != null) {
+                    ttsLanguage.setVisible((Boolean) newValue);
+                }
+                return true;
+            });
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -135,5 +161,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
             }
         }
+
+        setupTtsPreference();
     }
 }

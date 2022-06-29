@@ -53,7 +53,9 @@ public class CounterTraitLayout extends BaseTraitLayout {
                     } else {
                         counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) + 1));
                     }
-                    updateTrait(getCurrentTrait().getTrait(), "counter", counterTv.getText().toString());
+                    String value = counterTv.getText().toString();
+                    updateTrait(getCurrentTrait().getTrait(), "counter", value);
+                    triggerTts(value);
                 } else {
                     Context ctx = getContext();
                     Utils.makeToast(ctx, ctx.getString(R.string.trait_counter_layout_failed));
@@ -70,7 +72,9 @@ public class CounterTraitLayout extends BaseTraitLayout {
                 } else {
                     counterTv.setText(Integer.toString(Integer.parseInt(counterTv.getText().toString()) - 1));
                 }
-                updateTrait(getCurrentTrait().getTrait(), "counter", counterTv.getText().toString());
+                String value = counterTv.getText().toString();
+                updateTrait(getCurrentTrait().getTrait(), "counter", value);
+                triggerTts(value);
             }
         });
 

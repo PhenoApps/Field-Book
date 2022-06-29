@@ -86,7 +86,6 @@ import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -97,6 +96,8 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
+import org.phenoapps.utils.KeyUtil;
+import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.IOException;
@@ -108,6 +109,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -213,6 +215,14 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     //variable used to skip the navigate to last used trait in onResume
     private boolean mSkipLastUsedTrait = false;
 
+    private TextToSpeechHelper ttsHelper = null;
+
+    public void triggerTts(String text) {
+        if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
+            ttsHelper.speak(text);
+        }
+    }
+
     public static void disableViews(ViewGroup layout) {
         layout.setEnabled(false);
         for (int i = 0; i < layout.getChildCount(); i++) {
@@ -242,6 +252,22 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+
+        ttsHelper = new TextToSpeechHelper(this, () -> {
+            KeyUtil keys = new KeyUtil(this);
+            int lang = mPrefs.getInt(keys.getArgTtsLocale(), -1);
+            if (lang != -1) {
+                Set<Locale> locales = TextToSpeechHelper.Companion.getAvailableLocales();
+                for (Locale l : locales) {
+                    if (l.hashCode() == lang) {
+                        ttsHelper.setLanguage(l);
+                        break;
+                    }
+                }
+            }
+            return null;
+        });
+
         if (ConfigActivity.dt == null) {    // when resume
             ConfigActivity.dt = new DataHelper(this);
         }
@@ -272,8 +298,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             public void afterTextChanged(Editable en) {
                 final TraitObject trait = traitBox.getCurrentTrait();
                 if (en.toString().length() > 0) {
-                    if (traitBox.existsNewTraits() & trait != null)
+                    if (traitBox.existsNewTraits() & trait != null) {
+                        triggerTts(en.toString());
                         updateTrait(trait.getTrait(), trait.getFormat(), en.toString());
+                    }
                 } else {
                     if (traitBox.existsNewTraits() & trait != null)
                         removeTrait(trait.getTrait());
@@ -654,6 +682,12 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         //save last plot id
         if (ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)) {
             rangeBox.saveLastPlot();
+        }
+
+        try {
+            ttsHelper.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         super.onDestroy();
@@ -1831,11 +1865,15 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 }
                 break;
             case 252:
+                String success = getString(R.string.trait_photo_tts_success);
+                String fail = getString(R.string.trait_photo_tts_fail);
                 if (resultCode == RESULT_OK) {
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                     traitPhoto.makeImage(traitBox.getCurrentTrait(),
                             traitBox.getNewTraits());
-                }
+
+                    triggerTts(success);
+                } else triggerTts(fail);
                 break;
         }
     }
