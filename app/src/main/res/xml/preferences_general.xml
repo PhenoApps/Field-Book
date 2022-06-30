@@ -46,6 +46,15 @@
         app:allowDividerAbove="true"
         android:defaultValue="1"/>
 
+    <ListPreference
+        android:icon="@drawable/ic_pref_profile_location"
+        android:key="com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION"
+        android:summary="@string/pref_general_location_collection_summary"
+        android:title="@string/pref_general_location_collection_title"
+        android:entries="@array/pref_general_location_acquisition_level_entries"
+        android:entryValues="@array/pref_general_location_acquisition_level_values"
+        android:defaultValue="0"/>
+
     <CheckBoxPreference
         android:defaultValue="false"
         android:icon="@drawable/ic_tb_barcode_scan"

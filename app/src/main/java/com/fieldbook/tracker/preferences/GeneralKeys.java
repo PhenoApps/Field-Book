@@ -26,6 +26,7 @@ public class GeneralKeys {
     public static final String HIDE_ENTRIES_WITH_DATA_TOOLBAR       = "com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR";
     public static final String USE_DAY_OF_YEAR                      = "UseDay";
     public static final String DISABLE_SHARE                        = "DisableShare";
+    public static final String GENERAL_LOCATION_COLLECTION          = "com.fieldbook.tracker.GENERAL_LOCATION_COLLECTION";
 
     // Files and Naming
     public static final String DEFAULT_STORAGE_LOCATION_PREFERENCE  = "DEFAULT_STORAGE_LOCATION_PREFERENCE";

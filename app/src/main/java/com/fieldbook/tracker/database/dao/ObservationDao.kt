@@ -31,6 +31,16 @@ class ObservationDao {
 
         } ?: emptyArray()
 
+        fun getAll(studyId: String, obsUnit: String): Array<ObservationModel> = withDatabase { db ->
+
+            db.query(Observation.tableName, where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ?",
+                whereArgs = arrayOf(studyId, obsUnit))
+                .toTable()
+                .map { ObservationModel(it) }
+                .toTypedArray()
+
+        } ?: emptyArray()
+
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
         fun getHostImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->

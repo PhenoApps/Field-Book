@@ -707,5 +707,11 @@
     <string name="brapi_chunk_size">Chunk Size</string>
 
     <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
+    <string name="pref_general_location_collection_title">Location Collection</string>
+    <string name="pref_general_location_collection_summary">Select a method for collecting location.</string>
+    <string name="pref_general_location_collection_summary_obs_units">Observation locations are only collected once per observation unit.</string>
+    <string name="pref_general_location_collection_summary_obs">Observation locations are collected per phenotype.</string>
+    <string name="pref_general_location_collection_obs_dialog_title">This setting may increase battery consumption.</string>
+    <string name="pref_general_location_collection_summary_manual">Location saved in the profile setting will be saved in each observation.</string>
 
 </resources>
