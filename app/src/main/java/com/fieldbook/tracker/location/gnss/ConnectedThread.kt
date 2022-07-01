@@ -30,10 +30,12 @@ class ConnectedThread constructor(private val socket: BluetoothSocket, val handl
 
     override fun run() {
 
-        mmBuffer = ByteArray(256)
+        mmBuffer = ByteArray(512)
         var bytes = 0
 
         while (socket.isConnected) try {
+
+            if (bytes == 512) bytes = 0
 
             mmBuffer[bytes] = mmInStream.read().toByte()
 
@@ -52,7 +54,7 @@ class ConnectedThread constructor(private val socket: BluetoothSocket, val handl
 
             } else bytes++
 
-        } catch (e: IOException) {
+        } catch (e: Exception) {
 
             e.printStackTrace()
 
