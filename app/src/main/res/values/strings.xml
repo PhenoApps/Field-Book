@@ -707,5 +707,10 @@
     <string name="brapi_chunk_size">Chunk Size</string>
 
     <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
+    <string name="preferences_profile_crashlytics">Crashlytics</string>
+    <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">If enabled, this setting will log a unique ID which will help the developers solve certain issues.</string>
+    <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
+    <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
 
 </resources>

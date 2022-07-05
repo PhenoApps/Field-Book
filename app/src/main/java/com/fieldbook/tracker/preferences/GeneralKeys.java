@@ -3,6 +3,14 @@ package com.fieldbook.tracker.preferences;
 public class GeneralKeys {
     // @formatter:off
 
+    //Crashlytics
+    public static final String CRASHLYTICS_KEY_USER_TOKEN           = "user_token";
+
+    //Profile
+    public static final String CRASHLYTICS_ID_ENABLED               = "com.tracker.fieldbook.preference.crashlytics.user_id_enabled";
+    public static final String CRASHLYTICS_ID_REFRESH               = "com.tracker.fieldbook.preference.crashlytics.refresh";
+    public static final String CRASHLYTICS_ID                       = "com.tracker.fieldbook.preference.crashlytics.id";
+
     // Appearance
     public static final String TOOLBAR_CUSTOMIZE                    = "TOOLBAR_CUSTOMIZE";
     public static final String INFOBAR_NUMBER                       = "INFOBAR_NUMBER";
