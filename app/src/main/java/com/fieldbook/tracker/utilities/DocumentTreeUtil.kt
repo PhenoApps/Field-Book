@@ -51,9 +51,10 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
         }
 
         /**
-         * Gets a specific directory for the currently chosen plot. (s.a audio or photos)
+         * Gets a specific directory for the currently chosen plot.
+         * @param format: trait format, either photos or audio
          */
-        fun getFieldMediaDirectory(context: Context?, trait: String): DocumentFile? {
+        fun getFieldMediaDirectory(context: Context?, format: String): DocumentFile? {
 
             if (context != null) {
 
@@ -64,11 +65,11 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
                     val plotDataDirName = context.getString(R.string.dir_plot_data)
                     val fieldDir = createDir(context, plotDataDirName, field)
                     if (fieldDir != null) {
-                        val photosDir = fieldDir.findFile(trait)
+                        val photosDir = fieldDir.findFile(format)
                         if (photosDir == null || !photosDir.exists()) {
-                            fieldDir.createDirectory(trait)
+                            fieldDir.createDirectory(format)
                         }
-                        return fieldDir.findFile(trait)
+                        return fieldDir.findFile(format)
                     }
                 } else return null
             }
@@ -82,6 +83,24 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
         fun getPlotMedia(mediaDir: DocumentFile?, plot: String, ext: String): List<DocumentFile> {
 
             return getPlotMedia(mediaDir, plot).filter { it.name?.endsWith(ext) == true }
+        }
+
+        fun getTraitMediaDir(context: Context?, trait: String, format: String): DocumentFile? {
+
+            var traitDir: DocumentFile? = null
+
+            getFieldMediaDirectory(context, format)?.let { mediaDir ->
+
+                traitDir = mediaDir.findFile(trait)
+
+                if (traitDir == null) {
+
+                    traitDir = mediaDir.createDirectory(trait)
+
+                }
+            }
+
+            return traitDir
         }
 
         /**

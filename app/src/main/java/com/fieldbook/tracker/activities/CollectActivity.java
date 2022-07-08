@@ -96,6 +96,8 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
+import org.phenoapps.usb.camera.UsbCameraHelper;
+import org.phenoapps.usb.camera.UsbCameraInterface;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 
@@ -122,7 +124,8 @@ import kotlin.Pair;
  */
 
 @SuppressLint("ClickableViewAccessibility")
-public class CollectActivity extends AppCompatActivity implements SensorEventListener, GPSTracker.GPSTrackerListener {
+public class CollectActivity extends AppCompatActivity
+        implements SensorEventListener, GPSTracker.GPSTrackerListener, UsbCameraInterface {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
 
@@ -213,6 +216,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     //variable used to skip the navigate to last used trait in onResume
     private boolean mSkipLastUsedTrait = false;
 
+    /**
+     * Usb Camera Helper
+     */
+    private UsbCameraHelper mUsbCameraHelper = null;
+
     public static void disableViews(ViewGroup layout) {
         layout.setEnabled(false);
         for (int i = 0; i < layout.getChildCount(); i++) {
@@ -245,6 +253,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         if (ConfigActivity.dt == null) {    // when resume
             ConfigActivity.dt = new DataHelper(this);
         }
+
+        mUsbCameraHelper = new UsbCameraHelper(this);
 
         ConfigActivity.dt.open();
 
@@ -655,6 +665,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         if (ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)) {
             rangeBox.saveLastPlot();
         }
+
+        mUsbCameraHelper.destroy();
 
         super.onDestroy();
     }
@@ -1981,6 +1993,12 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         //always log location updates
         GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, location.getLatitude() + "," + location.getLongitude() + "," + location.getTime() + ",null,null,null,null,null,null,null,null,null,null\n");
+    }
+
+    @Nullable
+    @Override
+    public UsbCameraHelper getCameraHelper() {
+        return mUsbCameraHelper;
     }
 
     ///// class TraitBox /////

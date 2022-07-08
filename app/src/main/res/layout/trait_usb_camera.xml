@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.fieldbook.tracker.traits.UsbCameraTraitLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/usb_camera_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="gone"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:visibility="visible">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <Button
+            android:layout_margin="8dp"
+            android:id="@+id/trait_usb_camera_devices_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/trait_usb_camera_devices_btn_text"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.serenegiant.SimpleUVCCameraTextureView
+            android:id="@+id/trait_usb_camera_min_texture_view"
+            android:layout_margin="16dp"
+            android:layout_width="256dp"
+            android:layout_height="256dp"
+            app:layout_constraintBottom_toTopOf="@id/trait_usb_camera_capture_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.serenegiant.SimpleUVCCameraTextureView
+            android:id="@+id/trait_usb_camera_max_texture_view"
+            android:layout_width="0dp"
+            android:layout_height="512dp"
+            app:layout_constraintBottom_toTopOf="@id/trait_usb_camera_capture_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:visibility="invisible"
+            android:layout_margin="8dp"
+            android:id="@+id/trait_usb_camera_capture_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/trait_external_camera_capture_btn"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+            android:visibility="gone"
+            android:padding="16dp"
+            android:background="@color/zxing_transparent"
+            android:src="@drawable/ic_arrow_expand_all"
+            android:id="@+id/trait_usb_camera_expand_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/trait_usb_camera_min_texture_view"
+            app:layout_constraintEnd_toEndOf="@id/trait_usb_camera_min_texture_view"
+            android:contentDescription="@string/trait_external_camera_expand_content_desc" />
+
+        <ImageButton
+            android:visibility="gone"
+            android:padding="16dp"
+            android:background="@color/zxing_transparent"
+            android:src="@drawable/ic_arrow_collapse_all"
+            android:id="@+id/trait_usb_camera_collapse_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/trait_usb_camera_max_texture_view"
+            app:layout_constraintEnd_toEndOf="@id/trait_usb_camera_max_texture_view"
+            android:contentDescription="@string/trait_external_camera_collapse_content_desc" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.fieldbook.tracker.traits.UsbCameraTraitLayout>

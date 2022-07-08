@@ -122,6 +122,7 @@
     <string name="traits_format_printer">Printer</string>
     <string name="traits_format_barcode">Barcode</string>
     <string name="traits_format_labelprint">Zebra Label Print</string>
+    <string name="traits_format_usb_camera">Usb Camera</string>
 
     <string name="traits_create_trait">Trait</string>
     <string name="traits_create_format">Format</string>
@@ -707,5 +708,9 @@
     <string name="brapi_chunk_size">Chunk Size</string>
 
     <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
+    <string name="trait_external_camera_collapse_content_desc">Collapse</string>
+    <string name="trait_external_camera_expand_content_desc">Expand</string>
+    <string name="trait_external_camera_capture_btn">Capture</string>
+    <string name="trait_usb_camera_devices_btn_text">Pair Device</string>
 
 </resources>
