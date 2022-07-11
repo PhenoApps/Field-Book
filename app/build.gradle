@@ -26,7 +26,7 @@ android {
         applicationId "com.fieldbook.tracker"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode = 522
+        versionCode = 523
         versionName = '5.2.0'
         multiDexEnabled true
     }
@@ -101,7 +101,7 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.3.3'
 
-    implementation('com.github.phenoapps:phenolib:v0.9.31')
+    implementation('com.github.phenoapps:phenolib:v0.9.37')
 
     implementation 'com.github.breeding-insight:brapi:2.0.3'
     implementation("com.squareup.okhttp3:okhttp:4.9.3")

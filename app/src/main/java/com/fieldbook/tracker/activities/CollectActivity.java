@@ -96,6 +96,8 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
+import org.phenoapps.security.SecureBluetoothActivityImpl;
+import org.phenoapps.security.Security;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 
@@ -213,6 +215,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     //variable used to skip the navigate to last used trait in onResume
     private boolean mSkipLastUsedTrait = false;
 
+    private SecureBluetoothActivityImpl secureBluetooth;
+
     public static void disableViews(ViewGroup layout) {
         layout.setEnabled(false);
         for (int i = 0; i < layout.getChildCount(); i++) {
@@ -239,6 +243,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        secureBluetooth = new SecureBluetoothActivityImpl(this);
+        secureBluetooth.initialize();
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
@@ -723,7 +730,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         if (systemMenu != null) {
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
             systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_TEXT, false));
-            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(GeneralKeys.NEXT_ENTRY_NO_DATA, false));
+            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1").equals("1"));
             systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
             systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
         }
@@ -780,7 +787,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             //setup logger whenever activity resumes
             setupGeoNavLogger();
 
-            startGeoNav();
+            secureBluetooth.withNearby((adapter) -> {
+                startGeoNav();
+                return null;
+            });
+
         }
 
         checkLastOpened();
@@ -975,7 +986,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         systemMenu.findItem(R.id.jumpToPlot).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_TEXT, false));
-        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(ep.getBoolean(GeneralKeys.NEXT_ENTRY_NO_DATA, false));
+        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1").equals("1"));
         systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
         systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
 
@@ -1070,7 +1081,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 }
                 break;
             case R.id.nextEmptyPlot:
-                nextEmptyPlot();
+                rangeBox.paging = rangeBox.movePaging(rangeBox.paging, 1, false, true);
+                refreshMain();
+
                 break;
             case R.id.jumpToPlot:
                 moveToPlotID();
@@ -1274,14 +1287,18 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
      */
     private void setupCommunicationsUi(BluetoothDevice device) {
 
-        BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+        secureBluetooth.withNearby((adapter) -> {
 
-        mLastDevice = device;
+            adapter.cancelDiscovery();
 
-        mConnectThread = new ConnectThread(device, mHandler);
+            mLastDevice = device;
 
-        mConnectThread.start();
+            mConnectThread = new ConnectThread(device, mHandler);
 
+            mConnectThread.start();
+
+            return null;
+        });
     }
 
     private final GNSSResponseReceiver mGnssResponseReceiver = new GNSSResponseReceiver() {
@@ -2645,7 +2662,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             if (rangeID != null && rangeID.length > 0) {
                 final int step = left ? -1 : 1;
-                paging = movePaging(paging, step, true);
+                paging = movePaging(paging, step, true, false);
 
                 // Refresh onscreen controls
                 updateCurrentRange(rangeID[paging -1]);
@@ -2882,11 +2899,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
 
         private int decrementPaging(int pos) {
-            return movePaging(pos, -1, false);
+            return movePaging(pos, -1, false, false);
         }
 
         private int incrementPaging(int pos) {
-            return movePaging(pos, 1, false);
+            return movePaging(pos, 1, false, false);
         }
 
         private void chooseNextTrait(int pos, int step) {
@@ -3037,7 +3054,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
         }
 
-        private int movePaging(int pos, int step, boolean cyclic) {
+        private int movePaging(int pos, int step, boolean cyclic, boolean fromToolbar) {
             // If ignore existing data is enabled, then skip accordingly
             final SharedPreferences ep = parent.getPreference();
 
@@ -3045,6 +3062,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
             //three options: 1. disabled 2. skip active trait 3. skip but check all traits
             String skipMode = ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1");
+
+            if (fromToolbar) {
+                skipMode = ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1");
+            }
 
             switch (skipMode) {
 

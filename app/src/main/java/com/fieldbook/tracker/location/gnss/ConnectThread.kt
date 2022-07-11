@@ -22,7 +22,7 @@ class ConnectThread(device: BluetoothDevice, private val handler: Handler) : Thr
 
         try {
             tmp = device.createRfcommSocketToServiceRecord(device.uuids[0].uuid)
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             Log.e(TAG, "Socket's create() method failed", e)
         }
 
