@@ -1,14 +1,8 @@
 <changelog>
-    <release
-        date="2022-07-01"
-        versionCode="530"
-        versionName="v5.3">
-        <new>Expanded options available for next entry with no data setting</new>
-    </release>
 
     <release
-        date="2022-05-09"
-        versionCode="522"
+        date="2022-07-11"
+        versionCode="523"
         versionName="v5.2">
         <new>Datagrid focuses on current entry/trait</new>
         <new>Database export now exports to single zipped file</new>
@@ -18,6 +12,7 @@
         <new>New sound for missing barcodes when navigating</new>
         <new>InfoBars adjust based on prefix size</new>
         <new>Export option to export ZIP bundle containing export data and collected media</new>
+        <new>Expanded options available for next entry with no data setting</new>
         <info>Exporting multiple files at once will export a ZIP bundle</info>
         <info>Improved import file sanitation</info>
         <info>Added warnings for failed file imports</info>
