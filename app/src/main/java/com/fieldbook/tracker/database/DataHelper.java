@@ -208,6 +208,8 @@ public class DataHelper {
      */
     public void updateTraitVisibility(String trait, boolean val) {
 
+        open();
+
         ObservationVariableDao.Companion.updateTraitVisibility(trait, String.valueOf(val));
 
 //        db.execSQL("update " + TRAITS
@@ -222,6 +224,8 @@ public class DataHelper {
      * v1.6 - Amended to consider both trait and user data
      */
     public long insertUserTraits(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id, String observationDbId, OffsetDateTime lastSyncedTime) {
+
+        open();
 
         return ObservationDao.Companion.insertUserTraits(rid, parent, trait, userValue, person, location, notes, exp_id, observationDbId, lastSyncedTime);
 
@@ -262,6 +266,8 @@ public class DataHelper {
      */
     public int getRep(String plot, String trait) {
 
+        open();
+
         return ObservationDao.Companion.getRep(plot, trait) + 1;
 
 //        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{plot, trait});
@@ -269,6 +275,8 @@ public class DataHelper {
     }
 
     public int getMaxPositionFromTraits() {
+
+        open();
 
         return ObservationVariableDao.Companion.getMaxPosition();
 
@@ -288,6 +296,8 @@ public class DataHelper {
     }
 
     public Boolean isBrapiSynced(String exp_id, String rid, String parent) {
+
+        open();
 
         return ObservationDao.Companion.isBrapiSynced(exp_id, rid, parent);
 
@@ -317,6 +327,8 @@ public class DataHelper {
      * Get user created trait observations for currently selected study
      */
     public List<Observation> getUserTraitObservations() {
+
+        open();
 
         String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
@@ -365,6 +377,8 @@ public class DataHelper {
      */
     public List<FieldBookImage> getUserTraitImageObservations() {
 
+        open();
+
         String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserTraitImageObservations(exp_id, missingPhoto);
@@ -407,6 +421,8 @@ public class DataHelper {
     }
 
     public List<Observation> getWrongSourceObservations(String hostUrl) {
+
+        open();
 
         return ObservationDao.Companion.getWrongSourceObservations(hostUrl);
 
@@ -452,6 +468,8 @@ public class DataHelper {
     }
 
     public List<FieldBookImage> getWrongSourceImageObservations(String hostUrl) {
+
+        open();
 
         return ObservationDao.Companion.getWrongSourceImageObservations(hostUrl, missingPhoto);
 
@@ -499,6 +517,8 @@ public class DataHelper {
      * Get the data for brapi export to external system
      */
     public List<Observation> getObservations(String hostUrl) {
+
+        open();
 
         return ObservationDao.Companion.getObservations(hostUrl);
 
@@ -569,6 +589,8 @@ public class DataHelper {
      * Get the image observations for brapi export to external system
      */
     public List<FieldBookImage> getImageObservations(String hostUrl) {
+
+        open();
 
         return ObservationDao.Companion.getHostImageObservations(hostUrl, missingPhoto);
 
@@ -648,6 +670,8 @@ public class DataHelper {
      */
     public void updateObservations(List<Observation> observations) {
 
+        open();
+
         ObservationDao.Companion.updateObservations(observations);
 
 //        ArrayList<String> ids = new ArrayList<String>();
@@ -686,6 +710,8 @@ public class DataHelper {
     }
 
     public void updateImage(FieldBookImage image, Boolean writeLastSyncedTime) {
+
+        open();
 
         ObservationDao.Companion.updateImage(image, writeLastSyncedTime);
 
@@ -760,6 +786,8 @@ public class DataHelper {
      */
     public Cursor getExportDBData(String[] fieldList, String[] traits) {
 
+        open();
+
         return ObservationUnitPropertyDao.Companion.getExportDbData(
                 ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
                 ep.getString(GeneralKeys.UNIQUE_NAME, ""), fieldList, traits);
@@ -800,6 +828,8 @@ public class DataHelper {
      */
     public Cursor convertDatabaseToTable(String[] col, String[] traits) {
 
+        open();
+
         return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
                 ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
                 ep.getString(GeneralKeys.UNIQUE_NAME, ""), col, traits);
@@ -831,6 +861,8 @@ public class DataHelper {
      * Used by the application to return all traits which are visible
      */
     public String[] getVisibleTrait() {
+
+        open();
 
         return VisibleObservationVariableDao.Companion.getVisibleTrait();
 
@@ -864,6 +896,8 @@ public class DataHelper {
      */
     public String[] getFormat() {
 
+        open();
+
         return VisibleObservationVariableDao.Companion.getFormat();
 
 //        String[] data = null;
@@ -895,6 +929,8 @@ public class DataHelper {
      * Returns all traits regardless of visibility. Used by the ratings screen
      */
     public String[] getAllTraits() {
+
+        open();
 
         return ObservationVariableDao.Companion.getAllTraits();
 
@@ -928,6 +964,8 @@ public class DataHelper {
      */
     public String[] getTraitColumnData(String column) {
 
+        open();
+
         return ObservationVariableDao.Companion.getTraitColumnData(column);
 
 //        String[] data = null;
@@ -959,6 +997,8 @@ public class DataHelper {
      * Write new realPosition
      */
     public void writeNewPosition(String column, String id, String position) {
+
+        open();
 
         ObservationVariableDao.Companion.writeNewPosition(column, id, position);
 
@@ -1010,6 +1050,8 @@ public class DataHelper {
      */
     public Cursor getAllTraitsForExport() {
 
+        open();
+
         return ObservationVariableDao.Companion.getAllTraitsForExport();
 
 //        Cursor cursor = db.query(TRAITS, getTraitColumns(),
@@ -1022,6 +1064,8 @@ public class DataHelper {
      * V4 - Get all traits in the system, in order, as TraitObjects
      */
     public ArrayList<FieldObject> getAllFieldObjects() {
+
+        open();
 
         return StudyDao.Companion.getAllFieldObjects();
 
@@ -1058,6 +1102,8 @@ public class DataHelper {
 
     public FieldObject getFieldObject(Integer exp_id) {
 
+        open();
+
         return StudyDao.Companion.getFieldObject(exp_id);
 
 //        Cursor cursor = db.query(EXP_INDEX, new String[]{"exp_id", "exp_name", "unique_id", "primary_id",
@@ -1091,6 +1137,8 @@ public class DataHelper {
      * V2 - Get all traits in the system, in order, as TraitObjects
      */
     public ArrayList<TraitObject> getAllTraitObjects() {
+
+        open();
 
         return ObservationVariableDao.Companion.getAllTraitObjects();
 
@@ -1132,6 +1180,8 @@ public class DataHelper {
      */
     public HashMap<String, String> getTraitVisibility() {
 
+        open();
+
         return ObservationVariableDao.Companion.getTraitVisibility();
 
 //        HashMap data = new HashMap();
@@ -1157,6 +1207,8 @@ public class DataHelper {
      * Returns a particular trait as an object
      */
     public TraitObject getDetail(String trait) {
+
+        open();
 
         return VisibleObservationVariableDao.Companion.getDetail(trait);
 
@@ -1200,6 +1252,8 @@ public class DataHelper {
      */
     public HashMap<String, String> getUserDetail(String plotId) {
 
+        open();
+
         String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         return ObservationDao.Companion.getUserDetail(exp_id, plotId);
@@ -1229,6 +1283,8 @@ public class DataHelper {
      */
     public Observation getObservation(String exp_id, String plotId, String parent) {
 
+        open();
+
         return ObservationDao.Companion.getObservation(exp_id, plotId, parent);
 
         //        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ?", new String[]{plotId, parent},
@@ -1249,6 +1305,8 @@ public class DataHelper {
     }
 
     public Observation getObservationByValue(String exp_id, String plotId, String parent, String value) {
+
+        open();
 
         return ObservationDao.Companion.getObservationByValue(exp_id, plotId, parent, value);
 
@@ -1277,6 +1335,8 @@ public class DataHelper {
      * v1.6 - Amended to consider both trait and format
      */
     public boolean getTraitExists(int id, String parent, String trait) {
+
+        open();
 
         return ObservationVariableDao.Companion.getTraitExists(ep.getString(GeneralKeys.UNIQUE_NAME, ""), id, parent, trait);
 
@@ -1307,6 +1367,8 @@ public class DataHelper {
      * Returns the primary key for all ranges
      */
     public int[] getAllRangeID() {
+
+        open();
 
         if (!isTableExists("ObservationUnitProperty")) {
 
@@ -1365,6 +1427,8 @@ public class DataHelper {
      */
     public SearchData[] getRangeBySql(String sql) {
 
+        open();
+
         try {
             Cursor cursor = db.rawQuery(sql, null);
 
@@ -1405,6 +1469,8 @@ public class DataHelper {
      * //TODO add catch here for sqlite error
      */
     public RangeObject getRange(String first, String second, String unique, int id) {
+
+        open();
 
         return ObservationUnitPropertyDao.Companion.getRangeFromId(
                 first, second, unique,
@@ -1474,6 +1540,8 @@ public class DataHelper {
      */
     public void deleteTraitByValue(String expId, String rid, String parent, String value) {
 
+        open();
+
         ObservationDao.Companion.deleteTraitByValue(expId, rid, parent, value);
 
 //        try {
@@ -1540,6 +1608,8 @@ public class DataHelper {
      */
     public String[] getDropDownRange(String trait, String plotId) {
 
+        open();
+
         if (trait.length() == 0)
             return null;
 
@@ -1578,6 +1648,9 @@ public class DataHelper {
      * Returns the column names for the range table
      */
     public String[] getRangeColumnNames() {
+
+        open();
+
 //        if (db == null || !db.isOpen()) db = openHelper.getWritableDatabase();
         if (!isTableExists("ObservationUnitProperty")) {
 
@@ -1650,6 +1723,8 @@ public class DataHelper {
      */
     public void deleteTrait(String exp_id, String rid, String parent) {
 
+        open();
+
         ObservationDao.Companion.deleteTrait(exp_id, rid, parent);
 
 //        try {
@@ -1665,6 +1740,8 @@ public class DataHelper {
      * v2 - Delete trait
      */
     public void deleteTrait(String id) {
+
+        open();
 
         ObservationVariableDao.Companion.deleteTrait(id);
 
@@ -1692,6 +1769,8 @@ public class DataHelper {
      * The above deleteTable function is only used to delete Traits table.
      */
     public void deleteTraitsTable() {
+
+        open();
 
         try {
             ObservationVariableDao.Companion.deleteTraits();
@@ -1795,6 +1874,7 @@ public class DataHelper {
             /*String trait, String format, String defaultValue,
                              String minimum, String maximum, String details, String categories,
                              String isVisible, String realPosition) {*/
+        open();
 
         return ObservationVariableDao.Companion.insertTraits(t);
 
@@ -1837,6 +1917,8 @@ public class DataHelper {
      */
     public void updateTraitPosition(String id, int realPosition) {
 
+        open();
+
         ObservationVariableDao.Companion.updateTraitPosition(id, realPosition);
 
 //        try {
@@ -1855,6 +1937,8 @@ public class DataHelper {
      */
     public long editTraits(String id, String trait, String format, String defaultValue,
                            String minimum, String maximum, String details, String categories) {
+
+        open();
 
         return ObservationVariableDao.Companion.editTraits(id, trait, format, defaultValue,
                 minimum, maximum, details, categories);
@@ -1876,20 +1960,31 @@ public class DataHelper {
     }
 
     public TraitObject getTraitByName(String name) {
+
+        open();
+
         return ObservationVariableDao.Companion.getTraitByName(name);
     }
 
     public TraitObject getTraitByExternalDbId(String externalDbId, String traitDataSource) {
+
+        open();
+
         return ObservationVariableDao.Companion.getTraitByExternalDbId(externalDbId, traitDataSource);
     }
 
     public long updateTrait(TraitObject trait) {
+
+        open();
+
         return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getTrait(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
                 trait.getDetails(), trait.getCategories());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
+
+        open();
 
         return ObservationUnitDao.Companion.checkUnique(values);
 
@@ -1910,7 +2005,8 @@ public class DataHelper {
 
     public void updateExpTable(Boolean imp, Boolean ed, Boolean ex, int exp_id) {
 
-        ConfigActivity.dt.open();
+        open();
+
         StudyDao.Companion.updateStudyTable(imp, ed, ex, exp_id);
 
 //        ConfigActivity.dt.open();
@@ -1961,6 +2057,8 @@ public class DataHelper {
 
     public void deleteField(int exp_id) {
 
+        open();
+
         //TODO add optional cascade delete
         StudyDao.Companion.deleteField(exp_id);
 //        db.execSQL("DELETE FROM studies WHERE internal_id_study = " + exp_id);
@@ -1977,6 +2075,8 @@ public class DataHelper {
     }
 
     public void switchField(int exp_id) {
+
+        open();
 
         //TODO lastplot is effectively erased when fields are switched, change this to persist and save each field's last plot.
         //potentially use preference map or db column
@@ -2033,6 +2133,8 @@ public class DataHelper {
 
     public int checkFieldName(String name) {
 
+        open();
+
         return StudyDao.Companion.checkFieldName(name);
 
 //        Cursor c = db.rawQuery("SELECT exp_id FROM " + EXP_INDEX + " WHERE exp_name=?", new String[]{name});
@@ -2046,6 +2148,8 @@ public class DataHelper {
 
     public int createField(FieldObject e, List<String> columns) {
         // String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns){
+
+        open();
 
         return StudyDao.Companion.createField(e, timeStamp.format(Calendar.getInstance().getTime()), columns);
 
@@ -2087,6 +2191,8 @@ public class DataHelper {
     }
 
     public void createFieldData(int exp_id, List<String> columns, List<String> data) {
+
+        open();
 
         StudyDao.Companion.createFieldData(exp_id, columns, data);
 
@@ -2333,6 +2439,8 @@ public class DataHelper {
 
     public boolean isTableExists(String tableName) {
 
+        open();
+
         Cursor cursor = db.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '" + tableName + "'", null);
         if (cursor != null) {
             if (cursor.getCount() > 0) {
@@ -2364,6 +2472,9 @@ public class DataHelper {
     //TODO replace with ObservationUnitPropertyDao call
     //copy of the above function, its only called once
     public boolean isRangeTableEmpty() {
+
+        open();
+
         boolean empty = true;
 
         if (!isTableExists("ObservationUnitProperty")) {
