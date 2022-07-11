@@ -42,6 +42,56 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
             startActivityForResult(intent, REQUEST_STORAGE_DEFINER_CODE);
             return true;
         });
+
+        Preference skipEntriesPref = this.findPreference(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR);
+
+        if (skipEntriesPref != null) {
+
+            //set preference change listener to change summary when needed
+            skipEntriesPref.setOnPreferenceChangeListener(this);
+
+            //also initialize the summary whenever the fragment is opened, or else it defaults to "disabled"
+            String skipMode = prefMgr.getSharedPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1");
+
+            switchSkipPreferenceMode(skipMode, skipEntriesPref);
+
+        }
+    }
+
+    private void switchSkipPreferenceMode(String mode, Preference preference) {
+
+        switch (mode) {
+
+            case "2": {
+
+                preference.setSummary(R.string.preferences_general_skip_entries_with_data_description);
+
+                break;
+
+            }
+
+            case "3": {
+
+                preference.setSummary(R.string.preferences_general_skip_entries_across_all_traits_description);
+
+                break;
+
+            }
+
+            case "4": {
+
+                preference.setSummary(R.string.preferences_general_skip_entries_default_description);
+
+                break;
+            }
+            default: {
+
+                preference.setSummary(R.string.preferences_general_feature_next_missing_description);
+
+                break;
+
+            }
+        }
     }
 
     @Override
@@ -55,7 +105,17 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
 
-        return false;
+        //When the skip entries preference is changed, update the summary that is defined in string.xml.
+        if (preference.hasKey()) {
+
+            if (preference.getKey().equals(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR)) {
+
+                switchSkipPreferenceMode((String) newValue, preference);
+
+            }
+        }
+
+        return true;
     }
 
     @Override
