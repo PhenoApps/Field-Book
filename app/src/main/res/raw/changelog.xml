@@ -1,5 +1,12 @@
 <changelog>
     <release
+        date="2022-08-01"
+        versionCode="530"
+        versionName="v5.3">
+        <new>Updated GeoNav notification layout</new>
+    </release>
+
+    <release
         date="2022-05-09"
         versionCode="522"
         versionName="v5.2">
