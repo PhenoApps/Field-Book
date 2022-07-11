@@ -124,5 +124,22 @@
         <item>@string/preferences_appearance_collect_labelval_customize_value</item>
         <item>@string/preferences_appearance_collect_labelval_customize_label</item>
     </string-array>
+
     <string name="preferences_general_skip_entries_default">Default</string>
+    <string name="location_level_manual">Manual</string>
+    <string name="location_level_experiment">Experiment</string>
+    <string name="location_level_observation_unit">Observation Unit</string>
+    <string name="location_level_observation">Observation</string>
+
+    <string-array name="pref_general_location_acquisition_level_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="pref_general_location_acquisition_level_entries">
+        <item>@string/location_level_manual</item>
+        <item>@string/location_level_observation_unit</item>
+        <item>@string/location_level_observation</item>
+    </string-array>
 </resources>
