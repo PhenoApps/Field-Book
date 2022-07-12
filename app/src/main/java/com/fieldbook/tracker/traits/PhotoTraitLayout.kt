@@ -2,47 +2,40 @@ package com.fieldbook.tracker.traits
 
 import android.app.Activity
 import android.content.Context
-import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
-import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
-import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getStem
-import com.fieldbook.tracker.traits.BaseTraitLayout
-import android.graphics.Bitmap
-import android.widget.Gallery
-import com.fieldbook.tracker.adapters.GalleryImageAdapter
-import android.widget.ImageButton
-import com.fieldbook.tracker.R
-import com.fieldbook.tracker.traits.PhotoTraitLayout.PhotoTraitOnClickListener
-import android.widget.EditText
-import androidx.documentfile.provider.DocumentFile
-import com.fieldbook.tracker.utilities.DocumentTreeUtil
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.AdapterView
-import android.graphics.BitmapFactory
-import org.phenoapps.utils.BaseDocumentTreeUtil
-import android.provider.MediaStore
 import android.content.Intent
-import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.activities.ConfigActivity
-import android.content.DialogInterface
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
+import android.provider.MediaStore
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemClickListener
+import android.widget.Gallery
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.documentfile.provider.DocumentFile
+import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.ConfigActivity
+import com.fieldbook.tracker.adapters.GalleryImageAdapter
+import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DialogUtils
-import com.fieldbook.tracker.traits.PhotoTraitLayout
+import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
+import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
 import com.fieldbook.tracker.utilities.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getStem
 import java.io.IOException
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
+
 
 class PhotoTraitLayout : BaseTraitLayout {
 
@@ -171,7 +164,11 @@ class PhotoTraitLayout : BaseTraitLayout {
     private fun decodeBitmap(uri: Uri): Bitmap? {
         return try {
             val input = context.contentResolver.openInputStream(uri)
-            val bmp = BitmapFactory.decodeStream(input)
+            var bmp = BitmapFactory.decodeStream(input)
+            val mat = Matrix().apply {
+                postRotate(90f)
+            }
+            bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, mat, false)
             input?.close()
             bmp
         } catch (e: IOException) {
@@ -197,6 +194,10 @@ class PhotoTraitLayout : BaseTraitLayout {
             val thumbsDir = getFieldMediaDirectory(context, "thumbnails")
             val name: String = uri.getStem(context)
             if (thumbsDir != null) {
+                val nomedia = thumbsDir.findFile(".nomedia")
+                if (nomedia == null || !nomedia.exists()) {
+                    thumbsDir.createFile("*/*", ".nomedia")
+                }
                 var bmp = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
                 bmp = Bitmap.createScaledBitmap(bmp, 256, 256, true)
                 val thumbnail = thumbsDir.createFile("image/*", "$name.jpg")
