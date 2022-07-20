@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.location.Location
 import com.fieldbook.tracker.database.dao.ObservationDao
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.GeneralPreferencesFragment
 import java.util.*
+import kotlin.NoSuchElementException
+import kotlin.math.exp
 
 class LocationCollectorUtil {
 
@@ -42,8 +45,8 @@ class LocationCollectorUtil {
                                      expId: String, obsUnit: String,
                                      internalGps: Location?, externalGps: Location?): String {
 
-            //default to the manual location mode
-            var location = prefs.getString(GeneralKeys.LOCATION, "") ?: ""
+            //default to no location
+            var location = String() //prefs.getString(GeneralKeys.LOCATION, "") ?: "" <-- old way was to use preference location
 
             try {
                 val recent: String? = getRecentLocation(context, internalGps, externalGps)
@@ -58,24 +61,12 @@ class LocationCollectorUtil {
 
                     //if obs unit mode, search all observations within the current plot
                     //if a location already exists, use that location for this observation, otherwise use the most recent location
-                    val obs = ObservationDao.getAll(expId, obsUnit)
-                    if (obs.isNotEmpty()) {
-                        var l: String? = null
-                        for (m in obs) {
-                            val phenoCoordinate = m.geo_coordinates
-                            if (phenoCoordinate != null) {
-                                l = phenoCoordinate
-                                break
-                            }
-                        }
-                        if (l != null) {
-                            location = l
-                        } else {
-                            if (recent != null) {
-                                location = recent
-                            }
-                        }
-                    }
+                    location = ObservationDao.getAll(expId, obsUnit).getLocation() ?: recent ?: String()
+
+                } else if (locationCollectionMode == GeneralPreferencesFragment.LOCATION_COLLECTION_STUDY) {
+
+                    //similar to above but check if an observation has been saved for a field/study
+                    location = ObservationDao.getAll(expId).getLocation() ?: recent ?: String()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -83,6 +74,12 @@ class LocationCollectorUtil {
 
             return location
         }
-    }
 
+        //simple search to find a non null geo coordinate column
+        private fun Array<ObservationModel>.getLocation(): String? = try {
+            this.firstNotNullOf { it.geo_coordinates }
+        } catch (e: NoSuchElementException) {
+            null
+        }
+    }
 }

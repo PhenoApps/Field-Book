@@ -53,7 +53,7 @@
         android:title="@string/pref_general_location_collection_title"
         android:entries="@array/pref_general_location_acquisition_level_entries"
         android:entryValues="@array/pref_general_location_acquisition_level_values"
-        android:defaultValue="0"/>
+        android:defaultValue="-1"/>
 
     <CheckBoxPreference
         android:defaultValue="false"

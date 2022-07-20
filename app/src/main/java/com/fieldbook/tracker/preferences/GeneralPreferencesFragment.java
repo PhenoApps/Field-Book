@@ -21,9 +21,10 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
     private static final int REQUEST_STORAGE_DEFINER_CODE = 999;
 
-    public static final int LOCATION_COLLECTION_MANUAL = 0;
+    public static final int LOCATION_COLLECTION_OFF = 0;
     public static final int LOCATION_COLLECTION_OBS_UNIT = 1;
     public static final int LOCATION_COLLECTION_OBS = 2;
+    public static final int LOCATION_COLLECTION_STUDY = 3;
 
     PreferenceManager prefMgr;
     Context context;
@@ -62,6 +63,8 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
             switchSkipPreferenceMode(skipMode, skipEntriesPref);
 
         }
+
+        updateLocationCollectionPreference();
     }
 
     private void switchSkipPreferenceMode(String mode, Preference preference) {
@@ -131,19 +134,12 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
             ListPreference pref = findPreference(GeneralKeys.GENERAL_LOCATION_COLLECTION);
             if (pref != null) {
 
-                String obsUnitModeSummary = getString(R.string.pref_general_location_collection_summary_obs_units);
-                String obsModeManualSummary = getString(R.string.pref_general_location_collection_summary_manual);
-                String obsModeSummary = getString(R.string.pref_general_location_collection_summary_obs);
                 String obsModeDialogTitle = getString(R.string.pref_general_location_collection_obs_dialog_title);
-
-                int mode = Integer.parseInt(prefMgr.getSharedPreferences().getString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "0"));
-                if (mode == LOCATION_COLLECTION_MANUAL) pref.setSummary(obsModeManualSummary);
-                else if (mode == LOCATION_COLLECTION_OBS_UNIT) pref.setSummary(obsUnitModeSummary);
-                else pref.setSummary(obsModeSummary);
 
                 pref.setOnPreferenceChangeListener(((preference, newValue) -> {
 
-                    int value = Integer.parseInt((String) newValue);
+                    String newStringValue = (String) newValue;
+                    int value = Integer.parseInt(newStringValue);
 
                     if (value == LOCATION_COLLECTION_OBS) {
 
@@ -158,13 +154,18 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
                                 prefMgr.getSharedPreferences().edit().putString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "0").apply();
 
-                                pref.setValueIndex(0);
+                                pref.setValueIndex(GeneralPreferencesFragment.LOCATION_COLLECTION_OFF);
 
                                 dialog.dismiss();
+
+                                updateLocationCollectionSummary(GeneralPreferencesFragment.LOCATION_COLLECTION_OFF);
 
                             }).show();
 
                     }
+
+                    updateLocationCollectionSummary(value);
+
 
                     return true;
 
@@ -175,6 +176,25 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
             e.printStackTrace();
 
+        }
+    }
+
+    private void updateLocationCollectionSummary(int mode) {
+
+        ListPreference pref = findPreference(GeneralKeys.GENERAL_LOCATION_COLLECTION);
+        if (pref != null) {
+
+            String obsUnitModeSummary = getString(R.string.pref_general_location_collection_summary_obs_units);
+            String obsModeOffSummary = getString(R.string.pref_general_location_collection_off_summary);
+            String obsModeSummary = getString(R.string.pref_general_location_collection_summary_obs);
+            String defaultSummary = getString(R.string.pref_general_location_collection_summary);
+            String studySummary = getString(R.string.pref_general_location_collection_study_summary);
+
+            if (mode == LOCATION_COLLECTION_OFF) pref.setSummary(obsModeOffSummary);
+            else if (mode == LOCATION_COLLECTION_OBS_UNIT) pref.setSummary(obsUnitModeSummary);
+            else if (mode == LOCATION_COLLECTION_OBS) pref.setSummary(obsModeSummary);
+            else if (mode == LOCATION_COLLECTION_STUDY) pref.setSummary(studySummary);
+            else pref.setSummary(defaultSummary);
         }
     }
 
@@ -196,6 +216,8 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
             }
         }
 
-        updateLocationCollectionPreference();
+        updateLocationCollectionSummary(Integer
+                .parseInt(prefMgr.getSharedPreferences()
+                        .getString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "-1")));
     }
 }

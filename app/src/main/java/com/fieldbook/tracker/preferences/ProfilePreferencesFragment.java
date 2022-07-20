@@ -30,15 +30,12 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     PreferenceManager prefMgr;
     Context context;
     private Preference profilePerson;
-    private Preference profileLocation;
     private Preference profileReset;
     SharedPreferences ep;
     private double lat;
     private double lng;
     private AlertDialog personDialog;
     private AlertDialog locationDialog;
-
-    private final int PERMISSIONS_REQUEST_LOCATION = 9960;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -52,7 +49,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         ep = getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
 
         profilePerson = findPreference("pref_profile_person");
-        profileLocation = findPreference("pref_profile_location");
 
         updateSummaries();
 
@@ -61,13 +57,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         profilePerson.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 showPersonDialog();
-                return true;
-            }
-        });
-
-        profileLocation.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                locationDialogPermission();
                 return true;
             }
         });
@@ -251,7 +240,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
     private void updateSummaries() {
         profilePerson.setSummary(personSummary());
-        profileLocation.setSummary(locationSummary());
     }
 
     private String personSummary() {
@@ -317,15 +305,4 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         return false;
     }
 
-    @AfterPermissionGranted(PERMISSIONS_REQUEST_LOCATION)
-    private void locationDialogPermission() {
-        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
-        if (EasyPermissions.hasPermissions(getContext(), perms)) {
-            showLocationDialog();
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_location),
-                    PERMISSIONS_REQUEST_LOCATION, perms);
-        }
-    }
 }
