@@ -710,5 +710,10 @@
     <string name="dialog_new_trait_add_cat_button_text">Add</string>
     <string name="traits_create_categories_label_text">Enter category label here</string>
     <string name="traits_create_categories_value_text">Enter category value here</string>
+    <string name="preferences_profile_crashlytics">Crashlytics</string>
+    <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
+    <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
+    <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
 
 </resources>

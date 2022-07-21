@@ -60,6 +60,7 @@ import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -133,6 +134,14 @@ public class ConfigActivity extends AppCompatActivity {
         loadScreen();
     }
 
+    private void setCrashlyticsUserId() {
+
+        String id = ep.getString(GeneralKeys.CRASHLYTICS_ID, "");
+        FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
+        instance.setUserId(id);
+        instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, id);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,6 +151,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
+        setCrashlyticsUserId();
         invalidateOptionsMenu();
         loadScreen();
 
