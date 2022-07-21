@@ -23,14 +23,13 @@ class CategoryAdapter(private val context: CategoryListItemOnClick):
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val labelTextView: TextView = view.findViewById(R.id.list_item_category_label_tv)
         val valueTextView: TextView = view.findViewById(R.id.list_item_category_value_tv)
-        val deleteButton: Button = view.findViewById(R.id.list_item_category_delete_btn)
+        private val deleteButton: Button = view.findViewById(R.id.list_item_category_delete_btn)
 
         init {
             deleteButton.setOnClickListener {
-                val label = labelTextView.text.toString()
-                context.onCategoryClick(label)
+                val value = valueTextView.text.toString()
+                context.onCategoryClick(value)
             }
         }
     }
@@ -50,7 +49,6 @@ class CategoryAdapter(private val context: CategoryListItemOnClick):
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         with (currentList[position]) {
-            viewHolder.labelTextView.text = label
             viewHolder.valueTextView.text = value
             viewHolder.itemView.tag = label
         }

@@ -94,8 +94,8 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 for (BrAPIScaleValidValuesCategories scale : json) {
 
                     if (labelValPref.equals("value")) {
-                        cat[i++] = scale.getLabel();
-                    } else cat[i++] = scale.getValue();
+                        cat[i++] = scale.getValue();
+                    } else cat[i++] = scale.getLabel();
                 }
 
             }
@@ -112,7 +112,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
             String label = getNewTraits().get(trait);
             if (label != null) {
                 if (CategoryJsonUtil.Companion.contains(cat, label)) {
-                    getEtCurVal().setText(getNewTraits().get(trait));
+                    getEtCurVal().setText(label);
                     getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
                 }
             }

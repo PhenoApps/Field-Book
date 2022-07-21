@@ -51,6 +51,7 @@ import static com.fieldbook.tracker.activities.TraitEditorActivity.loadData;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
+//TODO this class needs refactoring @chaneylc
 public class NewTraitDialog extends DialogFragment implements CategoryAdapter.CategoryListItemOnClick {
     private TraitEditorActivity originActivity;
     private AlertDialog createDialog;
@@ -68,7 +69,6 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
     private EditText minimum;
     private EditText maximum;
     private EditText details;
-    private EditText categoryLabelEt;
     private EditText categoryValueEt;
     private RecyclerView categoriesRv;
     private Button addCategoryButton;
@@ -134,7 +134,6 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         minimum = layout.findViewById(R.id.minimum);
         maximum = layout.findViewById(R.id.maximum);
         details = layout.findViewById(R.id.details);
-        categoryLabelEt = layout.findViewById(R.id.categoryLabelEt);
         categoryValueEt = layout.findViewById(R.id.categoryValueEt);
         categoriesRv = layout.findViewById(R.id.dialog_new_trait_cat_rv);
         addCategoryButton = layout.findViewById(R.id.dialog_new_trait_cat_btn);
@@ -162,21 +161,19 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         categoriesRv.setAdapter(catAdapter);
 
         addCategoryButton.setOnClickListener((v) -> {
-            String label = categoryLabelEt.getText().toString();
             String value = categoryValueEt.getText().toString();
-            if (!label.isEmpty()) {
+            if (!value.isEmpty()) {
 
-                ArrayList<String> labels = new ArrayList<>();
+                ArrayList<String> values = new ArrayList<>();
                 for (BrAPIScaleValidValuesCategories s : catList) {
-                    labels.add(s.getLabel());
+                    values.add(s.getValue());
                 }
 
-                if (!labels.contains(label)) {
+                if (!values.contains(value)) {
                     BrAPIScaleValidValuesCategories scale = new BrAPIScaleValidValuesCategories();
-                    scale.setLabel(label);
+                    scale.setLabel(value);
                     scale.setValue(value);
                     catList.add(scale);
-                    categoryLabelEt.setText("");
                     categoryValueEt.setText("");
                     updateCatAdapter();
                 }
@@ -255,7 +252,6 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
                     minimum.setText("");
                     maximum.setText("");
                     details.setText("");
-                    categoryLabelEt.setText("");
                     categoryValueEt.setText("");
                     bool.setChecked(false);
                     currentPosition = position;
@@ -361,7 +357,6 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         minimum.setText("");
         maximum.setText("");
         details.setText("");
-        categoryLabelEt.setText("");
         categoryValueEt.setText("");
         catList = new ArrayList<>();
         updateCatAdapter();
