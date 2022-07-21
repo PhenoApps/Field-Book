@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -49,9 +50,11 @@ import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -63,6 +66,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
@@ -208,6 +212,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private BluetoothDevice mLastDevice = null;
     public static HandlerThread mAverageHandler = new HandlerThread("averaging");
     private SharedPreferences mPrefs = null;
+    private String lastPlotIdNav = null;
+    private Snackbar mGeoNavSnackbar = null;
 
     private TextWatcher cvText;
     private InputMethodManager imm;
@@ -1475,7 +1481,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                     String id = target.getFirst().getObservation_unit_db_id();
 
-                    if (!id.equals(rangeBox.cRange.plot_id)) {
+                    if (!id.equals(rangeBox.cRange.plot_id) && !id.equals(lastPlotIdNav)) {
+
+                        lastPlotIdNav = id;
 
                         thisActivity.runOnUiThread(() -> {
 
@@ -1487,23 +1495,38 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                             } else {
 
-                                Snackbar mySnackbar = Snackbar.make(findViewById(R.id.layout_main),
-                                    id, Snackbar.LENGTH_LONG);
+                                mGeoNavSnackbar = Snackbar.make(findViewById(R.id.traitHolder),
+                                    id, Snackbar.LENGTH_INDEFINITE);
 
-                                mySnackbar.setTextColor(Color.BLACK);
-                                mySnackbar.setBackgroundTint(Color.WHITE);
-                                mySnackbar.setActionTextColor(Color.BLACK);
+                                Snackbar.SnackbarLayout snackLayout = (Snackbar.SnackbarLayout) mGeoNavSnackbar.getView();
+                                View snackView = getLayoutInflater().inflate(R.layout.geonav_snackbar_layout, null);
+                                ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                                snackView.setLayoutParams(params);
+                                snackLayout.addView(snackView);
+                                snackLayout.setPadding(0, 0, 0, 0);
 
-                                mySnackbar.setAction(R.string.activity_collect_geonav_navigate, (view) -> {
+                                TextView tv = snackView.findViewById(R.id.geonav_snackbar_tv);
+                                if (tv != null) {
+                                    tv.setText(id);
+                                }
 
-                                    //when navigate button is pressed use rangeBox to go to the plot id
-                                    moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
+                                ImageButton btn = snackView.findViewById(R.id.geonav_snackbar_btn);
+                                if (btn != null) {
+                                    btn.setOnClickListener((v) -> {
 
-                                });
+                                        mGeoNavSnackbar.dismiss();
 
-                                mySnackbar.show();
+                                        lastPlotIdNav = null;
+
+                                        //when navigate button is pressed use rangeBox to go to the plot id
+                                        moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
+                                    });
+                                }
+
+                                mGeoNavSnackbar.setBackgroundTint(Color.TRANSPARENT);
+
+                                mGeoNavSnackbar.show();
                             }
-
                         });
                     }
                 }
@@ -2354,6 +2377,14 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
+    private void resetGeoNavMessages() {
+        if (mGeoNavSnackbar != null) {
+            mGeoNavSnackbar.dismiss();
+            mGeoNavSnackbar = null;
+            lastPlotIdNav = null;
+        }
+    }
+
     ///// class RangeBox /////
 
     class RangeBox {
@@ -2893,6 +2924,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     parent.refreshMain();
                 }
             }
+
+            resetGeoNavMessages();
         }
 
         private void moveEntryRight() {
@@ -2918,6 +2951,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     parent.refreshMain();
                 }
             }
+
+            resetGeoNavMessages();
         }
 
         private int decrementPaging(int pos) {

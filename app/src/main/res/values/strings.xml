@@ -730,5 +730,10 @@
     <string name="trait_date_next_day_tts">Next day</string>
     <string name="trait_date_open_calendar_tts">Opening calendar.</string>
     <string name="trait_location_saved_tts">Location saved.</string>
+    <string name="preferences_profile_crashlytics">Crashlytics</string>
+    <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
+    <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
+    <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
 
 </resources>
