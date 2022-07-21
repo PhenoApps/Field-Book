@@ -4,6 +4,7 @@
         versionCode="530"
         versionName="v5.3">
         <new>Expanded options available for next entry with no data setting</new>
+        <new>Added text-to-speech options for inputing data</new>
         <new>Added option to provide anonymous identifier in profile</new>
         <new>Updated GeoNav notification layout</new>
     </release>
