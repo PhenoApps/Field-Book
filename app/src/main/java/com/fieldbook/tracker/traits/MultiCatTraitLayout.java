@@ -131,7 +131,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
                         getCurrentTrait().getFormat(),
                         value);
 
-                triggerTts(value);
+                triggerTts(category);
 
             }
         };

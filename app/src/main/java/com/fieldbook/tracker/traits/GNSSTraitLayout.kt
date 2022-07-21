@@ -618,6 +618,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val elevation = altTextView.text.toString()
 
             submitGnss(latitude, longitude, elevation)
+
+            triggerTts(context.getString(R.string.trait_location_saved_tts))
+
         }
 
         //cancel the thread when the disconnect button is pressed

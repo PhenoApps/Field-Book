@@ -16,6 +16,11 @@ import com.fieldbook.tracker.activities.LocaleChoiceActivity;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
+import org.phenoapps.utils.KeyUtil;
+import org.phenoapps.utils.TextToSpeechHelper;
+
+import java.util.Locale;
+import java.util.Set;
 
 public class GeneralPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
@@ -24,6 +29,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
     PreferenceManager prefMgr;
     Context context;
     private Preference defaultStorageLocation;
+    private KeyUtil mKeys;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -102,6 +108,9 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
         // Occurs before the on create function. We get the context this way.
         GeneralPreferencesFragment.this.context = context;
+
+        mKeys = new KeyUtil(context);
+
     }
 
     @Override
@@ -132,6 +141,12 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
                     startActivity(new Intent(getContext(), LocaleChoiceActivity.class));
                     return true;
                 });
+
+                ttsLanguage.setOnPreferenceChangeListener((p, v) -> {
+                    int code = (int) v;
+                    updateTtsSummary(code);
+                    return true;
+                });
             }
 
             ttsEnabled.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -141,6 +156,24 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
                 }
                 return true;
             });
+        }
+    }
+
+    private void updateTtsSummary(int code) {
+
+        Preference ttsLanguage = findPreference(GeneralKeys.TTS_LANGUAGE);
+
+        if (ttsLanguage != null) {
+
+            Set<Locale> locales = TextToSpeechHelper.Companion.getAvailableLocales();
+            for (Locale l : locales) {
+                if (l.hashCode() == code) {
+
+                    ttsLanguage.setSummary(l.getDisplayName());
+
+                    break;
+                }
+            }
         }
     }
 
@@ -163,5 +196,8 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
         }
 
         setupTtsPreference();
+
+        int code = PreferenceManager.getDefaultSharedPreferences(context).getInt(mKeys.getArgTtsLocale(), -1);
+        updateTtsSummary(code);
     }
 }

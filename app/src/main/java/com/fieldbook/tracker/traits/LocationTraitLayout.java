@@ -40,27 +40,28 @@ public class LocationTraitLayout extends BaseTraitLayout {
     @Override
     public void init() {
         ImageButton getLocation = findViewById(R.id.getLocationBtn);
-        // Get Location
-        getLocation.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                GPSTracker gps = new GPSTracker(getContext());
-                String fullLocation = "";
-                double lat;
-                double lng;
 
-                if (gps.canGetLocation()) { //GPS enabled
-                    lat = gps.getLatitude(); // returns latitude
-                    lng = gps.getLongitude(); // returns longitude
-                    fullLocation = Utils.truncateDecimalString(String.valueOf(lat), 8) + "; " + Utils.truncateDecimalString(String.valueOf(lng), 8);
-                } else {
-                    Intent intent = new Intent(
-                            Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    getContext().startActivity(intent);
-                }
-                getEtCurVal().setText(fullLocation);
-                updateTrait(getCurrentTrait().getTrait(), "location", fullLocation);
-                triggerTts(fullLocation);
+        String locationSavedTts = getContext().getString(R.string.trait_location_saved_tts);
+
+        // Get Location
+        getLocation.setOnClickListener(arg0 -> {
+            GPSTracker gps = new GPSTracker(getContext());
+            String fullLocation = "";
+            double lat;
+            double lng;
+
+            if (gps.canGetLocation()) { //GPS enabled
+                lat = gps.getLatitude(); // returns latitude
+                lng = gps.getLongitude(); // returns longitude
+                fullLocation = Utils.truncateDecimalString(String.valueOf(lat), 8) + "; " + Utils.truncateDecimalString(String.valueOf(lng), 8);
+            } else {
+                Intent intent = new Intent(
+                        Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                getContext().startActivity(intent);
             }
+            getEtCurVal().setText(fullLocation);
+            updateTrait(getCurrentTrait().getTrait(), "location", fullLocation);
+            triggerTts(locationSavedTts);
         });
     }
 

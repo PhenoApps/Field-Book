@@ -175,7 +175,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                         getCurrentTrait().getFormat(),
                         value);
 
-                triggerTts(value);
+                triggerTts(category);
 
                 loadLayout(); //todo this is not the best way to do this
             }

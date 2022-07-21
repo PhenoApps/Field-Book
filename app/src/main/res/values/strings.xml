@@ -720,5 +720,15 @@
     <string name="trait_print_label_success">Printing label.</string>
     <string name="trait_gnss_internal_tts">Internal GPS</string>
     <string name="trait_gnss_external_device_tts">External device %s chosen.</string>
+    <string name="act_collect_missing_value_btn_tts">Not applicable</string>
+    <string name="act_collect_na_btn_tts">Not applicable</string>
+    <string name="act_collect_barcode_btn_tts">Opening barcode scanner</string>
+    <string name="act_collect_delete_btn_tts">Value has been deleted.</string>
+    <string name="trait_numeric_backspace_tts">Backspace</string>
+    <string name="trait_date_save_tts">Date saved</string>
+    <string name="trait_date_minus_day_tts">Back one day</string>
+    <string name="trait_date_next_day_tts">Next day</string>
+    <string name="trait_date_open_calendar_tts">Opening calendar.</string>
+    <string name="trait_location_saved_tts">Location saved.</string>
 
 </resources>

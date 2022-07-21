@@ -190,7 +190,9 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
                 if (getEtCurVal().getText().toString().matches(".*\\d.*")
                         && v.matches(".*\\d.*")
                         && !getEtCurVal().getText().toString().contains("/")) {
-                    Utils.makeToast(getContext(),getContext().getString(R.string.trait_error_disease_severity));
+                    String error = getContext().getString(R.string.trait_error_disease_severity);
+                    Utils.makeToast(getContext(),error);
+                    triggerTts(error);
                 } else {
                     getEtCurVal().setText(getEtCurVal().getText().toString() + v);
                     updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());

@@ -25,6 +25,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -433,49 +434,47 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
 
+        String naTts = getString(R.string.act_collect_na_btn_tts);
+        String barcodeTts = getString(R.string.act_collect_barcode_btn_tts);
+        String deleteTts = getString(R.string.act_collect_delete_btn_tts);
+
         missingValue = toolbarBottom.findViewById(R.id.missingValue);
-        missingValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TraitObject currentTrait = traitBox.getCurrentTrait();
-                updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
-                setNaText();
-            }
+        missingValue.setOnClickListener(v -> {
+            triggerTts(naTts);
+            TraitObject currentTrait = traitBox.getCurrentTrait();
+            updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
+            setNaText();
         });
 
         barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
-        barcodeInput.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new IntentIntegrator(thisActivity)
-                        .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(false)
-                        .setRequestCode(99)
-                        .initiateScan();
-            }
+        barcodeInput.setOnClickListener(v -> {
+            triggerTts(barcodeTts);
+            new IntentIntegrator(thisActivity)
+                    .setPrompt(getString(R.string.main_barcode_text))
+                    .setBeepEnabled(false)
+                    .setRequestCode(99)
+                    .initiateScan();
         });
 
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
-        deleteValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // if a brapi observation that has been synced, don't allow deleting
-                String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-                TraitObject currentTrait = traitBox.getCurrentTrait();
-                if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
-                    if (currentTrait.getFormat().equals("photo")) {
-                        // I want to use abstract method
-                        Map<String, String> newTraits = traitBox.getNewTraits();
-                        PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                        traitPhoto.brapiDelete(newTraits);
-                    } else {
-                        brapiDelete(currentTrait.getTrait(), false);
-                    }
+        deleteValue.setOnClickListener(v -> {
+            // if a brapi observation that has been synced, don't allow deleting
+            String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+            TraitObject currentTrait = traitBox.getCurrentTrait();
+            if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
+                if (currentTrait.getFormat().equals("photo")) {
+                    // I want to use abstract method
+                    Map<String, String> newTraits = traitBox.getNewTraits();
+                    PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
+                    traitPhoto.brapiDelete(newTraits);
                 } else {
-                    traitLayouts.deleteTraitListener(currentTrait.getFormat());
+                    brapiDelete(currentTrait.getTrait(), false);
                 }
+            } else {
+                traitLayouts.deleteTraitListener(currentTrait.getFormat());
             }
+
+            triggerTts(deleteTts);
         });
 
     }

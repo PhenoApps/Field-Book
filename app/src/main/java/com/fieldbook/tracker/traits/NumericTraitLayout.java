@@ -101,9 +101,13 @@ public class NumericTraitLayout extends BaseTraitLayout {
 
         @Override
         public void onClick(View view) {
+            final String backspaceTts = getContext().getString(R.string.trait_numeric_backspace_tts);
             final String curText = getEtCurVal().getText().toString();
-            String value = curText;
+            Button button = (Button) view;
+            triggerTts(button.getText().toString());
+            String value;
             if (view.getId() == R.id.k16) {        // Backspace Key Pressed
+                triggerTts(backspaceTts);
                 final int length = curText.length();
                 if (length > 0) {
                     value = curText.substring(0, length - 1);
@@ -115,7 +119,6 @@ public class NumericTraitLayout extends BaseTraitLayout {
                 getEtCurVal().setText(value);
                 updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
             }
-            triggerTts(value);
         }
     }
 }
