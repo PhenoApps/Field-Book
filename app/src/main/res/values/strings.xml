@@ -712,5 +712,10 @@
     <string name="trait_external_camera_expand_content_desc">Expand</string>
     <string name="trait_external_camera_capture_btn">Capture</string>
     <string name="trait_usb_camera_devices_btn_text">Pair Device</string>
+    <string name="preferences_profile_crashlytics">Crashlytics</string>
+    <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
+    <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
+    <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
 
 </resources>
