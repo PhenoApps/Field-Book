@@ -6,18 +6,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.hardware.usb.UsbManager
 import android.os.Build
-import android.text.format.DateUtils
 import android.util.AttributeSet
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
-import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
-import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
 import com.serenegiant.SimpleUVCCameraTextureView
 import org.phenoapps.androidlibrary.Utils
 import org.phenoapps.receivers.UsbPermissionReceiver
@@ -34,15 +30,14 @@ class UsbCameraTraitLayout : BaseTraitLayout {
 
     private var mUsbPermissionReceiver: UsbPermissionReceiver? = null
     private var mUsbCameraHelper: UsbCameraHelper? = null
-    private var minView: SimpleUVCCameraTextureView? = null
-    private var maxView: SimpleUVCCameraTextureView? = null
+    private var textureView: SimpleUVCCameraTextureView? = null
     private var devicesBtn: Button? = null
     private var captureBtn: Button? = null
     private var expandBtn: ImageButton? = null
     private var collapseBtn: ImageButton? = null
 
-    constructor(context: Context?) : super(context) {}
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
+    constructor(context: Context?) : super(context)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context,
         attrs,
@@ -58,8 +53,7 @@ class UsbCameraTraitLayout : BaseTraitLayout {
     override fun init(act: Activity?) {
         super.init(act)
 
-        minView = findViewById(R.id.trait_usb_camera_min_texture_view)
-        maxView = findViewById(R.id.trait_usb_camera_max_texture_view)
+        textureView = findViewById(R.id.trait_usb_camera_texture_view)
         devicesBtn = findViewById(R.id.trait_usb_camera_devices_btn)
         captureBtn = findViewById(R.id.trait_usb_camera_capture_btn)
         expandBtn = findViewById(R.id.trait_usb_camera_expand_btn)
@@ -136,19 +130,17 @@ class UsbCameraTraitLayout : BaseTraitLayout {
         mUsbPermissionReceiver = UsbPermissionReceiver {
 
             mUsbCameraHelper = camInterface?.getCameraHelper()?.also {
-                minView?.let { min ->
-                    maxView?.let { max ->
-                        it.init(min, max)
-                        expandBtn?.visibility = View.VISIBLE
-                        devicesBtn?.visibility = View.GONE
-                        captureBtn?.visibility = View.VISIBLE
+                textureView?.let { v ->
+                    it.init(v, 512, 1024)
+                    expandBtn?.visibility = View.VISIBLE
+                    devicesBtn?.visibility = View.GONE
+                    captureBtn?.visibility = View.VISIBLE
 
-                        try {
+                    try {
 
-                            context.unregisterReceiver(mUsbPermissionReceiver)
+                        context.unregisterReceiver(mUsbPermissionReceiver)
 
-                        } catch (ignore: Exception) {} //might not be registered if already paired
-                    }
+                    } catch (ignore: Exception) {} //might not be registered if already paired
                 }
             }
         }

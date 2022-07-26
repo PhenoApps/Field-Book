@@ -26,19 +26,10 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.serenegiant.SimpleUVCCameraTextureView
-            android:id="@+id/trait_usb_camera_min_texture_view"
+            android:id="@+id/trait_usb_camera_texture_view"
             android:layout_margin="16dp"
             android:layout_width="256dp"
             android:layout_height="256dp"
-            app:layout_constraintBottom_toTopOf="@id/trait_usb_camera_capture_btn"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.serenegiant.SimpleUVCCameraTextureView
-            android:id="@+id/trait_usb_camera_max_texture_view"
-            android:layout_width="0dp"
-            android:layout_height="512dp"
             app:layout_constraintBottom_toTopOf="@id/trait_usb_camera_capture_btn"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -63,8 +54,8 @@
             android:id="@+id/trait_usb_camera_expand_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/trait_usb_camera_min_texture_view"
-            app:layout_constraintEnd_toEndOf="@id/trait_usb_camera_min_texture_view"
+            app:layout_constraintBottom_toTopOf="@id/trait_usb_camera_capture_btn"
+            app:layout_constraintEnd_toEndOf="@id/trait_usb_camera_capture_btn"
             android:contentDescription="@string/trait_external_camera_expand_content_desc" />
 
         <ImageButton
@@ -75,8 +66,8 @@
             android:id="@+id/trait_usb_camera_collapse_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/trait_usb_camera_max_texture_view"
-            app:layout_constraintEnd_toEndOf="@id/trait_usb_camera_max_texture_view"
+            app:layout_constraintBottom_toTopOf="@id/trait_usb_camera_capture_btn"
+            app:layout_constraintEnd_toEndOf="@id/trait_usb_camera_capture_btn"
             android:contentDescription="@string/trait_external_camera_collapse_content_desc" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
