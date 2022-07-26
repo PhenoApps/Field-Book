@@ -13,6 +13,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.ConfigActivity
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
 import com.serenegiant.SimpleUVCCameraTextureView
 import org.phenoapps.androidlibrary.Utils
@@ -111,6 +113,18 @@ class UsbCameraTraitLayout : BaseTraitLayout {
                         context.contentResolver.openOutputStream(file.uri)?.let { output ->
 
                             bmp?.compress(Bitmap.CompressFormat.PNG, 100, output)
+
+                            val studyId = Integer.toString(prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0))
+
+                            //TODO when #469 is merged integrate location helper
+                            ConfigActivity.dt.insertUserTraits(
+                                cRange.plot_id, traitName, type, file.uri.toString(),
+                                prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
+                                        + prefs.getString(GeneralKeys.LAST_NAME, ""),
+                                prefs.getString(GeneralKeys.LOCATION, ""), "", studyId,
+                                null,
+                                null
+                            )
                         }
                     }
                 }
