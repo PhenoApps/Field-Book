@@ -75,7 +75,7 @@ public class CSVWriter {
      * database, and so is passed in as a parameter
      * V2 - Range added, columns selectable
      */
-    public void writeDatabaseFormat(ArrayList<String> range, ArrayList<TraitObject> traits, Boolean showLabel) throws Exception {
+    public void writeDatabaseFormat(ArrayList<String> range) throws Exception {
         // Simply loop through all items
         if (curCSV.getCount() > 0) {
 
@@ -92,32 +92,12 @@ public class CSVWriter {
 
             curCSV.moveToPosition(-1);
 
-            String nextTrait = null;
             while (curCSV.moveToNext()) {
                 String[] arrStr = new String[labels.length];
 
                 for (int i = 0; i < labels.length; i++) {
 
-                    String label = curCSV.getColumnName(i);
                     String value = curCSV.getString(i);
-
-                    if (label.equals("trait")) {
-                        nextTrait = value;
-                    }
-
-                    if (label.equals("userValue")) {
-                        if (nextTrait != null) {
-
-                            try {
-                                value = CategoryJsonUtil.Companion.flattenMultiCategoryValue(
-                                        CategoryJsonUtil.Companion.decode(value), showLabel
-                                );
-                            } catch (Exception ignored) { }
-
-                        }
-                        nextTrait = null;
-                    }
-
                     arrStr[i] = value;
                 }
 
@@ -155,14 +135,14 @@ public class CSVWriter {
         close();
     }
 
-    private String searchForCategorical(Boolean showLabel, ArrayList<TraitObject> traits, String name, String value) {
+    private String searchForCategorical(ArrayList<TraitObject> traits, String name, String value) {
         for (TraitObject t : traits) {
             if (t.getTrait().equals(name)) {
                 if (t.getFormat().equals("categorical") || t.getFormat().equals("multicat")
                         || t.getFormat().equals("qualitative")) {
                     try {
                         return CategoryJsonUtil.Companion.flattenMultiCategoryValue(
-                                CategoryJsonUtil.Companion.decode(value), showLabel
+                                CategoryJsonUtil.Companion.decode(value), false
                         );
                     } catch (Exception e) {
                         return value;
@@ -177,7 +157,7 @@ public class CSVWriter {
     /**
      * Generates data in an table style format
      */
-    public void writeTableFormat(String[] labels, int rangeTotal, ArrayList<TraitObject> traits, Boolean showLabel) throws Exception {
+    public void writeTableFormat(String[] labels, int rangeTotal, ArrayList<TraitObject> traits) throws Exception {
         if (curCSV.getCount() > 0) {
 
             writeNext(labels);
@@ -190,14 +170,14 @@ public class CSVWriter {
 
                 for (int k = 0; k < rangeTotal; k++) {
                     String traitName = curCSV.getColumnName(k);
-                    String value = searchForCategorical(showLabel, traits, traitName, curCSV.getString(k));
+                    String value = searchForCategorical(traits, traitName, curCSV.getString(k));
                     arrStr[k] = value;
                 }
 
                 // Get matching values for every row in the Range table
                 for (int k = rangeTotal; k < labels.length; k++) {
                     String traitName = curCSV.getColumnName(k);
-                    String value = searchForCategorical(showLabel, traits, traitName, curCSV.getString(k));
+                    String value = searchForCategorical(traits, traitName, curCSV.getString(k));
                     arrStr[k] = value;
                 }
 

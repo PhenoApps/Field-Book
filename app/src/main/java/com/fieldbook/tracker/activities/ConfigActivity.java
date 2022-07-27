@@ -870,7 +870,6 @@ public class ConfigActivity extends AppCompatActivity {
             DocumentFile dbFile = null;
             DocumentFile tableFile = null;
 
-            Boolean showLabel = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value").equals("label");
             ArrayList<TraitObject> traits = dt.getAllTraitObjects();
 
             //check if export database has been selected
@@ -896,7 +895,7 @@ public class ConfigActivity extends AppCompatActivity {
                         if (output != null) {
                             OutputStreamWriter fw = new OutputStreamWriter(output);
                             CSVWriter csvWriter = new CSVWriter(fw, exportData);
-                            csvWriter.writeDatabaseFormat(newRange, traits, showLabel);
+                            csvWriter.writeDatabaseFormat(newRange);
 
                             System.out.println(exportFileString);
                         }
@@ -931,7 +930,7 @@ public class ConfigActivity extends AppCompatActivity {
                         exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length, traits, showLabel);
+                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length, traits);
 
                     } catch (Exception e) {
                         fail = true;

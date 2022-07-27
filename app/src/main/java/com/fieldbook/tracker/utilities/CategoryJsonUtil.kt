@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.utilities
 
+import com.fieldbook.tracker.database.dao.ObservationDao
+import com.fieldbook.tracker.traits.CategoricalTraitLayout
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
@@ -52,6 +54,41 @@ class CategoryJsonUtil {
             *scale.filter { categories.any { c -> c.label == it.label && c.value == it.value } }.toTypedArray()
         )
 
-        fun contains(cats: Array<String>, value: String) = value in cats
+        /**
+         * Takes a row returned from a query that should contain "observation_variable_field_book_format" and "value" keys.
+         * Tests if this row is a categorical/multicat observations and returns the value if json is stored in the backend.
+         * For multicat the values are joined with a ":"
+         * @param row the cursor row that contains the required keys
+         * @return value which represents the raw observation value or the categorical value from its label/val pair
+         */
+        fun processValue(row: Map<String, Any?>): String? {
+
+            val rawValue = row["value"] as? String
+
+            return when(row["observation_variable_field_book_format"]) {
+                in CategoricalTraitLayout.POSSIBLE_VALUES -> {
+                    try {
+                        decode(rawValue ?: "")[0].value
+                    } catch (ignore: Exception) {
+                        rawValue
+                    }
+                }
+                in setOf("multicat") -> {
+                    try {
+                        decode(rawValue ?: "").joinToString(":") {
+                            it.value
+                        }
+                    } catch (ignore: Exception) {
+                        rawValue
+                    }
+                }
+                else -> {
+                    rawValue
+                }
+            }
+        }
+
+        fun contains(cats: ArrayList<BrAPIScaleValidValuesCategories>, cat: BrAPIScaleValidValuesCategories) = cat in cats
+        fun contains(cats: ArrayList<BrAPIScaleValidValuesCategories>, value: String) = value in cats.map { it.value }
     }
 }

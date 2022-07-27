@@ -32,10 +32,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CategoricalTraitLayout extends BaseTraitLayout {
 
     //todo this can eventually be merged with multicattraitlayout when we can support a switch in traits on how many categories to allow user to select
+
+    public static String[] POSSIBLE_VALUES = new String[]{ "qualitative", "categorical" };
 
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
@@ -80,40 +83,77 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
 
         //read the json object stored in additional info of the trait object (only in BrAPI imported traits)
-        String[] cat = new String[0];
+        ArrayList<BrAPIScaleValidValuesCategories> cats = new ArrayList<>();
 
         String categoryString = getCurrentTrait().getCategories();
         try {
 
-            ArrayList<BrAPIScaleValidValuesCategories> json = CategoryJsonUtil.Companion.decode(categoryString);
-
-            if (!json.isEmpty()) {
-
-                cat = new String[json.size()];
-                int i = 0;
-                for (BrAPIScaleValidValuesCategories scale : json) {
-
-                    if (labelValPref.equals("value")) {
-                        cat[i++] = scale.getValue();
-                    } else cat[i++] = scale.getLabel();
-                }
-
-            }
+            cats = CategoryJsonUtil.Companion.decode(categoryString);
 
         } catch (Exception e) {
 
-            cat = categoryString.split("/");
+            String[] cat = categoryString.split("/");
+            for (String label : cat) {
+                BrAPIScaleValidValuesCategories c = new BrAPIScaleValidValuesCategories();
+                c.setLabel(label);
+                c.setValue(label);
+                cats.add(c);
+            }
         }
 
         if (!getNewTraits().containsKey(trait)) {
+
             getEtCurVal().setText("");
+
             getEtCurVal().setTextColor(Color.BLACK);
+
         } else {
-            String label = getNewTraits().get(trait);
-            if (label != null) {
-                if (CategoryJsonUtil.Companion.contains(cat, label)) {
-                    getEtCurVal().setText(label);
-                    getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
+
+            //if there is a saved value, check if its json or old string
+            String savedJson = getNewTraits().get(trait);
+
+            if (savedJson != null) {
+
+                //check if its the new json
+                try {
+
+                    ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(savedJson);
+
+                    if (!c.isEmpty()) {
+
+                        //get the value from the single-sized array
+                        BrAPIScaleValidValuesCategories labelVal = c.get(0);
+
+                        //check that this pair is a valid label/val pair in the category,
+                        //if it is then set the text based on the preference
+                        if (CategoryJsonUtil.Companion.contains(cats, labelVal)) {
+
+                            //display the category based on preferences
+                            if (labelValPref.equals("value")) {
+
+                                getEtCurVal().setText(labelVal.getValue());
+
+                            } else {
+
+                                getEtCurVal().setText(labelVal.getLabel());
+
+                            }
+
+                            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
+
+                        }
+                    }
+
+                } catch (Exception e) {
+
+                    e.printStackTrace(); //if it fails to decode, assume its an old string
+
+                    if (CategoryJsonUtil.Companion.contains(cats, savedJson)) {
+
+                        getEtCurVal().setText(savedJson);
+
+                        getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
+                    }
                 }
             }
         }
@@ -126,21 +166,53 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
         if (!((CollectActivity) getContext()).isDataLocked()) {
 
-            String[] finalCat = cat;
+            ArrayList<BrAPIScaleValidValuesCategories> finalCats = cats;
             gridMultiCat.setAdapter(new CategoryTraitAdapter(getContext()) {
 
                 @Override
                 public void onBindViewHolder(CategoryTraitViewHolder holder, int position) {
                     holder.bindTo();
-                    holder.mButton.setText(finalCat[position]);
-                    holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
-                    if (getEtCurVal().getText().toString().equals(finalCat[position]))
-                        pressOnButton(holder.mButton);
+
+                    //get the label for this position
+                    BrAPIScaleValidValuesCategories pair = finalCats.get(position);
+
+                    //update button with the preference based text
+                    if (labelValPref.equals("value")) {
+
+                        holder.mButton.setText(pair.getValue());
+
+                    } else {
+
+                        holder.mButton.setText(pair.getLabel());
+
+                    }
+
+                    //set the buttons tag to the json, when clicked this is updated in db
+                    holder.mButton.setTag(pair);
+                    holder.mButton.setOnClickListener(createClickListener(holder.mButton, position));
+
+                    //update the button's state if this category is selected
+                    String currentText = getEtCurVal().getText().toString();
+
+                    if (labelValPref.equals("value")) {
+
+                        if (currentText.equals(pair.getValue())) {
+
+                            pressOnButton(holder.mButton);
+
+                        }
+                    } else {
+
+                        if (currentText.equals(pair.getLabel())) {
+
+                            pressOnButton(holder.mButton);
+                        }
+                    }
                 }
 
                 @Override
                 public int getItemCount() {
-                    return finalCat.length;
+                    return finalCats.size();
                 }
             });
         }
@@ -158,28 +230,31 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     }
 
     private OnClickListener createClickListener(final Button button, int position) {
-        return new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String category = button.getText().toString();
-                String currentCat = getEtCurVal().getText().toString();
+        return v -> {
 
-                if (currentCat.equals(category)) {
-                    pressOffButton(button);
-                    currentCat = "";
-                } else {
-                    pressOnButton(button);
-                    currentCat = category;
-                }
+            //cast tag to the buttons label/val pair
+            final BrAPIScaleValidValuesCategories pair = (BrAPIScaleValidValuesCategories) button.getTag();
+            final ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>(); //this is saved in the db
 
-                getEtCurVal().setText(currentCat);
+            final String category = button.getText().toString();
+            String currentCat = getEtCurVal().getText().toString(); //displayed in the edit text
 
-                updateTrait(getCurrentTrait().getTrait(),
-                        getCurrentTrait().getFormat(),
-                        currentCat);
-
-                loadLayout(); //todo this is not the best way to do this
+            if (currentCat.equals(category)) {
+                pressOffButton(button);
+                currentCat = "";
+            } else {
+                pressOnButton(button);
+                currentCat = category;
+                scale.add(pair);
             }
+
+            getEtCurVal().setText(currentCat);
+
+            updateTrait(getCurrentTrait().getTrait(),
+                    getCurrentTrait().getFormat(),
+                    CategoryJsonUtil.Companion.encode(scale));
+
+            loadLayout(); //todo this is not the best way to do this
         };
     }
 
