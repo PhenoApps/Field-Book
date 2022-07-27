@@ -62,6 +62,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
@@ -90,6 +91,7 @@ import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
+import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -1835,35 +1837,27 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                             int studyId = studyObj.getExp_id();
                             String fieldName = studyObj.getExp_name();
 
-                            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.layout_main),
-                                    getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName),
-                                    8000);
+                            String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
 
-                            mySnackbar.setTextColor(Color.BLACK);
-                            mySnackbar.setBackgroundTint(Color.WHITE);
-                            mySnackbar.setActionTextColor(Color.BLACK);
+                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, Snackbar.LENGTH_LONG, null,
+                                (v) -> {
 
-                            mySnackbar.setAction(R.string.activity_collect_geonav_navigate, (view) -> {
+                                    //updates obs. range view in database
+                                    dt.switchField(studyId);
 
-                                //updates obs. range view in database
-                                dt.switchField(studyId);
+                                    //refresh collect activity UI
+                                    rangeBox.reload();
+                                    rangeBox.refresh();
+                                    initWidgets(false);
 
-                                //refresh collect activity UI
-                                rangeBox.reload();
-                                rangeBox.refresh();
-                                initWidgets(false);
+                                    //navigate to the plot
+                                    moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
 
-                                //navigate to the plot
-                                moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
+                                    //update selected item in field adapter using preference
+                                    ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
 
-                                //update selected item in field adapter using preference
-                                ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
-
-                                playSound("hero_simple_celebration");
-
-                            });
-
-                            mySnackbar.show();
+                                    playSound("hero_simple_celebration");
+                                });
 
                         } else {
 

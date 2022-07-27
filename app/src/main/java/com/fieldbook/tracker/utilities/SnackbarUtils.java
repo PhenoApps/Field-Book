@@ -1,8 +1,18 @@
 package com.fieldbook.tracker.utilities;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.fieldbook.tracker.R;
 import com.google.android.material.snackbar.Snackbar;
+
+import android.graphics.Color;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public final class SnackbarUtils {
@@ -36,6 +46,46 @@ public final class SnackbarUtils {
         Snackbar snackbar = Snackbar.make(view, message.trim(), duration);
         TextView textView = snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
         textView.setSingleLine(false);
+        snackbar.show();
+    }
+
+    public static void showNavigateSnack(LayoutInflater inflater, View view,
+                                         String msg,
+                                         int duration,
+                                         @Nullable Boolean showGeoNavIcon,
+                                         View.OnClickListener onClickListener) {
+
+        Snackbar snackbar = Snackbar.make(view, msg, duration);
+
+        Snackbar.SnackbarLayout snackLayout = (Snackbar.SnackbarLayout) snackbar.getView();
+        View snackView = inflater.inflate(R.layout.geonav_snackbar_layout, null);
+        ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        snackView.setLayoutParams(params);
+        snackLayout.addView(snackView);
+        snackLayout.setPadding(0, 0, 0, 0);
+
+        TextView tv = snackView.findViewById(R.id.geonav_snackbar_tv);
+        if (tv != null) {
+            tv.setText(msg);
+        }
+
+        ImageButton btn = snackView.findViewById(R.id.geonav_snackbar_btn);
+        if (btn != null) {
+            btn.setOnClickListener((v) -> {
+
+                snackbar.dismiss();
+
+                onClickListener.onClick(v);
+
+            });
+        }
+
+        if (!(showGeoNavIcon != null && showGeoNavIcon)) {
+            snackView.findViewById(R.id.geonav_snackbar_icn).setVisibility(View.GONE);
+        }
+
+        snackbar.setBackgroundTint(Color.TRANSPARENT);
+
         snackbar.show();
     }
 }
