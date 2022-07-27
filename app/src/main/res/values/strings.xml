@@ -254,13 +254,14 @@
     <string name="preferences_general_skip_entries_with_data_description">Skips entries that have data for the active trait</string>
     <string name="preferences_general_skip_entries_across_all_traits">Skip entries across all traits</string>
     <string name="preferences_general_skip_entries_across_all_traits_description">Skip entries that have data for all traits</string>
+    <string name="preferences_general_skip_entries_default_description">Go to next plot.</string>
     <string name="preferences_general_skip_entries_disabled">Disabled</string>
     <string name="preferences_general_share_disable">Disable file sharing</string>
     <string name="preferences_general_share_disable_description">When files are exported, the share dialog will not be displayed</string>
     <string name="preferences_general_barcode_camera">Move to entry via barcode</string>
     <string name="preferences_general_barcode_camera_description">Scan barcode and move to the specific entry</string>
     <string name="preferences_general_feature_next_missing">Next entry with no data</string>
-    <string name="preferences_general_feature_next_missing_description">Adds a button to the toolbar that jumps to the next entry with no data for the current trait</string>
+    <string name="preferences_general_feature_next_missing_description">Adds a button to the toolbar that jumps to the next entry with no data depending on settings.</string>
     <string name="preferences_general_feature_barcode_text">Move to unique identifier</string>
     <string name="preferences_general_feature_barcode_text_description">Opens dialog to input unique id and move to specific entry</string>
     <string name="preferences_general_feature_datagrid">Datagrid</string>
@@ -706,6 +707,11 @@
     <string name="brapi_chunk_size">Chunk Size</string>
 
     <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
+    <string name="preferences_profile_crashlytics">Crashlytics</string>
+    <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
+    <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
+    <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
     <string name="act_collect_barcode_search_exists_in_other_field">This barcode is in %s</string>
 
 </resources>
