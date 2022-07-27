@@ -1652,7 +1652,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         missingValue.setEnabled(true);
         deleteValue.setEnabled(true);
         barcodeInput.setEnabled(true);
-        etCurVal.setEnabled(true);
         traitLayouts.enableViews();
     }
 
@@ -1660,7 +1659,6 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         missingValue.setEnabled(false);
         deleteValue.setEnabled(false);
         barcodeInput.setEnabled(false);
-        etCurVal.setEnabled(false);
         traitLayouts.disableViews();
     }
 
