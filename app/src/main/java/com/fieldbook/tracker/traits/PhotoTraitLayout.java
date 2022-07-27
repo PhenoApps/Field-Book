@@ -50,6 +50,7 @@ import java.util.Map;
 
 public class PhotoTraitLayout extends BaseTraitLayout {
 
+    private Activity act;
     private ArrayList<Drawable> drawables;
     private Gallery photo;
     private GalleryImageAdapter photoAdapter;
@@ -83,10 +84,14 @@ public class PhotoTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void init() {
+    public void init() {}
+
+    @Override
+    public void init(Activity act) {
         ImageButton capture = findViewById(R.id.capture);
         capture.setOnClickListener(new PhotoTraitOnClickListener());
         photo = findViewById(R.id.photo);
+        this.act = act;
     }
 
     @Override
@@ -282,7 +287,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                     trait,
                     newValue == null ? value : newValue,
                     getPrefs().getString(GeneralKeys.FIRST_NAME, "") + " " + getPrefs().getString(GeneralKeys.LAST_NAME, ""),
-                    getPrefs().getString(GeneralKeys.LOCATION, ""),
+                    ((CollectActivity) act).getLocationByPreferences(),
                     "",
                     exp_id,
                     observation.getDbId(),

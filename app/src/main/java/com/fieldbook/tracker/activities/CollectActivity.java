@@ -926,16 +926,22 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         // Based on plot_id, prevent duplicates
         dt.deleteTrait(expId, obsUnit, parent);
 
-        String location = LocationCollectorUtil.Companion
-                .getLocationByCollectMode(this, ep, expId, obsUnit, mInternalLocation, mExternalLocation);
-
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
                 ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
-                location, "", expId, observationDbId,
+                getLocationByPreferences(), "", expId, observationDbId,
                 lastSyncedTime);
 
         //update the info bar in case a variable is used
         infoBarAdapter.notifyItemRangeChanged(0, infoBarAdapter.getItemCount());
+    }
+
+    public String getLocationByPreferences() {
+
+        String expId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String obsUnit = rangeBox.getPlotID();
+
+        return LocationCollectorUtil.Companion
+                .getLocationByCollectMode(this, ep, expId, obsUnit, mInternalLocation, mExternalLocation);
     }
 
     private void brapiDelete(String parent, Boolean hint) {
@@ -2002,7 +2008,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         dt.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
                 ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
-                ep.getString(GeneralKeys.LOCATION, ""), "", studyId, "",
+                getLocationByPreferences(), "", studyId, "",
                 null);
 
     }

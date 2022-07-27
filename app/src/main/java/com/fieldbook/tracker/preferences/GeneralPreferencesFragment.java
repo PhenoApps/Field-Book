@@ -166,7 +166,6 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
                     updateLocationCollectionSummary(value);
 
-
                     return true;
 
                 }));

@@ -109,9 +109,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                 SharedPreferences.Editor ed = ep.edit();
                 ed.putString(GeneralKeys.FIRST_NAME, "");
                 ed.putString(GeneralKeys.LAST_NAME, "");
-                ed.putString(GeneralKeys.LOCATION, "");
-                ed.putString(GeneralKeys.LATITUDE, "");
-                ed.putString(GeneralKeys.LONGITUDE, "");
                 ed.apply();
 
                 updateSummaries();
@@ -175,77 +172,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         personDialog.getWindow().setAttributes(langParams);
     }
 
-    private void showLocationDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_location, null);
-
-        GPSTracker gps = new GPSTracker(getContext());
-        if (gps.canGetLocation()) { //GPS enabled
-            lat = gps.getLatitude(); // returns latitude
-            lng = gps.getLongitude(); // returns longitude
-        } else {
-            Intent intent = new Intent(
-                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivity(intent);
-        }
-
-        final EditText longitude = layout.findViewById(R.id.longitude);
-        final EditText latitude = layout.findViewById(R.id.latitude);
-
-        longitude.setText(ep.getString(GeneralKeys.LONGITUDE, ""));
-        latitude.setText(ep.getString(GeneralKeys.LATITUDE, ""));
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
-
-        builder.setTitle(R.string.profile_location_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                SharedPreferences.Editor e = ep.edit();
-                if (latitude.getText().toString().length() > 0 && longitude.getText().toString().length() > 0) {
-                    e.putString(GeneralKeys.LOCATION, latitude.getText().toString() + " ; " + longitude.getText().toString());
-                    e.putString(GeneralKeys.LATITUDE, latitude.getText().toString());
-                    e.putString(GeneralKeys.LONGITUDE, longitude.getText().toString());
-                } else {
-                    e.putString(GeneralKeys.LOCATION, "null");
-                }
-
-                e.apply();
-
-                locationDialog.dismiss();
-                updateSummaries();
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
-
-        builder.setNeutralButton(getString(R.string.profile_location_get), null);
-
-        locationDialog = builder.create();
-        locationDialog.show();
-        DialogUtils.styleDialogs(locationDialog);
-
-        android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
-        langParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
-        locationDialog.getWindow().setAttributes(langParams);
-
-        // Override neutral button so it doesnt automatically dismiss location dialog
-        Button neutralButton = locationDialog.getButton(AlertDialog.BUTTON_NEUTRAL);
-        neutralButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                latitude.setText(truncateDecimalString(String.valueOf(lat)));
-                longitude.setText(truncateDecimalString(String.valueOf(lng)));
-            }
-        });
-    }
-
     private void updateSummaries() {
         profilePerson.setSummary(personSummary());
     }
@@ -260,44 +186,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         }
 
         return tagName;
-    }
-
-    private String locationSummary() {
-        String tagLocation = "";
-
-        if (ep.getString(GeneralKeys.LOCATION, "").length() > 0) {
-            tagLocation += ep.getString(GeneralKeys.LOCATION, "");
-        } else {
-            tagLocation = "";
-        }
-
-        return tagLocation;
-    }
-
-    // Only used for truncating lat long values
-    public String truncateDecimalString(String v) {
-        int count = 0;
-
-        boolean found = false;
-
-        StringBuilder truncated = new StringBuilder();
-
-        for (int i = 0; i < v.length(); i++) {
-            if (found) {
-                count += 1;
-
-                if (count == 5)
-                    break;
-            }
-
-            if (v.charAt(i) == '.') {
-                found = true;
-            }
-
-            truncated.append(v.charAt(i));
-        }
-
-        return truncated.toString();
     }
 
     private String refreshIdSummary(Preference refresh) {
