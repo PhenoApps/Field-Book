@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:key="category_language"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:icon="@drawable/ic_adv_language"
+            android:key="com.fieldbook.tracker.preference.language.default"
+            android:title="@string/preference_language_default" />
+
+        <Preference
+            android:icon="@drawable/ic_am"
+            android:key="am"
+            android:title="@string/language_am" />
+
+        <Preference
+            android:icon="@drawable/ic_ar"
+            android:key="ar"
+            android:title="@string/language_ar" />
+
+        <Preference
+            android:icon="@drawable/ic_bn"
+            android:key="bn"
+            android:title="@string/language_bn" />
+
+        <Preference
+            android:icon="@drawable/ic_de"
+            android:key="de"
+            android:title="@string/language_de" />
+
+        <Preference
+            android:icon="@drawable/ic_us"
+            android:key="en"
+            android:title="@string/language_en" />
+
+        <Preference
+            android:icon="@drawable/ic_mx"
+            android:key="es"
+            android:title="@string/language_es" />
+
+        <Preference
+            android:icon="@drawable/ic_fr"
+            android:key="fr"
+            android:title="@string/language_fr" />
+
+        <Preference
+            android:icon="@drawable/ic_in"
+            android:key="hi"
+            android:title="@string/language_hi" />
+
+        <Preference
+            android:icon="@drawable/ic_it"
+            android:key="it"
+            android:title="@string/language_it" />
+
+        <Preference
+            android:icon="@drawable/ic_jp"
+            android:key="ja"
+            android:title="@string/language_ja" />
+
+        <Preference
+            android:icon="@drawable/ic_om"
+            android:key="om-ET"
+            android:title="@string/language_om_rET" />
+
+        <Preference
+            android:icon="@drawable/ic_pt"
+            android:key="pt-BR"
+            android:title="@string/language_pt_rBR" />
+
+        <Preference
+            android:icon="@drawable/ic_ru"
+            android:key="ru"
+            android:title="@string/language_ru" />
+
+        <Preference
+            android:icon="@drawable/ic_cn"
+            android:key="zh-CN"
+            android:title="@string/language_zh_rCN" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
