@@ -16,6 +16,8 @@ public class GeneralKeys {
     public static final String INFOBAR_NUMBER                       = "INFOBAR_NUMBER";
     public static final String APPLICATION_THEME                    = "APPLICATION_THEME";
     public static final String RESTORE_DEFAULT_THEME                = "RESTORE_DEFAULT_THEME";
+    public static final String LANGUAGE_LOCALE_ID                   = "com.tracker.fieldbook.preference.language.id";
+    public static final String LANGUAGE_LOCALE_SUMMARY              = "com.tracker.fieldbook.preference.language.summary";
 
     // Behavior
     public static final String RETURN_CHARACTER                     = "RETURN_CHARACTER";
@@ -101,11 +103,11 @@ public class GeneralKeys {
     public static final String UPDATE_VERSION = "UpdateVersion";
     public static final String REGION = "region";
     public static final String TIPS = "Tips";
-    public static final String LANGUAGE = "language";
     public static final String TIPS_CONFIGURED = "TipsConfigured";
 
     //shared preferences file name
     public static final String SHARED_PREF_FILE_NAME = "Settings";
+    public static final String LANGUAGE_PREF = "language";
 
     //used to get the name of the currently selected field that is saved in preferences
     //example: field_sample how to get: sharedPreferences.getString(Constants.FIELD_FILE, "")

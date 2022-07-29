@@ -713,4 +713,37 @@
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
     <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
 
+    <!-- languages, not to be translated -->
+    <string name="language_en" translatable="false">English %s</string>
+    <string name="language_am" translatable="false">አማርኛ %s</string>
+    <string name="language_ar" translatable="false">%s اَلْعَرَبِيَّةُ</string>
+    <string name="language_bn" translatable="false">বাংলা %s</string>
+    <string name="language_de" translatable="false">Deutsche %s</string>
+    <string name="language_es" translatable="false">Español %s</string>
+    <string name="language_fr" translatable="false">Français %s</string>
+    <string name="language_hi" translatable="false">हिन्दी %s</string>
+    <string name="language_it" translatable="false">Italiana %s</string>
+    <string name="language_ja" translatable="false">日本語 %s</string>
+    <string name="language_om_rET" translatable="false">Afaan Oromoo %s</string>
+    <string name="language_pt_rBR" translatable="false">Português %s</string>
+    <string name="language_ru" translatable="false">Русский %s</string>
+    <string name="language_zh_rCN" translatable="false">简体字 %s</string>
+
+    <!-- translated locale versions of each language, selected locale should be blank -->
+    <string name="locale_language_en" />
+    <string name="locale_language_am">(Amharic)</string>
+    <string name="locale_language_ar">(Arabic)</string>
+    <string name="locale_language_bn">(Bengal)</string>
+    <string name="locale_language_de">(German)</string>
+    <string name="locale_language_es">(Spanish)</string>
+    <string name="locale_language_fr">(French)</string>
+    <string name="locale_language_hi">(Hindi)</string>
+    <string name="locale_language_it">(Italian)</string>
+    <string name="locale_language_ja">(Japanese)</string>
+    <string name="locale_language_om_rET">(Oromo)</string>
+    <string name="locale_language_pt_rBR">(Portuguese)</string>
+    <string name="locale_language_ru">(Russian)</string>
+    <string name="locale_language_zh_rCN">(Simplified Chinese)</string>
+    <string name="language">Language</string>
+
 </resources>

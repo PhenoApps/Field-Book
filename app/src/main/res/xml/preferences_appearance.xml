@@ -20,10 +20,10 @@
             android:summary="@string/preferences_appearance_language_description"
             android:title="@string/preferences_appearance_language">
 
-            <intent
-                android:action="android.intent.action.MAIN"
-                android:targetClass="com.android.settings.LanguageSettings"
-                android:targetPackage="com.android.settings" />
+<!--            <intent-->
+<!--                android:action="android.intent.action.MAIN"-->
+<!--                android:targetClass="com.android.settings.LanguageSettings"-->
+<!--                android:targetPackage="com.android.settings" />-->
         </Preference>
 
         <CheckBoxPreference
