@@ -11,7 +11,6 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.fragments.AppLanguageListFragment;
 import com.h6ah4i.android.preference.NumberPickerPreferenceCompat;
 import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
 
@@ -30,23 +29,6 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat impl
         PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences_appearance, true);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
-
-        Preference langPref = findPreference(GeneralKeys.LANGUAGE_PREF);
-        if (langPref != null) {
-            langPref.setOnPreferenceClickListener((v) -> {
-
-                ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
-                if (ab != null) {
-                    ab.setTitle(R.string.language);
-                }
-
-                getParentFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, new AppLanguageListFragment())
-                    .commit();
-
-                return true;
-            });
-        }
     }
 
     @Override

@@ -18,6 +18,7 @@ public class GeneralKeys {
     public static final String RESTORE_DEFAULT_THEME                = "RESTORE_DEFAULT_THEME";
     public static final String LANGUAGE_LOCALE_ID                   = "com.tracker.fieldbook.preference.language.id";
     public static final String LANGUAGE_LOCALE_SUMMARY              = "com.tracker.fieldbook.preference.language.summary";
+    public static final String LANGUAGE_LOCALE_DEFAULT_ID                   = "com.tracker.fieldbook.preference.language.default_id";
 
     // Behavior
     public static final String RETURN_CHARACTER                     = "RETURN_CHARACTER";

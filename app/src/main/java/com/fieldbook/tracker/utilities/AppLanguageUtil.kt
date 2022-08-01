@@ -6,12 +6,20 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.preferences.GeneralKeys
+import java.util.*
 
 class AppLanguageUtil {
 
     companion object {
 
         const val TAG = "TextLangUtil"
+
+        fun setDefaultLanguage(context: Context?) {
+
+            PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putString(GeneralKeys.LANGUAGE_LOCALE_DEFAULT_ID, Locale.getDefault().language)
+                .apply()
+        }
 
         /**
          * Uses the preferences from Settings/Appearance/Language and androidx app compat
