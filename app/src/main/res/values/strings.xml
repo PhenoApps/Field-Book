@@ -712,6 +712,6 @@
     <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
     <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
-    <string name="act_collect_barcode_search_exists_in_other_field">This barcode is in %s</string>
+    <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
 
 </resources>

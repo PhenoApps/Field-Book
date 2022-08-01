@@ -6,6 +6,7 @@
         <new>Expanded options available for next entry with no data setting</new>
         <new>Added option to provide anonymous identifier in profile</new>
         <new>Updated GeoNav notification layout</new>
+        <new>Scanning barcodes searches across loaded fields for matches</new>
     </release>
 
     <release

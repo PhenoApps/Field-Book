@@ -1863,7 +1863,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                             String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
 
-                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, Snackbar.LENGTH_LONG, null,
+                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, 8000, null,
                                 (v) -> {
 
                                     //updates obs. range view in database
