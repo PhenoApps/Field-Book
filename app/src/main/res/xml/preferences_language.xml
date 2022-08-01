@@ -2,10 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
-        android:key="category_language"
-        app:iconSpaceReserved="false">
-
         <Preference
             android:icon="@drawable/ic_adv_language"
             android:key="com.fieldbook.tracker.preference.language.default"
@@ -80,6 +76,5 @@
             android:icon="@drawable/ic_cn"
             android:key="zh-CN"
             android:title="@string/language_zh_rCN" />
-    </PreferenceCategory>
 
 </PreferenceScreen>
