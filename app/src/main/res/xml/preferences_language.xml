@@ -4,7 +4,6 @@
 
     <PreferenceCategory
         android:key="category_language"
-        android:title="@string/language"
         app:iconSpaceReserved="false">
 
         <Preference

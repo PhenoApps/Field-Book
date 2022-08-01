@@ -23,7 +23,7 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
             "am", "ar", "bn", "de", "en", "es",
             "fr", "hi", "it", "ja", "om-ET", "pt-BR",
             "ru", "zh-CN")) {
-            preferenceScreen.findPreference<Preference>(key)?.onPreferenceClickListener = this
+            findPreference<Preference>(key)?.onPreferenceClickListener = this
         }
     }
 
@@ -56,8 +56,7 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
 
         }
 
-        //need two
-        parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        //parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
 
         return true
     }
