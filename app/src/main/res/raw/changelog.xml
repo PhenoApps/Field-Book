@@ -7,6 +7,7 @@
         <new>Added option to provide anonymous identifier in profile</new>
         <new>Locking now has three input states: all data, new data, no data</new>
         <new>Updated GeoNav notification layout</new>
+        <new>Updated language selection options</new>
     </release>
 
     <release
