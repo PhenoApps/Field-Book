@@ -69,17 +69,11 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
+
         final String trait = getCurrentTrait().getTrait();
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
-
-        if (!getNewTraits().containsKey(trait)) {
-            getEtCurVal().setText("");
-            getEtCurVal().setTextColor(Color.BLACK);
-        } else {
-            getEtCurVal().setText(getNewTraits().get(trait).toString());
-            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-        }
 
         //read the preferences, default to displaying values instead of labels
         String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
@@ -111,25 +105,24 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         layoutManager.setAlignItems(AlignItems.STRETCH);
         gridMultiCat.setLayoutManager(layoutManager);
 
-        if (!((CollectActivity) getContext()).isDataLocked()) {
+        gridMultiCat.setAdapter(new CategoricalTraitAdapter(getContext()) {
 
-            gridMultiCat.setAdapter(new CategoricalTraitAdapter(getContext()) {
+            @Override
+            public void onBindViewHolder(CategoricalTraitViewHolder holder, int position) {
+                holder.bindTo();
+                holder.mButton.setText(cat[position]);
 
-                @Override
-                public void onBindViewHolder(CategoricalTraitViewHolder holder, int position) {
-                    holder.bindTo();
-                    holder.mButton.setText(cat[position]);
-                    holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
-                    if (hasCategory(cat[position], getEtCurVal().getText().toString()))
-                        pressOnButton(holder.mButton);
-                }
+                holder.mButton.setOnClickListener(createClickListener(holder.mButton, position));
+                if (hasCategory(cat[position], getEtCurVal().getText().toString()))
+                    pressOnButton(holder.mButton);
 
-                @Override
-                public int getItemCount() {
-                    return cat.length;
-                }
-            });
-        }
+            }
+
+            @Override
+            public int getItemCount() {
+                return cat.length;
+            }
+        });
 
         gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -144,9 +137,10 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     }
 
     private OnClickListener createClickListener(final Button button, int position) {
-        return new OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        return v -> {
+
+            if (!((CollectActivity) getContext()).isDataLocked()) {
+
                 final String normalizedCategory = normalizeCategory();
                 getEtCurVal().setText(normalizedCategory);
                 final String category = button.getText().toString();
@@ -165,7 +159,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 list.remove(category);
                 catList = list.toArray(new String[0]);
 
-                for(String cat : catList) {
+                for (String cat : catList) {
                     removeCategory(cat);
                 }
 

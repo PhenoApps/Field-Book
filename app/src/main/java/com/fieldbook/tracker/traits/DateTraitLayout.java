@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.fieldbook.tracker.R;
@@ -212,36 +213,39 @@ public class DateTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
+
         getEtCurVal().setEnabled(false);
         getEtCurVal().setVisibility(View.GONE);
 
         final Calendar c = Calendar.getInstance();
         date = dateFormat.format(c.getTime());
+    }
 
-        final Map<String, String> observations = getNewTraits();
-        final String trait = getCurrentTrait().getTrait();
-        final String obsValue = observations.get(trait);
+    @Override
+    public void afterLoadExists(CollectActivity act, @Nullable String value) {
+        super.afterLoadExists(act, value);
 
         //first check if observation values is observed for this plot and the value is not NA
-        if (observations.containsKey(trait) && obsValue != null && !obsValue.equals("NA")) {
+        if (value != null && !value.equals("NA")) {
 
             forceDataSavedColor();
 
             //there is a FB preference to save dates as Day of year between 1-365
-            if (obsValue.length() < 4 && obsValue.length() > 0) {
+            if (value.length() < 4 && value.length() > 0) {
                 Calendar calendar = Calendar.getInstance();
 
                 //convert day of year to yyyy-mm-dd string
-                date = obsValue;
+                date = value;
                 calendar.set(Calendar.DAY_OF_YEAR, Integer.parseInt(date));
                 date = dateFormat.format(calendar.getTime());
 
                 month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
                 day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
 
-            } else if (obsValue.contains(".")) {
+            } else if (value.contains(".")) {
                 //convert from yyyy.mm.dd to yyyy-mm-dd
-                String[] oldDate = obsValue.split("\\.");
+                String[] oldDate = value.split("\\.");
                 date = oldDate[0] + "-" + String.format("%02d", Integer.parseInt(oldDate[1])) + "-" + String.format("%02d", Integer.parseInt(oldDate[2]));
 
                 //set month/day text and color
@@ -252,7 +256,7 @@ public class DateTraitLayout extends BaseTraitLayout {
                 Calendar calendar = Calendar.getInstance();
 
                 //new format
-                date = obsValue;
+                date = value;
 
                 //Parse date
                 try {
@@ -266,7 +270,8 @@ public class DateTraitLayout extends BaseTraitLayout {
                 day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
             }
 
-        } else if (observations.containsKey(trait) && obsValue != null && obsValue.equals("NA")) {
+        } else if (value != null) {
+
             //NA is saved as the date
 
             month.setText("");
@@ -274,14 +279,17 @@ public class DateTraitLayout extends BaseTraitLayout {
             day.setText("NA");
 
             forceDataSavedColor();
-
-        } else { //no date is saved
-
-            month.setTextColor(Color.BLACK);
-            day.setTextColor(Color.BLACK);
-            month.setText(getMonthForInt(c.get(Calendar.MONTH)));
-            day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
         }
+    }
+
+    @Override
+    public void afterLoadNotExists(CollectActivity act) {
+        super.afterLoadNotExists(act);
+        final Calendar c = Calendar.getInstance();
+        month.setTextColor(Color.BLACK);
+        day.setTextColor(Color.BLACK);
+        month.setText(getMonthForInt(c.get(Calendar.MONTH)));
+        day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
     }
 
     @Override

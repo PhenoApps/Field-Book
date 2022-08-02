@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.activities.CollectActivity;
@@ -26,6 +27,9 @@ import java.util.HashSet;
 
 public class MultiCatTraitLayout extends BaseTraitLayout {
     //todo this can eventually be merged with multicattraitlayout when we can support a switch in traits on how many categories to allow user to select
+
+    //track when we go to new data
+    private boolean isFrozen = false;
 
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
@@ -47,6 +51,11 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     }
 
     @Override
+    public void refreshLock() {
+        isFrozen = ((CollectActivity) getContext()).isDataLocked();
+    }
+
+    @Override
     public String type() {
         return "multicat";
     }
@@ -58,17 +67,10 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
-        final String trait = getCurrentTrait().getTrait();
+        super.loadLayout();
+
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
-
-        if (!getNewTraits().containsKey(trait)) {
-            getEtCurVal().setText("");
-            getEtCurVal().setTextColor(Color.BLACK);
-        } else {
-            getEtCurVal().setText(getNewTraits().get(trait).toString());
-            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-        }
 
         final String[] cat = getCurrentTrait().getCategories().split("/");
 
@@ -78,25 +80,23 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         layoutManager.setAlignItems(AlignItems.STRETCH);
         gridMultiCat.setLayoutManager(layoutManager);
 
-        if (!((CollectActivity) getContext()).isDataLocked()) {
+        gridMultiCat.setAdapter(new MultiCatTraitAdapter(getContext()) {
 
-            gridMultiCat.setAdapter(new MultiCatTraitAdapter(getContext()) {
+            @Override
+            public void onBindViewHolder(MultiCatTraitViewHolder holder, int position) {
+                holder.bindTo();
+                holder.mButton.setText(cat[position]);
+                holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
+                if (hasCategory(cat[position], getEtCurVal().getText().toString()))
+                    pressOnButton(holder.mButton);
+            }
 
-                @Override
-                public void onBindViewHolder(MultiCatTraitViewHolder holder, int position) {
-                    holder.bindTo();
-                    holder.mButton.setText(cat[position]);
-                    holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
-                    if (hasCategory(cat[position], getEtCurVal().getText().toString()))
-                        pressOnButton(holder.mButton);
-                }
+            @Override
+            public int getItemCount() {
+                return cat.length;
+            }
+        });
 
-                @Override
-                public int getItemCount() {
-                    return cat.length;
-                }
-            });
-        }
 
         gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -108,12 +108,14 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
                 gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             }
         });
+
+        refreshLock();
     }
 
     private OnClickListener createClickListener(final Button button, int position) {
-        return new OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        return v -> {
+            if (!isFrozen) {
+
                 final String normalizedCategory = normalizeCategory();
                 getEtCurVal().setText(normalizedCategory);
                 final String category = button.getText().toString();

@@ -67,20 +67,10 @@ public class LocationTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
 
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
-        if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
-            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-        } else {
-            getEtCurVal().setText("");
-            getEtCurVal().setTextColor(Color.BLACK);
-
-            if (getCurrentTrait().getDefaultValue() != null
-                    && getCurrentTrait().getDefaultValue().length() > 0)
-                getEtCurVal().setText(getCurrentTrait().getDefaultValue());
-        }
     }
 
     @Override

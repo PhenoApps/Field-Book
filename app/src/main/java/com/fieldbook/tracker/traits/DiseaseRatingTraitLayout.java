@@ -132,23 +132,12 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
+
         // clear NA hint
         getEtCurVal().setHint("");
         getEtCurVal().removeTextChangedListener(getCvText());
         getEtCurVal().setVisibility(EditText.VISIBLE);
-
-        if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().setText("");
-            getEtCurVal().setTextColor(Color.BLACK);
-
-            if (getCurrentTrait().getDefaultValue() != null
-                    && getCurrentTrait().getDefaultValue().length() > 0)
-                getEtCurVal().setText(getCurrentTrait().getDefaultValue());
-
-        } else {
-            getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
-            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-        }
     }
 
     @Override

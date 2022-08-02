@@ -6,7 +6,9 @@
         <new>Expanded options available for next entry with no data setting</new>
         <new>Added text-to-speech options for inputing data</new>
         <new>Added option to provide anonymous identifier in profile</new>
+        <new>Locking now has three input states: all data, new data, no data</new>
         <new>Updated GeoNav notification layout</new>
+        <new>Updated language selection options</new>
     </release>
 
     <release

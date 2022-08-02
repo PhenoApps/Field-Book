@@ -217,7 +217,17 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
     private TextWatcher cvText;
     private InputMethodManager imm;
-    private Boolean dataLocked = false;
+
+    /**
+     * Data lock is controlled by the toolbar lock icon
+     * 0: Unlocked, any data can be entered
+     * 1: Locked, data cannot be entered
+     * 2: Frozen, old data cannot be edited, but new data can be entered
+     */
+    public static final int UNLOCKED = 0;
+    public static final int LOCKED = 1;
+    public static final int FROZEN = 2;
+    private int dataLocked = UNLOCKED;
 
     //variable used to skip the navigate to last used trait in onResume
     private boolean mSkipLastUsedTrait = false;
@@ -363,6 +373,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         initWidgets(true);
+
+        refreshLock();
     }
 
     private void playSound(String sound) {
@@ -1026,7 +1038,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         customizeToolbarIcons();
 
-        lockData(dataLocked);
+        lockData();
 
         return true;
     }
@@ -1135,8 +1147,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 startActivityForResult(i, 2);
                 break;
             case R.id.lockData:
-                dataLocked = !dataLocked;
-                lockData(dataLocked);
+                if (dataLocked == UNLOCKED) dataLocked = LOCKED;
+                else if (dataLocked == LOCKED) dataLocked = FROZEN;
+                else dataLocked = UNLOCKED;
+                lockData();
                 break;
             case android.R.id.home:
                 finish();
@@ -1671,19 +1685,62 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         return Math.sqrt(sum);
     }
 
-    void lockData(boolean lock) {
-        if (lock) {
+    void refreshLock() {
+        //refresh lock state
+        etCurVal.postDelayed(this::lockData, 100);
+    }
+
+    /**
+     * Given the lock state, changes the ui to allow how data is entered.
+     * unlocked, locked, or frozen
+     */
+    void lockData() {
+        if (dataLocked == LOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
-            missingValue.setEnabled(false);
-            deleteValue.setEnabled(false);
-            etCurVal.setEnabled(false);
-            traitLayouts.disableViews();
-        } else {
+            disableDataEntry();
+        } else if (dataLocked == UNLOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
-            missingValue.setEnabled(true);
-            deleteValue.setEnabled(true);
-            traitLayouts.enableViews();
+            enableDataEntry();
+        } else {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
+            if (etCurVal.getText().toString().isEmpty()) {
+                enableDataEntry();
+            } else disableDataEntry();
         }
+
+        TraitObject trait = getCurrentTrait();
+        if (trait != null && trait.getTrait() != null) {
+            traitLayouts.refreshLock(trait.getFormat());
+        }
+    }
+
+    public void traitLockData() {
+        if (dataLocked == LOCKED) {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
+            disableDataEntry();
+        } else if (dataLocked == UNLOCKED) {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
+            enableDataEntry();
+        } else {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
+            if (etCurVal.getText().toString().isEmpty()) {
+                enableDataEntry();
+            } else disableDataEntry();
+        }
+    }
+
+    private void enableDataEntry() {
+        missingValue.setEnabled(true);
+        deleteValue.setEnabled(true);
+        barcodeInput.setEnabled(true);
+        traitLayouts.enableViews();
+    }
+
+    private void disableDataEntry() {
+        missingValue.setEnabled(false);
+        deleteValue.setEnabled(false);
+        barcodeInput.setEnabled(false);
+        traitLayouts.disableViews();
     }
 
     private void moveToPlotID() {
@@ -2004,8 +2061,21 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         return rangeBox.getRangeRight();
     }
 
-    public Boolean isDataLocked() {
-        return dataLocked;
+    /**
+     * Lock data if the lock feature is on, or if data is frozen then check
+     * if the current value is empty.
+     */
+    public boolean isDataLocked() {
+        return (dataLocked == LOCKED)
+                || (!etCurVal.getText().toString().isEmpty() && dataLocked == FROZEN);
+    }
+
+    public boolean isFrozen() {
+        return dataLocked == FROZEN;
+    }
+
+    public boolean isLocked() {
+        return dataLocked == LOCKED;
     }
 
     public SharedPreferences getPreference() {
@@ -2366,6 +2436,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
 
             traitType.setSelection(pos);
+
+            refreshLock();
         }
 
         public void update(String parent, String value) {
