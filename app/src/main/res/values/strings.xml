@@ -372,8 +372,8 @@
     <string name="about_project_lead_title">Project Lead</string>
     <string name="about_developer_title">Developer</string>
     <string name="about_developer_trife" translatable="false">Trevor Rife</string>
-    <string name="about_developer_trife_location" translatable="false">Kansas State University</string>
-    <string name="about_developer_trife_email" translatable="false">trife@ksu.edu</string>
+    <string name="about_developer_trife_location" translatable="false">Clemson University</string>
+    <string name="about_developer_trife_email" translatable="false">twrife@clemson.edu</string>
     <string name="about_email_title">Email</string>
     <string name="about_developer_trife_website" translatable="false">https://github.com/PhenoApps/Field-Book</string>
     <string name="about_contributors_title">Contributors</string>

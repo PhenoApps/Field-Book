@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -78,14 +79,24 @@ public class CounterTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
+
         getEtCurVal().setVisibility(EditText.GONE);
         getEtCurVal().setEnabled(false);
+    }
 
-        if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            counterTv.setText("0");
-        } else {
-            counterTv.setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
+    @Override
+    public void afterLoadExists(CollectActivity act, String value) {
+        super.afterLoadExists(act, value);
+        if (value != null) {
+            counterTv.setText(value);
         }
+    }
+
+    @Override
+    public void afterLoadNotExists(CollectActivity act) {
+        super.afterLoadNotExists(act);
+        counterTv.setText("0");
     }
 
     @Override
