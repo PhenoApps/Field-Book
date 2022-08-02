@@ -20,6 +20,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
 
@@ -863,11 +864,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     details += buildCategoryDescriptionString(var.getScale().getValidValues().getCategories());
                     trait.setDetails(details);
 
-                    try {
-                        trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
-                    } catch (Exception e) {
-                        Log.d("FieldBookError", "Error parsing trait label/value.");
-                    }
+//                    try {
+//                        trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
+//                    } catch (Exception e) {
+//                        Log.d("FieldBookError", "Error parsing trait label/value.");
+//                    }
                 }
 
             }
@@ -914,6 +915,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     private String buildCategoryList(List<BrAPIScaleValidValuesCategories> categories) {
+        try {
+            return CategoryJsonUtil.Companion.encode(new ArrayList<>(categories));
+        } catch (Exception e) {
+            return buildCategoryListOld(categories);
+        }
+    }
+
+    private String buildCategoryListOld(List<BrAPIScaleValidValuesCategories> categories) {
         StringBuilder sb = new StringBuilder();
         if (categories != null) {
             for (int j = 0; j < categories.size(); ++j) {
