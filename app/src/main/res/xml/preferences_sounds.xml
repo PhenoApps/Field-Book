@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <CheckBoxPreference
         android:defaultValue="false"
@@ -22,4 +23,22 @@
         android:title="@string/preferences_sound_cycle_traits_title"
         android:summary="@string/preferences_sound_cycle_traits_description" />
 
+    <PreferenceCategory android:title="@string/preferences_category_audio_tts_title"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_tts"
+            android:key="TTS_LANGUAGE_ENABLED"
+            android:summary="@string/preferences_general_tts_description"
+            android:title="@string/preferences_general_tts_title" />
+
+        <Preference
+            app:isPreferenceVisible="false"
+            android:icon="@drawable/ic_pref_general_root_directory"
+            android:key="TTS_LANGUAGE"
+            android:summary="@string/preferences_general_tts_language_description"
+            android:title="@string/preferences_general_tts_language_title" />
+
+    </PreferenceCategory>
 </PreferenceScreen>
