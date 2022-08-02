@@ -715,6 +715,8 @@
     <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
     <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
+    <string name="list_item_category_delete_content_description">Delete the category.</string>
+    <string name="dialog_new_trait_add_category_content_description">Add new category.</string>
 
     <!-- languages, not to be translated -->
     <string name="language_en" translatable="false">English</string>

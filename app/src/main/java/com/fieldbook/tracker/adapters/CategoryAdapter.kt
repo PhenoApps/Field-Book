@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -24,7 +25,7 @@ class CategoryAdapter(private val context: CategoryListItemOnClick):
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val valueTextView: TextView = view.findViewById(R.id.list_item_category_value_tv)
-        private val deleteButton: Button = view.findViewById(R.id.list_item_category_delete_btn)
+        private val deleteButton: ImageButton = view.findViewById(R.id.list_item_category_delete_btn)
 
         init {
             deleteButton.setOnClickListener {

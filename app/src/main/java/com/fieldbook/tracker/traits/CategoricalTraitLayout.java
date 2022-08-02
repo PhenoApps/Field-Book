@@ -160,8 +160,6 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
             }
         }
 
-        final String[] cat = buttonCat;
-
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
         layoutManager.setFlexWrap(FlexWrap.WRAP);
         layoutManager.setFlexDirection(FlexDirection.ROW);
@@ -204,13 +202,15 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                             pressOnButton(holder.mButton);
 
-                        }
+                        } else pressOffButton(holder.mButton);
+
                     } else {
 
                         if (currentText.equals(pair.getLabel())) {
 
                             pressOnButton(holder.mButton);
-                        }
+
+                        } else pressOffButton(holder.mButton);
                     }
                 }
 

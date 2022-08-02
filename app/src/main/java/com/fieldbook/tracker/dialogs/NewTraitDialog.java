@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -71,7 +72,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
     private EditText details;
     private EditText categoryValueEt;
     private RecyclerView categoriesRv;
-    private Button addCategoryButton;
+    private ImageButton addCategoryButton;
     private TextView defTv;
     private ToggleButton bool;
     private LinearLayout defBox;

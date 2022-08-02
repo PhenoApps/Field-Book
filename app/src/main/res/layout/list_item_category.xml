@@ -19,14 +19,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/list_item_category_delete_btn"/>
 
-    <Button
+    <ImageButton
+        android:padding="8dp"
+        android:background="@color/zxing_transparent"
+        android:src="@drawable/ic_tb_delete"
         android:text="@string/fields_delete"
         android:id="@+id/list_item_category_delete_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="@string/list_item_category_delete_content_description" />
 
     <View
         android:layout_width="match_parent"
