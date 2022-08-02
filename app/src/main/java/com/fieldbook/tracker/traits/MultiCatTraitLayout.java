@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.activities.CollectActivity;
@@ -39,6 +40,9 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
     private ArrayList<BrAPIScaleValidValuesCategories> categoryList;
 
+    //track when we go to new data
+    private boolean isFrozen = false;
+
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
 
@@ -59,6 +63,11 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     }
 
     @Override
+    public void refreshLock() {
+        isFrozen = ((CollectActivity) getContext()).isDataLocked();
+    }
+
+    @Override
     public String type() {
         return "multicat";
     }
@@ -73,8 +82,10 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
 
         final String trait = getCurrentTrait().getTrait();
+
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
@@ -163,35 +174,39 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
                 gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             }
         });
+
+        refreshLock();
     }
 
     private OnClickListener createClickListener(final Button button, int position) {
         return v -> {
 
-            BrAPIScaleValidValuesCategories cat = (BrAPIScaleValidValuesCategories) button.getTag();
+            if (!isFrozen) {
+                BrAPIScaleValidValuesCategories cat = (BrAPIScaleValidValuesCategories) button.getTag();
 
-            if (hasCategory(cat)) {
-                pressOffButton(button);
-                removeCategory(cat);
-            } else {
-                pressOnButton(button);
-                addCategory((BrAPIScaleValidValuesCategories) button.getTag());
+                if (hasCategory(cat)) {
+                    pressOffButton(button);
+                    removeCategory(cat);
+                } else {
+                    pressOnButton(button);
+                    addCategory((BrAPIScaleValidValuesCategories) button.getTag());
+                }
+
+                StringJoiner joiner = new StringJoiner(":");
+                for (BrAPIScaleValidValuesCategories c : categoryList) {
+                    if (showLabel) {
+                        joiner.add(c.getLabel());
+                    } else joiner.add(c.getValue());
+                }
+
+                getEtCurVal().setText(joiner.toString());
+
+                String json = CategoryJsonUtil.Companion.encode(categoryList);
+
+                updateTrait(getCurrentTrait().getTrait(),
+                        getCurrentTrait().getFormat(),
+                        json);
             }
-
-            StringJoiner joiner = new StringJoiner(":");
-            for (BrAPIScaleValidValuesCategories c : categoryList) {
-                if (showLabel) {
-                    joiner.add(c.getLabel());
-                } else joiner.add(c.getValue());
-            }
-
-            getEtCurVal().setText(joiner.toString());
-
-            String json = CategoryJsonUtil.Companion.encode(categoryList);
-
-            updateTrait(getCurrentTrait().getTrait(),
-                    getCurrentTrait().getFormat(),
-                    json);
         };
     }
 

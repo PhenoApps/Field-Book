@@ -372,8 +372,8 @@
     <string name="about_project_lead_title">Project Lead</string>
     <string name="about_developer_title">Developer</string>
     <string name="about_developer_trife" translatable="false">Trevor Rife</string>
-    <string name="about_developer_trife_location" translatable="false">Kansas State University</string>
-    <string name="about_developer_trife_email" translatable="false">trife@ksu.edu</string>
+    <string name="about_developer_trife_location" translatable="false">Clemson University</string>
+    <string name="about_developer_trife_email" translatable="false">twrife@clemson.edu</string>
     <string name="about_email_title">Email</string>
     <string name="about_developer_trife_website" translatable="false">https://github.com/PhenoApps/Field-Book</string>
     <string name="about_contributors_title">Contributors</string>
@@ -715,5 +715,23 @@
     <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
     <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
+
+    <!-- languages, not to be translated -->
+    <string name="language_en" translatable="false">English</string>
+    <string name="language_am" translatable="false">አማርኛ</string>
+    <string name="language_ar" translatable="false">اَلْعَرَبِيَّةُ</string>
+    <string name="language_bn" translatable="false">বাংলা</string>
+    <string name="language_de" translatable="false">Deutsche</string>
+    <string name="language_es" translatable="false">Español</string>
+    <string name="language_fr" translatable="false">Français</string>
+    <string name="language_hi" translatable="false">हिन्दी</string>
+    <string name="language_it" translatable="false">Italiana</string>
+    <string name="language_ja" translatable="false">日本語</string>
+    <string name="language_om_rET" translatable="false">Afaan Oromoo</string>
+    <string name="language_pt_rBR" translatable="false">Português</string>
+    <string name="language_ru" translatable="false">Русский</string>
+    <string name="language_zh_rCN" translatable="false">简体字</string>
+    <string name="language">Language</string>
+    <string name="preference_language_default">System Language</string>
 
 </resources>

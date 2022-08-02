@@ -61,24 +61,24 @@ public class AudioTraitLayout extends BaseTraitLayout {
         audioRecordingText = findViewById(R.id.audioRecordingText);
         buttonState = ButtonState.WAITING_FOR_RECORDING;
         controlButton = findViewById(R.id.record);
-        controlButton.setOnClickListener(new AudioTraitOnCLickListener());
+        controlButton.setOnClickListener(new AudioTraitOnClickListener());
     }
 
     @Override
     public void loadLayout() {
-        if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            buttonState = ButtonState.WAITING_FOR_RECORDING;
-            controlButton.setImageResource(buttonState.getImageId());
-            audioRecordingText.setText("");
-        } else if (getNewTraits().containsKey(getCurrentTrait().getTrait())
-                && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
+        getEtCurVal().setVisibility(View.INVISIBLE);
+        super.loadLayout();
+    }
+
+    @Override
+    public void afterLoadExists(CollectActivity act, String value) {
+        super.afterLoadExists(act, value);
+        if (value != null && value.equals("NA")) {
             buttonState = ButtonState.WAITING_FOR_RECORDING;
             controlButton.setImageResource(buttonState.getImageId());
             audioRecordingText.setText("NA");
         } else {
-            Map<String, String> observations = getNewTraits();
-            String dbSavedLocation = getNewTraits().get(getCurrentTrait().getTrait()).toString();
-            DocumentFile file = DocumentFile.fromSingleUri(getContext(), Uri.parse(dbSavedLocation));
+            DocumentFile file = DocumentFile.fromSingleUri(getContext(), Uri.parse(value));
             if (file != null && file.exists()) {
                 this.recordingLocation = file.getUri();
                 buttonState = ButtonState.WAITING_FOR_PLAYBACK;
@@ -87,6 +87,25 @@ public class AudioTraitLayout extends BaseTraitLayout {
             } else {
                 deleteTraitListener();
             }
+        }
+    }
+
+    @Override
+    public void afterLoadNotExists(CollectActivity act) {
+        super.afterLoadNotExists(act);
+        buttonState = ButtonState.WAITING_FOR_RECORDING;
+        controlButton.setImageResource(buttonState.getImageId());
+        audioRecordingText.setText("");
+    }
+
+    @Override
+    public void refreshLock() {
+        super.refreshLock();
+        ((CollectActivity) getContext()).traitLockData();
+        try {
+            loadLayout();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -130,7 +149,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
         }
     }
 
-    public class AudioTraitOnCLickListener implements OnClickListener {
+    public class AudioTraitOnClickListener implements OnClickListener {
 
         @Override
         public void onClick(View view) {
@@ -159,7 +178,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
             }
 
             controlButton.setImageResource(buttonState.getImageId());
-            toggleNavigationButtoms(enableNavigation);
+            toggleNavigationButtons(enableNavigation);
         }
 
         private void startPlayback() {
@@ -174,7 +193,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
                     stopPlayback();
                     buttonState = ButtonState.WAITING_FOR_PLAYBACK;
                     controlButton.setImageResource(buttonState.getImageId());
-                    toggleNavigationButtoms(true);
+                    toggleNavigationButtons(true);
                 });
                 mediaPlayer.setOnPreparedListener(MediaPlayer::start);
                 mediaPlayer.prepareAsync();
@@ -213,7 +232,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
             }
         }
 
-        private void toggleNavigationButtoms(boolean enabled) {
+        private void toggleNavigationButtons(boolean enabled) {
             ImageButton deleteValue = ((CollectActivity) getContext()).getDeleteValue();
             ImageView traitLeft = ((CollectActivity) getContext()).getTraitLeft();
             ImageView traitRight = ((CollectActivity) getContext()).getTraitRight();

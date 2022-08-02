@@ -83,7 +83,7 @@ dependencies {
     //zebra dependency
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
 
-    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.appcompat:appcompat:1.6.0-alpha04'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'

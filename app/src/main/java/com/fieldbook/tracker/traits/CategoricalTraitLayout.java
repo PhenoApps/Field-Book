@@ -75,6 +75,8 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
+
         final String trait = getCurrentTrait().getTrait();
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
@@ -158,6 +160,8 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
             }
         }
 
+        final String[] cat = buttonCat;
+
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
         layoutManager.setFlexWrap(FlexWrap.WRAP);
         layoutManager.setFlexDirection(FlexDirection.ROW);
@@ -232,29 +236,31 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     private OnClickListener createClickListener(final Button button, int position) {
         return v -> {
 
-            //cast tag to the buttons label/val pair
-            final BrAPIScaleValidValuesCategories pair = (BrAPIScaleValidValuesCategories) button.getTag();
-            final ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>(); //this is saved in the db
+            if (!((CollectActivity) getContext()).isDataLocked()) {
+                //cast tag to the buttons label/val pair
+                final BrAPIScaleValidValuesCategories pair = (BrAPIScaleValidValuesCategories) button.getTag();
+                final ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>(); //this is saved in the db
 
-            final String category = button.getText().toString();
-            String currentCat = getEtCurVal().getText().toString(); //displayed in the edit text
+                final String category = button.getText().toString();
+                String currentCat = getEtCurVal().getText().toString(); //displayed in the edit text
 
-            if (currentCat.equals(category)) {
-                pressOffButton(button);
-                currentCat = "";
-            } else {
-                pressOnButton(button);
-                currentCat = category;
-                scale.add(pair);
+                if (currentCat.equals(category)) {
+                    pressOffButton(button);
+                    currentCat = "";
+                } else {
+                    pressOnButton(button);
+                    currentCat = category;
+                    scale.add(pair);
+                }
+
+                getEtCurVal().setText(currentCat);
+
+                updateTrait(getCurrentTrait().getTrait(),
+                        getCurrentTrait().getFormat(),
+                        CategoryJsonUtil.Companion.encode(scale));
+
+                loadLayout(); //todo this is not the best way to do this
             }
-
-            getEtCurVal().setText(currentCat);
-
-            updateTrait(getCurrentTrait().getTrait(),
-                    getCurrentTrait().getFormat(),
-                    CategoryJsonUtil.Companion.encode(scale));
-
-            loadLayout(); //todo this is not the best way to do this
         };
     }
 
