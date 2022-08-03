@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 
+import androidx.annotation.Nullable;
+
 import com.fieldbook.tracker.utilities.CSVReader;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -27,8 +29,15 @@ import jxl.WorkbookSettings;
 
 //TODO when merged with xlsx edit getColumnSet
 public class FieldFileObject {
-    public static FieldFileBase create(final Context ctx, final Uri path, final InputStream inputStream) {
-        switch (getExtension(path.toString())) {
+    public static FieldFileBase create(final Context ctx, final Uri path,
+                                       final InputStream inputStream, @Nullable String cloudName) {
+
+        String ext = getExtension(path.toString());
+        if (cloudName != null) {
+            ext = getExtension(cloudName);
+        }
+
+        switch (ext) {
             case "csv":
                 return new FieldFileCSV(ctx, path);
             case "xls":

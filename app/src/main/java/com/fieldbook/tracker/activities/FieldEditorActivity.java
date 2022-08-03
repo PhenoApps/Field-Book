@@ -516,14 +516,14 @@ public class FieldEditorActivity extends AppCompatActivity {
         if (requestCode == 2) {
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra("result");
-                showFieldFileDialog(chosenFile);
+                showFieldFileDialog(chosenFile, null);
             }
         }
 
         if (requestCode == REQUEST_FILE_EXPLORER_CODE) {
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
-                showFieldFileDialog(chosenFile);
+                showFieldFileDialog(chosenFile, null);
             }
         }
 
@@ -569,12 +569,12 @@ public class FieldEditorActivity extends AppCompatActivity {
                     return;
                 }
 
-                showFieldFileDialog(content_describer.toString());
+                showFieldFileDialog(content_describer.toString(), true);
             }
         }
     }
 
-    private void showFieldFileDialog(final String chosenFile) {
+    private void showFieldFileDialog(final String chosenFile, Boolean isCloud) {
 
         try {
 
@@ -587,33 +587,42 @@ public class FieldEditorActivity extends AppCompatActivity {
                 ContentResolver resolver = getContentResolver();
                 if (resolver != null) {
 
-                    InputStream inputStream = resolver.openInputStream(docUri);
-
-                    fieldFile = FieldFileObject.create(this, docUri, inputStream);
-
-                    String fieldFileName = fieldFile.getStem();
-
-                    Editor e = ep.edit();
-                    e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
-                    e.apply();
-
-                    if (ConfigActivity.dt.checkFieldName(fieldFileName) >= 0) {
-                        Utils.makeToast(getApplicationContext(),getString(R.string.fields_study_exists_message));
-                        SharedPreferences.Editor ed = ep.edit();
-                        ed.putString(GeneralKeys.FIELD_FILE, null);
-                        ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-                        ed.apply();
-                        return;
+                    String cloudName = null;
+                    if (isCloud != null && isCloud) {
+                        cloudName = getFileName(Uri.parse(chosenFile));
                     }
 
-                    if (fieldFile.isOther()) {
-                        Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unsupported));
+                    try(InputStream is = resolver.openInputStream(docUri)) {
+
+                        fieldFile = FieldFileObject.create(this, docUri, is, cloudName);
+
+                        String fieldFileName = fieldFile.getStem();
+
+                        Editor e = ep.edit();
+                        e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
+                        e.apply();
+
+                        if (ConfigActivity.dt.checkFieldName(fieldFileName) >= 0) {
+                            Utils.makeToast(getApplicationContext(),getString(R.string.fields_study_exists_message));
+                            SharedPreferences.Editor ed = ep.edit();
+                            ed.putString(GeneralKeys.FIELD_FILE, null);
+                            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+                            ed.apply();
+                            return;
+                        }
+
+                        if (fieldFile.isOther()) {
+                            Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unsupported));
+                        }
+
+                        //utility call creates photos, audio and thumbnails folders under a new field folder
+                        DocumentTreeUtil.Companion.createFieldDir(this, fieldFileName);
+
+                        loadFile(fieldFile);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-
-                    //utility call creates photos, audio and thumbnails folders under a new field folder
-                    DocumentTreeUtil.Companion.createFieldDir(this, fieldFileName);
-
-                    loadFile(fieldFile);
                 }
             }
 
