@@ -1831,6 +1831,9 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 break;
             case BARCODE_SEARCH_CODE:
                 if(resultCode == RESULT_OK) {
+
+                    if (mGeoNavSnackbar != null) mGeoNavSnackbar.dismiss();
+
                     IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     inputPlotId = plotSearchResult.getContents();
                     rangeBox.setAllRangeID();
