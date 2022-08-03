@@ -453,6 +453,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     .setBeepEnabled(false)
                     .setRequestCode(BARCODE_COLLECT_CODE)
                     .initiateScan();
+        });
 
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
         deleteValue.setOnClickListener(v -> {
