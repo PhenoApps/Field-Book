@@ -735,5 +735,6 @@
     <string name="language_zh_rCN" translatable="false">简体字</string>
     <string name="language">Language</string>
     <string name="preference_language_default">System Language</string>
+    <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
 
 </resources>

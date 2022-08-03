@@ -76,12 +76,15 @@ import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
+import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.location.gnss.ConnectThread;
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver;
 import com.fieldbook.tracker.location.gnss.NmeaParser;
+import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -91,6 +94,7 @@ import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
+import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -128,6 +132,8 @@ import kotlin.Pair;
 public class CollectActivity extends AppCompatActivity implements SensorEventListener, GPSTracker.GPSTrackerListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
+    public static final int BARCODE_COLLECT_CODE = 99;
+    public static final int BARCODE_SEARCH_CODE = 98;
 
     public static boolean searchReload;
     public static String searchRange;
@@ -415,7 +421,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 new IntentIntegrator(thisActivity)
                         .setPrompt(getString(R.string.main_barcode_text))
                         .setBeepEnabled(false)
-                        .setRequestCode(99)
+                        .setRequestCode(BARCODE_COLLECT_CODE)
                         .initiateScan();
             }
         });
@@ -482,7 +488,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
     /**
      * Moves to specific plot/range/plot_id
-     * @param type the type of search, search, plot, range or id
+     * @param type the type of search, search, plot, range, id, barcode or quickgoto
      * @param rangeID the array of range ids
      * @param range the primary id
      * @param plot the secondary id
@@ -545,7 +551,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
 
         //move to plot id
-        if (type.equals("id")) {
+        if (type.equals("id") || type.equals("barcode")) {
             int rangeSize = rangeID.length;
             for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
@@ -561,7 +567,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             }
         }
 
-        if (!type.equals("quickgoto"))
+        if (!type.equals("quickgoto") && !type.equals("barcode"))
             Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
 
         return false;
@@ -1074,7 +1080,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.main_barcode_text))
                         .setBeepEnabled(false)
-                        .setRequestCode(98)
+                        .setRequestCode(BARCODE_SEARCH_CODE)
                         .initiateScan();
                 break;
             case R.id.summary:
@@ -1717,7 +1723,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 new IntentIntegrator(thisActivity)
                         .setPrompt(getString(R.string.main_barcode_text))
                         .setBeepEnabled(false)
-                        .setRequestCode(98)
+                        .setRequestCode(BARCODE_SEARCH_CODE)
                         .initiateScan();
             }
         });
@@ -1856,21 +1862,75 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                     mSkipLastUsedTrait = true;
                 }
                 break;
-            case 98:
+            case BARCODE_SEARCH_CODE:
                 if(resultCode == RESULT_OK) {
+
+                    if (mGeoNavSnackbar != null) mGeoNavSnackbar.dismiss();
+
                     IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     inputPlotId = plotSearchResult.getContents();
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
-                    boolean success = moveToSearch("id", rangeID, null, null, inputPlotId, -1);
+                    boolean success = moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
 
                     //play success or error sound if the plotId was not found
                     if (success) {
                         playSound("hero_simple_celebration");
-                    } else playSound("alert_error");
+                    } else {
+                        boolean found = false;
+                        FieldObject studyObj = null;
+                        ObservationUnitModel[] models = ObservationUnitDao.Companion.getAll();
+                        for (ObservationUnitModel m : models) {
+                            if (m.getObservation_unit_db_id().equals(inputPlotId)) {
+
+                                FieldObject study = StudyDao.Companion.getFieldObject(m.getStudy_id());
+                                if (study != null && study.getExp_name() != null) {
+                                    studyObj = study;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (found && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
+
+                            int studyId = studyObj.getExp_id();
+                            String fieldName = studyObj.getExp_name();
+
+                            String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
+
+                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, 8000, null,
+                                (v) -> {
+
+                                    //updates obs. range view in database
+                                    dt.switchField(studyId);
+
+                                    //refresh collect activity UI
+                                    rangeBox.reload();
+                                    rangeBox.refresh();
+                                    initWidgets(false);
+
+                                    //navigate to the plot
+                                    moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
+
+                                    //update selected item in field adapter using preference
+                                    ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
+                                    ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId).apply();
+
+                                    playSound("hero_simple_celebration");
+                                });
+
+                        } else {
+
+                            playSound("alert_error");
+
+                            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+
+                        }
+                    }
                 }
                 break;
-            case 99:
+            case BARCODE_COLLECT_CODE:
                 if(resultCode == RESULT_OK) {
                     // store barcode value as data
                     IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);

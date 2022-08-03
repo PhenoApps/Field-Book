@@ -9,6 +9,7 @@
         <new>Updated GeoNav notification layout</new>
         <new>Updated language selection options</new>
         <new>Updated categorical/multicat trait creator</new>
+        <new>Scanning barcodes searches across loaded fields for matches</new>
     </release>
 
     <release

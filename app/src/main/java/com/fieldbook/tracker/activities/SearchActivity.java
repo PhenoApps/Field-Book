@@ -317,8 +317,6 @@ public class SearchActivity extends AppCompatActivity {
         //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(adapter);
 
-        ConfigActivity.dt.open();
-
         String[] col = ConfigActivity.dt.getRangeColumns();
 
         if (col != null) {
