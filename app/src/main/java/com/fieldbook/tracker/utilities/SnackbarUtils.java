@@ -82,7 +82,7 @@ public final class SnackbarUtils {
 
         if (!(showGeoNavIcon != null && showGeoNavIcon)) {
             ((ImageButton) snackView.findViewById(R.id.geonav_snackbar_icn))
-                    .setImageResource(R.drawable.ic_nav_drawer_fields);
+                    .setImageResource(R.drawable.ic_snackbar_fields);
         }
 
         snackbar.setBackgroundTint(Color.TRANSPARENT);
