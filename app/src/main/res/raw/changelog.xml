@@ -9,6 +9,7 @@
         <new>Locking now has three input states: all data, new data, no data</new>
         <new>Updated GeoNav notification layout</new>
         <new>Updated language selection options</new>
+        <new>Updated categorical/multicat trait creator</new>
     </release>
 
     <release

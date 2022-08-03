@@ -47,6 +47,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.CSVWriter;
@@ -873,6 +874,8 @@ public class ConfigActivity extends AppCompatActivity {
             DocumentFile dbFile = null;
             DocumentFile tableFile = null;
 
+            ArrayList<TraitObject> traits = dt.getAllTraitObjects();
+
             //check if export database has been selected
             if (checkDbBool) {
                 if (exportData.getCount() > 0) {
@@ -931,7 +934,7 @@ public class ConfigActivity extends AppCompatActivity {
                         exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
+                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length, traits);
 
                     } catch (Exception e) {
                         fail = true;
