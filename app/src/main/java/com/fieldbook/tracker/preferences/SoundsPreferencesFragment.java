@@ -22,7 +22,6 @@ public class SoundsPreferencesFragment extends PreferenceFragmentCompat implemen
 
     PreferenceManager prefMgr;
     Context context;
-    private KeyUtil mKeys;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -41,8 +40,6 @@ public class SoundsPreferencesFragment extends PreferenceFragmentCompat implemen
         // Occurs before the on create function. We get the context this way.
         SoundsPreferencesFragment.this.context = context;
 
-        mKeys = new KeyUtil(context);
-
     }
 
     @Override
@@ -56,8 +53,7 @@ public class SoundsPreferencesFragment extends PreferenceFragmentCompat implemen
 
         setupTtsPreference();
 
-        int code = PreferenceManager.getDefaultSharedPreferences(context).getInt(mKeys.getArgTtsLocale(), -1);
-        updateTtsSummary(code);
+        updateTtsSummary();
     }
 
     private void setupTtsPreference() {
@@ -68,14 +64,8 @@ public class SoundsPreferencesFragment extends PreferenceFragmentCompat implemen
             if (ttsLanguage != null) {
                 ttsLanguage.setVisible(ttsEnabled.isChecked());
 
-                ttsLanguage.setOnPreferenceClickListener((v) -> {
-                    startActivity(new Intent(getContext(), LocaleChoiceActivity.class));
-                    return true;
-                });
-
                 ttsLanguage.setOnPreferenceChangeListener((p, v) -> {
-                    int code = (int) v;
-                    updateTtsSummary(code);
+                    updateTtsSummary();
                     return true;
                 });
             }
@@ -90,21 +80,17 @@ public class SoundsPreferencesFragment extends PreferenceFragmentCompat implemen
         }
     }
 
-    private void updateTtsSummary(int code) {
+    private void updateTtsSummary() {
 
         Preference ttsLanguage = findPreference(GeneralKeys.TTS_LANGUAGE);
 
+        String summary = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(GeneralKeys.TTS_LANGUAGE_SUMMARY, "");
+
         if (ttsLanguage != null) {
 
-            Set<Locale> locales = TextToSpeechHelper.Companion.getAvailableLocales();
-            for (Locale l : locales) {
-                if (l.hashCode() == code) {
+            ttsLanguage.setSummary(summary);
 
-                    ttsLanguage.setSummary(l.getDisplayName());
-
-                    break;
-                }
-            }
         }
     }
 }

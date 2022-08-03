@@ -271,12 +271,11 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         ttsHelper = new TextToSpeechHelper(this, () -> {
-            KeyUtil keys = new KeyUtil(this);
-            int lang = mPrefs.getInt(keys.getArgTtsLocale(), -1);
-            if (lang != -1) {
+            String lang = mPrefs.getString(GeneralKeys.TTS_LANGUAGE, "-1");
+            if (!lang.equals("-1")) {
                 Set<Locale> locales = TextToSpeechHelper.Companion.getAvailableLocales();
                 for (Locale l : locales) {
-                    if (l.hashCode() == lang) {
+                    if (l.getLanguage().equals(lang)) {
                         ttsHelper.setLanguage(l);
                         break;
                     }
