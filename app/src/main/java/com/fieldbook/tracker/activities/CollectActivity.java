@@ -1882,6 +1882,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
                                     //update selected item in field adapter using preference
                                     ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
+                                    ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId).apply();
 
                                     playSound("hero_simple_celebration");
                                 });
