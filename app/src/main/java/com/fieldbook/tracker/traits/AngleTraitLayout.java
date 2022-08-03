@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
 
+//TODO this isn't showing in new trait creator
 public class AngleTraitLayout extends BaseTraitLayout {
     SensorManager sensorManager;
     Sensor accelerometer;
@@ -96,18 +97,16 @@ public class AngleTraitLayout extends BaseTraitLayout {
 
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
-        if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
-            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-        } else {
-            getEtCurVal().setText("");
-            getEtCurVal().setTextColor(Color.BLACK);
+        super.loadLayout();
+    }
 
-            sensorManager.registerListener(mEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                    SensorManager.SENSOR_DELAY_NORMAL);
-            sensorManager.registerListener(mEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
+    @Override
+    public void afterLoadNotExists(CollectActivity act) {
+        super.afterLoadNotExists(act);
+        sensorManager.registerListener(mEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(mEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override

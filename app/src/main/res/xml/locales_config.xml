@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- can be used once Android 33 released, set localeConfig in application manifest tag -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="ja"/>
+    <locale android:name="fr"/>
+    <locale android:name="en"/>
+    <locale android:name="am"/>
+    <locale android:name="ar"/>
+    <locale android:name="bn"/>
+    <locale android:name="de"/>
+    <locale android:name="es"/>
+    <locale android:name="hi"/>
+    <locale android:name="it"/>
+    <locale android:name="om-rET"/>
+    <locale android:name="pt-rBR"/>
+    <locale android:name="ru"/>
+    <locale android:name="zh-rCN"/>
+</locale-config>
