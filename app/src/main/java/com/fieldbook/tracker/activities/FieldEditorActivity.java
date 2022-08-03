@@ -592,33 +592,37 @@ public class FieldEditorActivity extends AppCompatActivity {
                         cloudName = getFileName(Uri.parse(chosenFile));
                     }
 
-                    InputStream inputStream = resolver.openInputStream(docUri);
+                    try(InputStream is = resolver.openInputStream(docUri)) {
 
-                    fieldFile = FieldFileObject.create(this, docUri, inputStream, cloudName);
+                        fieldFile = FieldFileObject.create(this, docUri, is, cloudName);
 
-                    String fieldFileName = fieldFile.getStem();
+                        String fieldFileName = fieldFile.getStem();
 
-                    Editor e = ep.edit();
-                    e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
-                    e.apply();
+                        Editor e = ep.edit();
+                        e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
+                        e.apply();
 
-                    if (ConfigActivity.dt.checkFieldName(fieldFileName) >= 0) {
-                        Utils.makeToast(getApplicationContext(),getString(R.string.fields_study_exists_message));
-                        SharedPreferences.Editor ed = ep.edit();
-                        ed.putString(GeneralKeys.FIELD_FILE, null);
-                        ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-                        ed.apply();
-                        return;
+                        if (ConfigActivity.dt.checkFieldName(fieldFileName) >= 0) {
+                            Utils.makeToast(getApplicationContext(),getString(R.string.fields_study_exists_message));
+                            SharedPreferences.Editor ed = ep.edit();
+                            ed.putString(GeneralKeys.FIELD_FILE, null);
+                            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+                            ed.apply();
+                            return;
+                        }
+
+                        if (fieldFile.isOther()) {
+                            Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unsupported));
+                        }
+
+                        //utility call creates photos, audio and thumbnails folders under a new field folder
+                        DocumentTreeUtil.Companion.createFieldDir(this, fieldFileName);
+
+                        loadFile(fieldFile);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-
-                    if (fieldFile.isOther()) {
-                        Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unsupported));
-                    }
-
-                    //utility call creates photos, audio and thumbnails folders under a new field folder
-                    DocumentTreeUtil.Companion.createFieldDir(this, fieldFileName);
-
-                    loadFile(fieldFile);
                 }
             }
 
