@@ -516,14 +516,14 @@ public class FieldEditorActivity extends AppCompatActivity {
         if (requestCode == 2) {
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra("result");
-                showFieldFileDialog(chosenFile);
+                showFieldFileDialog(chosenFile, null);
             }
         }
 
         if (requestCode == REQUEST_FILE_EXPLORER_CODE) {
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
-                showFieldFileDialog(chosenFile);
+                showFieldFileDialog(chosenFile, null);
             }
         }
 
@@ -569,12 +569,12 @@ public class FieldEditorActivity extends AppCompatActivity {
                     return;
                 }
 
-                showFieldFileDialog(content_describer.toString());
+                showFieldFileDialog(content_describer.toString(), true);
             }
         }
     }
 
-    private void showFieldFileDialog(final String chosenFile) {
+    private void showFieldFileDialog(final String chosenFile, Boolean isCloud) {
 
         try {
 
@@ -587,9 +587,14 @@ public class FieldEditorActivity extends AppCompatActivity {
                 ContentResolver resolver = getContentResolver();
                 if (resolver != null) {
 
+                    String cloudName = null;
+                    if (isCloud != null && isCloud) {
+                        cloudName = getFileName(Uri.parse(chosenFile));
+                    }
+
                     InputStream inputStream = resolver.openInputStream(docUri);
 
-                    fieldFile = FieldFileObject.create(this, docUri, inputStream);
+                    fieldFile = FieldFileObject.create(this, docUri, inputStream, cloudName);
 
                     String fieldFileName = fieldFile.getStem();
 
