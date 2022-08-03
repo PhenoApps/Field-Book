@@ -25,6 +25,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -104,6 +105,8 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
+import org.phenoapps.utils.KeyUtil;
+import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.IOException;
@@ -115,6 +118,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -234,11 +238,34 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     //variable used to skip the navigate to last used trait in onResume
     private boolean mSkipLastUsedTrait = false;
 
+    private TextToSpeechHelper ttsHelper = null;
+
+    public void triggerTts(String text) {
+        if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
+            ttsHelper.speak(text);
+        }
+    }
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+
+        ttsHelper = new TextToSpeechHelper(this, () -> {
+            String lang = mPrefs.getString(GeneralKeys.TTS_LANGUAGE, "-1");
+            if (!lang.equals("-1")) {
+                Set<Locale> locales = TextToSpeechHelper.Companion.getAvailableLocales();
+                for (Locale l : locales) {
+                    if (l.getLanguage().equals(lang)) {
+                        ttsHelper.setLanguage(l);
+                        break;
+                    }
+                }
+            }
+            return null;
+        });
+
         if (ConfigActivity.dt == null) {    // when resume
             ConfigActivity.dt = new DataHelper(this);
         }
@@ -269,8 +296,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
             public void afterTextChanged(Editable en) {
                 final TraitObject trait = traitBox.getCurrentTrait();
                 if (en.toString().length() > 0) {
-                    if (traitBox.existsNewTraits() & trait != null)
+                    if (traitBox.existsNewTraits() & trait != null) {
+                        triggerTts(en.toString());
                         updateTrait(trait.getTrait(), trait.getFormat(), en.toString());
+                    }
                 } else {
                     if (traitBox.existsNewTraits() & trait != null)
                         removeTrait(trait.getTrait());
@@ -404,49 +433,47 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
 
+        String naTts = getString(R.string.act_collect_na_btn_tts);
+        String barcodeTts = getString(R.string.act_collect_barcode_btn_tts);
+        String deleteTts = getString(R.string.act_collect_delete_btn_tts);
+
         missingValue = toolbarBottom.findViewById(R.id.missingValue);
-        missingValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TraitObject currentTrait = traitBox.getCurrentTrait();
-                updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
-                setNaText();
-            }
+        missingValue.setOnClickListener(v -> {
+            triggerTts(naTts);
+            TraitObject currentTrait = traitBox.getCurrentTrait();
+            updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
+            setNaText();
         });
 
         barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
-        barcodeInput.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new IntentIntegrator(thisActivity)
-                        .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(false)
-                        .setRequestCode(BARCODE_COLLECT_CODE)
-                        .initiateScan();
-            }
+        barcodeInput.setOnClickListener(v -> {
+            triggerTts(barcodeTts);
+            new IntentIntegrator(thisActivity)
+                    .setPrompt(getString(R.string.main_barcode_text))
+                    .setBeepEnabled(false)
+                    .setRequestCode(BARCODE_COLLECT_CODE)
+                    .initiateScan();
         });
 
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
-        deleteValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // if a brapi observation that has been synced, don't allow deleting
-                String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-                TraitObject currentTrait = traitBox.getCurrentTrait();
-                if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
-                    if (currentTrait.getFormat().equals("photo")) {
-                        // I want to use abstract method
-                        Map<String, String> newTraits = traitBox.getNewTraits();
-                        PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                        traitPhoto.brapiDelete(newTraits);
-                    } else {
-                        brapiDelete(currentTrait.getTrait(), false);
-                    }
+        deleteValue.setOnClickListener(v -> {
+            // if a brapi observation that has been synced, don't allow deleting
+            String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+            TraitObject currentTrait = traitBox.getCurrentTrait();
+            if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
+                if (currentTrait.getFormat().equals("photo")) {
+                    // I want to use abstract method
+                    Map<String, String> newTraits = traitBox.getNewTraits();
+                    PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
+                    traitPhoto.brapiDelete(newTraits);
                 } else {
-                    traitLayouts.deleteTraitListener(currentTrait.getFormat());
+                    brapiDelete(currentTrait.getTrait(), false);
                 }
+            } else {
+                traitLayouts.deleteTraitListener(currentTrait.getFormat());
             }
+
+            triggerTts(deleteTts);
         });
 
     }
@@ -653,6 +680,12 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         //save last plot id
         if (ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)) {
             rangeBox.saveLastPlot();
+        }
+
+        try {
+            ttsHelper.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         super.onDestroy();
@@ -1946,11 +1979,15 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 }
                 break;
             case 252:
+                String success = getString(R.string.trait_photo_tts_success);
+                String fail = getString(R.string.trait_photo_tts_fail);
                 if (resultCode == RESULT_OK) {
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                     traitPhoto.makeImage(traitBox.getCurrentTrait(),
                             traitBox.getNewTraits());
-                }
+
+                    triggerTts(success);
+                } else triggerTts(fail);
                 break;
         }
     }

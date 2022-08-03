@@ -103,17 +103,23 @@ public class NumericTraitLayout extends BaseTraitLayout {
         @Override
         public void onClick(View view) {
             if (!isLocked) {
+                final String backspaceTts = getContext().getString(R.string.trait_numeric_backspace_tts);
                 final String curText = getEtCurVal().getText().toString();
+                Button button = (Button) view;
+                triggerTts(button.getText().toString());
+                String value;
                 if (view.getId() == R.id.k16) {        // Backspace Key Pressed
+                    triggerTts(backspaceTts);
                     final int length = curText.length();
                     if (length > 0) {
-                        getEtCurVal().setText(curText.substring(0, length - 1));
-                        updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
+                        value = curText.substring(0, length - 1);
+                        getEtCurVal().setText(value);
+                        updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
                     }
                 } else if (numberButtons.containsKey(view.getId())) {
-                    final String v = numberButtons.get(view.getId()).getText().toString();
-                    getEtCurVal().setText(curText + v);
-                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
+                    value = curText + numberButtons.get(view.getId()).getText().toString();
+                    getEtCurVal().setText(value);
+                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
                 }
             }
         }

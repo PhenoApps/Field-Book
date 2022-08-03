@@ -561,12 +561,21 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                 if (value != null) {
 
+                    val internal = context.getString(R.string.trait_gnss_internal_tts)
+
                     val chosenDevice = pairedDevices.find { it.name == value }
 
                     if (chosenDevice == null) {
                         //register the location listener
                         //update no matter the distance change and every 10s
                         mGpsTracker = GPSTracker(context, this, 0, 10000)
+
+                        triggerTts(internal)
+                    } else {
+
+                        val deviceTts = context.getString(R.string.trait_gnss_external_device_tts, chosenDevice.name)
+
+                        triggerTts(deviceTts)
                     }
 
                     setupCommunicationsUi(chosenDevice)
@@ -613,6 +622,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val elevation = altTextView.text.toString()
 
             submitGnss(latitude, longitude, elevation)
+
+            triggerTts(context.getString(R.string.trait_location_saved_tts))
+
         }
 
         //cancel the thread when the disconnect button is pressed

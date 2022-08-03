@@ -101,7 +101,7 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.3.3'
 
-    implementation('com.github.phenoapps:phenolib:v0.9.31')
+    implementation('com.github.phenoapps:phenolib:v0.9.37')
 
     implementation 'com.github.breeding-insight:brapi:2.0.3'
     implementation("com.squareup.okhttp3:okhttp:4.9.3")

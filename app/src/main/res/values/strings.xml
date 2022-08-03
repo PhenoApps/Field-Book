@@ -270,6 +270,12 @@
     <string name="preferences_general_system_title">System Defaults</string>
     <string name="preferences_general_files_base_directory_title">Define storage location</string>
     <string name="preferences_general_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
+
+    <string name="preferences_general_tts_title">Text to Speech</string>
+    <string name="preferences_general_tts_description">Enable TTS when data is entered in the Collect activity.</string>
+    <string name="preferences_general_tts_language_title">Choose Language</string>
+    <string name="preferences_general_tts_language_description">Choose a compatible TTS language.</string>
+
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
 
@@ -710,6 +716,23 @@
     <string name="dialog_new_trait_add_cat_button_text">Add</string>
     <string name="traits_create_categories_label_text">Enter category label here</string>
     <string name="traits_create_categories_value_text">Enter category value here</string>
+    <string name="trait_boolean_on">On</string>
+    <string name="trait_boolean_off">Off</string>
+    <string name="trait_photo_tts_success">Picture taken successfully.</string>
+    <string name="trait_photo_tts_fail">Picture trait failed.</string>
+    <string name="trait_print_label_success">Printing label.</string>
+    <string name="trait_gnss_internal_tts">Internal GPS</string>
+    <string name="trait_gnss_external_device_tts">External device %s chosen.</string>
+    <string name="act_collect_missing_value_btn_tts">Not applicable</string>
+    <string name="act_collect_na_btn_tts">Not applicable</string>
+    <string name="act_collect_barcode_btn_tts">Opening barcode scanner</string>
+    <string name="act_collect_delete_btn_tts">Value has been deleted.</string>
+    <string name="trait_numeric_backspace_tts">Backspace</string>
+    <string name="trait_date_save_tts">Date saved</string>
+    <string name="trait_date_minus_day_tts">Back one day</string>
+    <string name="trait_date_next_day_tts">Next day</string>
+    <string name="trait_date_open_calendar_tts">Opening calendar.</string>
+    <string name="trait_location_saved_tts">Location saved.</string>
     <string name="preferences_profile_crashlytics">Crashlytics</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
@@ -717,6 +740,7 @@
     <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
     <string name="list_item_category_delete_content_description">Delete the category.</string>
     <string name="dialog_new_trait_add_category_content_description">Add new category.</string>
+    <string name="preferences_category_audio_tts_title">Text to Speech</string>
 
     <!-- languages, not to be translated -->
     <string name="language_en" translatable="false">English</string>

@@ -155,6 +155,11 @@ public class GeneralKeys {
     //categorical trait
     public static final String LABELVAL_CUSTOMIZE = "LABELVAL_CUSTOMIZE";
 
+    //tts
+    public static final String TTS_LANGUAGE_ENABLED = "TTS_LANGUAGE_ENABLED";
+    public static final String TTS_LANGUAGE = "TTS_LANGUAGE";
+    public static final String TTS_LANGUAGE_SUMMARY = "TTS_LANGUAGE_SUMMARY";
+
     private GeneralKeys() {
 
     }

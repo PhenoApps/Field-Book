@@ -206,6 +206,10 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
                 updateTrait(getCurrentTrait().getTrait(),
                         getCurrentTrait().getFormat(),
                         json);
+
+                if (showLabel) {
+                    triggerTts(cat.getLabel());
+                } else triggerTts(cat.getValue());
             }
         };
     }

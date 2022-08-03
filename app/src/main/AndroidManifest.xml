@@ -176,6 +176,9 @@
         <activity android:name=".activities.DefineStorageActivity"
             android:theme="@style/AppTheme"/>
 
+        <activity android:name=".activities.LocaleChoiceActivity"
+            android:theme="@style/AppTheme"/>
+
         <provider
             android:name=".provider.GenericFileProvider"
             android:authorities="com.fieldbook.tracker.fileprovider"

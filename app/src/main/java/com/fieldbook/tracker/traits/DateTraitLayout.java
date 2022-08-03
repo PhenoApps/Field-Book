@@ -20,6 +20,8 @@ import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 
 public class DateTraitLayout extends BaseTraitLayout {
@@ -74,6 +76,10 @@ public class DateTraitLayout extends BaseTraitLayout {
 
         ImageButton calendarVisibilityBtn = findViewById(R.id.trait_date_calendar_visibility_btn);
 
+        String minusDayTts = getContext().getString(R.string.trait_date_minus_day_tts);
+        String openCalendarTts = getContext().getString(R.string.trait_date_open_calendar_tts);
+        String nextDayTts = getContext().getString(R.string.trait_date_next_day_tts);
+
         /*
          * When the calendar view visibility button is pressed it starts the date picker dialog.
          */
@@ -92,75 +98,90 @@ public class DateTraitLayout extends BaseTraitLayout {
                 //save date to db
                 updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
 
+                triggerTts(getTtsFromCalendar(calendar));
+
                 return true;
             });
 
+            triggerTts(openCalendarTts);
             newFragment.show(((CollectActivity) getContext()).getSupportFragmentManager(),
                     "datePicker");
         });
 
         // Add day
-        addDayBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                Calendar calendar = Calendar.getInstance();
+        addDayBtn.setOnClickListener(arg0 -> {
+            Calendar calendar = Calendar.getInstance();
 
-                //Parse date
-                try {
-                    calendar.setTime(dateFormat.parse(date));
-                } catch (ParseException e) {
-                    e.printStackTrace();
+            //Parse date
+            try {
+                Date d = dateFormat.parse(date);
+                if (d != null) {
+                    calendar.setTime(d);
+                    triggerTts(nextDayTts);
                 }
-
-                // Add day
-                calendar.add(Calendar.DATE, 1);
-
-                updateViewDate(calendar);
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
+
+            // Add day
+            calendar.add(Calendar.DATE, 1);
+
+            updateViewDate(calendar);
         });
 
         // Minus day
-        minusDayBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                Calendar calendar = Calendar.getInstance();
+        minusDayBtn.setOnClickListener(arg0 -> {
+            Calendar calendar = Calendar.getInstance();
 
-                //Parse date
-                try {
-                    calendar.setTime(dateFormat.parse(date));
-                } catch (ParseException e) {
-                    e.printStackTrace();
+            //Parse date
+            try {
+                Date d = dateFormat.parse(date);
+                if (d != null) {
+                    calendar.setTime(d);
+                    triggerTts(minusDayTts);
                 }
-
-                //Subtract day, rewrite date
-                calendar.add(Calendar.DATE, -1);
-
-                updateViewDate(calendar);
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
+
+            //Subtract day, rewrite date
+            calendar.add(Calendar.DATE, -1);
+
+            updateViewDate(calendar);
         });
 
         // Saving date data
-        saveDayBtn.setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                Calendar calendar = Calendar.getInstance();
-
-                //Parse date
-                try {
-                    calendar.setTime(dateFormat.parse(date));
-                } catch (ParseException e) {
-                    e.printStackTrace();
+        saveDayBtn.setOnClickListener(arg0 -> {
+            Calendar calendar = Calendar.getInstance();
+            //Parse date
+            try {
+                Date d = dateFormat.parse(date);
+                if (d != null) {
+                    calendar.setTime(d);
+                    triggerTts(getTtsFromCalendar(calendar));
                 }
-
-                if (!day.getText().equals("NA")) { //issue 413, don't update NA when save button is pressed
-                    if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
-                        updateTrait(getCurrentTrait().getTrait(), "date", String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
-                    } else {
-                        updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
-                    }
-                }
-
-                // Change the text color accordingly
-                forceDataSavedColor();
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
+
+            if (!day.getText().equals("NA")) { //issue 413, don't update NA when save button is pressed
+                if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
+                    updateTrait(getCurrentTrait().getTrait(), "date", String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+                } else {
+                    updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
+                }
+            }
+
+            // Change the text color accordingly
+            forceDataSavedColor();
         });
+    }
+
+    private String getTtsFromCalendar(Calendar calendar) {
+
+        String month = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
+        String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+        return month + " " + day;
     }
 
     private void updateViewDate(Calendar calendar) {

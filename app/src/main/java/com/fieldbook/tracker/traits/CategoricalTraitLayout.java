@@ -259,6 +259,8 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                         getCurrentTrait().getFormat(),
                         CategoryJsonUtil.Companion.encode(scale));
 
+                triggerTts(category);
+
                 loadLayout(); //todo this is not the best way to do this
             }
         };
