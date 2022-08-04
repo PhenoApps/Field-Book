@@ -258,9 +258,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     private void updateUrls(String newValue) {
         SharedPreferences sp = prefMgr.getSharedPreferences();
-        String oldBaseUrl = sp.getString(GeneralKeys.BRAPI_BASE_URL, "");
-        String oldOidcUrl = sp.getString(GeneralKeys.BRAPI_OIDC_URL, "");
-        String newOidcUrl = oldOidcUrl.replaceFirst(oldBaseUrl, newValue);
+        String newOidcUrl = newValue + "/.well-known/openid-configuration";
+        if (newValue.endsWith("/")) {
+            newOidcUrl = newValue + ".well-known/openid-configuration";
+        }
         setServer(newValue, newOidcUrl, null);
     }
 
@@ -381,9 +382,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 //positive edit text callback
                 if (preference.getKey().equals(brapiURLPreference.getKey())) {
                     brapiURLPreference.setText(text);
+                    updateUrls(text);
                     brapiAuth();
                 } else {
                     brapiOIDCURLPreference.setText(text);
+                    updateUrls(text);
                 }
 
                 if (dialog != null)
