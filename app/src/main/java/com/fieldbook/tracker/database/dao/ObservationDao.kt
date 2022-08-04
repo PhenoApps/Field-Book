@@ -2,6 +2,7 @@ package com.fieldbook.tracker.database.dao
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
@@ -33,7 +34,7 @@ class ObservationDao {
 
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
-        fun getHostImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
+        fun getHostImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.rawQuery("""
                 SELECT DISTINCT props.observationUnitDbId AS uniqueName,
@@ -65,7 +66,7 @@ class ObservationDao {
                 AND vars.observation_variable_field_book_format = 'photo'
                 
         """.trimIndent(), arrayOf(hostUrl)).toTable()
-                    .map { row -> FieldBookImage(getStringVal(row, "value"), missingPhoto).apply {
+                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), missingPhoto).apply {
                         unitDbId = getStringVal(row, "uniqueName")
                         setDescriptiveOntologyTerms(listOf(getStringVal(row, "external_db_id")))
                         setDescription(getStringVal(row, "observation_variable_details"))
@@ -139,10 +140,10 @@ class ObservationDao {
             return null
         }
 
-        fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
+        fun getWrongSourceImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sRemoteImageObservationsViewName, where = "trait_data_source <> ?", whereArgs = arrayOf(hostUrl)).toTable()
-                    .map { row -> FieldBookImage(getStringVal(row, "value"), missingPhoto).apply {
+                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), missingPhoto).apply {
                         this.fieldBookDbId = getStringVal(row, "id")
                     } }
 
@@ -163,10 +164,10 @@ class ObservationDao {
 
         } ?: emptyList()
 
-        fun getUserTraitImageObservations(expId: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
+        fun getUserTraitImageObservations(ctx: Context, expId: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sLocalImageObservationsViewName, where = "${Study.FK} = ?", whereArgs = arrayOf(expId)).toTable()
-                    .map { row -> FieldBookImage(getStringVal(row, "value"), missingPhoto).apply {
+                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), missingPhoto).apply {
                         this.fieldBookDbId = getStringVal(row, "id")
                     } }
 

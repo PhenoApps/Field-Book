@@ -1,17 +1,24 @@
 package com.fieldbook.tracker.brapi.model;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 
+import androidx.documentfile.provider.DocumentFile;
 import androidx.exifinterface.media.ExifInterface;
 
+import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -20,7 +27,7 @@ import io.swagger.client.model.GeoJSON;
 
 public class FieldBookImage extends BrapiObservation {
 
-    private File file;
+    private DocumentFile file;
     private int width;
     private int height;
     private long fileSize;
@@ -39,15 +46,24 @@ public class FieldBookImage extends BrapiObservation {
 
     }
 
-    public FieldBookImage(String filePath, Bitmap missingPhoto) {
+    public FieldBookImage(Context ctx, String filePath, Bitmap missingPhoto) {
+        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(ctx, "photos");
 
-        this.file = new File(filePath);
-        this.fileSize = file.length();
-        this.fileName = file.getName();
-        this.imageName = this.fileName;
         this.missing = missingPhoto;
         this.location = new GeoJSON();
         this.additionalInfo = new HashMap<>();
+
+        if (photosDir != null) {
+
+            this.file = photosDir.findFile(filePath);
+
+            if (this.file != null) {
+
+                this.fileSize = file.length();
+                this.fileName = file.getName();
+                this.imageName = this.fileName;
+            }
+        }
     }
 
     public FieldBookImage(io.swagger.client.model.Image response) {
@@ -88,10 +104,6 @@ public class FieldBookImage extends BrapiObservation {
 
     public String getFileName() {
         return fileName;
-    }
-
-    public void setFile(File file) {
-        this.file = file;
     }
 
     public void setWidth(int width) {
@@ -138,10 +150,6 @@ public class FieldBookImage extends BrapiObservation {
         return mimeType;
     }
 
-    public File getFile() {
-        return file;
-    }
-
     public String getCopyright() {
         if(getTimestamp() != null) {
             return String.valueOf(getTimestamp().getYear());
@@ -177,26 +185,31 @@ public class FieldBookImage extends BrapiObservation {
         this.description = description;
     }
 
-    public void loadImage() {
-        Bitmap bitmap;
-        if (!file.exists()) {
-            bitmap = missing;
-            width = missing.getWidth();
-            height = missing.getHeight();
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 95, stream);
-            bytes = stream.toByteArray();
-            fileSize = bytes.length;
-        } else {
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            bmOptions.inJustDecodeBounds = true;
-            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), bmOptions);
-            width = bmOptions.outWidth;
-            height = bmOptions.outHeight;
-            bytes = new byte[(int) file.length()];
+    private void loadMissingImage() {
+        width = missing.getWidth();
+        height = missing.getHeight();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        missing.compress(Bitmap.CompressFormat.JPEG, 95, stream);
+        bytes = stream.toByteArray();
+        fileSize = bytes.length;
+    }
 
-            try {
-                ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+    public void loadImage(Context ctx) {
+
+        if (file.length() == 0) {
+
+            loadMissingImage();
+
+        } else {
+
+            try (InputStream is = ctx.getContentResolver().openInputStream(this.file.getUri())) {
+
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                width = bitmap.getWidth();
+                height = bitmap.getHeight();
+                bytes = new byte[(int) file.length()];
+
+                ExifInterface exif = new ExifInterface(is);
                 double latlon[] = exif.getLatLong();
                 if (latlon != null) {
                     double lat = latlon[0];
@@ -211,9 +224,13 @@ public class FieldBookImage extends BrapiObservation {
                     location.setGeometry(o);
                 }
 
-                FileInputStream fin = new FileInputStream(file);
-                fin.read(bytes);
-            } catch (IOException e) {
+                is.read(bytes);
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+                loadMissingImage();
             }
         }
 
