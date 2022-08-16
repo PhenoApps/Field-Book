@@ -717,5 +717,9 @@
     <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
     <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
+    <string name="trait_usb_camera_delete_photo">Delete USB Photo</string>
+    <string name="delete_photo_dialog_iv_content_description">Photo to be deleted.</string>
+    <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
+    <string name="trait_usb_camera_capture_button_text">Capture</string>
 
 </resources>
