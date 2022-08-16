@@ -4,10 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 import androidx.exifinterface.media.ExifInterface;
 
+import com.fieldbook.tracker.application.FieldBook;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -19,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -27,6 +30,7 @@ import io.swagger.client.model.GeoJSON;
 
 public class FieldBookImage extends BrapiObservation {
 
+    private static final String TAG = FieldBookImage.class.getSimpleName();
     private DocumentFile file;
     private int width;
     private int height;
@@ -62,7 +66,19 @@ public class FieldBookImage extends BrapiObservation {
                 this.fileSize = file.length();
                 this.fileName = file.getName();
                 this.imageName = this.fileName;
+
+                Log.d(TAG, "Instantiated fb image: " + imageName + " " + fileSize);
+
+            } else {
+
+                Log.d(TAG, "Failed to find file: " + filePath);
+
             }
+
+        } else {
+
+            Log.d(TAG, "Failed to find photos dir");
+
         }
     }
 
@@ -186,12 +202,18 @@ public class FieldBookImage extends BrapiObservation {
     }
 
     private void loadMissingImage() {
+
+        Log.d(TAG, "Loading missing image for: " + imageName);
+
         width = missing.getWidth();
         height = missing.getHeight();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        missing.compress(Bitmap.CompressFormat.JPEG, 95, stream);
-        bytes = stream.toByteArray();
-        fileSize = bytes.length;
+        try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+            missing.compress(Bitmap.CompressFormat.JPEG, 95, stream);
+            bytes = stream.toByteArray();
+            fileSize = bytes.length;
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
     }
 
     public void loadImage(Context ctx) {
@@ -204,13 +226,18 @@ public class FieldBookImage extends BrapiObservation {
 
             try (InputStream is = ctx.getContentResolver().openInputStream(this.file.getUri())) {
 
+                int byteLength = (int) file.length();
+
+                Log.d(TAG, "Stream opened for: " + imageName + " bytes: " + byteLength);
+
                 Bitmap bitmap = BitmapFactory.decodeStream(is);
+
                 width = bitmap.getWidth();
                 height = bitmap.getHeight();
                 bytes = new byte[(int) file.length()];
 
                 ExifInterface exif = new ExifInterface(is);
-                double latlon[] = exif.getLatLong();
+                double[] latlon = exif.getLatLong();
                 if (latlon != null) {
                     double lat = latlon[0];
                     double lon = latlon[1];
@@ -224,7 +251,21 @@ public class FieldBookImage extends BrapiObservation {
                     location.setGeometry(o);
                 }
 
-                is.read(bytes);
+                //stream must be reopened after BitmapFactory.decodeStream
+                //could also use mark/reset but it doesn't always work
+                is.close();
+
+                try (InputStream s = ctx.getContentResolver().openInputStream(this.file.getUri())) {
+
+                    int r = s.read(bytes);
+
+                    Log.d(TAG, "Read: " + r + " bytes from stream.");
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+
+                }
 
             } catch (Exception e) {
 
