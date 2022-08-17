@@ -86,7 +86,6 @@ import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -97,7 +96,6 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
-import org.phenoapps.security.Security;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 
@@ -1846,11 +1844,12 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
                 }
                 break;
             case 252:
-                if (resultCode == RESULT_OK) {
-                    PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                    traitPhoto.makeImage(traitBox.getCurrentTrait(),
-                            traitBox.getNewTraits());
-                }
+
+                PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
+                TraitObject currentTrait = traitBox.getCurrentTrait();
+                Map<String, String> newTraits = traitBox.getNewTraits();
+                traitPhoto.makeImage(currentTrait, newTraits, resultCode == RESULT_OK);
+
                 break;
         }
     }
