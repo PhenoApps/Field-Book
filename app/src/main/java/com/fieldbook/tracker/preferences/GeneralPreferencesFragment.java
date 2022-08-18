@@ -5,15 +5,22 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.DefineStorageActivity;
+import com.fieldbook.tracker.activities.LocaleChoiceActivity;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
+import org.phenoapps.utils.KeyUtil;
+import org.phenoapps.utils.TextToSpeechHelper;
+
+import java.util.Locale;
+import java.util.Set;
 
 public class GeneralPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
@@ -100,6 +107,7 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
         // Occurs before the on create function. We get the context this way.
         GeneralPreferencesFragment.this.context = context;
+
     }
 
     @Override

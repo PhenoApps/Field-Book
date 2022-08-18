@@ -25,6 +25,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -73,12 +74,15 @@ import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
+import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.location.gnss.ConnectThread;
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver;
 import com.fieldbook.tracker.location.gnss.NmeaParser;
+import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -88,6 +92,7 @@ import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
+import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -99,6 +104,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phenoapps.interfaces.usb.camera.UsbCameraInterface;
 import org.phenoapps.usb.camera.UsbCameraHelper;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
+import org.phenoapps.utils.KeyUtil;
+import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.IOException;
@@ -110,6 +117,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -128,6 +136,8 @@ public class CollectActivity extends AppCompatActivity
         implements SensorEventListener, GPSTracker.GPSTrackerListener, UsbCameraInterface {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
+    public static final int BARCODE_COLLECT_CODE = 99;
+    public static final int BARCODE_SEARCH_CODE = 98;
 
     public static boolean searchReload;
     public static String searchRange;
@@ -213,37 +223,30 @@ public class CollectActivity extends AppCompatActivity
 
     private TextWatcher cvText;
     private InputMethodManager imm;
-    private Boolean dataLocked = false;
+
+    /**
+     * Data lock is controlled by the toolbar lock icon
+     * 0: Unlocked, any data can be entered
+     * 1: Locked, data cannot be entered
+     * 2: Frozen, old data cannot be edited, but new data can be entered
+     */
+    public static final int UNLOCKED = 0;
+    public static final int LOCKED = 1;
+    public static final int FROZEN = 2;
+    private int dataLocked = UNLOCKED;
 
     //variable used to skip the navigate to last used trait in onResume
     private boolean mSkipLastUsedTrait = false;
 
+    private TextToSpeechHelper ttsHelper = null;
     /**
      * Usb Camera Helper
      */
     private UsbCameraHelper mUsbCameraHelper = null;
 
-    public static void disableViews(ViewGroup layout) {
-        layout.setEnabled(false);
-        for (int i = 0; i < layout.getChildCount(); i++) {
-            View child = layout.getChildAt(i);
-            if (child instanceof ViewGroup) {
-                disableViews((ViewGroup) child);
-            } else {
-                child.setEnabled(false);
-            }
-        }
-    }
-
-    public static void enableViews(ViewGroup layout) {
-        layout.setEnabled(false);
-        for (int i = 0; i < layout.getChildCount(); i++) {
-            View child = layout.getChildAt(i);
-            if (child instanceof ViewGroup) {
-                enableViews((ViewGroup) child);
-            } else {
-                child.setEnabled(true);
-            }
+    public void triggerTts(String text) {
+        if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
+            ttsHelper.speak(text);
         }
     }
 
@@ -252,6 +255,21 @@ public class CollectActivity extends AppCompatActivity
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+
+        ttsHelper = new TextToSpeechHelper(this, () -> {
+            String lang = mPrefs.getString(GeneralKeys.TTS_LANGUAGE, "-1");
+            if (!lang.equals("-1")) {
+                Set<Locale> locales = TextToSpeechHelper.Companion.getAvailableLocales();
+                for (Locale l : locales) {
+                    if (l.getLanguage().equals(lang)) {
+                        ttsHelper.setLanguage(l);
+                        break;
+                    }
+                }
+            }
+            return null;
+        });
+
         if (ConfigActivity.dt == null) {    // when resume
             ConfigActivity.dt = new DataHelper(this);
         }
@@ -284,8 +302,10 @@ public class CollectActivity extends AppCompatActivity
             public void afterTextChanged(Editable en) {
                 final TraitObject trait = traitBox.getCurrentTrait();
                 if (en.toString().length() > 0) {
-                    if (traitBox.existsNewTraits() & trait != null)
+                    if (traitBox.existsNewTraits() & trait != null) {
+                        triggerTts(en.toString());
                         updateTrait(trait.getTrait(), trait.getFormat(), en.toString());
+                    }
                 } else {
                     if (traitBox.existsNewTraits() & trait != null)
                         removeTrait(trait.getTrait());
@@ -340,6 +360,8 @@ public class CollectActivity extends AppCompatActivity
         traitBox.setNewTraits(rangeBox.getPlotID());
 
         initWidgets(true);
+
+        refreshLock();
     }
 
     private void playSound(String sound) {
@@ -417,49 +439,47 @@ public class CollectActivity extends AppCompatActivity
 
         Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
 
+        String naTts = getString(R.string.act_collect_na_btn_tts);
+        String barcodeTts = getString(R.string.act_collect_barcode_btn_tts);
+        String deleteTts = getString(R.string.act_collect_delete_btn_tts);
+
         missingValue = toolbarBottom.findViewById(R.id.missingValue);
-        missingValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TraitObject currentTrait = traitBox.getCurrentTrait();
-                updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
-                setNaText();
-            }
+        missingValue.setOnClickListener(v -> {
+            triggerTts(naTts);
+            TraitObject currentTrait = traitBox.getCurrentTrait();
+            updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
+            setNaText();
         });
 
         barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
-        barcodeInput.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new IntentIntegrator(thisActivity)
-                        .setPrompt(getString(R.string.main_barcode_text))
-                        .setBeepEnabled(false)
-                        .setRequestCode(99)
-                        .initiateScan();
-            }
+        barcodeInput.setOnClickListener(v -> {
+            triggerTts(barcodeTts);
+            new IntentIntegrator(thisActivity)
+                    .setPrompt(getString(R.string.main_barcode_text))
+                    .setBeepEnabled(false)
+                    .setRequestCode(BARCODE_COLLECT_CODE)
+                    .initiateScan();
         });
 
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
-        deleteValue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // if a brapi observation that has been synced, don't allow deleting
-                String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-                TraitObject currentTrait = traitBox.getCurrentTrait();
-                if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
-                    if (currentTrait.getFormat().equals("photo")) {
-                        // I want to use abstract method
-                        Map<String, String> newTraits = traitBox.getNewTraits();
-                        PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
-                        traitPhoto.brapiDelete(newTraits);
-                    } else {
-                        brapiDelete(currentTrait.getTrait(), false);
-                    }
+        deleteValue.setOnClickListener(v -> {
+            // if a brapi observation that has been synced, don't allow deleting
+            String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+            TraitObject currentTrait = traitBox.getCurrentTrait();
+            if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
+                if (currentTrait.getFormat().equals("photo")) {
+                    // I want to use abstract method
+                    Map<String, String> newTraits = traitBox.getNewTraits();
+                    PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
+                    traitPhoto.brapiDelete(newTraits);
                 } else {
-                    traitLayouts.deleteTraitListener(currentTrait.getFormat());
+                    brapiDelete(currentTrait.getTrait(), false);
                 }
+            } else {
+                traitLayouts.deleteTraitListener(currentTrait.getFormat());
             }
+
+            triggerTts(deleteTts);
         });
 
     }
@@ -501,7 +521,7 @@ public class CollectActivity extends AppCompatActivity
 
     /**
      * Moves to specific plot/range/plot_id
-     * @param type the type of search, search, plot, range or id
+     * @param type the type of search, search, plot, range, id, barcode or quickgoto
      * @param rangeID the array of range ids
      * @param range the primary id
      * @param plot the secondary id
@@ -564,7 +584,7 @@ public class CollectActivity extends AppCompatActivity
         }
 
         //move to plot id
-        if (type.equals("id")) {
+        if (type.equals("id") || type.equals("barcode")) {
             int rangeSize = rangeID.length;
             for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
@@ -580,7 +600,7 @@ public class CollectActivity extends AppCompatActivity
             }
         }
 
-        if (!type.equals("quickgoto"))
+        if (!type.equals("quickgoto") && !type.equals("barcode"))
             Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
 
         return false;
@@ -666,6 +686,12 @@ public class CollectActivity extends AppCompatActivity
         //save last plot id
         if (ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)) {
             rangeBox.saveLastPlot();
+        }
+
+        try {
+            ttsHelper.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         mUsbCameraHelper.destroy();
@@ -1001,7 +1027,7 @@ public class CollectActivity extends AppCompatActivity
 
         customizeToolbarIcons();
 
-        lockData(dataLocked);
+        lockData();
 
         return true;
     }
@@ -1095,7 +1121,7 @@ public class CollectActivity extends AppCompatActivity
                 new IntentIntegrator(this)
                         .setPrompt(getString(R.string.main_barcode_text))
                         .setBeepEnabled(false)
-                        .setRequestCode(98)
+                        .setRequestCode(BARCODE_SEARCH_CODE)
                         .initiateScan();
                 break;
             case R.id.summary:
@@ -1110,8 +1136,10 @@ public class CollectActivity extends AppCompatActivity
                 startActivityForResult(i, 2);
                 break;
             case R.id.lockData:
-                dataLocked = !dataLocked;
-                lockData(dataLocked);
+                if (dataLocked == UNLOCKED) dataLocked = LOCKED;
+                else if (dataLocked == LOCKED) dataLocked = FROZEN;
+                else dataLocked = UNLOCKED;
+                lockData();
                 break;
             case android.R.id.home:
                 finish();
@@ -1646,19 +1674,62 @@ public class CollectActivity extends AppCompatActivity
         return Math.sqrt(sum);
     }
 
-    void lockData(boolean lock) {
-        if (lock) {
+    void refreshLock() {
+        //refresh lock state
+        etCurVal.postDelayed(this::lockData, 100);
+    }
+
+    /**
+     * Given the lock state, changes the ui to allow how data is entered.
+     * unlocked, locked, or frozen
+     */
+    void lockData() {
+        if (dataLocked == LOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
-            missingValue.setEnabled(false);
-            deleteValue.setEnabled(false);
-            etCurVal.setEnabled(false);
-            traitLayouts.disableViews();
-        } else {
+            disableDataEntry();
+        } else if (dataLocked == UNLOCKED) {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
-            missingValue.setEnabled(true);
-            deleteValue.setEnabled(true);
-            traitLayouts.enableViews();
+            enableDataEntry();
+        } else {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
+            if (etCurVal.getText().toString().isEmpty()) {
+                enableDataEntry();
+            } else disableDataEntry();
         }
+
+        TraitObject trait = getCurrentTrait();
+        if (trait != null && trait.getTrait() != null) {
+            traitLayouts.refreshLock(trait.getFormat());
+        }
+    }
+
+    public void traitLockData() {
+        if (dataLocked == LOCKED) {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_lock);
+            disableDataEntry();
+        } else if (dataLocked == UNLOCKED) {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_tb_unlock);
+            enableDataEntry();
+        } else {
+            systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
+            if (etCurVal.getText().toString().isEmpty()) {
+                enableDataEntry();
+            } else disableDataEntry();
+        }
+    }
+
+    private void enableDataEntry() {
+        missingValue.setEnabled(true);
+        deleteValue.setEnabled(true);
+        barcodeInput.setEnabled(true);
+        traitLayouts.enableViews();
+    }
+
+    private void disableDataEntry() {
+        missingValue.setEnabled(false);
+        deleteValue.setEnabled(false);
+        barcodeInput.setEnabled(false);
+        traitLayouts.disableViews();
     }
 
     private void moveToPlotID() {
@@ -1693,7 +1764,7 @@ public class CollectActivity extends AppCompatActivity
                 new IntentIntegrator(thisActivity)
                         .setPrompt(getString(R.string.main_barcode_text))
                         .setBeepEnabled(false)
-                        .setRequestCode(98)
+                        .setRequestCode(BARCODE_SEARCH_CODE)
                         .initiateScan();
             }
         });
@@ -1832,21 +1903,75 @@ public class CollectActivity extends AppCompatActivity
                     mSkipLastUsedTrait = true;
                 }
                 break;
-            case 98:
+            case BARCODE_SEARCH_CODE:
                 if(resultCode == RESULT_OK) {
+
+                    if (mGeoNavSnackbar != null) mGeoNavSnackbar.dismiss();
+
                     IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     inputPlotId = plotSearchResult.getContents();
                     rangeBox.setAllRangeID();
                     int[] rangeID = rangeBox.getRangeID();
-                    boolean success = moveToSearch("id", rangeID, null, null, inputPlotId, -1);
+                    boolean success = moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
 
                     //play success or error sound if the plotId was not found
                     if (success) {
                         playSound("hero_simple_celebration");
-                    } else playSound("alert_error");
+                    } else {
+                        boolean found = false;
+                        FieldObject studyObj = null;
+                        ObservationUnitModel[] models = ObservationUnitDao.Companion.getAll();
+                        for (ObservationUnitModel m : models) {
+                            if (m.getObservation_unit_db_id().equals(inputPlotId)) {
+
+                                FieldObject study = StudyDao.Companion.getFieldObject(m.getStudy_id());
+                                if (study != null && study.getExp_name() != null) {
+                                    studyObj = study;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (found && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
+
+                            int studyId = studyObj.getExp_id();
+                            String fieldName = studyObj.getExp_name();
+
+                            String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
+
+                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, 8000, null,
+                                (v) -> {
+
+                                    //updates obs. range view in database
+                                    dt.switchField(studyId);
+
+                                    //refresh collect activity UI
+                                    rangeBox.reload();
+                                    rangeBox.refresh();
+                                    initWidgets(false);
+
+                                    //navigate to the plot
+                                    moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
+
+                                    //update selected item in field adapter using preference
+                                    ep.edit().putString(GeneralKeys.FIELD_FILE, fieldName).apply();
+                                    ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId).apply();
+
+                                    playSound("hero_simple_celebration");
+                                });
+
+                        } else {
+
+                            playSound("alert_error");
+
+                            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+
+                        }
+                    }
                 }
                 break;
-            case 99:
+            case BARCODE_COLLECT_CODE:
                 if(resultCode == RESULT_OK) {
                     // store barcode value as data
                     IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
@@ -1862,11 +1987,15 @@ public class CollectActivity extends AppCompatActivity
                 }
                 break;
             case 252:
+                String success = getString(R.string.trait_photo_tts_success);
+                String fail = getString(R.string.trait_photo_tts_fail);
                 if (resultCode == RESULT_OK) {
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                     traitPhoto.makeImage(traitBox.getCurrentTrait(),
                             traitBox.getNewTraits());
-                }
+
+                    triggerTts(success);
+                } else triggerTts(fail);
                 break;
         }
     }
@@ -1975,8 +2104,21 @@ public class CollectActivity extends AppCompatActivity
         return rangeBox.getRangeRight();
     }
 
-    public Boolean isDataLocked() {
-        return dataLocked;
+    /**
+     * Lock data if the lock feature is on, or if data is frozen then check
+     * if the current value is empty.
+     */
+    public boolean isDataLocked() {
+        return (dataLocked == LOCKED)
+                || (!etCurVal.getText().toString().isEmpty() && dataLocked == FROZEN);
+    }
+
+    public boolean isFrozen() {
+        return dataLocked == FROZEN;
+    }
+
+    public boolean isLocked() {
+        return dataLocked == LOCKED;
     }
 
     public SharedPreferences getPreference() {
@@ -2343,6 +2485,8 @@ public class CollectActivity extends AppCompatActivity
             }
 
             traitType.setSelection(pos);
+
+            refreshLock();
         }
 
         public void update(String parent, String value) {

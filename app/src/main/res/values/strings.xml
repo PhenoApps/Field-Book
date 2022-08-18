@@ -271,6 +271,12 @@
     <string name="preferences_general_system_title">System Defaults</string>
     <string name="preferences_general_files_base_directory_title">Define storage location</string>
     <string name="preferences_general_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
+
+    <string name="preferences_general_tts_title">Text to Speech</string>
+    <string name="preferences_general_tts_description">Enable TTS when data is entered in the Collect activity.</string>
+    <string name="preferences_general_tts_language_title">Choose Language</string>
+    <string name="preferences_general_tts_language_description">Choose a compatible TTS language.</string>
+
     <string name="preferences_source_default_import">Default import source</string>
     <string name="preferences_source_default_export">Default export source</string>
 
@@ -373,8 +379,8 @@
     <string name="about_project_lead_title">Project Lead</string>
     <string name="about_developer_title">Developer</string>
     <string name="about_developer_trife" translatable="false">Trevor Rife</string>
-    <string name="about_developer_trife_location" translatable="false">Kansas State University</string>
-    <string name="about_developer_trife_email" translatable="false">trife@ksu.edu</string>
+    <string name="about_developer_trife_location" translatable="false">Clemson University</string>
+    <string name="about_developer_trife_email" translatable="false">twrife@clemson.edu</string>
     <string name="about_email_title">Email</string>
     <string name="about_developer_trife_website" translatable="false">https://github.com/PhenoApps/Field-Book</string>
     <string name="about_contributors_title">Contributors</string>
@@ -708,6 +714,26 @@
     <string name="brapi_chunk_size">Chunk Size</string>
 
     <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
+    <string name="dialog_new_trait_add_cat_button_text">Add</string>
+    <string name="traits_create_categories_label_text">Enter category label here</string>
+    <string name="traits_create_categories_value_text">Enter category value here</string>
+    <string name="trait_boolean_on">On</string>
+    <string name="trait_boolean_off">Off</string>
+    <string name="trait_photo_tts_success">Picture taken successfully.</string>
+    <string name="trait_photo_tts_fail">Picture trait failed.</string>
+    <string name="trait_print_label_success">Printing label.</string>
+    <string name="trait_gnss_internal_tts">Internal GPS</string>
+    <string name="trait_gnss_external_device_tts">External device %s chosen.</string>
+    <string name="act_collect_missing_value_btn_tts">Not applicable</string>
+    <string name="act_collect_na_btn_tts">Not applicable</string>
+    <string name="act_collect_barcode_btn_tts">Opening barcode scanner</string>
+    <string name="act_collect_delete_btn_tts">Value has been deleted.</string>
+    <string name="trait_numeric_backspace_tts">Backspace</string>
+    <string name="trait_date_save_tts">Date saved</string>
+    <string name="trait_date_minus_day_tts">Back one day</string>
+    <string name="trait_date_next_day_tts">Next day</string>
+    <string name="trait_date_open_calendar_tts">Opening calendar.</string>
+    <string name="trait_location_saved_tts">Location saved.</string>
     <string name="trait_external_camera_collapse_content_desc">Collapse</string>
     <string name="trait_external_camera_expand_content_desc">Expand</string>
     <string name="trait_external_camera_capture_btn">Capture</string>
@@ -717,6 +743,29 @@
     <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
     <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID.</string>
+    <string name="list_item_category_delete_content_description">Delete the category.</string>
+    <string name="dialog_new_trait_add_category_content_description">Add new category.</string>
+    <string name="preferences_category_audio_tts_title">Text to Speech</string>
+
+    <!-- languages, not to be translated -->
+    <string name="language_en" translatable="false">English</string>
+    <string name="language_am" translatable="false">አማርኛ</string>
+    <string name="language_ar" translatable="false">اَلْعَرَبِيَّةُ</string>
+    <string name="language_bn" translatable="false">বাংলা</string>
+    <string name="language_de" translatable="false">Deutsche</string>
+    <string name="language_es" translatable="false">Español</string>
+    <string name="language_fr" translatable="false">Français</string>
+    <string name="language_hi" translatable="false">हिन्दी</string>
+    <string name="language_it" translatable="false">Italiana</string>
+    <string name="language_ja" translatable="false">日本語</string>
+    <string name="language_om_rET" translatable="false">Afaan Oromoo</string>
+    <string name="language_pt_rBR" translatable="false">Português</string>
+    <string name="language_ru" translatable="false">Русский</string>
+    <string name="language_zh_rCN" translatable="false">简体字</string>
+
+    <string name="language">Language</string>
+    <string name="preference_language_default">System Language</string>
+    <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
     <string name="trait_usb_camera_delete_photo">Delete USB Photo</string>
     <string name="delete_photo_dialog_iv_content_description">Photo to be deleted.</string>
     <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>

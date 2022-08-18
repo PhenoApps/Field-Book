@@ -41,45 +41,56 @@ public class TextTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
-        getEtCurVal().setHint("");
-        getEtCurVal().setVisibility(EditText.VISIBLE);
-        getEtCurVal().setSelection(getEtCurVal().getText().length());
-        getEtCurVal().setEnabled(true);
+        EditText valueEditText = getEtCurVal();
+        valueEditText.setHint("");
+        valueEditText.setVisibility(EditText.VISIBLE);
+        valueEditText.setSelection(valueEditText.getText().length());
+        valueEditText.setEnabled(true);
 
-        if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().removeTextChangedListener(getCvText());
-            getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
-            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-            getEtCurVal().addTextChangedListener(getCvText());
-            getEtCurVal().setSelection(getEtCurVal().getText().length());
-        } else {
-            getEtCurVal().removeTextChangedListener(getCvText());
-            getEtCurVal().setText("");
-            getEtCurVal().setTextColor(Color.BLACK);
-
-            if (getCurrentTrait().getDefaultValue() != null && getCurrentTrait().getDefaultValue().length() > 0) {
-                getEtCurVal().setText(getCurrentTrait().getDefaultValue());
-                updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
-            }
-
-            getEtCurVal().addTextChangedListener(getCvText());
-            getEtCurVal().setSelection(getEtCurVal().getText().length());
-        }
+        super.loadLayout();
 
         // This is needed to fix a keyboard bug
-        mHandler.postDelayed(new Runnable() {
-            public void run() {
-                getEtCurVal().dispatchTouchEvent(MotionEvent.obtain(
-                        SystemClock.uptimeMillis(),
-                        SystemClock.uptimeMillis(),
-                        MotionEvent.ACTION_DOWN, 0, 0, 0));
-                getEtCurVal().dispatchTouchEvent(MotionEvent.obtain(
-                        SystemClock.uptimeMillis(),
-                        SystemClock.uptimeMillis(),
-                        MotionEvent.ACTION_UP, 0, 0, 0));
-                getEtCurVal().setSelection(getEtCurVal().getText().length());
-            }
+        mHandler.postDelayed(() -> {
+            valueEditText.dispatchTouchEvent(MotionEvent.obtain(
+                    SystemClock.uptimeMillis(),
+                    SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_DOWN, 0, 0, 0));
+            valueEditText.dispatchTouchEvent(MotionEvent.obtain(
+                    SystemClock.uptimeMillis(),
+                    SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_UP, 0, 0, 0));
+            valueEditText.setSelection(getEtCurVal().getText().length());
         }, 300);
+
+        valueEditText.setEnabled(!isLocked);
+    }
+
+    @Override
+    public void afterLoadExists(CollectActivity act, String value) {
+        super.afterLoadExists(act, value);
+        getEtCurVal().removeTextChangedListener(getCvText());
+        getEtCurVal().setText(value);
+        getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
+        getEtCurVal().addTextChangedListener(getCvText());
+        getEtCurVal().setSelection(getEtCurVal().getText().length());
+    }
+
+    @Override
+    public void afterLoadNotExists(CollectActivity act) {
+        super.afterLoadNotExists(act);
+        getEtCurVal().removeTextChangedListener(getCvText());
+        getEtCurVal().setText("");
+        getEtCurVal().setTextColor(Color.BLACK);
+        getEtCurVal().addTextChangedListener(getCvText());
+        getEtCurVal().setSelection(getEtCurVal().getText().length());
+    }
+
+    @Override
+    public void afterLoadDefault(CollectActivity act) {
+        super.afterLoadDefault(act);
+
+        getEtCurVal().addTextChangedListener(getCvText());
+        getEtCurVal().setSelection(getEtCurVal().getText().length());
     }
 
     @Override
