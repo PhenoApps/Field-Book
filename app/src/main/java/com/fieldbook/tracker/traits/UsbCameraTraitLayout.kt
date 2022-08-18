@@ -208,6 +208,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         etCurVal.isEnabled = false
 
         loadAdapterItems()
+
+        super.loadLayout()
     }
 
     override fun deleteTraitListener() {
@@ -227,24 +229,26 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
     private fun showDeleteImageDialog(model: ImageAdapter.Model) {
 
-        context.contentResolver.openInputStream(Uri.parse(model.uri)).use { input ->
+        if (!isLocked) {
+            context.contentResolver.openInputStream(Uri.parse(model.uri)).use { input ->
 
-            val imageView = ImageView(context)
-            imageView.setImageBitmap(BitmapFactory.decodeStream(input))
+                val imageView = ImageView(context)
+                imageView.setImageBitmap(BitmapFactory.decodeStream(input))
 
-            AlertDialog.Builder(context)
-                .setTitle(R.string.trait_usb_camera_delete_photo)
-                .setOnCancelListener { dialog -> dialog.dismiss() }
-                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                AlertDialog.Builder(context)
+                    .setTitle(R.string.trait_usb_camera_delete_photo)
+                    .setOnCancelListener { dialog -> dialog.dismiss() }
+                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
 
-                    dialog.dismiss()
+                        dialog.dismiss()
 
-                    deleteItem(model)
+                        deleteItem(model)
 
-                }
-                .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
-                .setView(imageView)
-                .show()
+                    }
+                    .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
+                    .setView(imageView)
+                    .show()
+            }
         }
     }
 
@@ -386,20 +390,23 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
     override fun onItemClicked(model: ImageAdapter.Model) {
 
-        //get current trait's trait name, use it as a plot_media directory
-        currentTrait?.trait?.let { traitName ->
+        if (!isLocked) {
 
-            DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
+            //get current trait's trait name, use it as a plot_media directory
+            currentTrait?.trait?.let { traitName ->
 
-                val plot = cRange.plot_id
+                DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
 
-                DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
+                    val plot = cRange.plot_id
 
-                    highResImages.firstOrNull { it.name == (DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.name ?: String()) }?.let { image ->
+                    DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
 
-                        activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
-                            it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        })
+                        highResImages.firstOrNull { it.name == (DocumentFile.fromSingleUri(context, Uri.parse(model.uri))?.name ?: String()) }?.let { image ->
+
+                            activity?.startActivity(Intent(Intent.ACTION_VIEW, image.uri).also {
+                                it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            })
+                        }
                     }
                 }
             }
