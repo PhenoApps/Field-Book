@@ -365,19 +365,43 @@ class GeodeticUtils {
          * https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude
          * basically: normal gps ~4decimal places, differential 5, rtk 8
          */
+//        fun truncateFixQuality(x: String, fix: String): String = try {
+//
+//            val tokens = x.split(".")
+//
+//            val head = tokens[0]
+//            val tail = tokens[1]
+//
+//            "$head." + when (fix) {
+//                "RTK", "manual input mode" -> if (tail.length > 8) tail.substring(0, 8) else tail
+//                "DGPS", "Float RTK" -> if (tail.length > 5) tail.substring(0, 5) else tail
+//                "internal" -> if (tail.length > 4) tail.substring(0, 4) else tail
+//                else -> if (tail.length > 3) tail.substring(0, 3) else tail
+//            }
+//
+//        } catch (e: Exception) {
+//
+//            e.printStackTrace()
+//
+//            x
+//        }
+
+        /**
+         * As of issue #477 v5.3, standardize truncation to 7 digits
+         */
         fun truncateFixQuality(x: String, fix: String): String = try {
 
             val tokens = x.split(".")
-
             val head = tokens[0]
             val tail = tokens[1]
 
-            "$head." + when (fix) {
-                "RTK", "manual input mode" -> if (tail.length > 8) tail.substring(0, 8) else tail
-                "DGPS", "Float RTK" -> if (tail.length > 5) tail.substring(0, 5) else tail
-                "internal" -> if (tail.length > 4) tail.substring(0, 4) else tail
-                else -> if (tail.length > 3) tail.substring(0, 3) else tail
-            }
+            val n = tail.length
+
+            "$head." + if (n > 7) {
+
+                tail.substring(0, 7)
+
+            } else tail
 
         } catch (e: Exception) {
 
