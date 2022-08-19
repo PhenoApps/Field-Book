@@ -11,6 +11,7 @@
         <new>Updated language selection options</new>
         <new>Updated categorical/multicat trait creator</new>
         <new>Scanning barcodes searches across loaded fields for matches</new>
+        <new>Improved location and GNSS trait collection</new>
     </release>
 
     <release
