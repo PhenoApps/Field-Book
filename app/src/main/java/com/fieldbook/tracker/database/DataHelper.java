@@ -375,13 +375,13 @@ public class DataHelper {
     /**
      * Get user created trait observations for currently selected study
      */
-    public List<FieldBookImage> getUserTraitImageObservations() {
+    public List<FieldBookImage> getUserTraitImageObservations(Context ctx) {
 
         open();
 
         String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        return ObservationDao.Companion.getUserTraitImageObservations(exp_id, missingPhoto);
+        return ObservationDao.Companion.getUserTraitImageObservations(ctx, exp_id, missingPhoto);
 
 //        List<Image> images = new ArrayList<>();
 //
@@ -467,11 +467,11 @@ public class DataHelper {
 //        return observations;
     }
 
-    public List<FieldBookImage> getWrongSourceImageObservations(String hostUrl) {
+    public List<FieldBookImage> getWrongSourceImageObservations(Context ctx, String hostUrl) {
 
         open();
 
-        return ObservationDao.Companion.getWrongSourceImageObservations(hostUrl, missingPhoto);
+        return ObservationDao.Companion.getWrongSourceImageObservations(ctx, hostUrl, missingPhoto);
 
 //        List<Image> images = new ArrayList<>();
 //
@@ -588,11 +588,11 @@ public class DataHelper {
     /**
      * Get the image observations for brapi export to external system
      */
-    public List<FieldBookImage> getImageObservations(String hostUrl) {
+    public List<FieldBookImage> getImageObservations(Context ctx, String hostUrl) {
 
         open();
 
-        return ObservationDao.Companion.getHostImageObservations(hostUrl, missingPhoto);
+        return ObservationDao.Companion.getHostImageObservations(ctx, hostUrl, missingPhoto);
 
 //        List<Image> images = new ArrayList<Image>();
 //

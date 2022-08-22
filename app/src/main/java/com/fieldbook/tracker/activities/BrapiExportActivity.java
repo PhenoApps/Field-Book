@@ -231,13 +231,13 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private void loadNewImages() {
         for (FieldBookImage image : imagesNew) {
-            image.loadImage();
+            image.loadImage(this);
         }
     }
 
     private void loadEditedIncompleteImages() {
         for (FieldBookImage image : imagesEditedIncomplete) {
-            image.loadImage();
+            image.loadImage(this);
         }
     }
 
@@ -684,11 +684,11 @@ public class BrapiExportActivity extends AppCompatActivity {
         List<Observation> userCreatedTraitObservations = dataHelper.getUserTraitObservations();
         List<Observation> wrongSourceObservations = dataHelper.getWrongSourceObservations(hostURL);
 
-        List<FieldBookImage> images = dataHelper.getImageObservations(hostURL);
+        List<FieldBookImage> images = dataHelper.getImageObservations(this, hostURL);
         imagesNew.clear();
         imagesEditedIncomplete.clear();
-        List<FieldBookImage> userCreatedTraitImages = dataHelper.getUserTraitImageObservations();
-        List<FieldBookImage> wrongSourceImages = dataHelper.getWrongSourceImageObservations(hostURL);
+        List<FieldBookImage> userCreatedTraitImages = dataHelper.getUserTraitImageObservations(this);
+        List<FieldBookImage> wrongSourceImages = dataHelper.getWrongSourceImageObservations(this, hostURL);
 
         for (Observation observation : observations) {
             switch (observation.getStatus()) {
