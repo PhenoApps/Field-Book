@@ -6,9 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.SurfaceTexture
+import android.graphics.*
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
@@ -25,9 +23,12 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.receivers.UsbAttachReceiver
+import com.fieldbook.tracker.receivers.UsbDetachReceiver
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
 import com.serenegiant.SimpleUVCCameraTextureView
 import com.serenegiant.usb.UVCCamera
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.phenoapps.adapters.ImageAdapter
 import org.phenoapps.androidlibrary.Utils
@@ -43,17 +44,19 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     companion object {
         const val TAG = "UsbTrait"
         const val type = "usb camera"
+        private const val CAMERA_DELAY_MS = 2000L
     }
 
     private var activity: Activity? = null
     private var mUsbPermissionReceiver: UsbPermissionReceiver? = null
+    private var mUsbDetachReceiver: UsbDetachReceiver? = null
+    private var mUsbAttachReceiver: UsbAttachReceiver? = null
     private var mUsbCameraHelper: UsbCameraHelper? = null
     private var textureView: SimpleUVCCameraTextureView? = null
     private var connectBtn: ImageButton? = null
     private var captureBtn: ImageButton? = null
     private var recyclerView: RecyclerView? = null
     private var previewGroup: Group? = null
-    private var imageView: ImageView? = null
     private var constraintLayout: ConstraintLayout? = null
 
     constructor(context: Context?) : super(context)
@@ -78,29 +81,12 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
         captureBtn = findViewById(R.id.usb_camera_fragment_capture_btn)
         recyclerView = findViewById(R.id.usb_camera_fragment_rv)
         previewGroup = findViewById(R.id.usb_camera_fragment_preview_group)
-        imageView = findViewById(R.id.usb_camera_fragment_iv)
-
-        mUsbPermissionReceiver = UsbPermissionReceiver {
-
-            Log.d(TAG, "Permission result $it")
-
-            try {
-
-                context.unregisterReceiver(mUsbPermissionReceiver)
-
-            } catch (ignore: Exception) {} //might not be registered if already paired
-
-            setup()
-        }
 
         activity = act
 
         mUsbCameraHelper = (activity as? UsbCameraInterface)?.getCameraHelper()
 
         recyclerView?.adapter = ImageAdapter(this)
-
-        val filter = IntentFilter(UsbPermissionReceiver.ACTION_USB_PERMISSION)
-        context.registerReceiver(mUsbPermissionReceiver, filter)
 
         connectBtn?.setOnClickListener {
 
@@ -122,6 +108,95 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                 }
             }
         }
+
+        registerReconnectListener()
+    }
+
+    private fun registerReconnectListener() {
+
+        try {
+
+            context?.unregisterReceiver(mUsbPermissionReceiver)
+
+        } catch (ignore: Exception) {}
+
+        mUsbPermissionReceiver = UsbPermissionReceiver {
+
+            Log.d(TAG, "Permission result $it")
+
+            previewGroup?.visibility = View.VISIBLE
+
+            try {
+
+                context.unregisterReceiver(mUsbPermissionReceiver)
+
+            } catch (ignore: Exception) {} //might not be registered if already paired
+
+            setup()
+        }
+
+        val filter = IntentFilter(UsbPermissionReceiver.ACTION_USB_PERMISSION)
+
+        context.registerReceiver(mUsbPermissionReceiver, filter)
+    }
+
+    private fun registerDetachListener() {
+
+        try {
+
+            context?.unregisterReceiver(mUsbDetachReceiver)
+
+        } catch (ignore: Exception) {}
+
+        try {
+
+            val detachFilter = IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED)
+
+            mUsbDetachReceiver = UsbDetachReceiver {
+
+                Log.d(TAG, "Detaching")
+
+                activity?.runOnUiThread {
+
+                    previewGroup?.visibility = View.GONE
+
+                    registerAttachListener()
+                }
+            }
+
+            context.registerReceiver(mUsbDetachReceiver, detachFilter)
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+
+        }
+    }
+
+    private fun registerAttachListener() {
+
+        try {
+
+            context?.unregisterReceiver(mUsbAttachReceiver)
+
+        } catch (ignore: Exception) {}
+
+        mUsbAttachReceiver = UsbAttachReceiver {
+
+            Log.d(TAG, "Usb attach")
+
+            previewGroup?.visibility = VISIBLE
+
+            try {
+
+                context.unregisterReceiver(mUsbAttachReceiver)
+
+            } catch (ignore: Exception) {} //might not be registered if already paired
+        }
+
+        val filter = IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+
+        context.registerReceiver(mUsbAttachReceiver, filter)
     }
 
     private fun setup() {
@@ -146,11 +221,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
             }
 
-            override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
-
-                imageView?.setImageBitmap(textureView?.bitmap)
-
-            }
+            override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {}
         }
 
         if (textureView?.isAvailable == true) {
@@ -165,6 +236,8 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     private fun initPreview() {
 
         Log.d(TAG, "Init preview")
+
+        registerDetachListener()
 
         textureView?.let { tv ->
 
@@ -192,9 +265,33 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                         Log.d(TAG, "Capture click.")
 
                         saveBitmapToStorage()
+
+                        delay(CAMERA_DELAY_MS)
+
+                        scrollToLast()
                     }
                 }
             }
+        }
+    }
+
+    private fun scrollToLast() {
+
+        try {
+
+            recyclerView?.postDelayed({
+
+                val pos = recyclerView?.adapter?.itemCount ?: 1
+
+                recyclerView?.scrollToPosition(pos - 1)
+
+            }, 500L)
+
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+
         }
     }
 
