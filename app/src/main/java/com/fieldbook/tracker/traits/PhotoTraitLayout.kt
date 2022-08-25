@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.adapters.GalleryImageAdapter
 import com.fieldbook.tracker.database.dao.ObservationDao
@@ -53,14 +54,13 @@ class PhotoTraitLayout : BaseTraitLayout {
     private var mCurrentPhotoPath: String? = null
     private var activity: Activity? = null
 
-    constructor(context: Context?) : super(context) {}
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
+    constructor(context: Context?) : super(context)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context,
         attrs,
         defStyleAttr
-    ) {
-    }
+    )
 
     override fun setNaTraitsText() {}
     override fun type() = type
@@ -90,6 +90,7 @@ class PhotoTraitLayout : BaseTraitLayout {
 
         loadLayoutWork()
 
+        super.loadLayout()
     }
 
     /**
@@ -242,7 +243,7 @@ class PhotoTraitLayout : BaseTraitLayout {
 
                         photo?.setSelection((photo?.count ?: 1) - 1)
                         photo?.onItemClickListener =
-                            OnItemClickListener { arg0: AdapterView<*>?, arg1: View?, pos: Int, arg3: Long ->
+                            OnItemClickListener { _: AdapterView<*>?, _: View?, pos: Int, _: Long ->
                                 displayPlotImage(
                                     photos[pos].uri
                                 )
@@ -402,104 +403,105 @@ class PhotoTraitLayout : BaseTraitLayout {
                         GeneralKeys.FIRST_NAME,
                         ""
                     ) + " " + prefs.getString(GeneralKeys.LAST_NAME, ""),
-                    prefs.getString(GeneralKeys.LOCATION, ""),
+                    (activity as? CollectActivity)?.locationByPreferences,
                     "",
                     expId,
                     observation.dbId,
                     observation.lastSyncedTime
-                ) //TODO add notes and exp_id
-                //TODO update location when merged in develop
+                )
             }
         }
     }
 
     private fun deletePhotoWarning(brapiDelete: Boolean, newTraits: MutableMap<String, String>?) {
-        val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle(context.getString(R.string.dialog_warning))
-        builder.setMessage(context.getString(R.string.trait_delete_warning_photo))
-        builder.setPositiveButton(context.getString(R.string.dialog_yes)) { dialog, which ->
-            dialog.dismiss()
-            if (brapiDelete) {
-                Toast.makeText(
-                    context.applicationContext,
-                    context.getString(R.string.brapi_delete_message),
-                    Toast.LENGTH_SHORT
-                ).show()
-                //updateTrait(parent, currentTrait.getFormat(), getString(R.string.brapi_na));
-            }
-            if ((photo?.count ?: 0) > 0) {
-
-                currentTrait.trait?.let { traitName ->
-
-                    val photosDir = getFieldMediaDirectory(context, traitName)
-
-                    try {
-
-                        val thumbsDir = photosDir?.findFile(".thumbnails")
-                        val photosList = getPlotMedia(photosDir, cRange.plot_id, ".jpg").toMutableList()
-                        val thumbsList = getPlotMedia(thumbsDir, cRange.plot_id, ".jpg")
-                        val index = photo?.selectedItemPosition ?: 0
-                        val selected = photosList[index]
-                        val thumbSelected = thumbsList[index]
-                        val item = selected.uri
-                        if (!brapiDelete) {
-                            selected.delete()
-                            thumbSelected.delete()
-                            photosList.removeAt(index)
-                        }
-                        val file = DocumentFile.fromSingleUri(context, item)
-                        if (file != null && file.exists()) {
-                            file.delete()
-                        }
-
-                        // Remove individual images
-                        if (brapiDelete) {
-                            updateTraitAllowDuplicates(
-                                currentTrait.trait,
-                                "photo",
-                                item.toString(),
-                                "NA",
-                                newTraits
-                            )
-                            loadLayout()
-                        } else {
-                            ConfigActivity.dt.deleteTraitByValue(
-                                expId,
-                                cRange.plot_id,
-                                currentTrait.trait,
-                                item.toString()
-                            )
-                        }
-
-                        // Only do a purge by trait when there are no more images left
-                        if (!brapiDelete) {
-                            if (photosList.size == 0) removeTrait(currentTrait.trait)
-                        }
-
-                    } catch (e: Exception) {
-
-                        e.printStackTrace()
-
-                    }
+        if (!isLocked) {
+            val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle(context.getString(R.string.dialog_warning))
+            builder.setMessage(context.getString(R.string.trait_delete_warning_photo))
+            builder.setPositiveButton(context.getString(R.string.dialog_yes)) { dialog, _ ->
+                dialog.dismiss()
+                if (brapiDelete) {
+                    Toast.makeText(
+                        context.applicationContext,
+                        context.getString(R.string.brapi_delete_message),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    //updateTrait(parent, currentTrait.getFormat(), getString(R.string.brapi_na));
                 }
+                if ((photo?.count ?: 0) > 0) {
 
-            } else {
+                    currentTrait.trait?.let { traitName ->
 
-                // If an NA exists, delete it
-                ConfigActivity.dt.deleteTraitByValue(
-                    expId,
-                    cRange.plot_id,
-                    currentTrait.trait,
-                    "NA"
-                )
+                        val photosDir = getFieldMediaDirectory(context, traitName)
+
+                        try {
+
+                            val thumbsDir = photosDir?.findFile(".thumbnails")
+                            val photosList = getPlotMedia(photosDir, cRange.plot_id, ".jpg").toMutableList()
+                            val thumbsList = getPlotMedia(thumbsDir, cRange.plot_id, ".jpg")
+                            val index = photo?.selectedItemPosition ?: 0
+                            val selected = photosList[index]
+                            val thumbSelected = thumbsList[index]
+                            val item = selected.uri
+                            if (!brapiDelete) {
+                                selected.delete()
+                                thumbSelected.delete()
+                                photosList.removeAt(index)
+                            }
+                            val file = DocumentFile.fromSingleUri(context, item)
+                            if (file != null && file.exists()) {
+                                file.delete()
+                            }
+
+                            // Remove individual images
+                            if (brapiDelete) {
+                                updateTraitAllowDuplicates(
+                                    currentTrait.trait,
+                                    "photo",
+                                    item.toString(),
+                                    "NA",
+                                    newTraits
+                                )
+                                loadLayout()
+                            } else {
+                                ConfigActivity.dt.deleteTraitByValue(
+                                    expId,
+                                    cRange.plot_id,
+                                    currentTrait.trait,
+                                    item.toString()
+                                )
+                            }
+
+                            // Only do a purge by trait when there are no more images left
+                            if (!brapiDelete) {
+                                if (photosList.size == 0) removeTrait(currentTrait.trait)
+                            }
+
+                        } catch (e: Exception) {
+
+                            e.printStackTrace()
+
+                        }
+                    }
+
+                } else {
+
+                    // If an NA exists, delete it
+                    ConfigActivity.dt.deleteTraitByValue(
+                        expId,
+                        cRange.plot_id,
+                        currentTrait.trait,
+                        "NA"
+                    )
+                }
+                loadLayoutWork()
             }
-            loadLayoutWork()
+            builder.setNegativeButton(context.getString(R.string.dialog_no)) { dialog, _ -> dialog.dismiss() }
+            val alert = builder.create()
+            alert.show()
+            DialogUtils.styleDialogs(alert)
         }
-        builder.setNegativeButton(context.getString(R.string.dialog_no)) { dialog, _ -> dialog.dismiss() }
-        val alert = builder.create()
-        alert.show()
-        DialogUtils.styleDialogs(alert)
     }
 
     private fun takePicture() {
@@ -539,29 +541,41 @@ class PhotoTraitLayout : BaseTraitLayout {
             return repInt.toString()
         }
 
+    override fun refreshLock() {
+        super.refreshLock()
+        (context as CollectActivity).traitLockData()
+        try {
+            loadLayout()
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private inner class PhotoTraitOnClickListener : OnClickListener {
         override fun onClick(view: View) {
-            try {
-                val m: Int = try {
-                    currentTrait.details.toInt()
-                } catch (n: Exception) {
-                    0
+            if (!isLocked) {
+                try {
+                    val m: Int = try {
+                        currentTrait.details.toInt()
+                    } catch (n: Exception) {
+                        0
+                    }
+                    val photosDir = getFieldMediaDirectory(context, "photos")
+                    val plot = cRange.plot_id
+                    val locations = getPlotMedia(photosDir, plot, ".jpg")
+                    if (photosDir != null) {
+                        // Do not take photos if limit is reached
+                        if (m == 0 || locations.size < m) {
+                            takePicture()
+                        } else Utils.makeToast(
+                            context,
+                            context.getString(R.string.traits_create_photo_maximum)
+                        )
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Utils.makeToast(context, context.getString(R.string.trait_error_hardware_missing))
                 }
-                val photosDir = getFieldMediaDirectory(context, "photos")
-                val plot = cRange.plot_id
-                val locations = getPlotMedia(photosDir, plot, ".jpg")
-                if (photosDir != null) {
-                    // Do not take photos if limit is reached
-                    if (m == 0 || locations.size < m) {
-                        takePicture()
-                    } else Utils.makeToast(
-                        context,
-                        context.getString(R.string.traits_create_photo_maximum)
-                    )
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Utils.makeToast(context, context.getString(R.string.trait_error_hardware_missing))
             }
         }
     }

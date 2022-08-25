@@ -1,14 +1,11 @@
 package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.objects.TraitObject;
 
 import java.util.ArrayList;
 
@@ -30,7 +27,7 @@ public class LayoutCollections {
             BaseTraitLayout layout = _activity.findViewById(traitID);
             if (layout.type().equals("gnss")
                 || layout.type().equals(UsbCameraTraitLayout.type)
-                || layout.type().equals("photo")
+                || layout.type().equals(PhotoTraitLayout.type)
                 || layout.type().equals("zebra label print")) layout.init(_activity);
             else layout.init();
             traitLayouts.add(layout);

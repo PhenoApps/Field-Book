@@ -6,20 +6,24 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.SurfaceTexture
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Group
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -38,7 +42,6 @@ import org.phenoapps.receivers.UsbPermissionReceiver
 import org.phenoapps.usb.camera.UsbCameraHelper
 import kotlin.math.abs
 
-//TODO merge with develop and update locking for this trait
 class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
     companion object {
@@ -260,15 +263,18 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 captureBtn?.setOnClickListener {
 
-                    runBlocking {
+                    if (!isLocked) {
 
-                        Log.d(TAG, "Capture click.")
+                        runBlocking {
 
-                        saveBitmapToStorage()
+                            Log.d(TAG, "Capture click.")
 
-                        delay(CAMERA_DELAY_MS)
+                            saveBitmapToStorage()
 
-                        scrollToLast()
+                            delay(CAMERA_DELAY_MS)
+
+                            scrollToLast()
+                        }
                     }
                 }
             }
@@ -298,8 +304,6 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     override fun init() {}
     override fun loadLayout() {
 
-        Log.d(TAG, "Load layout")
-
         etCurVal.removeTextChangedListener(cvText)
         etCurVal.visibility = GONE
         etCurVal.isEnabled = false
@@ -311,14 +315,17 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
     override fun deleteTraitListener() {
 
-        (recyclerView?.layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()?.let { index ->
+        if (!isLocked) {
 
-            if (index > -1) {
+            (recyclerView?.layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()?.let { index ->
 
-                (recyclerView?.adapter as? ImageAdapter)?.currentList?.get(index)?.let { model ->
+                if (index > -1) {
 
-                    showDeleteImageDialog(model)
+                    (recyclerView?.adapter as? ImageAdapter)?.currentList?.get(index)?.let { model ->
 
+                        showDeleteImageDialog(model)
+
+                    }
                 }
             }
         }
@@ -373,12 +380,11 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                             bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 
-                            //TODO when #469 is merged integrate location helper
                             ConfigActivity.dt.insertUserTraits(
                                 plot, traitName, type, file.uri.toString(),
                                 prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
                                         + prefs.getString(GeneralKeys.LAST_NAME, ""),
-                                prefs.getString(GeneralKeys.LOCATION, ""), "", studyId,
+                                (activity as? CollectActivity)?.locationByPreferences, "", studyId,
                                 null,
                                 null
                             )
@@ -513,5 +519,10 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     override fun onItemDeleted(model: ImageAdapter.Model) {
 
         showDeleteImageDialog(model)
+    }
+
+    override fun refreshLock() {
+        super.refreshLock()
+        (context as CollectActivity).traitLockData()
     }
 }
