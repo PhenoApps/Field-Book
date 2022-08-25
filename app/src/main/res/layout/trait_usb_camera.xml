@@ -37,6 +37,7 @@
             android:id="@+id/usb_camera_fragment_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:minHeight="256dp"
             app:layout_constrainedHeight="true"
             app:layout_constraintVertical_bias="0"
             app:layout_constraintEnd_toEndOf="parent"
