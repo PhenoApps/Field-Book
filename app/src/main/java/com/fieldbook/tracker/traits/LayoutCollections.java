@@ -2,6 +2,7 @@ package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.fieldbook.tracker.R;
@@ -62,13 +63,41 @@ public class LayoutCollections {
 
     public void enableViews() {
         for (LinearLayout traitLayout : traitLayouts) {
-            CollectActivity.enableViews(traitLayout);
+            enableViews(true, traitLayout);
         }
     }
 
     public void disableViews() {
-        for (LinearLayout traitLayout : traitLayouts) {
-            CollectActivity.disableViews(traitLayout);
+        for (BaseTraitLayout traitLayout : traitLayouts) {
+            String type = traitLayout.type();
+            if (!type.equals("photo") && !type.equals("audio") && !type.equals("percent"))
+                enableViews(false, traitLayout);
+        }
+    }
+
+    public void enableViews(Boolean toggle, ViewGroup layout) {
+        layout.setEnabled(false);
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            View child = layout.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                enableViews(toggle, (ViewGroup) child);
+            } else {
+                child.setEnabled(toggle);
+            }
+        }
+    }
+
+    /**
+     * Triggers trait specific code for refreshing lock status.
+     * Some traits may need to refresh UI.
+     * Called when range box or trait box moves.
+     * @param trait the trait name s.a height
+     */
+    public void refreshLock(String trait) {
+        for (BaseTraitLayout traitLayout : traitLayouts) {
+            if (traitLayout.type().equals(trait)) {
+                traitLayout.refreshLock();
+            }
         }
     }
 }

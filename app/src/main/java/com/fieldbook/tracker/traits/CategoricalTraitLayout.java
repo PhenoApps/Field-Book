@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
@@ -25,14 +26,19 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CategoricalTraitLayout extends BaseTraitLayout {
 
     //todo this can eventually be merged with multicattraitlayout when we can support a switch in traits on how many categories to allow user to select
+
+    public static String[] POSSIBLE_VALUES = new String[]{ "qualitative", "categorical" };
 
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
@@ -69,41 +75,90 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
+
         final String trait = getCurrentTrait().getTrait();
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
-
-        if (!getNewTraits().containsKey(trait)) {
-            getEtCurVal().setText("");
-            getEtCurVal().setTextColor(Color.BLACK);
-        } else {
-            getEtCurVal().setText(getNewTraits().get(trait).toString());
-            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-        }
 
         //read the preferences, default to displaying values instead of labels
         String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
 
         //read the json object stored in additional info of the trait object (only in BrAPI imported traits)
-        Gson g = new Gson();
-        String[] buttonCat;
-        String additionalInfo = getCurrentTrait().getAdditionalInfo();
+        ArrayList<BrAPIScaleValidValuesCategories> cats = new ArrayList<>();
 
-        if (additionalInfo.equals("")){
-            //If imported before additional info was added, use original retrieval from categories
-            buttonCat = getCurrentTrait().getCategories().split("/");
-        } else { //otherwise decode the json object and populate the buttons with the value or label
-            JsonObject catObject = g.fromJson(additionalInfo,JsonObject.class);
-            JsonArray catValueLabel = catObject.getAsJsonArray("catValueLabel");
-            buttonCat = new String[catValueLabel.size()];
-            JsonObject valueLabelRow;
-            for (int i=0; i<catValueLabel.size();i++){
-                valueLabelRow = g.fromJson(catValueLabel.get(i), JsonObject.class);
-                buttonCat[i] = valueLabelRow.get(labelValPref).getAsString();
+        String categoryString = getCurrentTrait().getCategories();
+        try {
+
+            cats = CategoryJsonUtil.Companion.decode(categoryString);
+
+        } catch (Exception e) {
+
+            String[] cat = categoryString.split("/");
+            for (String label : cat) {
+                BrAPIScaleValidValuesCategories c = new BrAPIScaleValidValuesCategories();
+                c.setLabel(label);
+                c.setValue(label);
+                cats.add(c);
             }
         }
 
-        final String[] cat = buttonCat;
+        if (!getNewTraits().containsKey(trait)) {
+
+            getEtCurVal().setText("");
+
+            getEtCurVal().setTextColor(Color.BLACK);
+
+        } else {
+
+            //if there is a saved value, check if its json or old string
+            String savedJson = getNewTraits().get(trait);
+
+            if (savedJson != null) {
+
+                //check if its the new json
+                try {
+
+                    ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(savedJson);
+
+                    if (!c.isEmpty()) {
+
+                        //get the value from the single-sized array
+                        BrAPIScaleValidValuesCategories labelVal = c.get(0);
+
+                        //check that this pair is a valid label/val pair in the category,
+                        //if it is then set the text based on the preference
+                        if (CategoryJsonUtil.Companion.contains(cats, labelVal)) {
+
+                            //display the category based on preferences
+                            if (labelValPref.equals("value")) {
+
+                                getEtCurVal().setText(labelVal.getValue());
+
+                            } else {
+
+                                getEtCurVal().setText(labelVal.getLabel());
+
+                            }
+
+                            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
+
+                        }
+                    }
+
+                } catch (Exception e) {
+
+                    e.printStackTrace(); //if it fails to decode, assume its an old string
+
+                    if (CategoryJsonUtil.Companion.contains(cats, savedJson)) {
+
+                        getEtCurVal().setText(savedJson);
+
+                        getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
+                    }
+                }
+            }
+        }
 
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
         layoutManager.setFlexWrap(FlexWrap.WRAP);
@@ -113,20 +168,55 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
         if (!((CollectActivity) getContext()).isDataLocked()) {
 
-            gridMultiCat.setAdapter(new CategoricalTraitAdapter(getContext()) {
+            ArrayList<BrAPIScaleValidValuesCategories> finalCats = cats;
+            gridMultiCat.setAdapter(new CategoryTraitAdapter(getContext()) {
 
                 @Override
-                public void onBindViewHolder(CategoricalTraitViewHolder holder, int position) {
+                public void onBindViewHolder(CategoryTraitViewHolder holder, int position) {
                     holder.bindTo();
-                    holder.mButton.setText(cat[position]);
-                    holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
-                    if (hasCategory(cat[position], getEtCurVal().getText().toString()))
-                        pressOnButton(holder.mButton);
+
+                    //get the label for this position
+                    BrAPIScaleValidValuesCategories pair = finalCats.get(position);
+
+                    //update button with the preference based text
+                    if (labelValPref.equals("value")) {
+
+                        holder.mButton.setText(pair.getValue());
+
+                    } else {
+
+                        holder.mButton.setText(pair.getLabel());
+
+                    }
+
+                    //set the buttons tag to the json, when clicked this is updated in db
+                    holder.mButton.setTag(pair);
+                    holder.mButton.setOnClickListener(createClickListener(holder.mButton, position));
+
+                    //update the button's state if this category is selected
+                    String currentText = getEtCurVal().getText().toString();
+
+                    if (labelValPref.equals("value")) {
+
+                        if (currentText.equals(pair.getValue())) {
+
+                            pressOnButton(holder.mButton);
+
+                        } else pressOffButton(holder.mButton);
+
+                    } else {
+
+                        if (currentText.equals(pair.getLabel())) {
+
+                            pressOnButton(holder.mButton);
+
+                        } else pressOffButton(holder.mButton);
+                    }
                 }
 
                 @Override
                 public int getItemCount() {
-                    return cat.length;
+                    return finalCats.size();
                 }
             });
         }
@@ -144,84 +234,36 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     }
 
     private OnClickListener createClickListener(final Button button, int position) {
-        return new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String normalizedCategory = normalizeCategory();
-                getEtCurVal().setText(normalizedCategory);
-                final String category = button.getText().toString();
+        return v -> {
 
-                if (hasCategory(category, normalizedCategory)) {
+            if (!((CollectActivity) getContext()).isDataLocked()) {
+                //cast tag to the buttons label/val pair
+                final BrAPIScaleValidValuesCategories pair = (BrAPIScaleValidValuesCategories) button.getTag();
+                final ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>(); //this is saved in the db
+
+                final String category = button.getText().toString();
+                String currentCat = getEtCurVal().getText().toString(); //displayed in the edit text
+
+                if (currentCat.equals(category)) {
                     pressOffButton(button);
-                    removeCategory(category);
+                    currentCat = "";
                 } else {
                     pressOnButton(button);
-                    addCategory(category);
+                    currentCat = category;
+                    scale.add(pair);
                 }
 
-                String[] catList = getCategoryList();
-
-                List<String> list = new ArrayList<>(Arrays.asList(catList));
-                list.remove(category);
-                catList = list.toArray(new String[0]);
-
-                for(String cat : catList) {
-                    removeCategory(cat);
-                }
+                getEtCurVal().setText(currentCat);
 
                 updateTrait(getCurrentTrait().getTrait(),
                         getCurrentTrait().getFormat(),
-                        getEtCurVal().getText().toString());
+                        CategoryJsonUtil.Companion.encode(scale));
+
+                triggerTts(category);
 
                 loadLayout(); //todo this is not the best way to do this
             }
         };
-    }
-
-    private boolean existsCategory(final String category) {
-        final String[] cats = getCurrentTrait().getCategories().split("/");
-        for (String cat : cats) {
-            if (cat.equals(category))
-                return true;
-        }
-        return false;
-    }
-
-    // if there are wrong categories, remove them
-    // I want to remove them when moveing the page,
-    // but it is not so easy
-    private String normalizeCategory() {
-        final String[] categories = getCategoryList();
-        ArrayList<String> normalizedCategoryList = new ArrayList<>();
-        HashSet<String> appeared = new HashSet<>();
-        for (String category : categories) {
-            if (!appeared.contains(category) && existsCategory(category)) {
-                normalizedCategoryList.add(category);
-                appeared.add(category);
-            }
-        }
-
-        if (normalizedCategoryList.isEmpty())
-            return "";
-        String normalizedCategory = normalizedCategoryList.get(0);
-        for (int i = 1; i < normalizedCategoryList.size(); ++i) {
-            normalizedCategory += ":";
-            normalizedCategory += normalizedCategoryList.get(i);
-        }
-        return normalizedCategory;
-    }
-
-    private boolean hasCategory(final String category, final String categories) {
-        final String[] categoryArray = categories.split(":");
-        for (final String cat : categoryArray) {
-            if (cat.equals(category))
-                return true;
-        }
-        return false;
-    }
-
-    public String[] getCategoryList() {
-        return getEtCurVal().getText().toString().split(":");
     }
 
     private void pressOnButton(Button button) {
@@ -234,81 +276,9 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         button.getBackground().setColorFilter(button.getContext().getResources().getColor(R.color.button_normal), PorterDuff.Mode.MULTIPLY);
     }
 
-    private void addCategory(final String category) {
-        final String currentValue = getEtCurVal().getText().toString();
-        getEtCurVal().setText(category);
-    }
-
-    private void removeCategory(final String category) {
-        final String[] categories = getCategoryList();
-        ArrayList<String> newCategories = new ArrayList<>();
-        for (final String cat : categories) {
-            if (!cat.equals(category))
-                newCategories.add(cat);
-        }
-
-        if (newCategories.isEmpty()) {
-            getEtCurVal().setText("");
-        } else {
-            // String#join does not work
-            String newValue = newCategories.get(0);
-            for (int i = 1; i < newCategories.size(); ++i) {
-                newValue += ":";
-                newValue += newCategories.get(i);
-            }
-            getEtCurVal().setText(newValue);
-        }
-    }
-
     @Override
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
         loadLayout();
-    }
-}
-
-class CategoricalTraitAdapter extends RecyclerView.Adapter<CategoricalTraitViewHolder> {
-
-    CategoricalTraitAdapter(Context context) {
-    }
-
-    @Override
-    public CategoricalTraitViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.trait_multicat_button, parent, false);
-        return new CategoricalTraitViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(CategoricalTraitViewHolder holder, int position) {
-
-    }
-
-    @Override
-    public int getItemCount() {
-        return 0;
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return 0;
-    }
-}
-
-class CategoricalTraitViewHolder extends RecyclerView.ViewHolder {
-
-    Button mButton;
-
-    CategoricalTraitViewHolder(View itemView) {
-        super(itemView);
-        mButton = (Button) itemView.findViewById(R.id.multicatButton);
-    }
-
-    void bindTo() {
-        ViewGroup.LayoutParams lp = mButton.getLayoutParams();
-        if (lp instanceof FlexboxLayoutManager.LayoutParams) {
-            FlexboxLayoutManager.LayoutParams flexboxLp = (FlexboxLayoutManager.LayoutParams) lp;
-            flexboxLp.setFlexGrow(1.0f);
-        }
     }
 }

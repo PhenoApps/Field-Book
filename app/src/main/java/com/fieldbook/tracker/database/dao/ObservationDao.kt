@@ -2,6 +2,7 @@ package com.fieldbook.tracker.database.dao
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
@@ -13,6 +14,7 @@ import com.fieldbook.tracker.database.Migrator.Companion.sLocalImageObservations
 import com.fieldbook.tracker.database.Migrator.Companion.sNonImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sRemoteImageObservationsViewName
 import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import java.util.*
@@ -21,6 +23,15 @@ import com.fieldbook.tracker.brapi.model.Observation as BrapiObservation
 class ObservationDao {
 
     companion object {
+
+        fun getAll(): Array<ObservationModel> = withDatabase { db ->
+
+            db.query(Observation.tableName)
+                .toTable()
+                .map { ObservationModel(it) }
+                .toTypedArray()
+
+        } ?: emptyArray()
 
         fun getAll(studyId: String): Array<ObservationModel> = withDatabase { db ->
 
@@ -43,7 +54,7 @@ class ObservationDao {
 
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
-        fun getHostImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
+        fun getHostImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.rawQuery("""
                 SELECT DISTINCT props.observationUnitDbId AS uniqueName,
@@ -75,7 +86,7 @@ class ObservationDao {
                 AND vars.observation_variable_field_book_format = 'photo'
                 
         """.trimIndent(), arrayOf(hostUrl)).toTable()
-                    .map { row -> FieldBookImage(getStringVal(row, "value"), missingPhoto).apply {
+                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), missingPhoto).apply {
                         unitDbId = getStringVal(row, "uniqueName")
                         setDescriptiveOntologyTerms(listOf(getStringVal(row, "external_db_id")))
                         setDescription(getStringVal(row, "observation_variable_details"))
@@ -104,30 +115,27 @@ class ObservationDao {
                     obs.observation_db_id,
                     obs.last_synced_time,
                     obs.collector,
-                
-                study.${Study.PK} AS ${Study.FK},
-                study.study_alias,
-                
-                vars.external_db_id AS external_db_id,
-                vars.observation_variable_name as observation_variable_name, 
-                vars.observation_variable_details
-                
-            FROM ${Observation.tableName} AS obs
-            JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.observationUnitDbId
-            JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
-            JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
-           
-            WHERE study.study_source IS NOT NULL
-                AND obs.value <> ''
-                AND vars.trait_data_source = ?
-                AND vars.trait_data_source IS NOT NULL
-                AND vars.observation_variable_field_book_format <> 'photo'
-                
+                    study.${Study.PK} AS ${Study.FK},
+                    study.study_alias, 
+                    vars.external_db_id AS external_db_id,
+                    vars.observation_variable_name as observation_variable_name, 
+                    vars.observation_variable_details,
+                    vars.observation_variable_field_book_format as observation_variable_field_book_format
+                FROM ${Observation.tableName} AS obs
+                JOIN ${Migrator.sObservationUnitPropertyViewName} AS props ON obs.observation_unit_id = props.observationUnitDbId
+                JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
+                JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
+                WHERE study.study_source IS NOT NULL
+                    AND obs.value <> ''
+                    AND vars.trait_data_source = ?
+                    AND vars.trait_data_source IS NOT NULL
+                    AND vars.observation_variable_field_book_format <> 'photo'
+                    
         """.trimIndent(), arrayOf(hostUrl)).toTable()
                     .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
                         unitDbId = getStringVal(row, "uniqueName")
                         variableDbId = getStringVal(row, "external_db_id")
-                        value = getStringVal(row, "value")
+                        value = CategoryJsonUtil.processValue(row)
                         variableName = getStringVal(row, "observation_variable_name")
                         fieldBookDbId = getStringVal(row, "id")
                         dbId = getStringVal(row, "observation_db_id")
@@ -149,10 +157,10 @@ class ObservationDao {
             return null
         }
 
-        fun getWrongSourceImageObservations(hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
+        fun getWrongSourceImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sRemoteImageObservationsViewName, where = "trait_data_source <> ?", whereArgs = arrayOf(hostUrl)).toTable()
-                    .map { row -> FieldBookImage(getStringVal(row, "value"), missingPhoto).apply {
+                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), missingPhoto).apply {
                         this.fieldBookDbId = getStringVal(row, "id")
                     } }
 
@@ -168,15 +176,15 @@ class ObservationDao {
                     whereArgs = arrayOf(hostUrl)).toTable()
                     .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
                         this.fieldBookDbId = getStringVal(row, "id")
-                        this.value = getStringVal(row, "value")
+                        this.value = CategoryJsonUtil.processValue(row)
                     } }
 
         } ?: emptyList()
 
-        fun getUserTraitImageObservations(expId: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
+        fun getUserTraitImageObservations(ctx: Context, expId: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sLocalImageObservationsViewName, where = "${Study.FK} = ?", whereArgs = arrayOf(expId)).toTable()
-                    .map { row -> FieldBookImage(getStringVal(row, "value"), missingPhoto).apply {
+                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), missingPhoto).apply {
                         this.fieldBookDbId = getStringVal(row, "id")
                     } }
 
@@ -189,7 +197,7 @@ class ObservationDao {
                     where = "study_db_id = ? AND (trait_data_source = 'local' OR trait_data_source IS NULL)", whereArgs = arrayOf(expId)).toTable()
                     .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
                         this.fieldBookDbId = getStringVal(row, "id")
-                        this.value = getStringVal(row, "value")
+                        this.value = CategoryJsonUtil.processValue(row)
                     } }
 
         } ?: emptyList()

@@ -130,23 +130,23 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            if (intent != null && intent.getExtras() != null) {
+        if (intent != null && intent.getExtras() != null) {
 
-                String message = intent.getExtras().getString("message");
-                String size = intent.getExtras().getString("size");
+            String message = intent.getExtras().getString("message");
+            String size = intent.getExtras().getString("size");
 
-                if (message != null) {
+            if (message != null) {
 
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
-                }
-
-                if (size != null) {
-
-                    // record each print event
-                    ((CollectActivity) getContext()).insertPrintObservation(size);
-                }
             }
+
+            if (size != null) {
+
+                // record each print event
+                ((CollectActivity) getContext()).insertPrintObservation(size);
+            }
+        }
         }
     };
 
@@ -403,6 +403,8 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                     }
 
                     if (checkPermissions(mActivity)) {
+                        String printing = getContext().getString(R.string.trait_print_label_success);
+                        triggerTts(printing);
                         /*
                          * As of v5.0.6 the app no longer requires the extra PrintConnect app.
                          * This bluetooth utility class is used to connect with a paired printer and send print commands.

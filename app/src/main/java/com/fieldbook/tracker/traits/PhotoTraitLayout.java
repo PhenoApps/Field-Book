@@ -103,6 +103,8 @@ public class PhotoTraitLayout extends BaseTraitLayout {
         // Run saving task in the background so we can showing progress dialog
         Handler mHandler = new Handler();
         mHandler.post(importRunnable);
+
+        super.loadLayout();
     }
 
     public void loadLayoutWork() {
@@ -462,32 +464,34 @@ public class PhotoTraitLayout extends BaseTraitLayout {
     private class PhotoTraitOnClickListener implements OnClickListener {
         @Override
         public void onClick(View view) {
-            try {
-                int m;
-
+            if (!isLocked) {
                 try {
-                    m = Integer.parseInt(getCurrentTrait().getDetails());
-                } catch (Exception n) {
-                    m = 0;
+                    int m;
+
+                    try {
+                        m = Integer.parseInt(getCurrentTrait().getDetails());
+                    } catch (Exception n) {
+                        m = 0;
+                    }
+
+                    DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
+
+                    String plot = getCRange().plot_id;
+
+                    List<DocumentFile> locations = DocumentTreeUtil.Companion.getPlotMedia(photosDir, plot, ".jpg");
+
+                    if (photosDir != null) {
+                        // Do not take photos if limit is reached
+                        if (m == 0 || locations.size() < m) {
+                            takePicture();
+                        } else
+                            Utils.makeToast(getContext(),getContext().getString(R.string.traits_create_photo_maximum));
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Utils.makeToast(getContext(),getContext().getString(R.string.trait_error_hardware_missing));
                 }
-
-                DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
-
-                String plot = getCRange().plot_id;
-
-                List<DocumentFile> locations = DocumentTreeUtil.Companion.getPlotMedia(photosDir, plot, ".jpg");
-
-                if (photosDir != null) {
-                    // Do not take photos if limit is reached
-                    if (m == 0 || locations.size() < m) {
-                        takePicture();
-                    } else
-                        Utils.makeToast(getContext(),getContext().getString(R.string.traits_create_photo_maximum));
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Utils.makeToast(getContext(),getContext().getString(R.string.trait_error_hardware_missing));
             }
         }
     }

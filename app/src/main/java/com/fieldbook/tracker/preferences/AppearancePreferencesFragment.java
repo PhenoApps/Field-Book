@@ -3,6 +3,8 @@ package com.fieldbook.tracker.preferences;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -12,7 +14,7 @@ import com.fieldbook.tracker.R;
 import com.h6ah4i.android.preference.NumberPickerPreferenceCompat;
 import com.h6ah4i.android.preference.NumberPickerPreferenceDialogFragmentCompat;
 
-public class AppearancePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
 
     private static final String DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG";
     PreferenceManager prefMgr;
@@ -61,14 +63,25 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat impl
     }
 
     @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-
-        return false;
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
+
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_appearance_title));
+
+        updateLanguageSummary();
+
+        ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (ab != null) {
+            ab.setTitle(R.string.preferences_appearance_title);
+        }
+    }
+
+    private void updateLanguageSummary() {
+        Preference langPref = findPreference(GeneralKeys.LANGUAGE_PREF);
+        if (langPref != null) {
+            String summary = PreferenceManager.getDefaultSharedPreferences(context)
+                    .getString(GeneralKeys.LANGUAGE_LOCALE_SUMMARY, getString(R.string.preference_language_default));
+            langPref.setSummary(summary);
+        }
     }
 }
