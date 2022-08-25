@@ -86,6 +86,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
+import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
@@ -1981,7 +1982,9 @@ public class CollectActivity extends AppCompatActivity
                     validateData();
                 }
                 break;
-            case PhotoTraitLayout.PICTURE_REQUEST_CODE:
+            case 252:
+                String success = getString(R.string.trait_photo_tts_success);
+                String fail = getString(R.string.trait_photo_tts_fail);
                 if (resultCode == RESULT_OK) {
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                     traitPhoto.makeImage(traitBox.getCurrentTrait(),

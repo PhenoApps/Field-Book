@@ -21,22 +21,27 @@ import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.adapters.GalleryImageAdapter
+import com.fieldbook.tracker.database.dao.ObservationDao
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
 import com.fieldbook.tracker.utilities.Utils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getStem
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
 class PhotoTraitLayout : BaseTraitLayout {
+
+    companion object {
+        const val TAG = "PhotoTrait"
+        const val type = "photo"
+        const val PICTURE_REQUEST_CODE = 252
+    }
 
     private var scope = CoroutineScope(Dispatchers.IO)
 
@@ -58,9 +63,7 @@ class PhotoTraitLayout : BaseTraitLayout {
     }
 
     override fun setNaTraitsText() {}
-    override fun type(): String {
-        return "photo"
-    }
+    override fun type() = type
 
     override fun init() {
 
@@ -78,7 +81,83 @@ class PhotoTraitLayout : BaseTraitLayout {
         etCurVal.removeTextChangedListener(cvText)
         etCurVal.visibility = GONE
         etCurVal.isEnabled = false
+
+        runBlocking {
+
+            migrateOldPhotosDir()
+
+        }
+
         loadLayoutWork()
+
+    }
+
+    /**
+     * In v5.3 a directory change happened, where each trait gets it's own media directory for photos.
+     * This function is called to query for existing observations that have a uri in the old photos directory, which used to hold all photos.
+     * This will update the database obs. value to a new uri after copying it to its respective trait folder, and delete the old photo from the photos dir.
+     */
+    private fun migrateOldPhotosDir() {
+
+        try {
+
+            currentTrait.trait?.let { traitName ->
+
+                val timeStamp = SimpleDateFormat(
+                    "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
+                )
+
+                val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+
+                val traitPhotos = ObservationDao.getAll(expId).filter { it.observation_variable_name ==  traitName }
+
+                if (traitName != "photos") { //edge case where trait name is actually photos
+
+                    val photoDir = getFieldMediaDirectory(context, traitName)
+                    val oldPhotos = getFieldMediaDirectory(context, "photos")
+
+                    traitPhotos.forEach { photo ->
+
+                        val generatedName =
+                            cRange.plot_id + "_" + currentTrait.trait + "_" + rep + "_" + timeStamp.format(
+                                Calendar.getInstance().time
+                            ) + ".jpg"
+
+                        //load uri and check if its parent is "photos" old photo dir
+                        oldPhotos?.findFile(photo.value ?: "")?.let { photoFile ->
+
+                            photoDir?.createFile("*/jpg", photoFile.name ?: generatedName)?.let { newFile ->
+
+                                context.contentResolver?.openInputStream(photoFile.uri)?.use { input ->
+
+                                    context.contentResolver?.openOutputStream(newFile.uri)?.use { output ->
+
+                                        input.copyTo(output)
+
+                                    }
+                                }
+
+                                ObservationDao.updateObservation(ObservationModel(
+                                    photo.createMap().apply {
+                                        this["value"] = newFile.uri.toString()
+                                    }
+                                ))
+
+                                createThumbnail(photoDir, newFile.uri)
+                            }
+
+                            photoFile.delete()
+
+                        }
+                    }
+                }
+            }
+
+        } catch (e: Exception) {
+
+            Log.e(TAG, "Error during photo migration", e)
+
+        }
     }
 
     private fun loadLayoutWork() {
@@ -91,71 +170,87 @@ class PhotoTraitLayout : BaseTraitLayout {
             drawables = ArrayList()
             uris = arrayListOf()
 
-            val photosDir = getFieldMediaDirectory(context, "thumbnails")
+            currentTrait.trait?.let { traitName ->
 
-            //back down to the photos directory if thumbnails don't exist
-            if (photosDir == null || photosDir.listFiles().isEmpty()) {
-                generateThumbnails()
-            }
-            if (photosDir != null) {
-                val plot = cRange.plot_id
-                val locations = getPlotMedia(photosDir, plot, ".jpg")
+                val photosDir = getFieldMediaDirectory(context, traitName)
 
-                if (locations.isNotEmpty()) {
-                    locations.forEach { image ->
-                        if (image.exists()) {
+                try {
 
-                            val name = image.name
+                    val thumbDir = photosDir?.findFile(".thumbnails")
+                    //back down to the photos directory if thumbnails don't exist
+                    if (thumbDir == null || thumbDir.listFiles().isEmpty()) {
+                        generateThumbnails()
+                    }
+                    if (thumbDir != null) {
+                        val plot = cRange.plot_id
+                        val locations = getPlotMedia(thumbDir, plot, ".jpg")
 
-                            if (name != null) {
+                        if (locations.isNotEmpty()) {
+                            locations.forEach { image ->
+                                if (image.exists()) {
 
-                                if (plot in name) {
+                                    val name = image.name
 
-                                    val bmp = decodeBitmap(image.uri)
+                                    if (name != null) {
 
-                                    if (bmp != null) {
+                                        if (plot in name) {
 
-                                        if (image.uri !in uris) {
-                                            uris.add(image.uri)
-                                            drawables?.add(bmp)
+                                            val bmp = decodeBitmap(image.uri)
+
+                                            if (bmp != null) {
+
+                                                if (image.uri !in uris) {
+                                                    uris.add(image.uri)
+                                                    drawables?.add(bmp)
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+
+                        loadGallery()
+
                     }
+
+                    scope.cancel()
+
+                } catch (e: Exception) {
+
+                    e.printStackTrace()
+
                 }
-
-                loadGallery()
-
             }
-
-            scope.cancel()
         }
     }
 
     private fun loadGallery() {
-        val photosDir = getFieldMediaDirectory(context, "photos")
-        if (photosDir != null) {
-            val photos = getPlotMedia(photosDir, cRange.plot_id, ".jpg")
 
-            activity?.runOnUiThread {
+        currentTrait.trait?.let { traitName ->
 
-                photoAdapter = GalleryImageAdapter(context as Activity, drawables)
-                photo?.adapter = photoAdapter
+            val photosDir = getFieldMediaDirectory(context, traitName)
+            if (photosDir != null) {
+                val photos = getPlotMedia(photosDir, cRange.plot_id, ".jpg")
 
-                if (photos.isNotEmpty()) {
+                activity?.runOnUiThread {
 
-                    photo?.setSelection((photo?.count ?: 1) - 1)
-                    photo?.onItemClickListener =
-                        OnItemClickListener { arg0: AdapterView<*>?, arg1: View?, pos: Int, arg3: Long ->
-                            displayPlotImage(
-                                photos[pos].uri
-                            )
-                        }
+                    photoAdapter = GalleryImageAdapter(context as Activity, drawables)
+                    photo?.adapter = photoAdapter
+
+                    if (photos.isNotEmpty()) {
+
+                        photo?.setSelection((photo?.count ?: 1) - 1)
+                        photo?.onItemClickListener =
+                            OnItemClickListener { arg0: AdapterView<*>?, arg1: View?, pos: Int, arg3: Long ->
+                                displayPlotImage(
+                                    photos[pos].uri
+                                )
+                            }
+                    }
+
+                    photoAdapter?.notifyDataSetChanged()
                 }
-
-                photoAdapter?.notifyDataSetChanged()
             }
         }
     }
@@ -177,21 +272,28 @@ class PhotoTraitLayout : BaseTraitLayout {
     }
 
     private fun generateThumbnails() {
-        val photosDir = getFieldMediaDirectory(context, "photos")
-        if (photosDir != null) {
-            val files = photosDir.listFiles()
-            for (doc in files) {
-                createThumbnail(doc.uri)
+        currentTrait.trait?.let { traitName ->
+            val photosDir = getFieldMediaDirectory(context, traitName)
+            if (photosDir != null) {
+                val files = photosDir.listFiles()
+                for (doc in files) {
+                    createThumbnail(photosDir, doc.uri)
+                }
             }
         }
     }
 
-    private fun createThumbnail(uri: Uri) {
+    private fun createThumbnail(photosDir: DocumentFile, uri: Uri) {
 
         //create thumbnail
         try {
-            val thumbsDir = getFieldMediaDirectory(context, ".thumbnails")
+            var thumbsDir = photosDir.findFile(".thumbnails")
             val name: String = uri.getStem(context)
+
+            if (thumbsDir == null) {
+                thumbsDir = photosDir.createDirectory(".thumbnails")
+            }
+
             if (thumbsDir != null) {
                 val nomedia = thumbsDir.findFile(".nomedia")
                 if (nomedia == null || !nomedia.exists()) {
@@ -221,7 +323,7 @@ class PhotoTraitLayout : BaseTraitLayout {
 
     private fun displayPlotImage(path: Uri) {
         try {
-            Log.w("Display path", path.toString())
+            Log.w(TAG, path.toString())
             val intent = Intent()
             intent.action = Intent.ACTION_VIEW
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -233,34 +335,46 @@ class PhotoTraitLayout : BaseTraitLayout {
     }
 
     fun makeImage(currentTrait: TraitObject, newTraits: MutableMap<String, String>?) {
-        val photosDir = getFieldMediaDirectory(context, "photos")
-        val thumbsDir = getFieldMediaDirectory(context, "thumbnails")
-        if (photosDir != null && thumbsDir != null) {
-            mCurrentPhotoPath?.let { path ->
-                val file = photosDir.findFile(path)
-                if (file != null) {
-                    try {
-                        Utils.scanFile(context, file.uri.toString(), "image/*")
-                        createThumbnail(file.uri)
-                        updateTraitAllowDuplicates(
-                            currentTrait.trait,
-                            "photo",
-                            path,
-                            null,
-                            newTraits
-                        )
-                        loadLayoutWork()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+
+        currentTrait.trait?.let { traitName ->
+
+            val photosDir = getFieldMediaDirectory(context, traitName)
+
+            try {
+
+                if (photosDir != null) {
+                    mCurrentPhotoPath?.let { path ->
+                        val file = photosDir.findFile(path)
+                        if (file != null) {
+                            try {
+                                Utils.scanFile(context, file.uri.toString(), "image/*")
+                                createThumbnail(photosDir, file.uri)
+                                updateTraitAllowDuplicates(
+                                    traitName,
+                                    "photo",
+                                    path,
+                                    null,
+                                    newTraits
+                                )
+                                loadLayoutWork()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
                     }
                 }
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
             }
         }
     }
 
     private fun updateTraitAllowDuplicates(
-        parent: String,
-        trait: String,
+        traitName: String,
+        format: String,
         value: String?,
         newValue: String?,
         newTraits: MutableMap<String, String>?
@@ -272,17 +386,17 @@ class PhotoTraitLayout : BaseTraitLayout {
 
             value?.let { v ->
 
-                Log.d("Field Book", "$trait $v")
-                newTraits?.remove(parent)
-                newTraits?.set(parent, v)
+                Log.d(TAG, "$format $v")
+                newTraits?.remove(traitName)
+                newTraits?.set(traitName, v)
                 val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
                 val observation =
-                    ConfigActivity.dt.getObservationByValue(expId, cRange.plot_id, parent, v)
-                ConfigActivity.dt.deleteTraitByValue(expId, cRange.plot_id, parent, v)
+                    ConfigActivity.dt.getObservationByValue(expId, cRange.plot_id, traitName, v)
+                ConfigActivity.dt.deleteTraitByValue(expId, cRange.plot_id, traitName, v)
                 ConfigActivity.dt.insertUserTraits(
                     cRange.plot_id,
-                    parent,
-                    trait,
+                    traitName,
+                    format,
                     newValue ?: v,
                     prefs.getString(
                         GeneralKeys.FIRST_NAME,
@@ -315,47 +429,61 @@ class PhotoTraitLayout : BaseTraitLayout {
                 //updateTrait(parent, currentTrait.getFormat(), getString(R.string.brapi_na));
             }
             if ((photo?.count ?: 0) > 0) {
-                val photosDir = getFieldMediaDirectory(context, "photos")
-                val thumbsDir = getFieldMediaDirectory(context, "thumbnails")
-                val photosList = getPlotMedia(photosDir, cRange.plot_id, ".jpg").toMutableList()
-                val thumbsList = getPlotMedia(thumbsDir, cRange.plot_id, ".jpg")
-                val index = photo?.selectedItemPosition ?: 0
-                val selected = photosList[index]
-                val thumbSelected = thumbsList[index]
-                val item = selected.uri
-                if (!brapiDelete) {
-                    selected.delete()
-                    thumbSelected.delete()
-                    photosList.removeAt(index)
-                }
-                val file = DocumentFile.fromSingleUri(context, item)
-                if (file != null && file.exists()) {
-                    file.delete()
+
+                currentTrait.trait?.let { traitName ->
+
+                    val photosDir = getFieldMediaDirectory(context, traitName)
+
+                    try {
+
+                        val thumbsDir = photosDir?.findFile(".thumbnails")
+                        val photosList = getPlotMedia(photosDir, cRange.plot_id, ".jpg").toMutableList()
+                        val thumbsList = getPlotMedia(thumbsDir, cRange.plot_id, ".jpg")
+                        val index = photo?.selectedItemPosition ?: 0
+                        val selected = photosList[index]
+                        val thumbSelected = thumbsList[index]
+                        val item = selected.uri
+                        if (!brapiDelete) {
+                            selected.delete()
+                            thumbSelected.delete()
+                            photosList.removeAt(index)
+                        }
+                        val file = DocumentFile.fromSingleUri(context, item)
+                        if (file != null && file.exists()) {
+                            file.delete()
+                        }
+
+                        // Remove individual images
+                        if (brapiDelete) {
+                            updateTraitAllowDuplicates(
+                                currentTrait.trait,
+                                "photo",
+                                item.toString(),
+                                "NA",
+                                newTraits
+                            )
+                            loadLayout()
+                        } else {
+                            ConfigActivity.dt.deleteTraitByValue(
+                                expId,
+                                cRange.plot_id,
+                                currentTrait.trait,
+                                item.toString()
+                            )
+                        }
+
+                        // Only do a purge by trait when there are no more images left
+                        if (!brapiDelete) {
+                            if (photosList.size == 0) removeTrait(currentTrait.trait)
+                        }
+
+                    } catch (e: Exception) {
+
+                        e.printStackTrace()
+
+                    }
                 }
 
-                // Remove individual images
-                if (brapiDelete) {
-                    updateTraitAllowDuplicates(
-                        currentTrait.trait,
-                        "photo",
-                        item.toString(),
-                        "NA",
-                        newTraits
-                    )
-                    loadLayout()
-                } else {
-                    ConfigActivity.dt.deleteTraitByValue(
-                        expId,
-                        cRange.plot_id,
-                        currentTrait.trait,
-                        item.toString()
-                    )
-                }
-
-                // Only do a purge by trait when there are no more images left
-                if (!brapiDelete) {
-                    if (photosList.size == 0) removeTrait(currentTrait.trait)
-                }
             } else {
 
                 // If an NA exists, delete it
@@ -378,24 +506,28 @@ class PhotoTraitLayout : BaseTraitLayout {
         val timeStamp = SimpleDateFormat(
             "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
         )
-        val dir = getFieldMediaDirectory(context, "photos")
-        if (dir != null) {
-            val generatedName =
-                cRange.plot_id + "_" + currentTrait.trait + "_" + rep + "_" + timeStamp.format(
-                    Calendar.getInstance().time
-                ) + ".jpg"
-            mCurrentPhotoPath = generatedName
-            Log.w("File", dir.uri.toString() + generatedName)
-            val file = dir.createFile("image/jpg", generatedName)
-            if (file != null) {
-                val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                // Ensure that there's a camera activity to handle the intent
-                if (takePictureIntent.resolveActivity(context.packageManager) != null) {
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, file.uri)
-                    (context as Activity).startActivityForResult(
-                        takePictureIntent,
-                        PICTURE_REQUEST_CODE
-                    )
+
+        currentTrait.trait?.let { traitName ->
+
+            val dir = getFieldMediaDirectory(context, traitName)
+            if (dir != null) {
+                val generatedName =
+                    cRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
+                        Calendar.getInstance().time
+                    ) + ".jpg"
+                mCurrentPhotoPath = generatedName
+                Log.w(TAG, dir.uri.toString() + generatedName)
+                val file = dir.createFile("image/jpg", generatedName)
+                if (file != null) {
+                    val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    // Ensure that there's a camera activity to handle the intent
+                    if (takePictureIntent.resolveActivity(context.packageManager) != null) {
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, file.uri)
+                        (context as Activity).startActivityForResult(
+                            takePictureIntent,
+                            PICTURE_REQUEST_CODE
+                        )
+                    }
                 }
             }
         }
@@ -432,9 +564,5 @@ class PhotoTraitLayout : BaseTraitLayout {
                 Utils.makeToast(context, context.getString(R.string.trait_error_hardware_missing))
             }
         }
-    }
-
-    companion object {
-        const val PICTURE_REQUEST_CODE = 252
     }
 }
