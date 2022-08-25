@@ -713,6 +713,21 @@
     <string name="brapi_chunk_size">Chunk Size</string>
 
     <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
+    <string name="pref_general_location_collection_title">Location collected</string>
+    <string name="pref_general_location_collection_summary">Select a method for collecting location while using Field Book.</string>
+    <string name="pref_general_location_collection_off_summary">No location data will be collected for any phenotypes.</string>
+    <string name="pref_general_location_collection_study_summary">A location will be collected for the first the phenotype within a field.</string>
+    <string name="pref_general_location_collection_summary_obs_units">A location will be collected for the first phenotype in a plot.</string>
+    <string name="pref_general_location_collection_summary_obs">A location will be collected for every phenotype that is collected.</string>
+    <string name="pref_general_location_collection_obs_dialog_title">This setting may substantially increase battery consumption.</string>
+
+    <!-- location acquisition preference -->
+    <string name="preferences_general_skip_entries_default">Default</string>
+    <string name="location_level_off">Off</string>
+    <string name="location_level_study">Field / Study</string>
+    <string name="location_level_observation_unit">Plot / Observation Unit</string>
+    <string name="location_level_observation">Phenotype / Observation</string>
+
     <string name="dialog_new_trait_add_cat_button_text">Add</string>
     <string name="traits_create_categories_label_text">Enter category label here</string>
     <string name="traits_create_categories_value_text">Enter category value here</string>

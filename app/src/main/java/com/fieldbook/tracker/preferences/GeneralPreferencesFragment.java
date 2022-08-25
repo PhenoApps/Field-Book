@@ -1,10 +1,12 @@
 package com.fieldbook.tracker.preferences;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.ListPreference;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -25,6 +27,11 @@ import java.util.Set;
 public class GeneralPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     private static final int REQUEST_STORAGE_DEFINER_CODE = 999;
+
+    public static final int LOCATION_COLLECTION_OFF = 0;
+    public static final int LOCATION_COLLECTION_OBS_UNIT = 1;
+    public static final int LOCATION_COLLECTION_OBS = 2;
+    public static final int LOCATION_COLLECTION_STUDY = 3;
 
     PreferenceManager prefMgr;
     Context context;
@@ -63,6 +70,8 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
             switchSkipPreferenceMode(skipMode, skipEntriesPref);
 
         }
+
+        updateLocationCollectionPreference();
     }
 
     private void switchSkipPreferenceMode(String mode, Preference preference) {
@@ -126,6 +135,76 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
         return true;
     }
 
+    private void updateLocationCollectionPreference() {
+
+        try {
+
+            ListPreference pref = findPreference(GeneralKeys.GENERAL_LOCATION_COLLECTION);
+            if (pref != null) {
+
+                String obsModeDialogTitle = getString(R.string.pref_general_location_collection_obs_dialog_title);
+
+                pref.setOnPreferenceChangeListener(((preference, newValue) -> {
+
+                    String newStringValue = (String) newValue;
+                    int value = Integer.parseInt(newStringValue);
+
+                    if (value == LOCATION_COLLECTION_OBS) {
+
+                        new AlertDialog.Builder(context)
+                            .setTitle(obsModeDialogTitle)
+                            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+
+                                dialog.dismiss();
+
+                            })
+                            .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+
+                                prefMgr.getSharedPreferences().edit().putString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "0").apply();
+
+                                pref.setValueIndex(GeneralPreferencesFragment.LOCATION_COLLECTION_OFF);
+
+                                dialog.dismiss();
+
+                                updateLocationCollectionSummary(GeneralPreferencesFragment.LOCATION_COLLECTION_OFF);
+
+                            }).show();
+
+                    }
+
+                    updateLocationCollectionSummary(value);
+
+                    return true;
+
+                }));
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
+    private void updateLocationCollectionSummary(int mode) {
+
+        ListPreference pref = findPreference(GeneralKeys.GENERAL_LOCATION_COLLECTION);
+        if (pref != null) {
+
+            String obsUnitModeSummary = getString(R.string.pref_general_location_collection_summary_obs_units);
+            String obsModeOffSummary = getString(R.string.pref_general_location_collection_off_summary);
+            String obsModeSummary = getString(R.string.pref_general_location_collection_summary_obs);
+            String defaultSummary = getString(R.string.pref_general_location_collection_summary);
+            String studySummary = getString(R.string.pref_general_location_collection_study_summary);
+
+            if (mode == LOCATION_COLLECTION_OFF) pref.setSummary(obsModeOffSummary);
+            else if (mode == LOCATION_COLLECTION_OBS_UNIT) pref.setSummary(obsUnitModeSummary);
+            else if (mode == LOCATION_COLLECTION_OBS) pref.setSummary(obsModeSummary);
+            else if (mode == LOCATION_COLLECTION_STUDY) pref.setSummary(studySummary);
+            else pref.setSummary(defaultSummary);
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -143,5 +222,9 @@ public class GeneralPreferencesFragment extends PreferenceFragmentCompat impleme
 
             }
         }
+
+        updateLocationCollectionSummary(Integer
+                .parseInt(prefMgr.getSharedPreferences()
+                        .getString(GeneralKeys.GENERAL_LOCATION_COLLECTION, "-1")));
     }
 }

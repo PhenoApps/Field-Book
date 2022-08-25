@@ -76,9 +76,11 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.location.GPSTracker;
@@ -89,12 +91,14 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.GeneralPreferencesFragment;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
+import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -121,10 +125,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+import javax.validation.constraints.Null;
 
 import kotlin.Pair;
 
@@ -934,24 +941,33 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         }
 
         traitBox.update(parent, value);
-        String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String expId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String obsUnit = rangeBox.getPlotID();
 
-        Observation observation = dt.getObservation(exp_id, rangeBox.getPlotID(), parent);
+        Observation observation = dt.getObservation(expId, obsUnit, parent);
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
-
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        dt.deleteTrait(exp_id, rangeBox.getPlotID(), parent);
+        dt.deleteTrait(expId, obsUnit, parent);
 
         dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
                 ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
-                ep.getString(GeneralKeys.LOCATION, ""), "", exp_id, observationDbId,
+                getLocationByPreferences(), "", expId, observationDbId,
                 lastSyncedTime);
 
         //update the info bar in case a variable is used
         infoBarAdapter.notifyItemRangeChanged(0, infoBarAdapter.getItemCount());
+    }
+
+    public String getLocationByPreferences() {
+
+        String expId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String obsUnit = rangeBox.getPlotID();
+
+        return LocationCollectorUtil.Companion
+                .getLocationByCollectMode(this, ep, expId, obsUnit, mInternalLocation, mExternalLocation);
     }
 
     private void brapiDelete(String parent, Boolean hint) {
@@ -2134,7 +2150,7 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         dt.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
                 ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
-                ep.getString(GeneralKeys.LOCATION, ""), "", studyId, "",
+                getLocationByPreferences(), "", studyId, "",
                 null);
 
     }
