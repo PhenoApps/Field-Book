@@ -7,6 +7,7 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 
 public class PercentTraitLayout extends BaseTraitLayout {
     private SeekBar seekBar;
@@ -52,57 +53,85 @@ public class PercentTraitLayout extends BaseTraitLayout {
                 setCurrentValueText(sb.getProgress(), Color.parseColor(getDisplayColor()));
             }
 
-            public void onStartTrackingTouch(SeekBar arg0) {
+            public void onStartTrackingTouch(SeekBar sb) {
             }
 
-            public void onStopTrackingTouch(SeekBar arg0) {
+            public void onStopTrackingTouch(SeekBar sb) {
                 updateTrait(getCurrentTrait().getTrait(), "percent", String.valueOf(seekBar.getProgress()));
+                triggerTts(String.valueOf(sb.getProgress()));
             }
         };
 
         seekBar.setOnSeekBarChangeListener(seekListener);
     }
 
+    @Override
     public void loadLayout() {
 
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
         getEtCurVal().removeTextChangedListener(getCvText());
 
-        if (getNewTraits().containsKey(getCurrentTrait().getTrait())
-                && !getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
-            String currentValue = getNewTraits().get(getCurrentTrait().getTrait()).toString();
+        super.loadLayout();
+
+        seekBar.setEnabled(!isLocked);
+    }
+
+    @Override
+    public void afterLoadExists(CollectActivity act, String value) {
+        super.afterLoadExists(act, value);
+
+        if (value != null && !value.equals("NA")) {
+
             seekBar.setMax(Integer.parseInt(getCurrentTrait().getMaximum()));
 
-            int textColor = currentValue.equals(getDefaultValue()) ? Color.BLACK : Color.parseColor(getDisplayColor());
-            setCurrentValueText(currentValue, textColor);
+            int textColor = value.equals(getDefaultValue()) ? Color.BLACK : Color.parseColor(getDisplayColor());
+            setCurrentValueText(value, textColor);
 
             seekBar.setOnSeekBarChangeListener(null);
-            seekBar.setProgress(Integer.parseInt(currentValue));
+            seekBar.setProgress(Integer.parseInt(value));
             seekBar.setOnSeekBarChangeListener(seekListener);
 
-        } else if (getNewTraits().containsKey(getCurrentTrait().getTrait())
-                && getNewTraits().get(getCurrentTrait().getTrait()).toString().equals("NA")) {
+        } else if (value != null) {
             getEtCurVal().setText("NA");
             getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
             seekBar.setProgress(0);
-        } else {
-            String loadValue = "";
-            if (getCurrentTrait().getDefaultValue() != null
-                    && !getCurrentTrait().getDefaultValue().isEmpty()) {
-                loadValue = getDefaultValue();
-            }
-
-            setCurrentValueText(loadValue, Color.BLACK);
-            String max = getCurrentTrait().getMaximum();
-            //TODO: had to add this check, system was parsing empty string as max value which caused an error
-            if (!max.isEmpty()) {
-                seekBar.setMax(Integer.parseInt(max));
-            }
-            seekBar.setOnSeekBarChangeListener(null);
-            seekBar.setProgress(Integer.parseInt(getDefaultValue()));
-            seekBar.setOnSeekBarChangeListener(seekListener);
         }
+    }
+
+    @Override
+    public void afterLoadNotExists(CollectActivity act) {
+        super.afterLoadNotExists(act);
+        updateLoadBarValue("");
+    }
+
+    @Override
+    public void afterLoadDefault(CollectActivity act) {
+        super.afterLoadDefault(act);
+        updateLoadBarValue(getDefaultValue());
+    }
+
+    @Override
+    public void refreshLock() {
+        super.refreshLock();
+        ((CollectActivity) getContext()).traitLockData();
+        try {
+            loadLayout();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateLoadBarValue(String value) {
+        setCurrentValueText(value, Color.BLACK);
+        String max = getCurrentTrait().getMaximum();
+        //TODO: had to add this check, system was parsing empty string as max value which caused an error
+        if (!max.isEmpty()) {
+            seekBar.setMax(Integer.parseInt(max));
+        }
+        seekBar.setOnSeekBarChangeListener(null);
+        seekBar.setProgress(Integer.parseInt(getDefaultValue()));
+        seekBar.setOnSeekBarChangeListener(seekListener);
     }
 
     private String getDefaultValue() {

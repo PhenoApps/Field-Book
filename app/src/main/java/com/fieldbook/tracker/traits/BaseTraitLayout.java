@@ -9,6 +9,8 @@ import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
+
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
@@ -17,6 +19,10 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import java.util.Map;
 
 public abstract class BaseTraitLayout extends LinearLayout {
+
+    //tracks if data can be entered or not
+    //references the collect activity locked state (locked, unlocked or frozen)
+    protected boolean isLocked = false;
 
     public BaseTraitLayout(Context context) {
         super(context);
@@ -40,11 +46,60 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     public void init(Activity act) { /* not implemented */ }
 
-    public abstract void loadLayout();
+    public void loadLayout() {
+
+        CollectActivity act = (CollectActivity) getContext();
+        isLocked = act.isFrozen() || act.isLocked();
+
+        Map<String, String> observations = getNewTraits();
+        TraitObject trait = getCurrentTrait();
+        String traitName = trait.getTrait();
+        if (observations.containsKey(traitName)) {
+
+            String value = null;
+            if (traitName != null) {
+                value = observations.get(traitName);
+            }
+
+            getEtCurVal().setText(value);
+            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
+
+            afterLoadExists(act, value);
+
+        } else {
+            getEtCurVal().setText("");
+            getEtCurVal().setTextColor(Color.BLACK);
+
+            if (trait.getDefaultValue() != null && !trait.getDefaultValue().isEmpty()) {
+                getEtCurVal().setText(trait.getDefaultValue());
+                updateTrait(trait.getTrait(), trait.getFormat(), getEtCurVal().getText().toString());
+                afterLoadDefault(act);
+            } else afterLoadNotExists(act);
+        }
+    }
+
+    public void afterLoadExists(CollectActivity act, @Nullable String value) {
+        //lock data if frozen or locked state
+        isLocked = act.isFrozen() || act.isLocked();
+    }
+
+    public void afterLoadDefault(CollectActivity act) {
+        //unlock data only if frozen
+        isLocked = act.isLocked();
+    }
+
+    public void afterLoadNotExists(CollectActivity act) {
+        //unlock data only if frozen
+        isLocked = act.isLocked();
+    }
 
     public abstract void deleteTraitListener();
 
     public abstract void setNaTraitsText();
+
+    public void refreshLock() {
+        //((CollectActivity) getContext()).traitLockData();
+    }
 
     public Map<String, String> getNewTraits() {
         return ((CollectActivity) getContext()).getNewTraits();
@@ -82,5 +137,9 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     public void removeTrait(String parent) {
         ((CollectActivity) getContext()).removeTrait(parent);
+    }
+
+    public void triggerTts(String text) {
+        ((CollectActivity) getContext()).triggerTts(text);
     }
 }

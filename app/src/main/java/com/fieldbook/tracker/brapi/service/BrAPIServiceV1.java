@@ -21,9 +21,11 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
 
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,7 +45,6 @@ import io.swagger.client.ApiException;
 import io.swagger.client.api.ImagesApi;
 import io.swagger.client.api.ObservationVariablesApi;
 import io.swagger.client.api.ObservationsApi;
-import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ProgramsApi;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.TrialsApi;
@@ -844,11 +845,11 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
                         trait.setDetails(details);
                         trait.setCategories(buildCategoryList(var.getScale().getValidValues().getCategories()));
 
-                        try {
-                            trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
-                        } catch (Exception e) {
-                            Log.d("FieldBookError", "Error parsing trait label/value.");
-                        }
+//                        try {
+//                            trait.setAdditionalInfo(buildCategoryValueLabelJsonStr(var.getScale().getValidValues().getCategories()));
+//                        } catch (Exception e) {
+//                            Log.d("FieldBookError", "Error parsing trait label/value.");
+//                        }
                     }
                 }
             }
@@ -897,6 +898,31 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     }
 
     private String buildCategoryList(List<String> categories) {
+        try {
+            ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
+            for (int j = 0; j < categories.size(); j++) {
+                BrAPIScaleValidValuesCategories c = new BrAPIScaleValidValuesCategories();
+                String value;
+                // parse out only value of specified as according to BrAPI, value=meaning
+                String[] parts = categories.get(j).split("=");
+                if (parts.length > 1) {
+                    value = parts[0].trim();
+                    c.setValue(value);
+                    c.setLabel(parts[1].trim());
+                }
+                else {
+                    value = categories.get(j).trim();
+                    c.setValue(value);
+                    c.setLabel(value);
+                }
+            }
+            return CategoryJsonUtil.Companion.encode(scale);
+        } catch (Exception e) {
+            return buildCategoryListOld(categories);
+        }
+    }
+
+    private String buildCategoryListOld(List<String> categories) {
         StringBuilder sb = new StringBuilder();
         for (int j = 0; j < categories.size(); ++j) {
             String value;

@@ -19,6 +19,8 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:layout_margin="2dp"
+                android:background="@drawable/cell"
                 android:id="@+id/formatbox"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -51,6 +53,8 @@
             </LinearLayout>
 
             <LinearLayout
+                android:layout_margin="2dp"
+                android:background="@drawable/cell"
                 android:id="@+id/traitbox"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -82,6 +86,8 @@
             </LinearLayout>
 
             <LinearLayout
+                android:layout_margin="2dp"
+                android:background="@drawable/cell"
                 android:id="@+id/defbox"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -123,6 +129,8 @@
             </LinearLayout>
 
             <LinearLayout
+                android:layout_margin="2dp"
+                android:background="@drawable/cell"
                 android:id="@+id/minbox"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -156,6 +164,8 @@
             </LinearLayout>
 
             <LinearLayout
+                android:layout_margin="2dp"
+                android:background="@drawable/cell"
                 android:id="@+id/maxbox"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -189,6 +199,8 @@
             </LinearLayout>
 
             <LinearLayout
+                android:layout_margin="2dp"
+                android:background="@drawable/cell"
                 android:id="@+id/detailsbox"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -221,7 +233,9 @@
             </LinearLayout>
 
             <LinearLayout
+                android:layout_margin="2dp"
                 android:id="@+id/categorybox"
+                android:background="@drawable/cell"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -239,18 +253,51 @@
                     android:textSize="@dimen/text_size_small"
                     android:textStyle="bold" />
 
-                <EditText
-                    android:id="@+id/categories"
-                    android:layout_width="fill_parent"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:hint="@string/traits_create_categories_text"
-                    android:imeOptions="actionNext"
-                    android:inputType="textCapWords"
-                    android:paddingRight="10dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small" />
+                    android:orientation="horizontal">
 
+                    <EditText
+                        android:id="@+id/categoryValueEt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:hint="@string/traits_create_categories_value_text"
+                        android:imeOptions="actionNext"
+                        android:inputType="textCapWords"
+                        android:paddingRight="10dp"
+                        android:textColor="#000000"
+                        android:textSize="@dimen/text_size_small"
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/dialog_new_trait_cat_btn"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <ImageButton
+                        android:padding="8dp"
+                        android:background="@color/zxing_transparent"
+                        android:src="@drawable/ic_tb_add_circle"
+                        android:id="@+id/dialog_new_trait_cat_btn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="4dp"
+                        android:text="@string/dialog_new_trait_add_cat_button_text"
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintHorizontal_weight="0.9"
+                        android:contentDescription="@string/dialog_new_trait_add_category_content_description" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/dialog_new_trait_cat_rv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

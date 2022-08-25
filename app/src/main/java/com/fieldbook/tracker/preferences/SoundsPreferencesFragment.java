@@ -3,6 +3,7 @@ package com.fieldbook.tracker.preferences;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
@@ -30,10 +31,58 @@ public class SoundsPreferencesFragment extends PreferenceFragmentCompat implemen
 
         // Occurs before the on create function. We get the context this way.
         SoundsPreferencesFragment.this.context = context;
+
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         return false;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        setupTtsPreference();
+
+        updateTtsSummary();
+    }
+
+    private void setupTtsPreference() {
+
+        CheckBoxPreference ttsEnabled = findPreference(GeneralKeys.TTS_LANGUAGE_ENABLED);
+        if (ttsEnabled != null) {
+            Preference ttsLanguage = findPreference(GeneralKeys.TTS_LANGUAGE);
+            if (ttsLanguage != null) {
+                ttsLanguage.setVisible(ttsEnabled.isChecked());
+
+                ttsLanguage.setOnPreferenceChangeListener((p, v) -> {
+                    updateTtsSummary();
+                    return true;
+                });
+            }
+
+            ttsEnabled.setOnPreferenceChangeListener((preference, newValue) -> {
+
+                if (ttsLanguage != null) {
+                    ttsLanguage.setVisible((Boolean) newValue);
+                }
+                return true;
+            });
+        }
+    }
+
+    private void updateTtsSummary() {
+
+        Preference ttsLanguage = findPreference(GeneralKeys.TTS_LANGUAGE);
+
+        String summary = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(GeneralKeys.TTS_LANGUAGE_SUMMARY, "");
+
+        if (ttsLanguage != null) {
+
+            ttsLanguage.setSummary(summary);
+
+        }
     }
 }

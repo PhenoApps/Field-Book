@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -48,17 +47,19 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
+import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -85,6 +86,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class ConfigActivity extends AppCompatActivity {
 
     public static DataHelper dt;
+    private final static String TAG = ConfigActivity.class.getSimpleName();
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
     private final int PERMISSIONS_REQUEST_MAKE_DIRS = 9930;
@@ -132,8 +134,20 @@ public class ConfigActivity extends AppCompatActivity {
         loadScreen();
     }
 
+    private void setCrashlyticsUserId() {
+
+        String id = ep.getString(GeneralKeys.CRASHLYTICS_ID, "");
+        FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
+        instance.setUserId(id);
+        instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, id);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        //important: this must be called before super.onCreate or else you get a black flicker
+        AppLanguageUtil.Companion.refreshAppText(this);
+
         super.onCreate(savedInstanceState);
 
         dt = new DataHelper(this);
@@ -141,6 +155,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
+        setCrashlyticsUserId();
         invalidateOptionsMenu();
         loadScreen();
 
@@ -859,6 +874,8 @@ public class ConfigActivity extends AppCompatActivity {
             DocumentFile dbFile = null;
             DocumentFile tableFile = null;
 
+            ArrayList<TraitObject> traits = dt.getAllTraitObjects();
+
             //check if export database has been selected
             if (checkDbBool) {
                 if (exportData.getCount() > 0) {
@@ -917,7 +934,7 @@ public class ConfigActivity extends AppCompatActivity {
                         exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
+                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length, traits);
 
                     } catch (Exception e) {
                         fail = true;

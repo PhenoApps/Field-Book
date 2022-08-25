@@ -36,7 +36,6 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class PhotoTraitLayout : BaseTraitLayout {
 
     private var scope = CoroutineScope(Dispatchers.IO)
@@ -82,7 +81,7 @@ class PhotoTraitLayout : BaseTraitLayout {
         loadLayoutWork()
     }
 
-    fun loadLayoutWork() {
+    private fun loadLayoutWork() {
 
         scope.cancel()
         scope = CoroutineScope(Dispatchers.IO)
@@ -191,7 +190,7 @@ class PhotoTraitLayout : BaseTraitLayout {
 
         //create thumbnail
         try {
-            val thumbsDir = getFieldMediaDirectory(context, "thumbnails")
+            val thumbsDir = getFieldMediaDirectory(context, ".thumbnails")
             val name: String = uri.getStem(context)
             if (thumbsDir != null) {
                 val nomedia = thumbsDir.findFile(".nomedia")
@@ -295,6 +294,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                     observation.dbId,
                     observation.lastSyncedTime
                 ) //TODO add notes and exp_id
+                //TODO update location when merged in develop
             }
         }
     }

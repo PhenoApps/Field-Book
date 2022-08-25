@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.traits;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
@@ -132,23 +131,12 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
+
         // clear NA hint
         getEtCurVal().setHint("");
         getEtCurVal().removeTextChangedListener(getCvText());
         getEtCurVal().setVisibility(EditText.VISIBLE);
-
-        if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().setText("");
-            getEtCurVal().setTextColor(Color.BLACK);
-
-            if (getCurrentTrait().getDefaultValue() != null
-                    && getCurrentTrait().getDefaultValue().length() > 0)
-                getEtCurVal().setText(getCurrentTrait().getDefaultValue());
-
-        } else {
-            getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
-            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-        }
     }
 
     @Override
@@ -174,6 +162,8 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
                 v = rustButtons.get(view.getId()).getText().toString();
             }
 
+            triggerTts(v);
+
             if (getVisibility() == View.VISIBLE) {
                 if (getEtCurVal().getText().length() > 0
                         && !v.equals("/")
@@ -188,7 +178,9 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
                 if (getEtCurVal().getText().toString().matches(".*\\d.*")
                         && v.matches(".*\\d.*")
                         && !getEtCurVal().getText().toString().contains("/")) {
-                    Utils.makeToast(getContext(),getContext().getString(R.string.trait_error_disease_severity));
+                    String error = getContext().getString(R.string.trait_error_disease_severity);
+                    Utils.makeToast(getContext(),error);
+                    triggerTts(error);
                 } else {
                     getEtCurVal().setText(getEtCurVal().getText().toString() + v);
                     updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());

@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import android.os.Handler
@@ -15,9 +14,10 @@ import android.os.Looper
 import android.os.Message
 import android.util.AttributeSet
 import android.view.View
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.Group
 import androidx.core.app.ActivityCompat
@@ -25,7 +25,6 @@ import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.dao.ObservationUnitDao
 import com.fieldbook.tracker.database.models.ObservationUnitModel
@@ -40,8 +39,6 @@ import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.google.android.material.chip.ChipGroup
 import org.json.JSONObject
-import org.phenoapps.security.Security
-import kotlin.collections.HashMap
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -356,74 +353,78 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val newLat = latitude.toDouble()
             val newLng = longitude.toDouble()
 
-            val unit = ObservationUnitDao.getAll(studyDbId.toInt()).first { it.observation_unit_db_id == cRange.plot_id }
+            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == cRange.plot_id }
 
-            //check if the switch is enabled, then update obs units with average value
-            if (averageSwitch.isChecked) {
+            if (units.isNotEmpty()) {
 
-                val chipGroup = findViewById<ChipGroup>(R.id.gnss_trait_averaging_chip_group)
+                val unit = units.first()
+                //check if the switch is enabled, then update obs units with average value
+                if (averageSwitch.isChecked) {
 
-                val avgDuration = when (chipGroup.checkedChipId) {
-                    R.id.gnss_trait_10s_chip -> 10000L
-                    R.id.gnss_trait_5s_chip -> 5000L
-                    else -> -1L
-                }
+                    val chipGroup = findViewById<ChipGroup>(R.id.gnss_trait_averaging_chip_group)
 
-                //the saved geo coordinate location
-                val location = GeodeticUtils.parseGeoCoordinate(unit.geo_coordinates)
+                    val avgDuration = when (chipGroup.checkedChipId) {
+                        R.id.gnss_trait_10s_chip -> 10000L
+                        R.id.gnss_trait_5s_chip -> 5000L
+                        else -> -1L
+                    }
 
-                //listen for the duration and append lat/lngs to an array
-                val pointsToAverage = arrayListOf<Pair<Double, Double>>()
-                val info = AverageInfo(unit, location, pointsToAverage, latLength, lngLength)
-                if (avgDuration > -1L) {
+                    //the saved geo coordinate location
+                    val location = GeodeticUtils.parseGeoCoordinate(unit.geo_coordinates)
 
-                    if (location != null) {
+                    //listen for the duration and append lat/lngs to an array
+                    val pointsToAverage = arrayListOf<Pair<Double, Double>>()
+                    val info = AverageInfo(unit, location, pointsToAverage, latLength, lngLength)
+                    if (avgDuration > -1L) {
 
-                        //averaging is updating the location, so ask the user
-                        alertLocationUpdate {
+                        if (location != null) {
+
+                            //averaging is updating the location, so ask the user
+                            alertLocationUpdate {
+                                mProgressDialog?.show()
+                                startAverageTimer(info, avgDuration)
+                            }
+
+                        } else { //no location has been observed so don't ask the user
+
                             mProgressDialog?.show()
                             startAverageTimer(info, avgDuration)
+
                         }
 
-                    } else { //no location has been observed so don't ask the user
+                    } else {
 
-                        mProgressDialog?.show()
-                        startAverageTimer(info, avgDuration)
+                        if (location != null) {
 
+                            //averaging is updating the location, so ask the user
+                            alertLocationUpdate {
+                                val original = (location.latitude) to (location.longitude)
+                                val current = newLat to newLng
+                                pointsToAverage.add(original)
+                                pointsToAverage.add(current)
+                                averagePoints(info)
+                            }
+
+                        } else { //no location has been observed so don't ask the user
+
+                            updateCoordinateObservation(unit, geoJson)
+
+                        }
                     }
 
-                } else {
+                } else { //no averaging, so check if there is an observations and ask to update or not
 
-                    if (location != null) {
+                    if (etCurVal.text.isNotBlank()) {
 
-                        //averaging is updating the location, so ask the user
                         alertLocationUpdate {
-                            val original = (location.latitude) to (location.longitude)
-                            val current = newLat to newLng
-                            pointsToAverage.add(original)
-                            pointsToAverage.add(current)
-                            averagePoints(info)
+
+                            updateCoordinateObservation(unit, geoJson)
+
                         }
 
-                    } else { //no location has been observed so don't ask the user
+                    } else updateCoordinateObservation(unit, geoJson)
 
-                        updateCoordinateObservation(unit, geoJson)
-
-                    }
                 }
-
-            } else { //no averaging, so check if there is an observations and ask to update or not
-
-                if (etCurVal.text.isNotBlank()) {
-
-                    alertLocationUpdate {
-
-                        updateCoordinateObservation(unit, geoJson)
-
-                    }
-
-                } else updateCoordinateObservation(unit, geoJson)
-
             }
 
 //observations: store whatever the hell we want - Trevor circa 2021
@@ -557,12 +558,21 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                 if (value != null) {
 
+                    val internal = context.getString(R.string.trait_gnss_internal_tts)
+
                     val chosenDevice = pairedDevices.find { it.name == value }
 
                     if (chosenDevice == null) {
                         //register the location listener
                         //update no matter the distance change and every 10s
                         mGpsTracker = GPSTracker(context, this, 0, 10000)
+
+                        triggerTts(internal)
+                    } else {
+
+                        val deviceTts = context.getString(R.string.trait_gnss_external_device_tts, chosenDevice.name)
+
+                        triggerTts(deviceTts)
                     }
 
                     setupCommunicationsUi(chosenDevice)
@@ -609,6 +619,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val elevation = altTextView.text.toString()
 
             submitGnss(latitude, longitude, elevation)
+
+            triggerTts(context.getString(R.string.trait_location_saved_tts))
+
         }
 
         //cancel the thread when the disconnect button is pressed
@@ -656,17 +669,10 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
     }
 
     override fun loadLayout() {
+        super.loadLayout()
+
         this.visibility = View.VISIBLE
-        etCurVal.visibility = VISIBLE
-        if (newTraits.containsKey(currentTrait.trait)) {
-            etCurVal.setText(newTraits[currentTrait.trait].toString())
-            etCurVal.setTextColor(Color.parseColor(displayColor))
-        } else {
-            etCurVal.setText("")
-            etCurVal.setTextColor(Color.BLACK)
-            if (currentTrait.defaultValue != null
-                    && currentTrait.defaultValue.isNotEmpty()) etCurVal.setText(currentTrait.defaultValue)
-        }
+        etCurVal.visibility = View.VISIBLE
     }
 
     //delete the obs and the obs.unit geo coord (only if obs exists)
@@ -680,11 +686,11 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
             ObservationDao.deleteTrait(studyDbId, cRange.plot_id, currentTrait.trait)
 
-            ObservationUnitDao.getAll(studyDbId.toInt())
-                .first { it.observation_unit_db_id == cRange.plot_id }.let { unit ->
-
-                ObservationUnitDao.updateObservationUnit(unit, "")
-
+            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == cRange.plot_id }
+            if (units.isNotEmpty()) {
+                units.first().let { unit ->
+                    ObservationUnitDao.updateObservationUnit(unit, "")
+                }
             }
         }
 

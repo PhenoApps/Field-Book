@@ -7,6 +7,7 @@ import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
 import com.fieldbook.tracker.objects.RangeObject
+import com.fieldbook.tracker.utilities.CategoryJsonUtil
 
 class ObservationUnitPropertyDao {
 
@@ -179,7 +180,7 @@ class ObservationUnitPropertyDao {
             val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
-                val varSelectFields = arrayOf("observation_variable_name")
+                val varSelectFields = arrayOf("observation_variable_name", "observation_variable_field_book_format")
                 val obsSelectFields = arrayOf("value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
                 //val outputFields = fieldList + varSelectFields + obsSelectFields
                 val query = """
@@ -203,7 +204,7 @@ class ObservationUnitPropertyDao {
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
                         when (it) {
                             "trait" -> row["observation_variable_name"]
-                            "userValue" -> row["value"]
+                            "userValue" -> CategoryJsonUtil.processValue(row)
                             "timeTaken" -> row["observation_time_stamp"]
                             "person" -> row["collector"]
                             "location" -> row["geoCoordinates"]
