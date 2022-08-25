@@ -1,16 +1,19 @@
 package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.objects.TraitObject;
 
 import java.util.ArrayList;
 
 public class LayoutCollections {
-    private ArrayList<BaseTraitLayout> traitLayouts;
+    private final ArrayList<BaseTraitLayout> traitLayouts;
 
     public LayoutCollections(Activity _activity) {
         int[] traitIDs = {
@@ -19,13 +22,14 @@ public class LayoutCollections {
                 R.id.dateLayout, R.id.diseaseLayout, R.id.locationLayout,
                 R.id.multicatLayout, R.id.numericLayout, R.id.percentLayout,
                 R.id.photoLayout, R.id.textLayout, R.id.labelprintLayout,
-                R.id.gnssLayout
+                R.id.gnssLayout, R.id.usb_camera_layout
         };
 
         traitLayouts = new ArrayList<>();
         for (int traitID : traitIDs) {
             BaseTraitLayout layout = _activity.findViewById(traitID);
             if (layout.type().equals("gnss")
+                || layout.type().equals(UsbCameraTraitLayout.type)
                 || layout.type().equals("photo")
                 || layout.type().equals("zebra label print")) layout.init(_activity);
             else layout.init();
