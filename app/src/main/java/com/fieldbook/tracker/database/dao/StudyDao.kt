@@ -19,11 +19,19 @@ class StudyDao {
 
             db.rawQuery("PRAGMA foreign_keys=OFF;", null).close()
 
-            db.execSQL("""
+            try {
+
+                db.execSQL("""
                 insert or replace into observation_units_attributes (internal_id_observation_unit_attribute, observation_unit_attribute_name, study_id)
                 select attribute_id as internal_id_observation_unit_attribute, attribute_name as observation_unit_attribute_name, exp_id as study_id
                 from plot_attributes as p
             """.trimIndent())
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+            }
 
             db.rawQuery("PRAGMA foreign_keys=ON;", null).close()
         }
@@ -56,25 +64,26 @@ class StudyDao {
              * using a table gives better performance for getRangeByIdAndPlot query
              */
             val query = """
-                CREATE TABLE IF NOT EXISTS $sObservationUnitPropertyViewName AS 
-                SELECT units.${ObservationUnit.PK} AS id $selectStatement
-                FROM ${ObservationUnit.tableName} AS units
-                LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.${ObservationUnit.PK} = vals.${ObservationUnit.FK}
-                LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr on vals.${ObservationUnitAttribute.FK} = attr.${ObservationUnitAttribute.PK}
-                LEFT JOIN plot_attributes as a on vals.observation_unit_attribute_db_id = a.attribute_id
-                WHERE units.${Study.FK} = $exp_id
-                GROUP BY units.${ObservationUnit.PK}
-            """.trimMargin()
+            CREATE TABLE IF NOT EXISTS $sObservationUnitPropertyViewName AS 
+            SELECT units.${ObservationUnit.PK} AS id $selectStatement
+            FROM ${ObservationUnit.tableName} AS units
+            LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.${ObservationUnit.PK} = vals.${ObservationUnit.FK}
+            LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr on vals.${ObservationUnitAttribute.FK} = attr.${ObservationUnitAttribute.PK}
+            LEFT JOIN plot_attributes as a on vals.observation_unit_attribute_db_id = a.attribute_id
+            WHERE units.${Study.FK} = $exp_id
+            GROUP BY units.${ObservationUnit.PK}
+        """.trimMargin()
 
             db.execSQL(query)
 
-            println("$exp_id $query")
+//            println("$exp_id $query")
 //
 //            println("New switch field time: ${
 //                measureTimeMillis {
 //                    db.execSQL(query)
 //                }.toLong()
 //            }")
+
         }
 
         fun deleteField(exp_id: Int) = withDatabase { db ->

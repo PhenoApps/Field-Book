@@ -434,8 +434,21 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
         if (requestCode == REQUEST_FILE_EXPLORE_CODE) {
             if (resultCode == RESULT_OK) {
                 if (getContext() != null) {
-                    invokeImportDatabase(DocumentFile.fromSingleUri(getContext(),
-                            Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY))));
+
+                    DocumentFile dbDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_database);
+                    DocumentFile dbInput = DocumentFile.fromSingleUri(getContext(),
+                            Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY)));
+
+                    if (dbDir != null && dbInput != null && dbInput.getName() != null) {
+
+                        DocumentFile shared = dbDir.findFile(dbInput.getName());
+
+                        if (shared != null) {
+
+                            invokeImportDatabase(shared);
+
+                        }
+                    }
                 }
             }
         }
