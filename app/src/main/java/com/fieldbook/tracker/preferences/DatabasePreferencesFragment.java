@@ -31,7 +31,6 @@ import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 
@@ -40,6 +39,7 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
@@ -166,26 +166,33 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
                     String internalDbPath = DataHelper.getDatabasePath(context);
 
-                    try {
+                    try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
 
-                        ZipUtil.Companion.unzip(context,
-                                context.getContentResolver().openInputStream(file.getUri()),
-                                new FileOutputStream(internalDbPath));
+                        try (OutputStream output = new FileOutputStream(internalDbPath)) {
 
-                        SharedPreferences.Editor edit = ep.edit();
+                            ZipUtil.Companion.unzip(context, input, output);
 
-                        edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-                        edit.putString(GeneralKeys.UNIQUE_NAME, "");
-                        edit.putString(GeneralKeys.PRIMARY_NAME, "");
-                        edit.putString(GeneralKeys.SECONDARY_NAME, "");
-                        edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-                        edit.apply();
+                            SharedPreferences.Editor edit = ep.edit();
 
-                        dt.open();
+                            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+                            edit.putString(GeneralKeys.UNIQUE_NAME, "");
+                            edit.putString(GeneralKeys.PRIMARY_NAME, "");
+                            edit.putString(GeneralKeys.SECONDARY_NAME, "");
+                            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+                            edit.apply();
 
-                    } catch (IOException io) {
+                            dt.open();
 
-                        io.printStackTrace();
+                        } catch (Exception e) {
+
+                            e.printStackTrace();
+
+                            throw new Exception();
+                        }
+
+                    } catch (Exception e) {
+
+                        e.printStackTrace();
 
                     }
                 }
