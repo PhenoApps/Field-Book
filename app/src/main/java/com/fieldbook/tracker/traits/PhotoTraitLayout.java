@@ -54,7 +54,7 @@ public class PhotoTraitLayout extends BaseTraitLayout {
     private ArrayList<Drawable> drawables;
     private Gallery photo;
     private GalleryImageAdapter photoAdapter;
-    private String mCurrentPhotoPath;
+    private Uri currentPhotoPath = null;
     // Creates a new thread to do importing
     private Runnable importRunnable = new Runnable() {
         public void run() {
@@ -240,26 +240,41 @@ public class PhotoTraitLayout extends BaseTraitLayout {
         }
     }
 
-    public void makeImage(TraitObject currentTrait, Map newTraits) {
+    public void makeImage(TraitObject currentTrait, Map<String, String> newTraits, Boolean success) {
 
         DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(getContext(), "photos");
 
-        if (photosDir != null) {
+        if (photosDir != null && currentPhotoPath != null) {
 
-            DocumentFile file = photosDir.findFile(mCurrentPhotoPath);
+            DocumentFile file = DocumentFile.fromSingleUri(getContext(), currentPhotoPath);
 
             if (file != null) {
 
-                Utils.scanFile(getContext(), file.getUri().toString(), "image/*");
+                if (success) {
 
-                drawables.add(new BitmapDrawable(displayScaledSavedPhoto(file.getUri())));
+                    List<DocumentFile> p = DocumentTreeUtil.Companion.getPlotMedia(photosDir, getCRange().plot_id, ".jpg");
 
-                updateTraitAllowDuplicates(currentTrait.getTrait(), "photo", mCurrentPhotoPath, null, newTraits);
+                    Utils.scanFile(getContext(), file.getUri().toString(), "image/*");
 
-                photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+                    drawables.add(new BitmapDrawable(displayScaledSavedPhoto(file.getUri())));
 
-                photo.setAdapter(photoAdapter);
-                photo.setSelection(photoAdapter.getCount() - 1);
+                    updateTraitAllowDuplicates(currentTrait.getTrait(), "photo", currentPhotoPath.toString(), null, newTraits);
+
+                    photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
+
+                    photo.setAdapter(photoAdapter);
+                    photo.setSelection(photoAdapter.getCount() - 1);
+                    photo.setOnItemClickListener((arg0, arg1, pos, arg3) -> {
+                        if (p.size() > pos) {
+                            displayPlotImage(p.get(pos).getUri());
+                        }
+                    });
+
+                } else {
+
+                    file.delete();
+
+                }
             }
         }
     }
@@ -389,13 +404,13 @@ public class PhotoTraitLayout extends BaseTraitLayout {
 
             String generatedName = getCRange().plot_id + "_" + getCurrentTrait().getTrait() + "_" + getRep() + "_" + timeStamp.format(Calendar.getInstance().getTime()) + ".jpg";
 
-            mCurrentPhotoPath = generatedName;
-
             Log.w("File", dir.getUri() + generatedName);
 
             DocumentFile file = dir.createFile("image/jpg", generatedName);
 
             if (file != null) {
+
+                currentPhotoPath = file.getUri();
 
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 // Ensure that there's a camera activity to handle the intent
@@ -451,8 +466,11 @@ public class PhotoTraitLayout extends BaseTraitLayout {
                     photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
                     photo.setAdapter(photoAdapter);
                     photo.setSelection(photo.getCount() - 1);
-                    photo.setOnItemClickListener((arg0, arg1, pos, arg3) ->
-                            displayPlotImage(photos.get(pos).getUri()));
+                    photo.setOnItemClickListener((arg0, arg1, pos, arg3) -> {
+                        if (photos.size() > pos) {
+                            displayPlotImage(photos.get(pos).getUri());
+                        }
+                    });
                 } else {
                     photoAdapter = new GalleryImageAdapter((Activity) getContext(), drawables);
                     photo.setAdapter(photoAdapter);
