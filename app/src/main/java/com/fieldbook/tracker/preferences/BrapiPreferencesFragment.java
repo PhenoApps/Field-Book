@@ -122,7 +122,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         //set logout button
         if (brapiLogoutButton != null) {
             brapiLogoutButton.setOnPreferenceClickListener(preference -> {
-                SharedPreferences preferences = prefMgr.getSharedPreferences();
+                SharedPreferences preferences = context
+                        .getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
 
                 // Clear our brapi token
                 SharedPreferences.Editor editor = preferences.edit();
@@ -192,25 +193,25 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
                 setServer("https://www.cassavabase.org",
                         "https://www.cassavabase.org/.well-known/openid-configuration",
-                        getString(R.string.preferences_brapi_oidc_flow_old_custom));
+                        getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_wheat":
                 prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
                 setServer("https://wheat-sandbox.triticeaetoolbox.org",
                         "https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
-                        getString(R.string.preferences_brapi_oidc_flow_old_custom));
+                        getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_oat":
                 prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
                 setServer("https://oat-sandbox.triticeaetoolbox.org",
                         "https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
-                        getString(R.string.preferences_brapi_oidc_flow_old_custom));
+                        getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_t3_barley":
                 prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
                 setServer("https://barley-sandbox.triticeaetoolbox.org",
                         "https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration",
-                        getString(R.string.preferences_brapi_oidc_flow_old_custom));
+                        getString(R.string.preferences_brapi_oidc_flow_oauth_implicit));
                 break;
             case "brapi_server_default":
                 prefMgr.getSharedPreferences().edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false).apply();
@@ -330,8 +331,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     //checks the uri scheme, uris without http/https causes auth to crash
     private void brapiAuth() {
 
-        if (brapiOIDCURLPreference.getText().contains("http://")
-            || brapiURLPreference.getText().contains("http://")) {
+        if (brapiOIDCURLPreference.getText().startsWith("http://")
+            || brapiURLPreference.getText().startsWith("http://")) {
 
                 if (mBrapiHttpWarningDialog != null
                     && !mBrapiHttpWarningDialog.isShowing()) {
@@ -394,7 +395,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
      */
     public void setButtonView() {
 
-        String brapiToken = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_TOKEN, null);
+        String brapiToken = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+                .getString(GeneralKeys.BRAPI_TOKEN, null);
         String brapiHost = prefMgr.getSharedPreferences().getString(GeneralKeys.BRAPI_BASE_URL, null);
 
         if (brapiHost != null) {  // && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
@@ -422,7 +424,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     private void setOidcFlowUi() {
 
-        PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("brapi_oidc_settings");
+        PreferenceCategory preferenceCategory = findPreference("brapi_oidc_settings");
 
         if (preferenceCategory != null) {
 
