@@ -6,18 +6,35 @@ import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.database.*
+import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropertyViewName
 import com.fieldbook.tracker.objects.FieldObject
-import com.fieldbook.tracker.database.Migrator.Observation
-import com.fieldbook.tracker.database.Migrator.ObservationUnit
-import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
-import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
-import com.fieldbook.tracker.database.Migrator.Study
 
 
 class StudyDao {
 
     companion object {
+
+        private fun fixPlotAttributes(db: SQLiteDatabase) {
+
+            db.rawQuery("PRAGMA foreign_keys=OFF;", null).close()
+
+            try {
+
+                db.execSQL("""
+                insert or replace into observation_units_attributes (internal_id_observation_unit_attribute, observation_unit_attribute_name, study_id)
+                select attribute_id as internal_id_observation_unit_attribute, attribute_name as observation_unit_attribute_name, exp_id as study_id
+                from plot_attributes as p
+            """.trimIndent())
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+            }
+
+            db.rawQuery("PRAGMA foreign_keys=ON;", null).close()
+        }
 
         /**
          * Transpose obs. unit. attribute/values into a view based on the selected study.
@@ -27,6 +44,8 @@ class StudyDao {
         fun switchField(exp_id: Int) = withDatabase { db ->
 
             val headers = ObservationUnitAttributeDao.getAllNames(exp_id)
+
+            fixPlotAttributes(db)
 
             //create a select statement based on the saved plot attribute names
             val select = headers.map { col ->
@@ -45,14 +64,15 @@ class StudyDao {
              * using a table gives better performance for getRangeByIdAndPlot query
              */
             val query = """
-                CREATE TABLE IF NOT EXISTS $sObservationUnitPropertyViewName AS 
-                SELECT units.${ObservationUnit.PK} AS id $selectStatement
-                FROM ${ObservationUnit.tableName} AS units
-                LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.${ObservationUnit.PK} = vals.${ObservationUnit.FK}
-                LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr on vals.${ObservationUnitAttribute.FK} = attr.${ObservationUnitAttribute.PK}
-                WHERE units.${Study.FK} = $exp_id
-                GROUP BY units.${ObservationUnit.PK}
-            """.trimMargin()
+            CREATE TABLE IF NOT EXISTS $sObservationUnitPropertyViewName AS 
+            SELECT units.${ObservationUnit.PK} AS id $selectStatement
+            FROM ${ObservationUnit.tableName} AS units
+            LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.${ObservationUnit.PK} = vals.${ObservationUnit.FK}
+            LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr on vals.${ObservationUnitAttribute.FK} = attr.${ObservationUnitAttribute.PK}
+            LEFT JOIN plot_attributes as a on vals.observation_unit_attribute_db_id = a.attribute_id
+            WHERE units.${Study.FK} = $exp_id
+            GROUP BY units.${ObservationUnit.PK}
+        """.trimMargin()
 
             db.execSQL(query)
 
@@ -63,6 +83,7 @@ class StudyDao {
 //                    db.execSQL(query)
 //                }.toLong()
 //            }")
+
         }
 
         fun deleteField(exp_id: Int) = withDatabase { db ->
