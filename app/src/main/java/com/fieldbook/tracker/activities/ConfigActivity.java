@@ -50,10 +50,10 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
+import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -1125,7 +1125,62 @@ public class ConfigActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = prefs.edit();
             editor.apply();
 
+            //if sample db is imported, automatically select the first study
+            try {
+
+                selectFirstField();
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+            }
+
             CollectActivity.reloadData = true;
+        }
+    }
+
+    /**
+     * Queries the database for saved studies and calls switch field for the first one.
+     */
+    public void selectFirstField() {
+
+        try {
+
+            FieldObject[] fs = StudyDao.Companion.getAllFieldObjects().toArray(new FieldObject[0]);
+
+            if (fs.length > 0) {
+
+                switchField(fs[0].getExp_id());
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
+    /**
+     * Calls database switch field on the given studyId.
+     * @param studyId the study id to switch to
+     */
+    private void switchField(int studyId) {
+
+        FieldObject f = StudyDao.Companion.getFieldObject(studyId);
+
+        if (f != null) {
+
+            dt.switchField(studyId);
+
+            //clear field selection after updates
+            ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId)
+                .putString(GeneralKeys.FIELD_FILE, f.getExp_name())
+                .putString(GeneralKeys.UNIQUE_NAME, f.getUnique_id())
+                .putString(GeneralKeys.PRIMARY_NAME, f.getPrimary_id())
+                .putString(GeneralKeys.SECONDARY_NAME, f.getSecondary_id())
+                .putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true)
+                .putString(GeneralKeys.LAST_PLOT, null).apply();
         }
     }
 }
