@@ -52,7 +52,7 @@ class PhotoTraitLayout : BaseTraitLayout {
 
     private var photo: Gallery? = null
     private var photoAdapter: GalleryImageAdapter? = null
-    private var mCurrentPhotoPath: String? = null
+    private var currentPhotoPath: Uri? = null
     private var activity: Activity? = null
 
     constructor(context: Context?) : super(context)
@@ -263,7 +263,7 @@ class PhotoTraitLayout : BaseTraitLayout {
         }
     }
 
-    fun makeImage(currentTrait: TraitObject, newTraits: MutableMap<String, String>?) {
+    fun makeImage(currentTrait: TraitObject, newTraits: MutableMap<String, String>?, success: Boolean) {
 
         currentTrait.trait?.let { traitName ->
 
@@ -272,22 +272,36 @@ class PhotoTraitLayout : BaseTraitLayout {
             try {
 
                 if (photosDir != null) {
-                    mCurrentPhotoPath?.let { path ->
-                        val file = photosDir.findFile(path)
-                        if (file != null) {
-                            try {
-                                Utils.scanFile(context, file.uri.toString(), "image/*")
-                                createThumbnail(photosDir, file.uri)
-                                updateTraitAllowDuplicates(
-                                    traitName,
-                                    type,
-                                    path,
-                                    null,
-                                    newTraits
-                                )
-                                loadLayoutWork()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
+
+                    currentPhotoPath?.let { path ->
+
+                        DocumentFile.fromSingleUri(context, path)?.let { file ->
+
+                            if (success) {
+
+                                try {
+
+                                    Utils.scanFile(context, file.uri.toString(), "image/*")
+                                    createThumbnail(photosDir, file.uri)
+                                    updateTraitAllowDuplicates(
+                                        traitName,
+                                        type,
+                                        path.toString(),
+                                        null,
+                                        newTraits
+                                    )
+                                    loadLayoutWork()
+
+                                } catch (e: Exception) {
+
+                                    e.printStackTrace()
+
+                                }
+
+                            } else {
+
+                                file.delete()
+
                             }
                         }
                     }
@@ -433,6 +447,7 @@ class PhotoTraitLayout : BaseTraitLayout {
     }
 
     private fun takePicture() {
+
         val timeStamp = SimpleDateFormat(
             "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
         )
@@ -445,10 +460,12 @@ class PhotoTraitLayout : BaseTraitLayout {
                     cRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
                         Calendar.getInstance().time
                     ) + ".jpg"
-                mCurrentPhotoPath = generatedName
                 Log.w(TAG, dir.uri.toString() + generatedName)
                 val file = dir.createFile("image/jpg", generatedName)
                 if (file != null) {
+
+                    currentPhotoPath = file.uri
+
                     val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                     // Ensure that there's a camera activity to handle the intent
                     if (takePictureIntent.resolveActivity(context.packageManager) != null) {

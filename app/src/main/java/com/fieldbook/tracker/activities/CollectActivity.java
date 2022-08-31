@@ -1992,7 +1992,7 @@ public class CollectActivity extends AppCompatActivity
                     validateData();
                 }
                 break;
-            case 252:
+            case PhotoTraitLayout.PICTURE_REQUEST_CODE:
                 String success = getString(R.string.trait_photo_tts_success);
                 String fail = getString(R.string.trait_photo_tts_fail);
                 if (resultCode == RESULT_OK) {
