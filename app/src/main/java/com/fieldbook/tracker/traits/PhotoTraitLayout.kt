@@ -359,7 +359,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                                 createThumbnail(photosDir, file.uri)
                                 updateTraitAllowDuplicates(
                                     traitName,
-                                    "photo",
+                                    type,
                                     path,
                                     null,
                                     newTraits
