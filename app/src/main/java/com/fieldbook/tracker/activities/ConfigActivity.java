@@ -54,6 +54,7 @@ import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -163,16 +164,22 @@ public class ConfigActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
         int lastVersion = ep.getInt(GeneralKeys.UPDATE_VERSION, -1);
-        if (lastVersion < Utils.getVersion(this)) {
+        int currentVersion = Utils.getVersion(this);
+        if (lastVersion < currentVersion) {
             ep.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
             showChangelog(true, false);
 
-            //clear field selection after updates
-            ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
-            ep.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
-            ep.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
-            ep.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
-            ep.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
+            if (currentVersion >= 530 && lastVersion < 530) {
+
+                OldPhotosMigrator.Companion.migrateOldPhotosDir(this);
+
+                //clear field selection after updates
+                ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+                ep.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
+                ep.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
+                ep.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
+                ep.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
+            }
         }
 
         if (!ep.contains(GeneralKeys.FIRST_RUN)) {
