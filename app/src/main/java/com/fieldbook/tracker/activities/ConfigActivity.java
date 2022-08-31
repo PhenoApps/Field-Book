@@ -54,6 +54,7 @@ import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -162,9 +163,23 @@ public class ConfigActivity extends AppCompatActivity {
         // request permissions
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
-        if (ep.getInt(GeneralKeys.UPDATE_VERSION, -1) < Utils.getVersion(this)) {
+        int lastVersion = ep.getInt(GeneralKeys.UPDATE_VERSION, -1);
+        int currentVersion = Utils.getVersion(this);
+        if (lastVersion < currentVersion) {
             ep.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
             showChangelog(true, false);
+
+            if (currentVersion >= 530 && lastVersion < 530) {
+
+                OldPhotosMigrator.Companion.migrateOldPhotosDir(this);
+
+                //clear field selection after updates
+                ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+                ep.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
+                ep.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
+                ep.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
+                ep.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
+            }
         }
 
         if (!ep.contains(GeneralKeys.FIRST_RUN)) {
@@ -421,11 +436,6 @@ public class ConfigActivity extends AppCompatActivity {
                 ed.apply();
 
                 dialog.dismiss();
-
-                Intent intent = new Intent();
-                intent.setClassName(ConfigActivity.this,
-                        ConfigActivity.class.getName());
-                startActivity(intent);
             }
         });
 
@@ -850,6 +860,17 @@ public class ConfigActivity extends AppCompatActivity {
 
             //flag telling if the user checked the media bundle option
             boolean bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false);
+
+            newRange.clear();
+
+            if (onlyUnique.isChecked()) {
+                newRange.add(ep.getString(GeneralKeys.UNIQUE_NAME, ""));
+            }
+
+            if (allColumns.isChecked()) {
+                String[] columns = dt.getRangeColumns();
+                Collections.addAll(newRange, columns);
+            }
 
             String[] newRanges = newRange.toArray(new String[newRange.size()]);
             String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);

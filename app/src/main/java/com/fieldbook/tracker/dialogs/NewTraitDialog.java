@@ -1,5 +1,8 @@
 package com.fieldbook.tracker.dialogs;
 
+import static com.fieldbook.tracker.activities.TraitEditorActivity.displayBrapiInfo;
+import static com.fieldbook.tracker.activities.TraitEditorActivity.loadData;
+
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -9,7 +12,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -23,34 +25,23 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
 import com.fieldbook.tracker.adapters.CategoryAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapter;
-import com.fieldbook.tracker.database.Migrator;
-import com.fieldbook.tracker.database.dao.ObservationDao;
-import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static com.fieldbook.tracker.activities.TraitEditorActivity.displayBrapiInfo;
-import static com.fieldbook.tracker.activities.TraitEditorActivity.loadData;
-
-import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
 //TODO this class needs refactoring @chaneylc
 public class NewTraitDialog extends DialogFragment implements CategoryAdapter.CategoryListItemOnClick {
@@ -1012,6 +1003,22 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
 
     }
 
+    private class TraitUsbCameraFormat extends TraitFormatNotValue {
+
+        @Override
+        public ParameterObject detailsBox() {
+            return new ParameterObject(true, false, null, optionalHint);
+        }
+
+        public String getEnglishString() {
+            return "Usb Camera";
+        }
+
+        public int getResourceId() {
+            return R.string.traits_format_usb_camera;
+        }
+    }
+
     private class TraitFormatPhoto extends TraitFormatNotValue {
 
         @Override
@@ -1160,6 +1167,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
             //traitFormatList.add(new TraitFormatBarcode());
             traitFormatList.add(new TraitFormatZebraLablePrint());
             traitFormatList.add(new TraitFormatGnss());
+            traitFormatList.add(new TraitUsbCameraFormat());
         }
 
         public int size() {

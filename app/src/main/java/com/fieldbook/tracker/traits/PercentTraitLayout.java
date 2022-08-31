@@ -8,9 +8,6 @@ import android.widget.SeekBar;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.objects.TraitObject;
-
-import java.util.Map;
 
 public class PercentTraitLayout extends BaseTraitLayout {
     private SeekBar seekBar;

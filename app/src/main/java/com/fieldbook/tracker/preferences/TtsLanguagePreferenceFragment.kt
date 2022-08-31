@@ -1,14 +1,11 @@
 package com.fieldbook.tracker.preferences
 
-import android.content.res.Resources
 import android.os.Bundle
-import androidx.core.os.ConfigurationCompat
 import androidx.fragment.app.FragmentManager
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.utilities.AppLanguageUtil
 import org.phenoapps.utils.TextToSpeechHelper
 
 class TtsLanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClickListener {

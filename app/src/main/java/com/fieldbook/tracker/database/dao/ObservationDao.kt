@@ -5,7 +5,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.database.*
@@ -16,8 +15,6 @@ import com.fieldbook.tracker.database.Migrator.Companion.sRemoteImageObservation
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.format.DateTimeFormatter
-import java.util.*
 import com.fieldbook.tracker.brapi.model.Observation as BrapiObservation
 
 class ObservationDao {

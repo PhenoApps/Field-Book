@@ -32,7 +32,7 @@
 
     <!-- this tools:replace is required for tableview -->
     <application
-        android:name="androidx.multidex.MultiDexApplication"
+        android:name=".application.FieldBook"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/field_book"

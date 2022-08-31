@@ -1,14 +1,13 @@
 package com.fieldbook.tracker.traits;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

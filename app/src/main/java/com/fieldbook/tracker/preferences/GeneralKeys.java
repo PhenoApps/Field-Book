@@ -59,6 +59,7 @@ public class GeneralKeys {
     public static final String BRAPI_BASE_URL                       = "BRAPI_BASE_URL";
     public static final String BRAPI_OIDC_URL                       = "BRAPI_OIDC_URL";
     public static final String BRAPI_OIDC_FLOW                      = "BRAPI_OIDC_FLOW";
+    public static final String BRAPI_EXPLICIT_OIDC_URL             = "BRAPI_EXPLICIT_OIDC_URL";
     public static final String BRAPI_TOKEN                          = "BRAPI_TOKEN";
     public static final String BRAPI_VERSION                        = "BRAPI_VERSION";
     public static final String BRAPI_PAGE_SIZE                      = "BRAPI_PAGE_SIZE";

@@ -14,15 +14,8 @@ import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.DefineStorageActivity;
-import com.fieldbook.tracker.activities.LocaleChoiceActivity;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
-import org.phenoapps.utils.KeyUtil;
-import org.phenoapps.utils.TextToSpeechHelper;
-
-import java.util.Locale;
-import java.util.Set;
 
 public class GeneralPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 

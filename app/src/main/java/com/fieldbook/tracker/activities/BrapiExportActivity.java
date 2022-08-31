@@ -18,9 +18,6 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
-import com.fieldbook.tracker.brapi.service.AbstractBrAPIService;
-import com.fieldbook.tracker.brapi.service.BrAPIService;
-import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
@@ -35,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.Semaphore;
 
 public class BrapiExportActivity extends AppCompatActivity {
     private static final String TAG = BrapiExportActivity.class.getName();
