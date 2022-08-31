@@ -71,11 +71,9 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
-import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.location.gnss.ConnectThread;
@@ -85,7 +83,6 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.preferences.GeneralPreferencesFragment;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
@@ -120,13 +117,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-
-import javax.validation.constraints.Null;
 
 import kotlin.Pair;
 
@@ -1998,13 +1992,13 @@ public class CollectActivity extends AppCompatActivity
                     validateData();
                 }
                 break;
-            case 252:
+            case PhotoTraitLayout.PICTURE_REQUEST_CODE:
                 String success = getString(R.string.trait_photo_tts_success);
                 String fail = getString(R.string.trait_photo_tts_fail);
                 if (resultCode == RESULT_OK) {
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                     traitPhoto.makeImage(traitBox.getCurrentTrait(),
-                            traitBox.getNewTraits());
+                            traitBox.getNewTraits(), resultCode == RESULT_OK);
 
                     triggerTts(success);
                 } else triggerTts(fail);
