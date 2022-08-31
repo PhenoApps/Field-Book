@@ -2,15 +2,13 @@ package com.fieldbook.tracker.traits;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
 

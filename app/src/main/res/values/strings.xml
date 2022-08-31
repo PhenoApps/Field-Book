@@ -122,6 +122,7 @@
     <string name="traits_format_printer">Printer</string>
     <string name="traits_format_barcode">Barcode</string>
     <string name="traits_format_labelprint">Zebra Label Print</string>
+    <string name="traits_format_usb_camera">Usb Camera</string>
 
     <string name="traits_create_trait">Trait</string>
     <string name="traits_create_format">Format</string>
@@ -748,6 +749,10 @@
     <string name="trait_date_next_day_tts">Next day</string>
     <string name="trait_date_open_calendar_tts">Opening calendar.</string>
     <string name="trait_location_saved_tts">Location saved.</string>
+    <string name="trait_external_camera_collapse_content_desc">Collapse</string>
+    <string name="trait_external_camera_expand_content_desc">Expand</string>
+    <string name="trait_external_camera_capture_btn">Capture</string>
+    <string name="trait_usb_camera_devices_btn_text">Pair Device</string>
     <string name="preferences_profile_crashlytics">Crashlytics</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">This optional setting will log an anonymous, unique ID that will help the development team track and solve crashes.</string>
@@ -772,8 +777,13 @@
     <string name="language_pt_rBR" translatable="false">Português</string>
     <string name="language_ru" translatable="false">Русский</string>
     <string name="language_zh_rCN" translatable="false">简体字</string>
+
     <string name="language">Language</string>
     <string name="preference_language_default">System Language</string>
     <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
+    <string name="trait_usb_camera_delete_photo">Delete USB Photo</string>
+    <string name="delete_photo_dialog_iv_content_description">Photo to be deleted.</string>
+    <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
+    <string name="trait_usb_camera_capture_button_text">Capture</string>
 
 </resources>

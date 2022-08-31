@@ -3,28 +3,21 @@ package com.fieldbook.tracker.brapi.model;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 import androidx.exifinterface.media.ExifInterface;
 
-import com.fieldbook.tracker.application.FieldBook;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import org.phenoapps.utils.BaseDocumentTreeUtil;
-
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import io.swagger.client.model.GeoJSON;
 

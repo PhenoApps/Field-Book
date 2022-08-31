@@ -45,7 +45,6 @@ import io.swagger.client.ApiException;
 import io.swagger.client.api.ImagesApi;
 import io.swagger.client.api.ObservationVariablesApi;
 import io.swagger.client.api.ObservationsApi;
-import io.swagger.client.api.PhenotypesApi;
 import io.swagger.client.api.ProgramsApi;
 import io.swagger.client.api.StudiesApi;
 import io.swagger.client.api.TrialsApi;

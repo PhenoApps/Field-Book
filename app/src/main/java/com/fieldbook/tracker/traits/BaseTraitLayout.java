@@ -126,13 +126,18 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public String getDisplayColor() {
-        String hexColor = String.format("#%06X", (0xFFFFFF & getPrefs().getInt(GeneralKeys.SAVED_DATA_COLOR, Color.parseColor("#d50000"))));
 
-        return hexColor;
+        return String.format("#%06X", (0xFFFFFF & getPrefs().getInt(GeneralKeys.SAVED_DATA_COLOR, Color.parseColor("#d50000"))));
     }
 
-    public void updateTrait(String parent, String trait, String value) {
-        ((CollectActivity) getContext()).updateTrait(parent, trait, value);
+    /**
+     * Calls the collect activities db function to insert an observation row.
+     * @param traitName the name of the trait s.a "My Height Trait", "Height" (defined by user / FB)
+     * @param traitType the type of trait s.a "Numeric", "Categorical" (defined by FB)
+     * @param value the Text value to be saved in the row
+     */
+    public void updateTrait(String traitName, String traitType, String value) {
+        ((CollectActivity) getContext()).updateTrait(traitName, traitType, value);
     }
 
     public void removeTrait(String parent) {

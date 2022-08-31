@@ -1,17 +1,13 @@
 package com.fieldbook.tracker.utilities
 
 import android.location.Location
-import android.util.Log
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.traits.GNSSTraitLayout
-import com.github.filosganga.geogson.model.LineString
 import com.google.gson.Gson
 import math.geom2d.Point2D
 import math.geom2d.line.Line2D
-import java.io.FileWriter
 import java.io.IOException
 import java.io.OutputStreamWriter
-import java.lang.NumberFormatException
 import kotlin.math.*
 
 class GeodeticUtils {

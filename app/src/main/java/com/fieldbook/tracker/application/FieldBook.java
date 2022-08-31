@@ -1,7 +1,15 @@
 package com.fieldbook.tracker.application;
 
-import android.app.Application;
+import androidx.multidex.MultiDexApplication;
 
-public class FieldBook extends Application {
+import com.fieldbook.tracker.BuildConfig;
 
+public class FieldBook extends MultiDexApplication {
+
+    public FieldBook() {
+        if (BuildConfig.DEBUG) {
+            //StrictMode.enableDefaults();
+            //un-comment to enable strict warnings in logcat
+        }
+    }
 }

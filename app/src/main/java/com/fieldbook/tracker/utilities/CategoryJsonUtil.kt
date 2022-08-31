@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.utilities
 
-import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.traits.CategoricalTraitLayout
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson

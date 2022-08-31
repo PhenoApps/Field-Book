@@ -139,6 +139,9 @@ public class TraitAdapter extends BaseAdapter {
             case "gnss":
                 holder.format.setBackgroundResource(R.drawable.ic_trait_gnss);
                 break;
+            case "usb camera":
+                holder.format.setBackgroundResource(R.drawable.ic_trait_usb);
+                break;
             default:
                 holder.format.setBackgroundResource(R.drawable.ic_reorder);
                 break;

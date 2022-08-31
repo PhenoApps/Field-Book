@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.traits;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -10,8 +9,8 @@ import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 
 //TODO this isn't showing in new trait creator
 public class AngleTraitLayout extends BaseTraitLayout {
