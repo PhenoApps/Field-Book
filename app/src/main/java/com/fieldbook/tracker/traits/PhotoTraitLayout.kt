@@ -185,14 +185,15 @@ class PhotoTraitLayout : BaseTraitLayout {
 
     private fun decodeBitmap(uri: Uri): Bitmap? {
         return try {
-            val input = context.contentResolver.openInputStream(uri)
-            var bmp = BitmapFactory.decodeStream(input)
-            val mat = Matrix().apply {
-                postRotate(90f)
+            context.contentResolver.openInputStream(uri).use { input ->
+                var bmp = BitmapFactory.decodeStream(input)
+                val mat = Matrix().apply {
+                    postRotate(90f)
+                }
+                bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, mat, false)
+                input?.close()
+                bmp
             }
-            bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, mat, false)
-            input?.close()
-            bmp
         } catch (e: IOException) {
             e.printStackTrace()
             null
@@ -231,9 +232,9 @@ class PhotoTraitLayout : BaseTraitLayout {
                 bmp = Bitmap.createScaledBitmap(bmp, 256, 256, true)
                 val thumbnail = thumbsDir.createFile("image/*", "$name.jpg")
                 if (thumbnail != null) {
-                    val output = context.contentResolver.openOutputStream(thumbnail.uri)
-                    bmp.compress(Bitmap.CompressFormat.JPEG, 80, output)
-                    output?.close()
+                    context.contentResolver.openOutputStream(thumbnail.uri).use { output ->
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 80, output)
+                    }
                 }
             }
         } catch (e: Exception) {

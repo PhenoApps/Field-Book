@@ -89,7 +89,12 @@ fun Cursor.toFirst(): Map<String, Any?> = if (moveToFirst()) {
 
     row
 
-} else emptyMap()
+} else {
+
+    close()
+
+    emptyMap()
+}
 
 /**
  * Similar to toFirst, but returns a list of rows instead of the first one.
@@ -147,7 +152,12 @@ fun Cursor.toTable(): List<Map<String, Any?>> = if (moveToFirst()) {
 
     table
 
-} else mutableListOf()
+} else {
+
+    close()
+
+    mutableListOf()
+}
 
 /**
  * Previously this function would try to capture all errors,
