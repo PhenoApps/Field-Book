@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.preferences;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.preference.CheckBoxPreference;
@@ -10,13 +9,6 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.LocaleChoiceActivity;
-
-import org.phenoapps.utils.KeyUtil;
-import org.phenoapps.utils.TextToSpeechHelper;
-
-import java.util.Locale;
-import java.util.Set;
 
 public class SoundsPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 

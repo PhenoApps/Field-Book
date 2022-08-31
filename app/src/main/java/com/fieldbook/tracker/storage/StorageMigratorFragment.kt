@@ -25,10 +25,24 @@ class StorageMigratorFragment: PhenoLibMigratorFragment() {
         from.updateUri(to)
     }
 
+    /**
+     * Files that need to be updated in the database will be of this structure
+     * root/                                <-- user defined
+     *      plot_data/                      <-- field book folder
+     *              field/                  <-- user defined field name
+     *                  trait/              <-- user defined trait name
+     *                      media files     <-- image/audio uri's or thumbnails folder with media
+     *
+     */
     private fun DocumentFile.updateUri(docFile: DocumentFile) {
+
+        val plotDataDir = getString(R.string.dir_plot_data)
         //for field book we need to check if this type of file was persisted in the database
         //the observation value for  the file path must be updated in the database
-        if (parentFile?.exists() == true && parentFile?.name in arrayOf("audio", "photos")) {
+        if (parentFile?.exists() == true
+            && parentFile?.parentFile?.exists() == true
+            && parentFile?.parentFile?.parentFile?.exists() == true
+            && parentFile?.parentFile?.parentFile?.name == plotDataDir) {
             name?.let { name ->
                 try {
                     ObservationDao.getObservationByValue(name)?.let { observation ->

@@ -7,6 +7,7 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.EditText;
+
 import com.fieldbook.tracker.activities.CollectActivity;
 
 public class TextTraitLayout extends BaseTraitLayout {

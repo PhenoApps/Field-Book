@@ -3,6 +3,7 @@ package com.fieldbook.tracker.adapters;
 import java.util.List;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +16,9 @@ public class GalleryImageAdapter extends BaseAdapter {
 
     private static ImageView imageView;
     private Activity context;
-    private List<Drawable> plotsImages;
+    private List<Bitmap> plotsImages;
 
-    public GalleryImageAdapter(Activity context, List<Drawable> plotsImages) {
+    public GalleryImageAdapter(Activity context, List<Bitmap> plotsImages) {
         this.context = context;
         this.plotsImages = plotsImages;
     }
@@ -54,7 +55,8 @@ public class GalleryImageAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        holder.imageView.setImageDrawable(plotsImages.get(position));
+        holder.imageView.setImageBitmap(plotsImages.get(position));
+        //holder.imageView.setImageDrawable(plotsImages.get(position));
         holder.imageView.setScaleType(ScaleType.FIT_CENTER);
         holder.imageView.setLayoutParams(new Gallery.LayoutParams(270, 450));
 

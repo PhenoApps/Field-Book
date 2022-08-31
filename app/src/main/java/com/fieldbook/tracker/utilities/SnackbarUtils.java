@@ -1,19 +1,18 @@
 package com.fieldbook.tracker.utilities;
 
+import android.graphics.Color;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.fieldbook.tracker.R;
 import com.google.android.material.snackbar.Snackbar;
-
-import android.graphics.Color;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 public final class SnackbarUtils {
     private static final int DURATION_SHORT = 3500;

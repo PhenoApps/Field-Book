@@ -3,7 +3,9 @@ package com.fieldbook.tracker.activities
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -16,12 +18,13 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.DataGridAdapter
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
-import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.Utils
-import kotlinx.coroutines.*
-import java.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 /**
  * @author Chaney

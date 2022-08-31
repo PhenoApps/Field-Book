@@ -25,13 +25,11 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -43,18 +41,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -82,7 +77,6 @@ import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
-import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.location.gnss.ConnectThread;
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver;
@@ -108,8 +102,9 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
+import org.phenoapps.interfaces.usb.camera.UsbCameraInterface;
+import org.phenoapps.usb.camera.UsbCameraHelper;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
-import org.phenoapps.utils.KeyUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
@@ -140,7 +135,8 @@ import kotlin.Pair;
  */
 
 @SuppressLint("ClickableViewAccessibility")
-public class CollectActivity extends AppCompatActivity implements SensorEventListener, GPSTracker.GPSTrackerListener {
+public class CollectActivity extends AppCompatActivity
+        implements SensorEventListener, GPSTracker.GPSTrackerListener, UsbCameraInterface {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -246,6 +242,10 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
     private boolean mSkipLastUsedTrait = false;
 
     private TextToSpeechHelper ttsHelper = null;
+    /**
+     * Usb Camera Helper
+     */
+    private UsbCameraHelper mUsbCameraHelper = null;
 
     public void triggerTts(String text) {
         if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
@@ -276,6 +276,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         if (ConfigActivity.dt == null) {    // when resume
             ConfigActivity.dt = new DataHelper(this);
         }
+
+        mUsbCameraHelper = new UsbCameraHelper(this);
 
         ConfigActivity.dt.open();
 
@@ -694,6 +696,8 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        mUsbCameraHelper.destroy();
 
         super.onDestroy();
     }
@@ -2162,6 +2166,12 @@ public class CollectActivity extends AppCompatActivity implements SensorEventLis
 
         //always log location updates
         GeodeticUtils.Companion.writeGeoNavLog(mGeoNavLogWriter, location.getLatitude() + "," + location.getLongitude() + "," + location.getTime() + ",null,null,null,null,null,null,null,null,null,null\n");
+    }
+
+    @Nullable
+    @Override
+    public UsbCameraHelper getCameraHelper() {
+        return mUsbCameraHelper;
     }
 
     ///// class TraitBox /////
