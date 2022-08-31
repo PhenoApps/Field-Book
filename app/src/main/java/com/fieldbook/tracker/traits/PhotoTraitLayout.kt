@@ -23,6 +23,7 @@ import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.adapters.GalleryImageAdapter
 import com.fieldbook.tracker.database.dao.ObservationDao
+import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -30,7 +31,10 @@ import com.fieldbook.tracker.utilities.DialogUtils
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getPlotMedia
 import com.fieldbook.tracker.utilities.Utils
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getStem
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -75,18 +79,19 @@ class PhotoTraitLayout : BaseTraitLayout {
         capture.setOnClickListener(PhotoTraitOnClickListener())
         photo = findViewById(R.id.photo)
         activity = act
+        scope = CoroutineScope(Dispatchers.IO)
+
+        scope.launch {
+
+            migrateOldPhotosDir()
+
+        }
     }
 
     override fun loadLayout() {
         etCurVal.removeTextChangedListener(cvText)
         etCurVal.visibility = GONE
         etCurVal.isEnabled = false
-
-        runBlocking {
-
-            migrateOldPhotosDir()
-
-        }
 
         loadLayoutWork()
 
@@ -102,7 +107,7 @@ class PhotoTraitLayout : BaseTraitLayout {
 
         try {
 
-            currentTrait.trait?.let { traitName ->
+            ObservationVariableDao.getAllTraitObjects().filter { it.format == type }.forEach { t ->
 
                 val timeStamp = SimpleDateFormat(
                     "yyyy-MM-dd-hh-mm-ss", Locale.getDefault()
@@ -110,17 +115,19 @@ class PhotoTraitLayout : BaseTraitLayout {
 
                 val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-                val traitPhotos = ObservationDao.getAll(expId).filter { it.observation_variable_name ==  traitName }
+                val traitPhotos = ObservationDao.getAll(expId).filter { it.observation_variable_name == t.trait }
 
-                if (traitName != "photos") { //edge case where trait name is actually photos
+                if (t.trait != "photos") { //edge case where trait name is actually photos
 
-                    val photoDir = getFieldMediaDirectory(context, traitName)
+                    val photoDir = getFieldMediaDirectory(context, t.trait)
                     val oldPhotos = getFieldMediaDirectory(context, "photos")
 
                     traitPhotos.forEach { photo ->
 
+                        //todo update rep
+                        val repeatedValue = ConfigActivity.dt.getRep(photo.observation_unit_id, t.trait)
                         val generatedName =
-                            cRange.plot_id + "_" + currentTrait.trait + "_" + rep + "_" + timeStamp.format(
+                            photo.observation_unit_id + "_" + t.trait + "_" + repeatedValue + "_" + timeStamp.format(
                                 Calendar.getInstance().time
                             ) + ".jpg"
 
