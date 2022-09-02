@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.fieldbook.tracker",
+    "sha256_cert_fingerprints":
+    ["14:5E:EE:D6:7A:A6:1B:79:D8:A6:2C:1C:99:86:78:7A:5C:3E:AB:44:D9:02:86:A7:92:90:DC:D2:2C:AC:59:09"]
+  }
+}]

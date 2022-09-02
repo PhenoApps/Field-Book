@@ -147,6 +147,8 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
             if (file != null && file.getName() != null) {
 
+                dt.close();
+
                 //first check if the file to import is just a .db file
                 if (file.getName().endsWith(".db")) { //if it is import it old-style
 
@@ -207,7 +209,9 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
                 dialog.dismiss();
 
             if (fail) {
+
                 Utils.makeToast(getContext(), getString(R.string.import_error_general));
+
             }
 
             CollectActivity.reloadData = true;

@@ -101,6 +101,8 @@ import com.google.zxing.integration.android.IntentResult;
 import org.jetbrains.annotations.NotNull;
 import org.phenoapps.interfaces.usb.camera.UsbCameraInterface;
 import org.phenoapps.usb.camera.UsbCameraHelper;
+import org.phenoapps.security.SecureBluetoothActivityImpl;
+import org.phenoapps.security.Security;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
@@ -240,6 +242,20 @@ public class CollectActivity extends AppCompatActivity
      * Usb Camera Helper
      */
     private UsbCameraHelper mUsbCameraHelper = null;
+    
+    private SecureBluetoothActivityImpl secureBluetooth;
+
+    public static void disableViews(ViewGroup layout) {
+        layout.setEnabled(false);
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            View child = layout.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                disableViews((ViewGroup) child);
+            } else {
+                child.setEnabled(false);
+            }
+        }
+    }
 
     public void triggerTts(String text) {
         if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
@@ -249,6 +265,9 @@ public class CollectActivity extends AppCompatActivity
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        secureBluetooth = new SecureBluetoothActivityImpl(this);
+        secureBluetooth.initialize();
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
@@ -817,7 +836,11 @@ public class CollectActivity extends AppCompatActivity
             //setup logger whenever activity resumes
             setupGeoNavLogger();
 
-            startGeoNav();
+            secureBluetooth.withNearby((adapter) -> {
+                startGeoNav();
+                return null;
+            });
+
         }
 
         checkLastOpened();
@@ -1324,14 +1347,18 @@ public class CollectActivity extends AppCompatActivity
      */
     private void setupCommunicationsUi(BluetoothDevice device) {
 
-        BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+        secureBluetooth.withNearby((adapter) -> {
 
-        mLastDevice = device;
+            adapter.cancelDiscovery();
 
-        mConnectThread = new ConnectThread(device, mHandler);
+            mLastDevice = device;
 
-        mConnectThread.start();
+            mConnectThread = new ConnectThread(device, mHandler);
 
+            mConnectThread.start();
+
+            return null;
+        });
     }
 
     private final GNSSResponseReceiver mGnssResponseReceiver = new GNSSResponseReceiver() {

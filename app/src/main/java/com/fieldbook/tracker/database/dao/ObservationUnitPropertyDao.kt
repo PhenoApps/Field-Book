@@ -39,7 +39,7 @@ class ObservationUnitPropertyDao {
 
             sortCols = if(sortCols != null && sortCols != "") {
                 val sortColsSplit = sortCols.split(',')
-                val sortColsList = sortColsSplit.map{ "cast($it as integer),$it" }.toList()
+                val sortColsList = sortColsSplit.map{ "cast(`$it` as integer),`$it`" }.toList()
                 "${sortColsList.joinToString ( "," )}, id"
             } else {
                 "id"

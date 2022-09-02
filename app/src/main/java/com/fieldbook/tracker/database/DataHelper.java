@@ -2255,7 +2255,6 @@ public class DataHelper {
 
     public void importDatabase(DocumentFile file) {
         String internalDbPath = getDatabasePath(this.context);
-        String internalSpPath = "/data/data/com.fieldbook.tracker/shared_prefs/Settings.xml";
 
         close();
 
@@ -2265,46 +2264,35 @@ public class DataHelper {
 
             Log.w("File to copy", file.getName());
 
-            int extIndex = fileName.indexOf(".");
-            String stemName = fileName.substring(0, extIndex);
-            DocumentFile parent = file.getParentFile();
+            File oldDb = new File(internalDbPath);
 
-            if (parent != null && parent.exists()) {
+            try {
 
-                DocumentFile newSharedPrefsFile = parent.createFile("*/*", stemName + "_sharedpref.xml");
+                BaseDocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
 
-                File oldDb = new File(internalDbPath);
-                File oldSp = new File(internalSpPath);
+            } catch (Exception e) {
 
-                try {
+                Log.d("Database", e.toString());
 
-                    BaseDocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
-
-                    BaseDocumentTreeUtil.Companion.copy(context, newSharedPrefsFile, DocumentFile.fromFile(oldSp));
-
-                } catch (Exception e) {
-
-                    Log.d("Database", e.toString());
-
-                }
-
-                open();
-
-                if (!isTableExists(Migrator.Study.tableName)) {
-
-                    Migrator.Companion.migrateSchema(db, getAllTraitObjects());
-
-                }
-
-                SharedPreferences.Editor edit = ep.edit();
-
-                edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-                edit.putString(GeneralKeys.UNIQUE_NAME, "");
-                edit.putString(GeneralKeys.PRIMARY_NAME, "");
-                edit.putString(GeneralKeys.SECONDARY_NAME, "");
-                edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-                edit.apply();
             }
+
+            open();
+
+            if (!isTableExists(Migrator.Study.tableName)) {
+
+                Migrator.Companion.migrateSchema(db, getAllTraitObjects());
+
+            }
+
+            SharedPreferences.Editor edit = ep.edit();
+
+            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+            edit.putString(GeneralKeys.UNIQUE_NAME, "");
+            edit.putString(GeneralKeys.PRIMARY_NAME, "");
+            edit.putString(GeneralKeys.SECONDARY_NAME, "");
+            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+            edit.apply();
+
         }
     }
 
