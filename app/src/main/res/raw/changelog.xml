@@ -1,6 +1,23 @@
 <changelog>
 
     <release
+        date="2022-09-01"
+        versionCode="530"
+        versionName="v5.3">
+        <new>New USB camera trait!</new>
+        <new>Expanded options available for next entry with no data setting</new>
+        <new>Added text-to-speech options for inputing data</new>
+        <new>Updated how location is collected on a per phenotype basis</new>
+        <new>Added option to provide anonymous identifier in profile</new>
+        <new>Locking now has three input states: all data, new data, no data</new>
+        <new>Updated GeoNav notification layout</new>
+        <new>Updated language selection options</new>
+        <new>Updated categorical/multicat trait creator</new>
+        <new>Scanning barcodes searches across loaded fields for matches</new>
+        <new>Improved location and GNSS trait collection</new>
+    </release>
+    
+    <release
         date="2022-08-03"
         versionCode="525"
         versionName="v5.2.5">

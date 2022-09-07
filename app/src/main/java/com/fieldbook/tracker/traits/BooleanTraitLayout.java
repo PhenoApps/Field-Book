@@ -1,12 +1,13 @@
 package com.fieldbook.tracker.traits;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+
+import androidx.annotation.Nullable;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
@@ -45,6 +46,9 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     @Override
     public void init() {
 
+        String on = getContext().getString(R.string.trait_boolean_on);
+        String off = getContext().getString(R.string.trait_boolean_off);
+
         threeStateSeekBar = findViewById(R.id.traitBooleanSeekBar);
         threeStateSeekBar.setOnSeekBarChangeListener(this);
 
@@ -52,10 +56,12 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
         ImageView offImageView = findViewById(R.id.offImage);
 
         onImageView.setOnClickListener((View v) -> {
+            triggerTts(on);
             threeStateSeekBar.setProgress(ThreeState.ON);
         });
 
         offImageView.setOnClickListener((View v) -> {
+            triggerTts(off);
             threeStateSeekBar.setProgress(ThreeState.OFF);
         });
 
@@ -63,27 +69,23 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
 
     @Override
     public void loadLayout() {
+        super.loadLayout();
+
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
+    }
 
-        //if the trait has a default value and this unit has not been observed,
-        // set the seek bar to the default value's state
-        if (!getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            String defaultValue = getCurrentTrait().getDefaultValue().trim();
-            updateSeekBarState(defaultValue);
+    @Override
+    public void afterLoadExists(CollectActivity act, @Nullable String value) {
+        super.afterLoadExists(act, value);
+        updateSeekBarState(value);
+    }
 
-            getEtCurVal().setText(defaultValue);
-            getEtCurVal().setTextColor(Color.BLACK);
-
-            //save default value
-            updateTrait(getCurrentTrait().getTrait(), "boolean", defaultValue);
-        } else { //otherwise update the seekbar to the database's current value
-            getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
-            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-
-            String bval = getNewTraits().get(getCurrentTrait().getTrait()).toString();
-            updateSeekBarState(bval);
-        }
+    @Override
+    public void afterLoadDefault(CollectActivity act) {
+        super.afterLoadDefault(act);
+        String defaultValue = getCurrentTrait().getDefaultValue().trim();
+        updateSeekBarState(defaultValue);
     }
 
     @Override

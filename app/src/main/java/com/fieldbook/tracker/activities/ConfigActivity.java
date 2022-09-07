@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -48,17 +47,20 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesActivity;
+import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -85,6 +87,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class ConfigActivity extends AppCompatActivity {
 
     public static DataHelper dt;
+    private final static String TAG = ConfigActivity.class.getSimpleName();
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
     private final int PERMISSIONS_REQUEST_MAKE_DIRS = 9930;
@@ -132,8 +135,20 @@ public class ConfigActivity extends AppCompatActivity {
         loadScreen();
     }
 
+    private void setCrashlyticsUserId() {
+
+        String id = ep.getString(GeneralKeys.CRASHLYTICS_ID, "");
+        FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
+        instance.setUserId(id);
+        instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, id);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        //important: this must be called before super.onCreate or else you get a black flicker
+        AppLanguageUtil.Companion.refreshAppText(this);
+
         super.onCreate(savedInstanceState);
 
         dt = new DataHelper(this);
@@ -141,15 +156,30 @@ public class ConfigActivity extends AppCompatActivity {
 
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
+        setCrashlyticsUserId();
         invalidateOptionsMenu();
         loadScreen();
 
         // request permissions
         ActivityCompat.requestPermissions(this, Constants.permissions, Constants.PERM_REQ);
 
-        if (ep.getInt(GeneralKeys.UPDATE_VERSION, -1) < Utils.getVersion(this)) {
+        int lastVersion = ep.getInt(GeneralKeys.UPDATE_VERSION, -1);
+        int currentVersion = Utils.getVersion(this);
+        if (lastVersion < currentVersion) {
             ep.edit().putInt(GeneralKeys.UPDATE_VERSION, Utils.getVersion(this)).apply();
             showChangelog(true, false);
+
+            if (currentVersion >= 530 && lastVersion < 530) {
+
+                OldPhotosMigrator.Companion.migrateOldPhotosDir(this);
+
+                //clear field selection after updates
+                ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
+                ep.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
+                ep.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
+                ep.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
+                ep.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
+            }
         }
 
         if (!ep.contains(GeneralKeys.FIRST_RUN)) {
@@ -406,11 +436,6 @@ public class ConfigActivity extends AppCompatActivity {
                 ed.apply();
 
                 dialog.dismiss();
-
-                Intent intent = new Intent();
-                intent.setClassName(ConfigActivity.this,
-                        ConfigActivity.class.getName());
-                startActivity(intent);
             }
         });
 
@@ -836,6 +861,17 @@ public class ConfigActivity extends AppCompatActivity {
             //flag telling if the user checked the media bundle option
             boolean bundleChecked = ep.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false);
 
+            newRange.clear();
+
+            if (onlyUnique.isChecked()) {
+                newRange.add(ep.getString(GeneralKeys.UNIQUE_NAME, ""));
+            }
+
+            if (allColumns.isChecked()) {
+                String[] columns = dt.getRangeColumns();
+                Collections.addAll(newRange, columns);
+            }
+
             String[] newRanges = newRange.toArray(new String[newRange.size()]);
             String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
 
@@ -858,6 +894,8 @@ public class ConfigActivity extends AppCompatActivity {
             //separate files for table and database
             DocumentFile dbFile = null;
             DocumentFile tableFile = null;
+
+            ArrayList<TraitObject> traits = dt.getAllTraitObjects();
 
             //check if export database has been selected
             if (checkDbBool) {
@@ -917,7 +955,7 @@ public class ConfigActivity extends AppCompatActivity {
                         exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
-                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length);
+                        csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length, traits);
 
                     } catch (Exception e) {
                         fail = true;
@@ -1108,7 +1146,62 @@ public class ConfigActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = prefs.edit();
             editor.apply();
 
+            //if sample db is imported, automatically select the first study
+            try {
+
+                selectFirstField();
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+            }
+
             CollectActivity.reloadData = true;
+        }
+    }
+
+    /**
+     * Queries the database for saved studies and calls switch field for the first one.
+     */
+    public void selectFirstField() {
+
+        try {
+
+            FieldObject[] fs = StudyDao.Companion.getAllFieldObjects().toArray(new FieldObject[0]);
+
+            if (fs.length > 0) {
+
+                switchField(fs[0].getExp_id());
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+    }
+
+    /**
+     * Calls database switch field on the given studyId.
+     * @param studyId the study id to switch to
+     */
+    private void switchField(int studyId) {
+
+        FieldObject f = StudyDao.Companion.getFieldObject(studyId);
+
+        if (f != null) {
+
+            dt.switchField(studyId);
+
+            //clear field selection after updates
+            ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId)
+                .putString(GeneralKeys.FIELD_FILE, f.getExp_name())
+                .putString(GeneralKeys.UNIQUE_NAME, f.getUnique_id())
+                .putString(GeneralKeys.PRIMARY_NAME, f.getPrimary_id())
+                .putString(GeneralKeys.SECONDARY_NAME, f.getSecondary_id())
+                .putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true)
+                .putString(GeneralKeys.LAST_PLOT, null).apply();
         }
     }
 }

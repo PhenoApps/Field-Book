@@ -3,7 +3,9 @@ package com.fieldbook.tracker.activities
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -17,9 +19,12 @@ import com.fieldbook.tracker.adapters.DataGridAdapter
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.Utils
-import kotlinx.coroutines.*
-import java.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 /**
  * @author Chaney
@@ -128,7 +133,7 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
 
         menuInflater.inflate(R.menu.menu_data_grid, menu)
 
@@ -175,6 +180,8 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
         val ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, MODE_PRIVATE)
 
+        val showLabel = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value") == "value"
+
         val uniqueHeader = ep.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
         //if row header was not chosen, then use the preference unique name
@@ -196,6 +203,8 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
                 //query database for visible traits
                 mTraits = ConfigActivity.dt.visibleTrait
+
+                val traits = ConfigActivity.dt.allTraitObjects;
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
                 val cursor = ConfigActivity.dt.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
@@ -235,8 +244,24 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
                                     val value = cursor.getString(index) ?: ""
 
-                                    //data list is a trait row in the data grid
-                                    dataList.add(CellData(value, plotId))
+                                    val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
+
+                                    if (t != null) {
+
+                                        try {
+
+                                            dataList.add(CellData(CategoryJsonUtil
+                                                .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel), plotId))
+
+                                        } catch (e: Exception) {
+
+                                            dataList.add(CellData(value, plotId))
+
+                                        }
+                                    } else {
+                                        //data list is a trait row in the data grid
+                                        dataList.add(CellData(value, plotId))
+                                    }
                                 }
                             }
 

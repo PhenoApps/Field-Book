@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -14,6 +15,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
@@ -21,24 +23,27 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.utilities.DialogUtils;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class ProfilePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
+    private static final String TAG = ProfilePreferencesFragment.class.getSimpleName();
+
     PreferenceManager prefMgr;
     Context context;
     private Preference profilePerson;
-    private Preference profileLocation;
     private Preference profileReset;
     SharedPreferences ep;
     private double lat;
     private double lng;
     private AlertDialog personDialog;
     private AlertDialog locationDialog;
-
-    private final int PERMISSIONS_REQUEST_LOCATION = 9960;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -52,7 +57,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         ep = getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_MULTI_PROCESS);
 
         profilePerson = findPreference("pref_profile_person");
-        profileLocation = findPreference("pref_profile_location");
 
         updateSummaries();
 
@@ -61,13 +65,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         profilePerson.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 showPersonDialog();
-                return true;
-            }
-        });
-
-        profileLocation.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                locationDialogPermission();
                 return true;
             }
         });
@@ -112,9 +109,6 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                 SharedPreferences.Editor ed = ep.edit();
                 ed.putString(GeneralKeys.FIRST_NAME, "");
                 ed.putString(GeneralKeys.LAST_NAME, "");
-                ed.putString(GeneralKeys.LOCATION, "");
-                ed.putString(GeneralKeys.LATITUDE, "");
-                ed.putString(GeneralKeys.LONGITUDE, "");
                 ed.apply();
 
                 updateSummaries();
@@ -178,80 +172,8 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         personDialog.getWindow().setAttributes(langParams);
     }
 
-    private void showLocationDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_location, null);
-
-        GPSTracker gps = new GPSTracker(getContext());
-        if (gps.canGetLocation()) { //GPS enabled
-            lat = gps.getLatitude(); // returns latitude
-            lng = gps.getLongitude(); // returns longitude
-        } else {
-            Intent intent = new Intent(
-                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivity(intent);
-        }
-
-        final EditText longitude = layout.findViewById(R.id.longitude);
-        final EditText latitude = layout.findViewById(R.id.latitude);
-
-        longitude.setText(ep.getString(GeneralKeys.LONGITUDE, ""));
-        latitude.setText(ep.getString(GeneralKeys.LATITUDE, ""));
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
-
-        builder.setTitle(R.string.profile_location_title)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                SharedPreferences.Editor e = ep.edit();
-                if (latitude.getText().toString().length() > 0 && longitude.getText().toString().length() > 0) {
-                    e.putString(GeneralKeys.LOCATION, latitude.getText().toString() + " ; " + longitude.getText().toString());
-                    e.putString(GeneralKeys.LATITUDE, latitude.getText().toString());
-                    e.putString(GeneralKeys.LONGITUDE, longitude.getText().toString());
-                } else {
-                    e.putString(GeneralKeys.LOCATION, "null");
-                }
-
-                e.apply();
-
-                locationDialog.dismiss();
-                updateSummaries();
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
-
-        builder.setNeutralButton(getString(R.string.profile_location_get), null);
-
-        locationDialog = builder.create();
-        locationDialog.show();
-        DialogUtils.styleDialogs(locationDialog);
-
-        android.view.WindowManager.LayoutParams langParams = locationDialog.getWindow().getAttributes();
-        langParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
-        locationDialog.getWindow().setAttributes(langParams);
-
-        // Override neutral button so it doesnt automatically dismiss location dialog
-        Button neutralButton = locationDialog.getButton(AlertDialog.BUTTON_NEUTRAL);
-        neutralButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                latitude.setText(truncateDecimalString(String.valueOf(lat)));
-                longitude.setText(truncateDecimalString(String.valueOf(lng)));
-            }
-        });
-    }
-
     private void updateSummaries() {
         profilePerson.setSummary(personSummary());
-        profileLocation.setSummary(locationSummary());
     }
 
     private String personSummary() {
@@ -266,42 +188,93 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         return tagName;
     }
 
-    private String locationSummary() {
-        String tagLocation = "";
+    private String refreshIdSummary(Preference refresh) {
 
-        if (ep.getString(GeneralKeys.LOCATION, "").length() > 0) {
-            tagLocation += ep.getString(GeneralKeys.LOCATION, "");
-        } else {
-            tagLocation = "";
-        }
+        String newId = UUID.randomUUID().toString();
 
-        return tagLocation;
+        prefMgr.getSharedPreferences().edit().putString(GeneralKeys.CRASHLYTICS_ID, newId).apply();
+
+        refresh.setSummary(newId);
+
+        FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
+        instance.setUserId(newId);
+        instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, newId);
+
+        return newId;
     }
 
-    // Only used for truncating lat long values
-    public String truncateDecimalString(String v) {
-        int count = 0;
+    private void setupCrashlyticsPreference() {
 
-        boolean found = false;
+        try {
 
-        StringBuilder truncated = new StringBuilder();
+            CheckBoxPreference enablePref = findPreference(GeneralKeys.CRASHLYTICS_ID_ENABLED);
+            Preference refreshPref = findPreference(GeneralKeys.CRASHLYTICS_ID_REFRESH);
 
-        for (int i = 0; i < v.length(); i++) {
-            if (found) {
-                count += 1;
+            //check both preferences are found
+            if (enablePref != null && refreshPref != null) {
 
-                if (count == 5)
-                    break;
+                //check box listener, setup refresh visibility / on click implementation
+                enablePref.setOnPreferenceChangeListener((pref, newValue) -> {
+
+                    //get current id, might be null
+                    AtomicReference<String> id = new AtomicReference<>(prefMgr.getSharedPreferences().getString(GeneralKeys.CRASHLYTICS_ID, null));
+
+                    boolean enabled = (boolean) newValue;
+
+                    refreshPref.setVisible(enabled);
+
+                    //when refresh is clicked, update the unique id in the preferencs and update summary
+                    refreshPref.setOnPreferenceClickListener((v) -> {
+
+                        if (enabled) {
+
+                            id.set(refreshIdSummary(refreshPref));
+
+                        }
+
+                        return true;
+                    });
+
+                    if (enabled && id.get() == null) {
+
+                        id.set(refreshIdSummary(refreshPref));
+
+                    } else if (!enabled) {
+
+                        FirebaseCrashlytics instance = FirebaseCrashlytics.getInstance();
+                        instance.setUserId("");
+                        instance.setCustomKey(GeneralKeys.CRASHLYTICS_KEY_USER_TOKEN, "");
+                    }
+
+                    return true;
+                });
+
+                //get current id, might be null
+                String id = prefMgr.getSharedPreferences().getString(GeneralKeys.CRASHLYTICS_ID, null);
+
+                //when checkbox is initialized, check if id is null and update refresh vis
+                //update refresh summary as well
+                refreshPref.setVisible(enablePref.isChecked());
+
+                if (id != null) {
+
+                    refreshPref.setSummary(id);
+
+                    refreshPref.setOnPreferenceClickListener((v) -> {
+
+                        refreshIdSummary(refreshPref);
+
+                        return true;
+                    });
+                }
             }
 
-            if (v.charAt(i) == '.') {
-                found = true;
-            }
+        } catch (Exception e) {
 
-            truncated.append(v.charAt(i));
+            e.printStackTrace();
+
+            Log.d(TAG, "Crashlytics setup failed.");
         }
-
-        return truncated.toString();
     }
 
     @Override
@@ -317,15 +290,10 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         return false;
     }
 
-    @AfterPermissionGranted(PERMISSIONS_REQUEST_LOCATION)
-    private void locationDialogPermission() {
-        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
-        if (EasyPermissions.hasPermissions(getContext(), perms)) {
-            showLocationDialog();
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_location),
-                    PERMISSIONS_REQUEST_LOCATION, perms);
-        }
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        setupCrashlyticsPreference();
     }
 }

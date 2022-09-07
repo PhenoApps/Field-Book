@@ -1,14 +1,13 @@
 package com.fieldbook.tracker.traits;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CollectActivity;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -74,21 +73,22 @@ public class NumericTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+
         // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
         getEtCurVal().setHint("");
         getEtCurVal().setVisibility(EditText.VISIBLE);
 
-        if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getEtCurVal().setText(getNewTraits().get(getCurrentTrait().getTrait()).toString());
-            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-        } else {
-            getEtCurVal().setText("");
-            getEtCurVal().setTextColor(Color.BLACK);
+        super.loadLayout();
+    }
 
-            if (getCurrentTrait().getDefaultValue() != null && getCurrentTrait().getDefaultValue().length() > 0) {
-                getEtCurVal().setText(getCurrentTrait().getDefaultValue());
-                updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
-            }
+    @Override
+    public void refreshLock() {
+        super.refreshLock();
+        ((CollectActivity) getContext()).traitLockData();
+        try {
+            loadLayout();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -101,17 +101,25 @@ public class NumericTraitLayout extends BaseTraitLayout {
 
         @Override
         public void onClick(View view) {
-            final String curText = getEtCurVal().getText().toString();
-            if (view.getId() == R.id.k16) {        // Backspace Key Pressed
-                final int length = curText.length();
-                if (length > 0) {
-                    getEtCurVal().setText(curText.substring(0, length - 1));
-                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
+            if (!isLocked) {
+                final String backspaceTts = getContext().getString(R.string.trait_numeric_backspace_tts);
+                final String curText = getEtCurVal().getText().toString();
+                Button button = (Button) view;
+                triggerTts(button.getText().toString());
+                String value;
+                if (view.getId() == R.id.k16) {        // Backspace Key Pressed
+                    triggerTts(backspaceTts);
+                    final int length = curText.length();
+                    if (length > 0) {
+                        value = curText.substring(0, length - 1);
+                        getEtCurVal().setText(value);
+                        updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
+                    }
+                } else if (numberButtons.containsKey(view.getId())) {
+                    value = curText + numberButtons.get(view.getId()).getText().toString();
+                    getEtCurVal().setText(value);
+                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
                 }
-            } else if (numberButtons.containsKey(view.getId())) {
-                final String v = numberButtons.get(view.getId()).getText().toString();
-                getEtCurVal().setText(curText + v);
-                updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
             }
         }
     }

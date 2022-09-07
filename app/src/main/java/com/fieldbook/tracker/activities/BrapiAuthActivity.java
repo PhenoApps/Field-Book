@@ -118,6 +118,7 @@ public class BrapiAuthActivity extends AppCompatActivity {
             Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
 
             ConnectionBuilder builder = uri -> {
+
                 Preconditions.checkNotNull(uri, "url must not be null");
                 Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
                         "scheme or uri must be http or https");

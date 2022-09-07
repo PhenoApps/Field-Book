@@ -124,5 +124,18 @@
         <item>@string/preferences_appearance_collect_labelval_customize_value</item>
         <item>@string/preferences_appearance_collect_labelval_customize_label</item>
     </string-array>
-    <string name="preferences_general_skip_entries_default">Default</string>
+
+    <string-array name="pref_general_location_acquisition_level_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="pref_general_location_acquisition_level_entries">
+        <item>@string/location_level_off</item>
+        <item>@string/location_level_observation_unit</item>
+        <item>@string/location_level_observation</item>
+        <item>@string/location_level_study</item>
+    </string-array>
 </resources>
