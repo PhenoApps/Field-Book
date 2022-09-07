@@ -245,18 +245,6 @@ public class CollectActivity extends AppCompatActivity
     
     private SecureBluetoothActivityImpl secureBluetooth;
 
-    public static void disableViews(ViewGroup layout) {
-        layout.setEnabled(false);
-        for (int i = 0; i < layout.getChildCount(); i++) {
-            View child = layout.getChildAt(i);
-            if (child instanceof ViewGroup) {
-                disableViews((ViewGroup) child);
-            } else {
-                child.setEnabled(false);
-            }
-        }
-    }
-
     public void triggerTts(String text) {
         if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
             ttsHelper.speak(text);
