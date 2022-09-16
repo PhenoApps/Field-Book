@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Fragment/Activities that do not define an explicit toolbar -->
+    <style name="ActionBarTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowSoftInputMode">stateUnchanged</item>
+
+        <item name="colorPrimary">?attr/fb_color_primary</item>
+        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+    </style>
+
+    <style name="PreferenceTheme" parent="ActionBarTheme">
+
+        <item name="buttonStyle">@style/ButtonStyle</item>
+        <item name="toolbarStyle">@style/AppToolbar</item>
+        <item name="checkboxStyle">@style/CheckBoxStyle</item>
+        <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
+        <item name="navigationIcon">@drawable/ic_arrow_left</item>
+
+        <!-- Search bar card style -->
+        <item name="cardViewStyle">@style/CardViewStyle</item>
+
+        <!-- Edit text hint color (search bar, person name) -->
+        <item name="android:textColorHint">?attr/fb_color_text_dark</item>
+        <item name="android:colorBackground">?attr/fb_color_background</item>
+        <item name="android:textSize">?attr/fb_body_text_size</item>
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+        <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>
+        <item name="android:textColorSecondary">?attr/fb_color_text_dark</item>
+        <item name="titleTextColor">?attr/fb_color_text_dark</item>
+    </style>
+
+</resources>

@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -41,7 +40,7 @@ import kotlinx.coroutines.launch
  * i.putExtra("result", plotId)
  * i.putExtra("trait", 1) <- actually a trait index s.a 0 -> "height", 1 -> "lodging"
  **/
-class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITableViewListener {
+class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITableViewListener {
 
     /***
      * Polymorphism class structure to serve different cell types to the grid.

@@ -2,11 +2,10 @@ package com.fieldbook.tracker.activities
 
 import android.app.Activity
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import com.fieldbook.tracker.R
 import org.phenoapps.utils.BaseDocumentTreeUtil
 
-class DefineStorageActivity: AppCompatActivity() {
+class DefineStorageActivity: ThemedActivity() {
 
     private var mBackButtonEnabled = true
 

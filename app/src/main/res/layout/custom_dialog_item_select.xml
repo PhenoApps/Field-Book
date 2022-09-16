@@ -26,11 +26,8 @@
     android:id="@android:id/text1"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
     android:ellipsize="marquee"
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:paddingLeft="14dip"
-    android:paddingRight="15dip"
-    android:textAppearance="?android:attr/textAppearanceLarge"
-    android:textColor="@color/s_text" />
+    android:paddingRight="15dip" />

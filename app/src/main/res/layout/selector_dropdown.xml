@@ -5,7 +5,6 @@
     android:id="@+id/selector"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
     android:orientation="horizontal">
 
     <com.fieldbook.tracker.views.DynamicWidthSpinner
@@ -14,9 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:text="@string/main_infobar_title"
-        android:textColor="@color/s_text"
         android:textSize="@dimen/text_size_xlarge"
-        android:textStyle="bold"
         android:background="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -25,23 +22,20 @@
         app:layout_constraintWidth_max="wrap"
         app:layout_constraintWidth_percent="0.5" />
 
-    <TextView
+    <TextView style="@style/TextViewStyle.Bold"
         android:id="@+id/selectorTextSpacer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="1"
         android:scrollHorizontally="true"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_xlarge"
-        android:textStyle="bold"
         android:text=": "
         app:layout_constraintEnd_toStartOf="@id/selectorText"
         app:layout_constraintStart_toEndOf="@id/selectorSpinner"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="1" />
 
-    <TextView
+    <TextView style="@style/TextViewStyle.Bold"
         android:id="@+id/selectorText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -49,9 +43,6 @@
         android:layout_marginEnd="4dp"
         android:maxLines="1"
         android:scrollHorizontally="true"
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_xlarge"
-        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/selectorTextSpacer"
         app:layout_constraintTop_toTopOf="parent"

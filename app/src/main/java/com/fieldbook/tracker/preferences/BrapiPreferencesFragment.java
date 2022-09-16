@@ -20,7 +20,8 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.BrapiAuthActivity;
+import com.fieldbook.tracker.activities.PreferencesActivity;
+import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 

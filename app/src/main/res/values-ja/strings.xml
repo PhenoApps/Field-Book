@@ -15,22 +15,15 @@
     <string name="startup_sample_data_title">サンプルデータ</string>
     <string name="startup_sample_data_message">サンプルデータをロードしますか？</string>
     <!-- Permissions  -->
-    <string name="permission_rationale_location">位置機能にはデバイスの位置情報へのアクセスが必要です。</string>
-    <string name="permission_rationale_camera">撮影機能にはデバイスのカメラへのアクセスが必要です。</string>
-    <string name="permission_rationale_microphone">録音機能にはデバイスのマイクへのアクセスが必要です。</string>
     <string name="permission_rationale_storage_import">ファイルのインポートにはデバイスのファイルへのアクセスが必要です。</string>
     <string name="permission_rationale_storage_export">データのエクスポートにはデバイスのファイルへのアクセスが必要です。</string>
     <string name="permission_rationale_trait_features">データ収集にはデバイスのファイル、マイク及びカメラへのアクセスが必要です。</string>
     <!-- Miscellaneous  -->
-    <string name="fields_name">圃場名</string>
-    <string name="fields_load">読み込み</string>
     <!-- Main Activity  -->
     <string name="main_toolbar_search">検索</string>
     <string name="main_toolbar_resources">資料室</string>
     <string name="main_trait_details">形質の詳細</string>
     <string name="main_infobar_data_missing">データなし</string>
-    <string name="main_toolbar_data_lock">データ保護</string>
-    <string name="main_toolbar_data_unlock">データ保護の解除</string>
     <string name="main_toolbar_moveto_no_match">適合値なし</string>
     <string name="main_toolbar_next_entry_no_data">次の未入力エントリー</string>
     <string name="main_toolbar_moveto">移動先ID</string>
@@ -42,18 +35,7 @@
     <string name="fields_delete_study">圃場を削除</string>
     <string name="fields_delete_study_confirmation">この圃場を削除してもよろしいでしょうか？この圃場の全てのデータが削除されます。</string>
     <string name="fields_study_exists_message">この圃場は既に存在しています。</string>
-    <string name="fields_select_study">圃場の選択あるいはインポート</string>
-    <string name="fields_date_imported">インポートデータ</string>
-    <string name="fields_date_edited">編集データ</string>
-    <string name="fields_date_exported">エクスポートデータ</string>
-    <string name="fields_summary">圃場の総括</string>
-    <string name="fields_options">オプション</string>
-    <string name="fields_study_statistics">統計値</string>
-    <string name="fields_sort">並べ替え</string>
     <string name="fields_delete">削除</string>
-    <string name="fields_filter">絞り込み</string>
-    <string name="fields_reimport">再インポート</string>
-    <string name="fields_archive">書庫</string>
     <!-- Settings Activity  -->
     <string name="settings_fields">圃場</string>
     <string name="settings_traits">形質</string>
@@ -87,10 +69,7 @@
     <string name="traits_format_photo">写真</string>
     <string name="traits_format_audio">音声</string>
     <string name="traits_format_multicategorical">階級値</string>
-    <string name="traits_format_angle">角度</string>
-    <string name="traits_format_video">ビデオ</string>
     <string name="traits_format_location">位置</string>
-    <string name="traits_format_printer">プリンター</string>
     <string name="traits_format_barcode">バーコード</string>
     <string name="traits_format_labelprint">ゼブララベル印刷</string>
     <string name="traits_create_trait">形質</string>
@@ -108,18 +87,15 @@
     <string name="traits_create_warning_name_blank">形質名は空欄不可</string>
     <string name="traits_create_warning_duplicate">形質は既に存在</string>
     <string name="traits_create_warning_numeric_required">初期値、最小値、最大値は数値で入力</string>
-    <string name="traits_create_warning_categories_required">カテゴリー名は空欄不可</string>
     <string name="traits_export_check">現在の形質一覧をエクスポートしますか？</string>
     <string name="traits_warning_delete">形質を削除すると収集データも削除されます。削除してもよろしいでしょうか？</string>
     <!-- Export  -->
-    <string name="export_format_title">フォーマット</string>
     <string name="export_format_database">データベース</string>
     <string name="export_format_table">表</string>
     <string name="export_file_name">ファイル名</string>
     <string name="export_content_columns_title">圃場のカラム</string>
     <string name="export_content_columns_all">全ての項目</string>
     <string name="export_content_columns_unique">ユニークIDのみ</string>
-    <string name="export_content_traits_title">形質</string>
     <string name="export_content_traits_all">全ての形質</string>
     <string name="export_content_traits_active">選択した形質のみ</string>
     <string name="export_error_general">エクスポート中のエラー</string>
@@ -132,7 +108,6 @@
     <string name="export_overwrite">前回のエクスポートに上書き</string>
     <!-- Preferences Activity  -->
     <string name="preferences_appearance_title">表示</string>
-    <string name="preferences_appearance_tutorial">チュートリアル</string>
     <string name="preferences_appearance_tutorial_description">収集、設定、圃場および形質画面にチュートリアルアイコンを追加</string>
     <string name="preferences_appearance_infobar_number">インフォバーの数</string>
     <string name="preferences_appearance_infobar_number_description">メイン画面に表示するインフォバー数の調整</string>
@@ -151,21 +126,15 @@
     <string name="preferences_behavior_volume_buttons_navigate">ボリュームキーをエントリーナビゲーションに位置付け</string>
     <string name="preferences_behavior_volume_buttons_navigate_description">前あるいは後のエントリーへのボリュームキー</string>
     <string name="preferences_behavior_return_character">リターンキーの動作設定</string>
-    <string name="preferences_behavior_return_character_description">リターンキー押下時の動作方法を変更</string>
     <string name="preferences_behavior_return_character_next_plot">次のプロット</string>
     <string name="preferences_behavior_return_character_next_trait">次の形質</string>
     <string name="preferences_behavior_return_character_do_nothing">何もしない</string>
     <string name="preferences_behavior_cycle_traits">繰り返し調査設定</string>
     <string name="preferences_behavior_cycle_traits_description">全ての形質を調査した後、次のエントリーに移動</string>
-    <string name="preferences_behavior_import_source">デフォルトのインポートソースを選択</string>
-    <string name="preferences_behavior_export_source">エクスポートおよびインポートソースを選択</string>
     <string name="preferences_behavior_disable_entry_arrow">エントリー矢印の非表示</string>
     <string name="preferences_behavior_disable_entry_arrow_left">左</string>
     <string name="preferences_behavior_disable_entry_arrow_right">右</string>
     <string name="preferences_behavior_disable_entry_arrow_both">両方</string>
-    <string name="preferences_naming">項目名</string>
-    <string name="preferences_naming_photo">写真名フォーマット</string>
-    <string name="preferences_naming_export">エクスポート名フォーマット</string>
     <string name="preferences_sounds">音声</string>
     <string name="preferences_sound_primary_order_sound">第1オーダーの音</string>
     <string name="preferences_sound_primary_order_sound_description">第1オーダーが変わった時に音声で通知</string>
@@ -191,9 +160,6 @@
     <string name="preferences_appearance_collection_category_title">収集画面</string>
     <!-- Trait text and errors -->
     <string name="trait_layout_data_stored">データ保存</string>
-    <string name="trait_layout_print_title">ラベル印刷</string>
-    <string name="trait_layout_print_status_title">プリンターの状態</string>
-    <string name="trait_layout_print_status">接続状況の検索中</string>
     <string name="trait_layout_print_label_size_title">大きさ：</string>
     <string name="trait_layout_print_text_field_title">テキスト：</string>
     <string name="trait_layout_print_text_field_title_2">テキスト2：</string>
@@ -201,10 +167,7 @@
     <string name="trait_layout_print_text_field_title_4">テキスト4：</string>
     <string name="trait_layout_print_barcode_field_title">バーコード：</string>
     <string name="trait_layout_print_label_copies_title">コピー：</string>
-    <string name="trait_layout_print_clear_settings">削除設定</string>
     <string name="trait_error_hardware_missing">この機能にハードウェアーが対応していません</string>
-    <string name="trait_error_photo_missing">写真が存在しません</string>
-    <string name="trait_error_photo_error">写真が読み込めません</string>
     <string name="trait_error_minimum_value">設定した最小値よりも小さい値です</string>
     <string name="trait_error_maximum_value">設定した最大値よりも大きい値です</string>
     <string name="trait_error_disease_severity">病害判定スコアが入力済</string>
@@ -243,8 +206,6 @@
     <string name="tutorial_settings_traits_description">形質の追加、インポートおよび管理することができます。</string>
     <string name="tutorial_settings_collect_title">データ収集</string>
     <string name="tutorial_settings_collect_description">表現型データを収集することができます。</string>
-    <string name="tutorial_settings_profile_title">プロフィール</string>
-    <string name="tutorial_settings_profile_description">調査員および位置を設定することができます。</string>
     <string name="tutorial_settings_settings_title">設定</string>
     <string name="tutorial_settings_settings_description">データ収集の追加設定をすることができます。</string>
     <string name="tutorial_settings_export_title">エクスポート</string>
@@ -258,8 +219,6 @@
     <string name="tutorial_fields_delete_description">圃場を削除するには、圃場名の左側のメニューを開き削除を選択します。</string>
     <string name="tutorial_traits_add_title">形質の追加</string>
     <string name="tutorial_traits_add_description">形質の追加は新しい形質を作ることができます。異なる形質フォーマットは異なるデータ収集レイアウトになります。</string>
-    <string name="tutorial_traits_import_title">形質一覧のインポート</string>
-    <string name="tutorial_traits_import_description">予め作成した形質一覧をインポートするにはツールバーのインポートを選びます。</string>
     <string name="tutorial_traits_format_title">形質フォーマット</string>
     <string name="tutorial_traits_format_description">異なる形質フォーマットは異なるアイコンで示されます。</string>
     <string name="tutorial_traits_visibility_title">形質の表示/非表示</string>
@@ -269,28 +228,20 @@
     <string name="about_version_title">バージョン</string>
     <string name="about_title_other_apps">他のPhenoAppsについて</string>
     <string name="about_project_lead_title">プロジェクトリーダー</string>
-    <string name="about_developer_title">開発者</string>
     <string name="about_contributors_title">貢献者</string>
     <string name="about_contributors_developers_title">開発者</string>
     <string name="about_translators_title">翻訳者</string>
     <string name="about_contributors_funding_title">資金</string>
     <string name="about_rate">このアプリを評価</string>
     <string name="about_technical_title">技術的詳細1</string>
-    <string name="about_licenses_title">ライセンス</string>
     <string name="changelog_title">変更履歴</string>
     <string name="libraries_title">ライブラリー</string>
     <!-- Profile dialog -->
     <string name="profile_person">調査員</string>
-    <string name="profile_location">位置</string>
     <string name="profile_reset">設定の消去</string>
     <string name="profile_person_title">調査員の設定</string>
     <string name="profile_name_first">名</string>
     <string name="profile_name_last">姓</string>
-    <string name="profile_missing">備考</string>
-    <string name="profile_location_title">位置の設定</string>
-    <string name="profile_location_latitude">緯度</string>
-    <string name="profile_location_longitude">経度</string>
-    <string name="profile_location_get">位置の取得</string>
     <!-- Database dialog -->
     <string name="database_dialog_title">データベース</string>
     <string name="database_import">データベースのインポート</string>
@@ -313,7 +264,6 @@
     <string name="import_error_general">インポート中にエラー</string>
     <string name="import_error_unique">ユニークIDが重複あるいは他のファイルで使われています</string>
     <string name="import_error_unsupported">このファイル形式は現在サポートされていません</string>
-    <string name="import_error_columns">項目名に使えない文字列が含まれています：</string>
     <string name="import_error_column_name">インポートファイルに使えない項目名があります：</string>
     <string name="import_error_unique_characters_illegal">選択した項目はユニークIDに使えない文字列を含んでいます</string>
     <string name="import_error_column_choice">同じ割り当てに使えない項目です</string>
@@ -342,14 +292,11 @@
     <string name="brapi_export_images">画像</string>
     <string name="brapi_na">欠測値</string>
     <string name="brapi_delete_message">同期したBrAPI観測値は削除できません。代わりにNAを使って下さい。</string>
-    <string name="images_loading">画像のロード中・・・</string>
     <!-- Warnings/Catches -->
-    <string name="warning_field_before_traits">圃場ファイルは形質を作成する前にインポートしておいてください。</string>
     <string name="warning_field_missing">圃場データがありません。調査を開始する前に圃場ファイルを読み込んでください。</string>
     <string name="warning_traits_missing">調査形質のデータがありません。調査を開始する前に形質データを作成してください。</string>
     <string name="warning_traits_missing_modify">修正する前に形質を作成してください。</string>
     <!-- Search Activity -->
-    <string name="search_dialog_title">検索</string>
     <string name="search_dialog_add">追加</string>
     <string name="search_dialog_clear">消去</string>
     <string name="search_dialog_query_is_equal_to">一致</string>
@@ -383,7 +330,6 @@
     <string name="brapi_study_name">名前</string>
     <string name="brapi_study_description">説明</string>
     <string name="brapi_study_location">位置</string>
-    <string name="brapi_study_num_plots">プロット</string>
     <string name="brapi_study_num_traits">形質</string>
     <string name="brapi_study_detail_error">試験詳細のロード中エラー。試験は保存されていません。</string>
     <string name="brapi_plot_detail_error">試験のプロットのロード中エラー。試験は保存されていません。</string>

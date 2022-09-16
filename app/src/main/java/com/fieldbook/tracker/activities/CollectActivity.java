@@ -16,7 +16,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -59,7 +58,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
@@ -83,7 +81,6 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
@@ -91,6 +88,7 @@ import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
+import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -100,9 +98,8 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
 import org.phenoapps.interfaces.usb.camera.UsbCameraInterface;
-import org.phenoapps.usb.camera.UsbCameraHelper;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
-import org.phenoapps.security.Security;
+import org.phenoapps.usb.camera.UsbCameraHelper;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
@@ -131,7 +128,7 @@ import kotlin.Pair;
  */
 
 @SuppressLint("ClickableViewAccessibility")
-public class CollectActivity extends AppCompatActivity
+public class CollectActivity extends ThemedActivity
         implements SensorEventListener, GPSTracker.GPSTrackerListener, UsbCameraInterface {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -242,20 +239,8 @@ public class CollectActivity extends AppCompatActivity
      * Usb Camera Helper
      */
     private UsbCameraHelper mUsbCameraHelper = null;
-    
-    private SecureBluetoothActivityImpl secureBluetooth;
 
-    public static void disableViews(ViewGroup layout) {
-        layout.setEnabled(false);
-        for (int i = 0; i < layout.getChildCount(); i++) {
-            View child = layout.getChildAt(i);
-            if (child instanceof ViewGroup) {
-                disableViews((ViewGroup) child);
-            } else {
-                child.setEnabled(false);
-            }
-        }
-    }
+    private SecureBluetoothActivityImpl secureBluetooth;
 
     public void triggerTts(String text) {
         if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
@@ -454,6 +439,7 @@ public class CollectActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
+        toolbarBottom.setNavigationIcon(null);
 
         String naTts = getString(R.string.act_collect_na_btn_tts);
         String barcodeTts = getString(R.string.act_collect_barcode_btn_tts);
@@ -527,9 +513,9 @@ public class CollectActivity extends AppCompatActivity
         String[] traits = dt.getVisibleTrait();
         if (traits != null) {
             ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<>(
-                    this, R.layout.custom_spinnerlayout, traits);
+                    this, R.layout.custom_spinner_layout, traits);
             directionArrayAdapter
-                    .setDropDownViewResource(R.layout.custom_spinnerlayout);
+                    .setDropDownViewResource(R.layout.custom_spinner_layout);
             traitBox.initTraitType(directionArrayAdapter, rangeSuppress);
 
         }
@@ -1072,22 +1058,7 @@ public class CollectActivity extends AppCompatActivity
     }
 
     private TapTarget collectDataTapTargetView(int id, String title, String desc, int color, int targetRadius) {
-        return TapTarget.forView(findViewById(id), title, desc)
-                // All options below are optional
-                .outerCircleColor(color)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
-                .targetCircleColor(R.color.black)   // Specify a color for the target circle
-                .titleTextSize(30)                  // Specify the size (in sp) of the title text
-                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
-                .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .textColor(R.color.black)            // Specify a color for both the title and description text
-                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
-                .drawShadow(true)                   // Whether to draw a drop shadow or not
-                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                .tintTarget(true)                   // Whether to tint the target view's color
-                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
-                .targetRadius(targetRadius);
+        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), color, targetRadius, title, desc);
     }
 
     @Override
@@ -1098,26 +1069,26 @@ public class CollectActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.help:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(collectDataTapTargetView(R.id.selectorList, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), R.color.main_primaryDark,200),
-                                collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), R.color.main_primaryDark,60),
-                                collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), R.color.main_primaryDark,80),
-                                collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), R.color.main_primaryDark,60),
-                                collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), R.color.main_primaryDark,60),
-                                collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), R.color.main_primaryDark,200),
+                        .targets(collectDataTapTargetView(R.id.selectorList, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), R.color.main_primary_dark,200),
+                                collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), R.color.main_primary_dark,60),
+                                collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), R.color.main_primary_dark,80),
+                                collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), R.color.main_primary_dark,60),
+                                collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), R.color.main_primary_dark,60),
+                                collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), R.color.main_primary_dark,200),
                                 collectDataTapTargetView(R.id.missingValue, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), R.color.main_primary,60),
                                 collectDataTapTargetView(R.id.deleteValue, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), R.color.main_primary,60)
                         );
                 if (systemMenu.findItem(R.id.search).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.search, getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.search, getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), R.color.main_primary_dark,60));
                 }
                 if (systemMenu.findItem(R.id.resources).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.resources, getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.resources, getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), R.color.main_primary_dark,60));
                 }
                 if (systemMenu.findItem(R.id.summary).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.summary, getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.summary, getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), R.color.main_primary_dark,60));
                 }
                 if (systemMenu.findItem(R.id.lockData).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), R.color.main_primary_dark,60));
                 }
 
                 sequence.start();
@@ -1827,7 +1798,7 @@ public class CollectActivity extends AppCompatActivity
     private void showSummary() {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_summary, null);
-        TextView summaryText = layout.findViewById(R.id.field_name);
+        TextView summaryText = layout.findViewById(R.id.list_item_trait_trait_name);
         summaryText.setText(traitBox.createSummaryText(rangeBox.getPlotID()));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);

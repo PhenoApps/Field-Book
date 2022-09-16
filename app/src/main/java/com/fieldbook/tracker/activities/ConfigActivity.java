@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,12 +33,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.brapi.BrapiExportActivity;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
@@ -49,12 +48,11 @@ import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.Constants;
-import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
+import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -84,7 +82,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 /**
  * Settings Screen
  */
-public class ConfigActivity extends AppCompatActivity {
+public class ConfigActivity extends ThemedActivity {
 
     public static DataHelper dt;
     private final static String TAG = ConfigActivity.class.getSimpleName();
@@ -214,7 +212,7 @@ public class ConfigActivity extends AppCompatActivity {
                 .withRateButton(rateButton) // enable this to show a "rate app" button in the dialog => clicking it will open the play store; the parent activity or target fragment can also implement IChangelogRateHandler to handle the button click
                 .withSummary(false, true) // enable this to show a summary and a "show more" button, the second paramter describes if releases without summary items should be shown expanded or not
                 .withTitle(getString(R.string.changelog_title)) // provide a custom title if desired, default one is "Changelog <VERSION>"
-                .withOkButtonLabel("OK") // provide a custom ok button text if desired, default one is "OK"
+                .withOkButtonLabel(getString(android.R.string.ok)) // provide a custom ok button text if desired, default one is "OK"
                 .withSorter(new ImportanceChangelogSorter())
                 .buildAndShowDialog(this, false); // second parameter defines, if the dialog has a dark or light theme
     }
@@ -402,7 +400,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     private void showTipsDialog() {
@@ -441,7 +438,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     private void loadSampleDataDialog() {
@@ -463,7 +459,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     /**
@@ -501,7 +496,7 @@ public class ConfigActivity extends AppCompatActivity {
         exportArray[0] = getString(R.string.export_source_local);
         exportArray[1] = getString(R.string.export_source_brapi);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, exportArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, exportArray);
         exportSourceList.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
@@ -514,12 +509,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         final AlertDialog exportDialog = builder.create();
         exportDialog.show();
-        DialogUtils.styleDialogs(exportDialog);
-
-        android.view.WindowManager.LayoutParams params = exportDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        exportDialog.getWindow().setAttributes(params);
 
         exportSourceList.setOnItemClickListener((av, arg1, which, arg3) -> {
             switch (which) {
@@ -623,7 +612,6 @@ public class ConfigActivity extends AppCompatActivity {
         saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         saveDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         saveDialog.show();
-        DialogUtils.styleDialogs(saveDialog);
 
         android.view.WindowManager.LayoutParams params2 = saveDialog.getWindow().getAttributes();
         params2.width = LayoutParams.MATCH_PARENT;
@@ -749,22 +737,7 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private TapTarget settingsTapTargetRect(Rect item, String title, String desc) {
-        return TapTarget.forBounds(item, title, desc)
-                // All options below are optional
-                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
-                .targetCircleColor(R.color.black)   // Specify a color for the target circle
-                .titleTextSize(30)                  // Specify the size (in sp) of the title text
-                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .textColor(R.color.black)            // Specify a color for both the title and description text
-                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
-                .drawShadow(true)                   // Whether to draw a drop shadow or not
-                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                .tintTarget(true)                   // Whether to tint the target view's color
-                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
-                .targetRadius(60);
+        return TapTargetUtil.Companion.getTapTargetSettingsRect(this, item, title, desc);
     }
 
     @Override
@@ -1111,7 +1084,7 @@ public class ConfigActivity extends AppCompatActivity {
             super.onPreExecute();
             fail = false;
 
-            dialog = new ProgressDialog(ConfigActivity.this);
+            dialog = new ProgressDialog(ConfigActivity.this, R.style.AppAlertDialog);
             dialog.setIndeterminate(true);
             dialog.setCancelable(false);
             dialog.setMessage(Html

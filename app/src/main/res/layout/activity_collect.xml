@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="?attr/fb_color_background"
     android:fitsSystemWindows="true"
     app:layout_constraintWidth_default="percent">
 
@@ -13,23 +12,21 @@
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/main_primary"
+        android:fitsSystemWindows="true"
+        android:minHeight="?attr/actionBarSize"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/AppToolbar"
-        app:theme="@style/AppToolbar" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarBottom"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/main_primaryDark"
+        android:fitsSystemWindows="true"
+        android:minHeight="?attr/actionBarSize"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:popupTheme="@style/AppToolbar"
-        app:theme="@style/AppToolbar">
+        app:layout_constraintRight_toRightOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -126,7 +123,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toRightOf="@id/traitType"
         app:layout_constraintTop_toBottomOf="@id/selectorList"
-        app:layout_constraintHeight_percent="0.08" />
+        app:layout_constraintHeight_percent="0.08"/>
 
     <TextView
         android:id="@+id/traitDetails"
@@ -167,27 +164,21 @@
         app:layout_constraintRight_toLeftOf="@id/valuesPlotRangeHolder"
         app:layout_constraintTop_toBottomOf="@id/traitDetails">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/rangeName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="right"
             android:paddingRight="10dp"
-            android:text="@string/search_results_dialog_range"
-            android:textColor="@color/s_text"
-            android:textSize="@dimen/text_size_xlarge"
-            android:textStyle="bold" />
+            android:text="@string/search_results_dialog_range" />
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/plotName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="right"
             android:paddingRight="10dp"
-            android:text="@string/search_results_dialog_plot"
-            android:textColor="@color/s_text"
-            android:textSize="@dimen/text_size_xlarge"
-            android:textStyle="bold" />
+            android:text="@string/search_results_dialog_plot" />
 
     </LinearLayout>
 
@@ -349,7 +340,7 @@
                 android:layout_height="wrap_content" />
 
             <include
-                layout="@layout/trait_diseaserating"
+                layout="@layout/trait_disease_rating"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 

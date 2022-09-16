@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Activity Dialog styling:
+
+   A few activities in FB require tailored styling: SearchActivity, FileExploreActivity, these activities
+   mimic an alert dialog by having a translucent window, but since they are activities they can't be
+   automatically styled using 'alertDialogStyle' attribute seen in the default theme.
+
+   Notice in ThemedActivity, the class checks for these instances and sets one of these tailored themes.
+   Eventually, these classes can be rewritten as extended AlertDialogs and then can be auto styled
+   using the default themes.
+
+   Note: These activities also have an explicit android:theme in the manifest, otherwise
+   the windowBackground color is set to black.
+   -->
+
+    <style name="ActivityDialog" parent="Theme.AppCompat.DayNight.Dialog">
+        <item name="fb_color_primary">@color/main_primary</item>
+        <item name="fb_color_primary_dark">@color/main_primary_dark</item>
+        <item name="fb_color_accent">@color/main_color_accent</item>
+        <item name="fb_color_background">@color/WHITE</item>
+        <item name="fb_color_text_light">@color/BLACK</item>
+        <item name="fb_color_text_dark">@color/BLACK</item>
+        <item name="fb_color_text_button_background">@color/GRAY</item>
+        <item name="fb_icon_tint">@color/BLACK</item>
+        <item name="fb_icon_fill_tint">@color/WHITE</item>
+        <item name="fb_title_text_color">?attr/fb_color_text_light</item>
+        <item name="fb_trait_boolean_false_color">@color/RED</item>
+        <item name="fb_trait_boolean_true_color">#689F38</item>
+        <item name="fb_bluetooth_connected_color">#33b5e5</item>
+        <item name="fb_color_hint_text">@color/BLACK</item>
+        <item name="fb_spinner_focused">@color/main_color_accent</item>
+        <item name="fb_spinner_selected">@color/main_primary_transparent</item>
+
+        <item name="android:datePickerStyle">@style/DatePickerDialogStyle</item>
+        <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
+        <item name="imageButtonStyle">@style/ImageButtonStyle</item>
+        <item name="radioButtonStyle">@style/RadioButtonStyle</item>
+        <item name="buttonStyle">@style/ButtonStyle</item>
+        <item name="toolbarStyle">@style/AppToolbar</item>
+        <item name="checkboxStyle">@style/CheckBoxStyle</item>
+        <item name="alertDialogTheme">@style/AlertDialogStyle</item>
+        <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
+        <item name="progressBarStyle">@style/ProgressBarStyle</item>
+        <item name="indeterminateProgressStyle">@style/IndeterminateProgressStyle</item>
+        <item name="editTextStyle">@style/EditTextStyle</item>
+        <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
+        <item name="spinnerStyle">@style/SpinnerStyle</item>
+        <item name="dropDownListViewStyle">@style/DropDownListViewStyle</item>
+
+        <item name="navigationIcon">@drawable/ic_arrow_left</item>
+
+        <item name="colorPrimary">?attr/fb_color_primary</item>
+        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+
+        <item name="android:windowBackground">@android:color/white</item>
+    </style>
+
+    <!-- Blue Theme -->
+    <style name="ActivityDialog.Blue">
+        <item name="fb_color_primary">@color/blue_primary</item>
+        <item name="fb_color_primary_dark">@color/blue_primary_dark</item>
+        <item name="fb_color_accent">@color/blue_color_accent</item>
+        <item name="fb_color_background">@color/WHITE</item>
+        <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
+        <item name="fb_color_text_light">@color/WHITE</item>
+        <item name="fb_color_hint_text">@color/BLACK</item>
+        <item name="fb_color_text_dark">@color/BLACK</item>
+        <item name="fb_spinner_focused">@color/blue_color_accent</item>
+        <item name="fb_spinner_selected">@color/blue_primary_transparent</item>
+
+        <item name="colorPrimary">?attr/fb_color_primary</item>
+        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+    </style>
+
+    <!-- High Contrast Theme -->
+    <style name="ActivityDialog.HighContrast">
+        <item name="fb_color_primary">@color/high_contrast_primary</item>
+        <item name="fb_color_primary_dark">@color/high_contrast_primary_dark</item>
+        <item name="fb_color_accent">@color/high_contrast_color_accent</item>
+        <item name="fb_color_text_light">@color/WHITE</item>
+        <item name="fb_color_text_dark">@color/BLACK</item>
+        <item name="fb_color_hint_text">@color/BLACK</item>
+        <item name="fb_color_background">@color/WHITE</item>
+        <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
+        <item name="fb_spinner_focused">@color/high_contrast_color_accent</item>
+        <item name="fb_spinner_selected">@color/high_contrast_primary_transparent</item>
+
+        <item name="colorPrimary">?attr/fb_color_primary</item>
+        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+    </style>
+
+</resources>

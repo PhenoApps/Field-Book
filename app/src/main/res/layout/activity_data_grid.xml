@@ -11,11 +11,8 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/main_primary"
             android:fitsSystemWindows="true"
             android:minHeight="?attr/actionBarSize"
-            app:popupTheme="@style/AppToolbar"
-            app:theme="@style/AppToolbar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

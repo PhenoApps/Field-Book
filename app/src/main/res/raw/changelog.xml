@@ -1,6 +1,13 @@
 <changelog>
 
     <release
+        date="2022-?-?"
+        versionCode="540"
+        versionName="v5.4">
+        <new>New themes!</new>
+    </release>
+
+    <release
         date="2022-09-01"
         versionCode="530"
         versionName="v5.3">

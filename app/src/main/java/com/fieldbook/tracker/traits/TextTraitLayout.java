@@ -81,7 +81,7 @@ public class TextTraitLayout extends BaseTraitLayout {
         super.afterLoadNotExists(act);
         getEtCurVal().removeTextChangedListener(getCvText());
         getEtCurVal().setText("");
-        getEtCurVal().setTextColor(Color.BLACK);
+        getEtCurVal().setTextColor(getTextColor());
         getEtCurVal().addTextChangedListener(getCvText());
         getEtCurVal().setSelection(getEtCurVal().getText().length());
     }

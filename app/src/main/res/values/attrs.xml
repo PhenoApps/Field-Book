@@ -197,4 +197,70 @@
         <attr name="gravity" />
     </declare-styleable>
 
+    <!-- theme definitions -->
+    <!-- these attributes are changed for each theme within the styles file -->
+    <attr format="color" name="fb_color_primary"/>
+    <attr format="color" name="fb_color_primary_dark"/>
+    <attr format="color" name="fb_color_accent"/>
+    <attr format="color" name="fb_color_background"/>
+
+    <attr format="dimension" name="fb_title_text_size"/>
+    <attr format="dimension" name="fb_body_text_size" />
+    <attr format="dimension" name="fb_subheading_text_size"/>
+
+    <!-- tutorial lib -->
+    <attr format="color" name="fb_tap_target_color"/>
+
+    <!-- at times for each theme its helpful to have a dark/light text color -->
+    <attr format="color" name="fb_color_text_light"/>
+    <attr format="color" name="fb_color_text_dark"/>
+
+    <!-- color of edit text hint -->
+    <attr format="color" name="fb_color_hint_text"/>
+
+    <!-- color of buttons with text -->
+    <attr format="color" name="fb_color_text_button_background"/>
+
+    <!-- text color of all buttons -->
+    <attr format="color" name="fb_button_text_color"/>
+
+    <!-- color of the highlight applied to the list item that is currently selected -->
+    <attr format="color" name="fb_spinner_selected"/>
+
+    <!-- color of the box surrounding a spinner list item when it is clicked -->
+    <attr format="color" name="fb_spinner_focused"/>
+
+    <!-- these will change colors of all icons -->
+    <attr format="color" name="fb_icon_tint"/>
+    <attr format="color" name="fb_icon_fill_tint"/>
+
+    <!-- color of toolbar titles -->
+    <attr format="color" name="fb_title_text_color"/>
+    <attr format="color" name="fb_subheading_color"/>
+
+    <!-- circular progress bar color (brapi auth) -->
+    <attr format="color" name="fb_color_indeterminate_progress_bar"/>
+
+    <!-- specific to certain features/traits -->
+    <!-- round button normal/pressed colors (counter, gps, ...)-->
+    <attr format="color" name="fb_button_color_normal"/>
+    <attr format="color" name="fb_button_color_pressed"/>
+
+    <!-- default red/blue when a value is saved or a saved value is changed -->
+    <attr format="color" name="fb_value_saved_color"/>
+    <attr format="color" name="fb_value_altered_color"/>
+
+    <!-- button press color (for categorical traits) -->
+    <attr format="color" name="fb_trait_categorical_button_press_color"/>
+
+    <attr format="color" name="fb_bluetooth_connected_color"/>
+    <attr format="color" name="fb_trait_boolean_true_color"/>
+    <attr format="color" name="fb_trait_boolean_false_color"/>
+
+    <!-- percent trait colors -->
+    <attr format="color" name="fb_trait_percent_background_center_color"/>
+    <attr format="color" name="fb_trait_percent_background_start_end_color"/>
+    <attr format="color" name="fb_trait_percent_stroke_color"/>
+    <attr format="color" name="fb_trait_percent_start_color"/>
+
 </resources>

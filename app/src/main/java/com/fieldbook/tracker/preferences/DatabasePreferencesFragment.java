@@ -29,6 +29,7 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.FileExploreActivity;
+import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.Utils;

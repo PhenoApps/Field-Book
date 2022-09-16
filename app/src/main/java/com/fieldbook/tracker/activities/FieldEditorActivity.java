@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -29,9 +28,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.brapi.BrapiActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.database.DataHelper;
@@ -42,8 +43,8 @@ import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -65,7 +66,7 @@ import java.util.Optional;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class FieldEditorActivity extends AppCompatActivity {
+public class FieldEditorActivity extends ThemedActivity {
 
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
     private static final int REQUEST_CLOUD_FILE_CODE = 5;
@@ -79,6 +80,7 @@ public class FieldEditorActivity extends AppCompatActivity {
     private static Handler mHandler = new Handler();
     private static FieldFileObject.FieldFileBase fieldFile;
     private static SharedPreferences ep;
+    private Toolbar toolbar;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
     Spinner unique;
     Spinner primary;
@@ -138,6 +140,9 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_fields);
 
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.settings_fields));
             getSupportActionBar().getThemedContext();
@@ -154,6 +159,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
+
     }
 
     private void showFileDialog() {
@@ -167,7 +173,7 @@ public class FieldEditorActivity extends AppCompatActivity {
         importArray[2] = getString(R.string.import_source_brapi);
 
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, importArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, importArray);
         importSourceList.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
@@ -184,7 +190,6 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         final AlertDialog importDialog = builder.create();
         importDialog.show();
-        DialogUtils.styleDialogs(importDialog);
 
         android.view.WindowManager.LayoutParams params = importDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
@@ -277,41 +282,11 @@ public class FieldEditorActivity extends AppCompatActivity {
     }
 
     private TapTarget fieldsTapTargetRect(Rect item, String title, String desc) {
-        return TapTarget.forBounds(item, title, desc)
-                // All options below are optional
-                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
-                .targetCircleColor(R.color.black)   // Specify a color for the target circle
-                .titleTextSize(30)                  // Specify the size (in sp) of the title text
-                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
-                .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .textColor(R.color.black)            // Specify a color for both the title and description text
-                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
-                .drawShadow(true)                   // Whether to draw a drop shadow or not
-                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                .tintTarget(true)                   // Whether to tint the target view's color
-                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
-                .targetRadius(60);
+        return TapTargetUtil.Companion.getTapTargetSettingsRect(this, item, title, desc);
     }
 
     private TapTarget fieldsTapTargetMenu(int id, String title, String desc) {
-        return TapTarget.forView(findViewById(id), title, desc)
-                // All options below are optional
-                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
-                .targetCircleColor(R.color.black)   // Specify a color for the target circle
-                .titleTextSize(30)                  // Specify the size (in sp) of the title text
-                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
-                .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .textColor(R.color.black)            // Specify a color for both the title and description text
-                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
-                .drawShadow(true)                   // Whether to draw a drop shadow or not
-                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                .tintTarget(true)                   // Whether to tint the target view's color
-                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
-                .targetRadius(60);
+        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), title, desc);
     }
 
     //TODO
@@ -739,18 +714,12 @@ public class FieldEditorActivity extends AppCompatActivity {
             }
         });
 
-        AlertDialog importFieldDialog = builder.create();
-        importFieldDialog.show();
-        DialogUtils.styleDialogs(importFieldDialog);
-
-        android.view.WindowManager.LayoutParams params2 = importFieldDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        importFieldDialog.getWindow().setAttributes(params2);
+        builder.show();
     }
 
     // Helper function to set spinner adapter and listener
     private void setSpinner(Spinner spinner, String[] data, String pref) {
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.custom_spinnerlayout, data);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_layout, data);
         spinner.setAdapter(itemsAdapter);
         int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(0)));
         spinner.setSelection(spinnerPosition);

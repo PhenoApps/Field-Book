@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
     android:orientation="vertical"
     android:paddingLeft="20dp"
     android:paddingTop="5dp"
@@ -16,25 +15,20 @@
         android:padding="5dp"
         android:weightSum="1">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold.Title"
             android:id="@+id/uniqueCol"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="0.4"
             android:paddingRight="10dp"
-            android:text="@string/import_dialog_unique"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
-            android:textStyle="bold" />
+            android:text="@string/import_dialog_unique" />
 
         <Spinner
             android:id="@+id/uniqueSpin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:textColor="#FFFFFF"
-            android:textSize="@dimen/text_size_medium" />
+            android:layout_weight="0.6" />
     </LinearLayout>
 
     <LinearLayout
@@ -44,25 +38,20 @@
         android:padding="5dp"
         android:weightSum="1">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold.Title"
             android:id="@+id/primaryCol"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="0.4"
             android:paddingRight="10dp"
-            android:text="@string/import_dialog_primary"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
-            android:textStyle="bold" />
+            android:text="@string/import_dialog_primary" />
 
         <Spinner
             android:id="@+id/primarySpin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:textColor="#FFFFFF"
-            android:textSize="@dimen/text_size_medium" />
+            android:layout_weight="0.6" />
     </LinearLayout>
 
     <LinearLayout
@@ -72,24 +61,19 @@
         android:padding="5dp"
         android:weightSum="1">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold.Title"
             android:id="@+id/secondaryCol"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="0.4"
             android:paddingRight="10dp"
-            android:text="@string/import_dialog_secondary"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_medium"
-            android:textStyle="bold" />
+            android:text="@string/import_dialog_secondary" />
 
         <Spinner
             android:id="@+id/secondarySpin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:textColor="#FFFFFF"
-            android:textSize="@dimen/text_size_medium" />
+            android:layout_weight="0.6" />
     </LinearLayout>
 </LinearLayout>

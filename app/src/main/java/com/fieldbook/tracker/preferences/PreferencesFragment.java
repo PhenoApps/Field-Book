@@ -6,10 +6,11 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
-import com.bytehamster.lib.preferencesearch.SearchPreference;
 import com.bytehamster.lib.preferencesearch.SearchConfiguration;
+import com.bytehamster.lib.preferencesearch.SearchPreference;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.PreferencesActivity;
 
 public class PreferencesFragment extends BasePreferenceFragment {
 
@@ -42,7 +43,7 @@ public class PreferencesFragment extends BasePreferenceFragment {
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
     }
 
-    void onSearchResultClicked(SearchPreferenceResult result) {
+    public void onSearchResultClicked(SearchPreferenceResult result) {
         if (result.getResourceFile() == R.xml.preferences) {
             searchPreference.setVisible(false); // Do not allow to click search multiple times
             scrollToPreference(result.getKey());

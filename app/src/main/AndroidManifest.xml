@@ -39,68 +39,115 @@
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
+        android:theme="@style/BaseAppTheme.Blue"
         tools:replace="android:label"
         tools:ignore="GoogleAppIndexingWarning">
+
+        <!-- The Main Page activity that lists all other activities -->
         <activity
             android:name=".activities.ConfigActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--- File Import activity (field manager, local and brapi) -->
+        <activity
+            android:name=".activities.FieldEditorActivity"
+            android:alwaysRetainTaskState="false"
+            android:configChanges="keyboardHidden|orientation"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <!-- Trait manager, for importing .trt files -->
+        <activity
+            android:name=".activities.TraitEditorActivity"
+            android:alwaysRetainTaskState="false"
+            android:configChanges="keyboardHidden|orientation"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait" />
+
+        <!-- used to display and select a local file (found in field editor and trait editor activities) -->
+        <activity
+            android:name=".activities.FileExploreActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:theme="@style/ActivityDialog" />
+
+        <!-- Main page for data collection -->
         <activity
             android:name=".activities.CollectActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale|keyboard"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustPan|stateHidden" />
+
+        <!-- Data grid is available through the collect activity, once the setting is set -->
+        <activity
+            android:name=".activities.DataGridActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"/>
+
+        <!-- available within the collect activity, user can search by building sql statements -->
         <activity
             android:name=".activities.SearchActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:theme="@style/ActivityDialog"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".activities.DataGridActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/ActivityDialog"/> <!-- this must be set here even though it uses ThemedActivity -->
+
+        <!-- The settings page, each category has its own fragment class -->
+        <activity android:name=".activities.PreferencesActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme"/>
+            android:screenOrientation="portrait">
+        </activity>
+
+        <!-- About activity uses a library, which uses material design components, it has its own style file-->
+        <!-- shows version information and references to other apps, etc. -->
         <activity
-            android:name=".activities.BrapiActivity"
+            android:name=".activities.AboutActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale" />
+
+        <!-- Next couple of activities are used for brapi import/export and filtering -->
+        <activity
+            android:name=".activities.brapi.BrapiActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeAction" />
+            android:screenOrientation="portrait" />
+
         <activity
-            android:name=".activities.BrapiProgramActivity"
+            android:name=".activities.brapi.BrapiProgramActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait" />
+
         <activity
-            android:name=".activities.BrapiTrialActivity"
+            android:name=".activities.brapi.BrapiTrialActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait" />
+
         <activity
-            android:name=".activities.BrapiTraitActivity"
+            android:name=".activities.brapi.BrapiTraitActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait" />
+
+        <!-- Handles BrAPI server authentication, shows a progress circle -->
         <activity
-            android:name=".activities.BrapiAuthActivity"
+            android:name=".activities.brapi.BrapiAuthActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -125,57 +172,26 @@
                     tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
             </intent-filter>
         </activity>
+
         <activity
-            android:name=".activities.FileExploreActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:theme="@style/ActivityDialog" />
-        <activity
-            android:name=".activities.TraitEditorActivity"
-            android:alwaysRetainTaskState="false"
-            android:configChanges="keyboardHidden|orientation"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeAction" />
-        <activity
-            android:name=".activities.FieldEditorActivity"
-            android:alwaysRetainTaskState="false"
-            android:configChanges="keyboardHidden|orientation"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeAction" />
-        <activity
-            android:name=".activities.AboutActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:theme="@style/AppTheme.MaterialAboutActivity" />
-        <activity
-            android:name=".preferences.PreferencesActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeAction">
-        </activity>
-        <activity
-            android:name=".activities.BrapiExportActivity"
+            android:name=".activities.brapi.BrapiExportActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
         </activity>
 
-
+        <!-- barcode capture activity -->
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"
             tools:replace="android:screenOrientation" />
 
-        <activity android:name=".activities.DefineStorageActivity"
-            android:theme="@style/AppTheme"/>
+        <!-- used to define SAF storage directory, required at start of app -->
+        <activity android:name=".activities.DefineStorageActivity"/>
 
+        <!-- found in preferences, used to select a TTS language locale -->
         <activity android:name=".activities.LocaleChoiceActivity"
             android:theme="@style/AppTheme"/>
 

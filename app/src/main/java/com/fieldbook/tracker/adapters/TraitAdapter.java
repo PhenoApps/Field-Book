@@ -1,7 +1,5 @@
 package com.fieldbook.tracker.adapters;
 
-import androidx.appcompat.app.AlertDialog;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
@@ -18,12 +16,14 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.activities.CollectActivity;
+import androidx.appcompat.app.AlertDialog;
+
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
+import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
@@ -72,10 +72,10 @@ public class TraitAdapter extends BaseAdapter {
 
         if (convertView == null) {
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = vi.inflate(R.layout.listitem_trait, parent, false);
+            convertView = vi.inflate(R.layout.list_item_trait, parent, false);
 
             holder = new ViewHolder();
-            holder.name = convertView.findViewById(R.id.field_name);
+            holder.name = convertView.findViewById(R.id.list_item_trait_trait_name);
             holder.format = convertView.findViewById(R.id.traitType);
             holder.visible = convertView.findViewById(R.id.visible);
             holder.dragSort = convertView.findViewById(R.id.dragSort);
@@ -203,8 +203,9 @@ public class TraitAdapter extends BaseAdapter {
             @Override
             public void onClick(final View v) {
                 PopupMenu popup = new PopupMenu(TraitEditorActivity.thisActivity, v);
+
                 //Inflating the Popup using xml file
-                popup.getMenuInflater().inflate(R.menu.menu_trait_listitem, popup.getMenu());
+                popup.getMenuInflater().inflate(R.menu.menu_trait_list_item, popup.getMenu());
 
                 //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(createTraitListListener(parent, holder, v, position));

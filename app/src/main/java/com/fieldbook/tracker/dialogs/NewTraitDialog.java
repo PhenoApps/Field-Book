@@ -143,7 +143,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
 
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(
                 TraitEditorActivity.thisActivity,
-                R.layout.custom_spinnerlayout,
+                R.layout.custom_spinner_layout,
                 traitFormats.getLocalStringList());
         format.setAdapter(itemsAdapter);
 

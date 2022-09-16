@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.fieldbook.tracker.traits.LocationTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/locationLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:visibility="gone">
+    android:visibility="gone"
+    tools:visibility="visible">
 
     <ImageButton
         android:id="@+id/getLocationBtn"
@@ -16,5 +18,7 @@
         android:gravity="center"
         android:padding="10dp"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_trait_location" />
+        android:src="@drawable/ic_trait_location"
+        android:contentDescription="@string/trait_location_save_content_description" />
+
 </com.fieldbook.tracker.traits.LocationTraitLayout>

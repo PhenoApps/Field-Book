@@ -25,7 +25,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.SearchAdapter;
@@ -35,7 +34,7 @@ import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.Arrays;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends ThemedActivity {
     public static String TICK = "\"";
     private static String TAG = "Field Book";
     private SharedPreferences ep;
@@ -297,7 +296,7 @@ public class SearchActivity extends AppCompatActivity {
     // Helper function to add row
     public void addRow(String text) {
         LayoutInflater vi = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = vi.inflate(R.layout.listitem_search_constructor, null);
+        View v = vi.inflate(R.layout.list_item_search_constructor, null);
 
         Spinner c = v.findViewById(R.id.columns);
         Spinner s = v.findViewById(R.id.like);
@@ -312,7 +311,7 @@ public class SearchActivity extends AppCompatActivity {
         likes[4] = getString(R.string.search_dialog_query_is_more_than);
         likes[5] = getString(R.string.search_dialog_query_is_less_than);
 
-        ArrayAdapter adapter = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinnerlayout, likes);
+        ArrayAdapter adapter = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinner_layout, likes);
         //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(adapter);
 
@@ -321,9 +320,9 @@ public class SearchActivity extends AppCompatActivity {
         if (col != null) {
             rangeUntil = col.length;
 
-            ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinnerlayout,
+            ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinner_layout,
                     concat(col, ConfigActivity.dt.getVisibleTrait()));
-            adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            //adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             c.setAdapter(adapter2);
 
             if (text.length() > 0)

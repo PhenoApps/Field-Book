@@ -3,10 +3,6 @@ package com.fieldbook.tracker.activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,54 +11,50 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-
-import com.fieldbook.tracker.adapters.TraitAdapter;
-import com.fieldbook.tracker.brapi.BrapiInfoDialog;
-import com.fieldbook.tracker.database.dao.ObservationVariableDao;
-import com.fieldbook.tracker.objects.FieldFileObject;
-import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.dialogs.NewTraitDialog;
-import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
-import com.fieldbook.tracker.utilities.Utils;
-import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetSequence;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-
 import android.provider.OpenableColumns;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListView;
+import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 
-import android.widget.ListView;
-import android.widget.Toast;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-
+import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity;
+import com.fieldbook.tracker.adapters.TraitAdapter;
+import com.fieldbook.tracker.brapi.BrapiInfoDialog;
+import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.dialogs.NewTraitDialog;
+import com.fieldbook.tracker.dragsort.DragSortController;
+import com.fieldbook.tracker.dragsort.DragSortListView;
+import com.fieldbook.tracker.objects.FieldFileObject;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CSVReader;
 import com.fieldbook.tracker.utilities.CSVWriter;
-import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.dragsort.DragSortListView;
-import com.fieldbook.tracker.dragsort.DragSortController;
+import com.fieldbook.tracker.utilities.TapTargetUtil;
+import com.fieldbook.tracker.utilities.Utils;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -85,7 +77,7 @@ import java.util.Optional;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class TraitEditorActivity extends AppCompatActivity {
+public class TraitEditorActivity extends ThemedActivity {
 
     public static int REQUEST_CLOUD_FILE_CODE = 5;
     public static int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -213,6 +205,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     };
     private final int PERMISSIONS_REQUEST_STORAGE_IMPORT = 999;
     private final int PERMISSIONS_REQUEST_STORAGE_EXPORT = 998;
+    private Toolbar toolbar;
     private NewTraitDialog traitDialog;
     private Menu systemMenu;
     // Creates a new thread to do importing
@@ -243,7 +236,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 brapiDialogShown = false;
             }
 
-            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
+            mAdapter = new TraitAdapter(thisActivity, R.layout.list_item_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
 
             traitList.setAdapter(mAdapter);
             traitList.setDropListener(onDrop);
@@ -364,14 +357,16 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_traits);
 
+        toolbar = findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.settings_traits));
             getSupportActionBar().getThemedContext();
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
-
-        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
 
         thisActivity = this;
 
@@ -387,7 +382,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         // Determines whether brapi dialog should be shown on first click of a non-BrAPI
         // trait when a BrAPI field is selected.
         brapiDialogShown = false;
-        mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
+        mAdapter = new TraitAdapter(thisActivity, R.layout.list_item_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
 
         traitList.setAdapter(mAdapter);
         traitList.setDropListener(onDrop);
@@ -440,41 +435,11 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private TapTarget traitsTapTargetRect(Rect item, String title, String desc) {
-        return TapTarget.forBounds(item, title, desc)
-                // All options below are optional
-                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
-                .targetCircleColor(R.color.black)   // Specify a color for the target circle
-                .titleTextSize(30)                  // Specify the size (in sp) of the title text
-                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
-                .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .textColor(R.color.black)            // Specify a color for both the title and description text
-                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
-                .drawShadow(true)                   // Whether to draw a drop shadow or not
-                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                .tintTarget(true)                   // Whether to tint the target view's color
-                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
-                .targetRadius(60);
+        return TapTargetUtil.Companion.getTapTargetSettingsRect(this, item, title, desc);
     }
 
     private TapTarget traitsTapTargetMenu(int id, String title, String desc) {
-        return TapTarget.forView(findViewById(id), title, desc)
-                // All options below are optional
-                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
-                .targetCircleColor(R.color.black)   // Specify a color for the target circle
-                .titleTextSize(30)                  // Specify the size (in sp) of the title text
-                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
-                .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .textColor(R.color.black)            // Specify a color for both the title and description text
-                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
-                .drawShadow(true)                   // Whether to draw a drop shadow or not
-                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                .tintTarget(true)                   // Whether to tint the target view's color
-                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
-                .targetRadius(60);
+        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), title, desc);
     }
 
     @Override
@@ -566,7 +531,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         String[] sortOptions = new String[2];
         sortOptions[0] = getString(R.string.dialog_import);
         sortOptions[1] = getString(R.string.traits_dialog_export);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, sortOptions);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, sortOptions);
         myList.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
@@ -582,7 +547,6 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         final AlertDialog importExport = builder.create();
         importExport.show();
-        DialogUtils.styleDialogs(importExport);
 
         android.view.WindowManager.LayoutParams params = importExport.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
@@ -644,7 +608,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         importArray[1] = getString(R.string.import_source_cloud);
         importArray[2] = getString(R.string.import_source_brapi);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, importArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, importArray);
         myList.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
@@ -660,7 +624,6 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         final AlertDialog importDialog = builder.create();
         importDialog.show();
-        DialogUtils.styleDialogs(importDialog);
 
         android.view.WindowManager.LayoutParams params = importDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
@@ -730,7 +693,6 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     private void sortDialog() {
@@ -750,7 +712,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         sortOptions[1] = getString(R.string.traits_sort_format);
         sortOptions[2] = getString(R.string.traits_sort_visibility);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, sortOptions);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, sortOptions);
         myList.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
@@ -766,7 +728,6 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         final AlertDialog sortDialog = builder.create();
         sortDialog.show();
-        DialogUtils.styleDialogs(sortDialog);
 
         android.view.WindowManager.LayoutParams params = sortDialog.getWindow().getAttributes();
         params.width = LayoutParams.WRAP_CONTENT;
@@ -841,7 +802,6 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         final AlertDialog exportDialog = builder.create();
         exportDialog.show();
-        DialogUtils.styleDialogs(exportDialog);
 
         android.view.WindowManager.LayoutParams langParams = exportDialog.getWindow().getAttributes();
         langParams.width = LayoutParams.MATCH_PARENT;
@@ -876,7 +836,6 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
-        DialogUtils.styleDialogs(alert);
     }
 
     private void showCreateTraitDialog() {

@@ -6,11 +6,13 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
@@ -126,8 +128,34 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public String getDisplayColor() {
+        return String.format("#%06X", (0xFFFFFF & getPrefs().getInt(GeneralKeys.SAVED_DATA_COLOR,
+                resolveThemeColor(R.attr.fb_value_saved_color))));
+    }
 
-        return String.format("#%06X", (0xFFFFFF & getPrefs().getInt(GeneralKeys.SAVED_DATA_COLOR, Color.parseColor("#d50000"))));
+    public int getButtonTextColor() {
+        return resolveThemeColor(R.attr.fb_button_text_color);
+    }
+
+    public int getButtonBackgroundColor() {
+        return resolveThemeColor(R.attr.fb_button_color_normal);
+    }
+
+    public int getButtonPressedColor() {
+        return resolveThemeColor(R.attr.fb_trait_categorical_button_press_color);
+    }
+
+    public int getTextColor() {
+        return resolveThemeColor(R.attr.fb_color_text_dark);
+    }
+
+    public int getValueAlteredColor() {
+        return resolveThemeColor(R.attr.fb_value_altered_color);
+    }
+
+    private int resolveThemeColor(int resid) {
+        TypedValue value = new TypedValue();
+        getContext().getTheme().resolveAttribute(resid, value, true);
+        return value.data;
     }
 
     /**

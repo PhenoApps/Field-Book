@@ -201,11 +201,11 @@ public class DateTraitLayout extends BaseTraitLayout {
 
         // Change text color
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            month.setTextColor(Color.BLUE);
-            day.setTextColor(Color.BLUE);
+            month.setTextColor(getValueAlteredColor());
+            day.setTextColor(getValueAlteredColor());
         } else {
-            month.setTextColor(Color.BLACK);
-            day.setTextColor(Color.BLACK);
+            month.setTextColor(getTextColor());
+            day.setTextColor(getTextColor());
         }
 
     }
@@ -285,8 +285,8 @@ public class DateTraitLayout extends BaseTraitLayout {
     public void afterLoadNotExists(CollectActivity act) {
         super.afterLoadNotExists(act);
         final Calendar c = Calendar.getInstance();
-        month.setTextColor(Color.BLACK);
-        day.setTextColor(Color.BLACK);
+        month.setTextColor(getTextColor());
+        day.setTextColor(getTextColor());
         month.setText(getMonthForInt(c.get(Calendar.MONTH)));
         day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
     }
@@ -298,8 +298,8 @@ public class DateTraitLayout extends BaseTraitLayout {
         final Calendar c = Calendar.getInstance();
         date = dateFormat.format(c.getTime());
 
-        month.setTextColor(Color.BLACK);
-        day.setTextColor(Color.BLACK);
+        month.setTextColor(getTextColor());
+        day.setTextColor(getTextColor());
 
         //This is used to persist moving between months
         month.setText(getMonthForInt(c.get(Calendar.MONTH)));

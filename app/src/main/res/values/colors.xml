@@ -1,24 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="s_text">#000000</color>
-    <color name="s_grey">#f0f0f0</color>
-
+    <!-- default theme colors -->
     <color name="main_primary">#8BC34A</color>
-    <color name="main_primaryDark">#689F38</color>
-    <color name="main_colorAccent">#795548</color>
+    <color name="main_primary_dark">#689F38</color>
+    <color name="main_color_accent">#795548</color>
+    <color name="main_primary_transparent">#428BC34A</color>
+    <color name="main_trait_percent_background_center_color">#FFFFFFFF</color>
+    <color name="main_trait_percent_background_start_end_color">#FFDDDDDD</color>
+    <color name="main_trait_percent_stroke_color">#FF689F38</color>
+    <color name="main_trait_percent_start_color">#FF8BC34A</color>
+    <color name="main_tap_target_color">@color/BLACK</color>
+    <color name="main_color_background">@color/WHITE</color>
+    <color name="main_color_text_light">@color/BLACK</color>
+    <color name="main_color_text_dark">@color/BLACK</color>
+    <color name="main_color_text_button_background">#ffd6d7d7</color>
+    <color name="main_color_icon_tint">@color/BLACK</color>
+    <color name="main_color_icon_fill_tint">@color/WHITE</color>
+    <color name="main_trait_boolean_false_color">@color/RED</color>
+    <color name="main_trait_boolean_true_color">#689F38</color>
+    <color name="main_bluetooth_connected_color">#33b5e5</color>
+    <color name="main_color_hint_text">@color/BLACK</color>
+    <color name="main_value_saved_color">#d50000</color>
+    <color name="main_value_altered_color">#0000d5</color>
+    <color name="main_trait_categorical_button_press_color">#33b5e5</color>
+    <color name="main_button_text_color">@color/BLACK</color>
+    <color name="main_button_color_normal">#d9d9d9</color>
+    <color name="main_button_color_pressed">#969696</color>
+    <color name="main_subheading_color">#595959</color>
 
-    <color name="main_details">#595959</color>
+    <!-- blue theme colors -->
+    <color name="blue_primary">#01A7C2</color>
+    <color name="blue_primary_dark">#007090</color>
+    <color name="blue_color_accent">#795548</color>
+    <color name="blue_primary_transparent">#4201A7C2</color>
+    <color name="blue_trait_percent_background_center_color">#FFFFFFFF</color>
+    <color name="blue_trait_percent_background_start_end_color">#FFDDDDDD</color>
+    <color name="blue_trait_percent_stroke_color">#FF007090</color>
+    <color name="blue_trait_percent_start_color">#01A7C2</color>
+    <color name="blue_tap_target_color">#000000</color>
+    <color name="blue_color_background">@color/WHITE</color>
+    <color name="blue_color_text_light">@color/BLACK</color>
+    <color name="blue_color_text_dark">@color/BLACK</color>
+    <color name="blue_color_text_button_background">#ffd6d7d7</color>
+    <color name="blue_color_icon_tint">@color/BLACK</color>
+    <color name="blue_color_icon_fill_tint">@color/WHITE</color>
+    <color name="blue_trait_boolean_false_color">@color/RED</color>
+    <color name="blue_trait_boolean_true_color">#689F38</color>
+    <color name="blue_bluetooth_connected_color">#33b5e5</color>
+    <color name="blue_color_hint_text">@color/BLACK</color>
+    <color name="blue_value_saved_color">#d50000</color>
+    <color name="blue_value_altered_color">#0000d5</color>
+    <color name="blue_trait_categorical_button_press_color">#33b5e5</color>
+    <color name="blue_button_text_color">@color/BLACK</color>
+    <color name="blue_button_color_normal">#d9d9d9</color>
+    <color name="blue_button_color_pressed">#969696</color>
+    <color name="blue_subheading_color">#595959</color>
 
-    <color name="button_normal">#ffd6d7d7</color>
-    <color name="button_pressed">#33b5e5</color>
-
-    <color name="black">#000000</color>
-
-    <!-- data grid colors -->
-    <color name="progressBlank">#AAAAAAAA</color>
-    <color name="progressStart">#9000FF00</color>
-    <color name="progressMid">#90FFFF00</color>
-    <color name="progressEnd">#90FF0000</color>
+    <!-- high contrast theme colors -->
+    <color name="high_contrast_primary">#CCCCCC</color>
+    <color name="high_contrast_primary_dark">#262626</color>
+    <color name="high_contrast_color_accent">#9D9D9D</color>
+    <color name="high_contrast_primary_transparent">#42CCCCCC</color>
+    <color name="high_contrast_trait_percent_background_center_color">#FFFFFFFF</color>
+    <color name="high_contrast_trait_percent_background_start_end_color">#FFDDDDDD</color>
+    <color name="high_contrast_trait_percent_stroke_color">#FF262626</color>
+    <color name="high_contrast_trait_percent_start_color">#FFCCCCCC</color>
+    <color name="high_contrast_tap_target_color">#000000</color>
+    <color name="high_contrast_color_background">@color/WHITE</color>
+    <color name="high_contrast_color_text_light">@color/WHITE</color>
+    <color name="high_contrast_color_text_dark">@color/BLACK</color>
+    <color name="high_contrast_color_text_button_background">#ffd6d7d7</color>
+    <color name="high_contrast_color_icon_tint">@color/BLACK</color>
+    <color name="high_contrast_color_icon_fill_tint">@color/WHITE</color>
+    <color name="high_contrast_trait_boolean_false_color">@color/RED</color>
+    <color name="high_contrast_trait_boolean_true_color">#689F38</color>
+    <color name="high_contrast_bluetooth_connected_color">#33b5e5</color>
+    <color name="high_contrast_color_hint_text">@color/BLACK</color>
+    <color name="high_contrast_value_saved_color">#d50000</color>
+    <color name="high_contrast_value_altered_color">#0000d5</color>
+    <color name="high_contrast_trait_categorical_button_press_color">#33b5e5</color>
+    <color name="high_contrast_button_text_color">@color/BLACK</color>
+    <color name="high_contrast_button_color_normal">#d9d9d9</color>
+    <color name="high_contrast_button_color_pressed">#969696</color>
+    <color name="high_contrast_subheading_color">#595959</color>
 
 </resources>

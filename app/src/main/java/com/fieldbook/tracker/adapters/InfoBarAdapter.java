@@ -3,11 +3,6 @@ package com.fieldbook.tracker.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,8 +11,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.fieldbook.tracker.database.DataHelper;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -100,7 +99,7 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
         //combine the traits to be viewed within info bars
         final String[] allTraits = ArrayUtils.addAll(prefixTraits, obsTraits);
 
-        ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(this.context, R.layout.custom_spinnerlayout, allTraits);
+        ArrayAdapter<String> prefixArrayAdapter = new ArrayAdapter<>(this.context, R.layout.custom_spinner_layout, allTraits);
 
         spinner.setAdapter(prefixArrayAdapter);
 

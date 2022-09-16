@@ -26,17 +26,15 @@ public class AboutActivity extends MaterialAboutActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemedActivity.Companion.applyTheme(this);
         super.onCreate(savedInstanceState);
     }
 
     @Override
     @NonNull
     public MaterialAboutList getMaterialAboutList(@NonNull Context c) {
+
         MaterialAboutCard.Builder appCardBuilder = new MaterialAboutCard.Builder();
-
-        // Add items to card
-        int colorIcon = R.color.mal_color_icon_light_theme;
-
         appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
                 .text(getString(R.string.field_book))
                 .icon(R.mipmap.ic_launcher)
@@ -175,7 +173,7 @@ public class AboutActivity extends MaterialAboutActivity {
                 .withRateButton(rateButton) // enable this to show a "rate app" button in the dialog => clicking it will open the play store; the parent activity or target fragment can also implement IChangelogRateHandler to handle the button click
                 .withSummary(false, true) // enable this to show a summary and a "show more" button, the second paramter describes if releases without summary items should be shown expanded or not
                 .withTitle(getString(R.string.changelog_title)) // provide a custom title if desired, default one is "Changelog <VERSION>"
-                .withOkButtonLabel("OK") // provide a custom ok button text if desired, default one is "OK"
+                .withOkButtonLabel(getString(android.R.string.ok)) // provide a custom ok button text if desired, default one is "OK"
                 .withSorter(new ImportanceChangelogSorter())
                 .buildAndShowDialog(this, false); // second parameter defines, if the dialog has a dark or light theme
     }
