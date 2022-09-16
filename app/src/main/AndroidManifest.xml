@@ -39,7 +39,7 @@
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/BaseAppTheme.Blue"
+        android:theme="@style/BaseAppTheme"
         tools:replace="android:label"
         tools:ignore="GoogleAppIndexingWarning">
 
