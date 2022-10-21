@@ -6,7 +6,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.AttributeSet;
-import android.widget.EditText;
+import android.view.View;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
@@ -22,7 +22,6 @@ public class AngleTraitLayout extends BaseTraitLayout {
     TextView rollTv;
     TextView azimutTv;
     SensorEventListener mEventListener;
-    EditText etCurVal;
 
     public AngleTraitLayout(Context context) {
         super(context);
@@ -54,7 +53,6 @@ public class AngleTraitLayout extends BaseTraitLayout {
         pitchTv = findViewById(R.id.pitch);
         rollTv = findViewById(R.id.roll);
         azimutTv = findViewById(R.id.azimuth);
-        etCurVal = findViewById(R.id.etCurVal);
 
         mEventListener = new SensorEventListener() {
             float[] mGravity;
@@ -93,9 +91,7 @@ public class AngleTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
-
-        getEtCurVal().setVisibility(EditText.VISIBLE);
-
+        super.toggleVisibility(View.VISIBLE);
         super.loadLayout();
     }
 

@@ -25,6 +25,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.BrapiExportUtil;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.text.SimpleDateFormat;
@@ -248,9 +249,11 @@ public class BrapiExportActivity extends AppCompatActivity {
     private void hideSaving() {
         // Re-enable our login button
         // Disable the export button so that can't click it again
-        Button exportBtn = this.findViewById(R.id.brapi_export_btn);
-        exportBtn.setEnabled(true);
-        this.findViewById(R.id.saving_panel).setVisibility(View.GONE);
+        runOnUiThread(() -> {
+            Button exportBtn = this.findViewById(R.id.brapi_export_btn);
+            exportBtn.setEnabled(true);
+            this.findViewById(R.id.saving_panel).setVisibility(View.GONE);
+        });
     }
 
     private void createObservations() throws InterruptedException {
@@ -335,23 +338,19 @@ public class BrapiExportActivity extends AppCompatActivity {
                         });
                         return null;
                     }
-                }, new Function<Integer, Void>() {
+                }, code -> {
 
-                    @Override
-                    public Void apply(final Integer code) {
+                    (BrapiExportActivity.this).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            postImageMetaDataError = processErrorCode(code);
+                            postImageMetaDataUpdatesCount++;
+                            putImageContentUpdatesCount++; //since we aren't calling this
+                            uploadComplete();
+                        }
+                    });
 
-                        (BrapiExportActivity.this).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                postImageMetaDataError = processErrorCode(code);
-                                postImageMetaDataUpdatesCount++;
-                                putImageContentUpdatesCount++; //since we aren't calling this
-                                uploadComplete();
-                            }
-                        });
-
-                        return null;
-                    }
+                    return null;
                 }
         );
     }
@@ -534,7 +533,9 @@ public class BrapiExportActivity extends AppCompatActivity {
                     message = getMessageForErrorCode(UploadError.NONE);
                 }
 
-                Toast.makeText(this.getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                runOnUiThread(() -> {
+                    Toast.makeText(this.getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                });
             }
 
             // refresh statistics
@@ -576,15 +577,17 @@ public class BrapiExportActivity extends AppCompatActivity {
         if (observationDbIds.size() != observationsNeedingSync.size()) {
             retVal = UploadError.WRONG_NUM_OBSERVATIONS_RETURNED;
         } else {
-            // TODO: update to work with multiple observations per variable
+            // TODO: updated equals key to the fieldbook db id, this might affect future syncing feature
             // Also would be nice to have a cleaner 'find' mechanism
             // For now, just use observationUnitDbId and observationVariableId to key off
             // Won't work for multiple observations of the same variable which we want to support in the future
 
             for (Observation converted : observationDbIds) {
                 // find observation with matching keys and update observationDbId
-                int first_index = observationsNeedingSync.indexOf(converted);
-                int last_index = observationsNeedingSync.lastIndexOf(converted);
+                //int first_index = observationsNeedingSync.indexOf(converted);
+                //int last_index = observationsNeedingSync.lastIndexOf(converted);
+                int first_index = BrapiExportUtil.Companion.firstIndexOfDbId(observationsNeedingSync, converted);
+                int last_index = BrapiExportUtil.Companion.lastIndexOfDbId(observationsNeedingSync, converted);
                 if (first_index == -1) {
                     retVal = UploadError.MISSING_OBSERVATION_IN_RESPONSE;
                 } else if (first_index != last_index) {
@@ -725,21 +728,22 @@ public class BrapiExportActivity extends AppCompatActivity {
         SharedPreferences ep = this.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
         String field = ep.getString(GeneralKeys.FIELD_FILE, "");
 
-        ((TextView) findViewById(R.id.brapistudyValue)).setText(field);
-        ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));
-        ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
-        ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));
-        ((TextView) findViewById(R.id.brapiUserCreatedValue)).setText(String.valueOf(userCreatedTraitObservations.size()));
-        ((TextView) findViewById(R.id.brapiWrongSource)).setText(String.valueOf(wrongSourceObservations.size()));
+        runOnUiThread(() -> {
+            ((TextView) findViewById(R.id.brapistudyValue)).setText(field);
+            ((TextView) findViewById(R.id.brapiNumNewValue)).setText(String.valueOf(numNewObservations));
+            ((TextView) findViewById(R.id.brapiNumSyncedValue)).setText(String.valueOf(numSyncedObservations));
+            ((TextView) findViewById(R.id.brapiNumEditedValue)).setText(String.valueOf(numEditedObservations));
+            ((TextView) findViewById(R.id.brapiUserCreatedValue)).setText(String.valueOf(userCreatedTraitObservations.size()));
+            ((TextView) findViewById(R.id.brapiWrongSource)).setText(String.valueOf(wrongSourceObservations.size()));
 
-        ((TextView) findViewById(R.id.brapiNumNewImagesValue)).setText(String.valueOf(numNewImages));
-        ((TextView) findViewById(R.id.brapiNumSyncedImagesValue)).setText(String.valueOf(numSyncedImages));
-        ((TextView) findViewById(R.id.brapiNumEditedImagesValue)).setText(String.valueOf(numEditedImages));
-        ((TextView) findViewById(R.id.brapiNumIncompleteImagesValue)).setText(String.valueOf(numIncompleteImages));
+            ((TextView) findViewById(R.id.brapiNumNewImagesValue)).setText(String.valueOf(numNewImages));
+            ((TextView) findViewById(R.id.brapiNumSyncedImagesValue)).setText(String.valueOf(numSyncedImages));
+            ((TextView) findViewById(R.id.brapiNumEditedImagesValue)).setText(String.valueOf(numEditedImages));
+            ((TextView) findViewById(R.id.brapiNumIncompleteImagesValue)).setText(String.valueOf(numIncompleteImages));
 
-        ((TextView) findViewById(R.id.brapiUserCreatedImagesValue)).setText(String.valueOf(userCreatedTraitImages.size()));
-        ((TextView) findViewById(R.id.brapiWrongSourceImages)).setText(String.valueOf(wrongSourceImages.size()));
-
+            ((TextView) findViewById(R.id.brapiUserCreatedImagesValue)).setText(String.valueOf(userCreatedTraitImages.size()));
+            ((TextView) findViewById(R.id.brapiWrongSourceImages)).setText(String.valueOf(wrongSourceImages.size()));
+        });
     }
 
     @Override

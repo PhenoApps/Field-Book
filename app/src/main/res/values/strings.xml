@@ -786,5 +786,13 @@
     <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
     <string name="trait_usb_camera_capture_button_text">Capture</string>
     <string name="preferences_beta_title">Beta Features</string>
+    <string name="pref_beta_repeated_values_title">Repeated Values Edit Text</string>
+    <string name="pref_beta_repeated_values_summary">Allows the user to visualize and selected old repeated values.</string>
+    <string name="view_repeated_values_add_button_content_description">Adds a new observation.</string>
+    <string name="view_repeated_values_add_button_fail">You must enter a value before creating a new observation.</string>
+    <string name="menu_collect_repeated_values_indicator">Displays the number of repeated values.</string>
+
+    <string name="pref_beta_repeated_values_disabled_title">Feature disabled</string>
+    <string name="pref_beta_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
 
 </resources>

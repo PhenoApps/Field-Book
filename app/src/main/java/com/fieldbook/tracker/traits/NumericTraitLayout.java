@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
@@ -64,7 +63,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
         numberButtons.get(R.id.k16).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                getEtCurVal().setText("");
+                getCollectInputView().setText("");
                 removeTrait(getCurrentTrait().getTrait());
                 return false;
             }
@@ -73,11 +72,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
-
-        // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
-        getEtCurVal().setHint("");
-        getEtCurVal().setVisibility(EditText.VISIBLE);
-
+        super.toggleVisibility(View.VISIBLE);
         super.loadLayout();
     }
 
@@ -95,6 +90,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
     @Override
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
+        super.deleteTraitListener();
     }
 
     private class NumberButtonOnClickListener implements OnClickListener {
@@ -103,7 +99,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
         public void onClick(View view) {
             if (!isLocked) {
                 final String backspaceTts = getContext().getString(R.string.trait_numeric_backspace_tts);
-                final String curText = getEtCurVal().getText().toString();
+                final String curText = getCollectInputView().getText();
                 Button button = (Button) view;
                 triggerTts(button.getText().toString());
                 String value;
@@ -112,13 +108,13 @@ public class NumericTraitLayout extends BaseTraitLayout {
                     final int length = curText.length();
                     if (length > 0) {
                         value = curText.substring(0, length - 1);
-                        getEtCurVal().setText(value);
-                        updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
+                        getCollectInputView().setText(value);
+                        updateObservation(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
                     }
                 } else if (numberButtons.containsKey(view.getId())) {
                     value = curText + numberButtons.get(view.getId()).getText().toString();
-                    getEtCurVal().setText(value);
-                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
+                    getCollectInputView().setText(value);
+                    updateObservation(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
                 }
             }
         }

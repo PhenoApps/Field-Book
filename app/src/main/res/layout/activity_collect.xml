@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -151,7 +150,7 @@
         android:adjustViewBounds="true"
         android:scaleType="centerInside"
         android:src="@drawable/main_entry_left_unpressed"
-        app:layout_constraintBottom_toTopOf="@id/etCurVal"
+        app:layout_constraintBottom_toTopOf="@id/act_collect_input_view"
         app:layout_constraintRight_toLeftOf="@id/namesPlotRangeHolder"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/traitDetails"
@@ -162,7 +161,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@id/etCurVal"
+        app:layout_constraintBottom_toTopOf="@id/act_collect_input_view"
         app:layout_constraintLeft_toRightOf="@id/rangeLeft"
         app:layout_constraintRight_toLeftOf="@id/valuesPlotRangeHolder"
         app:layout_constraintTop_toBottomOf="@id/traitDetails">
@@ -197,7 +196,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@id/etCurVal"
+        app:layout_constraintBottom_toTopOf="@id/act_collect_input_view"
         app:layout_constraintLeft_toRightOf="@id/namesPlotRangeHolder"
         app:layout_constraintRight_toLeftOf="@id/rangeRight"
         app:layout_constraintTop_toBottomOf="@id/traitDetails">
@@ -261,30 +260,22 @@
         android:adjustViewBounds="true"
         android:scaleType="centerInside"
         android:src="@drawable/main_entry_right_unpressed"
-        app:layout_constraintBottom_toTopOf="@id/etCurVal"
+        app:layout_constraintBottom_toTopOf="@id/act_collect_input_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toRightOf="@id/valuesPlotRangeHolder"
         app:layout_constraintTop_toBottomOf="@id/traitDetails"
         app:layout_constraintHeight_percent="0.13" />
 
-    <EditText
-        android:id="@+id/etCurVal"
-        android:layout_width="match_parent"
+    <com.fieldbook.tracker.views.CollectInputView
+        android:id="@+id/act_collect_input_view"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:enabled="false"
-        android:gravity="center"
-        android:inputType="textNoSuggestions"
-        android:maxLines="1"
-        android:text=""
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_xlarge"
-        android:textStyle="bold"
-        android:visibility="gone"
+        android:layout_margin="2dp"
+        android:padding="2dp"
+        app:layout_constraintTop_toBottomOf="@id/valuesPlotRangeHolder"
         app:layout_constraintBottom_toTopOf="@id/svTraitContainer"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/valuesPlotRangeHolder" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <ScrollView
         android:id="@+id/svTraitContainer"
@@ -294,7 +285,7 @@
         app:layout_constraintBottom_toTopOf="@id/toolbarBottom"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etCurVal">
+        app:layout_constraintTop_toBottomOf="@id/act_collect_input_view">
 
         <LinearLayout
             android:id="@+id/traitHolder"

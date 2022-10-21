@@ -2,7 +2,7 @@ package com.fieldbook.tracker.traits;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.EditText;
+import android.view.View;
 
 public class BarcodeTraitLayout extends BaseTraitLayout {
 
@@ -34,7 +34,7 @@ public class BarcodeTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
-        getEtCurVal().setVisibility(EditText.VISIBLE);
+        super.toggleVisibility(View.VISIBLE);
     }
 
     @Override

@@ -200,7 +200,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
     @Override
     public void loadLayout() {
 
-        getEtCurVal().setVisibility(EditText.GONE);
+        getCollectInputView().setVisibility(EditText.GONE);
 
         try {
 
@@ -449,7 +449,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 value = "";
             } else {
                 int pos = spinner.getSelectedItemPosition();
-                value = ConfigActivity.dt.getDropDownRange(options[pos], getCRange().plot_id)[0];
+                value = ConfigActivity.dt.getDropDownRange(options[pos], getCurrentRange().plot_id)[0];
             }
         }
          /*

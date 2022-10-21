@@ -4,9 +4,9 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,6 +45,13 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         super(context, attrs, defStyleAttr);
     }
 
+    static public boolean isTraitCategorical(String traitName) {
+        for (String name : POSSIBLE_VALUES) {
+            if (name.equals(traitName)) return true;
+        }
+        return false;
+    }
+
     @Override
     public void setNaTraitsText() {
     }
@@ -65,11 +72,10 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
+        super.toggleVisibility(View.VISIBLE);
         super.loadLayout();
 
         final String trait = getCurrentTrait().getTrait();
-        getEtCurVal().setHint("");
-        getEtCurVal().setVisibility(EditText.VISIBLE);
 
         //read the preferences, default to displaying values instead of labels
         String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
@@ -95,16 +101,16 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
         if (!getNewTraits().containsKey(trait)) {
 
-            getEtCurVal().setText("");
+            //getCollectInputView().setText("");
 
-            getEtCurVal().setTextColor(Color.BLACK);
+            getCollectInputView().setTextColor(Color.BLACK);
 
         } else {
 
             //if there is a saved value, check if its json or old string
             String savedJson = getNewTraits().get(trait);
 
-            if (savedJson != null) {
+            if (savedJson != null && !savedJson.isEmpty()) {
 
                 //check if its the new json
                 try {
@@ -123,15 +129,15 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                             //display the category based on preferences
                             if (labelValPref.equals("value")) {
 
-                                getEtCurVal().setText(labelVal.getValue());
+                                getCollectInputView().setText(labelVal.getValue());
 
                             } else {
 
-                                getEtCurVal().setText(labelVal.getLabel());
+                                getCollectInputView().setText(labelVal.getLabel());
 
                             }
 
-                            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
+                            getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
 
                         }
                     }
@@ -142,9 +148,9 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                     if (CategoryJsonUtil.Companion.contains(cats, savedJson)) {
 
-                        getEtCurVal().setText(savedJson);
+                        getCollectInputView().setText(savedJson);
 
-                        getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
+                        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
                     }
                 }
             }
@@ -184,7 +190,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                     holder.mButton.setOnClickListener(createClickListener(holder.mButton, position));
 
                     //update the button's state if this category is selected
-                    String currentText = getEtCurVal().getText().toString();
+                    String currentText = getCollectInputView().getText();
 
                     if (labelValPref.equals("value")) {
 
@@ -223,6 +229,19 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         });
     }
 
+    /**
+     * Notifies grid adapter to refresh which buttons are selected.
+     * This is used when the repeat value view navigates across repeated values.
+     */
+    @Override
+    public void refreshLayout(Boolean onNew) {
+        super.refreshLayout(onNew);
+        RecyclerView.Adapter<?> adapter = gridMultiCat.getAdapter();
+        if (adapter != null) {
+            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+        }
+    }
+
     private OnClickListener createClickListener(final Button button, int position) {
         return v -> {
 
@@ -232,7 +251,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 final ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>(); //this is saved in the db
 
                 final String category = button.getText().toString();
-                String currentCat = getEtCurVal().getText().toString(); //displayed in the edit text
+                String currentCat = getCollectInputView().getText(); //displayed in the edit text
 
                 if (currentCat.equals(category)) {
                     pressOffButton(button);
@@ -243,9 +262,9 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                     scale.add(pair);
                 }
 
-                getEtCurVal().setText(currentCat);
+                getCollectInputView().setText(currentCat);
 
-                updateTrait(getCurrentTrait().getTrait(),
+                updateObservation(getCurrentTrait().getTrait(),
                         getCurrentTrait().getFormat(),
                         CategoryJsonUtil.Companion.encode(scale));
 
@@ -269,6 +288,15 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     @Override
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
+        super.deleteTraitListener();
         loadLayout();
+    }
+
+    @Override
+    public String decodeValue(String value) {
+        ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
+        if (!scale.isEmpty()) {
+            return scale.get(0).getValue();
+        } else return "";
     }
 }

@@ -3,7 +3,6 @@ package com.fieldbook.tracker.traits;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
@@ -18,7 +17,7 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
 
     private static class ThreeState {
         static int OFF = 0;
-        //static int NEUTRAL = 1;
+        static int NEUTRAL = -1;
         static int ON = 1;
     }
 
@@ -69,10 +68,8 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
 
     @Override
     public void loadLayout() {
+        super.toggleVisibility(View.VISIBLE);
         super.loadLayout();
-
-        getEtCurVal().setHint("");
-        getEtCurVal().setVisibility(EditText.VISIBLE);
     }
 
     @Override
@@ -84,15 +81,44 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     @Override
     public void afterLoadDefault(CollectActivity act) {
         super.afterLoadDefault(act);
-        String defaultValue = getCurrentTrait().getDefaultValue().trim();
-        updateSeekBarState(defaultValue);
+        resetToDefault();
     }
 
     @Override
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
-        String defaultValue = getCurrentTrait().getDefaultValue().trim();
-        updateSeekBarState(defaultValue);
+        super.deleteTraitListener();
+
+        //resetToDefault();
+    }
+
+    private void resetToDefault() {
+
+        String value = getCurrentTrait().getDefaultValue().trim();
+
+        if (getCurrentObservation() != null && !getCurrentObservation().getValue().isEmpty()) {
+            value = getCurrentObservation().getValue();
+        }
+
+        checkSet(value);
+        updateSeekBarState(value);
+    }
+
+    /**
+     * When updating view to a new measurement, check that the default value is not already selected,
+     * if not handled here, the onProgressChanged will not catch.
+     */
+    private void checkSet(String value) {
+
+        int state = threeStateSeekBar.getProgress();
+
+        boolean flag = (value.equalsIgnoreCase("true") && state == ThreeState.ON)
+                || (value.equalsIgnoreCase("false") && state == ThreeState.OFF);
+
+        if (flag) {
+            updateObservation(getCurrentTrait().getTrait(), type(), value);
+            getCollectInputView().setText(value);
+        }
     }
 
     private void updateSeekBarState(String state) {
@@ -120,8 +146,14 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
         if (state == ThreeState.OFF) newVal = "FALSE";
         //else if (state == ThreeState.NEUTRAL) newVal = "unset";
 
-        updateTrait(getCurrentTrait().getTrait(), "boolean", newVal);
-        getEtCurVal().setText(newVal);
+        updateObservation(getCurrentTrait().getTrait(), type(), newVal);
+        getCollectInputView().setText(newVal);
+    }
+
+    @Override
+    public void refreshLayout(Boolean onNew) {
+        super.refreshLayout(onNew);
+        resetToDefault();
     }
 
     @Override

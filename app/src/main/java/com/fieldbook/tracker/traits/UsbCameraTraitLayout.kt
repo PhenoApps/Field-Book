@@ -304,10 +304,6 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
     override fun init() {}
     override fun loadLayout() {
 
-        etCurVal.removeTextChangedListener(cvText)
-        etCurVal.visibility = GONE
-        etCurVal.isEnabled = false
-
         loadAdapterItems()
 
         super.loadLayout()
@@ -366,7 +362,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { usbPhotosDir ->
 
-                    val plot = cRange.plot_id
+                    val plot = currentRange.plot_id
 
                     val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
@@ -385,6 +381,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
                                 prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
                                         + prefs.getString(GeneralKeys.LAST_NAME, ""),
                                 (activity as? CollectActivity)?.locationByPreferences, "", studyId,
+                                null,
                                 null,
                                 null
                             )
@@ -440,7 +437,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
             DocumentTreeUtil.getThumbnailsDir(context, traitName)?.let { thumbnailDir ->
 
-                val plot = cRange.plot_id
+                val plot = currentRange.plot_id
 
                 val images = DocumentTreeUtil.getPlotMedia(thumbnailDir, plot, ".png")
 
@@ -465,7 +462,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
             DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
 
-                val plot = cRange.plot_id
+                val plot = currentRange.plot_id
 
                 DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
 
@@ -500,7 +497,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                 DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { fieldDir ->
 
-                    val plot = cRange.plot_id
+                    val plot = currentRange.plot_id
 
                     DocumentTreeUtil.getPlotMedia(fieldDir, plot, ".png").let { highResImages ->
 
