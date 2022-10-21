@@ -71,6 +71,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     public void loadLayout() {
 
+        ((CollectActivity) getContext()).refreshRepeatedValuesToolbarIndicator();
+
         //right now text entry is disabled in the camera and photo traits
         //uris are too long to be nicely displayed in the current editTexts
         if (type().equals(PhotoTraitLayout.type)

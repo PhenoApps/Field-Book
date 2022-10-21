@@ -354,6 +354,7 @@ public class CollectActivity extends AppCompatActivity
         traitBox = new TraitBox(this);
         rangeBox = new RangeBox(this);
         initCurrentVals();
+
     }
 
     private void refreshMain() {
@@ -2105,65 +2106,68 @@ public class CollectActivity extends AppCompatActivity
         traitLayouts.getTraitLayout(getCurrentTrait().getFormat()).refreshLayout(true);
     }
 
-    private void refreshRepeatedValuesToolbarIndicator() {
+    public void refreshRepeatedValuesToolbarIndicator() {
 
-        MenuItem item = systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator);
+        if (systemMenu != null) {
 
-        if (collectInputView.isRepeatEnabled()) {
+            MenuItem item = systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator);
 
-            item.setVisible(true);
+            if (collectInputView.isRepeatEnabled()) {
 
-            ObservationModel[] values = ObservationDao.Companion
-                    .getAllRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
+                item.setVisible(true);
 
-            int n = values.length;
+                ObservationModel[] values = ObservationDao.Companion
+                        .getAllRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
 
-            if (n == 1) {
-                if (values[0].getValue().isEmpty()) {
-                    n = 0;
+                int n = values.length;
+
+                if (n == 1) {
+                    if (values[0].getValue().isEmpty()) {
+                        n = 0;
+                    }
                 }
+
+                switch (n) {
+                    case 0:
+                        item.setIcon(R.drawable.numeric_0_box);
+                        break;
+                    case 1:
+                        item.setIcon(R.drawable.numeric_1_box);
+                        break;
+                    case 2:
+                        item.setIcon(R.drawable.numeric_2_box_multiple);
+                        break;
+                    case 3:
+                        item.setIcon(R.drawable.numeric_3_box_multiple);
+                        break;
+                    case 4:
+                        item.setIcon(R.drawable.numeric_4_box_multiple);
+                        break;
+                    case 5:
+                        item.setIcon(R.drawable.numeric_5_box_multiple);
+                        break;
+                    case 6:
+                        item.setIcon(R.drawable.numeric_6_box_multiple);
+                        break;
+                    case 7:
+                        item.setIcon(R.drawable.numeric_7_box_multiple);
+                        break;
+                    case 8:
+                        item.setIcon(R.drawable.numeric_8_box_multiple);
+                        break;
+                    case 9:
+                        item.setIcon(R.drawable.numeric_9_box_multiple);
+                        break;
+                    default:
+                        item.setIcon(R.drawable.numeric_9_plus_box_multiple);
+                        break;
+                }
+
+            } else {
+
+                item.setVisible(false);
+
             }
-
-            switch (n) {
-                case 0:
-                    item.setIcon(R.drawable.numeric_0_box);
-                    break;
-                case 1:
-                    item.setIcon(R.drawable.numeric_1_box);
-                    break;
-                case 2:
-                    item.setIcon(R.drawable.numeric_2_box_multiple);
-                    break;
-                case 3:
-                    item.setIcon(R.drawable.numeric_3_box_multiple);
-                    break;
-                case 4:
-                    item.setIcon(R.drawable.numeric_4_box_multiple);
-                    break;
-                case 5:
-                    item.setIcon(R.drawable.numeric_5_box_multiple);
-                    break;
-                case 6:
-                    item.setIcon(R.drawable.numeric_6_box_multiple);
-                    break;
-                case 7:
-                    item.setIcon(R.drawable.numeric_7_box_multiple);
-                    break;
-                case 8:
-                    item.setIcon(R.drawable.numeric_8_box_multiple);
-                    break;
-                case 9:
-                    item.setIcon(R.drawable.numeric_9_box_multiple);
-                    break;
-                default:
-                    item.setIcon(R.drawable.numeric_9_plus_box_multiple);
-                    break;
-            }
-
-        } else {
-
-            item.setVisible(false);
-
         }
     }
 
