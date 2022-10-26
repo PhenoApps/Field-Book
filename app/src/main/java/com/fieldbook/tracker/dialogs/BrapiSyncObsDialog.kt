@@ -113,34 +113,40 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
                     StudyObservations(fieldBookStudyDbId, input.traits, mutableListOf())
                 studyObservations.merge(traitStudy)
 
-                brAPIService!!.getObservations(brapiStudyDbId, observationIds, paginationManager,
+                brAPIService!!.getObservations(brapiStudyDbId,
+                    observationIds,
+                    paginationManager,
                     { obsInput ->
                         ((context as ContextWrapper).baseContext as Activity).runOnUiThread {
                             val currentStudy =
                                 StudyObservations(fieldBookStudyDbId, mutableListOf(), obsInput)
                             studyObservations.merge(currentStudy)
 
-                            //Print out the values for debug
-                            for (obs in studyObservations.observationList) {
-                                println("***************************")
-                                println("StudyId: " + obs.studyId)
-                                println("ObsId: " + obs.dbId)
-                                println("UnitDbId: " + obs.unitDbId)
-                                println("VariableDbId: " + obs.variableDbId)
-                                println("VariableName: " + obs.variableName)
-                                println("Value: " + obs.value)
-                            }
-                            println("Done pulling observations.")
 
-                            //Once we have loaded in the observations, we can make the save button visible
-                            makeSaveBtnVisible()
+                            //Print out the values for debug
+//                                for (obs in currentStudy.observationList) {
+//                                    println("***************************")
+//                                    println("StudyId: " + obs.studyId)
+//                                    println("ObsId: " + obs.dbId)
+//                                    println("UnitDbId: " + obs.unitDbId)
+//                                    println("VariableDbId: " + obs.variableDbId)
+//                                    println("VariableName: " + obs.variableName)
+//                                    println("Value: " + obs.value)
+//                                }
+                            println("Size of ObsList: ${studyObservations.observationList.size}")
+                            println("Done pulling observations. Page: ${paginationManager.page}/${paginationManager.totalPages}")
+
+                            //Once we have loaded in all the observations, we can make the save button visible
+                            if (paginationManager.page == paginationManager.totalPages) {
+                                makeSaveBtnVisible()
+                            }
                         }
 
                         null
                     }) {
-                    println("Stopped:")
-                    null
-                }
+                        println("Stopped:")
+                        null
+                    }
 
                 null
             }) { null }

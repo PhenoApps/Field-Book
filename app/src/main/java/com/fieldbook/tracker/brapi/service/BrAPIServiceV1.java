@@ -644,16 +644,24 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             BrapiV1ApiCallBack<ObservationsResponse> callback = new BrapiV1ApiCallBack<ObservationsResponse>() {
                 @Override
                 public void onSuccess(ObservationsResponse response, int i, Map<String, List<String>> map) {
-                    // Cancel processing if the page that was processed is not the page
-                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
-                    if (initPage.equals(paginationManager.getPage())) {
-                        updatePageInfo(paginationManager, response.getMetadata());
-                        // Result contains a list of observation variables
-                        List<io.swagger.client.model.Observation> brapiObservationList = response.getResult().getData();
-                        final List<Observation> observationList = mapObservations(brapiObservationList);
 
-                        function.apply(observationList);
+                    paginationManager.updateTotalPages(response.getMetadata().getPagination().getTotalPages());
+                    List<io.swagger.client.model.Observation> brapiObservationList = response.getResult().getData();
+                    final List<Observation> observationList = mapObservations(brapiObservationList);
+
+                    function.apply(observationList);
+
+                    System.out.println("TotalNumber of Observation records: "+response.getMetadata().getPagination().getTotalCount());
+
+                    //Slide pagingation up 1 this is handled within function
+                    paginationManager.moveToNextPage();
+
+                    //Check if next recursion is valid
+                    if(paginationManager.getPage() < paginationManager.getTotalPages()) {
+                        //recurse
+                        getObservations(studyDbId,observationVariableDbIds, paginationManager, function, failFunction);
                     }
+
                 }
 
                 @Override

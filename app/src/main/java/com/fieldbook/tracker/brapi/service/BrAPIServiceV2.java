@@ -646,21 +646,29 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public void getObservations(final String studyDbId, final List<String> observationVariableDbIds,
                                 BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function,
                                 final Function<Integer, Void> failFunction ) {
-        Integer initPage = paginationManager.getPage();
 
         try {
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
                 public void onSuccess(BrAPIObservationListResponse response, int i, Map<String, List<String>> map) {
-                    // Cancel processing if the page that was processed is not the page
-                    // that we are currently on. For Example: User taps "Next Page" before brapi call returns data
-                    if (initPage.equals(paginationManager.getPage())) {
-                        updatePageInfo(paginationManager, response.getMetadata());
-                        // Result contains a list of observation variables
-                        List<BrAPIObservation> brapiObservationList = response.getResult().getData();
-                        final List<Observation> observationList = mapObservations(brapiObservationList);
 
-                        function.apply(observationList);
+                    paginationManager.updateTotalPages(response.getMetadata().getPagination().getTotalPages());
+
+                    // Result contains a list of observation variables
+                    List<BrAPIObservation> brapiObservationList = response.getResult().getData();
+                    final List<Observation> observationList = mapObservations(brapiObservationList);
+
+                    function.apply(observationList);
+
+                    System.out.println("TotalNumber of Observation records: "+response.getMetadata().getPagination().getTotalCount());
+
+                    //Slide pagingation up 1 this is handled within function
+                    paginationManager.moveToNextPage();
+
+                    //Check if next recursion is valid
+                    if(paginationManager.getPage() < paginationManager.getTotalPages()) {
+                        //recurse
+                        getObservations(studyDbId,observationVariableDbIds, paginationManager, function, failFunction);
                     }
                 }
 
@@ -693,7 +701,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             ObservationQueryParams queryParams = new ObservationQueryParams();
             queryParams.studyDbId(studyDbId).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
 
-            System.out.println(queryParams.toString());
+//            System.out.println(queryParams.toString());
             //This kicks off the async thread with the parameters and the callback
             observationsApi.observationsGetAsync(queryParams, callback);
 
