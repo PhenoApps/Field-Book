@@ -1110,15 +1110,6 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 
                 System.out.println("Size of study details: "+studyDetails.getValues().size());
 
-                //Need to make sure the plot values are sorted before we try to save observations.
-                List<List<String>> sortedPlotValues = studyDetails.getValues()
-                        .stream()
-                        .distinct()
-                        .sorted((plot1, plot2) -> Integer.parseInt(plot1.get(plotId)) - Integer.parseInt(plot2.get(plotId)))
-                        .collect(Collectors.toList());
-
-                System.out.println("Size of study details after sort: "+sortedPlotValues.size());
-
                 for (List<String> dataRow : studyDetails.getValues()) {
                     dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
                 }

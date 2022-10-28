@@ -102,19 +102,19 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
         //Get the trait information first as we need to know that to associate an observation with a plot:
         brAPIService!!.getTraits(brapiStudyDbId,
             { input ->
-                val observationIds: MutableList<String> = ArrayList()
+                val observationVariableDbIds: MutableList<String> = ArrayList()
 
                 for (obj in input.traits) {
                     println("Trait:" + obj.trait)
                     println("ObsIds: " + obj.externalDbId)
-                    observationIds.add(obj.externalDbId)
+                    observationVariableDbIds.add(obj.externalDbId)
                 }
                 val traitStudy =
                     StudyObservations(fieldBookStudyDbId, input.traits, mutableListOf())
                 studyObservations.merge(traitStudy)
 
                 brAPIService!!.getObservations(brapiStudyDbId,
-                    observationIds,
+                    observationVariableDbIds,
                     paginationManager,
                     { obsInput ->
                         ((context as ContextWrapper).baseContext as Activity).runOnUiThread {
@@ -181,7 +181,6 @@ class BrapiSyncObsDialog(context: Context) : Dialog(context) ,android.view.View.
 internal class ImportRunnableTask(val context: Context, val studyObservations: StudyObservations) : AsyncTask<Int, Int, Int>() {
 
     var dialog: ProgressDialog? = null
-    var brapiControllerResponse: BrapiControllerResponse? = null
     var fail = false
     var failMessage = ""
 

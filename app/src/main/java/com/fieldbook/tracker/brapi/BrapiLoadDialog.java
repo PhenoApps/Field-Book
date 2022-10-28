@@ -251,7 +251,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     private void loadObservations() {
         System.out.println("Study DBId: "+study.getStudyDbId());
 
-        List<String> observationIds = new ArrayList<String>();
+        List<String> observationVariableDbIds = new ArrayList<String>();
 
         //Trying to get the traits as well:
         brAPIService.getTraits(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
@@ -260,7 +260,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                 for(TraitObject obj : input.getTraits()) {
                     System.out.println("Trait:"+obj.getTrait());
                     System.out.println("ObsIds: "+obj.getExternalDbId());
-                    observationIds.add(obj.getExternalDbId());
+                    observationVariableDbIds.add(obj.getExternalDbId());
                 }
 
                 return null;
@@ -272,8 +272,8 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
             }
         });
 
-        System.out.println("obsIds Size:"+observationIds.size());
-        brAPIService.getObservations(study.getStudyDbId(), observationIds, paginationManager, new Function<List<Observation>, Void>() {
+        System.out.println("obsIds Size:"+observationVariableDbIds.size());
+        brAPIService.getObservations(study.getStudyDbId(), observationVariableDbIds, paginationManager, new Function<List<Observation>, Void>() {
             @Override
             public Void apply(List<Observation> input) {
                 study.setObservations(input);
