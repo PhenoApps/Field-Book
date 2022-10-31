@@ -2144,6 +2144,13 @@ public class DataHelper {
 //        return -1;
     }
 
+    public int checkFieldNameAndObsLvl(String name, String observationLevel) {
+
+        open();
+
+        return StudyDao.Companion.checkFieldNameAndObsLvl(name, observationLevel);
+    }
+
     public int createField(FieldObject e, List<String> columns) {
         // String exp_name, String exp_alias, String unique_id, String primary_id, String secondary_id, String[] columns){
 
