@@ -785,5 +785,7 @@
     <string name="delete_photo_dialog_iv_content_description">Photo to be deleted.</string>
     <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
     <string name="trait_usb_camera_capture_button_text">Capture</string>
+    <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
+    <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
 
 </resources>
