@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -80,7 +79,6 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
-        super.toggleVisibility(View.VISIBLE);
         super.loadLayout();
 
         final String trait = getCurrentTrait().getTrait();

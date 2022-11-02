@@ -376,7 +376,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                             bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 
-                            ConfigActivity.dt.insertUserTraits(
+                            ConfigActivity.dt.insertObservation(
                                 plot, traitName, type, file.uri.toString(),
                                 prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
                                         + prefs.getString(GeneralKeys.LAST_NAME, ""),

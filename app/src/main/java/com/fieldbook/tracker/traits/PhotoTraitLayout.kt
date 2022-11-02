@@ -333,7 +333,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                 val observation =
                     ConfigActivity.dt.getObservationByValue(expId, currentRange.plot_id, traitName, v)
                 ConfigActivity.dt.deleteTraitByValue(expId, currentRange.plot_id, traitName, v)
-                ConfigActivity.dt.insertUserTraits(
+                ConfigActivity.dt.insertObservation(
                     currentRange.plot_id,
                     traitName,
                     format,

@@ -6,7 +6,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
@@ -87,12 +86,6 @@ public class AngleTraitLayout extends BaseTraitLayout {
                 }
             }
         };
-    }
-
-    @Override
-    public void loadLayout() {
-        super.toggleVisibility(View.VISIBLE);
-        super.loadLayout();
     }
 
     @Override

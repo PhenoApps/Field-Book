@@ -71,12 +71,6 @@ public class NumericTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void loadLayout() {
-        super.toggleVisibility(View.VISIBLE);
-        super.loadLayout();
-    }
-
-    @Override
     public void refreshLock() {
         super.refreshLock();
         ((CollectActivity) getContext()).traitLockData();

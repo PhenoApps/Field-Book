@@ -71,7 +71,6 @@ class TextTraitLayout : BaseTraitLayout {
 
     override fun loadLayout() {
         inputEditText?.removeTextChangedListener(textWatcher)
-        super.toggleVisibility(VISIBLE)
         super.loadLayout()
         inputEditText?.isEnabled = !isLocked
         inputEditText?.selectAll()

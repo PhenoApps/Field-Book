@@ -76,17 +76,17 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
     fun getRep(): String = repeatView.getRep()
 
     val editText: EditText
-        get() = if (repeatModeFlag) {
+        get() = if (isRepeatEnabled()) {
             repeatView.getEditText() ?: originalEditText
         } else originalEditText
 
     var text: String
-        get() = if (repeatModeFlag) {
+        get() = if (isRepeatEnabled()) {
             repeatView.text
         } else editText.text.toString()
 
         set(value) {
-            if (repeatModeFlag) {
+            if (isRepeatEnabled()) {
                 repeatView.text = value
             } else editText.setText(value)
         }
@@ -97,7 +97,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
      * Set Text Color
      */
     fun setTextColor(value: Int) {
-        if (repeatModeFlag) {
+        if (isRepeatEnabled()) {
             repeatView.setTextColor(value)
         } else editText.setTextColor(value)
     }
@@ -106,14 +106,14 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
      * Set current hint
      */
     fun setHint(hint: String) {
-        if (!repeatModeFlag) editText.hint = hint
+        if (!isRepeatEnabled()) editText.hint = hint
     }
 
     /**
      * Clears the current text
      */
     fun clear() {
-        if (repeatModeFlag) {
+        if (isRepeatEnabled()) {
             repeatView.clear()
         } else editText.text.clear()
     }

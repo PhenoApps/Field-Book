@@ -222,11 +222,11 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertUserTraits(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
+    public long insertObservation(String rid, String parent, String trait, String userValue, String person, String location, String notes, String exp_id, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
 
         open();
 
-        return ObservationDao.Companion.insertUserTraits(rid, parent, trait, userValue, person, location, notes, exp_id, observationDbId, lastSyncedTime, rep);
+        return ObservationDao.Companion.insertObservation(rid, parent, trait, userValue, person, location, notes, exp_id, observationDbId, lastSyncedTime, rep);
 
 //        Cursor cursor = db.rawQuery("SELECT * from user_traits WHERE user_traits.rid = ? and user_traits.parent = ?", new String[]{rid, parent});
 //        int rep = cursor.getCount() + 1;
@@ -258,13 +258,6 @@ public class DataHelper {
 //            e.printStackTrace();
 //            return -1;
 //        }
-    }
-
-    public long insertRep(String rid, String parent, String trait, String userValue, String person, String location, String studyId, String rep) {
-
-        open();
-
-        return ObservationDao.Companion.insertRep(rid, parent, trait, userValue, person, location, studyId, rep);
     }
 
     /**

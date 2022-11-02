@@ -67,12 +67,6 @@ public class AudioTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void loadLayout() {
-        super.toggleVisibility(View.INVISIBLE);
-        super.loadLayout();
-    }
-
-    @Override
     public void afterLoadExists(CollectActivity act, String value) {
         super.afterLoadExists(act, value);
         if (value != null && value.equals("NA")) {

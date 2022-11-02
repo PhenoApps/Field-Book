@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -37,6 +36,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 public class LabelPrintTraitLayout extends BaseTraitLayout {
+
+    static public String type = "zebra label print";
 
     private String[] options;
     private String[] labelCopiesArray;
@@ -199,8 +200,6 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
-
-        getCollectInputView().setVisibility(EditText.GONE);
 
         try {
 

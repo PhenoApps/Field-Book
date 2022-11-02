@@ -242,11 +242,11 @@ class ObservationDao {
         /**
          * In this case parent is the variable name and trait is the format
          */
-        fun insertUserTraits(rid: String, parent: String, trait: String,
-                             userValue: String, person: String, location: String,
-                             notes: String, studyId: String, observationDbId: String?,
-                             lastSyncedTime: OffsetDateTime?,
-                             rep: String? = (getRep(studyId, rid, parent) + 1).toString()): Long = withDatabase { db ->
+        fun insertObservation(rid: String, parent: String, trait: String,
+                              userValue: String, person: String, location: String,
+                              notes: String, studyId: String, observationDbId: String?,
+                              lastSyncedTime: OffsetDateTime?,
+                              rep: String? = (getRep(studyId, rid, parent) + 1).toString()): Long = withDatabase { db ->
 
             val traitObj = ObservationVariableDao.getTraitByName(parent)
             val internalTraitId = if (traitObj == null) {-1} else {traitObj.id}
@@ -272,28 +272,6 @@ class ObservationDao {
                     // "additional_info" to model.additional_info,
                     ObservationUnit.FK to rid,
                     ObservationVariable.FK to internalTraitId
-            ))
-
-        } ?: -1L
-
-        fun insertRep(rid: String, parent: String, trait: String,
-                             userValue: String, person: String, location: String,
-                             studyId: String, rep: String): Long = withDatabase { db ->
-
-            val traitObj = ObservationVariableDao.getTraitByName(parent)
-            val internalTraitId = if (traitObj == null) {-1} else {traitObj.id}
-
-            db.insert(Observation.tableName, null, contentValuesOf(
-                "observation_variable_name" to parent,
-                "observation_variable_field_book_format" to trait,
-                "value" to userValue,
-                "collector" to person,
-                "geoCoordinates" to location,
-                "rep" to rep,
-                Study.FK to studyId.toInt(),
-                // "additional_info" to model.additional_info,
-                ObservationUnit.FK to rid,
-                ObservationVariable.FK to internalTraitId
             ))
 
         } ?: -1L

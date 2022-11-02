@@ -1006,7 +1006,7 @@ public class CollectActivity extends AppCompatActivity
             }
 
             if (!pass) {
-                dt.insertUserTraits(obsUnit, traitName, traitFormat, value, person,
+                dt.insertObservation(obsUnit, traitName, traitFormat, value, person,
                         getLocationByPreferences(), "", studyId, observationDbId,
                         lastSyncedTime, rep);
             }
@@ -1024,8 +1024,8 @@ public class CollectActivity extends AppCompatActivity
         String obsUnit = getObservationUnit();
         String person = getPerson();
 
-        dt.insertRep(obsUnit, parent, trait, value, person,
-                getLocationByPreferences(), expId, rep);
+        dt.insertObservation(obsUnit, parent, trait, value, person,
+                getLocationByPreferences(), "", expId, null, null, rep);
     }
 
     public void deleteRep(String trait, String rep) {
@@ -2127,6 +2127,7 @@ public class CollectActivity extends AppCompatActivity
                     }
                 }
 
+                String drawableName = "numeric_" + n + "_box.xml";
                 switch (n) {
                     case 0:
                         item.setIcon(R.drawable.numeric_0_box);
@@ -2307,7 +2308,7 @@ public class CollectActivity extends AppCompatActivity
 
         String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        dt.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
+        dt.insertObservation(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
                 ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);

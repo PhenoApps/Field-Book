@@ -75,13 +75,13 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
         //right now text entry is disabled in the camera and photo traits
         //uris are too long to be nicely displayed in the current editTexts
-        if (type().equals(PhotoTraitLayout.type)
-                || type().equals(UsbCameraTraitLayout.type)
-                || type().equals(AudioTraitLayout.type)) {
+        if (isTraitType(PhotoTraitLayout.type)
+            || isTraitType(UsbCameraTraitLayout.type)
+            || isTraitType(AudioTraitLayout.type)
+            || isTraitType(TextTraitLayout.type)
+            || isTraitType(LabelPrintTraitLayout.type)) {
             toggleVisibility(View.GONE);
-        } else {
-            toggleVisibility(View.VISIBLE);
-        }
+        } else toggleVisibility(View.VISIBLE);
 
         CollectActivity act = (CollectActivity) getContext();
         isLocked = act.isFrozen() || act.isLocked();
@@ -230,14 +230,6 @@ public abstract class BaseTraitLayout extends LinearLayout {
         } else {
             editText.setVisibility(visibility);
             editText.setHint("");
-
-            if (isTraitType(TextTraitLayout.type)
-                    || isTraitType(AudioTraitLayout.type)
-                    || isTraitType(PhotoTraitLayout.type)) {
-                editText.setVisibility(View.GONE);
-            } else {
-                editText.setVisibility(View.VISIBLE);
-            }
         }
     }
 

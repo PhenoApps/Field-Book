@@ -34,8 +34,6 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     private val pager: ViewPager
     private val nonEmptyGroup: Group
 
-    private val newButtonVisible = false
-
     //initialize all the global view variables
     init {
 
@@ -224,11 +222,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         mValues.addAll(values)
 
-        pager.adapter = RepeatedValuesPagerAdapter(context).apply {
-
-            submitItems(values)
-
-        }
+        submitList()
 
         pager.currentItem = values.size - 1
 
@@ -318,21 +312,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
     private fun updateButtonVisibility() {
 
-        if (pager.currentItem != (pager.adapter?.count ?: 1) - 1) {
-
-            swapRightButtonVisibility(!newButtonVisible)
-
-        } else {
-
-            swapRightButtonVisibility(newButtonVisible)
-
-        }
-
-        leftButton.visibility = if (pager.currentItem == 0) View.INVISIBLE else View.VISIBLE
-
-    }
-
-    private fun swapRightButtonVisibility(flag: Boolean) {
+        val flag = pager.currentItem != (pager.adapter?.count ?: 1) - 1
 
         //swap the right arrow / new button visibility
         if (flag) {
@@ -342,5 +322,8 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
             addButton.visibility = View.VISIBLE
             rightButton.visibility = View.INVISIBLE
         }
+
+        leftButton.visibility = if (pager.currentItem == 0) View.INVISIBLE else View.VISIBLE
+
     }
 }

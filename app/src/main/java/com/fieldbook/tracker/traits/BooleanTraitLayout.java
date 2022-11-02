@@ -67,12 +67,6 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     }
 
     @Override
-    public void loadLayout() {
-        super.toggleVisibility(View.VISIBLE);
-        super.loadLayout();
-    }
-
-    @Override
     public void afterLoadExists(CollectActivity act, @Nullable String value) {
         super.afterLoadExists(act, value);
         updateSeekBarState(value);

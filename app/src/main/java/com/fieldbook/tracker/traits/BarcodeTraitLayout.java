@@ -2,7 +2,6 @@ package com.fieldbook.tracker.traits;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 
 public class BarcodeTraitLayout extends BaseTraitLayout {
 
@@ -30,11 +29,6 @@ public class BarcodeTraitLayout extends BaseTraitLayout {
     @Override
     public void init() {
 
-    }
-
-    @Override
-    public void loadLayout() {
-        super.toggleVisibility(View.VISIBLE);
     }
 
     @Override

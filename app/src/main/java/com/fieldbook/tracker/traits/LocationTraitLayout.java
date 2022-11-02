@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.ImageButton;
 
 import com.fieldbook.tracker.R;
@@ -61,12 +60,6 @@ public class LocationTraitLayout extends BaseTraitLayout {
             updateObservation(getCurrentTrait().getTrait(), "location", fullLocation);
             triggerTts(locationSavedTts);
         });
-    }
-
-    @Override
-    public void loadLayout() {
-        super.toggleVisibility(View.VISIBLE);
-        super.loadLayout();
     }
 
     @Override
