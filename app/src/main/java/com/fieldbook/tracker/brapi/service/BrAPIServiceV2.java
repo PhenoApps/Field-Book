@@ -697,7 +697,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                 BrAPIExternalReference reference = new BrAPIExternalReference();
                 reference.setReferenceID(observation.getFieldbookDbId());
-                reference.setReferenceSource("Field Book Upload");
+                reference.setReferenceSource(fieldBookReferenceSource);
 
                 newObservation.setExternalReferences(Collections.singletonList(reference));
                 request.add(newObservation);
