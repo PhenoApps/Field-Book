@@ -106,9 +106,9 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         } else {
 
             //if there is a saved value, check if its json or old string
-            String savedJson = getNewTraits().get(trait);
+            String savedJson =  getCurrentObservation().getValue();
 
-            if (savedJson != null && !savedJson.isEmpty()) {
+            if (!savedJson.isEmpty()) {
 
                 //check if its the new json
                 try {
@@ -268,7 +268,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                 triggerTts(category);
 
-                loadLayout(); //todo this is not the best way to do this
+                refreshLayout(false);
             }
         };
     }

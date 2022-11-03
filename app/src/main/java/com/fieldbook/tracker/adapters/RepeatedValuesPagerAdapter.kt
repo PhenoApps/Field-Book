@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.viewpager.widget.PagerAdapter
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.views.RepeatedValuesView
 
 /**
  * Used in the repeated values view.
@@ -16,7 +16,7 @@ import com.fieldbook.tracker.database.models.ObservationModel
  */
 class RepeatedValuesPagerAdapter(private val mContext: Context) : PagerAdapter() {
 
-    private var items: List<ObservationModel> = listOf()
+    private var items: List<RepeatedValuesView.ObservationModelViewHolder> = listOf()
 
     private val views = SparseArray<EditText>()
 
@@ -25,10 +25,10 @@ class RepeatedValuesPagerAdapter(private val mContext: Context) : PagerAdapter()
         val layout = inflater.inflate(R.layout.list_item_edit_text_view, collection, false) as ViewGroup
         collection.addView(layout)
         val editText = layout.findViewById<EditText>(R.id.list_item_text_et)
-        editText.setText(items[position].value)
+        editText.setText(items[position].model.value)
         editText.tag = position
         editText.isEnabled = false
-        editText.setTextColor(R.color.BLACK)
+        editText.setTextColor(items[position].color)
         views.put(position, editText)
 
         return layout
@@ -49,7 +49,7 @@ class RepeatedValuesPagerAdapter(private val mContext: Context) : PagerAdapter()
 
     fun get(position: Int): EditText? = views.get(position)
 
-    fun submitItems(values: List<ObservationModel>) {
+    fun submitItems(values: List<RepeatedValuesView.ObservationModelViewHolder>) {
         this.items = values
     }
 }

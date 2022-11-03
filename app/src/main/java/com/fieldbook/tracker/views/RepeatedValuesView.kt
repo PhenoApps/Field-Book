@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.views
 
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
@@ -27,7 +28,11 @@ import kotlin.math.abs
 class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     ConstraintLayout(context, attributeSet) {
 
-    private var mValues = arrayListOf<ObservationModel>()
+    data class ObservationModelViewHolder(val model: ObservationModel, val color: Int)
+
+    var displayColor: Int = Color.RED
+
+    private var mValues = arrayListOf<ObservationModelViewHolder>()
     private val leftButton: Button
     private val rightButton: Button
     private val addButton: ImageButton
@@ -99,9 +104,9 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
                 //only add new measurements if the current one has been observed
                 if (current != null && current.value.isNotEmpty()) {
 
-                    val model = insertNewRep((mValues.maxOf { it.rep.toInt() } + 1).toString())
+                    val model = insertNewRep((mValues.maxOf { it.model.rep.toInt() } + 1).toString())
 
-                    mValues.add(model)
+                    mValues.add(ObservationModelViewHolder(model, Color.BLACK))
 
                     submitList()
 
@@ -129,7 +134,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         prepareModeNonEmpty()
 
-        mValues.add(insertNewRep("1"))
+        mValues.add(ObservationModelViewHolder(insertNewRep("1"), Color.BLACK))
 
         submitList()
 
@@ -220,7 +225,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         mValues.clear()
 
-        mValues.addAll(values)
+        mValues.addAll(values.map { ObservationModelViewHolder(it, displayColor) })
 
         submitList()
 
@@ -235,7 +240,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
         val repToDelete = getRep()
 
         //delete the selected rep from the repeated values list
-        mValues = arrayListOf(*mValues.filter { it.rep != repToDelete }.toTypedArray())
+        mValues = arrayListOf(*mValues.filter { it.model.rep != repToDelete }.toTypedArray())
 
         //if all values are deleted, keep at least one for data entry
         if (mValues.isEmpty()) {
@@ -247,7 +252,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
             submitList()
 
             //select closest rep
-            mValues.minByOrNull { abs(it.rep.toInt() - repToDelete.toInt()) }?.let { entry ->
+            mValues.minByOrNull { abs(it.model.rep.toInt() - repToDelete.toInt()) }?.let { entry ->
                 pager.currentItem = mValues.indexOf(entry)
             }
 
@@ -262,9 +267,9 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         val repToDelete = getRep()
 
-        mValues.firstOrNull { it.rep == repToDelete }?.let { deleteItem ->
+        mValues.firstOrNull { it.model.rep == repToDelete }?.let { deleteItem ->
 
-            (context as? CollectActivity)?.deleteRep(deleteItem.observation_variable_name, deleteItem.rep)
+            (context as? CollectActivity)?.deleteRep(deleteItem.model.observation_variable_name, deleteItem.model.rep)
 
         }
     }
@@ -276,7 +281,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     }
 
     private fun getSelectedModel(): ObservationModel? {
-        return if (mValues.isNotEmpty()) mValues[pager.currentItem]
+        return if (mValues.isNotEmpty()) mValues[pager.currentItem].model
         else null
     }
 

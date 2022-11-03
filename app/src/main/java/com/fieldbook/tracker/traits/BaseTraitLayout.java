@@ -94,6 +94,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
         //clear old list of repeated values each time a new trait is loaded
         act.getInputView().getRepeatView().clear();
 
+        act.getInputView().getRepeatView().setDisplayColor(Color.parseColor(getDisplayColor()));
+
         if (observations.containsKey(traitName)) {
 
             String value = null;
