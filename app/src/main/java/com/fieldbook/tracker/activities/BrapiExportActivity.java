@@ -260,8 +260,8 @@ public class BrapiExportActivity extends AppCompatActivity {
         int chunkSize = BrAPIService.getChunkSize(this);
         brAPIService.createObservationsChunked(chunkSize, newObservations, (input, completedChunkNum, chunks, done) -> {
             (BrapiExportActivity.this).runOnUiThread(() -> {
-                processCreateObservationsResponse(chunks);
-                processResponse(input, chunks);
+                processCreateObservationsResponse(input);
+//                processResponse(input, chunks);
 
                 numNewObservations -= input.size();
                 numSyncedObservations += input.size();
@@ -275,7 +275,8 @@ public class BrapiExportActivity extends AppCompatActivity {
                 }
             });
         }, failureInput -> {
-            createObservationsError = createObservationsError == null ? processErrorCode(failureInput) : createObservationsError;
+            //createObservationsError = createObservationsError == null ? processErrorCode(failureInput) : createObservationsError;
+            createObservationsError = processErrorCode(failureInput);
             createObservationsComplete = true;
             uploadComplete();
             return null;
@@ -287,8 +288,8 @@ public class BrapiExportActivity extends AppCompatActivity {
         int chunkSize = BrAPIService.getChunkSize(this);
         brAPIService.updateObservationsChunked(chunkSize, editedObservations, (input, completedChunkNum, chunks, done) -> {
             (BrapiExportActivity.this).runOnUiThread(() -> {
-                processUpdateObservationsResponse(chunks);
-                processResponse(input, chunks);
+                processUpdateObservationsResponse(input);
+//                processResponse(input, chunks);
 
                 numEditedObservations -= input.size();
                 numSyncedObservations += input.size();
