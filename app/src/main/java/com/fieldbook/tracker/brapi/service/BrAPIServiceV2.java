@@ -936,18 +936,51 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         return sb.toString();
     }
 
+    /**
+     * @param dataType
+     * @return
+     */
     private String convertBrAPIDataType(String dataType) {
         //TODO: Check these out and make sure they match with fieldbook data types.
         switch (dataType) {
             case "Nominal":
             case "Ordinal":
+            case "categorical":
+            case "qualitative":
                 // All Field Book categories are ordered, so this works
                 return "categorical";
+            case "date":
             case "Date":
                 return "date";
             case "Numerical":
             case "Duration":
+            case "numeric":
                 return "numeric";
+            case "rust rating":
+            case "disease rating":
+                return "disease rating";
+            case "percent":
+                return "percent";
+            case "boolean":
+                return "boolean";
+            case "photo":
+                return "photo";
+            case "audio":
+                return "audio";
+            case "counter":
+                return "counter";
+            case "multicat":
+                return "multicat";
+            case "location":
+                return "location";
+            case "barcode":
+                return "barcode";
+            case "gnss":
+                return "gnss";
+            case "zebra label print":
+                return "zebra label print";
+            case "usb camera":
+                return "usb camera";
             case "Code":
             case "Text":
             default:
