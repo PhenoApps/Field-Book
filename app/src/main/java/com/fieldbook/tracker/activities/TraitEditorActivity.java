@@ -3,10 +3,6 @@ package com.fieldbook.tracker.activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,49 +16,47 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-
-import com.fieldbook.tracker.adapters.TraitAdapter;
-import com.fieldbook.tracker.brapi.BrapiInfoDialog;
-import com.fieldbook.tracker.database.dao.ObservationVariableDao;
-import com.fieldbook.tracker.objects.FieldFileObject;
-import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.dialogs.NewTraitDialog;
-import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.DialogUtils;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
-import com.fieldbook.tracker.utilities.Utils;
-import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetSequence;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-
 import android.provider.OpenableColumns;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 
-import android.widget.ListView;
-import android.widget.Toast;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-
+import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.adapters.TraitAdapter;
+import com.fieldbook.tracker.brapi.BrapiInfoDialog;
+import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.dialogs.NewTraitDialog;
+import com.fieldbook.tracker.dragsort.DragSortController;
+import com.fieldbook.tracker.dragsort.DragSortListView;
+import com.fieldbook.tracker.objects.FieldFileObject;
+import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CSVReader;
 import com.fieldbook.tracker.utilities.CSVWriter;
-import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.dragsort.DragSortListView;
-import com.fieldbook.tracker.dragsort.DragSortController;
+import com.fieldbook.tracker.utilities.DialogUtils;
+import com.fieldbook.tracker.utilities.Utils;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -72,6 +66,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -498,7 +493,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                     break;
 
                 case R.id.deleteTrait:
-                    showDeleteTraitDialog();
+                    checkShowDeleteDialog();
                     break;
 
                 case R.id.sortTrait:
@@ -530,6 +525,19 @@ public class TraitEditorActivity extends AppCompatActivity {
             Utils.makeToast(thisActivity, getString(R.string.act_trait_editor_menu_click_while_dragging));
 
             return false;
+        }
+    }
+
+    private void checkShowDeleteDialog() {
+        ArrayList<TraitObject> traits = ConfigActivity.dt.getAllTraitObjects();
+        if (traits.isEmpty()) {
+            Toast.makeText(this, R.string.act_trait_editor_no_traits_exist, Toast.LENGTH_SHORT).show();
+        } else {
+            showDeleteTraitDialog((dialog, which) -> {
+                ConfigActivity.dt.deleteTraitsTable();
+                loadData();
+                dialog.dismiss();
+            }, (dialog, which) -> dialog.dismiss(), null);
         }
     }
 
@@ -634,7 +642,8 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
     }
 
-    private void showFileDialog() {
+    private void showImportDialog() {
+
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
 
@@ -659,6 +668,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         });
 
         final AlertDialog importDialog = builder.create();
+
         importDialog.show();
         DialogUtils.styleDialogs(importDialog);
 
@@ -692,6 +702,22 @@ public class TraitEditorActivity extends AppCompatActivity {
         });
     }
 
+    private void showFileDialog() {
+
+        ArrayList<TraitObject> traits = ConfigActivity.dt.getAllTraitObjects();
+
+        if (!traits.isEmpty()) {
+
+            showDeleteTraitDialog(null, null, (dialog) -> {
+
+                showImportDialog();
+
+            });
+
+        } else showImportDialog();
+
+    }
+
     private void loadCloud() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
@@ -705,9 +731,10 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void checkTraitExportDialog() {
-        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
-        if (allTraits == null) {
+        ArrayList<TraitObject> traits = ConfigActivity.dt.getAllTraitObjects();
+
+        if (traits.isEmpty()) {
             showFileDialog();
             return;
         }
@@ -848,7 +875,10 @@ public class TraitEditorActivity extends AppCompatActivity {
         exportDialog.getWindow().setAttributes(langParams);
     }
 
-    private void showDeleteTraitDialog() {
+    private void showDeleteTraitDialog(@Nullable DialogInterface.OnClickListener onPositive,
+                                       @Nullable DialogInterface.OnClickListener onNegative,
+                                       @Nullable DialogInterface.OnDismissListener onDismiss) {
+
         String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
 
         if (allTraits == null) {
@@ -858,21 +888,11 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(TraitEditorActivity.this, R.style.AppAlertDialog);
         builder.setTitle(getString(R.string.traits_toolbar_delete_all));
-        builder.setMessage(getString(R.string.dialog_confirm));
+        builder.setMessage(getString(R.string.dialog_delete_traits_message));
 
-        builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                ConfigActivity.dt.deleteTraitsTable();
-                loadData();
-                dialog.dismiss();
-            }
-        });
-
-        builder.setNegativeButton(getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setPositiveButton(getString(android.R.string.yes), onPositive);
+        builder.setNegativeButton(getString(android.R.string.no), onNegative);
+        builder.setOnDismissListener(onDismiss);
 
         AlertDialog alert = builder.create();
         alert.show();
