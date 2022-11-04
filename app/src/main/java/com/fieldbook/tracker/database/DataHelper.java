@@ -321,6 +321,10 @@ public class DataHelper {
 //        return synced;
     }
 
+    public void setTraitObservations(Integer expId, Observation observation) {
+        ObservationDao.Companion.insertObservation(expId, observation);
+    }
+
     /**
      * Get user created trait observations for currently selected study
      */

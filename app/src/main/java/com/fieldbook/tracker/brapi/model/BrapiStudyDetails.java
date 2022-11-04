@@ -14,6 +14,7 @@ public class BrapiStudyDetails {
   private List<String> attributes;
   private List<List<String>> values;
   private List<TraitObject> traits;
+  private List<Observation> observations;
 
   public static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2) {
     if (sd2.getStudyDbId() != null)
@@ -34,6 +35,8 @@ public class BrapiStudyDetails {
       sd1.setValues(sd2.getValues());
     if (sd2.getTraits() != null)
       sd1.setTraits(sd2.getTraits());
+    if (sd2.getObservations() != null)
+      sd1.setObservations(sd2.getObservations());
   }
 
   public String getCommonCropName() {
@@ -107,4 +110,9 @@ public class BrapiStudyDetails {
   public void setValues(List<List<String>> values) {
     this.values = values;
   }
+
+  public List<Observation> getObservations() { return observations; }
+
+  public void setObservations(List<Observation> observations) { this.observations = observations; }
+
 }
