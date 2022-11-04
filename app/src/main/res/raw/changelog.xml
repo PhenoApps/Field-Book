@@ -1,6 +1,13 @@
 <changelog>
 
     <release
+        date="2022-12-01"
+        versionCode="540"
+        versionName="v5.4">
+        <new>Experimental settings section</new>
+    </release>
+
+    <release
         date="2022-09-01"
         versionCode="530"
         versionName="v5.3">
