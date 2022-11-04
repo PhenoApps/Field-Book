@@ -6,8 +6,8 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
-import com.bytehamster.lib.preferencesearch.SearchPreference;
 import com.bytehamster.lib.preferencesearch.SearchConfiguration;
+import com.bytehamster.lib.preferencesearch.SearchPreference;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
 import com.fieldbook.tracker.R;
 
@@ -38,6 +38,7 @@ public class PreferencesFragment extends BasePreferenceFragment {
         config.index(R.xml.preferences_general);
         config.index(R.xml.preferences_profile);
         config.index(R.xml.preferences_sounds);
+        config.index(R.xml.preferences_beta);
 
         ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
     }

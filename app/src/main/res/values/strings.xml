@@ -785,5 +785,6 @@
     <string name="delete_photo_dialog_iv_content_description">Photo to be deleted.</string>
     <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
     <string name="trait_usb_camera_capture_button_text">Capture</string>
+    <string name="preferences_beta_title">Beta</string>
 
 </resources>
