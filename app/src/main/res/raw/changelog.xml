@@ -5,6 +5,7 @@
         versionCode="540"
         versionName="v5.4">
         <new>Experimental settings section</new>
+        <info>Optimized the workflow when traits are imported</info>
     </release>
 
     <release
