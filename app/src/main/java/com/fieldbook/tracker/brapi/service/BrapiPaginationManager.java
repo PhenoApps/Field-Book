@@ -80,8 +80,25 @@ public class BrapiPaginationManager {
         return pageSize;
     }
 
-    public void updatePageInfo(Integer totalPages) {
+    public Integer getTotalPages() { return totalPages; }
+
+    /**
+     * Function to move the paginationManager to the next page
+     */
+    public void moveToNextPage() {
+        currentPage++;
+    }
+
+    /**
+     * Function to update the total number of pages
+     * @param totalPages
+     */
+    public void updateTotalPages(Integer totalPages) {
         this.totalPages = totalPages;
+    }
+
+    public void updatePageInfo(Integer totalPages) {
+        updateTotalPages(totalPages);
         refreshPageIndicator();
     }
 
