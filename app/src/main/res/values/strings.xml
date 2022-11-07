@@ -562,6 +562,10 @@
     <string name="brapi_error_saving_all_traits">Error saving traits. No traits were saved.</string>
     <string name="brapi_error_saving_some_traits">Error saving some traits. Some traits were not saved</string>
     <string name="brapi_traits_saved_success">Selected traits saved successfully.</string>
+    <string name="brapi_obs_sync_menu_name">Sync Observations</string>
+    <string name="brapi_obs_header_name">Downloading Observations for Study:</string>
+    <string name="number_traits_label">Number of Traits:</string>
+    <string name="number_observation_label">Number of Observations:</string>
     <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>
@@ -792,6 +796,9 @@
     <string name="list_item_field_sort_drag_content_description">Drag to move item.</string>
     <string name="dialog_field_sort_no_attributes_found">No attributes found.</string>
     <string name="dialog_field_sort_no_more_attributes_found">All attributes have been used.</string>
+    <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
+    <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
+    <string name="preferences_beta_title">Beta</string>
     <string name="dialog_field_sort_revert_btn_text">Revert</string>
 
 </resources>

@@ -21,6 +21,9 @@ import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
+import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
+import com.fieldbook.tracker.database.dao.StudyDao;
+import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.DialogUtils;
@@ -44,6 +47,9 @@ public class FieldAdapter extends BaseAdapter {
         void showSortDialog(FieldObject field);
         void submitSortList(FieldObject field, String[] attributes);
     }
+
+    AlertDialog.Builder builder;
+    AlertDialog progressDialog;
 
     public FieldAdapter(Context context, ArrayList<FieldObject> list) {
         this.context = context;
@@ -180,6 +186,11 @@ public class FieldAdapter extends BaseAdapter {
                 } else if (item.getItemId() == R.id.sort) {
                     showSortDialog(position);
                     //DialogUtils.styleDialogs(alert);
+                }
+                else if (item.getItemId() == R.id.syncObs) {
+                    BrapiSyncObsDialog alert = new BrapiSyncObsDialog(context);
+                    alert.setFieldObject(getItem(position));
+                    alert.show();
                 }
 
                 return false;
