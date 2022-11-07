@@ -5,8 +5,10 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.graphics.Rect
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.ScrollView
 import android.widget.Toast
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +27,7 @@ import com.fieldbook.tracker.objects.FieldObject
 class FieldSortDialog(private val act: Activity, private val field: FieldObject) : Dialog(act, R.style.Dialog),
     FieldSortAdapter.FieldSorter {
 
+    private var scrollView: ScrollView? = null
     private var attributeRv: RecyclerView? = null
     private var addButton: Button? = null
     private var cancelButton: Button? = null
@@ -33,8 +36,6 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
 
     private var attributes = listOf<String>()
     private var sortList = arrayListOf<String>()
-
-    private var preSortList = arrayListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,6 +129,7 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
 
         setTitle(R.string.dialog_field_sort_title)
 
+        scrollView = findViewById(R.id.dialog_field_sort_sv)
         attributeRv = findViewById(R.id.dialog_field_sort_rv)
         addButton = findViewById(R.id.dialog_field_sort_add_btn)
         okButton = findViewById(R.id.dialog_field_sort_ok_btn)
@@ -154,12 +156,17 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
 
                     sortList.addAll(sortOrder)
 
-                    preSortList.addAll(sortOrder)
                 }
 
                 adapter.submitList(sortList)
 
                 adapter.notifyDataSetChanged()
+
+                scrollView?.postDelayed({
+
+                    scrollView?.fullScroll(View.FOCUS_DOWN)
+
+                }, 500)
 
             } else {
 
@@ -207,8 +214,6 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
 
                 sortList.clear()
 
-                sortList.addAll(preSortList)
-
                 adapter.submitList(sortList)
 
                 adapter.notifyDataSetChanged()
@@ -227,6 +232,8 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
             it.notifyDataSetChanged()
 
             attributeRv?.scrollToPosition(sortList.size - 1)
+
+            scrollView?.fullScroll(View.FOCUS_DOWN)
         }
     }
 
@@ -256,11 +263,9 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
 
     override fun onDeleteItem(attribute: String) {
 
-        val index = sortList.indexOf(attribute)
-
         sortList.remove(attribute)
 
-        (attributeRv?.adapter as? FieldSortAdapter)?.notifyItemRemoved(index)
+        (attributeRv?.adapter as? FieldSortAdapter)?.notifyDataSetChanged()
     }
 
     override fun onDrag(item: FieldSortAdapter.ViewHolder) {

@@ -1,72 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/dialog_field_sort_sv"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/dialog_field_sort_header_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:text="@string/dialog_field_sort_header_tv"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/dialog_field_sort_rv"
-        android:layout_margin="4dp"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:orientation="vertical"
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:listitem="@layout/list_item_field_sort"
-        tools:itemCount="5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_add_btn"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_sort_header_tv"/>
+        <TextView
+            android:id="@+id/dialog_field_sort_header_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:text="@string/dialog_field_sort_header_tv"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-    <Button
-        android:layout_margin="4dp"
-        android:id="@+id/dialog_field_sort_add_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_field_sort_add_btn_text"
-        app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_revert_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/dialog_field_sort_rv"
+            android:layout_margin="4dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:orientation="vertical"
+            xmlns:tools="http://schemas.android.com/tools"
+            tools:listitem="@layout/list_item_field_sort"
+            tools:itemCount="5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_add_btn"
+            app:layout_constraintTop_toBottomOf="@id/dialog_field_sort_header_tv"/>
 
-    <Button
-        android:layout_margin="4dp"
-        android:id="@+id/dialog_field_sort_revert_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_field_sort_revert_btn_text"
-        app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_cancel_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        <Button
+            android:layout_margin="4dp"
+            android:id="@+id/dialog_field_sort_add_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_field_sort_add_btn_text"
+            app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_revert_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-    <Button
-        android:layout_margin="4dp"
-        android:id="@+id/dialog_field_sort_ok_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@android:string/ok"
-        app:layout_constraintStart_toEndOf="@id/dialog_field_sort_cancel_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        <Button
+            android:layout_margin="4dp"
+            android:id="@+id/dialog_field_sort_revert_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_field_sort_revert_btn_text"
+            app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_cancel_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-    <Button
-        android:layout_margin="4dp"
-        android:id="@+id/dialog_field_sort_cancel_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@android:string/cancel"
-        app:layout_constraintEnd_toStartOf="@id/dialog_field_sort_ok_btn"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        <Button
+            android:layout_margin="4dp"
+            android:id="@+id/dialog_field_sort_ok_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@android:string/ok"
+            app:layout_constraintStart_toEndOf="@id/dialog_field_sort_cancel_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:layout_margin="4dp"
+            android:id="@+id/dialog_field_sort_cancel_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@android:string/cancel"
+            app:layout_constraintEnd_toStartOf="@id/dialog_field_sort_ok_btn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

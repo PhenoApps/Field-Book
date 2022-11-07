@@ -799,6 +799,6 @@
     <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
     <string name="preferences_beta_title">Beta</string>
-    <string name="dialog_field_sort_revert_btn_text">Revert</string>
+    <string name="dialog_field_sort_revert_btn_text">Default Order</string>
 
 </resources>
