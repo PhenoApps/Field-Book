@@ -1,15 +1,16 @@
 package com.fieldbook.tracker.adapters
 
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import java.util.*
 
 /**
  * Reference:
@@ -20,16 +21,28 @@ class FieldSortAdapter(private val sorter: FieldSorter):
 
     interface FieldSorter {
        fun onDeleteItem(attribute: String)
+       fun onDrag(item: ViewHolder)
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val valueTextView: TextView = view.findViewById(R.id.list_item_field_sort_value_tv)
         private val deleteButton: ImageButton = view.findViewById(R.id.list_item_field_sort_delete_btn)
-
+        private val dragButton: ImageView = view.findViewById(R.id.list_item_field_sort_drag_iv)
         init {
+
             deleteButton.setOnClickListener {
                 val value = valueTextView.tag as String
                 sorter.onDeleteItem(value)
+            }
+
+            dragButton.setOnTouchListener { v, event ->
+
+                if (event.action == MotionEvent.ACTION_DOWN) {
+
+                    sorter.onDrag(this)
+                }
+
+                v.performClick()
             }
         }
     }
@@ -58,8 +71,11 @@ class FieldSortAdapter(private val sorter: FieldSorter):
     override fun getItemCount() = currentList.size
 
     fun moveItem(from: Int, to: Int) {
+
         val list = currentList.toMutableList()
-        Collections.swap(list, from, to)
+
+        list[to] = list[from].also { list[from] = list[to] }
+
         submitList(list)
     }
 

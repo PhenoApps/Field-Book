@@ -3,9 +3,8 @@ package com.fieldbook.tracker.dialogs
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
+import android.graphics.Rect
 import android.os.Bundle
-import android.view.Gravity
-import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Toast
@@ -30,9 +29,12 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
     private var addButton: Button? = null
     private var cancelButton: Button? = null
     private var okButton: Button? = null
+    private var revertButton: Button? = null
 
     private var attributes = listOf<String>()
     private var sortList = arrayListOf<String>()
+
+    private var preSortList = arrayListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +43,19 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
 
         setCanceledOnTouchOutside(true)
 
-        window?.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        window?.setGravity(Gravity.CENTER)
+        //when shown, update the window size to %80 width and %50 height
+        setOnShowListener {
+
+            window?.let { w ->
+
+                val rect = Rect()
+                w.decorView.getWindowVisibleDisplayFrame(rect)
+
+                w.setLayout((rect.width() * .8).toInt(),
+                    (rect.height() * .5).toInt())
+            }
+
+        }
 
         setupUi()
 
@@ -50,7 +63,11 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
 
     private val itemTouchHelper by lazy {
 
-        val itemTouchCallback = object: ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+        val itemTouchCallback = object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+
+            override fun isLongPressDragEnabled(): Boolean {
+                return false
+            }
 
             override fun onMove(
                 recyclerView: RecyclerView,
@@ -115,6 +132,7 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
         addButton = findViewById(R.id.dialog_field_sort_add_btn)
         okButton = findViewById(R.id.dialog_field_sort_ok_btn)
         cancelButton = findViewById(R.id.dialog_field_sort_cancel_btn)
+        revertButton = findViewById(R.id.dialog_field_sort_revert_btn)
 
         attributes = ObservationUnitPropertyDao.getRangeColumnNames().mapNotNull { it }
 
@@ -130,16 +148,13 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
 
                 val order = f?.exp_sort ?: String()
 
-                if (order.isEmpty()) {
-
-                    sortList.add(attributes.first())
-
-                } else {
+                if (order.isNotEmpty()) {
 
                     val sortOrder = order.split(",")
 
                     sortList.addAll(sortOrder)
 
+                    preSortList.addAll(sortOrder)
                 }
 
                 adapter.submitList(sortList)
@@ -183,6 +198,21 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
 
             dismiss()
 
+        }
+
+        //revert list to un-edited version
+        revertButton?.setOnClickListener {
+
+            (attributeRv?.adapter as? FieldSortAdapter)?.let { adapter ->
+
+                sortList.clear()
+
+                sortList.addAll(preSortList)
+
+                adapter.submitList(sortList)
+
+                adapter.notifyDataSetChanged()
+            }
         }
     }
 
@@ -231,5 +261,10 @@ class FieldSortDialog(private val act: Activity, private val field: FieldObject)
         sortList.remove(attribute)
 
         (attributeRv?.adapter as? FieldSortAdapter)?.notifyItemRemoved(index)
+    }
+
+    override fun onDrag(item: FieldSortAdapter.ViewHolder) {
+
+        itemTouchHelper.startDrag(item)
     }
 }

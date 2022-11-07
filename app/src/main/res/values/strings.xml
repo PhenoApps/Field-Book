@@ -792,5 +792,6 @@
     <string name="list_item_field_sort_drag_content_description">Drag to move item.</string>
     <string name="dialog_field_sort_no_attributes_found">No attributes found.</string>
     <string name="dialog_field_sort_no_more_attributes_found">All attributes have been used.</string>
+    <string name="dialog_field_sort_revert_btn_text">Revert</string>
 
 </resources>
