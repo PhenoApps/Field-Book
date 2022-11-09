@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/WHITE">
+
+    <androidx.appcompat.widget.Toolbar
+        android:background="@color/main_primary"
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:minHeight="?attr/actionBarSize"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fragment_summary_rv"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toTopOf="@id/fragment_summary_next_btn"
+        app:layout_constraintVertical_bias="0"
+        tools:listitem="@layout/list_item_summary"
+        tools:itemCount="5"/>
+
+    <Button android:id="@+id/fragment_summary_prev_btn"
+        android:layout_margin="4dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/fragment_summary_prev_button_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/fragment_summary_next_btn"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <Button android:id="@+id/fragment_summary_next_btn"
+        android:layout_margin="4dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/fragment_summary_next_button_text"
+        app:layout_constraintStart_toEndOf="@id/fragment_summary_prev_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

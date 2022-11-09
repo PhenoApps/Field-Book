@@ -821,9 +821,22 @@ public class DataHelper {
     }
 
     /**
-     * Convert EAV database to relational
-     * TODO add where statement for repeated values
+     * Same as convertDatabaseToTable but filters by obs unit
      */
+    public Cursor convertDatabaseToTable(String[] col, String[] traits, String obsUnit) {
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
+                ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
+                ep.getString(GeneralKeys.UNIQUE_NAME, ""), obsUnit, col, traits);
+
+    }
+
+        /**
+         * Convert EAV database to relational
+         * TODO add where statement for repeated values
+         */
     public Cursor convertDatabaseToTable(String[] col, String[] traits) {
 
         open();

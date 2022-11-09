@@ -100,9 +100,8 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
 import org.phenoapps.interfaces.usb.camera.UsbCameraInterface;
-import org.phenoapps.usb.camera.UsbCameraHelper;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
-import org.phenoapps.security.Security;
+import org.phenoapps.usb.camera.UsbCameraHelper;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
@@ -284,6 +283,26 @@ public class CollectActivity extends AppCompatActivity
 
         loadScreen();
 
+    }
+
+    public String getStudyId() {
+        return Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+    }
+
+    public String getObservationUnit() {
+        return getCRange().plot_id;
+    }
+
+    public String getPerson() {
+        return ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, "");
+    }
+
+    public String getTraitName() {
+        return getCurrentTrait().getTrait();
+    }
+
+    public String getTraitFormat() {
+        return getCurrentTrait().getFormat();
     }
 
     private void initCurrentVals() {
@@ -855,6 +874,11 @@ public class CollectActivity extends AppCompatActivity
 
         //navigate to the last used trait using preferences
         String trait = ep.getString(GeneralKeys.LAST_USED_TRAIT, null);
+
+        navigateToTrait(trait);
+    }
+
+    public void navigateToTrait(String trait) {
 
         if (trait != null) {
 
@@ -1813,30 +1837,37 @@ public class CollectActivity extends AppCompatActivity
     }
 
     private void showSummary() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_summary, null);
-        TextView summaryText = layout.findViewById(R.id.field_name);
-        summaryText.setText(traitBox.createSummaryText(rangeBox.getPlotID()));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.preferences_appearance_toolbar_customize_summary)
-                .setCancelable(true)
-                .setView(layout);
+        getSupportFragmentManager().beginTransaction()
+                .add(android.R.id.content, new SummaryFragment())
+                .addToBackStack(null)
+                .commit();
 
-        builder.setNegativeButton(getString(R.string.dialog_close), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
-
-        final AlertDialog summaryDialog = builder.create();
-        summaryDialog.show();
-        DialogUtils.styleDialogs(summaryDialog);
-
-        android.view.WindowManager.LayoutParams params2 = summaryDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        summaryDialog.getWindow().setAttributes(params2);
+//        LayoutInflater inflater = this.getLayoutInflater();
+//        inflater.inflate(R.layout.fragment_summary, null);
+//        View layout = inflater.inflate(R.layout.dialog_summary, null);
+//        TextView summaryText = layout.findViewById(R.id.field_name);
+//        summaryText.setText(traitBox.createSummaryText(rangeBox.getPlotID()));
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+//        builder.setTitle(R.string.preferences_appearance_toolbar_customize_summary)
+//                .setCancelable(true)
+//                .setView(layout);
+//
+//        builder.setNegativeButton(getString(R.string.dialog_close), new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int i) {
+//                dialog.dismiss();
+//            }
+//        });
+//
+//        final AlertDialog summaryDialog = builder.create();
+//        summaryDialog.show();
+//        DialogUtils.styleDialogs(summaryDialog);
+//
+//        android.view.WindowManager.LayoutParams params2 = summaryDialog.getWindow().getAttributes();
+//        params2.width = LayoutParams.MATCH_PARENT;
+//        summaryDialog.getWindow().setAttributes(params2);
     }
 
     @Override
@@ -2023,7 +2054,16 @@ public class CollectActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        finish();
+
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+
+        if (count == 0) {
+
+            finish();
+
+        } else {
+            getSupportFragmentManager().popBackStack();
+        }
     }
 
     @Override

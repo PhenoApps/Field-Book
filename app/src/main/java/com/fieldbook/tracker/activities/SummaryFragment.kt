@@ -1,0 +1,240 @@
+package com.fieldbook.tracker.activities
+
+import android.app.AlertDialog
+import android.content.Context
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.RecyclerView
+import com.fieldbook.tracker.R
+import com.fieldbook.tracker.adapters.SummaryAdapter
+import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao
+import com.fieldbook.tracker.preferences.GeneralKeys
+
+class SummaryFragment: Fragment(), SummaryAdapter.SummaryController {
+
+    private var recyclerView: RecyclerView? = null
+    private var nextButton: Button? = null
+    private var prevButton: Button? = null
+
+    private var toolbar: Toolbar? = null
+
+    private var filterDialog: AlertDialog? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+
+        val view = inflater.inflate(R.layout.fragment_summary, container, false)
+
+        org.phenoapps.utils.SoftKeyboardUtil.closeKeyboard(context, view, 100L)
+
+        toolbar = view.findViewById(R.id.toolbar)
+
+        recyclerView = view.findViewById(R.id.fragment_summary_rv)
+
+        prevButton = view.findViewById(R.id.fragment_summary_prev_btn)
+
+        nextButton = view.findViewById(R.id.fragment_summary_next_btn)
+
+        recyclerView?.adapter = SummaryAdapter(this)
+
+        setup()
+
+        return view
+
+    }
+
+    private fun setupToolbar(attributes: Array<String>, traits: Array<String>, collector: CollectActivity) {
+
+        toolbar?.inflateMenu(R.menu.menu_fragment_summary)
+
+        toolbar?.setTitle(R.string.fragment_summary_toolbar_title)
+
+        toolbar?.setNavigationIcon(R.drawable.arrow_left)
+
+        toolbar?.setNavigationOnClickListener {
+
+            parentFragmentManager.popBackStack()
+        }
+
+        toolbar?.setOnMenuItemClickListener { item ->
+
+            when (item.itemId) {
+                android.R.id.home -> {
+                    parentFragmentManager.popBackStack()
+                }
+                R.id.menu_fragment_summary_filter -> {
+                    showFilterDialog(collector, attributes, traits)
+                }
+            }
+
+            true
+        }
+    }
+
+    private fun setup() {
+
+        with (context as? CollectActivity) {
+
+            this?.let { collector ->
+
+                val studyId = collector.studyId
+
+                val attributes = ObservationUnitAttributeDao.getAllNames(studyId.toInt())
+
+                val traits = ConfigActivity.dt.visibleTrait
+
+                loadData(collector, attributes, traits)
+
+                setupToolbar(attributes, traits, collector)
+
+                prevButton?.setOnClickListener {
+
+                    collector.rangeBox.clickLeft()
+
+                    loadData(collector, attributes, traits)
+                }
+
+                nextButton?.setOnClickListener {
+
+                    collector.rangeBox.clickRight()
+
+                    loadData(collector, attributes, traits)
+                }
+            }
+        }
+    }
+
+    private fun loadData(collector: CollectActivity, attributes: Array<String>, traits: Array<String>) {
+
+        val filter = getPersistedFilter(collector)
+
+        val obsUnit = collector.observationUnit
+
+        val data = ConfigActivity.dt.convertDatabaseToTable(attributes, traits, obsUnit)
+
+        val pairList = arrayListOf<Pair<String, String>>()
+
+        (recyclerView?.adapter as? SummaryAdapter)?.let { adapter ->
+
+            data.moveToFirst()
+
+            try {
+
+                (attributes + traits).filter { if (filter == null) true else it in filter }.forEach { key ->
+
+                    val index = data.getColumnIndex(key)
+
+                    if (index > -1) {
+
+                        val value = data.getString(data.getColumnIndex(key))
+
+                        pairList.add(key to value)
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+            }
+
+            adapter.submitList(pairList)
+
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun getPersistedFilter(ctx: Context): Set<String>? =
+        PreferenceManager.getDefaultSharedPreferences(ctx)
+            .getStringSet(GeneralKeys.SUMMARY_FILTER_ATTRIBUTES, null)
+
+    private fun setPersistedFilter(ctx: Context, filter: Set<String>?) {
+        PreferenceManager.getDefaultSharedPreferences(ctx)
+            .edit().putStringSet(GeneralKeys.SUMMARY_FILTER_ATTRIBUTES, filter ?: setOf()).commit()
+    }
+
+    private fun showFilterDialog(collector: CollectActivity, attributes: Array<String>, traits: Array<String>) {
+
+        context?.let { ctx ->
+
+            var filter: Set<String>? = getPersistedFilter(ctx)
+
+            val keys = attributes + traits
+
+            //initialize which attributes are checked, if no filter is saved then check all
+            val checked = keys.map {
+                if (filter == null) true
+                else it in filter!!
+            }.toBooleanArray()
+
+            //initialize filter in case this is the first load
+            if (filter == null) {
+                filter = setOf()
+                filter = filter.plus(keys)
+            }
+
+            filterDialog = AlertDialog.Builder(context)
+                .setTitle(R.string.fragment_summary_filter_title)
+                .setMultiChoiceItems(keys, checked) { _, which, isChecked ->
+                    val item = keys[which]
+                    filter = if (isChecked) {
+                        filter?.plus(item)
+                    } else {
+                        filter?.minus(item)
+                    }
+                }
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                    setPersistedFilter(ctx, filter)
+                    dialog.dismiss()
+                    loadData(collector, attributes, traits)
+                }
+                .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .setNeutralButton(R.string.dialog_fragment_summary_neutral_button) { dialog, _ ->
+                    filter = if ((filter?.size ?: 0) < keys.size) {
+                        filter?.plus(keys)
+                    } else setOf()
+                    setPersistedFilter(ctx, filter)
+                    dialog.dismiss()
+                    loadData(collector, attributes, traits)
+                }
+                .create()
+
+            if (isAdded && filterDialog?.isShowing != true) {
+
+                filterDialog?.show()
+
+            }
+        }
+    }
+
+    /**
+     * Navigate to the clicked trait
+     */
+    override fun onAttributeClicked(attribute: String) {
+
+        with (context as? CollectActivity) {
+
+            this?.let { collector ->
+
+                if (attribute in ConfigActivity.dt.visibleTrait) {
+
+                    collector.navigateToTrait(attribute)
+
+                    parentFragmentManager.popBackStack()
+
+                }
+            }
+        }
+    }
+}

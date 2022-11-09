@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:background="@drawable/cell"
+    android:layout_margin="8dp">
+
+    <TextView style="@style/TextAppearance.AppCompat.Title"
+        android:textStyle="bold"
+        android:id="@+id/list_item_summary_key_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="plot_id"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView style="@style/TextAppearance.AppCompat.Subhead"
+        android:id="@+id/list_item_summary_value_tv"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="13RPN00001"
+        app:layout_constraintTop_toBottomOf="@id/list_item_summary_key_tv"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/list_item_summary_key_tv"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

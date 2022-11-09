@@ -785,5 +785,11 @@
     <string name="delete_photo_dialog_iv_content_description">Photo to be deleted.</string>
     <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
     <string name="trait_usb_camera_capture_button_text">Capture</string>
+    <string name="fragment_summary_toolbar_title">Summary</string>
+    <string name="menu_fragment_summary_filter_title">Filter</string>
+    <string name="fragment_summary_filter_title">Filter attributes and traits to show in summary</string>
+    <string name="dialog_fragment_summary_neutral_button">Toggle All</string>
+    <string name="fragment_summary_prev_button_text">Previous</string>
+    <string name="fragment_summary_next_button_text">Next</string>
 
 </resources>

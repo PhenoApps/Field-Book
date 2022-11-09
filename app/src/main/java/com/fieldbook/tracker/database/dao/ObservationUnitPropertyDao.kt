@@ -253,5 +253,32 @@ class ObservationUnitPropertyDao {
 
             db.rawQuery(query, null)
         }
+
+        /**
+         * Same as above but filters by obs unit.
+         */
+        fun convertDatabaseToTable(expId: Int, uniqueName: String, unit: String, col: Array<String?>, traits: Array<String>): Cursor? = withDatabase { db ->
+
+            val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it) }
+            val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
+
+            val maxStatements = arrayListOf<String>()
+            sanitizeTraits.forEach {
+                maxStatements.add(
+                    "MAX (CASE WHEN o.observation_variable_name='$it' THEN o.value ELSE NULL END) AS '$it'"
+                )
+            }
+
+            val query = """
+                SELECT $select,
+                ${maxStatements.joinToString(",\n")}
+                FROM ObservationUnitProperty as props
+                LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $expId
+                WHERE props.`${uniqueName}` = "$unit"
+                GROUP BY props.id
+            """.trimIndent()
+
+            db.rawQuery(query, null)
+        }
     }
 }
