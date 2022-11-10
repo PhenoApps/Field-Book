@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ImageView
 import android.widget.ListView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -23,8 +23,8 @@ import org.phenoapps.utils.SoftKeyboardUtil
 class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
     private var recyclerView: RecyclerView? = null
-    private var nextButton: Button? = null
-    private var prevButton: Button? = null
+    private var nextButton: ImageView? = null
+    private var prevButton: ImageView? = null
     private var toolbar: Toolbar? = null
     private var filterDialog: AlertDialog? = null
     private var listener: SummaryOpenListener? = null
@@ -210,11 +210,17 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
     private fun getPersistedFilter(ctx: Context): Set<String>? =
         PreferenceManager.getDefaultSharedPreferences(ctx)
-            .getStringSet("${GeneralKeys.SUMMARY_FILTER_ATTRIBUTES}.${(ctx as CollectActivity).studyId}", null)
+            .getStringSet(
+                "${GeneralKeys.SUMMARY_FILTER_ATTRIBUTES}.${(ctx as CollectActivity).studyId}",
+                null
+            )
 
     private fun setPersistedFilter(ctx: Context, filter: Set<String>?) {
         PreferenceManager.getDefaultSharedPreferences(ctx).edit()
-            .putStringSet("${GeneralKeys.SUMMARY_FILTER_ATTRIBUTES}.${(ctx as CollectActivity).studyId}", filter ?: setOf()).commit()
+            .putStringSet(
+                "${GeneralKeys.SUMMARY_FILTER_ATTRIBUTES}.${(ctx as CollectActivity).studyId}",
+                filter ?: setOf()
+            ).commit()
     }
 
     private fun showFilterDialog(

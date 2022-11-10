@@ -36,7 +36,7 @@
         app:layout_constraintTop_toBottomOf="@id/list_item_summary_key_tv"
         tools:text="13RPN00001" />
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/list_item_summary_ib"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -44,6 +44,7 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:src="@drawable/chevron_right"
+        android:tint="@color/main_colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

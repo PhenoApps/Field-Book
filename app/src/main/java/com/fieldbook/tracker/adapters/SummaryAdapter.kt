@@ -3,8 +3,8 @@ package com.fieldbook.tracker.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +26,7 @@ class SummaryAdapter(private val controller: SummaryController) :
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val keyTextView: TextView = view.findViewById(R.id.list_item_summary_key_tv)
         val valueTextView: TextView = view.findViewById(R.id.list_item_summary_value_tv)
-        val navButton: ImageView = view.findViewById(R.id.list_item_summary_ib)
+        val navButton: AppCompatImageView = view.findViewById(R.id.list_item_summary_ib)
 
         init {
             navButton.setOnClickListener {

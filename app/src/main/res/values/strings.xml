@@ -792,5 +792,7 @@
     <string name="fragment_summary_prev_button_text">Previous</string>
     <string name="fragment_summary_next_button_text">Next</string>
     <string name="list_item_summary_nav_button_content_description">Navigates to the selected entry.</string>
+    <string name="fragment_summary_prev_button_content_description">Navigates to previous entry.</string>
+    <string name="fragment_summary_next_button_content_description">Navigates to next entry.</string>
 
 </resources>
