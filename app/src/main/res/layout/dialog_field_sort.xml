@@ -5,17 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/dialog_field_sort_header_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:text="@string/dialog_field_sort_header_tv"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/dialog_field_sort_rv"
         android:layout_margin="4dp"
         android:layout_width="0dp"
@@ -78,7 +68,6 @@
         app:layout_constraintStart_toEndOf="@id/dialog_field_sort_toggle_order_btn" />
 
     <Button
-        android:layout_margin="4dp"
         android:id="@+id/dialog_field_sort_ok_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -88,7 +77,6 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <Button
-        android:layout_margin="4dp"
         android:id="@+id/dialog_field_sort_cancel_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
