@@ -16,10 +16,10 @@ import com.fieldbook.tracker.R
  * Reference:
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
-class FieldSortAdapter(private val sorter: FieldSorter):
-        ListAdapter<String, FieldSortAdapter.ViewHolder>(DiffCallback()) {
+class SortAdapter(private val sorter: Sorter):
+        ListAdapter<String, SortAdapter.ViewHolder>(DiffCallback()) {
 
-    interface FieldSorter {
+    interface Sorter {
        fun onDeleteItem(attribute: String)
        fun onDrag(item: ViewHolder)
     }

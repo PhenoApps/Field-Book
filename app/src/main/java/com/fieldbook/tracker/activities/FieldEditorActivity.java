@@ -38,9 +38,11 @@ import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
+import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
+import com.fieldbook.tracker.dialogs.FieldSortController;
 import com.fieldbook.tracker.dialogs.FieldSortDialog;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
@@ -70,7 +72,7 @@ import java.util.StringJoiner;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class FieldEditorActivity extends AppCompatActivity implements FieldAdapter.FieldSortController {
+public class FieldEditorActivity extends AppCompatActivity implements FieldSortController {
 
     private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -786,7 +788,28 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldAdapt
 
     @Override
     public void showSortDialog(FieldObject field) {
-        FieldSortDialog d = new FieldSortDialog(this, field);
+
+        String order = field.getExp_sort();
+
+        ArrayList<String> sortOrderList = new ArrayList<>();
+
+        if (order != null) {
+
+            List<String> orderList = Arrays.asList(order.split(","));
+
+            if (!orderList.isEmpty() && !orderList.get(0).isEmpty()) {
+
+                sortOrderList.addAll(orderList);
+
+            }
+        }
+
+        //initialize: initial items are the current sort order, selectable items are the obs. unit attributes.
+        FieldSortDialog d = new FieldSortDialog(this,
+                field,
+                sortOrderList.toArray(new String[] {}),
+                ObservationUnitPropertyDao.Companion.getRangeColumnNames());
+
         d.show();
     }
 
