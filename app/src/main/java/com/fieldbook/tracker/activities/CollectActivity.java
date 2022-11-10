@@ -131,7 +131,8 @@ import kotlin.Pair;
 
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends AppCompatActivity
-        implements SensorEventListener, GPSTracker.GPSTrackerListener, UsbCameraInterface {
+        implements SensorEventListener, GPSTracker.GPSTrackerListener,
+        UsbCameraInterface, SummaryFragment.SummaryOpenListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -243,6 +244,9 @@ public class CollectActivity extends AppCompatActivity
     private UsbCameraHelper mUsbCameraHelper = null;
     
     private SecureBluetoothActivityImpl secureBluetooth;
+
+    //summary fragment listener
+    private boolean isSummaryOpen = false;
 
     public void triggerTts(String text) {
         if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
@@ -1838,8 +1842,13 @@ public class CollectActivity extends AppCompatActivity
 
     private void showSummary() {
 
+        SummaryFragment fragment = new SummaryFragment();
+        fragment.setListener(this);
+
+        isSummaryOpen = true;
+
         getSupportFragmentManager().beginTransaction()
-                .add(android.R.id.content, new SummaryFragment())
+                .add(android.R.id.content, fragment)
                 .addToBackStack(null)
                 .commit();
 
@@ -2221,6 +2230,15 @@ public class CollectActivity extends AppCompatActivity
     @Override
     public UsbCameraHelper getCameraHelper() {
         return mUsbCameraHelper;
+    }
+
+    @Override
+    public void onSummaryDestroy() {
+        isSummaryOpen = false;
+    }
+
+    public boolean isSummaryFragmentOpen() {
+        return isSummaryOpen;
     }
 
     ///// class TraitBox /////

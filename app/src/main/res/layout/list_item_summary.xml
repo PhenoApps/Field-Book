@@ -1,34 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@drawable/cell"
-    android:layout_margin="8dp">
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:background="@drawable/cell">
 
-    <TextView style="@style/TextAppearance.AppCompat.Title"
-        android:textStyle="bold"
+    <TextView
         android:id="@+id/list_item_summary_key_tv"
-        android:layout_width="wrap_content"
+        style="@style/TextAppearance.AppCompat.Title"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:maxLines="1"
         android:ellipsize="end"
-        tools:text="plot_id"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView style="@style/TextAppearance.AppCompat.Subhead"
-        android:id="@+id/list_item_summary_value_tv"
+        android:maxLines="1"
         android:textStyle="bold"
-        android:layout_width="wrap_content"
+        app:layout_constraintEnd_toStartOf="@id/list_item_summary_ib"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="plot_id" />
+
+    <TextView
+        android:id="@+id/list_item_summary_value_tv"
+        style="@style/TextAppearance.AppCompat.Subhead"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:maxLines="1"
         android:ellipsize="end"
-        tools:text="13RPN00001"
-        app:layout_constraintTop_toBottomOf="@id/list_item_summary_key_tv"
+        android:maxLines="1"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@id/list_item_summary_key_tv"/>
+        app:layout_constraintEnd_toStartOf="@id/list_item_summary_ib"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="@id/list_item_summary_key_tv"
+        app:layout_constraintTop_toBottomOf="@id/list_item_summary_key_tv"
+        tools:text="13RPN00001" />
+
+    <ImageView
+        android:id="@+id/list_item_summary_ib"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/list_item_summary_nav_button_content_description"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:src="@drawable/chevron_right"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ListView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
@@ -15,26 +16,39 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.SummaryAdapter
 import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.google.gson.JsonParseException
+import org.phenoapps.utils.SoftKeyboardUtil
 
-class SummaryFragment: Fragment(), SummaryAdapter.SummaryController {
+class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
     private var recyclerView: RecyclerView? = null
     private var nextButton: Button? = null
     private var prevButton: Button? = null
-
     private var toolbar: Toolbar? = null
-
     private var filterDialog: AlertDialog? = null
+    private var listener: SummaryOpenListener? = null
+
+    fun interface SummaryOpenListener {
+        fun onSummaryDestroy()
+    }
+
+    fun setListener(listener: SummaryOpenListener) {
+
+        this.listener = listener
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        listener?.onSummaryDestroy()
+    }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
 
         val view = inflater.inflate(R.layout.fragment_summary, container, false)
-
-        org.phenoapps.utils.SoftKeyboardUtil.closeKeyboard(context, view, 100L)
 
         toolbar = view.findViewById(R.id.toolbar)
 
@@ -52,7 +66,16 @@ class SummaryFragment: Fragment(), SummaryAdapter.SummaryController {
 
     }
 
-    private fun setupToolbar(attributes: Array<String>, traits: Array<String>, collector: CollectActivity) {
+    override fun onResume() {
+        super.onResume()
+        view?.let { v ->
+            SoftKeyboardUtil.closeKeyboard(context, v, 0L)
+        }
+    }
+
+    private fun setupToolbar(
+        attributes: Array<String>, traits: Array<String>, collector: CollectActivity
+    ) {
 
         toolbar?.inflateMenu(R.menu.menu_fragment_summary)
 
@@ -82,7 +105,7 @@ class SummaryFragment: Fragment(), SummaryAdapter.SummaryController {
 
     private fun setup() {
 
-        with (context as? CollectActivity) {
+        with(context as? CollectActivity) {
 
             this?.let { collector ->
 
@@ -113,7 +136,9 @@ class SummaryFragment: Fragment(), SummaryAdapter.SummaryController {
         }
     }
 
-    private fun loadData(collector: CollectActivity, attributes: Array<String>, traits: Array<String>) {
+    private fun loadData(
+        collector: CollectActivity, attributes: Array<String>, traits: Array<String>
+    ) {
 
         val filter = getPersistedFilter(collector)
 
@@ -121,7 +146,7 @@ class SummaryFragment: Fragment(), SummaryAdapter.SummaryController {
 
         val data = ConfigActivity.dt.convertDatabaseToTable(attributes, traits, obsUnit)
 
-        val pairList = arrayListOf<Pair<String, String>>()
+        val pairList = arrayListOf<SummaryAdapter.SummaryListModel>()
 
         (recyclerView?.adapter as? SummaryAdapter)?.let { adapter ->
 
@@ -129,17 +154,47 @@ class SummaryFragment: Fragment(), SummaryAdapter.SummaryController {
 
             try {
 
-                (attributes + traits).filter { if (filter == null) true else it in filter }.forEach { key ->
+                (attributes + traits).filter { if (filter == null) true else it in filter }
+                    .forEach { key ->
 
-                    val index = data.getColumnIndex(key)
+                        val index = data.getColumnIndex(key)
 
-                    if (index > -1) {
+                        var value: String? = null
 
-                        val value = data.getString(data.getColumnIndex(key))
+                        if (index > -1) {
 
-                        pairList.add(key to value)
+                            value = data.getString(index)
+
+                            try {
+
+                                value?.let { v ->
+
+                                    //read the preferences, default to displaying values instead of labels
+                                    val labelValPref: String =
+                                        PreferenceManager.getDefaultSharedPreferences(context)
+                                            .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value")
+                                            ?: "value"
+
+                                    value = CategoryJsonUtil.flattenMultiCategoryValue(
+                                        CategoryJsonUtil.decode(v), labelValPref == "value"
+                                    )
+
+                                }
+
+                            } catch (ignore: JsonParseException) {
+                            }
+
+                        }
+
+                        pairList.add(
+                            SummaryAdapter.SummaryListModel(
+                                key,
+                                value ?: "",
+                                key in traits
+                            )
+                        )
+
                     }
-                }
 
             } catch (e: Exception) {
 
@@ -155,14 +210,16 @@ class SummaryFragment: Fragment(), SummaryAdapter.SummaryController {
 
     private fun getPersistedFilter(ctx: Context): Set<String>? =
         PreferenceManager.getDefaultSharedPreferences(ctx)
-            .getStringSet(GeneralKeys.SUMMARY_FILTER_ATTRIBUTES, null)
+            .getStringSet("${GeneralKeys.SUMMARY_FILTER_ATTRIBUTES}.${(ctx as CollectActivity).studyId}", null)
 
     private fun setPersistedFilter(ctx: Context, filter: Set<String>?) {
-        PreferenceManager.getDefaultSharedPreferences(ctx)
-            .edit().putStringSet(GeneralKeys.SUMMARY_FILTER_ATTRIBUTES, filter ?: setOf()).commit()
+        PreferenceManager.getDefaultSharedPreferences(ctx).edit()
+            .putStringSet("${GeneralKeys.SUMMARY_FILTER_ATTRIBUTES}.${(ctx as CollectActivity).studyId}", filter ?: setOf()).commit()
     }
 
-    private fun showFilterDialog(collector: CollectActivity, attributes: Array<String>, traits: Array<String>) {
+    private fun showFilterDialog(
+        collector: CollectActivity, attributes: Array<String>, traits: Array<String>
+    ) {
 
         context?.let { ctx ->
 
@@ -182,38 +239,50 @@ class SummaryFragment: Fragment(), SummaryAdapter.SummaryController {
                 filter = filter.plus(keys)
             }
 
-            filterDialog = AlertDialog.Builder(context)
-                .setTitle(R.string.fragment_summary_filter_title)
-                .setMultiChoiceItems(keys, checked) { _, which, isChecked ->
-                    val item = keys[which]
-                    filter = if (isChecked) {
-                        filter?.plus(item)
-                    } else {
-                        filter?.minus(item)
-                    }
-                }
-                .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                    setPersistedFilter(ctx, filter)
-                    dialog.dismiss()
-                    loadData(collector, attributes, traits)
-                }
-                .setNegativeButton(android.R.string.cancel) { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .setNeutralButton(R.string.dialog_fragment_summary_neutral_button) { dialog, _ ->
-                    filter = if ((filter?.size ?: 0) < keys.size) {
-                        filter?.plus(keys)
-                    } else setOf()
-                    setPersistedFilter(ctx, filter)
-                    dialog.dismiss()
-                    loadData(collector, attributes, traits)
-                }
-                .create()
+            filterDialog =
+                AlertDialog.Builder(context).setTitle(R.string.fragment_summary_filter_title)
+                    .setMultiChoiceItems(keys, checked) { _, which, isChecked ->
+                        val item = keys[which]
+                        filter = if (isChecked) {
+                            filter?.plus(item)
+                        } else {
+                            filter?.minus(item)
+                        }
+                    }.setPositiveButton(android.R.string.ok) { dialog, _ ->
+                        setPersistedFilter(ctx, filter)
+                        dialog.dismiss()
+                        loadData(collector, attributes, traits)
+                    }.setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                        dialog.dismiss()
+                    }.setNeutralButton(R.string.dialog_fragment_summary_neutral_button) { _, _ -> }
+                    .create()
 
             if (isAdded && filterDialog?.isShowing != true) {
 
                 filterDialog?.show()
 
+                filterDialog?.getButton(AlertDialog.BUTTON_NEUTRAL)?.setOnClickListener { _ ->
+
+                    val list = (filterDialog as AlertDialog).listView
+
+                    list.choiceMode = ListView.CHOICE_MODE_MULTIPLE
+
+                    val toggle = (filter?.size ?: 0) < keys.size
+
+                    filter = if (toggle) {
+
+                        filter?.plus(keys)
+
+                    } else setOf()
+
+                    keys.forEachIndexed { index, _ ->
+
+                        list.setItemChecked(index, toggle)
+
+                        checked[index] = toggle
+
+                    }
+                }
             }
         }
     }
@@ -223,7 +292,7 @@ class SummaryFragment: Fragment(), SummaryAdapter.SummaryController {
      */
     override fun onAttributeClicked(attribute: String) {
 
-        with (context as? CollectActivity) {
+        with(context as? CollectActivity) {
 
             this?.let { collector ->
 

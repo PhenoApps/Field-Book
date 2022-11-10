@@ -45,23 +45,25 @@ public class TextTraitLayout extends BaseTraitLayout {
         EditText valueEditText = getEtCurVal();
         valueEditText.setHint("");
         valueEditText.setVisibility(EditText.VISIBLE);
-        valueEditText.setSelection(valueEditText.getText().length());
         valueEditText.setEnabled(true);
+        valueEditText.setSelection(valueEditText.getText().length());
 
         super.loadLayout();
 
-        // This is needed to fix a keyboard bug
-        mHandler.postDelayed(() -> {
-            valueEditText.dispatchTouchEvent(MotionEvent.obtain(
-                    SystemClock.uptimeMillis(),
-                    SystemClock.uptimeMillis(),
-                    MotionEvent.ACTION_DOWN, 0, 0, 0));
-            valueEditText.dispatchTouchEvent(MotionEvent.obtain(
-                    SystemClock.uptimeMillis(),
-                    SystemClock.uptimeMillis(),
-                    MotionEvent.ACTION_UP, 0, 0, 0));
-            valueEditText.setSelection(getEtCurVal().getText().length());
-        }, 300);
+        if (!((CollectActivity) getContext()).isSummaryFragmentOpen()) {
+            // This is needed to fix a keyboard bug
+            mHandler.postDelayed(() -> {
+                valueEditText.dispatchTouchEvent(MotionEvent.obtain(
+                        SystemClock.uptimeMillis(),
+                        SystemClock.uptimeMillis(),
+                        MotionEvent.ACTION_DOWN, 0, 0, 0));
+                valueEditText.dispatchTouchEvent(MotionEvent.obtain(
+                        SystemClock.uptimeMillis(),
+                        SystemClock.uptimeMillis(),
+                        MotionEvent.ACTION_UP, 0, 0, 0));
+                valueEditText.setSelection(getEtCurVal().getText().length());
+            }, 300);
+        }
 
         valueEditText.setEnabled(!isLocked);
     }
