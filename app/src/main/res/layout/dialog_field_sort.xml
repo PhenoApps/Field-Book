@@ -1,89 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView xmlns:tools="http://schemas.android.com/tools"
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/dialog_field_sort_rv"
-        android:layout_margin="4dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:layout_margin="4dp"
         android:orientation="vertical"
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:listitem="@layout/list_item_field_sort"
-        tools:itemCount="5"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_delete_all_btn"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="percent"
         app:layout_constraintHeight_percent="0.4"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_delete_all_btn"
-        app:layout_constraintTop_toBottomOf="@id/dialog_field_sort_header_tv"/>
+        app:layout_constraintTop_toTopOf="parent"
+        tools:itemCount="5"
+        tools:listitem="@layout/list_item_field_sort" />
 
     <ImageButton
-        app:tint="@color/BLACK"
-        android:background="@drawable/circle_background"
-        android:src="@drawable/ic_tb_delete"
-        android:layout_margin="8dp"
         android:id="@+id/dialog_field_sort_delete_all_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="@drawable/circle_background"
         android:contentDescription="@string/dialog_field_sort_delete_all_content_description"
         android:minWidth="48dp"
         android:minHeight="48dp"
+        android:src="@drawable/ic_tb_delete"
         app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_ok_btn"
         app:layout_constraintEnd_toStartOf="@id/dialog_field_sort_toggle_order_btn"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:tint="@color/BLACK" />
 
     <ImageButton
-        android:background="@drawable/circle_background"
-        android:src="@drawable/ic_tb_sort"
-        android:layout_margin="8dp"
         android:id="@+id/dialog_field_sort_toggle_order_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="@drawable/circle_background"
         android:contentDescription="@string/dialog_field_sort_toggle_order_content_description"
         android:minWidth="48dp"
         android:minHeight="48dp"
+        android:src="@drawable/ic_tb_sort"
         app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_ok_btn"
         app:layout_constraintEnd_toStartOf="@id/dialog_field_sort_add_btn"
         app:layout_constraintStart_toEndOf="@id/dialog_field_sort_delete_all_btn"
         app:tint="@color/BLACK" />
 
     <ImageButton
-        app:tint="@color/BLACK"
-        android:background="@drawable/circle_background"
-        android:src="@drawable/ic_add_white"
-        android:layout_margin="8dp"
         android:id="@+id/dialog_field_sort_add_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="@drawable/circle_background"
         android:contentDescription="@string/dialog_field_sort_add_content_description"
         android:minWidth="48dp"
         android:minHeight="48dp"
+        android:src="@drawable/ic_add_white"
         app:layout_constraintBottom_toTopOf="@id/dialog_field_sort_ok_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/dialog_field_sort_toggle_order_btn" />
+        app:layout_constraintStart_toEndOf="@id/dialog_field_sort_toggle_order_btn"
+        app:tint="@color/BLACK" />
 
     <Button
         android:id="@+id/dialog_field_sort_ok_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@android:string/ok"
-        app:layout_constraintStart_toEndOf="@id/dialog_field_sort_cancel_btn"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toEndOf="@id/dialog_field_sort_cancel_btn" />
 
     <Button
         android:id="@+id/dialog_field_sort_cancel_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@android:string/cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/dialog_field_sort_ok_btn"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

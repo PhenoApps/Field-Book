@@ -5,29 +5,33 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.graphics.Rect
 import android.os.Bundle
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.Toast
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.SortAdapter
 
 /**
- Extensible sort dialog
+Extensible sort dialog
 
- Look at FieldSortDialog and FieldAdapter for example: extends and overrides setup ui to update field object
- //EXAMPLE: extend this class and implement this on click in on create, extend Sorter interface and call save method
- //        //submits the new sort list to the field sort controller (where db queries should be handled)
- //        okButton?.setOnClickListener {
- //
- //            (act as? FieldSortController)?.submitSortList(field, sortList.toTypedArray())
- //
- //            dismiss()
- //        }
+Look at FieldSortDialog and FieldAdapter for example: extends and overrides setup ui to update field object
+//EXAMPLE: extend this class and implement this on click in on create, extend Sorter interface and call save method
+//        //submits the new sort list to the field sort controller (where db queries should be handled)
+//        okButton?.setOnClickListener {
+//
+//            (act as? FieldSortController)?.submitSortList(field, sortList.toTypedArray())
+//
+//            dismiss()
+//        }
  */
 open class SortDialog(
     act: Activity,
     private val initialItems: Array<String>,
-    private val selectableItems: Array<String>) : Dialog(act, R.style.Dialog),
+    private val selectableItems: Array<String>
+) : Dialog(act, R.style.Dialog),
     SortAdapter.Sorter {
 
     protected var attributeRv: RecyclerView? = null
@@ -35,7 +39,6 @@ open class SortDialog(
     protected var deleteAllButton: ImageButton? = null
     protected var addButton: ImageButton? = null
     protected var sortOrderButton: ImageButton? = null
-    protected var headerTextView: TextView? = null
     protected var okButton: Button? = null
     protected var sortList = arrayListOf<String>()
 
@@ -54,8 +57,10 @@ open class SortDialog(
                 val rect = Rect()
                 w.decorView.getWindowVisibleDisplayFrame(rect)
 
-                w.setLayout((rect.width() * .8).toInt(),
-                    (rect.height() * .5).toInt())
+                w.setLayout(
+                    (rect.width() * .8).toInt(),
+                    (rect.height() * .5).toInt()
+                )
             }
 
         }
@@ -66,60 +71,67 @@ open class SortDialog(
 
     private val itemTouchHelper by lazy {
 
-        val itemTouchCallback = object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+        val itemTouchCallback =
+            object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
 
-            override fun isLongPressDragEnabled(): Boolean {
-                return false
-            }
-
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-
-                val adapter = recyclerView.adapter as SortAdapter
-                val from = viewHolder.bindingAdapterPosition
-                val to = target.bindingAdapterPosition
-
-                try {
-
-                    //swap local list
-                    sortList[to] = sortList[from].also { sortList[from] = sortList[to] }
-
-                    //swap adapter list
-                    adapter.moveItem(from, to)
-
-                } catch (e: java.lang.IndexOutOfBoundsException) {
-
+                override fun isLongPressDragEnabled(): Boolean {
                     return false
+                }
+
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+
+                    val adapter = recyclerView.adapter as SortAdapter
+                    val from = viewHolder.bindingAdapterPosition
+                    val to = target.bindingAdapterPosition
+
+                    try {
+
+                        //swap local list
+                        sortList[to] = sortList[from].also { sortList[from] = sortList[to] }
+
+                        //swap adapter list
+                        adapter.moveItem(from, to)
+
+                    } catch (e: java.lang.IndexOutOfBoundsException) {
+
+                        return false
+
+                    }
+
+                    return true
+                }
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
 
                 }
 
-                return true
-            }
+                override fun onSelectedChanged(
+                    viewHolder: RecyclerView.ViewHolder?,
+                    actionState: Int
+                ) {
+                    super.onSelectedChanged(viewHolder, actionState)
 
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-
-            }
-
-            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-                super.onSelectedChanged(viewHolder, actionState)
-
-                if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-                    viewHolder?.itemView?.scaleY = 1.618f //golden ratio
-                    viewHolder?.itemView?.alpha = 0.5f
+                    if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                        viewHolder?.itemView?.scaleY = 1.618f //golden ratio
+                        viewHolder?.itemView?.alpha = 0.5f
+                    }
                 }
+
+                override fun clearView(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ) {
+                    super.clearView(recyclerView, viewHolder)
+
+                    viewHolder.itemView.scaleY = 1.0f
+                    viewHolder.itemView.alpha = 1.0f
+                }
+
             }
-
-            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-                super.clearView(recyclerView, viewHolder)
-
-                viewHolder.itemView.scaleY = 1.0f
-                viewHolder.itemView.alpha = 1.0f
-            }
-
-        }
 
         ItemTouchHelper(itemTouchCallback)
     }
@@ -129,7 +141,6 @@ open class SortDialog(
      */
     open fun setupUi() {
 
-        headerTextView = findViewById(R.id.dialog_field_sort_header_tv)
         attributeRv = findViewById(R.id.dialog_field_sort_rv)
         addButton = findViewById(R.id.dialog_field_sort_add_btn)
         okButton = findViewById(R.id.dialog_field_sort_ok_btn)
@@ -154,7 +165,11 @@ open class SortDialog(
 
             } else {
 
-                Toast.makeText(context, R.string.dialog_field_sort_no_attributes_found, Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    R.string.dialog_field_sort_no_attributes_found,
+                    Toast.LENGTH_SHORT
+                ).show()
 
                 dismiss()
             }
@@ -171,7 +186,11 @@ open class SortDialog(
 
             } else {
 
-                Toast.makeText(context, R.string.dialog_field_sort_no_more_attributes_found, Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    R.string.dialog_field_sort_no_more_attributes_found,
+                    Toast.LENGTH_SHORT
+                ).show()
 
             }
         }
@@ -222,7 +241,7 @@ open class SortDialog(
 
         val dialog = AlertDialog.Builder(context)
 
-        dialog.setTitle(R.string.dialog_sort_title)
+        dialog.setTitle(R.string.dialog_field_sort_title)
 
         val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, unused)
 

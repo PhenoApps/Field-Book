@@ -21,8 +21,6 @@ open class FieldSortDialog(private val act: Activity,
     override fun setupUi() {
         super.setupUi()
 
-        headerTextView?.text = context.getString(R.string.dialog_field_sort_header_tv)
-
         setTitle(R.string.dialog_field_sort_title)
 
         //submits the new sort list to the field sort controller (where db queries should be handled)
