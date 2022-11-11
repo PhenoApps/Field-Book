@@ -100,9 +100,8 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
 import org.phenoapps.interfaces.usb.camera.UsbCameraInterface;
-import org.phenoapps.usb.camera.UsbCameraHelper;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
-import org.phenoapps.security.Security;
+import org.phenoapps.usb.camera.UsbCameraHelper;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
@@ -284,6 +283,26 @@ public class CollectActivity extends AppCompatActivity
 
         loadScreen();
 
+    }
+
+    public String getStudyId() {
+        return Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+    }
+
+    public String getObservationUnit() {
+        return getCRange().plot_id;
+    }
+
+    public String getPerson() {
+        return ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, "");
+    }
+
+    public String getTraitName() {
+        return getCurrentTrait().getTrait();
+    }
+
+    public String getTraitFormat() {
+        return getCurrentTrait().getFormat();
     }
 
     private void initCurrentVals() {

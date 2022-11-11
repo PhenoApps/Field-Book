@@ -9,10 +9,12 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.SortAdapter
+import com.fieldbook.tracker.preferences.GeneralKeys
 
 /**
 Extensible sort dialog
@@ -31,8 +33,7 @@ open class SortDialog(
     act: Activity,
     private val initialItems: Array<String>,
     private val selectableItems: Array<String>
-) : Dialog(act, R.style.Dialog),
-    SortAdapter.Sorter {
+) : Dialog(act, R.style.Dialog), SortAdapter.Sorter {
 
     protected var attributeRv: RecyclerView? = null
     protected var cancelButton: Button? = null
@@ -58,8 +59,7 @@ open class SortDialog(
                 w.decorView.getWindowVisibleDisplayFrame(rect)
 
                 w.setLayout(
-                    (rect.width() * .8).toInt(),
-                    (rect.height() * .5).toInt()
+                    (rect.width() * .8).toInt(), (rect.height() * .5).toInt()
                 )
             }
 
@@ -110,8 +110,7 @@ open class SortDialog(
                 }
 
                 override fun onSelectedChanged(
-                    viewHolder: RecyclerView.ViewHolder?,
-                    actionState: Int
+                    viewHolder: RecyclerView.ViewHolder?, actionState: Int
                 ) {
                     super.onSelectedChanged(viewHolder, actionState)
 
@@ -122,8 +121,7 @@ open class SortDialog(
                 }
 
                 override fun clearView(
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder
+                    recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder
                 ) {
                     super.clearView(recyclerView, viewHolder)
 
@@ -166,9 +164,7 @@ open class SortDialog(
             } else {
 
                 Toast.makeText(
-                    context,
-                    R.string.dialog_field_sort_no_attributes_found,
-                    Toast.LENGTH_SHORT
+                    context, R.string.dialog_field_sort_no_attributes_found, Toast.LENGTH_SHORT
                 ).show()
 
                 dismiss()
@@ -187,9 +183,7 @@ open class SortDialog(
             } else {
 
                 Toast.makeText(
-                    context,
-                    R.string.dialog_field_sort_no_more_attributes_found,
-                    Toast.LENGTH_SHORT
+                    context, R.string.dialog_field_sort_no_more_attributes_found, Toast.LENGTH_SHORT
                 ).show()
 
             }
@@ -211,11 +205,38 @@ open class SortDialog(
 
         sortOrderButton?.setOnClickListener {
 
-            sortList.reverse()
+            val studyId = getStudyId()
 
-            submitList()
+            toggleSortOrder(studyId)
+
+            sortOrderButton?.setImageResource(getSortIcon(studyId))
         }
+
+        submitList()
+
+        sortOrderButton?.setImageResource(getSortIcon(getStudyId()))
+
     }
+
+    private fun getStudyId() = PreferenceManager.getDefaultSharedPreferences(context)
+        .getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+
+    private fun getSortIcon(studyId: String) = if (isSortOrderAsc(studyId)) R.drawable.sort_ascending else R.drawable.sort_descending
+
+    private fun toggleSortOrder(studyId: String) = when (isSortOrderAsc(studyId)) {
+        true -> persistSortOrder(studyId, false)
+        else -> persistSortOrder(studyId, true)
+    }
+
+    private fun isSortOrderAsc(studyId: String) = getSortOrder(studyId)
+
+    private fun persistSortOrder(studyId: String, isAsc: Boolean) =
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+            .putBoolean("${GeneralKeys.SORT_ORDER}.$studyId", isAsc).apply()
+
+    private fun getSortOrder(studyId: String) =
+        PreferenceManager.getDefaultSharedPreferences(context)
+            .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)
 
     private fun submitList() {
 
