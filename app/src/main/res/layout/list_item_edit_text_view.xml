@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@drawable/cell"
     android:id="@+id/list_item_edit_text_view_container"
-    android:layout_gravity="center_horizontal"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@drawable/cell">
 
     <EditText
-        tools:text="Edit Text"
-        android:background="@android:color/transparent"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         android:id="@+id/list_item_text_et"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="36sp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
         android:ellipsize="end"
+        android:gravity="center"
+        android:inputType="textNoSuggestions"
         android:maxLines="1"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text=""
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_xlarge"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginVertical="8dp"/>
+        tools:text="Edit Text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
