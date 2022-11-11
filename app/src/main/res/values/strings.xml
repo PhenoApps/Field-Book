@@ -562,6 +562,10 @@
     <string name="brapi_error_saving_all_traits">Error saving traits. No traits were saved.</string>
     <string name="brapi_error_saving_some_traits">Error saving some traits. Some traits were not saved</string>
     <string name="brapi_traits_saved_success">Selected traits saved successfully.</string>
+    <string name="brapi_obs_sync_menu_name">Sync Observations</string>
+    <string name="brapi_obs_header_name">Downloading Observations for Study:</string>
+    <string name="number_traits_label">Number of Traits:</string>
+    <string name="number_observation_label">Number of Observations:</string>
     <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>
@@ -785,6 +789,7 @@
     <string name="delete_photo_dialog_iv_content_description">Photo to be deleted.</string>
     <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
     <string name="trait_usb_camera_capture_button_text">Capture</string>
+    
     <string name="preferences_beta_title">Beta Features</string>
     <string name="pref_beta_repeated_values_title">Repeated Measures</string>
     <string name="pref_beta_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
@@ -794,5 +799,9 @@
 
     <string name="pref_beta_repeated_values_disabled_title">Feature disabled</string>
     <string name="pref_beta_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
+    
+    <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
+    <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
+    <string name="preferences_beta_title">Beta</string>
 
 </resources>

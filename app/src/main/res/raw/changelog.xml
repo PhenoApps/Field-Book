@@ -4,7 +4,9 @@
         date="2022-12-01"
         versionCode="540"
         versionName="v5.4">
+        <new>Experimental settings section</new>
         <new>Repeated measures! (beta)</new>
+        <info>Optimized the workflow when traits are imported</info>
     </release>
 
     <release
