@@ -4,9 +4,9 @@
         date="2022-12-01"
         versionCode="540"
         versionName="v5.4">
-        <new>Experimental beta settings section</new>
-        <new>Improved field sorting dialog</new>
-        <info>Optimized the workflow when traits are imported</info>
+        <new>Experimental settings section</new>
+        <new>Improved field sorting workflow</new>
+        <info>Optimized trait import workflow</info>
     </release>
 
     <release
