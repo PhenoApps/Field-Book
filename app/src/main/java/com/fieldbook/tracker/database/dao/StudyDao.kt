@@ -145,7 +145,7 @@ class StudyDao {
             it.primary_id = this["study_primary_id_name"].toString()
             it.secondary_id = this["study_secondary_id_name"].toString()
             it.date_import = this["date_import"].toString()
-            it.exp_sort = this["study_sort_name"].toString()
+            it.exp_sort = (this["study_sort_name"] ?: "").toString()
             it.date_edit = when (val date = this["date_edit"]?.toString()) {
                 null, "null" -> ""
                 else -> date

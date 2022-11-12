@@ -15,6 +15,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,8 +38,12 @@ import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
+import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
+import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
+import com.fieldbook.tracker.dialogs.FieldSortController;
+import com.fieldbook.tracker.dialogs.FieldSortDialog;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -61,12 +67,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class FieldEditorActivity extends AppCompatActivity {
+public class FieldEditorActivity extends AppCompatActivity implements FieldSortController {
 
+    private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
     private static final int REQUEST_CLOUD_FILE_CODE = 5;
 
@@ -776,5 +784,68 @@ public class FieldEditorActivity extends AppCompatActivity {
 
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @Override
+    public void showSortDialog(FieldObject field) {
+
+        String order = field.getExp_sort();
+
+        ArrayList<String> sortOrderList = new ArrayList<>();
+
+        if (order != null) {
+
+            List<String> orderList = Arrays.asList(order.split(","));
+
+            if (!orderList.isEmpty() && !orderList.get(0).isEmpty()) {
+
+                sortOrderList.addAll(orderList);
+
+            }
+        }
+
+        //initialize: initial items are the current sort order, selectable items are the obs. unit attributes.
+        FieldSortDialog d = new FieldSortDialog(this,
+                field,
+                sortOrderList.toArray(new String[] {}),
+                ObservationUnitPropertyDao.Companion.getRangeColumnNames());
+
+        d.show();
+    }
+
+    @Override
+    public void submitSortList(FieldObject field, String[] attributes) {
+
+        StringJoiner joiner = new StringJoiner(",");
+        for (String a : attributes) joiner.add(a);
+
+        field.setExp_sort(joiner.toString());
+
+        try {
+
+            StudyDao.Companion.updateStudySort(joiner.toString(), field.getExp_id());
+
+            if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
+                ConfigActivity.dt.switchField(field.getExp_id());
+                CollectActivity.reloadData = true;
+            }
+
+            Toast toast = Toast.makeText(this, R.string.sort_dialog_saved, Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+            toast.show();
+
+        } catch (Exception e) {
+
+            Log.e(TAG, "Error updating sorting", e);
+
+            new AlertDialog.Builder(this).setTitle(R.string.dialog_save_error_title)
+                    .setPositiveButton(R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
+                    .setMessage(R.string.sort_dialog_error_saving)
+                    .create()
+                    .show();
+        }
+
+        FieldEditorActivity.loadData();
+
     }
 }
