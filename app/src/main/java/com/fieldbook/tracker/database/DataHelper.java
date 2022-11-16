@@ -1397,8 +1397,7 @@ public class DataHelper {
             }
         }
 
-        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
-                .getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId(context);
 
         int[] data = new int[result.length];
 
@@ -2090,12 +2089,26 @@ public class DataHelper {
 //        db.execSQL("DELETE FROM " + USER_TRAITS + " WHERE exp_id = " + exp_id);
 
         resetSummaryLabels(studyId);
+        deleteFieldSortOrder(studyId);
     }
 
     private void resetSummaryLabels(int studyId) {
         try {
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit().remove(GeneralKeys.SUMMARY_FILTER_ATTRIBUTES + "." + studyId)
+                    .apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        deleteFieldSortOrder(studyId);
+    }
+
+
+    private void deleteFieldSortOrder(int studyId) {
+        try {
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit().remove(GeneralKeys.SORT_ORDER + "." + studyId)
                     .apply();
         } catch (Exception e) {
             e.printStackTrace();
