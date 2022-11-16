@@ -33,12 +33,13 @@
 
     <ImageView
         android:id="@+id/fragment_summary_prev_btn"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
+        android:background="@drawable/custom_round_button"
         android:contentDescription="@string/fragment_summary_prev_button_content_description"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
+        android:minWidth="60dp"
+        android:minHeight="60dp"
         android:src="@drawable/chevron_left"
         android:text="@string/fragment_summary_prev_button_text"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -48,12 +49,13 @@
 
     <ImageView
         android:id="@+id/fragment_summary_next_btn"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
+        android:background="@drawable/custom_round_button"
         android:contentDescription="@string/fragment_summary_next_button_content_description"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
+        android:minWidth="60dp"
+        android:minHeight="60dp"
         android:src="@drawable/chevron_right"
         android:text="@string/fragment_summary_next_button_text"
         app:layout_constraintBottom_toBottomOf="parent"

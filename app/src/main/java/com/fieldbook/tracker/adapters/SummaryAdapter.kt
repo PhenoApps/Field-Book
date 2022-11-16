@@ -29,7 +29,7 @@ class SummaryAdapter(private val controller: SummaryController) :
         val navButton: AppCompatImageView = view.findViewById(R.id.list_item_summary_ib)
 
         init {
-            navButton.setOnClickListener {
+            view.setOnClickListener {
                 controller.onAttributeClicked(keyTextView.text.toString())
             }
         }
