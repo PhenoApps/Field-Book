@@ -419,11 +419,11 @@ class StudyDao {
          * Search for the first studies row that matches the name and observationLevel parameter.
          * Default return value is -1
          */
-        fun checkFieldNameAndObsLvl(name: String, observationLevel: String): Int = withDatabase { db ->
+        fun checkFieldNameAndObsLvl(name: String, observationLevel: String?): Int = withDatabase { db ->
             db.query(Study.tableName,
                     arrayOf(Study.PK),
                     where = "study_name = ? AND observation_levels = ?",
-                    whereArgs = arrayOf(name, observationLevel)).toFirst()[Study.PK] as? Int ?: -1
+                    whereArgs = arrayOf(name, observationLevel ?: "")).toFirst()[Study.PK] as? Int ?: -1
 
         } ?: -1
 
