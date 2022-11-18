@@ -6,7 +6,8 @@
         versionName="v5.4">
         <new>Experimental settings section</new>
         <new>Repeated measures! (beta)</new>
-        <info>Optimized the workflow when traits are imported</info>
+        <new>Improved field sorting workflow</new>
+        <info>Optimized trait import workflow</info>
     </release>
 
     <release

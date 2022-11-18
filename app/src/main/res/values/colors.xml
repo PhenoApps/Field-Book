@@ -21,4 +21,8 @@
     <color name="progressMid">#90FFFF00</color>
     <color name="progressEnd">#90FF0000</color>
 
+    <color name="circleBackgroundMiddleColor">#80FEFEFE</color>
+    <color name="circleBackgroundMiddleColorPressed">#20FEFEFE</color>
+    <color name="circleBackgroundOuterColor">#FFFFFF</color>
+
 </resources>

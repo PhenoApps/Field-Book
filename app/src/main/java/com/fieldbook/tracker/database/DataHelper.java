@@ -15,6 +15,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
@@ -1393,8 +1394,7 @@ public class DataHelper {
             }
         }
 
-        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId(context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0)
-                .getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        Integer[] result = ObservationUnitPropertyDao.Companion.getAllRangeId(context);
 
         int[] data = new int[result.length];
 
@@ -2067,12 +2067,12 @@ public class DataHelper {
 //        cursor.close();
     }
 
-    public void deleteField(int exp_id) {
+    public void deleteField(int studyId) {
 
         open();
 
         //TODO add optional cascade delete
-        StudyDao.Companion.deleteField(exp_id);
+        StudyDao.Companion.deleteField(studyId);
 //        db.execSQL("DELETE FROM studies WHERE internal_id_study = " + exp_id);
 //        db.execSQL("DELETE FROM observation_units WHERE study_db_id = " + exp_id);
 //        db.execSQL("DELETE FROM observation_units_attributes WHERE study_db_id = " + exp_id);
@@ -2084,6 +2084,19 @@ public class DataHelper {
 //        db.execSQL("DELETE FROM " + PLOT_ATTRIBUTES + " WHERE exp_id = " + exp_id);
 //        db.execSQL("DELETE FROM " + PLOT_VALUES + " WHERE exp_id = " + exp_id);
 //        db.execSQL("DELETE FROM " + USER_TRAITS + " WHERE exp_id = " + exp_id);
+
+        deleteFieldSortOrder(studyId);
+    }
+
+
+    private void deleteFieldSortOrder(int studyId) {
+        try {
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit().remove(GeneralKeys.SORT_ORDER + "." + studyId)
+                    .apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void switchField(int exp_id) {
