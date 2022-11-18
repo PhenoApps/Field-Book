@@ -24,6 +24,7 @@ class BetaPreferencesFragment : PreferenceFragmentCompat() {
                     AlertDialog.Builder(context)
                         .setTitle(getString(R.string.pref_beta_repeated_values_disabled_title))
                         .setMessage(getString(R.string.pref_beta_repeated_values_disabled_message))
+                        .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
                         .show()
                 }
             }

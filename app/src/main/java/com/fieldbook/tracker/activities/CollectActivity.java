@@ -248,6 +248,12 @@ public class CollectActivity extends AppCompatActivity
     
     private SecureBluetoothActivityImpl secureBluetooth;
 
+    /**
+     * Multi Measure delete dialogs
+     */
+    private AlertDialog dialogMultiMeasureDelete;
+    private AlertDialog dialogMultiMeasureConfirmDelete;
+
     public void triggerTts(String text) {
         if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
             ttsHelper.speak(text);
@@ -1256,8 +1262,101 @@ public class CollectActivity extends AppCompatActivity
                 }
 
                 return true;
+
+            case R.id.action_act_collect_repeated_values_indicator:
+
+                showMultiMeasureDeleteDialog();
+
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showMultiMeasureDeleteDialog() {
+
+        ObservationModel[] values = ObservationDao.Companion.getAllRepeatedValues(
+                getStudyId(), getObservationUnit(), getTraitName());
+
+        int size = values.length;
+        String[] items = new String[size];
+        boolean[] checked = new boolean[size];
+
+        for (int n = 0; n < size; n++) {
+            ObservationModel model = values[n];
+            items[n] = model.getValue();
+            checked[n] = false;
+        }
+
+        dialogMultiMeasureDelete = new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_multi_measure_delete_title)
+                .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {})
+                .setPositiveButton(android.R.string.ok, (d, which) -> {
+
+                    List<ObservationModel> deleteItems = new ArrayList<>();
+                    int checkSize = checked.length;
+                    for (int j = 0; j < checkSize; j++) {
+                        if (checked[j]) {
+                            deleteItems.add(values[j]);
+                        }
+                    }
+
+                    if (!deleteItems.isEmpty()) {
+
+                        showConfirmMultiMeasureDeleteDialog(deleteItems);
+
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                    d.dismiss();
+                })
+                .create();
+
+        if (!dialogMultiMeasureDelete.isShowing()) {
+
+            dialogMultiMeasureDelete.show();
+        }
+    }
+
+    private void showConfirmMultiMeasureDeleteDialog(List<ObservationModel> models) {
+
+        dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
+            .setPositiveButton(android.R.string.ok, (d, which) -> {
+                deleteMultiMeasures(models);
+            })
+            .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                d.dismiss();
+            })
+            .create();
+
+        if (!dialogMultiMeasureConfirmDelete.isShowing()) {
+
+            dialogMultiMeasureConfirmDelete.show();
+        }
+    }
+
+    /**
+     * Called when multi measure delete dialog deletes an item.
+     * @param models the observations to be deleted
+     */
+    public void deleteMultiMeasures(@NonNull List<ObservationModel> models) {
+
+        for (ObservationModel model : models) {
+
+            deleteRep(model.getObservation_variable_name(), model.getRep());
+
+            ObservationModel[] currentModels = ObservationDao.Companion.getAllRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
+
+            if (currentModels.length == 0) {
+
+                collectInputView.setText("");
+
+            } else {
+
+                collectInputView.prepareObservationsExistMode(Arrays.asList(currentModels));
+
+            }
+        }
     }
 
     /**

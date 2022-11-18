@@ -12,8 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.database.dao.ObservationDao;
-import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.google.android.flexbox.AlignItems;
@@ -24,8 +22,6 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.StringJoiner;
 
 public class MultiCatTraitLayout extends BaseTraitLayout {
@@ -162,9 +158,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         });
     }
 
-    private void loadScale() {
-
-        //load();
+    private void refreshList() {
 
         categoryList.clear();
 
@@ -190,35 +184,13 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         scale = CategoryJsonUtil.Companion.filterExists(getCategories(), scale);
 
         categoryList.addAll(scale);
-        refreshCategoryText();
-        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
-
     }
 
-    private void load() {
+    private void loadScale() {
 
-        CollectActivity act = (CollectActivity) getContext();
-
-        List<ObservationModel> models = Arrays.asList(ObservationDao.Companion
-                .getAllRepeatedValues(act.getStudyId(), act.getObservationUnit(), act.getTraitName()));
-
-        for (ObservationModel m : models) {
-
-            if (m.getValue() != null && !m.getValue().isEmpty()) {
-
-                StringJoiner joiner = new StringJoiner(":");
-                ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(m.getValue());
-
-                for (BrAPIScaleValidValuesCategories v : scale) {
-
-                    joiner.add(v.getValue());
-                }
-
-                m.setValue(joiner.toString());
-            }
-        }
-
-        act.getInputView().getRepeatView().initialize(models);
+        refreshList();
+        refreshCategoryText();
+        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
 
     }
 
@@ -349,9 +321,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     @Override
     public void refreshLayout(Boolean onNew) {
         super.refreshLayout(onNew);
-
-        setAdapter();
-
+        refreshList();
     }
 
     @Override

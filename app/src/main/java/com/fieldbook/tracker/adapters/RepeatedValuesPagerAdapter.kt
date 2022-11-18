@@ -34,6 +34,10 @@ class RepeatedValuesPagerAdapter(private val mContext: Context) : PagerAdapter()
         return layout
     }
 
+    override fun getItemPosition(`object`: Any): Int {
+        return POSITION_NONE
+    }
+
     override fun destroyItem(collection: ViewGroup, position: Int, view: Any) {
         views.remove(position)
         collection.removeView(view as View)
@@ -51,5 +55,6 @@ class RepeatedValuesPagerAdapter(private val mContext: Context) : PagerAdapter()
 
     fun submitItems(values: List<RepeatedValuesView.ObservationModelViewHolder>) {
         this.items = values
+        notifyDataSetChanged()
     }
 }

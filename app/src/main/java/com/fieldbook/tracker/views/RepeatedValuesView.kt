@@ -28,7 +28,28 @@ import kotlin.math.abs
 class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     ConstraintLayout(context, attributeSet) {
 
-    data class ObservationModelViewHolder(val model: ObservationModel, val color: Int)
+    data class ObservationModelViewHolder(var model: ObservationModel, val color: Int)
+
+    class SimplePageTransformer : ViewPager.PageTransformer {
+
+        override fun transformPage(view: View, position: Float) {
+            view.apply {
+                alpha = when {
+                    position < -1 -> { // [-Infinity,-1)
+                        // This page is way off-screen to the left.
+                        0.1f
+                    }
+                    position <= 1 -> { // [-1,1]
+                        1f
+                    }
+                    else -> { // (1,+Infinity]
+                        // This page is way off-screen to the right.
+                        0.1f
+                    }
+                }
+            }
+        }
+    }
 
     var displayColor: Int = Color.RED
 
@@ -51,6 +72,10 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
         nonEmptyGroup = findViewById(R.id.view_repeated_values_group)
 
         pager.pageMargin = 8f.dipToPixels(context).toInt()
+
+        pager.adapter = RepeatedValuesPagerAdapter(context)
+
+        pager.setPageTransformer(true, SimplePageTransformer())
 
         //update buttons when user scrolls
         pager.setOnScrollChangeListener { _, _, _, _, _ ->
@@ -149,13 +174,16 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         val old = pager.currentItem
 
-        getSelectedModel()?.value = value
+        getSelectedModel()?.let { model ->
 
-        submitList()
+            getSelectedModel()?.value = value
 
-        pager.currentItem = old
+            submitList()
 
-        updateButtonVisibility()
+            pager.currentItem = old
+
+            updateButtonVisibility()
+        }
     }
 
     /**
@@ -303,9 +331,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
     private fun submitList() {
 
-        pager.adapter = RepeatedValuesPagerAdapter(context).apply {
-            submitItems(mValues)
-        }
+        (pager.adapter as RepeatedValuesPagerAdapter).submitItems(mValues)
 
         updateButtonVisibility()
     }

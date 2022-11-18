@@ -310,7 +310,7 @@ class ObservationDao {
 //            println("FAIL VariableName: ${obs?.variableName}")
 //            println("**************************")
 
-            if(getObservation("$expId", model.unitDbId,model.variableName)?.dbId != null)  {
+            if(getObservation("$expId", model.unitDbId,model.variableName, "1")?.dbId != null)  {
 
 //                println("**************************")
 //                println("FAIL Value: ${obs?.value}")
@@ -319,7 +319,7 @@ class ObservationDao {
 //                println("FAIL UnitDbId: ${obs?.unitDbId}")
 //                println("**************************")
 
-                println("DbId: ${getObservation("$expId", model.unitDbId,model.variableName)?.dbId}")
+                println("DbId: ${getObservation("$expId", model.unitDbId,model.variableName, "1")?.dbId}")
                 -1
             }
             else {

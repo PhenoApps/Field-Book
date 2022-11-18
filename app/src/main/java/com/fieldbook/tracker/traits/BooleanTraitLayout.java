@@ -147,7 +147,7 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
     @Override
     public void refreshLayout(Boolean onNew) {
         super.refreshLayout(onNew);
-        resetToDefault();
+        if (onNew) resetToDefault();
     }
 
     @Override

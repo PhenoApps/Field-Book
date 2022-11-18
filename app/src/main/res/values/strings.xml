@@ -790,7 +790,6 @@
     <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
     <string name="trait_usb_camera_capture_button_text">Capture</string>
     
-    <string name="preferences_beta_title">Beta Features</string>
     <string name="pref_beta_repeated_values_title">Repeated Measures</string>
     <string name="pref_beta_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
     <string name="view_repeated_values_add_button_content_description">Adds a new observation.</string>
@@ -803,5 +802,8 @@
     <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
     <string name="preferences_beta_title">Beta</string>
+    <string name="dialog_multi_measure_delete_no_observations">No observations exist.</string>
+    <string name="dialog_multi_measure_delete_title">Delete Observations</string>
+    <string name="dialog_multi_measure_confirm_delete_title">These observations will be permanently deleted.</string>
 
 </resources>
