@@ -1126,6 +1126,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setExp_alias(studyDetails.getStudyDbId()); //hack for now to get in table alias not used for anything
             field.setExp_species(studyDetails.getCommonCropName());
             field.setCount(studyDetails.getNumberOfPlots().toString());
+            field.setObservation_level(observationLevel);
 
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {
@@ -1140,7 +1141,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setSecondary_id(secondaryId);
 
             // Do a pre-check to see if the field exists so we can show an error
-            int FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
+            int FieldUniqueStatus = dataHelper.checkFieldNameAndObsLvl(field.getExp_name(), field.getObservation_level());
             if (FieldUniqueStatus != -1) {
                 return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
             }

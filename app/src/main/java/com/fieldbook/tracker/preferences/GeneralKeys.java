@@ -128,6 +128,9 @@ public class GeneralKeys {
     public static final String PRIMARY_NAME = "ImportFirstName";
     public static final String SECONDARY_NAME = "ImportSecondName";
 
+    //Used to get name of observation level of currently selected field
+    public static final String FIELD_OBS_LEVEL = "FieldObsLevel";
+
     //flag saved in preferences to determine if import is completed
     public static final String IMPORT_FIELD_FINISHED = "ImportFieldFinished";
 
@@ -145,6 +148,9 @@ public class GeneralKeys {
 
     //Data grid
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
+
+    //summary filter
+    public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
 
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";

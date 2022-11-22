@@ -836,9 +836,22 @@ public class DataHelper {
     }
 
     /**
-     * Convert EAV database to relational
-     * TODO add where statement for repeated values
+     * Same as convertDatabaseToTable but filters by obs unit
      */
+    public Cursor convertDatabaseToTable(String[] col, String[] traits, String obsUnit) {
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.convertDatabaseToTable(
+                ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1),
+                ep.getString(GeneralKeys.UNIQUE_NAME, ""), obsUnit, col, traits);
+
+    }
+
+        /**
+         * Convert EAV database to relational
+         * TODO add where statement for repeated values
+         */
     public Cursor convertDatabaseToTable(String[] col, String[] traits) {
 
         open();
@@ -2085,6 +2098,19 @@ public class DataHelper {
 //        db.execSQL("DELETE FROM " + PLOT_VALUES + " WHERE exp_id = " + exp_id);
 //        db.execSQL("DELETE FROM " + USER_TRAITS + " WHERE exp_id = " + exp_id);
 
+        resetSummaryLabels(studyId);
+        deleteFieldSortOrder(studyId);
+    }
+
+    private void resetSummaryLabels(int studyId) {
+        try {
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit().remove(GeneralKeys.SUMMARY_FILTER_ATTRIBUTES + "." + studyId)
+                    .apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         deleteFieldSortOrder(studyId);
     }
 
@@ -2099,7 +2125,7 @@ public class DataHelper {
         }
     }
 
-    public void switchField(int exp_id) {
+    public void switchField(int studyId) {
 
         open();
 
@@ -2112,7 +2138,7 @@ public class DataHelper {
         //delete the old table
         db.execSQL("DROP TABLE IF EXISTS ObservationUnitProperty");
 
-        StudyDao.Companion.switchField(exp_id);
+        StudyDao.Companion.switchField(studyId);
 
 //        Cursor cursor;
 //
@@ -2169,6 +2195,13 @@ public class DataHelper {
 //        }
 //
 //        return -1;
+    }
+
+    public int checkFieldNameAndObsLvl(String name, String observationLevel) {
+
+        open();
+
+        return StudyDao.Companion.checkFieldNameAndObsLvl(name, observationLevel);
     }
 
     public int createField(FieldObject e, List<String> columns) {

@@ -138,7 +138,8 @@ import kotlin.Pair;
 
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends AppCompatActivity
-        implements SensorEventListener, GPSTracker.GPSTrackerListener, UsbCameraInterface {
+        implements SensorEventListener, GPSTracker.GPSTrackerListener,
+        UsbCameraInterface, SummaryFragment.SummaryOpenListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -250,6 +251,9 @@ public class CollectActivity extends AppCompatActivity
     private UsbCameraHelper mUsbCameraHelper = null;
     
     private SecureBluetoothActivityImpl secureBluetooth;
+
+    //summary fragment listener
+    private boolean isSummaryOpen = false;
 
     /**
      * Multi Measure delete dialogs
@@ -886,6 +890,11 @@ public class CollectActivity extends AppCompatActivity
 
         //navigate to the last used trait using preferences
         String trait = ep.getString(GeneralKeys.LAST_USED_TRAIT, null);
+
+        navigateToTrait(trait);
+    }
+
+    public void navigateToTrait(String trait) {
 
         if (trait != null) {
 
@@ -2044,30 +2053,42 @@ public class CollectActivity extends AppCompatActivity
     }
 
     private void showSummary() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_summary, null);
-        TextView summaryText = layout.findViewById(R.id.field_name);
-        summaryText.setText(traitBox.createSummaryText(rangeBox.getPlotID()));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.preferences_appearance_toolbar_customize_summary)
-                .setCancelable(true)
-                .setView(layout);
+        SummaryFragment fragment = new SummaryFragment();
+        fragment.setListener(this);
 
-        builder.setNegativeButton(getString(R.string.dialog_close), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int i) {
-                dialog.dismiss();
-            }
-        });
+        isSummaryOpen = true;
 
-        final AlertDialog summaryDialog = builder.create();
-        summaryDialog.show();
-        DialogUtils.styleDialogs(summaryDialog);
+        getSupportFragmentManager().beginTransaction()
+                .add(android.R.id.content, fragment)
+                .addToBackStack(null)
+                .commit();
 
-        android.view.WindowManager.LayoutParams params2 = summaryDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        summaryDialog.getWindow().setAttributes(params2);
+//        LayoutInflater inflater = this.getLayoutInflater();
+//        inflater.inflate(R.layout.fragment_summary, null);
+//        View layout = inflater.inflate(R.layout.dialog_summary, null);
+//        TextView summaryText = layout.findViewById(R.id.field_name);
+//        summaryText.setText(traitBox.createSummaryText(rangeBox.getPlotID()));
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+//        builder.setTitle(R.string.preferences_appearance_toolbar_customize_summary)
+//                .setCancelable(true)
+//                .setView(layout);
+//
+//        builder.setNegativeButton(getString(R.string.dialog_close), new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int i) {
+//                dialog.dismiss();
+//            }
+//        });
+//
+//        final AlertDialog summaryDialog = builder.create();
+//        summaryDialog.show();
+//        DialogUtils.styleDialogs(summaryDialog);
+//
+//        android.view.WindowManager.LayoutParams params2 = summaryDialog.getWindow().getAttributes();
+//        params2.width = LayoutParams.MATCH_PARENT;
+//        summaryDialog.getWindow().setAttributes(params2);
     }
 
     @Override
@@ -2339,7 +2360,16 @@ public class CollectActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        finish();
+
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+
+        if (count == 0) {
+
+            finish();
+
+        } else {
+            getSupportFragmentManager().popBackStack();
+        }
     }
 
     @Override
@@ -2493,6 +2523,15 @@ public class CollectActivity extends AppCompatActivity
     @Override
     public UsbCameraHelper getCameraHelper() {
         return mUsbCameraHelper;
+    }
+
+    @Override
+    public void onSummaryDestroy() {
+        isSummaryOpen = false;
+    }
+
+    public boolean isSummaryFragmentOpen() {
+        return isSummaryOpen;
     }
 
     ///// class TraitBox /////

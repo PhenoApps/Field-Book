@@ -18,6 +18,7 @@ public class FieldObject {
     private String date_export;
     private String count;
     private String exp_source;
+    private String observation_level;
 
     public FieldObject() {
     }
@@ -132,5 +133,13 @@ public class FieldObject {
 
     public void setExp_source(String exp_source) {
         this.exp_source = exp_source;
+    }
+
+    public String getObservation_level() {
+        return observation_level;
+    }
+
+    public void setObservation_level(String observation_level) {
+        this.observation_level = observation_level;
     }
 }

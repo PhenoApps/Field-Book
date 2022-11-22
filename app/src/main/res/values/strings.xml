@@ -52,6 +52,7 @@
     <string name="fields_update_sort_study">Update Sorting</string>
     <string name="fields_delete_study_confirmation">Are you sure you want to delete this field? This will delete all data from this field.</string>
     <string name="fields_study_exists_message">This field already exists.</string>
+    <string name="fields_study_and_obs_exists_message">This field is already imported at this observation level.</string>
     <string name="fields_select_study">Select or import a field.</string>
     <string name="fields_date_imported">Import date</string>
     <string name="fields_date_edited">Edit date</string>
@@ -796,6 +797,15 @@
     <string name="list_item_field_sort_drag_content_description">Drag to move item.</string>
     <string name="dialog_field_sort_no_attributes_found">No attributes found.</string>
     <string name="dialog_field_sort_no_more_attributes_found">All attributes have been used.</string>
+    <string name="fragment_summary_toolbar_title">Summary</string>
+    <string name="menu_fragment_summary_filter_title">Filter</string>
+    <string name="fragment_summary_filter_title">Select summary labels</string>
+    <string name="dialog_fragment_summary_neutral_button">Toggle All</string>
+    <string name="fragment_summary_prev_button_text">Previous</string>
+    <string name="fragment_summary_next_button_text">Next</string>
+    <string name="list_item_summary_nav_button_content_description">Navigates to the selected entry.</string>
+    <string name="fragment_summary_prev_button_content_description">Navigates to previous entry.</string>
+    <string name="fragment_summary_next_button_content_description">Navigates to next entry.</string>
 
     <string name="pref_beta_repeated_values_title">Repeated Measures</string>
     <string name="pref_beta_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
