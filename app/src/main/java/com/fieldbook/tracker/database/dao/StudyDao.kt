@@ -140,11 +140,12 @@ class StudyDao {
 
             it.exp_id = this[Study.PK] as Int
             it.exp_name = this["study_name"].toString()
+            it.exp_alias = this["study_alias"].toString()
             it.unique_id = this["study_unique_id_name"].toString()
             it.primary_id = this["study_primary_id_name"].toString()
             it.secondary_id = this["study_secondary_id_name"].toString()
             it.date_import = this["date_import"].toString()
-            it.exp_sort = this["study_sort_name"].toString()
+            it.exp_sort = (this["study_sort_name"] ?: "").toString()
             it.date_edit = when (val date = this["date_edit"]?.toString()) {
                 null, "null" -> ""
                 else -> date
@@ -419,11 +420,11 @@ class StudyDao {
          * Search for the first studies row that matches the name and observationLevel parameter.
          * Default return value is -1
          */
-        fun checkFieldNameAndObsLvl(name: String, observationLevel: String): Int = withDatabase { db ->
+        fun checkFieldNameAndObsLvl(name: String, observationLevel: String?): Int = withDatabase { db ->
             db.query(Study.tableName,
                     arrayOf(Study.PK),
                     where = "study_name = ? AND observation_levels = ?",
-                    whereArgs = arrayOf(name, observationLevel)).toFirst()[Study.PK] as? Int ?: -1
+                    whereArgs = arrayOf(name, observationLevel ?: "")).toFirst()[Study.PK] as? Int ?: -1
 
         } ?: -1
 

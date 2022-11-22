@@ -96,8 +96,7 @@
             android:minWidth="40dp"
             android:singleLine="true"
             android:textColor="@color/main_details"
-            android:textSize="@dimen/text_size_small"
-            android:text="observationLevel"/>
+            android:textSize="@dimen/text_size_small"/>
     </LinearLayout>
 
     <ImageView

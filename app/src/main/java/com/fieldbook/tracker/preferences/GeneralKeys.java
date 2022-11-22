@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
+import org.jetbrains.annotations.NotNull;
+
 public class GeneralKeys {
     // @formatter:off
 
@@ -84,6 +86,8 @@ public class GeneralKeys {
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
     // @formatter:on
 
+    //Beta feature keys
+
     public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
     public static final String VERIFY_USER = "VerifyUserEvery24Hours";
 
@@ -160,6 +164,9 @@ public class GeneralKeys {
     public static final String TTS_LANGUAGE_ENABLED = "TTS_LANGUAGE_ENABLED";
     public static final String TTS_LANGUAGE = "TTS_LANGUAGE";
     public static final String TTS_LANGUAGE_SUMMARY = "TTS_LANGUAGE_SUMMARY";
+
+    @NotNull
+    public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
 
     private GeneralKeys() {
 

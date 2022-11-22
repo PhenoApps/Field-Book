@@ -24,12 +24,16 @@ import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails;
+import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class BrapiLoadDialog extends Dialog implements android.view.View.OnClickListener {
@@ -42,6 +46,8 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
     private Boolean studyLoadStatus = false;
     private Boolean plotLoadStatus = false;
     private Boolean traitLoadStatus = false;
+    private BrapiPaginationManager paginationManager;
+
     // Creates a new thread to do importing
     private Runnable importRunnable = new Runnable() {
         public void run() {
@@ -59,6 +65,10 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
 
     public void setSelectedStudy(BrapiStudyDetails selectedStudy) {
         this.study = selectedStudy;
+    }
+
+    public void setPaginationManager(BrapiPaginationManager paginationManager) {
+        this.paginationManager = paginationManager;
     }
 
     @Override
@@ -82,6 +92,7 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
         studyDetails = new BrapiStudyDetails();
         updateNumPlotsLabel();
         buildStudyDetails();
+        //        loadObservations(); //Uncomment this if you want the app to sync the observations when field is loaded.
         loadStudy();
     }
 
@@ -227,6 +238,65 @@ public class BrapiLoadDialog extends Dialog implements android.view.View.OnClick
                         }
                     }
                 });
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Function to load the observations.
+     *
+     * TODO: Decide if we want to delete.  It is likely a better approach to use the BrapiSyncObsDialog as it gives the user more control
+     */
+    private void loadObservations() {
+        System.out.println("Study DBId: "+study.getStudyDbId());
+
+        List<String> observationVariableDbIds = new ArrayList<String>();
+
+        //Trying to get the traits as well:
+        brAPIService.getTraits(study.getStudyDbId(), new Function<BrapiStudyDetails, Void>() {
+            @Override
+            public Void apply(BrapiStudyDetails input) {
+                for(TraitObject obj : input.getTraits()) {
+                    System.out.println("Trait:"+obj.getTrait());
+                    System.out.println("ObsIds: "+obj.getExternalDbId());
+                    observationVariableDbIds.add(obj.getExternalDbId());
+                }
+
+                return null;
+            }
+        }, new Function<Integer, Void>() {
+            @Override
+            public Void apply(Integer input) {
+                return null;
+            }
+        });
+
+        System.out.println("obsIds Size:"+observationVariableDbIds.size());
+        brAPIService.getObservations(study.getStudyDbId(), observationVariableDbIds, paginationManager, new Function<List<Observation>, Void>() {
+            @Override
+            public Void apply(List<Observation> input) {
+                study.setObservations(input);
+                BrapiStudyDetails.merge(studyDetails, study);
+                System.out.println("StudyId: " + study.getStudyDbId());
+                System.out.println("StudyName: " + study.getStudyName());
+                for(Observation obs : input) {
+
+                    System.out.println("***************************");
+                    System.out.println("StudyId: "+obs.getStudyId());
+                    System.out.println("ObsId: "+obs.getDbId());
+                    System.out.println("UnitDbId: "+obs.getUnitDbId());
+
+                    System.out.println("VariableDbId: "+obs.getVariableDbId());
+                    System.out.println("VariableName: "+obs.getVariableName());
+                    System.out.println("Value: "+obs.getValue());
+                }
+                return null;
+            }
+        }, new Function<Integer, Void>() {
+            @Override
+            public Void apply(Integer input) {
+                System.out.println("Stopped:");
                 return null;
             }
         });
