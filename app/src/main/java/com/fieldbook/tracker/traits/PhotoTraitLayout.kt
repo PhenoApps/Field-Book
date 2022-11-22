@@ -309,6 +309,8 @@ class PhotoTraitLayout : BaseTraitLayout {
                 e.printStackTrace()
 
             }
+
+            (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
         }
     }
 
@@ -436,6 +438,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                     )
                 }
                 loadLayoutWork()
+                (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
             }
             builder.setNegativeButton(context.getString(R.string.dialog_no)) { dialog, _ -> dialog.dismiss() }
             val alert = builder.create()

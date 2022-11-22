@@ -51,6 +51,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -90,6 +91,7 @@ import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
+import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.GeodeticUtils;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
@@ -102,6 +104,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.jetbrains.annotations.NotNull;
 import org.phenoapps.interfaces.usb.camera.UsbCameraInterface;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
@@ -317,6 +320,10 @@ public class CollectActivity extends AppCompatActivity
 
     public String getTraitFormat() {
         return getCurrentTrait().getFormat();
+    }
+
+    public BaseTraitLayout getTraitLayout() {
+        return traitLayouts.getTraitLayout(getTraitFormat());
     }
 
     private void initCurrentVals() {
@@ -721,6 +728,8 @@ public class CollectActivity extends AppCompatActivity
         }
 
         mUsbCameraHelper.destroy();
+
+        traitLayoutRefresh();
 
         super.onDestroy();
     }
@@ -1274,46 +1283,92 @@ public class CollectActivity extends AppCompatActivity
 
     private void showMultiMeasureDeleteDialog() {
 
+        String labelValPref = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+
         ObservationModel[] values = ObservationDao.Companion.getAllRepeatedValues(
                 getStudyId(), getObservationUnit(), getTraitName());
 
-        int size = values.length;
-        String[] items = new String[size];
-        boolean[] checked = new boolean[size];
-
-        for (int n = 0; n < size; n++) {
-            ObservationModel model = values[n];
-            items[n] = model.getValue();
-            checked[n] = false;
+        ArrayList<String> is = new ArrayList<>();
+        for (ObservationModel m: values) {
+            if (!m.getValue().isEmpty()) {
+                is.add(m.getValue());
+            }
         }
 
-        dialogMultiMeasureDelete = new AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_multi_measure_delete_title)
-                .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {})
-                .setPositiveButton(android.R.string.ok, (d, which) -> {
+        int size = is.size();
 
-                    List<ObservationModel> deleteItems = new ArrayList<>();
-                    int checkSize = checked.length;
-                    for (int j = 0; j < checkSize; j++) {
-                        if (checked[j]) {
-                            deleteItems.add(values[j]);
+        if (size > 0) {
+
+            String[] items = new String[size];
+            boolean[] checked = new boolean[size];
+
+            for (int n = 0; n < size; n++) {
+
+                ObservationModel model = values[n];
+
+                String value = model.getValue();
+
+                if (!value.isEmpty()) {
+
+                    try {
+
+                        ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(value);
+
+                        value = CategoryJsonUtil.Companion.flattenMultiCategoryValue(CategoryJsonUtil.Companion.decode(value), labelValPref.equals("label"));
+
+                    } catch (Exception ignore) {}
+
+                    items[n] = value;
+                    checked[n] = false;
+                }
+            }
+
+            dialogMultiMeasureDelete = new AlertDialog.Builder(this)
+                    .setTitle(R.string.dialog_multi_measure_delete_title)
+                    .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {})
+                    .setPositiveButton(R.string.dialog_multi_measure_delete, (d, which) -> {
+
+                        List<ObservationModel> deleteItems = new ArrayList<>();
+                        int checkSize = checked.length;
+                        for (int j = 0; j < checkSize; j++) {
+                            if (checked[j]) {
+                                deleteItems.add(values[j]);
+                            }
                         }
+
+                        if (!deleteItems.isEmpty()) {
+
+                            showConfirmMultiMeasureDeleteDialog(deleteItems);
+
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                        d.dismiss();
+                    })
+                    .setNeutralButton(R.string.dialog_multi_measure_select_all, (d, which) -> {
+                        //Arrays.fill(checked, true);
+                    })
+                    .create();
+
+            dialogMultiMeasureDelete.setOnShowListener((d) -> {
+                AlertDialog ad = (AlertDialog) d;
+                ad.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener((v) -> {
+                    Arrays.fill(checked, true);
+                    ListView lv = ad.getListView();
+                    for (int i = 0; i < checked.length; i++) {
+                        lv.setItemChecked(i, true);
                     }
+                });
+            });
 
-                    if (!deleteItems.isEmpty()) {
+            if (!dialogMultiMeasureDelete.isShowing()) {
 
-                        showConfirmMultiMeasureDeleteDialog(deleteItems);
+                dialogMultiMeasureDelete.show();
+            }
+        } else {
 
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, (d, which) -> {
-                    d.dismiss();
-                })
-                .create();
+            Toast.makeText(this, R.string.dialog_multi_measure_delete_no_observations, Toast.LENGTH_SHORT).show();
 
-        if (!dialogMultiMeasureDelete.isShowing()) {
-
-            dialogMultiMeasureDelete.show();
         }
     }
 
@@ -1353,9 +1408,17 @@ public class CollectActivity extends AppCompatActivity
 
             } else {
 
+                for (ObservationModel m : currentModels) {
+                    try {
+                        m.setValue(getTraitLayout().decodeValue(m.getValue()));
+                    } catch (Exception ignore) {}
+                }
+
                 collectInputView.prepareObservationsExistMode(Arrays.asList(currentModels));
 
             }
+
+            traitLayoutRefresh();
         }
     }
 
@@ -2224,9 +2287,12 @@ public class CollectActivity extends AppCompatActivity
                     if (values[0].getValue().isEmpty()) {
                         n = 0;
                     }
+                } else if (n > 1) {
+                    if (values[n-1].getValue().isEmpty()) {
+                        n--;
+                    }
                 }
 
-                String drawableName = "numeric_" + n + "_box.xml";
                 switch (n) {
                     case 0:
                         item.setIcon(R.drawable.numeric_0_box);

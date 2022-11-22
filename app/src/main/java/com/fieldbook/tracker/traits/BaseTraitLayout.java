@@ -87,32 +87,24 @@ public abstract class BaseTraitLayout extends LinearLayout {
         CollectActivity act = (CollectActivity) getContext();
         isLocked = act.isFrozen() || act.isLocked();
 
-        Map<String, String> observations = getNewTraits();
-        TraitObject trait = getCurrentTrait();
-        String traitName = trait.getTrait();
-        //String traitFormat = trait.getFormat();
+        ObservationModel[] observations = ObservationDao.Companion.getAllRepeatedValues(
+                act.getStudyId(),
+                act.getObservationUnit(),
+                act.getTraitName()
+        );
 
         //clear old list of repeated values each time a new trait is loaded
         act.getInputView().getRepeatView().clear();
 
         act.getInputView().getRepeatView().setDisplayColor(Color.parseColor(getDisplayColor()));
 
-        if (observations.containsKey(traitName)) {
+        if (observations.length > 0) {
 
-            String value = null;
-            if (traitName != null) {
-                value = observations.get(traitName);
-            }
+            String value = observations[observations.length - 1].getValue();
 
-            if (value != null) {
+            if (!value.isEmpty()) {
 
-                ObservationModel[] models = ObservationDao.Companion.getAllRepeatedValues(
-                        act.getStudyId(),
-                        act.getObservationUnit(),
-                        act.getTraitName()
-                );
-
-                for (ObservationModel m : models) {
+                for (ObservationModel m : observations) {
                     if (!m.getValue().isEmpty()) {
                         m.setValue(decodeValue(m.getValue()));
                     }
@@ -120,7 +112,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
                 act.getInputView().setTextColor(Color.parseColor(getDisplayColor()));
 
-                act.getInputView().prepareObservationsExistMode(Arrays.asList(models));
+                act.getInputView().prepareObservationsExistMode(Arrays.asList(observations));
 
             }
 

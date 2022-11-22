@@ -814,7 +814,8 @@
     <string name="dialog_field_sort_toggle_order_content_description">Reverses sort order.</string>
     <string name="dialog_field_sort_add_content_description">Opens a dialog to add a new attribute to sort by.</string>
     <string name="dialog_multi_measure_delete_no_observations">No observations exist.</string>
-    <string name="dialog_multi_measure_delete_title">Delete Observations</string>
+    <string name="dialog_multi_measure_delete_title">Observations</string>
     <string name="dialog_multi_measure_confirm_delete_title">These observations will be permanently deleted.</string>
-
+    <string name="dialog_multi_measure_delete">Delete</string>
+    <string name="dialog_multi_measure_select_all">Select all</string>
 </resources>

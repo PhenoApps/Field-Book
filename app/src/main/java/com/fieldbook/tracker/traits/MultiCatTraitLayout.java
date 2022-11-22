@@ -8,6 +8,7 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
@@ -74,50 +75,44 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void loadLayout() {
-        super.loadLayout();
+    public void afterLoadNotExists(CollectActivity act) {
+        super.afterLoadNotExists(act);
+        setAdapter();
+    }
 
-        final String trait = getCurrentTrait().getTrait();
+    @Override
+    public void afterLoadDefault(CollectActivity act) {
+        super.afterLoadDefault(act);
+        setAdapter();
+    }
+
+    @Override
+    public void afterLoadExists(CollectActivity act, @Nullable String value) {
+        super.afterLoadExists(act, value);
 
         String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
         showLabel = !labelValPref.equals("value");
 
         categoryList = new ArrayList<>();
 
-        if (!getNewTraits().containsKey(trait)) {
+        loadScale();
 
-            getCollectInputView().setText("");
-            getCollectInputView().setTextColor(Color.BLACK);
+        if (!((CollectActivity) getContext()).isDataLocked()) {
 
-        } else {
+            setAdapter();
 
-            loadScale();
         }
+
+        refreshLock();
+    }
+
+    private void setAdapter() {
 
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
         layoutManager.setFlexWrap(FlexWrap.WRAP);
         layoutManager.setFlexDirection(FlexDirection.ROW);
         layoutManager.setAlignItems(AlignItems.STRETCH);
         gridMultiCat.setLayoutManager(layoutManager);
-
-        if (!((CollectActivity) getContext()).isDataLocked()) {
-
-           setAdapter();
-
-        }
-
-        gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                gridMultiCat.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-            }
-        });
-
-        refreshLock();
-    }
-
-    private void setAdapter() {
 
         loadScale();
 
@@ -154,6 +149,14 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
             @Override
             public int getItemCount() {
                 return cat.length;
+            }
+        });
+
+        gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                gridMultiCat.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             }
         });
     }
@@ -322,6 +325,8 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     public void refreshLayout(Boolean onNew) {
         super.refreshLayout(onNew);
         refreshList();
+        loadScale();
+        setAdapter();
     }
 
     @Override
@@ -329,7 +334,9 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         StringJoiner joiner = new StringJoiner(":");
         ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
         for (BrAPIScaleValidValuesCategories s : scale) {
-            joiner.add(s.getValue());
+            if (showLabel) {
+                joiner.add(s.getLabel());
+            } else joiner.add(s.getValue());
         }
         return joiner.toString();
     }

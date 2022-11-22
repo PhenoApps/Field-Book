@@ -105,6 +105,12 @@ public class AudioTraitLayout extends BaseTraitLayout {
         }
     }
 
+    @Override
+    public void refreshLayout(Boolean onNew) {
+        super.refreshLayout(onNew);
+        refreshButtonState();
+    }
+
     private void refreshButtonState() {
         ObservationModel model = getCurrentObservation();
         if (model != null && !model.getValue().isEmpty()) {
