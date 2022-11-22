@@ -70,12 +70,14 @@ public class FieldAdapter extends BaseAdapter {
         boolean has_contents = item != null;
         if (has_contents) {
             ed.putString(GeneralKeys.FIELD_FILE, item.getExp_name());
+            ed.putString(GeneralKeys.FIELD_OBS_LEVEL, item.getObservation_level());
             ed.putInt(GeneralKeys.SELECTED_FIELD_ID, item.getExp_id());
             ed.putString(GeneralKeys.UNIQUE_NAME, item.getUnique_id());
             ed.putString(GeneralKeys.PRIMARY_NAME, item.getPrimary_id());
             ed.putString(GeneralKeys.SECONDARY_NAME, item.getSecondary_id());
         } else {
             ed.putString(GeneralKeys.FIELD_FILE, null);
+            ed.putString(GeneralKeys.FIELD_OBS_LEVEL, null);
             ed.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
             ed.putString(GeneralKeys.UNIQUE_NAME, null);
             ed.putString(GeneralKeys.PRIMARY_NAME, null);
@@ -103,6 +105,7 @@ public class FieldAdapter extends BaseAdapter {
             holder.exportDate = convertView.findViewById(R.id.field_export_date);
             holder.active = convertView.findViewById(R.id.fieldRadio);
             holder.menuPopup = convertView.findViewById(R.id.popupMenu);
+            holder.observationLevel = convertView.findViewById(R.id.observationLevelLbl);
 
             convertView.setTag(holder);
         } else {
@@ -118,6 +121,7 @@ public class FieldAdapter extends BaseAdapter {
         String importDate = getItem(position).getDate_import();
         String editDate = getItem(position).getDate_edit();
         String exportDate = getItem(position).getDate_export();
+        String observationLevel = getItem(position).getObservation_level();
 
         if (importDate != null) {
             importDate = importDate.split(" ")[0];
@@ -131,17 +135,27 @@ public class FieldAdapter extends BaseAdapter {
             exportDate = exportDate.split(" ")[0];
         }
 
+        if (observationLevel == null) {
+            holder.observationLevel.setVisibility(View.GONE);//make invisible
+        } else {
+            holder.observationLevel.setVisibility(View.VISIBLE);
+        }
+
         holder.fieldName.setText(getItem(position).getExp_name());
         holder.count.setText(getItem(position).getCount());
         holder.importDate.setText(importDate);
         holder.editDate.setText(editDate);
         holder.exportDate.setText(exportDate);
+        holder.observationLevel.setText(observationLevel);
 
         holder.active.setOnClickListener(v -> fieldClick(getItem(position)));
 
+        //Check both file name and observation level
         if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) != -1) {
-            holder.active.setChecked(ep.getString(GeneralKeys.FIELD_FILE, "")
-                    .contentEquals(holder.fieldName.getText()));
+            holder.active.setChecked((ep.getString(GeneralKeys.FIELD_FILE, "")
+                    .contentEquals(holder.fieldName.getText())) &&
+                    (ep.getString(GeneralKeys.FIELD_OBS_LEVEL, "")
+                    .contentEquals(holder.observationLevel.getText())));
         } else holder.active.setChecked(false);
 
         holder.menuPopup.setOnClickListener(makeMenuPopListener(position));
@@ -263,5 +277,6 @@ public class FieldAdapter extends BaseAdapter {
         TextView editDate;
         TextView exportDate;
         RadioButton active;
+        TextView observationLevel;
     }
 }

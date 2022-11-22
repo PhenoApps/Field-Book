@@ -127,6 +127,9 @@ public class GeneralKeys {
     public static final String PRIMARY_NAME = "ImportFirstName";
     public static final String SECONDARY_NAME = "ImportSecondName";
 
+    //Used to get name of observation level of currently selected field
+    public static final String FIELD_OBS_LEVEL = "FieldObsLevel";
+
     //flag saved in preferences to determine if import is completed
     public static final String IMPORT_FIELD_FINISHED = "ImportFieldFinished";
 
