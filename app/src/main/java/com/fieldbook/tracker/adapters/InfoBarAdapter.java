@@ -60,7 +60,7 @@ public class InfoBarAdapter extends RecyclerView.Adapter<InfoBarAdapter.ViewHold
     public InfoBarAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.selector_dropdown, parent, false);
+                .inflate(R.layout.item_infobar_dropdown, parent, false);
         return new ViewHolder((ConstraintLayout) v);
     }
 

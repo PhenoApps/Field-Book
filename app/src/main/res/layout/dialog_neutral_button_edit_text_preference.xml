@@ -23,8 +23,9 @@
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:text="@string/neutral"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_neutral_button_edit_text_positive_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/dialog_neutral_button_edit_text_negative_btn"
+        app:layout_constraintTop_toBottomOf="@id/dialog_neutral_button_edit_text_et"
         tools:text="Neutral" />
 
     <Button
@@ -34,8 +35,9 @@
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:text="@android:string/cancel"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_neutral_button_edit_text_neutral_btn"
+        app:layout_constraintStart_toEndOf="@id/dialog_neutral_button_edit_text_neutral_btn"
+        app:layout_constraintEnd_toStartOf="@id/dialog_neutral_button_edit_text_positive_btn"
+        app:layout_constraintTop_toBottomOf="@id/dialog_neutral_button_edit_text_et"
         tools:text="@android:string/cancel" />
 
     <Button

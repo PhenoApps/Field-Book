@@ -214,6 +214,7 @@
     <!-- at times for each theme its helpful to have a dark/light text color -->
     <attr format="color" name="fb_color_text_light"/>
     <attr format="color" name="fb_color_text_dark"/>
+    <attr format="color" name="fb_color_text_secondary"/>
 
     <!-- color of edit text hint -->
     <attr format="color" name="fb_color_hint_text"/>

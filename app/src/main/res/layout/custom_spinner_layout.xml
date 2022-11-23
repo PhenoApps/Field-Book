@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView style="@style/TextViewStyle.Bold"
+<TextView style="@style/DropDownTextViewStyle"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/spinnerTarget"
     android:layout_width="match_parent"
@@ -7,4 +7,5 @@
     android:background="@drawable/list_item_selector"
     android:ellipsize="end"
     android:gravity="center"
-    android:singleLine="true" />
+    android:singleLine="true"
+    android:textStyle="bold"/>

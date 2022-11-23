@@ -29,7 +29,7 @@
         <item name="android:textSize">?attr/fb_body_text_size</item>
         <item name="android:textColor">?attr/fb_color_text_dark</item>
         <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>
-        <item name="android:textColorSecondary">?attr/fb_color_text_dark</item>
+        <item name="android:textColorSecondary">?attr/fb_color_text_secondary</item>
         <item name="titleTextColor">?attr/fb_color_text_dark</item>
     </style>
 

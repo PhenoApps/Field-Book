@@ -3,12 +3,6 @@
 
     <!-- Each new theme requires 5 child themes, one for each of the text size options -->
 
-    <style name="BaseAppTheme.ExtraSmallTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xsmall</item>
-        <item name="fb_body_text_size">@dimen/text_size_xsmall</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xsmall</item>
-    </style>
-
     <style name="BaseAppTheme.SmallTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_small</item>
         <item name="fb_body_text_size">@dimen/text_size_small</item>
@@ -31,18 +25,6 @@
         <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
         <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
-    </style>
-
-    <style name="BaseAppTheme.ExtraExtraLargeTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xxlarge</item>
-        <item name="fb_body_text_size">@dimen/text_size_xxlarge</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xxlarge</item>
-    </style>
-
-    <style name="BaseAppTheme.HighContrast.ExtraSmallTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xsmall</item>
-        <item name="fb_body_text_size">@dimen/text_size_xsmall</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xsmall</item>
     </style>
 
     <style name="BaseAppTheme.HighContrast.SmallTextTheme">
@@ -69,18 +51,6 @@
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
     </style>
 
-    <style name="BaseAppTheme.HighContrast.ExtraExtraLargeTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xxlarge</item>
-        <item name="fb_body_text_size">@dimen/text_size_xxlarge</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xxlarge</item>
-    </style>
-
-    <style name="BaseAppTheme.Blue.ExtraSmallTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xsmall</item>
-        <item name="fb_body_text_size">@dimen/text_size_xsmall</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xsmall</item>
-    </style>
-
     <style name="BaseAppTheme.Blue.SmallTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_small</item>
         <item name="fb_body_text_size">@dimen/text_size_small</item>
@@ -103,18 +73,6 @@
         <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
         <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
-    </style>
-
-    <style name="BaseAppTheme.Blue.ExtraExtraLargeTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xxlarge</item>
-        <item name="fb_body_text_size">@dimen/text_size_xxlarge</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xxlarge</item>
-    </style>
-
-    <style name="BaseAppTheme.Mal.ExtraSmallTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xsmall</item>
-        <item name="fb_body_text_size">@dimen/text_size_xsmall</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xsmall</item>
     </style>
 
     <style name="BaseAppTheme.Mal.SmallTextTheme">
@@ -141,18 +99,6 @@
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
     </style>
 
-    <style name="BaseAppTheme.Mal.ExtraExtraLargeTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xxlarge</item>
-        <item name="fb_body_text_size">@dimen/text_size_xxlarge</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xxlarge</item>
-    </style>
-
-    <style name="BaseAppTheme.Mal.HighContrast.ExtraSmallTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xsmall</item>
-        <item name="fb_body_text_size">@dimen/text_size_xsmall</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xsmall</item>
-    </style>
-
     <style name="BaseAppTheme.Mal.HighContrast.SmallTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_small</item>
         <item name="fb_body_text_size">@dimen/text_size_small</item>
@@ -175,18 +121,6 @@
         <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
         <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
-    </style>
-
-    <style name="BaseAppTheme.Mal.HighContrast.ExtraExtraLargeTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xxlarge</item>
-        <item name="fb_body_text_size">@dimen/text_size_xxlarge</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xxlarge</item>
-    </style>
-
-    <style name="BaseAppTheme.Mal.Blue.ExtraSmallTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xsmall</item>
-        <item name="fb_body_text_size">@dimen/text_size_xsmall</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xsmall</item>
     </style>
 
     <style name="BaseAppTheme.Mal.Blue.SmallTextTheme">
@@ -213,9 +147,4 @@
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
     </style>
 
-    <style name="BaseAppTheme.Mal.Blue.ExtraExtraLargeTextTheme">
-        <item name="fb_title_text_size">@dimen/title_text_size_xxlarge</item>
-        <item name="fb_body_text_size">@dimen/text_size_xxlarge</item>
-        <item name="fb_subheading_text_size">@dimen/sub_text_size_xxlarge</item>
-    </style>
 </resources>

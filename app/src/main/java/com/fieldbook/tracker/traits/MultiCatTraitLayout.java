@@ -290,6 +290,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
     private void pressOffButton(Button button) {
         button.setTextColor(getButtonTextColor());
+        button.getBackground().setTint(getButtonBackgroundColor());
         button.getBackground().setColorFilter(getButtonBackgroundColor(), PorterDuff.Mode.MULTIPLY);
     }
 

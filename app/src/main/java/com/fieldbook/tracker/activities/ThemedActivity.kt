@@ -22,19 +22,17 @@ open class ThemedActivity: AppCompatActivity() {
         const val HIGH_CONTRAST = 1
         const val BLUE = 2
 
-        const val EXTRA_SMALL = 0
         const val SMALL = 1
         const val MEDIUM = 2
         const val LARGE = 3
         const val EXTRA_LARGE = 4
-        const val EXTRA_EXTRA_LARGE = 5
 
         fun applyTheme(activity: Activity) {
 
             //set the theme
             val (themeIndex, textIndex) = with (PreferenceManager.getDefaultSharedPreferences(activity)) {
 
-                (getString(GeneralKeys.THEME, "0")?.toInt() ?: 0) to (getString(GeneralKeys.TEXT_THEME, "0")?.toInt() ?: 0)
+                (getString(GeneralKeys.THEME, "0")?.toInt() ?: 0) to (getString(GeneralKeys.TEXT_THEME, "2")?.toInt() ?: 2)
 
             }
 
@@ -43,19 +41,6 @@ open class ThemedActivity: AppCompatActivity() {
             activity.runOnUiThread {
 
                 when (ThemePair(themeIndex, textIndex)) {
-
-                    //extra small text themes
-                    ThemePair(DEFAULT, EXTRA_SMALL) -> {
-                        activity.setTheme(R.style.BaseAppTheme_ExtraSmallTextTheme)
-                    }
-                    ThemePair(HIGH_CONTRAST, EXTRA_SMALL) -> {
-                        activity.setTheme(R.style.BaseAppTheme_HighContrast_ExtraSmallTextTheme)
-                        statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
-                    }
-                    ThemePair(BLUE, EXTRA_SMALL) -> {
-                        activity.setTheme(R.style.BaseAppTheme_Blue_ExtraSmallTextTheme)
-                        statusBarColor = activity.getColor(R.color.blue_primary_dark)
-                    }
 
                     //small text themes
                     ThemePair(DEFAULT, SMALL) -> {
@@ -108,19 +93,6 @@ open class ThemedActivity: AppCompatActivity() {
                         activity.setTheme(R.style.BaseAppTheme_Blue_ExtraLargeTextTheme)
                         statusBarColor = activity.getColor(R.color.blue_primary_dark)
                     }
-
-                    //extra extra large text themes
-                    ThemePair(DEFAULT, EXTRA_EXTRA_LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_ExtraExtraLargeTextTheme)
-                    }
-                    ThemePair(HIGH_CONTRAST, EXTRA_EXTRA_LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_HighContrast_ExtraExtraLargeTextTheme)
-                        statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
-                    }
-                    ThemePair(BLUE, EXTRA_EXTRA_LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_Blue_ExtraExtraLargeTextTheme)
-                        statusBarColor = activity.getColor(R.color.blue_primary_dark)
-                    }
                 }
 
                 Log.d(TAG, "Applying theme $themeIndex to ${activity::class.simpleName}")
@@ -128,19 +100,6 @@ open class ThemedActivity: AppCompatActivity() {
                 if (activity is AboutActivity) {
 
                     when (ThemePair(themeIndex, textIndex)) {
-
-                        //extra small text themes
-                        ThemePair(DEFAULT, EXTRA_SMALL) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_ExtraSmallTextTheme)
-                        }
-                        ThemePair(HIGH_CONTRAST, EXTRA_SMALL) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_HighContrast_ExtraSmallTextTheme)
-                            statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
-                        }
-                        ThemePair(BLUE, EXTRA_SMALL) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_Blue_ExtraSmallTextTheme)
-                            statusBarColor = activity.getColor(R.color.blue_primary_dark)
-                        }
 
                         //small text themes
                         ThemePair(DEFAULT, SMALL) -> {
@@ -191,19 +150,6 @@ open class ThemedActivity: AppCompatActivity() {
                         }
                         ThemePair(BLUE, EXTRA_LARGE) -> {
                             activity.setTheme(R.style.BaseAppTheme_Mal_Blue_ExtraLargeTextTheme)
-                            statusBarColor = activity.getColor(R.color.blue_primary_dark)
-                        }
-
-                        //extra extra large text themes
-                        ThemePair(DEFAULT, EXTRA_EXTRA_LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_ExtraExtraLargeTextTheme)
-                        }
-                        ThemePair(HIGH_CONTRAST, EXTRA_EXTRA_LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_HighContrast_ExtraExtraLargeTextTheme)
-                            statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
-                        }
-                        ThemePair(BLUE, EXTRA_EXTRA_LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_Blue_ExtraExtraLargeTextTheme)
                             statusBarColor = activity.getColor(R.color.blue_primary_dark)
                         }
                     }

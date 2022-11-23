@@ -439,7 +439,7 @@
     <string name="brapi_oidc_url">OIDC Discovery URL</string>
     <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
     <string name="brapi_oidc_url_default">https://test-server.brapi.org/.well-known/openid-configuration</string>
-    <string name="brapi_save_authorize">Save and Authorize</string>
+    <string name="brapi_save_authorize">Authorize</string>
     <string name="brapi_authorize">Authorize</string>
     <string name="brapi_reauthorize">Reauthorize</string>
     <string name="brapi_revoke_auth">Log Out</string>
@@ -598,7 +598,7 @@
     <string name="dialog_data_grid_header_picker_title">Choose Row Headers</string>
     <string name="act_trait_editor_menu_click_while_dragging">Please finish dragging.</string>
     <string name="act_collect_no_plots">This study has no plots saved.</string>
-    <string name="scan_barcode">Scan Barcode</string>
+    <string name="scan_barcode">Scan</string>
     <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>
     <string name="act_brapi_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
     <string name="preference_geonav_title">GeoNav</string>
@@ -700,12 +700,10 @@
     <string name="preferences_theme_text_size_title">Text Size</string>
 
     <!-- theme text size -->
-    <string name="text_size_xs">Extra Small</string>
     <string name="text_size_s">Small</string>
-    <string name="text_size_m">Medium</string>
+    <string name="text_size_m">Medium (Default)</string>
     <string name="text_size_l">Large</string>
     <string name="text_size_xl">Extra Large</string>
-    <string name="text_size_xxl">Extra Extra Large</string>
 
     <!-- Theme names -->
     <string name="theme_default">Default</string>

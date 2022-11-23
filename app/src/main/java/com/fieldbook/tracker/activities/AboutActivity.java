@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
 import com.danielstone.materialaboutlibrary.ConvenienceBuilder;
 import com.danielstone.materialaboutlibrary.MaterialAboutActivity;
@@ -16,6 +17,7 @@ import com.danielstone.materialaboutlibrary.items.MaterialAboutTitleItem;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -120,6 +122,20 @@ public class AboutActivity extends MaterialAboutActivity {
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
                 .build());
 
+        String theme = PreferenceManager.getDefaultSharedPreferences(this)
+                .getString(GeneralKeys.THEME, "0");
+
+        int styleId = R.style.AboutLibrariesCustom;
+        switch (theme) {
+            case "2":
+                styleId = R.style.AboutLibrariesCustom_Blue;
+                break;
+            case "1":
+                styleId = R.style.AboutLibrariesCustom_HighContrast;
+                break;
+        }
+        final int libStyleId = styleId;
+
         technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(R.string.libraries_title)
                 .icon(R.drawable.ic_about_libraries)
@@ -127,7 +143,7 @@ public class AboutActivity extends MaterialAboutActivity {
                     @Override
                     public void onClick() {
                         new LibsBuilder()
-                                .withActivityTheme(R.style.AppTheme)
+                                .withActivityTheme(libStyleId)
                                 .withAutoDetect(true)
                                 .withActivityTitle(getString(R.string.libraries_title))
                                 .withLicenseShown(true)
