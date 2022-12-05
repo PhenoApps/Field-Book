@@ -103,9 +103,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class ConfigActivity extends AppCompatActivity {
 
     @Inject
-    public DataHelper injectedDatabase;
-
-    public static DataHelper dt;
+    public DataHelper database;
 
     private final static String TAG = ConfigActivity.class.getSimpleName();
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
@@ -149,8 +147,6 @@ public class ConfigActivity extends AppCompatActivity {
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
 
-        dt.open();
-
         invalidateOptionsMenu();
         loadScreen();
     }
@@ -171,9 +167,6 @@ public class ConfigActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-        dt = new DataHelper(this);
-        dt.open();
-
         ep = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
         setCrashlyticsUserId();
@@ -191,7 +184,7 @@ public class ConfigActivity extends AppCompatActivity {
 
             if (currentVersion >= 530 && lastVersion < 530) {
 
-                OldPhotosMigrator.Companion.migrateOldPhotosDir(this);
+                OldPhotosMigrator.Companion.migrateOldPhotosDir(this, database);
 
                 //clear field selection after updates
                 ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
@@ -338,8 +331,6 @@ public class ConfigActivity extends AppCompatActivity {
      * @return -1 when the conditions fail, otherwise it returns 1
      */
     private int checkTraitsExist() {
-
-        dt.open();
 
         String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
 
@@ -560,7 +551,7 @@ public class ConfigActivity extends AppCompatActivity {
         int activeFieldId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         FieldObject activeField;
         if (activeFieldId != -1) {
-            activeField = dt.getFieldObject(activeFieldId);
+            activeField = database.getFieldObject(activeFieldId);
         } else {
             activeField = null;
             Toast.makeText(ConfigActivity.this, R.string.warning_field_missing, Toast.LENGTH_LONG).show();
@@ -688,19 +679,19 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (allColumns.isChecked()) {
-                String[] columns = dt.getRangeColumns();
+                String[] columns = database.getRangeColumns();
                 Collections.addAll(newRange, columns);
             }
 
             exportTrait = new ArrayList<>();
 
             if (activeTraits.isChecked()) {
-                String[] traits = dt.getVisibleTrait();
+                String[] traits = database.getVisibleTrait();
                 Collections.addAll(exportTrait, traits);
             }
 
             if (allTraits.isChecked()) {
-                String[] traits = dt.getAllTraits();
+                String[] traits = database.getAllTraits();
                 Collections.addAll(exportTrait, traits);
             }
 
@@ -889,7 +880,7 @@ public class ConfigActivity extends AppCompatActivity {
             }
 
             if (allColumns.isChecked()) {
-                String[] columns = dt.getRangeColumns();
+                String[] columns = database.getRangeColumns();
                 Collections.addAll(newRange, columns);
             }
 
@@ -897,7 +888,7 @@ public class ConfigActivity extends AppCompatActivity {
             String[] exportTraits = exportTrait.toArray(new String[exportTrait.size()]);
 
             // Retrieves the data needed for export
-            Cursor exportData = dt.getExportDBData(newRanges, exportTraits);
+            Cursor exportData = database.getExportDBData(newRanges, exportTraits);
 
             for (String i : newRanges) {
                 Log.i("Field Book : Ranges : ", i);
@@ -916,7 +907,7 @@ public class ConfigActivity extends AppCompatActivity {
             DocumentFile dbFile = null;
             DocumentFile tableFile = null;
 
-            ArrayList<TraitObject> traits = dt.getAllTraitObjects();
+            ArrayList<TraitObject> traits = database.getAllTraitObjects();
 
             //check if export database has been selected
             if (checkDbBool) {
@@ -973,7 +964,7 @@ public class ConfigActivity extends AppCompatActivity {
                         OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(ConfigActivity.this, R.string.dir_field_export, tableFileName);
                         OutputStreamWriter fw = new OutputStreamWriter(output);
 
-                        exportData = dt.convertDatabaseToTable(newRanges, exportTraits);
+                        exportData = database.convertDatabaseToTable(newRanges, exportTraits);
                         CSVWriter csvWriter = new CSVWriter(fw, exportData);
 
                         csvWriter.writeTableFormat(concat(newRanges, exportTraits), newRanges.length, traits);
@@ -1105,7 +1096,7 @@ public class ConfigActivity extends AppCompatActivity {
 
             if (!fail) {
                 showCitationDialog();
-                dt.updateExpTable(false, false, true, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+                database.updateExpTable(false, false, true, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
             }
 
             if (fail) {
@@ -1144,7 +1135,7 @@ public class ConfigActivity extends AppCompatActivity {
         protected Integer doInBackground(Integer... params) {
             try {
                 if (this.file != null) {
-                    dt.importDatabase(this.file);
+                    database.importDatabase(this.file);
                 }
             } catch (Exception e) {
                 Log.d("Database", e.toString());
@@ -1213,7 +1204,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         if (f != null) {
 
-            dt.switchField(studyId);
+            database.switchField(studyId);
 
             //clear field selection after updates
             ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId)

@@ -15,7 +15,6 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
 import java.io.FileDescriptor;
@@ -152,7 +151,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         @Override
         public void onClick(View view) {
-            ((CollectActivity) getContext()).setNewTraits(ConfigActivity.dt.getUserDetail(getCRange().plot_id));
+            ((CollectActivity) getContext()).setNewTraits(getDatabase().getUserDetail(getCRange().plot_id));
 
             boolean enableNavigation = true;
             switch (buttonState) {

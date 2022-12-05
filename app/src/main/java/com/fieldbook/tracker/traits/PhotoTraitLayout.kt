@@ -20,7 +20,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.adapters.GalleryImageAdapter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -334,9 +333,9 @@ class PhotoTraitLayout : BaseTraitLayout {
                 newTraits?.set(traitName, v)
                 val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
                 val observation =
-                    ConfigActivity.dt.getObservationByValue(expId, cRange.plot_id, traitName, v)
-                ConfigActivity.dt.deleteTraitByValue(expId, cRange.plot_id, traitName, v)
-                ConfigActivity.dt.insertUserTraits(
+                    database.getObservationByValue(expId, cRange.plot_id, traitName, v)
+                database.deleteTraitByValue(expId, cRange.plot_id, traitName, v)
+                database.insertUserTraits(
                     cRange.plot_id,
                     traitName,
                     format,
@@ -407,7 +406,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                                 )
                                 loadLayout()
                             } else {
-                                ConfigActivity.dt.deleteTraitByValue(
+                                database.deleteTraitByValue(
                                     expId,
                                     cRange.plot_id,
                                     currentTrait.trait,
@@ -430,7 +429,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                 } else {
 
                     // If an NA exists, delete it
-                    ConfigActivity.dt.deleteTraitByValue(
+                    database.deleteTraitByValue(
                         expId,
                         cRange.plot_id,
                         currentTrait.trait,
@@ -482,7 +481,7 @@ class PhotoTraitLayout : BaseTraitLayout {
 
     private val rep: String
         get() {
-            val repInt = ConfigActivity.dt.getRep(cRange.plot_id, currentTrait.trait)
+            val repInt = database.getRep(cRange.plot_id, currentTrait.trait)
             return repInt.toString()
         }
 

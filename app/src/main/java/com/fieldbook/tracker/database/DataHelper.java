@@ -2550,6 +2550,18 @@ public class DataHelper {
         return ObservationUnitAttributeDao.Companion.getAllNames(studyId);
     }
 
+    public void beginTransaction() {
+        openHelper.getWritableDatabase().beginTransaction();
+    }
+
+    public void endTransaction() {
+        openHelper.getWritableDatabase().endTransaction();
+    }
+
+    public void setTransactionSuccessfull() {
+        openHelper.getWritableDatabase().setTransactionSuccessful();
+    }
+
     /**
      * When the version number changes, this class will recreate the entire
      * database

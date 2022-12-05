@@ -25,7 +25,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BluetoothUtil;
 import com.fieldbook.tracker.utilities.Constants;
@@ -160,7 +159,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         mBluetoothUtil = new BluetoothUtil();
 
-        String[] prefixTraits = ConfigActivity.dt.getRangeColumnNames();
+        String[] prefixTraits = getDatabase().getRangeColumnNames();
         optionsList = new ArrayList<>(Arrays.asList(prefixTraits));
         optionsList.add("date");
         optionsList.add("trial_name");
@@ -449,7 +448,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 value = "";
             } else {
                 int pos = spinner.getSelectedItemPosition();
-                value = ConfigActivity.dt.getDropDownRange(options[pos], getCRange().plot_id)[0];
+                value = getDatabase().getDropDownRange(options[pos], getCRange().plot_id)[0];
             }
         }
          /*

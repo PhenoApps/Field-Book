@@ -67,6 +67,7 @@ import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.adapters.FieldController;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
@@ -135,7 +136,7 @@ import kotlin.Pair;
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends AppCompatActivity
         implements SensorEventListener, GPSTracker.GPSTrackerListener,
-        UsbCameraInterface, SummaryFragment.SummaryOpenListener {
+        UsbCameraInterface, SummaryFragment.SummaryOpenListener, FieldController {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -2225,6 +2226,12 @@ public class CollectActivity extends AppCompatActivity
 
     public boolean isSummaryFragmentOpen() {
         return isSummaryOpen;
+    }
+
+    @NonNull
+    @Override
+    public DataHelper getDatabase() {
+        return database;
     }
 
     ///// class TraitBox /////

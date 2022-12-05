@@ -18,7 +18,6 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
 import com.fieldbook.tracker.dialogs.FieldSortController;
@@ -36,8 +35,8 @@ public class FieldAdapter extends BaseAdapter {
 
     private static final String TAG = "FieldAdapter";
 
-    private LayoutInflater mLayoutInflater;
-    private ArrayList<FieldObject> list;
+    private final LayoutInflater mLayoutInflater;
+    private final ArrayList<FieldObject> list;
     private final Context context;
     private SharedPreferences ep;
 
@@ -209,13 +208,13 @@ public class FieldAdapter extends BaseAdapter {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
 
-                ConfigActivity.dt.deleteField(getItem(position).getExp_id());
+                ((FieldAdapterController) context).getDatabase().deleteField(getItem(position).getExp_id());
 
                 if (getItem(position).getExp_id() == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
                     setEditorItem(ep, null);
                 }
 
-                ((FieldEditorLoader) context).queryAndLoadFields();
+                ((FieldAdapterController) context).queryAndLoadFields();
 
                 CollectActivity.reloadData = true;
             }
@@ -254,7 +253,8 @@ public class FieldAdapter extends BaseAdapter {
         ed.putInt(GeneralKeys.SELECTED_FIELD_ID, selectedField.getExp_id());
         ed.apply();
 
-        ConfigActivity.dt.switchField(selectedField.getExp_id());
+        ((FieldController) context).getDatabase().switchField(selectedField.getExp_id());
+
         CollectActivity.reloadData = true;
         notifyDataSetChanged();
 

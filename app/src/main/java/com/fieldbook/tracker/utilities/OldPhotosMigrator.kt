@@ -3,7 +3,7 @@ package com.fieldbook.tracker.utilities
 import android.content.Context
 import android.util.Log
 import androidx.preference.PreferenceManager
-import com.fieldbook.tracker.activities.ConfigActivity
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.database.models.ObservationModel
@@ -26,7 +26,7 @@ class OldPhotosMigrator {
          * This function is called to query for existing observations that have a uri in the old photos directory, which used to hold all photos.
          * This will update the database obs. value to a new uri after copying it to its respective trait folder, and delete the old photo from the photos dir.
          */
-        fun migrateOldPhotosDir(context: Context) {
+        fun migrateOldPhotosDir(context: Context, database: DataHelper) {
 
             try {
 
@@ -53,7 +53,7 @@ class OldPhotosMigrator {
 
                             traitPhotos.forEach { photo ->
 
-                                val repeatedValue = ConfigActivity.dt.getRep(photo.observation_unit_id, t.trait)
+                                val repeatedValue = database.getRep(photo.observation_unit_id, t.trait)
                                 val generatedName =
                                     photo.observation_unit_id + "_" + t.trait + "_" + repeatedValue + "_" + timeStamp.format(
                                         Calendar.getInstance().time

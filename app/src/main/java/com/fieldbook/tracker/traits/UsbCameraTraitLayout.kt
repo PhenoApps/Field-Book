@@ -24,7 +24,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.receivers.UsbAttachReceiver
@@ -380,7 +379,7 @@ class UsbCameraTraitLayout : BaseTraitLayout, ImageAdapter.ImageItemHandler {
 
                             bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 
-                            ConfigActivity.dt.insertUserTraits(
+                            database.insertUserTraits(
                                 plot, traitName, type, file.uri.toString(),
                                 prefs.getString(GeneralKeys.FIRST_NAME, "") + " "
                                         + prefs.getString(GeneralKeys.LAST_NAME, ""),

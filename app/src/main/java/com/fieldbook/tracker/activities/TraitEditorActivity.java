@@ -40,7 +40,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.TraitAdapter;
-import com.fieldbook.tracker.adapters.TraitEditorLoader;
+import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
@@ -73,6 +73,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -83,7 +84,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
-public class TraitEditorActivity extends AppCompatActivity implements TraitEditorLoader {
+public class TraitEditorActivity extends AppCompatActivity implements TraitAdapterController {
 
     public static int REQUEST_CLOUD_FILE_CODE = 5;
     public static int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -216,11 +217,7 @@ public class TraitEditorActivity extends AppCompatActivity implements TraitEdito
     private NewTraitDialog traitDialog;
     private Menu systemMenu;
     // Creates a new thread to do importing
-    private Runnable importCSV = new Runnable() {
-        public void run() {
-            new ImportCSVTask().execute(0);
-        }
-    };
+    private Runnable importCSV = () -> new ImportCSVTask().execute(0);
 
     private DragSortController mController;
 
@@ -228,7 +225,7 @@ public class TraitEditorActivity extends AppCompatActivity implements TraitEdito
     DataHelper database;
 
     // Helper function to load data
-    public void loadData(HashMap<String, String> visibility, ArrayList<TraitObject> traits) {
+    public void loadData(HashMap<String, Boolean> visibility, ArrayList<TraitObject> traits) {
         try {
 
             if (!traitList.isShown())
@@ -1071,7 +1068,19 @@ public class TraitEditorActivity extends AppCompatActivity implements TraitEdito
 
     @Override
     public void queryAndLoadTraits() {
-        loadData(database.getTraitVisibility(), database.getAllTraitObjects());
+        //database holds boolean values as string, this creates a new map that casts those values to Booleans
+        HashMap<String, String> vis = database.getTraitVisibility();
+        HashMap<String, Boolean> visCast = new HashMap<>();
+        for (Map.Entry<String, String> v : vis.entrySet()) {
+            visCast.put(v.getKey(), v.getValue().equals("true"));
+        }
+        loadData(visCast, database.getAllTraitObjects());
+    }
+
+    @NonNull
+    @Override
+    public DataHelper getDatabase() {
+        return database;
     }
 
     private static class ArrayIndexComparator implements Comparator<Integer> {

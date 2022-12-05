@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.preferences;
 
 import static android.app.Activity.RESULT_OK;
-import static com.fieldbook.tracker.activities.ConfigActivity.dt;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -47,9 +46,13 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
+@AndroidEntryPoint
 public class DatabasePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     private static int REQUEST_FILE_EXPLORE_CODE = 2;
@@ -63,6 +66,9 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
     private final int PERMISSIONS_REQUEST_DATABASE_IMPORT = 9980;
     private final int PERMISSIONS_REQUEST_DATABASE_EXPORT = 9970;
     private SharedPreferences ep;
+
+    @Inject
+    DataHelper database;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -147,14 +153,14 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
             if (file != null && file.getName() != null) {
 
-                dt.close();
+                database.close();
 
                 //first check if the file to import is just a .db file
                 if (file.getName().endsWith(".db")) { //if it is import it old-style
 
                     try {
 
-                        dt.importDatabase(file);
+                        database.importDatabase(file);
 
                     } catch (Exception e) {
 
@@ -183,7 +189,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
                             edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
                             edit.apply();
 
-                            dt.open();
+                            database.open();
 
                         } catch (Exception e) {
 
@@ -386,7 +392,7 @@ public class DatabasePreferencesFragment extends PreferenceFragmentCompat implem
 
             public void onClick(DialogInterface dialog, int which) {
                 // Delete database
-                dt.deleteDatabase();
+                database.deleteDatabase();
 
                 // Clear all existing settings
                 SharedPreferences.Editor ed = ep.edit();

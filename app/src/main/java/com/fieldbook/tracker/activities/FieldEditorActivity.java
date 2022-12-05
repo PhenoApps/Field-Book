@@ -29,13 +29,14 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.FieldAdapter;
-import com.fieldbook.tracker.adapters.FieldEditorLoader;
+import com.fieldbook.tracker.adapters.FieldAdapterController;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
@@ -75,7 +76,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
 public class FieldEditorActivity extends AppCompatActivity
-        implements FieldSortController, FieldEditorLoader {
+        implements FieldSortController, FieldAdapterController {
 
     private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -156,9 +157,6 @@ public class FieldEditorActivity extends AppCompatActivity
         }
 
         thisActivity = this;
-        if (ConfigActivity.dt == null) {    // when resuming
-            ConfigActivity.dt = new DataHelper(this);
-        }
         database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects());
@@ -830,5 +828,11 @@ public class FieldEditorActivity extends AppCompatActivity
     @Override
     public void queryAndLoadFields() {
         loadData(database.getAllFieldObjects());
+    }
+
+    @NonNull
+    @Override
+    public DataHelper getDatabase() {
+        return database;
     }
 }

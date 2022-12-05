@@ -1,5 +1,5 @@
 package com.fieldbook.tracker.adapters
 
-interface FieldEditorLoader {
+interface FieldAdapterController: FieldController {
     fun queryAndLoadFields()
 }
