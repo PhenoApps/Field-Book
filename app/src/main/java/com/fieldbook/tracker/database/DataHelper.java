@@ -20,11 +20,13 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.dao.ObservationDao;
+import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
+import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
@@ -52,6 +54,10 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.qualifiers.ActivityContext;
+
 /**
  * All database related functions are here
  */
@@ -70,8 +76,6 @@ public class DataHelper {
     private static String TICK = "`";
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
     private Context context;
-    private SQLiteStatement insertTraits;
-    private SQLiteStatement insertUserTraits;
     private SimpleDateFormat timeStamp;
     private DateTimeFormatter timeFormat;
 
@@ -81,16 +85,14 @@ public class DataHelper {
 
     private Bitmap missingPhoto;
 
-    public DataHelper(Context context) {
+    @Inject
+    public DataHelper(@ActivityContext Context context) {
         try {
             this.context = context;
             ep = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
 
             openHelper = new OpenHelper(this);
             db = openHelper.getWritableDatabase();
-
-            //this.insertTraits = db.compileStatement(INSERTTRAITS);
-            //this.insertUserTraits = db.compileStatement(INSERTUSERTRAITS);
 
             timeStamp = new SimpleDateFormat(TIME_FORMAT_PATTERN,
                     Locale.getDefault());
@@ -214,6 +216,13 @@ public class DataHelper {
 //        db.execSQL("update " + TRAITS
 //                + " set isVisible = ? where trait like ?", new String[]{
 //                String.valueOf(val), trait});
+    }
+
+    public ObservationUnitModel[] getAllObservationUnits() {
+
+        open();
+
+        return ObservationUnitDao.Companion.getAll();
     }
 
     /**
@@ -2525,6 +2534,20 @@ public class DataHelper {
             cur.close();
         }
         return empty;
+    }
+
+    public void updateStudySort(String sortString, int studyId) {
+
+        open();
+
+        StudyDao.Companion.updateStudySort(sortString, studyId);
+    }
+
+    public String[] getAllObservationUnitAttributeNames(int studyId) {
+
+        open();
+
+        return ObservationUnitAttributeDao.Companion.getAllNames(studyId);
     }
 
     /**

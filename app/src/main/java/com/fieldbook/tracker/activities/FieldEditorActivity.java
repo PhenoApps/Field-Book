@@ -35,11 +35,9 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.FieldAdapter;
+import com.fieldbook.tracker.adapters.FieldEditorLoader;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.ObservationUnitDao;
-import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
-import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
 import com.fieldbook.tracker.dialogs.FieldSortController;
@@ -69,10 +67,15 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class FieldEditorActivity extends AppCompatActivity implements FieldSortController {
+@AndroidEntryPoint
+public class FieldEditorActivity extends AppCompatActivity
+        implements FieldSortController, FieldEditorLoader {
 
     private final String TAG = "FieldEditor";
     private static final int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -84,7 +87,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
     public static FieldAdapter mAdapter;
     public static AppCompatActivity thisActivity;
     public static EditText trait;
-    private static Handler mHandler = new Handler();
+    private static final Handler mHandler = new Handler();
     private static FieldFileObject.FieldFileBase fieldFile;
     private static SharedPreferences ep;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
@@ -95,23 +98,20 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
 
     private GPSTracker mGpsTracker;
 
+    @Inject
+    DataHelper database;
+
     // Creates a new thread to do importing
     private final Runnable importRunnable = new Runnable() {
         public void run() {
-            new ImportRunnableTask(thisActivity,
-                    fieldFile,
-                    unique.getSelectedItemPosition(),
-                    unique.getSelectedItem().toString(),
-                    primary.getSelectedItem().toString(),
-                    secondary.getSelectedItem().toString()).execute(0);
+            new ImportRunnableTask(thisActivity, fieldFile, unique.getSelectedItemPosition(), unique.getSelectedItem().toString(), primary.getSelectedItem().toString(), secondary.getSelectedItem().toString()).execute(0);
         }
     };
 
     // Helper function to load data
-    public static void loadData() {
+    public void loadData(ArrayList<FieldObject> fields) {
         try {
-            ConfigActivity.dt.open();
-            mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
+            mAdapter = new FieldAdapter(thisActivity, fields);
             fieldList.setAdapter(mAdapter);
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,10 +130,12 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
     @Override
     public void onResume() {
         super.onResume();
+
         if (systemMenu != null) {
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
-        loadData();
+
+        loadData(database.getAllFieldObjects());
 
         mGpsTracker = new GPSTracker(this);
     }
@@ -157,10 +159,9 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
         if (ConfigActivity.dt == null) {    // when resuming
             ConfigActivity.dt = new DataHelper(this);
         }
-        ConfigActivity.dt.open();
-        ConfigActivity.dt.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        database.updateExpTable(false, true, false, ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         fieldList = findViewById(R.id.myList);
-        mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
+        mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
     }
 
@@ -179,9 +180,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
         importSourceList.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.import_dialog_title_fields)
-                .setCancelable(true)
-                .setView(layout);
+        builder.setTitle(R.string.import_dialog_title_fields).setCancelable(true).setView(layout);
 
         builder.setPositiveButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
             @Override
@@ -236,8 +235,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
     public void loadBrAPI() {
         Intent intent = new Intent();
 
-        intent.setClassName(FieldEditorActivity.this,
-                BrapiActivity.class.getName());
+        intent.setClassName(FieldEditorActivity.this, BrapiActivity.class.getName());
         startActivityForResult(intent, 1);
     }
 
@@ -260,8 +258,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
             loadLocal();
         } else {
             // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
-                    PERMISSIONS_REQUEST_STORAGE, perms);
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import), PERMISSIONS_REQUEST_STORAGE, perms);
         }
 
     }
@@ -293,8 +290,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
                 .titleTextSize(30)                  // Specify the size (in sp) of the title text
                 .descriptionTextSize(20)            // Specify the size (in sp) of the description text
                 .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .textColor(R.color.black)            // Specify a color for both the title and description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD).textColor(R.color.black)            // Specify a color for both the title and description text
                 .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
                 .drawShadow(true)                   // Whether to draw a drop shadow or not
                 .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
@@ -312,8 +308,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
                 .titleTextSize(30)                  // Specify the size (in sp) of the title text
                 .descriptionTextSize(20)            // Specify the size (in sp) of the description text
                 .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .textColor(R.color.black)            // Specify a color for both the title and description text
+                .descriptionTypeface(Typeface.DEFAULT_BOLD).textColor(R.color.black)            // Specify a color for both the title and description text
                 .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
                 .drawShadow(true)                   // Whether to draw a drop shadow or not
                 .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
@@ -332,10 +327,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.help:
-                TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description)),
-                                fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description))
-                        );
+                TapTargetSequence sequence = new TapTargetSequence(this).targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description)), fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description)));
 
                 if (fieldExists()) {
                     sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_select_title), getString(R.string.tutorial_fields_select_description)));
@@ -376,7 +368,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
 
                     //update list of fields
                     fieldList = findViewById(R.id.myList);
-                    mAdapter = new FieldAdapter(thisActivity, ConfigActivity.dt.getAllFieldObjects());
+                    mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects());
                     fieldList.setAdapter(mAdapter);
 
                 }));
@@ -418,7 +410,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
             //get current coordinate of the user
             Location thisLocation = mGpsTracker.getLocation();
 
-            ObservationUnitModel[] units = ObservationUnitDao.Companion.getAll();
+            ObservationUnitModel[] units = database.getAllObservationUnits();
             List<ObservationUnitModel> coordinates = new ArrayList<>();
 
             //find all observation units with a coordinate
@@ -453,15 +445,11 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
 
                     if (studyId == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
 
-                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
-                                getString(R.string.activity_field_editor_switch_field_same),
-                                Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout), getString(R.string.activity_field_editor_switch_field_same), Snackbar.LENGTH_LONG).show();
 
                     } else {
 
-                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
-                                getString(R.string.activity_field_editor_switch_field, String.valueOf(studyId)),
-                                Snackbar.LENGTH_LONG);
+                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout), getString(R.string.activity_field_editor_switch_field, String.valueOf(studyId)), Snackbar.LENGTH_LONG);
 
                         mySnackbar.setAction(R.string.activity_field_editor_switch_field_action, (view) -> {
 
@@ -520,7 +508,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        
+
         if (requestCode == 2) {
             if (resultCode == RESULT_OK) {
                 final String chosenFile = data.getStringExtra("result");
@@ -543,8 +531,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
                 OutputStream out = null;
                 try {
                     in = getContentResolver().openInputStream(content_describer);
-                    out = BaseDocumentTreeUtil.Companion.getFileOutputStream(this,
-                            R.string.dir_field_import, chosenFile);
+                    out = BaseDocumentTreeUtil.Companion.getFileOutputStream(this, R.string.dir_field_import, chosenFile);
                     if (out == null) throw new IOException();
                     byte[] buffer = new byte[1024];
                     int len;
@@ -561,7 +548,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
                             e.printStackTrace();
                         }
                     }
-                    if (out != null){
+                    if (out != null) {
                         try {
                             out.close();
                         } catch (IOException e) {
@@ -572,7 +559,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
 
                 String extension = FieldFileObject.getExtension(chosenFile);
 
-                if(!extension.equals("csv") && !extension.equals("xls") && !extension.equals("xlsx")) {
+                if (!extension.equals("csv") && !extension.equals("xls") && !extension.equals("xlsx")) {
                     Toast.makeText(FieldEditorActivity.thisActivity, getString(R.string.import_error_format_field), Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -600,7 +587,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
                         cloudName = getFileName(Uri.parse(chosenFile));
                     }
 
-                    try(InputStream is = resolver.openInputStream(docUri)) {
+                    try (InputStream is = resolver.openInputStream(docUri)) {
 
                         fieldFile = FieldFileObject.create(this, docUri, is, cloudName);
 
@@ -610,8 +597,8 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
                         e.putString(GeneralKeys.FIELD_FILE, fieldFileName);
                         e.apply();
 
-                        if (ConfigActivity.dt.checkFieldName(fieldFileName) >= 0) {
-                            Utils.makeToast(getApplicationContext(),getString(R.string.fields_study_exists_message));
+                        if (database.checkFieldName(fieldFileName) >= 0) {
+                            Utils.makeToast(getApplicationContext(), getString(R.string.fields_study_exists_message));
                             SharedPreferences.Editor ed = ep.edit();
                             ed.putString(GeneralKeys.FIELD_FILE, null);
                             ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
@@ -620,7 +607,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
                         }
 
                         if (fieldFile.isOther()) {
-                            Utils.makeToast(getApplicationContext(),getString(R.string.import_error_unsupported));
+                            Utils.makeToast(getApplicationContext(), getString(R.string.import_error_unsupported));
                         }
 
                         //utility call creates photos, audio and thumbnails folders under a new field folder
@@ -647,6 +634,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
      * These ids are used to navigate between plots in the collect activity.
      * Sanitization has to happen here to ensure no empty string column is selected.
      * Also special characters are checked for and replaced here, if they exist a message is shown to the user.
+     *
      * @param fieldFile contains the parsed input file which has columns
      */
     private void loadFile(FieldFileObject.FieldFileBase fieldFile) {
@@ -707,16 +695,15 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
                 if (hasSpecialCharacters) {
 
 
-                    Utils.makeToast(getApplicationContext(),getString(R.string.import_error_columns_replaced));
+                    Utils.makeToast(getApplicationContext(), getString(R.string.import_error_columns_replaced));
 
                 }
 
-                importDialog(actualColumns.toArray(new String[] {}));
+                importDialog(actualColumns.toArray(new String[]{}));
 
             } else {
 
-                Toast.makeText(this, R.string.act_field_editor_no_suitable_columns_error,
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.act_field_editor_no_suitable_columns_error, Toast.LENGTH_SHORT).show();
             }
         } else {
 
@@ -737,9 +724,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
         setSpinner(secondary, columns, GeneralKeys.SECONDARY_NAME);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.import_dialog_title_fields)
-                .setCancelable(true)
-                .setView(layout);
+        builder.setTitle(R.string.import_dialog_title_fields).setCancelable(true).setView(layout);
 
         builder.setPositiveButton(getString(R.string.dialog_import), (dialogInterface, i) -> {
             if (checkImportColumnNames()) {
@@ -771,7 +756,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
         final String secondaryS = secondary.getSelectedItem().toString();
 
         if (uniqueS.equals(primaryS) || uniqueS.equals(secondaryS) || primaryS.equals(secondaryS)) {
-            Utils.makeToast(getApplicationContext(),getString(R.string.import_error_column_choice));
+            Utils.makeToast(getApplicationContext(), getString(R.string.import_error_column_choice));
             return false;
         }
 
@@ -805,10 +790,7 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
         }
 
         //initialize: initial items are the current sort order, selectable items are the obs. unit attributes.
-        FieldSortDialog d = new FieldSortDialog(this,
-                field,
-                sortOrderList.toArray(new String[] {}),
-                ObservationUnitPropertyDao.Companion.getRangeColumnNames());
+        FieldSortDialog d = new FieldSortDialog(this, field, sortOrderList.toArray(new String[]{}), database.getRangeColumnNames());
 
         d.show();
     }
@@ -823,29 +805,30 @@ public class FieldEditorActivity extends AppCompatActivity implements FieldSortC
 
         try {
 
-            StudyDao.Companion.updateStudySort(joiner.toString(), field.getExp_id());
+            database.updateStudySort(joiner.toString(), field.getExp_id());
 
             if (ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.getExp_id()) {
-                ConfigActivity.dt.switchField(field.getExp_id());
+                database.switchField(field.getExp_id());
                 CollectActivity.reloadData = true;
             }
 
             Toast toast = Toast.makeText(this, R.string.sort_dialog_saved, Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+            toast.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 0);
             toast.show();
 
         } catch (Exception e) {
 
             Log.e(TAG, "Error updating sorting", e);
 
-            new AlertDialog.Builder(this).setTitle(R.string.dialog_save_error_title)
-                    .setPositiveButton(R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
-                    .setMessage(R.string.sort_dialog_error_saving)
-                    .create()
-                    .show();
+            new AlertDialog.Builder(this).setTitle(R.string.dialog_save_error_title).setPositiveButton(R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed")).setMessage(R.string.sort_dialog_error_saving).create().show();
         }
 
-        FieldEditorActivity.loadData();
+        loadData(database.getAllFieldObjects());
 
+    }
+
+    @Override
+    public void queryAndLoadFields() {
+        loadData(database.getAllFieldObjects());
     }
 }

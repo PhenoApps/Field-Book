@@ -36,14 +36,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.TraitAdapter;
+import com.fieldbook.tracker.adapters.TraitEditorLoader;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
 import com.fieldbook.tracker.dragsort.DragSortController;
 import com.fieldbook.tracker.dragsort.DragSortListView;
@@ -77,10 +76,14 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class TraitEditorActivity extends AppCompatActivity {
+@AndroidEntryPoint
+public class TraitEditorActivity extends AppCompatActivity implements TraitEditorLoader {
 
     public static int REQUEST_CLOUD_FILE_CODE = 5;
     public static int REQUEST_FILE_EXPLORER_CODE = 1;
@@ -95,13 +98,15 @@ public class TraitEditorActivity extends AppCompatActivity {
     private static SharedPreferences ep;
 
     private static OnItemClickListener traitListener;
+
     private static DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
         @Override
         public void remove(int which) {
             mAdapter.list.remove(which);
         }
     };
-    private static DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
+
+    private final DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
 
         @Override
         public void drop(int from, int to) {
@@ -123,14 +128,14 @@ public class TraitEditorActivity extends AppCompatActivity {
                         String currentID = mAdapter.getItem(to).getId();
                         Integer currentPosition = mAdapter.getItem(to).getRealPosition();
 
-                        ConfigActivity.dt.updateTraitPosition(currentID, currentPosition);
-                        ConfigActivity.dt.updateTraitPosition(prevID, currentPosition + 1);
+                        database.updateTraitPosition(currentID, currentPosition);
+                        database.updateTraitPosition(prevID, currentPosition + 1);
 
                         // Push everything below down by 1
                         int newCount = 2;
 
                         for (int i = to + 1; i < mAdapter.getCount(); i++) {
-                            ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), currentPosition + newCount);
+                            database.updateTraitPosition(mAdapter.getItem(i).getId(), currentPosition + newCount);
                             newCount++;
                         }
 
@@ -156,13 +161,13 @@ public class TraitEditorActivity extends AppCompatActivity {
                             int newCount = currentPosition - to;
 
                             for (int i = 0; i < to; i++) {
-                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), newCount);
+                                database.updateTraitPosition(mAdapter.getItem(i).getId(), newCount);
                                 newCount++;
                             }
 
                             Log.w("Reorder", "current");
 
-                            ConfigActivity.dt.updateTraitPosition(prevID, currentPosition);
+                            database.updateTraitPosition(prevID, currentPosition);
 
                         } else {
                             // We hit a -1, might as well do a full zero based reorder
@@ -171,12 +176,12 @@ public class TraitEditorActivity extends AppCompatActivity {
                             Log.w("Reorder", "top2");
 
                             for (int i = 0; i < to; i++) {
-                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), i);
+                                database.updateTraitPosition(mAdapter.getItem(i).getId(), i);
                             }
 
                             Log.w("Reorder", "current");
 
-                            ConfigActivity.dt.updateTraitPosition(prevID, to);
+                            database.updateTraitPosition(prevID, to);
 
                             // Reset current position as well, otherwise we don't know where it points to
                             currentPosition = to;
@@ -191,7 +196,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                         for (int i = to; i < mAdapter.getCount(); i++) {
                             if (i != from) {
-                                ConfigActivity.dt.updateTraitPosition(mAdapter.getItem(i).getId(), currentPosition + newCount);
+                                database.updateTraitPosition(mAdapter.getItem(i).getId(), currentPosition + newCount);
                                 newCount++;
                             }
                         }
@@ -203,7 +208,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
 
             CollectActivity.reloadData = true;
-            loadData();
+            queryAndLoadTraits();
         }
     };
     private final int PERMISSIONS_REQUEST_STORAGE_IMPORT = 999;
@@ -219,11 +224,12 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     private DragSortController mController;
 
-    // Helper function to load data
-    public static void loadData() {
-        try {
+    @Inject
+    DataHelper database;
 
-            HashMap visibility = ConfigActivity.dt.getTraitVisibility();
+    // Helper function to load data
+    public void loadData(HashMap<String, String> visibility, ArrayList<TraitObject> traits) {
+        try {
 
             if (!traitList.isShown())
                 traitList.setVisibility(ListView.VISIBLE);
@@ -238,7 +244,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 brapiDialogShown = false;
             }
 
-            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
+            mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, traits, traitListener, visibility, brapiDialogShown);
 
             traitList.setAdapter(mAdapter);
             traitList.setDropListener(onDrop);
@@ -249,7 +255,8 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
     }
 
-    public static Boolean displayBrapiInfo(Context context, DataHelper dt, String traitName, Boolean noCheckTrait) {
+    @Override
+    public boolean displayBrapiInfo(Context context, @Nullable String traitName, boolean noCheckTrait) {
 
         // Returns true if the dialog is shown, false if not.
         // If we run into an error, do not warn the user since this is just a helper dialog
@@ -275,7 +282,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                 if (traitName != null) {
 
                     // Just returns an empty trait object in the case the trait isn't found
-                    TraitObject trait = dt.getDetail(traitName);
+                    TraitObject trait = database.getDetail(traitName);
                     if (trait.getTrait() == null) {
                         return false;
                     }
@@ -347,7 +354,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             systemMenu.findItem(R.id.help).setVisible(ep.getBoolean(GeneralKeys.TIPS, false));
         }
 
-        loadData();
+        queryAndLoadTraits();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -366,14 +373,9 @@ public class TraitEditorActivity extends AppCompatActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
-
         thisActivity = this;
 
-        if (ConfigActivity.dt == null) {    // when resuming
-            ConfigActivity.dt = new DataHelper(this);
-        }
-        HashMap visibility = ConfigActivity.dt.getTraitVisibility();
+        HashMap visibility = database.getTraitVisibility();
         traitList = findViewById(R.id.myList);
 
         if (!traitList.isShown())
@@ -382,7 +384,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         // Determines whether brapi dialog should be shown on first click of a non-BrAPI
         // trait when a BrAPI field is selected.
         brapiDialogShown = false;
-        mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, ConfigActivity.dt.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
+        mAdapter = new TraitAdapter(thisActivity, R.layout.listitem_trait, database.getAllTraitObjects(), traitListener, visibility, brapiDialogShown);
 
         traitList.setAdapter(mAdapter);
         traitList.setDropListener(onDrop);
@@ -409,7 +411,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             TraitObject o = mAdapter.getItem(position);
             traitDialog.setTraitObject(o);
 
-            loadData();
+            queryAndLoadTraits();
             traitDialog.show(true);
         };
 
@@ -431,7 +433,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         View v = traitList.getChildAt(item);
         final int[] location = new int[2];
         v.getLocationOnScreen(location);
-        return new Rect(location[0], location[1], location[0] + v.getWidth()/adjust, location[1] + v.getHeight());
+        return new Rect(location[0], location[1], location[0] + v.getWidth() / adjust, location[1] + v.getHeight());
     }
 
     private TapTarget traitsTapTargetRect(Rect item, String title, String desc) {
@@ -484,9 +486,9 @@ public class TraitEditorActivity extends AppCompatActivity {
                                     //Todo add overflow menu action
                             );
 
-                    if (ConfigActivity.dt.getTraitColumnData("trait") != null) {
-                        sequence.target(traitsTapTargetRect(traitsListItemLocation(0,4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
-                        sequence.target(traitsTapTargetRect(traitsListItemLocation(0,2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
+                    if (database.getTraitColumnData("trait") != null) {
+                        sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
+                        sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
                     }
 
                     sequence.start();
@@ -529,13 +531,13 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void checkShowDeleteDialog() {
-        ArrayList<TraitObject> traits = ConfigActivity.dt.getAllTraitObjects();
+        ArrayList<TraitObject> traits = database.getAllTraitObjects();
         if (traits.isEmpty()) {
             Toast.makeText(this, R.string.act_trait_editor_no_traits_exist, Toast.LENGTH_SHORT).show();
         } else {
             showDeleteTraitDialog((dialog, which) -> {
-                ConfigActivity.dt.deleteTraitsTable();
-                loadData();
+                database.deleteTraitsTable();
+                queryAndLoadTraits();
                 dialog.dismiss();
             }, (dialog, which) -> dialog.dismiss(), null);
         }
@@ -543,10 +545,10 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     private void changeAllVisibility() {
         boolean globalVis = ep.getBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, false);
-        List<TraitObject> allTraits = ConfigActivity.dt.getAllTraitObjects();
+        List<TraitObject> allTraits = database.getAllTraitObjects();
 
         if (allTraits.isEmpty()) {
-            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing_modify));
+            Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing_modify));
             return;
         }
 
@@ -554,7 +556,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         globalVis = !allTraits.stream().allMatch(TraitObject::getVisible);
 
         for (TraitObject allTrait : allTraits) {
-            ConfigActivity.dt.updateTraitVisibility(allTrait.getTrait(), globalVis);
+            database.updateTraitVisibility(allTrait.getTrait(), globalVis);
             Log.d("Field", allTrait.getTrait());
         }
 
@@ -563,7 +565,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         Editor ed = ep.edit();
         ed.putBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, globalVis);
         ed.apply();
-        loadData();
+        queryAndLoadTraits();
     }
 
     private void importExportDialog() {
@@ -704,7 +706,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     private void showFileDialog() {
 
-        ArrayList<TraitObject> traits = ConfigActivity.dt.getAllTraitObjects();
+        ArrayList<TraitObject> traits = database.getAllTraitObjects();
 
         if (!traits.isEmpty()) {
 
@@ -732,7 +734,7 @@ public class TraitEditorActivity extends AppCompatActivity {
 
     private void checkTraitExportDialog() {
 
-        ArrayList<TraitObject> traits = ConfigActivity.dt.getAllTraitObjects();
+        ArrayList<TraitObject> traits = database.getAllTraitObjects();
 
         if (traits.isEmpty()) {
             showFileDialog();
@@ -764,9 +766,9 @@ public class TraitEditorActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
 
-        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
+        String[] allTraits = database.getTraitColumnData("trait");
         if (allTraits == null) {
-            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing_modify));
+            Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing_modify));
             return;
         }
 
@@ -819,7 +821,7 @@ public class TraitEditorActivity extends AppCompatActivity {
     }
 
     private void sortTraitList(String colName) {
-        String[] sortList = ConfigActivity.dt.getTraitColumnData(colName);
+        String[] sortList = database.getTraitColumnData(colName);
 
         ArrayIndexComparator comparator = new ArrayIndexComparator(sortList);
         Integer[] indexes = comparator.createIndexArray();
@@ -830,11 +832,11 @@ public class TraitEditorActivity extends AppCompatActivity {
         }
 
         for (int j = 0; j < indexes.length; j++) {
-            ConfigActivity.dt.writeNewPosition(colName, sortList[j], Integer.toString(indexes[j]));
+            database.writeNewPosition(colName, sortList[j], Integer.toString(indexes[j]));
             Log.e("TRAIT", sortList[j] + " " + indexes[j].toString());
         }
 
-        loadData();
+        queryAndLoadTraits();
     }
 
     private void showExportDialog() {
@@ -879,10 +881,10 @@ public class TraitEditorActivity extends AppCompatActivity {
                                        @Nullable DialogInterface.OnClickListener onNegative,
                                        @Nullable DialogInterface.OnDismissListener onDismiss) {
 
-        String[] allTraits = ConfigActivity.dt.getTraitColumnData("trait");
+        String[] allTraits = database.getTraitColumnData("trait");
 
         if (allTraits == null) {
-            Utils.makeToast(getApplicationContext(),getString(R.string.warning_traits_missing_modify));
+            Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing_modify));
             return;
         }
 
@@ -926,7 +928,7 @@ public class TraitEditorActivity extends AppCompatActivity {
         if (requestCode == 2) {
             brapiDialogShown = mAdapter.infoDialogShown;
             if (!brapiDialogShown) {
-                brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, ConfigActivity.dt, null, true);
+                brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
             }
         }
 
@@ -961,7 +963,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         }
-                        if (out != null){
+                        if (out != null) {
                             try {
                                 out.close();
                             } catch (IOException e) {
@@ -973,8 +975,8 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                     String extension = FieldFileObject.getExtension(fileName);
 
-                    if(!extension.equals("trt")) {
-                        Utils.makeToast(getApplicationContext(),getString(R.string.import_error_format_trait));
+                    if (!extension.equals("trt")) {
+                        Utils.makeToast(getApplicationContext(), getString(R.string.import_error_format_trait));
                         return;
                     }
 
@@ -1025,8 +1027,8 @@ public class TraitEditorActivity extends AppCompatActivity {
                     if (output != null) {
 
                         OutputStreamWriter osw = new OutputStreamWriter(output);
-                        CSVWriter csvWriter = new CSVWriter(osw, ConfigActivity.dt.getAllTraitsForExport());
-                        csvWriter.writeTraitFile(ConfigActivity.dt.getAllTraitsForExport().getColumnNames());
+                        CSVWriter csvWriter = new CSVWriter(osw, database.getAllTraitsForExport());
+                        csvWriter.writeTraitFile(database.getAllTraitsForExport().getColumnNames());
 
                         csvWriter.close();
                         osw.close();
@@ -1065,6 +1067,11 @@ public class TraitEditorActivity extends AppCompatActivity {
 
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @Override
+    public void queryAndLoadTraits() {
+        loadData(database.getTraitVisibility(), database.getAllTraitObjects());
     }
 
     private static class ArrayIndexComparator implements Comparator<Integer> {
@@ -1121,12 +1128,12 @@ public class TraitEditorActivity extends AppCompatActivity {
 
                 data = columns;
 
-                if (ConfigActivity.dt.isTableExists(DataHelper.TRAITS)) {
-                    ConfigActivity.dt.deleteTraitsTable();
+                if (database.isTableExists(DataHelper.TRAITS)) {
+                    database.deleteTraitsTable();
                 }
 
                 //get variable with largest real position
-                Optional<TraitObject> maxPosition = ObservationVariableDao.Companion.getAllTraitObjects().stream()
+                Optional<TraitObject> maxPosition = database.getAllTraitObjects().stream()
                         .max(Comparator.comparingInt(TraitObject::getRealPosition));
 
                 //by default start from zero
@@ -1163,7 +1170,7 @@ public class TraitEditorActivity extends AppCompatActivity {
                         //t.visible = data[7].toLowerCase();
                         t.setRealPosition(positionOffset + Integer.parseInt(data[8]));
                         t.setVisible(data[7].equalsIgnoreCase("true"));
-                        ConfigActivity.dt.insertTraits(t);
+                        database.insertTraits(t);
                     }
                 }
 
@@ -1185,8 +1192,8 @@ public class TraitEditorActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                ConfigActivity.dt.close();
-                ConfigActivity.dt.open();
+                database.close();
+                database.open();
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1202,7 +1209,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             ed.putBoolean(GeneralKeys.CREATE_TRAIT_FINISHED, true);
             ed.apply();
 
-            loadData();
+            queryAndLoadTraits();
 
             CollectActivity.reloadData = true;
 
@@ -1211,7 +1218,7 @@ public class TraitEditorActivity extends AppCompatActivity {
             }
 
             if (fail) {
-                Utils.makeToast(getApplicationContext(),thisActivity.getString(R.string.import_error_general));
+                Utils.makeToast(getApplicationContext(), thisActivity.getString(R.string.import_error_general));
             }
         }
     }

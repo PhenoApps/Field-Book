@@ -78,15 +78,35 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 /**
- * Settings Screen
+ * The main page of FieldBook.
+ *
+ * This contains a list of features that the app provides containing:
+ *      Fields -> the FieldEditorActivity, allows the user to import, delete and select a field
+ *      Traits -> the TraitEditorActivity, allows the user to edit, import, delete and select visible traits
+ *      Collect -> the main phenotyping component allowing user to navigate across plots and make
+ *                  observations using the visible traits
+ *      Export -> creates a dialog that lets the user export data
+ *      Settings -> the app preferences activity
+ *      About -> a third party library that handles showing dependencies and other app data
+ *
+ * Also this activity has a static member variable for the DataHelper (database) class that many other classes use
+ * to make queries.
  */
+@AndroidEntryPoint
 public class ConfigActivity extends AppCompatActivity {
 
+    @Inject
+    public DataHelper injectedDatabase;
+
     public static DataHelper dt;
+
     private final static String TAG = ConfigActivity.class.getSimpleName();
     private final int PERMISSIONS_REQUEST_EXPORT_DATA = 9990;
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;

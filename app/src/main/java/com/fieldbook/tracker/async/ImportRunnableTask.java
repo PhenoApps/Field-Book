@@ -9,7 +9,7 @@ import android.text.Html;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.FieldEditorActivity;
+import com.fieldbook.tracker.adapters.FieldEditorLoader;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -233,7 +233,11 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             ed.apply();
 
             CollectActivity.reloadData = true;
-            FieldEditorActivity.loadData();
+
+            Context ctx = mContext.get();
+            if (ctx instanceof FieldEditorLoader) {
+                ((FieldEditorLoader) ctx).queryAndLoadFields();
+            }
 
             try {
 

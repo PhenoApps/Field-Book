@@ -16,15 +16,17 @@ import com.evrencoskun.tableview.TableView
 import com.evrencoskun.tableview.listener.ITableViewListener
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.DataGridAdapter
-import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.Utils
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * @author Chaney
@@ -41,6 +43,7 @@ import kotlinx.coroutines.launch
  * i.putExtra("result", plotId)
  * i.putExtra("trait", 1) <- actually a trait index s.a 0 -> "height", 1 -> "lodging"
  **/
+@AndroidEntryPoint
 class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITableViewListener {
 
     /***
@@ -86,6 +89,9 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
     private lateinit var mRowHeaders: ArrayList<String>
     private lateinit var mPlotIds: ArrayList<String>
     private lateinit var mTraits: Array<String>
+
+    @Inject
+    lateinit var database: DataHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -149,7 +155,7 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
             R.id.menu_data_grid_action_header_view -> {
 
                 //get all available obs. property columns
-                val prefixTraits = ObservationUnitPropertyDao.getRangeColumns()
+                val prefixTraits = database.rangeColumns
 
                 if (prefixTraits.isNotEmpty()) {
 
@@ -187,9 +193,7 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
         //if row header was not chosen, then use the preference unique name
         var rowHeader = prefixTrait ?: ep.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
 
-        ConfigActivity.dt.open()
-
-        if (rowHeader !in ObservationUnitPropertyDao.getRangeColumnNames()) {
+        if (rowHeader !in database.rangeColumnNames) {
             rowHeader = uniqueHeader
         }
 
@@ -202,12 +206,12 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
             scope.launch {
 
                 //query database for visible traits
-                mTraits = ConfigActivity.dt.visibleTrait
+                mTraits = database.visibleTrait
 
-                val traits = ConfigActivity.dt.allTraitObjects;
+                val traits = database.allTraitObjects;
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
-                val cursor = ConfigActivity.dt.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
+                val cursor = database.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
 
                 if (cursor.moveToFirst()) {
 

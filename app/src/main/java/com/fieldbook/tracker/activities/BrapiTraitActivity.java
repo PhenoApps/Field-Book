@@ -2,11 +2,6 @@ package com.fieldbook.tracker.activities;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.arch.core.util.Function;
-
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,10 +10,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.arch.core.util.Function;
+
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
-import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -26,13 +27,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import com.fieldbook.tracker.objects.TraitObject;
+import javax.inject.Inject;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class BrapiTraitActivity extends AppCompatActivity {
 
     private BrAPIService brAPIService;
     private List<TraitObject> selectedTraits;
     private BrapiPaginationManager paginationManager;
+
+    @Inject
+    DataHelper database;
 
     @Override
     public void onDestroy() {
@@ -245,13 +252,13 @@ public class BrapiTraitActivity extends AppCompatActivity {
         String secondaryMessage = "";
         // For now, only give the ability to create new variables
         // Determine later if the need to edit existing variables is needed.
-        int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
+        int pos = database.getMaxPositionFromTraits() + 1;
         for (int i = 0; i < selectedTraits.size(); ++i) {
 
             TraitObject trait = selectedTraits.get(i);
 
-            TraitObject existingTraitByName = ConfigActivity.dt.getTraitByName(trait.getTrait());
-            TraitObject existingTraitByExId = ConfigActivity.dt.getTraitByExternalDbId(trait.getExternalDbId(), trait.getTraitDataSource());
+            TraitObject existingTraitByName = database.getTraitByName(trait.getTrait());
+            TraitObject existingTraitByExId = database.getTraitByExternalDbId(trait.getExternalDbId(), trait.getTraitDataSource());
             // Check if the trait already exists
             if (existingTraitByName != null) {
                 secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getTrait());
@@ -260,12 +267,12 @@ public class BrapiTraitActivity extends AppCompatActivity {
             }else if (existingTraitByExId != null) {
                 // Update existing trait
                 trait.setId(existingTraitByExId.getId());
-                long saveStatus = ConfigActivity.dt.updateTrait(trait);
+                long saveStatus = database.updateTrait(trait);
                 successfulSaves += saveStatus == -1 ? 0 : 1;
             }else{
                 // Insert our new trait
                 trait.setRealPosition(pos + i);
-                long saveStatus = ConfigActivity.dt.insertTraits(trait);
+                long saveStatus = database.insertTraits(trait);
                 successfulSaves += saveStatus == -1 ? 0 : 1;
             }
         }

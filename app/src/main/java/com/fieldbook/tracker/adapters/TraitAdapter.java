@@ -1,7 +1,5 @@
 package com.fieldbook.tracker.adapters;
 
-import androidx.appcompat.app.AlertDialog;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
@@ -18,12 +16,13 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.activities.CollectActivity;
+import androidx.appcompat.app.AlertDialog;
+
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
@@ -191,7 +190,7 @@ public class TraitAdapter extends BaseAdapter {
 
                         // Show our BrAPI info box if this is a non-BrAPI trait
                         String traitName = holder.name.getText().toString();
-                        infoDialogShown = TraitEditorActivity.displayBrapiInfo(context, new DataHelper(context), traitName, false);
+                        infoDialogShown = ((TraitEditorLoader) context).displayBrapiInfo(context, traitName, false);
 
                     }
 
@@ -246,9 +245,12 @@ public class TraitAdapter extends BaseAdapter {
         trait.setVisible(true);
         trait.setRealPosition(pos);
 
-        //MainActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
         ConfigActivity.dt.insertTraits(trait);
-        TraitEditorActivity.loadData();
+
+        if (context instanceof TraitEditorLoader) {
+            ((TraitEditorLoader) context).queryAndLoadTraits();
+        }
+
         CollectActivity.reloadData = true;
     }
 
@@ -279,7 +281,11 @@ public class TraitAdapter extends BaseAdapter {
         builder.setPositiveButton(context.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 ConfigActivity.dt.deleteTrait(holder.id);
-                TraitEditorActivity.loadData();
+
+                if (context instanceof TraitEditorLoader) {
+                    ((TraitEditorLoader) context).queryAndLoadTraits();
+                }
+
                 CollectActivity.reloadData = true;
             }
         });

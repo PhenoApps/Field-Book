@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.activities;
 
-import static com.fieldbook.tracker.activities.ConfigActivity.dt;
 import static com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.ACTION_BROADCAST_GNSS_ROVER;
 
 import android.annotation.SuppressLint;
@@ -123,12 +122,16 @@ import java.util.TimerTask;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import kotlin.Pair;
 
 /**
  * All main screen logic resides here
  */
 
+@AndroidEntryPoint
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends AppCompatActivity
         implements SensorEventListener, GPSTracker.GPSTrackerListener,
@@ -137,6 +140,8 @@ public class CollectActivity extends AppCompatActivity
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
+
+    @Inject DataHelper database;
 
     public static boolean searchReload;
     public static String searchRange;
@@ -277,13 +282,7 @@ public class CollectActivity extends AppCompatActivity
             return null;
         });
 
-        if (ConfigActivity.dt == null) {    // when resume
-            ConfigActivity.dt = new DataHelper(this);
-        }
-
         mUsbCameraHelper = new UsbCameraHelper(this);
-
-        ConfigActivity.dt.open();
 
         loadScreen();
 
@@ -493,7 +492,7 @@ public class CollectActivity extends AppCompatActivity
             // if a brapi observation that has been synced, don't allow deleting
             String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
             TraitObject currentTrait = traitBox.getCurrentTrait();
-            if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
+            if (database.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
                 if (currentTrait.getFormat().equals("photo")) {
                     // I want to use abstract method
                     Map<String, String> newTraits = traitBox.getNewTraits();
@@ -527,7 +526,7 @@ public class CollectActivity extends AppCompatActivity
     private void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
-        if (!dt.isRangeTableEmpty()) {
+        if (!database.isRangeTableEmpty()) {
             String plotID = rangeBox.getPlotID();
             infoBarAdapter.configureDropdownArray(plotID);
         }
@@ -535,7 +534,7 @@ public class CollectActivity extends AppCompatActivity
         traitBox.initTraitDetails();
 
         // trait is unique, format is not
-        String[] traits = dt.getVisibleTrait();
+        String[] traits = database.getVisibleTrait();
         if (traits != null) {
             ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<>(
                     this, R.layout.custom_spinnerlayout, traits);
@@ -668,9 +667,6 @@ public class CollectActivity extends AppCompatActivity
     public void onPause() {
         // Backup database
         try {
-//            dt.exportDatabase("backup");
-//            File exportedDb = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db");
-//            File exportedSp = new File(ep.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY, Constants.MPATH) + Constants.BACKUPPATH + "/" + "backup.db_sharedpref.xml");
 
             DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_database);
             if (databaseDir != null) {
@@ -680,7 +676,7 @@ public class CollectActivity extends AppCompatActivity
 
                     try {
 
-                        dt.exportDatabase(this,"backup");
+                        database.exportDatabase(this,"backup");
 
                     } catch (IOException io) {
                         io.printStackTrace();
@@ -689,8 +685,6 @@ public class CollectActivity extends AppCompatActivity
                 });
             }
 
-//            Utils.scanFile(CollectActivity.this, exportedDb);
-//            Utils.scanFile(CollectActivity.this, exportedSp);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -797,12 +791,6 @@ public class CollectActivity extends AppCompatActivity
 
         // If reload data is true, it means there was an import operation, and
         // the screen should refresh
-        if (ConfigActivity.dt == null) {
-            ConfigActivity.dt = new DataHelper(this);
-        }
-
-        ConfigActivity.dt.open();
-
         if (reloadData) {
             reloadData = false;
             partialReload = false;
@@ -887,7 +875,7 @@ public class CollectActivity extends AppCompatActivity
         if (trait != null) {
 
             //get all traits, filter the preference trait and check it's visibility
-            String[] traits = dt.getVisibleTrait();
+            String[] traits = database.getVisibleTrait();
 
             try {
 
@@ -981,15 +969,15 @@ public class CollectActivity extends AppCompatActivity
         String expId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         String obsUnit = rangeBox.getPlotID();
 
-        Observation observation = dt.getObservation(expId, obsUnit, parent);
+        Observation observation = database.getObservation(expId, obsUnit, parent);
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        dt.deleteTrait(expId, obsUnit, parent);
+        database.deleteTrait(expId, obsUnit, parent);
 
-        dt.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
+        database.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
                 ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
                 getLocationByPreferences(), "", expId, observationDbId,
                 lastSyncedTime);
@@ -1026,7 +1014,7 @@ public class CollectActivity extends AppCompatActivity
 
         String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         TraitObject trait = traitBox.getCurrentTrait();
-        if (dt.isBrapiSynced(exp_id, rangeBox.getPlotID(), trait.getTrait())) {
+        if (database.isBrapiSynced(exp_id, rangeBox.getPlotID(), trait.getTrait())) {
             brapiDelete(parent, true);
         } else {
             // Always remove existing trait before inserting again
@@ -1502,8 +1490,6 @@ public class CollectActivity extends AppCompatActivity
 
             //get current field id
             int studyId = ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
-
-            dt.open();
 
             //find all observation units within the field
             ObservationUnitModel[] units = ObservationUnitDao.Companion.getAll(studyId);
@@ -2005,7 +1991,7 @@ public class CollectActivity extends AppCompatActivity
                                 (v) -> {
 
                                     //updates obs. range view in database
-                                    dt.switchField(studyId);
+                                    database.switchField(studyId);
 
                                     //refresh collect activity UI
                                     rangeBox.reload();
@@ -2096,7 +2082,7 @@ public class CollectActivity extends AppCompatActivity
 
     public boolean existsTrait(final int ID) {
         final TraitObject trait = traitBox.getCurrentTrait();
-        return dt.getTraitExists(ID, trait.getTrait(), trait.getFormat());
+        return database.getTraitExists(ID, trait.getTrait(), trait.getFormat());
     }
 
     /**
@@ -2110,7 +2096,7 @@ public class CollectActivity extends AppCompatActivity
         final String[] formats = VisibleObservationVariableDao.Companion.getFormat();
         for (int i = 0; i < traits.length; i++) {
             if (i != traitIndex
-                    && !dt.getTraitExists(ID, traits[i], formats[i])) return i;
+                    && !database.getTraitExists(ID, traits[i], formats[i])) return i;
         }
         return -1;
     }
@@ -2120,7 +2106,7 @@ public class CollectActivity extends AppCompatActivity
         final String[] formats = VisibleObservationVariableDao.Companion.getFormat();
         final ArrayList<Integer> indices = new ArrayList<>();
         for (int i = 0; i < traits.length; i++) {
-            if (!dt.getTraitExists(ID, traits[i], formats[i]))
+            if (!database.getTraitExists(ID, traits[i], formats[i]))
                 indices.add(i);
         }
         return indices;
@@ -2210,7 +2196,7 @@ public class CollectActivity extends AppCompatActivity
 
         String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        dt.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
+        database.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
                 ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
                 getLocationByPreferences(), "", studyId, "",
                 null);
@@ -2346,10 +2332,8 @@ public class CollectActivity extends AppCompatActivity
                 public void onItemSelected(AdapterView<?> arg0, View arg1,
                                            int arg2, long arg3) {
 
-                    dt.open();
-
                     // This updates the in memory hashmap from database
-                    currentTrait = dt.getDetail(traitType.getSelectedItem()
+                    currentTrait = database.getDetail(traitType.getSelectedItem()
                             .toString());
 
                     etCurVal = parent.getEtCurVal();
@@ -2407,7 +2391,7 @@ public class CollectActivity extends AppCompatActivity
          * @param plotID the new plot id we are transitioning to
          */
         void setNewTraits(final String plotID) {
-            newTraits = dt.getUserDetail(plotID);
+            newTraits = database.getUserDetail(plotID);
         }
 
         void setNewTraits(Map<String, String> newTraits) {
@@ -2427,7 +2411,7 @@ public class CollectActivity extends AppCompatActivity
         }
 
         void setPrefixTraits() {
-            prefixTraits = dt.getRangeColumnNames();
+            prefixTraits = database.getRangeColumnNames();
         }
 
         void setSelection(int pos) {
@@ -2455,14 +2439,14 @@ public class CollectActivity extends AppCompatActivity
         }
 
         final String createSummaryText(final String plotID) {
-            String[] traitList = dt.getAllTraits();
+            String[] traitList = database.getAllTraits();
             StringBuilder data = new StringBuilder();
 
             //TODO this test crashes app
             if (rangeBox.getCRange() != null) {
                 for (String s : traitBox.prefixTraits) {
                     data.append(s).append(": ");
-                    data.append(dt.getDropDownRange(s, plotID)[0]).append("\n");
+                    data.append(database.getDropDownRange(s, plotID)[0]).append("\n");
                 }
             }
 
@@ -2487,7 +2471,7 @@ public class CollectActivity extends AppCompatActivity
 
             String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-            dt.deleteTrait(exp_id, plotID, traitName);
+            database.deleteTrait(exp_id, plotID, traitName);
         }
 
         public void remove(TraitObject trait, String plotID) {
@@ -2949,7 +2933,7 @@ public class CollectActivity extends AppCompatActivity
 
             if (!firstName.isEmpty() && !secondName.isEmpty() && !uniqueName.isEmpty()) {
 
-                cRange = dt.getRange(firstName, secondName, uniqueName, id);
+                cRange = database.getRange(firstName, secondName, uniqueName, id);
 
             } else {
 
@@ -3084,7 +3068,7 @@ public class CollectActivity extends AppCompatActivity
         }
 
         void setAllRangeID() {
-            rangeID = dt.getAllRangeID();
+            rangeID = database.getAllRangeID();
         }
 
         public void setRange(final int id) {

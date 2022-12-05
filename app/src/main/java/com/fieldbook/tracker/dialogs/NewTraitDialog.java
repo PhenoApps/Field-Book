@@ -1,8 +1,5 @@
 package com.fieldbook.tracker.dialogs;
 
-import static com.fieldbook.tracker.activities.TraitEditorActivity.displayBrapiInfo;
-import static com.fieldbook.tracker.activities.TraitEditorActivity.loadData;
-
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -31,6 +28,7 @@ import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
 import com.fieldbook.tracker.adapters.CategoryAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapter;
+import com.fieldbook.tracker.adapters.TraitEditorLoader;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
@@ -297,13 +295,11 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         // brapiDialogShown = mAdapter.infoDialogShown;
         setBrAPIDialogShown(mAdapter.infoDialogShown);
         if (!brapiDialogShown) {
-            // brapiDialogShown = displayBrapiInfo(originActivity,
-            //                          ConfigActivity.dt, null, true);
-            setBrAPIDialogShown(displayBrapiInfo(originActivity,
-                    ConfigActivity.dt, null, true));
+            setBrAPIDialogShown(((TraitEditorLoader) originActivity)
+                            .displayBrapiInfo(originActivity, null, true));
         }
 
-        loadData();
+        ((TraitEditorLoader) originActivity).queryAndLoadTraits();
 
         CollectActivity.reloadData = true;
         createDialog.dismiss();

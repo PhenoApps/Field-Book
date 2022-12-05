@@ -29,18 +29,27 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.SearchAdapter;
+import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SearchActivity extends AppCompatActivity {
     public static String TICK = "\"";
     private static String TAG = "Field Book";
     private SharedPreferences ep;
     private LinearLayout parent;
     private int rangeUntil;
+
+    @Inject
+    DataHelper database;
 
     // Helper function to merge arrays
     public static <T> T[] concat(T[] first, T[] second) {
@@ -190,7 +199,7 @@ public class SearchActivity extends AppCompatActivity {
                     else
                         sql = sql1 + sql;
 
-                    final SearchData[] data = ConfigActivity.dt.getRangeBySql(sql);
+                    final SearchData[] data = database.getRangeBySql(sql);
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this, R.style.AppAlertDialog);
 
@@ -316,13 +325,13 @@ public class SearchActivity extends AppCompatActivity {
         //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(adapter);
 
-        String[] col = ConfigActivity.dt.getRangeColumns();
+        String[] col = database.getRangeColumns();
 
         if (col != null) {
             rangeUntil = col.length;
 
             ArrayAdapter adapter2 = new ArrayAdapter(SearchActivity.this, R.layout.custom_spinnerlayout,
-                    concat(col, ConfigActivity.dt.getVisibleTrait()));
+                    concat(col, database.getVisibleTrait()));
             adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             c.setAdapter(adapter2);
 

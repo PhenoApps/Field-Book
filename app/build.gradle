@@ -4,6 +4,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'androidx.navigation.safeargs'
+apply plugin: 'com.google.dagger.hilt.android'
 
 android {
     signingConfigs {
@@ -143,6 +144,10 @@ dependencies {
 
     implementation 'androidx.documentfile:documentfile:1.0.1'
 
+    //hilt dependency injection
+    implementation "com.google.dagger:hilt-android:2.44"
+    kapt "com.google.dagger:hilt-compiler:2.44"
+
     kapt 'com.android.databinding:compiler:3.1.4'
 
     testImplementation 'androidx.test:core:1.4.0'
@@ -153,6 +158,11 @@ dependencies {
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+}
+
+kapt {
+    //used in hilt documentation says 'Allow references to generated code"
+    correctErrorTypes true
 }
 
 repositories {

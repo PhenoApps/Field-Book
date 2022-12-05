@@ -19,7 +19,6 @@ import androidx.appcompat.app.AlertDialog;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
 import com.fieldbook.tracker.dialogs.FieldSortController;
@@ -216,7 +215,8 @@ public class FieldAdapter extends BaseAdapter {
                     setEditorItem(ep, null);
                 }
 
-                FieldEditorActivity.loadData();
+                ((FieldEditorLoader) context).queryAndLoadFields();
+
                 CollectActivity.reloadData = true;
             }
         };
