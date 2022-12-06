@@ -74,7 +74,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         val info = it.obj as AverageInfo
 
-        if (!CollectActivity.thisActivity.isDestroyed)
+        if (!(context as CollectActivity).isDestroyed)
             averagePoints(info)
 
         mProgressDialog?.dismiss()

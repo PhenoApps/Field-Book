@@ -1,3 +1,7 @@
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 
@@ -9,8 +13,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import static org.junit.Assert.assertTrue;
-
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = {Build.VERSION_CODES.P})
 public class ImageTest {
@@ -20,10 +22,11 @@ public class ImageTest {
 
     @Before
     public void setUp() throws Exception {
+        Context context = mock(Context.class);
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap bmp = Bitmap.createBitmap(100, 100, conf);
-        image = new FieldBookImage(filePath, bmp);
-        image.loadImage();
+        image = new FieldBookImage(context, filePath, bmp);
+        image.loadImage(context);
     }
 
     @Test

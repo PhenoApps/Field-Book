@@ -3,7 +3,6 @@ package com.fieldbook.tracker.activities;
 import static com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.ACTION_BROADCAST_GNSS_ROVER;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ContentResolver;
@@ -12,7 +11,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -36,21 +34,15 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -92,6 +84,10 @@ import com.fieldbook.tracker.utilities.GeodeticUtils;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.views.CollectRangeController;
+import com.fieldbook.tracker.views.CollectTraitController;
+import com.fieldbook.tracker.views.RangeBoxView;
+import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.android.material.snackbar.Snackbar;
@@ -111,8 +107,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -135,21 +129,26 @@ import kotlin.Pair;
 @AndroidEntryPoint
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends AppCompatActivity
-        implements SensorEventListener, GPSTracker.GPSTrackerListener,
-        UsbCameraInterface, SummaryFragment.SummaryOpenListener, FieldController {
+        implements SensorEventListener,
+        GPSTracker.GPSTrackerListener,
+        UsbCameraInterface,
+        SummaryFragment.SummaryOpenListener,
+        FieldController,
+        CollectRangeController,
+        CollectTraitController {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
 
-    @Inject DataHelper database;
+    @Inject
+    DataHelper database;
 
     public static boolean searchReload;
     public static String searchRange;
     public static String searchPlot;
     public static boolean reloadData;
     public static boolean partialReload;
-    public static Activity thisActivity;
     public static String TAG = "Field Book";
     public static String GEOTAG = "GeoNav";
 
@@ -172,8 +171,8 @@ public class CollectActivity extends AppCompatActivity
      */
     private Menu systemMenu;
     private InfoBarAdapter infoBarAdapter;
-    private TraitBox traitBox;
-    private RangeBox rangeBox;
+    private TraitBoxView traitBox;
+    private RangeBoxView rangeBox;
     /**
      * Trait-related elements
      */
@@ -368,20 +367,19 @@ public class CollectActivity extends AppCompatActivity
 
         lock = new Object();
 
-        thisActivity = this;
-
         // Keyboard service manager
         setIMM();
 
         infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
 
         traitLayouts = new LayoutCollections(this);
-        traitBox = new TraitBox(this);
-        rangeBox = new RangeBox(this);
+        traitBox = findViewById(R.id.act_collect_trait_box);
+        rangeBox = findViewById(R.id.act_collect_range_box);
         initCurrentVals();
     }
 
-    private void refreshMain() {
+    @Override
+    public void refreshMain() {
         rangeBox.saveLastPlot();
         rangeBox.refresh();
         traitBox.setNewTraits(rangeBox.getPlotID());
@@ -391,7 +389,8 @@ public class CollectActivity extends AppCompatActivity
         refreshLock();
     }
 
-    private void playSound(String sound) {
+    @Override
+    public void playSound(String sound) {
         try {
             int resID = getResources().getIdentifier(sound, "raw", getPackageName());
             MediaPlayer chimePlayer = MediaPlayer.create(CollectActivity.this, resID);
@@ -413,7 +412,8 @@ public class CollectActivity extends AppCompatActivity
      *
      * @return boolean flag false when data is out of bounds, true otherwise
      */
-    private boolean validateData() {
+    @Override
+    public boolean validateData() {
         final String strValue = etCurVal.getText().toString();
         final TraitObject currentTrait = traitBox.getCurrentTrait();
 
@@ -481,7 +481,7 @@ public class CollectActivity extends AppCompatActivity
         barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
         barcodeInput.setOnClickListener(v -> {
             triggerTts(barcodeTts);
-            new IntentIntegrator(thisActivity)
+            new IntentIntegrator(CollectActivity.this)
                     .setPrompt(getString(R.string.main_barcode_text))
                     .setBeepEnabled(false)
                     .setRequestCode(BARCODE_COLLECT_CODE)
@@ -512,7 +512,10 @@ public class CollectActivity extends AppCompatActivity
     }
 
     // This update should only be called after repeating keypress ends
-    private void repeatUpdate() {
+    //TODO
+    // STOPSHIP: 12/6/2022 refactor to range box class
+    @Override
+    public void repeatUpdate() {
         if (rangeBox.getRangeID() == null)
             return;
 
@@ -524,7 +527,8 @@ public class CollectActivity extends AppCompatActivity
     // This is central to the application
     // Calling this function resets all the controls for traits, and picks one
     // to show based on the current trait data
-    private void initWidgets(final boolean rangeSuppress) {
+    @Override
+    public void initWidgets(final boolean rangeSuppress) {
         // Reset dropdowns
 
         if (!database.isRangeTableEmpty()) {
@@ -548,23 +552,30 @@ public class CollectActivity extends AppCompatActivity
 
     /**
      * Moves to specific plot/range/plot_id
-     * @param type the type of search, search, plot, range, id, barcode or quickgoto
-     * @param rangeID the array of range ids
+     * @param command the type of search, search, plot, range, id, barcode or quickgoto
+     * @param plotIndices the array of range ids
      * @param range the primary id
      * @param plot the secondary id
      * @param data data to search for
      * @param trait the trait to navigate to
      * @return true if the search was successful, false otherwise
      */
-    private boolean moveToSearch(String type, int[] rangeID, String range, String plot, String data, int trait) {
+    @Override
+    public boolean moveToSearch(
+            @NonNull String command,
+            int[] plotIndices,
+            String range,
+            String plot,
+            String data,
+            int trait) {
 
-        if (rangeID == null) {
+        if (plotIndices == null) {
             return false;
         }
 
         // search moveto
-        if (type.equals("search")) {
-            for (int j = 1; j <= rangeID.length; j++) {
+        if (command.equals("search")) {
+            for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
                 if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
@@ -575,8 +586,8 @@ public class CollectActivity extends AppCompatActivity
         }
 
         // new type to skip the toast message and keep previous functionality
-        if (type.equals("quickgoto")) {
-            for (int j = 1; j <= rangeID.length; j++) {
+        if (command.equals("quickgoto")) {
+            for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
                 if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
@@ -587,8 +598,8 @@ public class CollectActivity extends AppCompatActivity
         }
 
         //move to plot
-        if (type.equals("plot")) {
-            for (int j = 1; j <= rangeID.length; j++) {
+        if (command.equals("plot")) {
+            for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
                 if (rangeBox.getCRange().plot.equals(data)) {
@@ -599,8 +610,8 @@ public class CollectActivity extends AppCompatActivity
         }
 
         //move to range
-        if (type.equals("range")) {
-            for (int j = 1; j <= rangeID.length; j++) {
+        if (command.equals("range")) {
+            for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
                 if (rangeBox.getCRange().range.equals(data)) {
@@ -611,8 +622,8 @@ public class CollectActivity extends AppCompatActivity
         }
 
         //move to plot id
-        if (type.equals("id") || type.equals("barcode")) {
-            int rangeSize = rangeID.length;
+        if (command.equals("id") || command.equals("barcode")) {
+            int rangeSize = plotIndices.length;
             for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
@@ -627,7 +638,7 @@ public class CollectActivity extends AppCompatActivity
             }
         }
 
-        if (!type.equals("quickgoto") && !type.equals("barcode"))
+        if (!command.equals("quickgoto") && !command.equals("barcode"))
             Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
 
         return false;
@@ -695,8 +706,8 @@ public class CollectActivity extends AppCompatActivity
         stopGeoNav();
 
         //save the last used trait
-        if (traitBox.currentTrait != null)
-            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.currentTrait.getTrait()).apply();
+        if (traitBox.getCurrentTrait() != null)
+            ep.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getTrait()).apply();
 
         mAverageHandler.quit();
 
@@ -1144,7 +1155,7 @@ public class CollectActivity extends AppCompatActivity
                 }
                 break;
             case R.id.nextEmptyPlot:
-                rangeBox.paging = rangeBox.movePaging(rangeBox.paging, 1, false, true);
+                rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, false, true));
                 refreshMain();
 
                 break;
@@ -1165,8 +1176,8 @@ public class CollectActivity extends AppCompatActivity
                 Intent i = new Intent();
                 i.setClassName(CollectActivity.this,
                         DataGridActivity.class.getName());
-                i.putExtra("plot_id", rangeBox.paging);
-                i.putExtra("trait", traitBox.currentTrait.getRealPosition());
+                i.putExtra("plot_id", rangeBox.getPaging());
+                i.putExtra("trait", traitBox.getCurrentTrait().getRealPosition());
                 startActivityForResult(i, 2);
                 break;
             case R.id.lockData:
@@ -1520,15 +1531,15 @@ public class CollectActivity extends AppCompatActivity
 
                     String id = target.getFirst().getObservation_unit_db_id();
 
-                    if (!id.equals(rangeBox.cRange.plot_id) && !id.equals(lastPlotIdNav)) {
+                    if (!id.equals(rangeBox.getCRange().plot_id) && !id.equals(lastPlotIdNav)) {
 
                         lastPlotIdNav = id;
 
-                        thisActivity.runOnUiThread(() -> {
+                        CollectActivity.this.runOnUiThread(() -> {
 
                             if (mPrefs.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
 
-                                moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
+                                moveToSearch("id", rangeBox.getRangeID(), null, null, id, -1);
 
                                 Toast.makeText(this, R.string.activity_collect_found_plot, Toast.LENGTH_SHORT).show();
 
@@ -1558,7 +1569,7 @@ public class CollectActivity extends AppCompatActivity
                                         lastPlotIdNav = null;
 
                                         //when navigate button is pressed use rangeBox to go to the plot id
-                                        moveToSearch("id", rangeBox.rangeID, null, null, id, -1);
+                                        moveToSearch("id", rangeBox.getRangeID(), null, null, id, -1);
                                     });
                                 }
 
@@ -1710,7 +1721,8 @@ public class CollectActivity extends AppCompatActivity
         return Math.sqrt(sum);
     }
 
-    void refreshLock() {
+    @Override
+    public void refreshLock() {
         //refresh lock state
         etCurVal.postDelayed(this::lockData, 100);
     }
@@ -1797,7 +1809,7 @@ public class CollectActivity extends AppCompatActivity
         builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                new IntentIntegrator(thisActivity)
+                new IntentIntegrator(CollectActivity.this)
                         .setPrompt(getString(R.string.main_barcode_text))
                         .setBeepEnabled(false)
                         .setRequestCode(BARCODE_SEARCH_CODE)
@@ -2077,10 +2089,12 @@ public class CollectActivity extends AppCompatActivity
 
     }
 
-    public TraitBox getTraitBox() {
+    @Override
+    public TraitBoxView getTraitBox() {
         return traitBox;
     }
 
+    @Override
     public boolean existsTrait(final int ID) {
         final TraitObject trait = traitBox.getCurrentTrait();
         return database.getTraitExists(ID, trait.getTrait(), trait.getFormat());
@@ -2092,6 +2106,7 @@ public class CollectActivity extends AppCompatActivity
      * @param ID the plot identifier
      * @return index of the trait missing or -1 if all traits exist
      */
+    @Override
     public int existsAllTraits(final int traitIndex, final int ID) {
         final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
         final String[] formats = VisibleObservationVariableDao.Companion.getFormat();
@@ -2102,6 +2117,7 @@ public class CollectActivity extends AppCompatActivity
         return -1;
     }
 
+    @Override
     public List<Integer> getNonExistingTraits(final int ID) {
         final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
         final String[] formats = VisibleObservationVariableDao.Companion.getFormat();
@@ -2125,7 +2141,7 @@ public class CollectActivity extends AppCompatActivity
         return traitBox.getCurrentTrait();
     }
 
-    public RangeBox getRangeBox() {
+    public RangeBoxView getRangeBox() {
         return rangeBox;
     }
 
@@ -2182,7 +2198,8 @@ public class CollectActivity extends AppCompatActivity
         return ep;
     }
 
-    public boolean is_cycling_traits_advances() {
+    @Override
+    public boolean isCyclingTraitsAdvances() {
         return ep.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
     }
 
@@ -2234,341 +2251,8 @@ public class CollectActivity extends AppCompatActivity
         return database;
     }
 
-    ///// class TraitBox /////
-    // traitLeft, traitType, and traitRight
-    private class TraitBox {
-        private final CollectActivity parent;
-        private String[] prefixTraits;
-        private TraitObject currentTrait;
-
-        private final Spinner traitType;
-        private final TextView traitDetails;
-        private final ImageView traitLeft;
-        private final ImageView traitRight;
-
-        /**
-         * New traits is a map of observations where the key is the trait name
-         * and the value is the observation value. This is updated whenever
-         * a new plot id is navigated to.
-         */
-        private Map<String, String> newTraits;  // { trait name: value }
-
-        TraitBox(CollectActivity parent_) {
-            parent = parent_;
-            prefixTraits = null;
-            newTraits = new HashMap<>();
-
-            traitType = findViewById(R.id.traitType);
-
-            //determine trait button function based on user-preferences
-            //issues217 introduces the ability to swap trait and plot arrows
-            boolean flipFlopArrows = ep.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false);
-            if (flipFlopArrows) {
-                traitLeft = findViewById(R.id.rangeLeft);
-                traitRight = findViewById(R.id.rangeRight);
-            } else {
-                traitLeft = findViewById(R.id.traitLeft);
-                traitRight = findViewById(R.id.traitRight);
-            }
-
-            traitDetails = findViewById(R.id.traitDetails);
-
-            //change click-arrow based on preferences
-            if (flipFlopArrows) {
-                traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft, R.drawable.main_entry_left_unpressed,
-                        R.drawable.main_entry_left_pressed));
-            } else {
-                traitLeft.setOnTouchListener(createTraitOnTouchListener(traitLeft, R.drawable.main_trait_left_arrow_unpressed,
-                        R.drawable.main_trait_left_arrow_pressed));
-            }
-
-            // Go to previous trait
-            traitLeft.setOnClickListener(new OnClickListener() {
-
-                public void onClick(View arg0) {
-                    moveTrait("left");
-                }
-            });
-
-            //change click-arrow based on preferences
-            if (flipFlopArrows) {
-                traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight, R.drawable.main_entry_right_unpressed,
-                        R.drawable.main_entry_right_pressed));
-            } else {
-                traitRight.setOnTouchListener(createTraitOnTouchListener(traitRight, R.drawable.main_trait_right_unpressed,
-                        R.drawable.main_trait_right_pressed));
-            }
-
-            // Go to next trait
-            traitRight.setOnClickListener(new OnClickListener() {
-
-                public void onClick(View arg0) {
-                    moveTrait("right");
-                }
-            });
-        }
-
-        void initTraitDetails() {
-            if (prefixTraits != null) {
-                final TextView traitDetails = findViewById(R.id.traitDetails);
-
-                traitDetails.setOnTouchListener(new OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        switch (event.getAction()) {
-                            case MotionEvent.ACTION_DOWN:
-                                traitDetails.setMaxLines(10);
-                                break;
-                            case MotionEvent.ACTION_UP:
-                                traitDetails.setMaxLines(1);
-                                break;
-                        }
-                        return true;
-                    }
-                });
-            }
-        }
-
-        void initTraitType(ArrayAdapter<String> adaptor,
-                           final boolean rangeSuppress) {
-            final int traitPosition = getSelectedItemPosition();
-            traitType.setAdapter(adaptor);
-
-            traitType.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-                public void onItemSelected(AdapterView<?> arg0, View arg1,
-                                           int arg2, long arg3) {
-
-                    // This updates the in memory hashmap from database
-                    currentTrait = database.getDetail(traitType.getSelectedItem()
-                            .toString());
-
-                    etCurVal = parent.getEtCurVal();
-                    parent.setIMM();
-                    InputMethodManager imm = parent.getIMM();
-                    if (!currentTrait.getFormat().equals("text")) {
-                        try {
-                            imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
-                        } catch (Exception ignore) {
-                        }
-                    }
-
-                    traitDetails.setText(currentTrait.getDetails());
-
-                    if (!rangeSuppress | !currentTrait.getFormat().equals("numeric")) {
-                        if (etCurVal.getVisibility() == TextView.VISIBLE) {
-                            etCurVal.setVisibility(EditText.GONE);
-                            etCurVal.setEnabled(false);
-                        }
-                    }
-
-                    //Clear all layouts
-                    traitLayouts.hideLayouts();
-
-                    //Get current layout object and make it visible
-                    BaseTraitLayout currentTraitLayout =
-                            traitLayouts.getTraitLayout(currentTrait.getFormat());
-                    currentTraitLayout.setVisibility(View.VISIBLE);
-
-                    //Call specific load layout code for the current trait layout
-                    if (currentTraitLayout != null) {
-                        currentTraitLayout.loadLayout();
-                    } else {
-                        etCurVal.removeTextChangedListener(parent.getCvText());
-                        etCurVal.setVisibility(EditText.VISIBLE);
-                        etCurVal.setEnabled(true);
-                    }
-                }
-
-                public void onNothingSelected(AdapterView<?> arg0) {
-                }
-            });
-
-            traitBox.setSelection(traitPosition);
-        }
-
-        public Map<String, String> getNewTraits() {
-            return newTraits;
-        }
-
-        /**
-         * Called when navigating between plots in collect activity.
-         * New Traits hashmap of <trait name to observation value> stores data for the currently
-         * selected plot id.
-         * @param plotID the new plot id we are transitioning to
-         */
-        void setNewTraits(final String plotID) {
-            newTraits = database.getUserDetail(plotID);
-        }
-
-        void setNewTraits(Map<String, String> newTraits) {
-            this.newTraits = newTraits;
-        }
-
-        ImageView getTraitLeft() {
-            return traitLeft;
-        }
-
-        ImageView getTraitRight() {
-            return traitRight;
-        }
-
-        boolean existsNewTraits() {
-            return newTraits != null;
-        }
-
-        void setPrefixTraits() {
-            prefixTraits = database.getRangeColumnNames();
-        }
-
-        void setSelection(int pos) {
-            traitType.setSelection(pos);
-        }
-
-        int getSelectedItemPosition() {
-            try {
-                return traitType.getSelectedItemPosition();
-            } catch (Exception f) {
-                return 0;
-            }
-        }
-
-        public final TraitObject getCurrentTrait() {
-            return currentTrait;
-        }
-
-        final String getCurrentFormat() {
-            return currentTrait.getFormat();
-        }
-
-        boolean existsTrait() {
-            return newTraits.containsKey(currentTrait.getTrait());
-        }
-
-        final String createSummaryText(final String plotID) {
-            String[] traitList = database.getAllTraits();
-            StringBuilder data = new StringBuilder();
-
-            //TODO this test crashes app
-            if (rangeBox.getCRange() != null) {
-                for (String s : traitBox.prefixTraits) {
-                    data.append(s).append(": ");
-                    data.append(database.getDropDownRange(s, plotID)[0]).append("\n");
-                }
-            }
-
-            for (String s : traitList) {
-                if (newTraits.containsKey(s)) {
-                    data.append(s).append(": ");
-                    data.append(newTraits.get(s).toString()).append("\n");
-                }
-            }
-            return data.toString();
-        }
-
-        /**
-         * Deletes all observation variables named traitName from the db.
-         * Also removes the trait from "newTraits"
-         * @param traitName the observation variable name
-         * @param plotID the unique plot identifier to remove the observations from
-         */
-        public void remove(String traitName, String plotID) {
-            if (newTraits.containsKey(traitName))
-                newTraits.remove(traitName);
-
-            String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-
-            database.deleteTrait(exp_id, plotID, traitName);
-        }
-
-        public void remove(TraitObject trait, String plotID) {
-            remove(trait.getTrait(), plotID);
-        }
-
-        private OnTouchListener createTraitOnTouchListener(final ImageView arrow,
-                                                           final int imageIdUp, final int imageIdDown) {
-            return new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()) {
-
-                        case MotionEvent.ACTION_DOWN:
-                            arrow.setImageResource(imageIdDown);
-                            break;
-                        case MotionEvent.ACTION_MOVE:
-                            break;
-                        case MotionEvent.ACTION_UP:
-                            arrow.setImageResource(imageIdUp);
-                        case MotionEvent.ACTION_CANCEL:
-                            break;
-                    }
-
-                    // return true to prevent calling btn onClick handler
-                    return false;
-                }
-            };
-        }
-
-        void moveTrait(String direction) {
-            int pos = 0;
-
-            if (!validateData()) {
-                return;
-            }
-
-            // Force the keyboard to be hidden to handle bug
-            try {
-                etCurVal = parent.getEtCurVal();
-                InputMethodManager imm = parent.getIMM();
-                imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0);
-            } catch (Exception ignore) {
-            }
-
-            RangeBox rangeBox = parent.getRangeBox();
-            if (direction.equals("left")) {
-                pos = traitType.getSelectedItemPosition() - 1;
-
-                if (pos < 0) {
-                    pos = traitType.getCount() - 1;
-
-                    if (parent.is_cycling_traits_advances()) {
-                        rangeBox.clickLeft();
-                    }
-
-                    if(ep.getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND,false)) {
-                        playSound("cycle");
-                    }
-                }
-            } else if (direction.equals("right")) {
-                pos = traitType.getSelectedItemPosition() + 1;
-
-                if (pos > traitType.getCount() - 1) {
-                    pos = 0;
-
-                    if (parent.is_cycling_traits_advances()) {
-                        rangeBox.clickRight();
-                    }
-
-                    if(ep.getBoolean(GeneralKeys.CYCLE_TRAITS_SOUND,false)) {
-                        playSound("cycle");
-                    }
-                }
-            }
-
-            traitType.setSelection(pos);
-
-            refreshLock();
-        }
-
-        public void update(String parent, String value) {
-            if (newTraits.containsKey(parent)) {
-                newTraits.remove(parent);
-            }
-
-            newTraits.put(parent, value);
-        }
-    }
-
-    private void resetGeoNavMessages() {
+    @Override
+    public void resetGeoNavMessages() {
         if (mGeoNavSnackbar != null) {
             mGeoNavSnackbar.dismiss();
             mGeoNavSnackbar = null;
@@ -2576,811 +2260,31 @@ public class CollectActivity extends AppCompatActivity
         }
     }
 
-    ///// class RangeBox /////
-
-    class RangeBox {
-        private CollectActivity parent;
-        private int[] rangeID;
-        private int paging;
-
-        private RangeObject cRange;
-        private String lastRange;
-
-        private TextView rangeName;
-        private TextView plotName;
-
-        //edit text used for quick goto feature range = primary id
-        private EditText range;
-        //edit text used for quick goto feature plot = secondary id
-        private EditText plot;
-
-        private TextView tvRange;
-        private TextView tvPlot;
-
-        private ImageView rangeLeft;
-        private ImageView rangeRight;
-
-        private Handler repeatHandler;
-
-        /**
-         * Variables to track Quick Goto searching
-         */
-        private boolean rangeEdited = false;
-        private boolean plotEdited = false;
-
-        /**
-         * unique plot names used in range queries
-         * query and save them once during initialization
-         */
-        private String firstName, secondName, uniqueName;
-
-        private int delay = 100;
-        private int count = 1;
-
-        RangeBox(CollectActivity parent_) {
-            parent = parent_;
-            rangeID = null;
-            cRange = new RangeObject();
-            cRange.plot = "";
-            cRange.plot_id = "";
-            cRange.range = "";
-            lastRange = "";
-
-            firstName = ep.getString(GeneralKeys.PRIMARY_NAME, "");
-            secondName = ep.getString(GeneralKeys.SECONDARY_NAME, "");
-            uniqueName = ep.getString(GeneralKeys.UNIQUE_NAME, "");
-
-            initAndPlot();
-        }
-
-        // getter
-        RangeObject getCRange() {
-            return cRange;
-        }
-
-        int[] getRangeID() {
-            return rangeID;
-        }
-
-        int getRangeIDByIndex(int j) {
-            return rangeID[j];
-        }
-
-        ImageView getRangeLeft() {
-            return rangeLeft;
-        }
-
-        ImageView getRangeRight() {
-            return rangeRight;
-        }
-
-        final String getPlotID() {
-            return cRange.plot_id;
-        }
-
-        boolean isEmpty() {
-            return cRange == null || cRange.plot_id.length() == 0;
-        }
-
-        private void initAndPlot() {
-            range = findViewById(R.id.range);
-            plot = findViewById(R.id.plot);
-
-            rangeName = findViewById(R.id.rangeName);
-            plotName = findViewById(R.id.plotName);
-
-            //determine range button function based on user-preferences
-            //issues217 introduces the ability to swap trait and plot arrows
-            boolean flipFlopArrows = ep.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false);
-            if (flipFlopArrows) {
-                rangeLeft = findViewById(R.id.traitLeft);
-                rangeRight = findViewById(R.id.traitRight);
-            } else {
-                rangeLeft = findViewById(R.id.rangeLeft);
-                rangeRight = findViewById(R.id.rangeRight);
-            }
-
-            tvRange = findViewById(R.id.tvRange);
-            tvPlot = findViewById(R.id.tvPlot);
-
-            rangeLeft.setOnTouchListener(createOnLeftTouchListener());
-            rangeRight.setOnTouchListener(createOnRightTouchListener());
-
-            // Go to previous range
-            rangeLeft.setOnClickListener(new OnClickListener() {
-                public void onClick(View arg0) {
-                    moveEntryLeft();
-                }
-            });
-
-            // Go to next range
-            rangeRight.setOnClickListener(new OnClickListener() {
-                public void onClick(View arg0) {
-                    moveEntryRight();
-                }
-            });
-
-            range.setOnEditorActionListener(createOnEditorListener(range,"range"));
-            plot.setOnEditorActionListener(createOnEditorListener(plot,"plot"));
-
-            range.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    range.setCursorVisible(true);
-                    return false;
-                }
-            });
-
-            plot.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    plot.setCursorVisible(true);
-                    return false;
-                }
-            });
-
-            setName(10);
-
-            rangeName.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    Utils.makeToast(getApplicationContext(),ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)));
-                    return false;
-                }
-            });
-
-            plotName.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    Utils.makeToast(getApplicationContext(),ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_range)));
-                    return false;
-                }
-            });
-        }
-
-        private String truncate(String s, int maxLen) {
-            if (s.length() > maxLen)
-                return s.substring(0, maxLen - 1) + ":";
-            return s;
-        }
-
-        /**
-         * This listener is used in the QuickGoto feature.
-         * This listens to the primary/secondary edit text's in the rangebox.
-         * When the soft keyboard enter key action is pressed (IME_ACTION_DONE)
-         * this will use the moveToSearch function.
-         * First it will search for both primary/secondary ids if they have both been changed.
-         * If one has not been changed or a plot is not found for both terms then it defaults to
-         * a search with whatever was changed last.
-         * @param edit the edit text to assign this listener to
-         * @param searchType the type used in moveToSearch, either plot or range
-         */
-        private OnEditorActionListener createOnEditorListener(final EditText edit, final String searchType) {
-            return new OnEditorActionListener() {
-                public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-                    // do not do bit check on event, crashes keyboard
-                    if (actionId == EditorInfo.IME_ACTION_DONE) {
-                        try {
-
-                            //if both quick goto et's have been changed, attempt a search with them
-                            if (rangeBox.rangeEdited && rangeBox.plotEdited) {
-
-                                //if the search fails back-down to the original search
-                                if (!moveToSearch("quickgoto", rangeID,
-                                        rangeBox.range.getText().toString(),
-                                        rangeBox.plot.getText().toString(), null, -1)) {
-
-                                    moveToSearch(searchType, rangeID, null, null, view.getText().toString(), -1);
-
-                                }
-
-                            } else { //original search if only one has changed
-
-                                moveToSearch(searchType, rangeID, null, null, view.getText().toString(), -1);
-
-                            }
-
-                            //reset the changed flags
-                            rangeBox.rangeEdited = false;
-                            rangeBox.plotEdited = false;
-
-                            InputMethodManager imm = parent.getIMM();
-                            imm.hideSoftInputFromWindow(edit.getWindowToken(), 0);
-                        } catch (Exception ignore) {
-                        }
-                        return true;
-                    }
-
-                    return false;
-                }
-            };
-        }
-
-        private Runnable createRunnable(final String directionStr) {
-            return new Runnable() {
-                @Override
-                public void run() {
-                    repeatKeyPress(directionStr);
-
-                    if ((count % 5) == 0) {
-                        if (delay > 20) {
-                            delay = delay - 10;
-                        }
-                    }
-
-                    count++;
-                    if (repeatHandler != null) {
-                        repeatHandler.postDelayed(this, delay);
-                    }
-                }
-            };
-        }
-
-        private OnTouchListener createOnLeftTouchListener() {
-            Runnable actionLeft = createRunnable("left");
-
-            //change click-arrow based on preferences
-            boolean flipFlopArrows = ep.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false);
-            if (flipFlopArrows) {
-                return createOnTouchListener(rangeLeft, actionLeft,
-                        R.drawable.main_trait_left_arrow_pressed,
-                        R.drawable.main_trait_left_arrow_unpressed);
-            } else {
-                return createOnTouchListener(rangeLeft, actionLeft,
-                        R.drawable.main_entry_left_pressed,
-                        R.drawable.main_entry_left_unpressed);
-            }
-        }
-
-        private OnTouchListener createOnRightTouchListener() {
-            Runnable actionRight = createRunnable("right");
-
-            //change click-arrow based on preferences
-            boolean flipFlopArrows = ep.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false);
-            if (flipFlopArrows) {
-                return createOnTouchListener(rangeRight, actionRight,
-                        R.drawable.main_trait_right_pressed,
-                        R.drawable.main_trait_right_unpressed);
-            } else {
-                return createOnTouchListener(rangeRight, actionRight,
-                        R.drawable.main_entry_right_pressed,
-                        R.drawable.main_entry_right_unpressed);
-            }
-        }
-
-        private OnTouchListener createOnTouchListener(final ImageView control,
-                                                      final Runnable action, final int imageID, final int imageID2) {
-            return new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            control.setImageResource(imageID);
-                            control.performClick();
-
-                            if (repeatHandler != null) {
-                                return true;
-                            }
-                            repeatHandler = new Handler();
-                            repeatHandler.postDelayed(action, 750);
-
-                            delay = 100;
-                            count = 1;
-
-                            break;
-                        case MotionEvent.ACTION_MOVE:
-                            break;
-                        case MotionEvent.ACTION_UP:
-                            control.setImageResource(imageID2);
-
-                            if (repeatHandler == null) {
-                                return true;
-                            }
-                            repeatHandler.removeCallbacks(action);
-                            repeatHandler = null;
-
-                            repeatUpdate();
-                            break;
-                        case MotionEvent.ACTION_CANCEL:
-                            control.setImageResource(imageID2);
-
-                            repeatHandler.removeCallbacks(action);
-                            repeatHandler = null;
-
-                            v.setTag(null); // mark btn as not pressed
-                            break;
-                    }
-
-                    // return true to prevent calling btn onClick handler
-                    return true;
-                }
-            };
-        }
-
-        // Simulate range right key press
-        private void repeatKeyPress(final String directionStr) {
-            boolean left = directionStr.equalsIgnoreCase("left");
-
-            if (!validateData()) {
-                return;
-            }
-
-            if (rangeID != null && rangeID.length > 0) {
-                final int step = left ? -1 : 1;
-                paging = movePaging(paging, step, true, false);
-
-                // Refresh onscreen controls
-                updateCurrentRange(rangeID[paging -1]);
-
-                rangeBox.saveLastPlot();
-
-                if (cRange.plot_id.length() == 0)
-                    return;
-
-                final SharedPreferences ep = parent.getPreference();
-                if (ep.getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
-                    if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                        lastRange = cRange.range;
-                        playSound("plonk");
-                    }
-                }
-
-                rangeBox.display();
-                traitBox.setNewTraits(rangeBox.getPlotID());
-
-                initWidgets(true);
-            }
-        }
-
-        /**
-         * Checks whether the preference study names are empty.
-         * If they are show a message, otherwise update the current range.
-         * @param id the range position to update to
-         */
-        private void updateCurrentRange(int id) {
-
-            if (!firstName.isEmpty() && !secondName.isEmpty() && !uniqueName.isEmpty()) {
-
-                cRange = database.getRange(firstName, secondName, uniqueName, id);
-
-            } else {
-
-                Toast.makeText(CollectActivity.this,
-                        R.string.act_collect_study_names_empty, Toast.LENGTH_SHORT).show();
-
-                finish();
-            }
-
-        }
-
-        void reload() {
-            final SharedPreferences ep = parent.getPreference();
-            switchVisibility(ep.getBoolean(GeneralKeys.QUICK_GOTO, false));
-
-            setName(8);
-
-            paging = 1;
-
-            setAllRangeID();
-            if (rangeID != null) {
-
-                //if the study has no plots this would cause an AIOB exception
-                if (rangeID.length > 0) {
-
-                    updateCurrentRange(rangeID[0]);
-
-                    //TODO NullPointerException
-                    lastRange = cRange.range;
-                    display();
-
-                    traitBox.setNewTraits(cRange.plot_id);
-
-                } else { //if no fields, print a message and finish with result canceled
-
-                    Utils.makeToast(thisActivity, getString(R.string.act_collect_no_plots));
-
-                    setResult(RESULT_CANCELED);
-
-                    finish();
-                }
-            }
-        }
-
-        // Refresh onscreen controls
-        void refresh() {
-
-            updateCurrentRange(rangeID[paging - 1]);
-
-            display();
-            final SharedPreferences ep = parent.getPreference();
-            if (ep.getBoolean(GeneralKeys.PRIMARY_SOUND, false)) {
-                if (!cRange.range.equals(lastRange) && !lastRange.equals("")) {
-                    lastRange = cRange.range;
-                    playSound("plonk");
-                }
-            }
-        }
-
-        // Updates the data shown in the dropdown
-        private void display() {
-            if (cRange == null)
-                return;
-
-            range.setText(cRange.range);
-            plot.setText(cRange.plot);
-
-            range.setCursorVisible(false);
-            plot.setCursorVisible(false);
-
-            tvRange.setText(cRange.range);
-            tvPlot.setText(cRange.plot);
-        }
-
-        void rightClick() {
-            rangeRight.performClick();
-        }
-
-        private void saveLastPlot() {
-            final SharedPreferences ep = parent.getPreference();
-            Editor ed = ep.edit();
-            ed.putString(GeneralKeys.LAST_PLOT, cRange.plot_id);
-            ed.apply();
-        }
-
-        private TextWatcher createTextWatcher(String type) {
-            return new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-
-                    if (type.equals("range")) rangeEdited = true;
-                    else plotEdited = true;
-                }
-            };
-        }
-
-        void switchVisibility(boolean textview) {
-            if (textview) {
-                tvRange.setVisibility(TextView.GONE);
-                tvPlot.setVisibility(TextView.GONE);
-                range.setVisibility(EditText.VISIBLE);
-                plot.setVisibility(EditText.VISIBLE);
-
-                //when the et's are visible create text watchers to listen for changes
-                range.addTextChangedListener(createTextWatcher("range"));
-                plot.addTextChangedListener(createTextWatcher("plot"));
-
-            } else {
-                tvRange.setVisibility(TextView.VISIBLE);
-                tvPlot.setVisibility(TextView.VISIBLE);
-                range.setVisibility(EditText.GONE);
-                plot.setVisibility(EditText.GONE);
-            }
-        }
-
-        public void setName(int maxLen) {
-            final SharedPreferences ep = parent.getPreference();
-            String primaryName = ep.getString(GeneralKeys.PRIMARY_NAME, getString(R.string.search_results_dialog_range)) + ":";
-            String secondaryName = ep.getString(GeneralKeys.SECONDARY_NAME, getString(R.string.search_results_dialog_plot)) + ":";
-            rangeName.setText(truncate(primaryName, maxLen));
-            plotName.setText(truncate(secondaryName, maxLen));
-        }
-
-        void setAllRangeID() {
-            rangeID = database.getAllRangeID();
-        }
-
-        public void setRange(final int id) {
-            updateCurrentRange(id);
-        }
-
-        void setRangeByIndex(final int j) {
-            updateCurrentRange(rangeID[j]);
-        }
-
-        void setLastRange() {
-            lastRange = cRange.range;
-        }
-
-        ///// paging /////
-
-        private void moveEntryLeft() {
-            final SharedPreferences ep = parent.getPreference();
-
-            if (!validateData()) {
-                return;
-            }
-
-            if (ep.getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
-                    && !parent.getTraitBox().existsTrait()) {
-                playSound("advance");
-            }
-
-            String entryArrow = ep.getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0");
-
-            if ((entryArrow.equals("1")||entryArrow.equals("3")) && !parent.getTraitBox().existsTrait()) {
-                playSound("error");
-            } else {
-                if (rangeID != null && rangeID.length > 0) {
-                    //index.setEnabled(true);
-                    paging = decrementPaging(paging);
-                    parent.refreshMain();
-                }
-            }
-
-            resetGeoNavMessages();
-        }
-
-        private void moveEntryRight() {
-            final SharedPreferences ep = parent.getPreference();
-
-            if (!validateData()) {
-                return;
-            }
-
-            if (ep.getBoolean(GeneralKeys.ENTRY_NAVIGATION_SOUND, false)
-                    && !parent.getTraitBox().existsTrait()) {
-                playSound("advance");
-            }
-
-            String entryArrow = ep.getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0");
-
-            if ((entryArrow.equals("2")||entryArrow.equals("3")) && !parent.getTraitBox().existsTrait()) {
-                playSound("error");
-            } else {
-                if (rangeID != null && rangeID.length > 0) {
-                    //index.setEnabled(true);
-                    paging = incrementPaging(paging);
-                    parent.refreshMain();
-                }
-            }
-
-            resetGeoNavMessages();
-        }
-
-        private int decrementPaging(int pos) {
-            return movePaging(pos, -1, false, false);
-        }
-
-        private int incrementPaging(int pos) {
-            return movePaging(pos, 1, false, false);
-        }
-
-        private void chooseNextTrait(int pos, int step) {
-            List<Integer> nextTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
-            if (!nextTrait.isEmpty()) {
-                if (step < 0) {
-                    traitBox.setSelection(Collections.max(nextTrait));
-                } else traitBox.setSelection(Collections.min(nextTrait));
-            }
-        }
-
-        private int getTraitIndex(String[] traits) {
-            String currentTraitName = traitBox.currentTrait.getTrait();
-            int traitIndex = 0;
-            for (int i = 0; i < traits.length; i++) {
-                if (currentTraitName.equals(traits[i])) {
-                    traitIndex = i;
-                    break;
-                }
-            }
-            return traitIndex;
-        }
-
-        private int checkSkipTraits(String[] traits, int step, int pos, boolean cyclic, boolean skipMode) {
-
-            //edge case where we are on the last position
-            //check for missing traits dependent on step for last position
-            //if all traits are observed or the only unobserved is to the left, move to pos 1
-            if (step == 1 && pos == rangeID.length) {
-                if (!skipMode) {
-                    int currentTrait = getTraitIndex(traits);
-                    int nextTrait = parent.existsAllTraits(currentTrait, rangeID[pos - 1]);
-                    if (nextTrait != -1) { //check if this trait is "next" if not then move to 1
-                        if (nextTrait > currentTrait) {
-                            traitBox.setSelection(nextTrait);
-                            return rangeID.length;
-                        } else { //when moving to one, select the non existing trait
-                            List<Integer> nextTraitOnFirst = parent.getNonExistingTraits(rangeID[0]);
-                            if (!nextTraitOnFirst.isEmpty()) {
-                                traitBox.setSelection(Collections.min(nextTraitOnFirst));
-                                return 1;
-                            }
-                        } //if all traits exist for 1 then just follow the main loop
-                    }
-                }
-            }
-
-            final int prevPos = pos;
-            //first loop is used to detect if all observations are completed
-            boolean firstLoop = true;
-            //this keeps track of the previous loops position
-            //while prevPos keeps track of what position this function was called with.
-            int localPrev;
-            while (true) {
-
-                //get the index of the currently selected trait
-                int traitIndex = getTraitIndex(traits);
-
-                localPrev = pos;
-                pos = moveSimply(pos, step);
-
-                //if we wrap around the entire range then observations are completed
-                //notify the user and just go to the first range id.
-                if (!firstLoop && prevPos == localPrev) {
-                    Toast.makeText(CollectActivity.this,
-                            R.string.activity_collect_all_obs_made, Toast.LENGTH_SHORT).show();
-                    return 1;
-                }
-                firstLoop = false;
-
-                // absorb the differece
-                // between single click and repeated clicks
-                if (cyclic) {
-                    if (pos == prevPos) {
-                        return pos;
-                    } else if (pos == 1) {
-                        pos = rangeID.length;
-                    } else if (pos == rangeID.length) {
-                        pos = 1;
-                    }
-                } else {
-                    if (pos == 1 || pos == prevPos) {
-                        if (!skipMode) {
-                            List<Integer> nextTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
-                            if (!nextTrait.isEmpty()) {
-                                if (step < 0) {
-                                    traitBox.setSelection(Collections.max(nextTrait));
-                                } else traitBox.setSelection(Collections.min(nextTrait));
-                                return pos;
-                            }
-                        }
-                    }
-                }
-
-                if (skipMode) {
-                    if (!parent.existsTrait(rangeID[pos - 1])) {
-                        return pos;
-                    }
-                } else {
-
-                    //check all traits for the currently selected range id
-                    //this returns the missing trait index or -1 if they all are observed
-                    int nextTrait = parent.existsAllTraits(traitIndex, rangeID[localPrev - 1]);
-                    //if we press right, but a trait to the left is missing, go to next plot
-                    //similarly if we press left, but a trait to the right is missing, go to previous
-                    //check if pressing left/right will skip an unobserved trait
-                    //if it does, force it to the next plot and set the traitBox to the first unobserved
-                    //boolean skipped = Math.abs(prevPos - localPrev) > 1;
-                    if (nextTrait < traitIndex && step > 0) {
-
-                        //check which trait is missing in the next position
-                        List<Integer> nextPlotTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
-
-                        //if no trait is missing, loop
-                        if (!nextPlotTrait.isEmpty()) { //otherwise set the selection and return position
-
-                            //we are moving to the right, so set the left most trait
-                            traitBox.setSelection(
-                                    Collections.min(nextPlotTrait)
-                            );
-
-                            return pos;
-                        }
-
-                    } else if ((nextTrait == -1 || nextTrait > traitIndex) && step < 0) {
-
-                        //check which trait is missing in the next position
-                        List<Integer> nextPlotTrait = parent.getNonExistingTraits(rangeID[pos - 1]);
-
-                        //if no trait is missing, loop
-                        if (!nextPlotTrait.isEmpty()) { //otherwise set the selection and return position
-
-                            //moving to the left so set the right most trait
-                            traitBox.setSelection(
-                                    Collections.max(nextPlotTrait)
-                            );
-
-                            return pos;
-                        }
-                    //otherwise, set the selection to the missing trait and return the current pos
-                    } else if (nextTrait > -1) {
-
-                        traitBox.setSelection(nextTrait);
-
-                        return localPrev;
-                    }
-                }
-            }
-        }
-
-        private int movePaging(int pos, int step, boolean cyclic, boolean fromToolbar) {
-            // If ignore existing data is enabled, then skip accordingly
-            final SharedPreferences ep = parent.getPreference();
-
-            final String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
-
-            //three options: 1. disabled 2. skip active trait 3. skip but check all traits
-            String skipMode = ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1");
-
-            if (fromToolbar) {
-                skipMode = ep.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1");
-            }
-
-            switch (skipMode) {
-
-                case "2" : {
-
-                    return checkSkipTraits(traits, step, pos, cyclic, true);
-
-                }
-
-                case "3" : {
-
-                    return checkSkipTraits(traits, step, pos, cyclic, false);
-
-                }
-
-                default : return moveSimply(pos, step);
-
-            }
-        }
-
-        private int moveSimply(int pos, int step) {
-            pos += step;
-            if (pos > rangeID.length) {
-                return 1;
-            } else if (pos < 1) {
-                return rangeID.length;
-            } else {
-                return pos;
-            }
-        }
-
-        void resetPaging() {
-            paging = 1;
-        }
-
-        void setPaging(int j) {
-            paging = j;
-        }
-
-        final int nextEmptyPlot() throws Exception {
-            int pos = paging;
-
-            if (pos == rangeID.length) {
-                throw new Exception();
-            }
-
-            while (pos <= rangeID.length) {
-                pos += 1;
-
-                if (pos > rangeID.length) {
-                    throw new Exception();
-                }
-
-                if (!parent.existsTrait(rangeID[pos - 1])) {
-                    paging = pos;
-                    return rangeID[pos - 1];
-                }
-            }
-            throw new Exception();      // not come here
-        }
-
-        void clickLeft() {
-            rangeLeft.performClick();
-        }
-
-        void clickRight() {
-            rangeRight.performClick();
-        }
+    @Override
+    public void callFinish() {
+        finish();
+    }
+
+    @Override
+    public void cancelAndFinish() {
+        setResult(RESULT_CANCELED);
+        finish();
+    }
+
+    @NonNull
+    @Override
+    public SharedPreferences getPreferences() {
+        return ep;
+    }
+
+    @Override
+    public void setEtCurVal(@NonNull EditText editText) {
+        etCurVal = editText;
+    }
+
+    @NonNull
+    @Override
+    public LayoutCollections getTraitLayouts() {
+        return traitLayouts;
     }
 }

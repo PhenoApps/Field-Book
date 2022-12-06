@@ -2562,6 +2562,14 @@ public class DataHelper {
         openHelper.getWritableDatabase().setTransactionSuccessful();
     }
 
+    public String[] getAllTraitNames() {
+
+        open();
+
+        return ObservationVariableDao.Companion.getAllTraits();
+
+    }
+
     /**
      * When the version number changes, this class will recreate the entire
      * database

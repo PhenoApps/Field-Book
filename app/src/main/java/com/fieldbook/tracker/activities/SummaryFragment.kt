@@ -127,14 +127,14 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                 prevButton?.setOnClickListener {
 
-                    collector.rangeBox.clickLeft()
+                    collector.getRangeBox().clickLeft()
 
                     loadData(collector, attributes, traits)
                 }
 
                 nextButton?.setOnClickListener {
 
-                    collector.rangeBox.clickRight()
+                    collector.getRangeBox().clickRight()
 
                     loadData(collector, attributes, traits)
                 }

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/traitLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:paddingEnd="5dp"
+        android:paddingStart="0dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/main_trait_left_arrow_unpressed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/view_trait_box_left_content_description" />
+
+    <ImageView
+        android:id="@+id/traitRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:paddingStart="5dp"
+        android:paddingEnd="0dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/main_trait_right_unpressed"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/view_trait_box_right_content_description" />
+
+    <Spinner
+        android:id="@+id/traitType"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintStart_toEndOf="@id/traitLeft"
+        app:layout_constraintEnd_toStartOf="@id/traitRight"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
+        android:id="@+id/traitDetails"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="@string/main_trait_details"
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_small"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/traitRight" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

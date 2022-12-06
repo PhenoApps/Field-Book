@@ -158,12 +158,12 @@ public class TraitAdapter extends BaseAdapter {
         holder.visible.setOnCheckedChangeListener((arg0, isChecked) -> {
             String traitName = holder.name.getText().toString();
             if (holder.visible.isChecked()) {
-                ((TraitAdapterController) context).updateTraitVisibility(traitName, true);
+                ((TraitAdapterController) context).getDatabase().updateTraitVisibility(traitName, true);
                 if (visibility != null) {
                     visibility.put(traitName, true);
                 }
             } else {
-                ((TraitAdapterController) context).updateTraitVisibility(traitName, false);
+                ((TraitAdapterController) context).getDatabase().updateTraitVisibility(traitName, false);
                 if (visibility != null) {
                     visibility.put(traitName, false);
                 }
@@ -222,7 +222,7 @@ public class TraitAdapter extends BaseAdapter {
     }
 
     private void copyTrait(final int position) {
-        int pos = ((TraitAdapterController) context).getMaxPositionFromTraits() + 1;
+        int pos = ((TraitAdapterController) context).getDatabase().getMaxPositionFromTraits() + 1;
 
         String traitName = getItem(position).getTrait();
         final String newTraitName = copyTraitName(traitName);
@@ -232,7 +232,7 @@ public class TraitAdapter extends BaseAdapter {
         trait.setVisible(true);
         trait.setRealPosition(pos);
 
-        ((TraitAdapterController) context).insertTraits(trait);
+        ((TraitAdapterController) context).getDatabase().insertTraits(trait);
         ((TraitAdapterController) context).queryAndLoadTraits();
 
         CollectActivity.reloadData = true;
@@ -245,7 +245,7 @@ public class TraitAdapter extends BaseAdapter {
 
         String newTraitName = "";
 
-        String[] allTraits = ((TraitAdapterController) context).getAllTraitNames();
+        String[] allTraits = ((TraitAdapterController) context).getDatabase().getAllTraitNames();
 
         for (int i = 0; i < allTraits.length; i++) {
             newTraitName = traitName + "-Copy-(" + i + ")";
@@ -264,7 +264,7 @@ public class TraitAdapter extends BaseAdapter {
 
         builder.setPositiveButton(context.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                ((TraitAdapterController) context).deleteTrait(holder.id);
+                ((TraitAdapterController) context).getDatabase().deleteTrait(holder.id);
 
                 if (context instanceof TraitAdapterController) {
                     ((TraitAdapterController) context).queryAndLoadTraits();
