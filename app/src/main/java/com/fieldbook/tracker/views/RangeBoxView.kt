@@ -37,8 +37,10 @@ class RangeBoxView : ConstraintLayout {
 
     private var rangeName: TextView
     private var plotName: TextView
+
     //edit text used for quick goto feature range = primary id
     private var rangeEt: EditText
+
     //edit text used for quick goto feature plot = secondary id
     private var plotEt: EditText
     private var tvRange: TextView
@@ -101,9 +103,18 @@ class RangeBoxView : ConstraintLayout {
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int): super(context, attrs, defStyle)
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(
+        context,
+        attrs,
+        defStyle
+    )
 
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int, defStyleRes: Int): super(context, attrs, defStyle, defStyleRes)
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int, defStyleRes: Int) : super(
+        context,
+        attrs,
+        defStyle,
+        defStyleRes
+    )
 
     fun getRangeID(): IntArray {
         return rangeID
@@ -137,7 +148,8 @@ class RangeBoxView : ConstraintLayout {
 
         //determine range button function based on user-preferences
         //issues217 introduces the ability to swap trait and plot arrows
-        val flipFlopArrows = controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
+        val flipFlopArrows =
+            controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
         if (flipFlopArrows) {
             rangeLeft = findViewById(R.id.traitLeft)
             rangeRight = findViewById(R.id.traitRight)
@@ -235,13 +247,21 @@ class RangeBoxView : ConstraintLayout {
                                 )
                             }
                         } else { //original search if only one has changed
-                            controller.moveToSearch(searchType, rangeID, null, null, view.text.toString(), -1)
+                            controller.moveToSearch(
+                                searchType,
+                                rangeID,
+                                null,
+                                null,
+                                view.text.toString(),
+                                -1
+                            )
                         }
 
                         //reset the changed flags
                         rangeEdited = false
                         plotEdited = false
-                        val imm: InputMethodManager = context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
+                        val imm: InputMethodManager =
+                            context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
                         imm.hideSoftInputFromWindow(edit.windowToken, 0)
                     } catch (ignore: Exception) {
                     }
@@ -271,7 +291,8 @@ class RangeBoxView : ConstraintLayout {
         val actionLeft = createRunnable("left")
 
         //change click-arrow based on preferences
-        val flipFlopArrows = controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
+        val flipFlopArrows =
+            controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
         return if (flipFlopArrows) {
             createOnTouchListener(
                 rangeLeft, actionLeft,
@@ -291,7 +312,8 @@ class RangeBoxView : ConstraintLayout {
         val actionRight = createRunnable("right")
 
         //change click-arrow based on preferences
-        val flipFlopArrows = controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
+        val flipFlopArrows =
+            controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
         return if (flipFlopArrows) {
             createOnTouchListener(
                 rangeRight, actionRight,
@@ -510,7 +532,8 @@ class RangeBoxView : ConstraintLayout {
         ) {
             controller.playSound("advance")
         }
-        val entryArrow = controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
+        val entryArrow =
+            controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
         if ((entryArrow == "1" || entryArrow == "3") && !controller.getTraitBox().existsTrait()) {
             controller.playSound("error")
         } else {
@@ -532,7 +555,8 @@ class RangeBoxView : ConstraintLayout {
         ) {
             controller.playSound("advance")
         }
-        val entryArrow = controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
+        val entryArrow =
+            controller.getPreferences().getString(GeneralKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
         if ((entryArrow == "2" || entryArrow == "3") && !controller.getTraitBox().existsTrait()) {
             controller.playSound("error")
         } else {
@@ -706,9 +730,11 @@ class RangeBoxView : ConstraintLayout {
         // If ignore existing data is enabled, then skip accordingly
         val traits = controller.getDatabase().visibleTrait
         //three options: 1. disabled 2. skip active trait 3. skip but check all traits
-        var skipMode = controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1")
+        var skipMode =
+            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "1")
         if (fromToolbar) {
-            skipMode = controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1")
+            skipMode = controller.getPreferences()
+                .getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "1")
         }
         return when (skipMode) {
             "2" -> {

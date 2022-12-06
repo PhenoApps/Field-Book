@@ -50,7 +50,8 @@ class TraitBoxView : ConstraintLayout {
 
         //determine trait button function based on user-preferences
         //issues217 introduces the ability to swap trait and plot arrows
-        val flipFlopArrows: Boolean = controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
+        val flipFlopArrows: Boolean =
+            controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
         if (flipFlopArrows) {
             traitLeft = findViewById(R.id.rangeLeft)
             traitRight = findViewById(R.id.rangeRight)
@@ -105,9 +106,18 @@ class TraitBoxView : ConstraintLayout {
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int): super(context, attrs, defStyle)
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(
+        context,
+        attrs,
+        defStyle
+    )
 
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int, defStyleRes: Int): super(context, attrs, defStyle, defStyleRes)
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int, defStyleRes: Int) : super(
+        context,
+        attrs,
+        defStyle,
+        defStyleRes
+    )
 
     fun initTraitDetails() {
         val traitDetails: TextView = findViewById(R.id.traitDetails)
@@ -138,7 +148,8 @@ class TraitBoxView : ConstraintLayout {
                         .toString()
                 )
 
-                val imm = context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm =
+                    context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
                 if (currentTrait!!.format != "text") {
                     try {
                         imm.hideSoftInputFromWindow(controller.getEtCurVal().windowToken, 0)
@@ -259,7 +270,8 @@ class TraitBoxView : ConstraintLayout {
      */
     fun remove(traitName: String?, plotID: String?) {
         if (newTraits!!.containsKey(traitName!!)) newTraits.remove(traitName)
-        val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+        val studyId =
+            controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
         controller.getDatabase().deleteTrait(studyId, plotID, traitName)
     }
 
