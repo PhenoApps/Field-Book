@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.brapi.service;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -134,8 +135,10 @@ public interface BrAPIService {
         switch (apiErrorCode) {
             case UNAUTHORIZED:
                 // Start the login process
-                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(context);
-                brapiAuth.show();
+                ((Activity) context).runOnUiThread(() -> {
+                    BrapiAuthDialog brapiAuth = new BrapiAuthDialog(context);
+                    brapiAuth.show();
+                });
                 toastMsg = context.getString(R.string.brapi_auth_deny);
                 break;
             case FORBIDDEN:

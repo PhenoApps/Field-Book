@@ -31,6 +31,7 @@ public class FieldBookImage extends BrapiObservation {
     private String fileName;
     private String imageName;
     private String mimeType;
+    private String rep;
     private Bitmap missing;
     private GeoJSON location;
     private Map<String, String> additionalInfo;
@@ -149,6 +150,14 @@ public class FieldBookImage extends BrapiObservation {
 
     public void setBytes(byte[] bytes) {
         this.bytes = bytes;
+    }
+
+    public void setRep(String rep) {
+        this.rep = rep;
+    }
+
+    public String getRep() {
+        return this.rep;
     }
 
     public String getImageName() {

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.fieldbook.tracker.R;
@@ -57,22 +56,15 @@ public class LocationTraitLayout extends BaseTraitLayout {
                         Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 getContext().startActivity(intent);
             }
-            getEtCurVal().setText(fullLocation);
-            updateTrait(getCurrentTrait().getTrait(), "location", fullLocation);
+            getCollectInputView().setText(fullLocation);
+            updateObservation(getCurrentTrait().getTrait(), "location", fullLocation);
             triggerTts(locationSavedTts);
         });
     }
 
     @Override
-    public void loadLayout() {
-        super.loadLayout();
-
-        getEtCurVal().setVisibility(EditText.VISIBLE);
-
-    }
-
-    @Override
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
+        super.deleteTraitListener();
     }
 }

@@ -4,9 +4,9 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.utilities.Utils;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
@@ -42,7 +42,7 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
     @Override
     public String type() {
-        return "audio";
+        return "disease rating";
     }
 
     public boolean isTraitType(String trait) {
@@ -133,16 +133,23 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
     public void loadLayout() {
         super.loadLayout();
 
-        // clear NA hint
-        getEtCurVal().setHint("");
-        getEtCurVal().removeTextChangedListener(getCvText());
-        getEtCurVal().setVisibility(EditText.VISIBLE);
+        ObservationModel model = getCurrentObservation();
+        if (model != null) {
+            getCollectInputView().setText(model.getValue());
+        }
     }
 
     @Override
     public void deleteTraitListener() {
-        getEtCurVal().setText("");
         removeTrait(getCurrentTrait().getTrait());
+        super.deleteTraitListener();
+
+        ObservationModel model = getCurrentObservation();
+        if (model != null) {
+            getCollectActivity().setTitle(model.getValue());
+        } else {
+            getCollectInputView().setText("");
+        }
     }
 
     private class RustButtonOnClickListener implements OnClickListener {
@@ -165,25 +172,27 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
             triggerTts(v);
 
             if (getVisibility() == View.VISIBLE) {
-                if (getEtCurVal().getText().length() > 0
+                String textValue = getCollectInputView().getText();
+                if (textValue.length() > 0
                         && !v.equals("/")
-                        && !getEtCurVal().getText().toString().substring(getEtCurVal().getText().length() - 1).equals("/")) {
+                        && !textValue.endsWith("/")) {
 
-                    String lastChar = getEtCurVal().getText().toString().substring(getEtCurVal().getText().toString().length() - 1);
+                    String lastChar = textValue.substring(textValue.length() - 1);
                     if (!lastChar.matches("^[a-zA-Z]*$")) {
                         v = ":" + v;
                     }
                 }
 
-                if (getEtCurVal().getText().toString().matches(".*\\d.*")
+                if (textValue.matches(".*\\d.*")
                         && v.matches(".*\\d.*")
-                        && !getEtCurVal().getText().toString().contains("/")) {
+                        && !textValue.contains("/")) {
                     String error = getContext().getString(R.string.trait_error_disease_severity);
                     Utils.makeToast(getContext(),error);
                     triggerTts(error);
                 } else {
-                    getEtCurVal().setText(getEtCurVal().getText().toString() + v);
-                    updateTrait(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), getEtCurVal().getText().toString());
+                    String value = textValue + v;
+                    getCollectInputView().setText(value);
+                    updateObservation(getCurrentTrait().getTrait(), getCurrentTrait().getFormat(), value);
                 }
             }
         }

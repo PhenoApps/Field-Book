@@ -806,6 +806,16 @@
     <string name="list_item_summary_nav_button_content_description">Navigates to the selected entry.</string>
     <string name="fragment_summary_prev_button_content_description">Navigates to previous entry.</string>
     <string name="fragment_summary_next_button_content_description">Navigates to next entry.</string>
+
+    <string name="pref_beta_repeated_values_title">Repeated Measures</string>
+    <string name="pref_beta_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
+    <string name="view_repeated_values_add_button_content_description">Adds a new observation.</string>
+    <string name="view_repeated_values_add_button_fail">You must enter a value before creating a new observation.</string>
+    <string name="menu_collect_repeated_values_indicator">Displays the number of repeated values.</string>
+
+    <string name="pref_beta_repeated_values_disabled_title">Feature disabled</string>
+    <string name="pref_beta_repeated_values_disabled_message">Disabling this feature will make some repeated values unavailable.</string>
+
     <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
     <string name="preferences_beta_title">Beta</string>
@@ -813,5 +823,9 @@
     <string name="dialog_field_sort_delete_all_content_description">Deletes all sort entries.</string>
     <string name="dialog_field_sort_toggle_order_content_description">Reverses sort order.</string>
     <string name="dialog_field_sort_add_content_description">Opens a dialog to add a new attribute to sort by.</string>
-
+    <string name="dialog_multi_measure_delete_no_observations">No observations exist.</string>
+    <string name="dialog_multi_measure_delete_title">Observations</string>
+    <string name="dialog_multi_measure_confirm_delete_title">These observations will be permanently deleted.</string>
+    <string name="dialog_multi_measure_delete">Delete</string>
+    <string name="dialog_multi_measure_select_all">Select all</string>
 </resources>

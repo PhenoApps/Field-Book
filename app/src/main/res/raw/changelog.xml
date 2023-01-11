@@ -5,8 +5,8 @@
         versionCode="540"
         versionName="v5.4">
         <new>Experimental settings section</new>
+        <new>Repeated measures! (beta)</new>
         <new>Summary view is now customizable and navigable</new>
-        <info>Optimized the workflow when traits are imported</info>
         <new>Improved field sorting workflow</new>
         <new>Import brapi studies at multiple observation levels</new>
         <info>Optimized trait import workflow</info>

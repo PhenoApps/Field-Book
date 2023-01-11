@@ -40,6 +40,7 @@ import org.brapi.client.v2.modules.phenotype.ImagesApi;
 import org.brapi.client.v2.modules.phenotype.ObservationUnitsApi;
 import org.brapi.client.v2.modules.phenotype.ObservationVariablesApi;
 import org.brapi.client.v2.modules.phenotype.ObservationsApi;
+import org.brapi.v2.model.BrAPIExternalReference;
 import org.brapi.v2.model.BrAPIMetadata;
 import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
@@ -79,6 +80,9 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
+
+    //used to identify field book db id in external references
+    private final String fieldBookReferenceSource = "Field Book Upload";
 
     private final Context context;
     private final BrAPIClient apiClient;
@@ -716,6 +720,22 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         newObservation.setDbId(obs.getObservationDbId());
         newObservation.setUnitDbId(obs.getObservationUnitDbId());
         newObservation.setVariableDbId(obs.getObservationVariableDbId());
+
+        //search imported obs references for first field book id
+        List<BrAPIExternalReference> references = obs.getExternalReferences();
+        if (!references.isEmpty()) {
+            for (BrAPIExternalReference ref : references) {
+                String source = ref.getReferenceSource();
+                if (source != null && source.equals(fieldBookReferenceSource)) {
+                    String id = ref.getReferenceID();
+                    if (id != null && !id.isEmpty()) {
+                        newObservation.setFieldBookDbId(id);
+                        break;
+                    }
+                }
+            }
+        }
+
         return newObservation;
     }
 
@@ -775,6 +795,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 newObservation.setObservationVariableName(observation.getVariableName());
                 newObservation.setValue(observation.getValue());
 
+                BrAPIExternalReference reference = new BrAPIExternalReference();
+                reference.setReferenceID(observation.getFieldbookDbId());
+                reference.setReferenceSource(fieldBookReferenceSource);
+
+                newObservation.setExternalReferences(Collections.singletonList(reference));
                 request.add(newObservation);
             }
 

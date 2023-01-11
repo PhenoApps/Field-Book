@@ -15,22 +15,6 @@
         android:background="@android:color/white"
         android:fitsSystemWindows="true">
 
-        <TextView
-            android:id="@+id/curCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:text="1"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_xxlarge"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/addBtn"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <Button
             android:id="@+id/minusBtn"
             android:layout_width="75dp"
@@ -41,7 +25,7 @@
             android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold"
-            android:layout_marginRight="20dp"
+            android:layout_marginEnd="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/addBtn"
             app:layout_constraintHorizontal_chainStyle="packed"
