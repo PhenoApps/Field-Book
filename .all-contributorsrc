@@ -273,6 +273,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "zrm22",
+      "name": "zrm22",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54960003?v=4",
+      "profile": "https://github.com/zrm22",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -280,5 +289,6 @@
   "projectOwner": "PhenoApps",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitConvention": "angular"
 }
