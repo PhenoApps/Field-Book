@@ -221,58 +221,68 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
                     val dataMap = arrayListOf<List<CellData>>()
 
-                    do { //iterate over cursor results and populate lists of plot ids and related trait values
+                    try {
 
-                        val rowHeaderIndex = cursor.getColumnIndex(rowHeader)
+                        do { //iterate over cursor results and populate lists of plot ids and related trait values
 
-                        //unique name column is always the first column
-                        val uniqueIndex = cursor.getColumnIndex(cursor.getColumnName(0))
+                            val rowHeaderIndex = cursor.getColumnIndex(rowHeader)
 
-                        if (uniqueIndex > -1) { //if it doesn't exist skip this row
+                            //unique name column is always the first column
+                            val uniqueIndex = cursor.getColumnIndex(cursor.getColumnName(0))
 
-                            val plotId = cursor.getString(uniqueIndex)
+                            if (uniqueIndex > -1) { //if it doesn't exist skip this row
 
-                            val header = cursor.getString(rowHeaderIndex)
+                                val plotId = cursor.getString(uniqueIndex)
 
-                            val dataList = arrayListOf<CellData>()
+                                val header = cursor.getString(rowHeaderIndex)
 
-                            mRowHeaders.add(header) //add unique name row header
+                                val dataList = arrayListOf<CellData>()
 
-                            mPlotIds.add(plotId)
+                                mRowHeaders.add(header) //add unique name row header
 
-                            mTraits.forEachIndexed { _, variable ->
+                                mPlotIds.add(plotId)
 
-                                val index = cursor.getColumnIndex(variable)
+                                mTraits.forEachIndexed { _, variable ->
 
-                                if (index > -1) {
+                                    val index = cursor.getColumnIndex(variable)
 
-                                    val value = cursor.getString(index) ?: ""
+                                    if (index > -1) {
 
-                                    val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
+                                        val value = cursor.getString(index) ?: ""
 
-                                    if (t != null) {
+                                        val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
 
-                                        try {
+                                        if (t != null) {
 
-                                            dataList.add(CellData(CategoryJsonUtil
-                                                .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel), plotId))
+                                            try {
 
-                                        } catch (e: Exception) {
+                                                dataList.add(CellData(CategoryJsonUtil
+                                                    .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel), plotId))
 
+                                            } catch (e: Exception) {
+
+                                                dataList.add(CellData(value, plotId))
+
+                                            }
+                                        } else {
+                                            //data list is a trait row in the data grid
                                             dataList.add(CellData(value, plotId))
-
                                         }
-                                    } else {
-                                        //data list is a trait row in the data grid
-                                        dataList.add(CellData(value, plotId))
                                     }
                                 }
+
+                                dataMap.add(dataList)
                             }
 
-                            dataMap.add(dataList)
-                        }
+                        } while (cursor.moveToNext())
 
-                    } while (cursor.moveToNext())
+                    } catch (e: java.lang.IllegalStateException) {
+
+                        Utils.makeToast(this@DataGridActivity, getString(R.string.act_data_grid_cursor_failed))
+
+                        e.printStackTrace()
+
+                    }
 
                     //send trait/plot indices to highlight the cell
                     mAdapter = DataGridAdapter((trait ?: 1) - 1, (plotId ?: 1) - 1)

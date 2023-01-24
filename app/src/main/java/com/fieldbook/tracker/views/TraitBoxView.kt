@@ -10,6 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.interfaces.CollectTraitController
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.BaseTraitLayout
@@ -121,7 +122,7 @@ class TraitBoxView : ConstraintLayout {
 
     fun initTraitDetails() {
         val traitDetails: TextView = findViewById(R.id.traitDetails)
-        traitDetails.setOnTouchListener { v, event ->
+        traitDetails.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> traitDetails.maxLines = 10
                 MotionEvent.ACTION_UP -> traitDetails.maxLines = 1
@@ -188,7 +189,7 @@ class TraitBoxView : ConstraintLayout {
         setSelection(traitPosition)
     }
 
-    fun getNewTraits(): Map<String, String>? {
+    fun getNewTraits(): Map<String, String> {
         return newTraits
     }
 
@@ -254,9 +255,9 @@ class TraitBoxView : ConstraintLayout {
         }
 
         for (s in traitList) {
-            if (newTraits!!.containsKey(s)) {
+            if (newTraits.containsKey(s)) {
                 data.append(s).append(": ")
-                data.append(newTraits!![s].toString()).append("\n")
+                data.append(newTraits[s].toString()).append("\n")
             }
         }
         return data.toString()
@@ -269,7 +270,7 @@ class TraitBoxView : ConstraintLayout {
      * @param plotID the unique plot identifier to remove the observations from
      */
     fun remove(traitName: String?, plotID: String?) {
-        if (newTraits!!.containsKey(traitName!!)) newTraits.remove(traitName)
+        if (newTraits.containsKey(traitName!!)) newTraits.remove(traitName)
         val studyId =
             controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
         controller.getDatabase().deleteTrait(studyId, plotID, traitName)
@@ -282,8 +283,8 @@ class TraitBoxView : ConstraintLayout {
     private fun createTraitOnTouchListener(
         arrow: ImageView,
         imageIdUp: Int, imageIdDown: Int
-    ): OnTouchListener? {
-        return OnTouchListener { v, event ->
+    ): OnTouchListener {
+        return OnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> arrow.setImageResource(imageIdDown)
                 MotionEvent.ACTION_MOVE -> {}
@@ -302,15 +303,6 @@ class TraitBoxView : ConstraintLayout {
             return
         }
 
-        //TODO
-        // STOPSHIP: test
-        // Force the keyboard to be hidden to handle bug
-//        try {
-//            etCurVal = parent!!.etCurVal
-//            val imm = parent!!.imm
-//            imm.hideSoftInputFromWindow(etCurVal.getWindowToken(), 0)
-//        } catch (ignore: Exception) {
-//        }
         val rangeBox = controller.getRangeBox()
         if (direction == "left") {
             pos = traitType.selectedItemPosition - 1

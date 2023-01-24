@@ -33,16 +33,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.FieldAdapter;
-import com.fieldbook.tracker.adapters.FieldAdapterController;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.dialogs.FieldCreatorDialog;
-import com.fieldbook.tracker.dialogs.FieldSortController;
 import com.fieldbook.tracker.dialogs.FieldSortDialog;
+import com.fieldbook.tracker.interfaces.FieldAdapterController;
+import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -834,5 +835,11 @@ public class FieldEditorActivity extends AppCompatActivity
     @Override
     public DataHelper getDatabase() {
         return database;
+    }
+
+    @NonNull
+    @Override
+    public SharedPreferences getPreferences() {
+        return PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     }
 }

@@ -113,8 +113,8 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             })
         }
 
-        if (CollectActivity.mAverageHandler.looper != null)
-            Handler(CollectActivity.mAverageHandler.looper).post(runnable)
+        if (controller.getAverageHandler().looper != null)
+            Handler(controller.getAverageHandler().looper).post(runnable)
         else mProgressDialog?.dismiss()
 
     }

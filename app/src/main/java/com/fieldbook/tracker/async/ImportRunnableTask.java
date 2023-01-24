@@ -8,8 +8,8 @@ import android.text.Html;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.adapters.FieldAdapterController;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;

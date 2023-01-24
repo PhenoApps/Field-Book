@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.dialogs
+package com.fieldbook.tracker.interfaces
 
 import com.fieldbook.tracker.objects.FieldObject
 

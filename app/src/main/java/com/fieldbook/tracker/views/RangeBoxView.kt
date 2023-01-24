@@ -10,7 +10,6 @@ import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.View.OnTouchListener
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -20,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.interfaces.CollectRangeController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
@@ -82,12 +82,7 @@ class RangeBoxView : ConstraintLayout {
 
         this.controller = context as CollectRangeController
 
-
-
         rangeID = this.controller.getDatabase().allRangeID
-
-
-
         cRange = RangeObject()
         cRange.plot = ""
         cRange.plot_id = ""
@@ -163,22 +158,24 @@ class RangeBoxView : ConstraintLayout {
         rangeRight.setOnTouchListener(createOnRightTouchListener())
 
         // Go to previous range
-        rangeLeft.setOnClickListener(OnClickListener { arg0: View? -> moveEntryLeft() })
+        rangeLeft.setOnClickListener { moveEntryLeft() }
 
         // Go to next range
-        rangeRight.setOnClickListener(OnClickListener { arg0: View? -> moveEntryRight() })
+        rangeRight.setOnClickListener { moveEntryRight() }
+
         rangeEt.setOnEditorActionListener(createOnEditorListener(rangeEt, "range"))
         plotEt.setOnEditorActionListener(createOnEditorListener(plotEt, "plot"))
-        rangeEt.setOnTouchListener(OnTouchListener { v, event ->
-            rangeEt.setCursorVisible(true)
+        rangeEt.setOnTouchListener { _, _ ->
+            rangeEt.isCursorVisible = true
             false
-        })
-        plotEt.setOnTouchListener(OnTouchListener { v, event ->
-            plotEt.setCursorVisible(true)
+        }
+
+        plotEt.setOnTouchListener { _, _ ->
+            plotEt.isCursorVisible = true
             false
-        })
+        }
         setName(10)
-        rangeName.setOnTouchListener(OnTouchListener { v, event ->
+        rangeName.setOnTouchListener { _, _ ->
             Utils.makeToast(
                 context,
                 controller.getPreferences().getString(
@@ -187,10 +184,10 @@ class RangeBoxView : ConstraintLayout {
                 )
             )
             false
-        })
+        }
 
         //TODO https://stackoverflow.com/questions/47107105/android-button-has-setontouchlistener-called-on-it-but-does-not-override-perform
-        plotName.setOnTouchListener(OnTouchListener { v: View, event: MotionEvent? ->
+        plotName.setOnTouchListener { v: View, _: MotionEvent? ->
             Utils.makeToast(
                 context,
                 controller.getPreferences().getString(
@@ -199,7 +196,14 @@ class RangeBoxView : ConstraintLayout {
                 )
             )
             v.performClick()
-        })
+        }
+    }
+
+    private fun repeatUpdate() {
+
+        controller.getTraitBox().setNewTraits(getPlotID())
+
+        controller.initWidgets(true)
     }
 
     private fun truncate(s: String, maxLen: Int): String? {
@@ -287,7 +291,7 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
-    private fun createOnLeftTouchListener(): OnTouchListener? {
+    private fun createOnLeftTouchListener(): OnTouchListener {
         val actionLeft = createRunnable("left")
 
         //change click-arrow based on preferences
@@ -308,7 +312,7 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
-    private fun createOnRightTouchListener(): OnTouchListener? {
+    private fun createOnRightTouchListener(): OnTouchListener {
         val actionRight = createRunnable("right")
 
         //change click-arrow based on preferences
@@ -332,7 +336,7 @@ class RangeBoxView : ConstraintLayout {
     private fun createOnTouchListener(
         control: ImageView,
         action: Runnable, imageID: Int, imageID2: Int
-    ): OnTouchListener? {
+    ): OnTouchListener {
         return OnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -354,7 +358,7 @@ class RangeBoxView : ConstraintLayout {
                     }
                     repeatHandler?.removeCallbacks(action)
                     repeatHandler = null
-                    controller.repeatUpdate()
+                    repeatUpdate()
                 }
                 MotionEvent.ACTION_CANCEL -> {
                     control.setImageResource(imageID2)
@@ -420,8 +424,6 @@ class RangeBoxView : ConstraintLayout {
         setAllRangeID()
         if (rangeID.isNotEmpty()) {
             updateCurrentRange(rangeID[0])
-
-            //TODO NullPointerException
             lastRange = cRange.range
             display()
             controller.getTraitBox().setNewTraits(cRange.plot_id)
@@ -463,7 +465,7 @@ class RangeBoxView : ConstraintLayout {
         ed.apply()
     }
 
-    private fun createTextWatcher(type: String): TextWatcher? {
+    private fun createTextWatcher(type: String): TextWatcher {
         return object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -473,7 +475,7 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
-    fun switchVisibility(textview: Boolean) {
+    private fun switchVisibility(textview: Boolean) {
         if (textview) {
             tvRange.visibility = GONE
             tvPlot.visibility = GONE
@@ -513,7 +515,9 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun setRangeByIndex(j: Int) {
-        updateCurrentRange(rangeID[j])
+        if (j < rangeID.size) {
+            updateCurrentRange(rangeID[j])
+        }
     }
 
     fun setLastRange() {
@@ -570,24 +574,24 @@ class RangeBoxView : ConstraintLayout {
     }
 
     private fun decrementPaging(pos: Int): Int {
-        return movePaging(pos, -1, false, false)
+        return movePaging(pos, -1, cyclic = false, fromToolbar = false)
     }
 
     private fun incrementPaging(pos: Int): Int {
-        return movePaging(pos, 1, false, false)
+        return movePaging(pos, 1, cyclic = false, fromToolbar = false)
     }
 
-    private fun chooseNextTrait(pos: Int, step: Int) {
-        val nextTrait = controller.getNonExistingTraits(rangeID[pos - 1])
-        if (nextTrait.isNotEmpty()) {
-            if (step < 0) {
-                controller.getTraitBox().setSelection(Collections.max(nextTrait))
-            } else controller.getTraitBox().setSelection(Collections.min(nextTrait))
-        }
-    }
+//    private fun chooseNextTrait(pos: Int, step: Int) {
+//        val nextTrait = controller.getNonExistingTraits(rangeID[pos - 1])
+//        if (nextTrait.isNotEmpty()) {
+//            if (step < 0) {
+//                controller.getTraitBox().setSelection(Collections.max(nextTrait))
+//            } else controller.getTraitBox().setSelection(Collections.min(nextTrait))
+//        }
+//    }
 
     private fun getTraitIndex(traits: Array<String>): Int {
-        val currentTraitName: String? = controller.getTraitBox().currentTrait?.getTrait()
+        val currentTraitName: String? = controller.getTraitBox().currentTrait?.trait
         var traitIndex = 0
         for (i in traits.indices) {
             if (currentTraitName == traits[i]) {
@@ -655,12 +659,16 @@ class RangeBoxView : ConstraintLayout {
             // absorb the differece
             // between single click and repeated clicks
             if (cyclic) {
-                if (pos == prevPos) {
-                    return pos
-                } else if (pos == 1) {
-                    pos = rangeID.size
-                } else if (pos == rangeID.size) {
-                    pos = 1
+                when (pos) {
+                    prevPos -> {
+                        return pos
+                    }
+                    1 -> {
+                        pos = rangeID.size
+                    }
+                    rangeID.size -> {
+                        pos = 1
+                    }
                 }
             } else {
                 if (pos == 1 || pos == prevPos) {
@@ -695,7 +703,7 @@ class RangeBoxView : ConstraintLayout {
                     val nextPlotTrait = controller.getNonExistingTraits(rangeID[pos - 1])
 
                     //if no trait is missing, loop
-                    if (!nextPlotTrait.isEmpty()) { //otherwise set the selection and return position
+                    if (nextPlotTrait.isNotEmpty()) { //otherwise set the selection and return position
 
                         //we are moving to the right, so set the left most trait
                         controller.getTraitBox().setSelection(
@@ -709,7 +717,7 @@ class RangeBoxView : ConstraintLayout {
                     val nextPlotTrait = controller.getNonExistingTraits(rangeID[pos - 1])
 
                     //if no trait is missing, loop
-                    if (!nextPlotTrait.isEmpty()) { //otherwise set the selection and return position
+                    if (nextPlotTrait.isNotEmpty()) { //otherwise set the selection and return position
 
                         //moving to the left so set the right most trait
                         controller.getTraitBox().setSelection(
@@ -748,20 +756,20 @@ class RangeBoxView : ConstraintLayout {
     }
 
     private fun moveSimply(pos: Int, step: Int): Int {
-        var pos = pos
-        pos += step
-        return if (pos > rangeID.size) {
+        var p = pos
+        p += step
+        return if (p > rangeID.size) {
             1
-        } else if (pos < 1) {
+        } else if (p < 1) {
             rangeID.size
         } else {
-            pos
+            p
         }
     }
 
-    fun resetPaging() {
-        paging = 1
-    }
+//    fun resetPaging() {
+//        paging = 1
+//    }
 
     @Throws(Exception::class)
     fun nextEmptyPlot(): Int {

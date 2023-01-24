@@ -820,5 +820,7 @@
     <string name="act_collect_na_value_button_content_description">Fill value with not applicable.</string>
     <string name="view_trait_box_right_content_description">Go to next trait.</string>
     <string name="view_trait_box_left_content_description">Go to previous trait.</string>
+    <string name="act_data_grid_cursor_failed">Data grid failed to load your data.</string>
+    <string name="act_brapi_export_image_load_failed">Image load failed.</string>
 
 </resources>

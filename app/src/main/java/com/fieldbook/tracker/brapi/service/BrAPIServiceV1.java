@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.brapi.ApiError;
@@ -18,7 +19,6 @@ import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
@@ -481,9 +480,18 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
                             function.apply(study);
                         }else {
                             try {
+
+                                //level is not a required field, so passing null here is fine
+                                //otherwise this was causing a NPE when observationLevel was null
+                                @Nullable String level = null;
+                                if (observationLevel != null) {
+                                    level = observationLevel.getObservationLevelName();
+                                }
+
                                 studiesApi.studiesStudyDbIdObservationunitsGetAsync(
-                                        studyDbId, observationLevel.getObservationLevelName(), currentPage.get(), pageSize,
+                                        studyDbId, level, currentPage.get(), pageSize,
                                         getBrapiToken(), this);
+
                             } catch (ApiException e) {
                                 failFunction.apply(e.getCode());
                                 e.printStackTrace();

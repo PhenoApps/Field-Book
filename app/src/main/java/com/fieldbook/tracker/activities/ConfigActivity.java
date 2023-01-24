@@ -45,7 +45,6 @@ import com.fieldbook.tracker.brapi.BrapiAuthDialog;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.StudyDao;
-import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -332,7 +331,7 @@ public class ConfigActivity extends AppCompatActivity {
      */
     private int checkTraitsExist() {
 
-        String[] traits = VisibleObservationVariableDao.Companion.getVisibleTrait();
+        String[] traits = database.getVisibleTrait();
 
         if (!ep.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
                 || ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {

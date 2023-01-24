@@ -12,8 +12,8 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.adapters.FieldController;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.interfaces.CollectController;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -26,7 +26,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
     //references the collect activity locked state (locked, unlocked or frozen)
     protected boolean isLocked = false;
 
-    protected FieldController controller;
+    protected CollectController controller;
 
     public BaseTraitLayout(Context context) {
         super(context);
@@ -44,8 +44,8 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     private void initController(Context context) {
-        if (context instanceof FieldController) {
-            this.controller = (FieldController) context;
+        if (context instanceof CollectController) {
+            this.controller = (CollectController) context;
         }
     }
 

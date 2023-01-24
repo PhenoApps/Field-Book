@@ -227,13 +227,27 @@ public class BrapiExportActivity extends AppCompatActivity {
 
     private void loadNewImages() {
         for (FieldBookImage image : imagesNew) {
-            image.loadImage(this);
+            loadImage(image);
         }
     }
 
     private void loadEditedIncompleteImages() {
         for (FieldBookImage image : imagesEditedIncomplete) {
+            loadImage(image);
+        }
+    }
+
+    private void loadImage(FieldBookImage image) {
+
+        try {
+
             image.loadImage(this);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Utils.makeToast(this, getString(R.string.act_brapi_export_image_load_failed));
         }
     }
 

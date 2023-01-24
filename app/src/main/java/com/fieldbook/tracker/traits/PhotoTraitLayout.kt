@@ -170,9 +170,11 @@ class PhotoTraitLayout : BaseTraitLayout {
                         photo?.setSelection((photo?.count ?: 1) - 1)
                         photo?.onItemClickListener =
                             OnItemClickListener { _: AdapterView<*>?, _: View?, pos: Int, _: Long ->
-                                displayPlotImage(
-                                    photos[pos].uri
-                                )
+                                if (pos < photos.size) {
+                                    displayPlotImage(
+                                        photos[pos].uri
+                                    )
+                                }
                             }
                     }
 
