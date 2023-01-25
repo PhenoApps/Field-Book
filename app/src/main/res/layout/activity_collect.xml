@@ -170,7 +170,8 @@
             android:layout_height="wrap_content"
             android:gravity="right"
             android:paddingRight="10dp"
-            android:text="@string/search_results_dialog_range" />
+            android:text="@string/search_results_dialog_range"
+            android:textSize="@dimen/text_size_xlarge" />
 
         <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/plotName"
@@ -178,7 +179,8 @@
             android:layout_height="wrap_content"
             android:gravity="right"
             android:paddingRight="10dp"
-            android:text="@string/search_results_dialog_plot" />
+            android:text="@string/search_results_dialog_plot"
+            android:textSize="@dimen/text_size_xlarge" />
 
     </LinearLayout>
 

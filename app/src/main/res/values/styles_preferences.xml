@@ -26,11 +26,20 @@
         <!-- Edit text hint color (search bar, person name) -->
         <item name="android:textColorHint">?attr/fb_color_text_dark</item>
         <item name="android:colorBackground">?attr/fb_color_background</item>
-        <item name="android:textSize">?attr/fb_body_text_size</item>
         <item name="android:textColor">?attr/fb_color_text_dark</item>
         <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>
         <item name="android:textColorSecondary">?attr/fb_color_text_secondary</item>
         <item name="titleTextColor">?attr/fb_color_text_dark</item>
+
+        <item name="textAppearanceListItem">@style/AppTextAppearance.Preference.Title</item>
+        <item name="textAppearanceListItemSecondary">@style/AppTextAppearance.Preference.Summary</item>
+    </style>
+
+    <style name="AppTextAppearance.Preference.Title" parent="TextAppearance.AppCompat.Headline">
+        <item name="android:textSize">?attr/fb_body_text_size</item>
+    </style>
+    <style name="AppTextAppearance.Preference.Summary" parent="TextAppearance.AppCompat.Subhead">
+        <item name="android:textSize">?attr/fb_subheading_text_size</item>
     </style>
 
 </resources>
