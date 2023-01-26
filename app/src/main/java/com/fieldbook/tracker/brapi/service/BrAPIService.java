@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.brapi.service;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -134,8 +135,10 @@ public interface BrAPIService {
         switch (apiErrorCode) {
             case UNAUTHORIZED:
                 // Start the login process
-                BrapiAuthDialog brapiAuth = new BrapiAuthDialog(context);
-                brapiAuth.show();
+                ((Activity) context).runOnUiThread(() -> {
+                    BrapiAuthDialog brapiAuth = new BrapiAuthDialog(context);
+                    brapiAuth.show();
+                });
                 toastMsg = context.getString(R.string.brapi_auth_deny);
                 break;
             case FORBIDDEN:
@@ -165,6 +168,8 @@ public interface BrAPIService {
     public void getStudyDetails(final String studyDbId, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
 
     public void getPlotDetails(final String studyDbId, BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function, final Function<Integer, Void> failFunction);
+
+    public void getObservations(final String studyDbId, final List<String> observationVariableDbIds, BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function, final Function<Integer, Void> failFunction );
 
     public void getOntology(BrapiPaginationManager paginationManager, final BiFunction<List<TraitObject>, Integer, Void> function, final Function<Integer, Void> failFunction);
 

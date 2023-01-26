@@ -8,6 +8,7 @@ public class Observation extends BrapiObservation {
     private String season;
     private String studyId;
     private String value;
+    private String rep;
 
     public Observation() {
     }
@@ -63,5 +64,9 @@ public class Observation extends BrapiObservation {
     public void setCollector(String collector) {
         this.collector = collector;
     }
+
+    public void setRep(String rep) { this.rep = rep; }
+
+    public String getRep() { return this.rep; }
 
 }

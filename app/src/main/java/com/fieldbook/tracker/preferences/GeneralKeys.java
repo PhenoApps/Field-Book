@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
+import org.jetbrains.annotations.NotNull;
+
 public class GeneralKeys {
     // @formatter:off
 
@@ -84,6 +86,9 @@ public class GeneralKeys {
     public static final String GEONAV_SEARCH_METHOD                 = GEONAV_PREFIX + "SEARCH_METHOD";
     // @formatter:on
 
+    //Beta feature keys
+    public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
+
     public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
     public static final String VERIFY_USER = "VerifyUserEvery24Hours";
 
@@ -125,6 +130,9 @@ public class GeneralKeys {
     public static final String PRIMARY_NAME = "ImportFirstName";
     public static final String SECONDARY_NAME = "ImportSecondName";
 
+    //Used to get name of observation level of currently selected field
+    public static final String FIELD_OBS_LEVEL = "FieldObsLevel";
+
     //flag saved in preferences to determine if import is completed
     public static final String IMPORT_FIELD_FINISHED = "ImportFieldFinished";
 
@@ -143,6 +151,9 @@ public class GeneralKeys {
     //Data grid
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
 
+    //summary filter
+    public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
+
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
 
@@ -159,6 +170,9 @@ public class GeneralKeys {
     public static final String TTS_LANGUAGE_ENABLED = "TTS_LANGUAGE_ENABLED";
     public static final String TTS_LANGUAGE = "TTS_LANGUAGE";
     public static final String TTS_LANGUAGE_SUMMARY = "TTS_LANGUAGE_SUMMARY";
+
+    @NotNull
+    public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
 
     private GeneralKeys() {
 

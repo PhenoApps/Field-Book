@@ -79,9 +79,6 @@ class PhotoTraitLayout : BaseTraitLayout {
     }
 
     override fun loadLayout() {
-        etCurVal.removeTextChangedListener(cvText)
-        etCurVal.visibility = GONE
-        etCurVal.isEnabled = false
 
         loadLayoutWork()
 
@@ -110,7 +107,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                         generateThumbnails()
                     }
                     if (thumbDir != null) {
-                        val plot = cRange.plot_id
+                        val plot = currentRange.plot_id
                         val locations = getPlotMedia(thumbDir, plot, ".jpg")
 
                         if (locations.isNotEmpty()) {
@@ -159,7 +156,7 @@ class PhotoTraitLayout : BaseTraitLayout {
 
             val photosDir = getFieldMediaDirectory(context, traitName)
             if (photosDir != null) {
-                val photos = getPlotMedia(photosDir, cRange.plot_id, ".jpg")
+                val photos = getPlotMedia(photosDir, currentRange.plot_id, ".jpg")
 
                 activity?.runOnUiThread {
 
@@ -312,6 +309,8 @@ class PhotoTraitLayout : BaseTraitLayout {
                 e.printStackTrace()
 
             }
+
+            (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
         }
     }
 
@@ -323,7 +322,7 @@ class PhotoTraitLayout : BaseTraitLayout {
         newTraits: MutableMap<String, String>?
     ) {
         if (value != newValue) {
-            if (cRange == null || cRange.plot_id.isEmpty()) {
+            if (currentRange == null || currentRange.plot_id.isEmpty()) {
                 return
             }
 
@@ -334,10 +333,10 @@ class PhotoTraitLayout : BaseTraitLayout {
                 newTraits?.set(traitName, v)
                 val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
                 val observation =
-                    ConfigActivity.dt.getObservationByValue(expId, cRange.plot_id, traitName, v)
-                ConfigActivity.dt.deleteTraitByValue(expId, cRange.plot_id, traitName, v)
-                ConfigActivity.dt.insertUserTraits(
-                    cRange.plot_id,
+                    ConfigActivity.dt.getObservationByValue(expId, currentRange.plot_id, traitName, v)
+                ConfigActivity.dt.deleteTraitByValue(expId, currentRange.plot_id, traitName, v)
+                ConfigActivity.dt.insertObservation(
+                    currentRange.plot_id,
                     traitName,
                     format,
                     newValue ?: v,
@@ -349,7 +348,8 @@ class PhotoTraitLayout : BaseTraitLayout {
                     "",
                     expId,
                     observation.dbId,
-                    observation.lastSyncedTime
+                    observation.lastSyncedTime,
+                    null
                 )
             }
         }
@@ -380,8 +380,8 @@ class PhotoTraitLayout : BaseTraitLayout {
                         try {
 
                             val thumbsDir = photosDir?.findFile(".thumbnails")
-                            val photosList = getPlotMedia(photosDir, cRange.plot_id, ".jpg").toMutableList()
-                            val thumbsList = getPlotMedia(thumbsDir, cRange.plot_id, ".jpg")
+                            val photosList = getPlotMedia(photosDir, currentRange.plot_id, ".jpg").toMutableList()
+                            val thumbsList = getPlotMedia(thumbsDir, currentRange.plot_id, ".jpg")
                             val index = photo?.selectedItemPosition ?: 0
                             val selected = photosList[index]
                             val thumbSelected = thumbsList[index]
@@ -409,7 +409,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                             } else {
                                 ConfigActivity.dt.deleteTraitByValue(
                                     expId,
-                                    cRange.plot_id,
+                                    currentRange.plot_id,
                                     currentTrait.trait,
                                     item.toString()
                                 )
@@ -432,12 +432,13 @@ class PhotoTraitLayout : BaseTraitLayout {
                     // If an NA exists, delete it
                     ConfigActivity.dt.deleteTraitByValue(
                         expId,
-                        cRange.plot_id,
+                        currentRange.plot_id,
                         currentTrait.trait,
                         "NA"
                     )
                 }
                 loadLayoutWork()
+                (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
             }
             builder.setNegativeButton(context.getString(R.string.dialog_no)) { dialog, _ -> dialog.dismiss() }
             val alert = builder.create()
@@ -454,10 +455,12 @@ class PhotoTraitLayout : BaseTraitLayout {
 
         currentTrait.trait?.let { traitName ->
 
+            val rep = (context as CollectActivity).rep
+
             val dir = getFieldMediaDirectory(context, traitName)
             if (dir != null) {
                 val generatedName =
-                    cRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
+                    currentRange.plot_id + "_" + traitName + "_" + rep + "_" + timeStamp.format(
                         Calendar.getInstance().time
                     ) + ".jpg"
                 Log.w(TAG, dir.uri.toString() + generatedName)
@@ -480,12 +483,6 @@ class PhotoTraitLayout : BaseTraitLayout {
         }
     }
 
-    private val rep: String
-        get() {
-            val repInt = ConfigActivity.dt.getRep(cRange.plot_id, currentTrait.trait)
-            return repInt.toString()
-        }
-
     override fun refreshLock() {
         super.refreshLock()
         (context as CollectActivity).traitLockData()
@@ -506,7 +503,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                         0
                     }
                     val photosDir = getFieldMediaDirectory(context, "photos")
-                    val plot = cRange.plot_id
+                    val plot = currentRange.plot_id
                     val locations = getPlotMedia(photosDir, plot, ".jpg")
                     if (photosDir != null) {
                         // Do not take photos if limit is reached

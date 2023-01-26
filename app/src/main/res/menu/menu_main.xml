@@ -3,7 +3,6 @@
 <!-- Warning / error below for showAsAction should be ignored until Toolbar is replaced with AppCompatToolbar-->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
     <item
@@ -56,5 +55,10 @@
         android:icon="@drawable/ic_explore_off_black_24dp"
         android:showAsAction="always"
         android:title="@string/menu_collect_start_geo_nav_title"/>
+    <item
+        android:id="@+id/action_act_collect_repeated_values_indicator"
+        android:icon="@drawable/numeric_1_box"
+        android:showAsAction="always"
+        android:title="@string/menu_collect_repeated_values_indicator"/>
 </menu>
 

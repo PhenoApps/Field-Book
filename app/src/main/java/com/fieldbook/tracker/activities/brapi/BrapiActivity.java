@@ -238,6 +238,7 @@ public class BrapiActivity extends ThemedActivity {
         if(this.selectedStudy != null) {
             brapiLoadDialog.setSelectedStudy(this.selectedStudy);
             brapiLoadDialog.setObservationLevel(this.selectedObservationLevel);
+            brapiLoadDialog.setPaginationManager(this.paginationManager);
             brapiLoadDialog.show();
         } else{
             Toast toast = Toast.makeText(getApplicationContext(), R.string.brapi_warning_select_study, Toast.LENGTH_LONG);

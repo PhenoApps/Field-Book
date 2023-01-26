@@ -53,14 +53,14 @@ class OldPhotosMigrator {
 
                             traitPhotos.forEach { photo ->
 
-                                val repeatedValue = ConfigActivity.dt.getRep(photo.observation_unit_id, t.trait)
+                                val repeatedValue = ConfigActivity.dt.getRep(expId, photo.observation_unit_id, t.trait)
                                 val generatedName =
                                     photo.observation_unit_id + "_" + t.trait + "_" + repeatedValue + "_" + timeStamp.format(
                                         Calendar.getInstance().time
                                     ) + ".jpg"
 
                                 //load uri and check if its parent is "photos" old photo dir
-                                oldPhotos?.findFile(photo.value ?: "")?.let { photoFile ->
+                                oldPhotos?.findFile(photo.value)?.let { photoFile ->
 
                                     photoDir?.createFile("*/jpg", photoFile.name ?: generatedName)?.let { newFile ->
 

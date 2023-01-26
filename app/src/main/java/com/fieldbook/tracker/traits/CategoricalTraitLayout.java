@@ -6,9 +6,9 @@ import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
@@ -45,6 +45,13 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         super(context, attrs, defStyleAttr);
     }
 
+    static public boolean isTraitCategorical(String traitName) {
+        for (String name : POSSIBLE_VALUES) {
+            if (name.equals(traitName)) return true;
+        }
+        return false;
+    }
+
     @Override
     public void setNaTraitsText() {
     }
@@ -64,15 +71,76 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     }
 
     @Override
-    public void loadLayout() {
-        super.loadLayout();
+    public void afterLoadNotExists(CollectActivity act) {
+        super.afterLoadNotExists(act);
+        setAdapter(getCategories());
+    }
 
-        final String trait = getCurrentTrait().getTrait();
-        getEtCurVal().setHint("");
-        getEtCurVal().setVisibility(EditText.VISIBLE);
+    @Override
+    public void afterLoadDefault(CollectActivity act) {
+        super.afterLoadDefault(act);
+        setAdapter(getCategories());
+    }
+
+    @Override
+    public void afterLoadExists(CollectActivity act, @Nullable String value) {
+        super.afterLoadExists(act, value);
 
         //read the preferences, default to displaying values instead of labels
         String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+
+        //read the json object stored in additional info of the trait object (only in BrAPI imported traits)
+        ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
+
+        if (value != null && !value.isEmpty()) {
+
+            //check if its the new json
+            try {
+
+                ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(value);
+
+                if (!c.isEmpty()) {
+
+                    //get the value from the single-sized array
+                    BrAPIScaleValidValuesCategories labelVal = c.get(0);
+
+                    //check that this pair is a valid label/val pair in the category,
+                    //if it is then set the text based on the preference
+                    if (CategoryJsonUtil.Companion.contains(cats, labelVal)) {
+
+                        //display the category based on preferences
+                        if (labelValPref.equals("value")) {
+
+                            getCollectInputView().setText(labelVal.getValue());
+
+                        } else {
+
+                            getCollectInputView().setText(labelVal.getLabel());
+
+                        }
+
+                        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
+
+                    }
+                }
+
+            } catch (Exception e) {
+
+                e.printStackTrace(); //if it fails to decode, assume its an old string
+
+                if (CategoryJsonUtil.Companion.contains(cats, value)) {
+
+                    getCollectInputView().setText(value);
+
+                    getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
+                }
+            }
+        }
+
+        setAdapter(cats);
+    }
+
+    private ArrayList<BrAPIScaleValidValuesCategories> getCategories() {
 
         //read the json object stored in additional info of the trait object (only in BrAPI imported traits)
         ArrayList<BrAPIScaleValidValuesCategories> cats = new ArrayList<>();
@@ -93,62 +161,12 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
             }
         }
 
-        if (!getNewTraits().containsKey(trait)) {
+        return cats;
+    }
 
-            getEtCurVal().setText("");
+    private void setAdapter(ArrayList<BrAPIScaleValidValuesCategories> cats) {
 
-            getEtCurVal().setTextColor(Color.BLACK);
-
-        } else {
-
-            //if there is a saved value, check if its json or old string
-            String savedJson = getNewTraits().get(trait);
-
-            if (savedJson != null) {
-
-                //check if its the new json
-                try {
-
-                    ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(savedJson);
-
-                    if (!c.isEmpty()) {
-
-                        //get the value from the single-sized array
-                        BrAPIScaleValidValuesCategories labelVal = c.get(0);
-
-                        //check that this pair is a valid label/val pair in the category,
-                        //if it is then set the text based on the preference
-                        if (CategoryJsonUtil.Companion.contains(cats, labelVal)) {
-
-                            //display the category based on preferences
-                            if (labelValPref.equals("value")) {
-
-                                getEtCurVal().setText(labelVal.getValue());
-
-                            } else {
-
-                                getEtCurVal().setText(labelVal.getLabel());
-
-                            }
-
-                            getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-
-                        }
-                    }
-
-                } catch (Exception e) {
-
-                    e.printStackTrace(); //if it fails to decode, assume its an old string
-
-                    if (CategoryJsonUtil.Companion.contains(cats, savedJson)) {
-
-                        getEtCurVal().setText(savedJson);
-
-                        getEtCurVal().setTextColor(Color.parseColor(getDisplayColor()));
-                    }
-                }
-            }
-        }
+        String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
 
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
         layoutManager.setFlexWrap(FlexWrap.WRAP);
@@ -158,7 +176,6 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
         if (!((CollectActivity) getContext()).isDataLocked()) {
 
-            ArrayList<BrAPIScaleValidValuesCategories> finalCats = cats;
             gridMultiCat.setAdapter(new CategoryTraitAdapter(getContext()) {
 
                 @Override
@@ -166,7 +183,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                     holder.bindTo();
 
                     //get the label for this position
-                    BrAPIScaleValidValuesCategories pair = finalCats.get(position);
+                    BrAPIScaleValidValuesCategories pair = cats.get(position);
 
                     //update button with the preference based text
                     if (labelValPref.equals("value")) {
@@ -184,7 +201,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                     holder.mButton.setOnClickListener(createClickListener(holder.mButton, position));
 
                     //update the button's state if this category is selected
-                    String currentText = getEtCurVal().getText().toString();
+                    String currentText = getCollectInputView().getText();
 
                     if (labelValPref.equals("value")) {
 
@@ -206,7 +223,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                 @Override
                 public int getItemCount() {
-                    return finalCats.size();
+                    return cats.size();
                 }
             });
         }
@@ -223,6 +240,19 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         });
     }
 
+    /**
+     * Notifies grid adapter to refresh which buttons are selected.
+     * This is used when the repeat value view navigates across repeated values.
+     */
+    @Override
+    public void refreshLayout(Boolean onNew) {
+        super.refreshLayout(onNew);
+        RecyclerView.Adapter<?> adapter = gridMultiCat.getAdapter();
+        if (adapter != null) {
+            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+        }
+    }
+
     private OnClickListener createClickListener(final Button button, int position) {
         return v -> {
 
@@ -232,7 +262,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 final ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>(); //this is saved in the db
 
                 final String category = button.getText().toString();
-                String currentCat = getEtCurVal().getText().toString(); //displayed in the edit text
+                String currentCat = getCollectInputView().getText(); //displayed in the edit text
 
                 if (currentCat.equals(category)) {
                     pressOffButton(button);
@@ -243,15 +273,15 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                     scale.add(pair);
                 }
 
-                getEtCurVal().setText(currentCat);
+                getCollectInputView().setText(currentCat);
 
-                updateTrait(getCurrentTrait().getTrait(),
+                updateObservation(getCurrentTrait().getTrait(),
                         getCurrentTrait().getFormat(),
                         CategoryJsonUtil.Companion.encode(scale));
 
                 triggerTts(category);
 
-                loadLayout(); //todo this is not the best way to do this
+                refreshLayout(false);
             }
         };
     }
@@ -269,6 +299,18 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     @Override
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
+        super.deleteTraitListener();
         loadLayout();
+    }
+
+    @Override
+    public String decodeValue(String value) {
+        String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+        ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
+        if (!scale.isEmpty()) {
+            if (labelValPref.equals("value")) {
+                return scale.get(0).getValue();
+            } else return scale.get(0).getLabel();
+        } else return "";
     }
 }

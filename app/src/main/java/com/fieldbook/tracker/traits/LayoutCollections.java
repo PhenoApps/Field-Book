@@ -34,9 +34,14 @@ public class LayoutCollections {
         }
     }
 
-    public BaseTraitLayout getTraitLayout(final String trait) {
+    /**
+     * Todo update this with trait name/dbid
+     * @param traitFormat the trait layout's format
+     * @return the trait layout corresponding to the format
+     */
+    public BaseTraitLayout getTraitLayout(final String traitFormat) {
         for (BaseTraitLayout layout : traitLayouts) {
-            if (layout.isTraitType(trait)) {
+            if (layout.isTraitType(traitFormat)) {
                 return layout;
             }
         }

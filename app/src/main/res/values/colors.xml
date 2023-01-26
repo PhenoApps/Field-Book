@@ -88,4 +88,8 @@
     <color name="high_contrast_subheading_color">@color/BLACK</color>
     <color name="high_contrast_color_text_secondary">@color/BLACK</color>
 
+    <color name="circleBackgroundMiddleColor">#80FEFEFE</color>
+    <color name="circleBackgroundMiddleColorPressed">#20FEFEFE</color>
+    <color name="circleBackgroundOuterColor">#FFFFFF</color>
+
 </resources>

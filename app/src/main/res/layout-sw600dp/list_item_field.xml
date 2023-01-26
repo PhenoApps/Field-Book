@@ -88,6 +88,16 @@
             android:textColor="?fb_color_hint_text"
             android:textSize="@dimen/text_size_small" />
 
+        <TextView
+            android:id="@+id/observationLevelLbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:minWidth="40dp"
+            android:singleLine="true"
+            android:textColor="@color/main_details"
+            android:textSize="@dimen/text_size_small" />
+
     </LinearLayout>
 
     <ImageView

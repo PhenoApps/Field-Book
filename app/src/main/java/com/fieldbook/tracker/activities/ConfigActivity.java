@@ -174,6 +174,7 @@ public class ConfigActivity extends ThemedActivity {
                 //clear field selection after updates
                 ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
                 ep.edit().putString(GeneralKeys.FIELD_FILE, null).apply();
+                ep.edit().putString(GeneralKeys.FIELD_OBS_LEVEL, null).apply();
                 ep.edit().putString(GeneralKeys.UNIQUE_NAME, null).apply();
                 ep.edit().putString(GeneralKeys.PRIMARY_NAME, null).apply();
                 ep.edit().putString(GeneralKeys.SECONDARY_NAME, null).apply();
@@ -1170,6 +1171,7 @@ public class ConfigActivity extends ThemedActivity {
             //clear field selection after updates
             ep.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, studyId)
                 .putString(GeneralKeys.FIELD_FILE, f.getExp_name())
+                .putString(GeneralKeys.FIELD_OBS_LEVEL, f.getObservation_level())
                 .putString(GeneralKeys.UNIQUE_NAME, f.getUnique_id())
                 .putString(GeneralKeys.PRIMARY_NAME, f.getPrimary_id())
                 .putString(GeneralKeys.SECONDARY_NAME, f.getSecondary_id())
