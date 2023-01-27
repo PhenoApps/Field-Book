@@ -33,7 +33,7 @@ open class SortDialog(
     act: Activity,
     private val initialItems: Array<String>,
     private val selectableItems: Array<String>
-) : Dialog(act, R.style.Dialog), SortAdapter.Sorter {
+) : Dialog(act), SortAdapter.Sorter {
 
     protected var attributeRv: RecyclerView? = null
     protected var cancelButton: Button? = null

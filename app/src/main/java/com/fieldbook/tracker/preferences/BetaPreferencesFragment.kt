@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.preference.CheckBoxPreference
 import androidx.preference.PreferenceFragmentCompat
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.PreferencesActivity
 
 class BetaPreferencesFragment : PreferenceFragmentCompat() {
 

@@ -137,7 +137,7 @@ import kotlin.Pair;
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends ThemedActivity
         implements SensorEventListener, GPSTracker.GPSTrackerListener,
-        UsbCameraInterface, SummarFragment.SummaryOpenListener {
+        UsbCameraInterface, SummaryFragment.SummaryOpenListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;

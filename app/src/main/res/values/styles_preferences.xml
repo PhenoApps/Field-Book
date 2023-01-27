@@ -31,8 +31,8 @@
         <item name="android:textColorSecondary">?attr/fb_color_text_secondary</item>
         <item name="titleTextColor">?attr/fb_color_text_dark</item>
 
-        <item name="textAppearanceListItem">@style/AppTextAppearance.Preference.Title</item>
-        <item name="textAppearanceListItemSecondary">@style/AppTextAppearance.Preference.Summary</item>
+        <item name="android:textAppearanceListItem">@style/AppTextAppearance.Preference.Title</item>
+        <item name="android:textAppearanceListItemSecondary">@style/AppTextAppearance.Preference.Summary</item>
     </style>
 
     <style name="AppTextAppearance.Preference.Title" parent="TextAppearance.AppCompat.Headline">

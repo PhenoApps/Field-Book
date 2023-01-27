@@ -33,8 +33,7 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
         }
 
         prefsFragment = new PreferencesFragment();
-        getSupportFragmentManager().beginTransaction()
-                .replace(android.R.id.content, prefsFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, prefsFragment).commit();
 
         //parse passed bundle and check if the person should be updated.
         Bundle extras = getIntent().getExtras();
@@ -45,26 +44,20 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
             Bundle personUpdate = new Bundle();
             personUpdate.putBoolean(GeneralKeys.PERSON_UPDATE, true);
             profile.setArguments(personUpdate);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, profile).commit();
+            getSupportFragmentManager().beginTransaction().replace(android.R.id.content, profile).commit();
 
         }
 
         boolean flag = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(GeneralKeys.THEME_FLAG, false);
         if (flag) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, new AppearancePreferencesFragment())
-                    .addToBackStack("PrefsFrag")
-                    .commit();
+            getSupportFragmentManager().beginTransaction().replace(android.R.id.content, new AppearancePreferencesFragment()).addToBackStack("PrefsFrag").commit();
         }
     }
 
     @Override
     public void onSearchResultClicked(SearchPreferenceResult result) {
         prefsFragment = new PreferencesFragment();
-        getSupportFragmentManager().beginTransaction()
-                .replace(android.R.id.content, prefsFragment).addToBackStack("PrefsFragment")
-                .commit(); // Allow to navigate back to search
+        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, prefsFragment).addToBackStack("PrefsFragment").commit(); // Allow to navigate back to search
 
         new Handler().post(new Runnable() { // Allow fragment to get created
             @Override
@@ -97,17 +90,12 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
 
         // Instantiate the new Fragment
         final Bundle args = pref.getExtras();
-        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(
-                getClassLoader(),
-                pref.getFragment());
+        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(getClassLoader(), pref.getFragment());
         fragment.setArguments(args);
         fragment.setTargetFragment(caller, 0);
 
         // Replace the existing Fragment with the new Fragment
-        getSupportFragmentManager().beginTransaction()
-                .replace(android.R.id.content, fragment)
-                .addToBackStack(null)
-                .commit();
+        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, fragment).addToBackStack(null).commit();
         return true;
     }
 

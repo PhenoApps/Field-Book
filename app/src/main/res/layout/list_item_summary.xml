@@ -44,7 +44,6 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:src="@drawable/chevron_right"
-        android:tint="@color/main_colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

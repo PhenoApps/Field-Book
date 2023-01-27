@@ -68,8 +68,6 @@
             android:scaleType="fitCenter"
             android:src="@drawable/ic_event_black_24dp" />
 
-        </LinearLayout>
-
     </LinearLayout>
 
 </com.fieldbook.tracker.traits.DateTraitLayout>
