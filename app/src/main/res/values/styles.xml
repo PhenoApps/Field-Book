@@ -142,6 +142,7 @@
         <item name="fb_value_altered_color">@color/high_contrast_value_altered_color</item>
         <item name="fb_color_text_secondary">@color/high_contrast_color_text_secondary</item>
         <item name="fb_button_color_pressed">@color/high_contrast_button_color_pressed</item>
+        <item name="fb_icon_fill_tint">@color/high_contrast_primary_dark</item>
 
         <item name="colorPrimary">?attr/fb_color_primary</item>
         <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>

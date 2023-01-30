@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -51,6 +50,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.GeoNavHelper;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.objects.VerifyPersonHelper;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CategoricalTraitLayout;
@@ -115,6 +115,9 @@ public class CollectActivity extends ThemedActivity
     @Inject
     GeoNavHelper geoNavHelper;
 
+    @Inject
+    VerifyPersonHelper verifyPersonHelper;
+    
     public static boolean searchReload;
     public static String searchRange;
     public static String searchPlot;
@@ -152,7 +155,6 @@ public class CollectActivity extends ThemedActivity
     public Handler myGuiHandler;
 
     private SharedPreferences mPrefs;
-    private TextWatcher cvText;
 
     /**
      * Data lock is controlled by the toolbar lock icon
@@ -652,7 +654,7 @@ public class CollectActivity extends ThemedActivity
             Log.e(TAG, e.getMessage());
         }
 
-        updateLastOpenedTime();
+        verifyPersonHelper.updateLastOpenedTime();
 
         geoNavHelper.stopGeoNav();
 
@@ -757,7 +759,7 @@ public class CollectActivity extends ThemedActivity
             });
         }
 
-        checkLastOpened();
+        verifyPersonHelper.checkLastOpened();
 
         if (!mSkipLastUsedTrait) {
 
@@ -798,72 +800,6 @@ public class CollectActivity extends ThemedActivity
 
             }
         }
-    }
-
-    /**
-     * Simple function that checks if the collect activity was opened >24hrs ago.
-     * If the condition is met, it asks the user to reenter the collector id.
-     */
-    private void checkLastOpened() {
-
-        long lastOpen = ep.getLong(GeneralKeys.LAST_TIME_OPENED, 0L);
-        long systemTime = System.nanoTime();
-
-        long nanosInOneDay = (long) 1e9*3600*24;
-
-        if (lastOpen != 0L && systemTime - lastOpen > nanosInOneDay) {
-
-            boolean verify = ep.getBoolean(GeneralKeys.VERIFY_USER, true);
-
-            if (verify) {
-
-                String firstName = ep.getString(GeneralKeys.FIRST_NAME,"");
-                String lastName = ep.getString(GeneralKeys.LAST_NAME,"");
-                if(firstName.length() > 0 || lastName.length() > 0) {
-                    //person presumably has been set
-                    showAskCollectorDialog(getString(R.string.activity_collect_dialog_verify_collector) + " " + firstName + " " + lastName + "?",
-                            getString(R.string.activity_collect_dialog_verify_yes_button),
-                            getString(R.string.activity_collect_dialog_neutral_button),
-                            getString(R.string.activity_collect_dialog_verify_no_button));
-                } else {
-                    //person presumably hasn't been set
-                    showAskCollectorDialog(getString(R.string.activity_collect_dialog_new_collector),
-                            getString(R.string.activity_collect_dialog_verify_no_button),
-                            getString(R.string.activity_collect_dialog_neutral_button),
-                            getString(R.string.activity_collect_dialog_verify_yes_button));
-                }
-            }
-        }
-
-        updateLastOpenedTime();
-    }
-
-    private void updateLastOpenedTime() {
-        ep.edit().putLong(GeneralKeys.LAST_TIME_OPENED, System.nanoTime()).apply();
-    }
-
-    private void showAskCollectorDialog(String message, String positive, String neutral, String negative) {
-        new AlertDialog.Builder(this, R.style.AppAlertDialog)
-                .setTitle(message)
-                //yes button
-                .setPositiveButton(positive, (DialogInterface dialog, int which) -> {
-                    dialog.dismiss();
-                })
-                //yes, don't ask again button
-                .setNeutralButton(neutral, (DialogInterface dialog, int which) -> {
-                    dialog.dismiss();
-                    ep.edit().putBoolean(GeneralKeys.VERIFY_USER, false).apply();
-                })
-                //no (navigates to the person preference)
-                .setNegativeButton(negative, (DialogInterface dialog, int which) -> {
-                    dialog.dismiss();
-                    Intent preferenceIntent = new Intent();
-                    preferenceIntent.setClassName(CollectActivity.this,
-                            PreferencesActivity.class.getName());
-                    preferenceIntent.putExtra("PersonUpdate", true);
-                    startActivity(preferenceIntent);
-                })
-                .show();
     }
 
     /**
@@ -1820,11 +1756,6 @@ public class CollectActivity extends ThemedActivity
 
     public RangeObject getCRange() {
         return rangeBox.getCRange();
-    }
-
-    @NonNull
-    public TextWatcher getCvText() {
-        return cvText;
     }
 
     @Override

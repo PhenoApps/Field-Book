@@ -75,7 +75,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
     override fun onResume() {
         super.onResume()
         view?.let { v ->
-            SoftKeyboardUtil.closeKeyboard(context, v, 0L)
+            SoftKeyboardUtil.closeKeyboard(activity, v, 0L)
         }
     }
 
@@ -111,7 +111,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
     private fun setup() {
 
-        with(context as? CollectActivity) {
+        with(activity as? CollectActivity) {
 
             this?.let { collector ->
 
@@ -177,7 +177,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                                     //read the preferences, default to displaying values instead of labels
                                     val labelValPref: String =
-                                        PreferenceManager.getDefaultSharedPreferences(context)
+                                        PreferenceManager.getDefaultSharedPreferences(activity)
                                             .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value")
                                             ?: "value"
 
@@ -233,7 +233,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
         collector: CollectActivity, attributes: Array<String>, traits: Array<String>
     ) {
 
-        context?.let { ctx ->
+        activity?.let { ctx ->
 
             var filter: Set<String>? = getPersistedFilter(ctx)
 
@@ -252,7 +252,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
             }
 
             filterDialog =
-                AlertDialog.Builder(context).setTitle(R.string.fragment_summary_filter_title)
+                AlertDialog.Builder(activity).setTitle(R.string.fragment_summary_filter_title)
                     .setMultiChoiceItems(keys, checked) { _, which, isChecked ->
                         val item = keys[which]
                         filter = if (isChecked) {
@@ -304,7 +304,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
      */
     override fun onAttributeClicked(attribute: String) {
 
-        with(context as? CollectActivity) {
+        with(activity as? CollectActivity) {
 
             this?.let { collector ->
 

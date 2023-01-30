@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -38,7 +39,7 @@ open class ThemedActivity: AppCompatActivity() {
 
             }
 
-            var statusBarColor = activity.getColor(R.color.main_primary_dark)
+            var statusBarColor = ContextCompat.getColor(activity, R.color.main_primary_dark)
 
             activity.runOnUiThread {
 
@@ -50,11 +51,11 @@ open class ThemedActivity: AppCompatActivity() {
                     }
                     ThemePair(HIGH_CONTRAST, SMALL) -> {
                         activity.setTheme(R.style.BaseAppTheme_HighContrast_SmallTextTheme)
-                        statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
+                        statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
                     }
                     ThemePair(BLUE, SMALL) -> {
                         activity.setTheme(R.style.BaseAppTheme_Blue_SmallTextTheme)
-                        statusBarColor = activity.getColor(R.color.blue_primary_dark)
+                        statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
                     }
 
                     //medium text themes
@@ -63,11 +64,11 @@ open class ThemedActivity: AppCompatActivity() {
                     }
                     ThemePair(HIGH_CONTRAST, MEDIUM) -> {
                         activity.setTheme(R.style.BaseAppTheme_HighContrast_MediumTextTheme)
-                        statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
+                        statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
                     }
                     ThemePair(BLUE, MEDIUM) -> {
                         activity.setTheme(R.style.BaseAppTheme_Blue_MediumTextTheme)
-                        statusBarColor = activity.getColor(R.color.blue_primary_dark)
+                        statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
                     }
 
                     //large text themes
@@ -76,11 +77,11 @@ open class ThemedActivity: AppCompatActivity() {
                     }
                     ThemePair(HIGH_CONTRAST, LARGE) -> {
                         activity.setTheme(R.style.BaseAppTheme_HighContrast_LargeTextTheme)
-                        statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
+                        statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
                     }
                     ThemePair(BLUE, LARGE) -> {
                         activity.setTheme(R.style.BaseAppTheme_Blue_LargeTextTheme)
-                        statusBarColor = activity.getColor(R.color.blue_primary_dark)
+                        statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
                     }
 
                     //extra large text themes
@@ -89,11 +90,11 @@ open class ThemedActivity: AppCompatActivity() {
                     }
                     ThemePair(HIGH_CONTRAST, EXTRA_LARGE) -> {
                         activity.setTheme(R.style.BaseAppTheme_HighContrast_ExtraLargeTextTheme)
-                        statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
+                        statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
                     }
                     ThemePair(BLUE, EXTRA_LARGE) -> {
                         activity.setTheme(R.style.BaseAppTheme_Blue_ExtraLargeTextTheme)
-                        statusBarColor = activity.getColor(R.color.blue_primary_dark)
+                        statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
                     }
                 }
 
@@ -109,11 +110,11 @@ open class ThemedActivity: AppCompatActivity() {
                         }
                         ThemePair(HIGH_CONTRAST, SMALL) -> {
                             activity.setTheme(R.style.BaseAppTheme_Mal_HighContrast_SmallTextTheme)
-                            statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
+                            statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
                         }
                         ThemePair(BLUE, SMALL) -> {
                             activity.setTheme(R.style.BaseAppTheme_Mal_Blue_SmallTextTheme)
-                            statusBarColor = activity.getColor(R.color.blue_primary_dark)
+                            statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
                         }
 
                         //medium text themes
@@ -122,11 +123,11 @@ open class ThemedActivity: AppCompatActivity() {
                         }
                         ThemePair(HIGH_CONTRAST, MEDIUM) -> {
                             activity.setTheme(R.style.BaseAppTheme_Mal_HighContrast_MediumTextTheme)
-                            statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
+                            statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
                         }
                         ThemePair(BLUE, MEDIUM) -> {
                             activity.setTheme(R.style.BaseAppTheme_Mal_Blue_MediumTextTheme)
-                            statusBarColor = activity.getColor(R.color.blue_primary_dark)
+                            statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
                         }
 
                         //large text themes
@@ -135,11 +136,11 @@ open class ThemedActivity: AppCompatActivity() {
                         }
                         ThemePair(HIGH_CONTRAST, LARGE) -> {
                             activity.setTheme(R.style.BaseAppTheme_Mal_HighContrast_LargeTextTheme)
-                            statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
+                            statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
                         }
                         ThemePair(BLUE, LARGE) -> {
                             activity.setTheme(R.style.BaseAppTheme_Mal_Blue_LargeTextTheme)
-                            statusBarColor = activity.getColor(R.color.blue_primary_dark)
+                            statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
                         }
 
                         //extra large text themes
@@ -148,11 +149,11 @@ open class ThemedActivity: AppCompatActivity() {
                         }
                         ThemePair(HIGH_CONTRAST, EXTRA_LARGE) -> {
                             activity.setTheme(R.style.BaseAppTheme_Mal_HighContrast_ExtraLargeTextTheme)
-                            statusBarColor = activity.getColor(R.color.high_contrast_primary_dark)
+                            statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
                         }
                         ThemePair(BLUE, EXTRA_LARGE) -> {
                             activity.setTheme(R.style.BaseAppTheme_Mal_Blue_ExtraLargeTextTheme)
-                            statusBarColor = activity.getColor(R.color.blue_primary_dark)
+                            statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
                         }
                     }
                 }

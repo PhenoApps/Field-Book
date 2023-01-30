@@ -177,7 +177,6 @@ class TraitBoxView : ConstraintLayout {
                 if (currentTraitLayout != null) {
                     currentTraitLayout.loadLayout()
                 } else {
-                    controller.getInputView().editText.removeTextChangedListener(controller.getCvText())
                     controller.getInputView().visibility = VISIBLE
                     controller.getInputView().isEnabled = true
                 }

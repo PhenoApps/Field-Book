@@ -2,6 +2,8 @@ package com.fieldbook.tracker.traits
 
 import android.content.Context
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -14,6 +16,11 @@ class TextTraitLayout : BaseTraitLayout {
 
     companion object {
         const val type = "text"
+
+        /**
+         * included this delay to ensure barcode readers scan the entire string correctly
+         */
+        const val DELAY_PER_UPDATE = 250L
     }
 
     private var isBlocked = false
@@ -23,9 +30,7 @@ class TextTraitLayout : BaseTraitLayout {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
+        context, attrs, defStyleAttr
     )
 
     // Validates the text entered for text format
@@ -39,18 +44,20 @@ class TextTraitLayout : BaseTraitLayout {
 
             collectInputView.text = value
 
-            updateObservation(currentTrait.trait, currentTrait.format, value)
+            Handler(Looper.getMainLooper()).postDelayed({
+
+                updateObservation(currentTrait.trait, currentTrait.format, value)
+
+            }, DELAY_PER_UPDATE)
         }
 
         override fun beforeTextChanged(
-            arg0: CharSequence, arg1: Int,
-            arg2: Int, arg3: Int
+            arg0: CharSequence, arg1: Int, arg2: Int, arg3: Int
         ) {
         }
 
         override fun onTextChanged(
-            arg0: CharSequence, arg1: Int, arg2: Int,
-            arg3: Int
+            arg0: CharSequence, arg1: Int, arg2: Int, arg3: Int
         ) {
         }
     }
