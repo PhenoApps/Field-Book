@@ -30,4 +30,27 @@
         <item>5</item>
         <item>10</item>
     </string-array>
+    <string-array name="preferences_themes_entries">
+        <item>@string/theme_default</item>
+        <item>@string/theme_high_contrast</item>
+        <item>@string/theme_blue</item>
+    </string-array>
+    <string-array name="preferences_themes_entry_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="preferences_text_size_entries">
+        <item>@string/text_size_s</item>
+        <item>@string/text_size_m</item>
+        <item>@string/text_size_l</item>
+        <item>@string/text_size_xl</item>
+    </string-array>
+    <string-array name="preferences_text_size_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
 </resources>

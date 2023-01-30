@@ -72,10 +72,10 @@ public class TraitAdapter extends BaseAdapter {
 
         if (convertView == null) {
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = vi.inflate(R.layout.listitem_trait, parent, false);
+            convertView = vi.inflate(R.layout.list_item_trait, parent, false);
 
             holder = new ViewHolder();
-            holder.name = convertView.findViewById(R.id.field_name);
+            holder.name = convertView.findViewById(R.id.list_item_trait_trait_name);
             holder.format = convertView.findViewById(R.id.traitType);
             holder.visible = convertView.findViewById(R.id.visible);
             holder.dragSort = convertView.findViewById(R.id.dragSort);
@@ -193,7 +193,7 @@ public class TraitAdapter extends BaseAdapter {
         holder.menuPopup.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(TraitEditorActivity.thisActivity, v);
             //Inflating the Popup using xml file
-            popup.getMenuInflater().inflate(R.menu.menu_trait_listitem, popup.getMenu());
+            popup.getMenuInflater().inflate(R.menu.menu_trait_list_item, popup.getMenu());
 
             //registering popup with OnMenuItemClickListener
             popup.setOnMenuItemClickListener(createTraitListListener(parent, holder, v, position));

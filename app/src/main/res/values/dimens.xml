@@ -2,22 +2,27 @@
 <resources>
 
     <!-- text sizes -->
-    <dimen name="text_size_xsmall">12sp</dimen>
+    <!-- regular text -->
     <dimen name="text_size_small">14sp</dimen>
     <dimen name="text_size_medium">16sp</dimen>
     <dimen name="text_size_large">20sp</dimen>
-    <dimen name="text_size_xlarge">22sp</dimen>
-    <dimen name="text_size_xxlarge">30sp</dimen>
+    <dimen name="text_size_xlarge">24sp</dimen>
 
-    <dimen name="button_default_height">40dp</dimen>
+    <!-- sub headings -->
+    <dimen name="sub_text_size_small">10sp</dimen>
+    <dimen name="sub_text_size_medium">14sp</dimen>
+    <dimen name="sub_text_size_large">18sp</dimen>
+    <dimen name="sub_text_size_xlarge">22sp</dimen>
+
+    <!-- title text sizes -->
+    <dimen name="title_text_size_small">18sp</dimen>
+    <dimen name="title_text_size_medium">20sp</dimen>
+    <dimen name="title_text_size_large">24sp</dimen>
+    <dimen name="title_text_size_xlarge">28sp</dimen>
+
     <dimen name="button_default_width">110dp</dimen>
     <dimen name="button_width_numeric">85dp</dimen>
     <dimen name="button_width_disease">60dp</dimen>
-
-    <dimen name="column_width">120dp</dimen>
-    <dimen name="row_height">120dp</dimen>
-    <dimen name="column_header_height">120dp</dimen>
-    <dimen name="row_header_width">120dp</dimen>
 
     <dimen name="default_row_header_width">55dp</dimen>
     <dimen name="default_column_header_height">40dp</dimen>

@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -32,10 +31,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.brapi.BrapiActivity;
 import com.fieldbook.tracker.adapters.FieldAdapter;
 import com.fieldbook.tracker.async.ImportRunnableTask;
 import com.fieldbook.tracker.database.DataHelper;
@@ -48,8 +49,8 @@ import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -76,7 +77,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
-public class FieldEditorActivity extends AppCompatActivity
+public class FieldEditorActivity extends ThemedActivity
         implements FieldSortController, FieldAdapterController {
 
     private final String TAG = "FieldEditor";
@@ -92,6 +93,7 @@ public class FieldEditorActivity extends AppCompatActivity
     private static final Handler mHandler = new Handler();
     private static FieldFileObject.FieldFileBase fieldFile;
     private static SharedPreferences ep;
+    private Toolbar toolbar;
     private final int PERMISSIONS_REQUEST_STORAGE = 998;
     Spinner unique;
     Spinner primary;
@@ -106,7 +108,12 @@ public class FieldEditorActivity extends AppCompatActivity
     // Creates a new thread to do importing
     private final Runnable importRunnable = new Runnable() {
         public void run() {
-            new ImportRunnableTask(thisActivity, fieldFile, unique.getSelectedItemPosition(), unique.getSelectedItem().toString(), primary.getSelectedItem().toString(), secondary.getSelectedItem().toString()).execute(0);
+            new ImportRunnableTask(thisActivity,
+                    fieldFile,
+                    unique.getSelectedItemPosition(),
+                    unique.getSelectedItem().toString(),
+                    primary.getSelectedItem().toString(),
+                    secondary.getSelectedItem().toString()).execute(0);
         }
     };
 
@@ -150,6 +157,9 @@ public class FieldEditorActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_fields);
 
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.settings_fields));
             getSupportActionBar().getThemedContext();
@@ -162,6 +172,7 @@ public class FieldEditorActivity extends AppCompatActivity
         fieldList = findViewById(R.id.myList);
         mAdapter = new FieldAdapter(thisActivity, database.getAllFieldObjects());
         fieldList.setAdapter(mAdapter);
+
     }
 
     private void showFileDialog() {
@@ -175,11 +186,13 @@ public class FieldEditorActivity extends AppCompatActivity
         importArray[2] = getString(R.string.import_source_brapi);
 
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.listitem, importArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, importArray);
         importSourceList.setAdapter(adapter);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.import_dialog_title_fields).setCancelable(true).setView(layout);
+        builder.setTitle(R.string.import_dialog_title_fields)
+                .setCancelable(true)
+                .setView(layout);
 
         builder.setPositiveButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
             @Override
@@ -190,7 +203,6 @@ public class FieldEditorActivity extends AppCompatActivity
 
         final AlertDialog importDialog = builder.create();
         importDialog.show();
-        DialogUtils.styleDialogs(importDialog);
 
         android.view.WindowManager.LayoutParams params = importDialog.getWindow().getAttributes();
         params.width = LayoutParams.MATCH_PARENT;
@@ -234,7 +246,8 @@ public class FieldEditorActivity extends AppCompatActivity
     public void loadBrAPI() {
         Intent intent = new Intent();
 
-        intent.setClassName(FieldEditorActivity.this, BrapiActivity.class.getName());
+        intent.setClassName(FieldEditorActivity.this,
+                BrapiActivity.class.getName());
         startActivityForResult(intent, 1);
     }
 
@@ -257,7 +270,8 @@ public class FieldEditorActivity extends AppCompatActivity
             loadLocal();
         } else {
             // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import), PERMISSIONS_REQUEST_STORAGE, perms);
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_rationale_storage_import),
+                    PERMISSIONS_REQUEST_STORAGE, perms);
         }
 
     }
@@ -281,39 +295,11 @@ public class FieldEditorActivity extends AppCompatActivity
     }
 
     private TapTarget fieldsTapTargetRect(Rect item, String title, String desc) {
-        return TapTarget.forBounds(item, title, desc)
-                // All options below are optional
-                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
-                .targetCircleColor(R.color.black)   // Specify a color for the target circle
-                .titleTextSize(30)                  // Specify the size (in sp) of the title text
-                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
-                .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD).textColor(R.color.black)            // Specify a color for both the title and description text
-                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
-                .drawShadow(true)                   // Whether to draw a drop shadow or not
-                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                .tintTarget(true)                   // Whether to tint the target view's color
-                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
-                .targetRadius(60);
+        return TapTargetUtil.Companion.getTapTargetSettingsRect(this, item, title, desc);
     }
 
     private TapTarget fieldsTapTargetMenu(int id, String title, String desc) {
-        return TapTarget.forView(findViewById(id), title, desc)
-                // All options below are optional
-                .outerCircleColor(R.color.main_primaryDark)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
-                .targetCircleColor(R.color.black)   // Specify a color for the target circle
-                .titleTextSize(30)                  // Specify the size (in sp) of the title text
-                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
-                .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD).textColor(R.color.black)            // Specify a color for both the title and description text
-                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
-                .drawShadow(true)                   // Whether to draw a drop shadow or not
-                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                .tintTarget(true)                   // Whether to tint the target view's color
-                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
-                .targetRadius(60);
+        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), title, desc);
     }
 
     //TODO
@@ -326,7 +312,10 @@ public class FieldEditorActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.help:
-                TapTargetSequence sequence = new TapTargetSequence(this).targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description)), fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description)));
+                TapTargetSequence sequence = new TapTargetSequence(this)
+                        .targets(fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_add_description)),
+                                fieldsTapTargetMenu(R.id.importField, getString(R.string.tutorial_fields_add_title), getString(R.string.tutorial_fields_file_description))
+                        );
 
                 if (fieldExists()) {
                     sequence.target(fieldsTapTargetRect(fieldsListItemLocation(0), getString(R.string.tutorial_fields_select_title), getString(R.string.tutorial_fields_select_description)));
@@ -444,11 +433,15 @@ public class FieldEditorActivity extends AppCompatActivity
 
                     if (studyId == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
 
-                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout), getString(R.string.activity_field_editor_switch_field_same), Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
+                                getString(R.string.activity_field_editor_switch_field_same),
+                                Snackbar.LENGTH_LONG).show();
 
                     } else {
 
-                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout), getString(R.string.activity_field_editor_switch_field, String.valueOf(studyId)), Snackbar.LENGTH_LONG);
+                        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.field_editor_parent_linear_layout),
+                                getString(R.string.activity_field_editor_switch_field, String.valueOf(studyId)),
+                                Snackbar.LENGTH_LONG);
 
                         mySnackbar.setAction(R.string.activity_field_editor_switch_field_action, (view) -> {
 
@@ -530,7 +523,8 @@ public class FieldEditorActivity extends AppCompatActivity
                 OutputStream out = null;
                 try {
                     in = getContentResolver().openInputStream(content_describer);
-                    out = BaseDocumentTreeUtil.Companion.getFileOutputStream(this, R.string.dir_field_import, chosenFile);
+                    out = BaseDocumentTreeUtil.Companion.getFileOutputStream(this,
+                            R.string.dir_field_import, chosenFile);
                     if (out == null) throw new IOException();
                     byte[] buffer = new byte[1024];
                     int len;
@@ -693,7 +687,6 @@ public class FieldEditorActivity extends AppCompatActivity
 
                 if (hasSpecialCharacters) {
 
-
                     Utils.makeToast(getApplicationContext(), getString(R.string.import_error_columns_replaced));
 
                 }
@@ -702,7 +695,8 @@ public class FieldEditorActivity extends AppCompatActivity
 
             } else {
 
-                Toast.makeText(this, R.string.act_field_editor_no_suitable_columns_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.act_field_editor_no_suitable_columns_error,
+                        Toast.LENGTH_SHORT).show();
             }
         } else {
 
@@ -723,7 +717,9 @@ public class FieldEditorActivity extends AppCompatActivity
         setSpinner(secondary, columns, GeneralKeys.SECONDARY_NAME);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.import_dialog_title_fields).setCancelable(true).setView(layout);
+        builder.setTitle(R.string.import_dialog_title_fields)
+                .setCancelable(true)
+                .setView(layout);
 
         builder.setPositiveButton(getString(R.string.dialog_import), (dialogInterface, i) -> {
             if (checkImportColumnNames()) {
@@ -731,18 +727,12 @@ public class FieldEditorActivity extends AppCompatActivity
             }
         });
 
-        AlertDialog importFieldDialog = builder.create();
-        importFieldDialog.show();
-        DialogUtils.styleDialogs(importFieldDialog);
-
-        android.view.WindowManager.LayoutParams params2 = importFieldDialog.getWindow().getAttributes();
-        params2.width = LayoutParams.MATCH_PARENT;
-        importFieldDialog.getWindow().setAttributes(params2);
+        builder.show();
     }
 
     // Helper function to set spinner adapter and listener
     private void setSpinner(Spinner spinner, String[] data, String pref) {
-        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.custom_spinnerlayout, data);
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_layout, data);
         spinner.setAdapter(itemsAdapter);
         int spinnerPosition = itemsAdapter.getPosition(ep.getString(pref, itemsAdapter.getItem(0)));
         spinner.setSelection(spinnerPosition);
@@ -789,7 +779,9 @@ public class FieldEditorActivity extends AppCompatActivity
         }
 
         //initialize: initial items are the current sort order, selectable items are the obs. unit attributes.
-        FieldSortDialog d = new FieldSortDialog(this, field, sortOrderList.toArray(new String[]{}), database.getRangeColumnNames());
+        FieldSortDialog d = new FieldSortDialog(this, field,
+                sortOrderList.toArray(new String[]{}),
+                database.getRangeColumnNames());
 
         d.show();
     }
@@ -819,7 +811,11 @@ public class FieldEditorActivity extends AppCompatActivity
 
             Log.e(TAG, "Error updating sorting", e);
 
-            new AlertDialog.Builder(this).setTitle(R.string.dialog_save_error_title).setPositiveButton(R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed")).setMessage(R.string.sort_dialog_error_saving).create().show();
+            new AlertDialog.Builder(this).setTitle(R.string.dialog_save_error_title)
+                    .setPositiveButton(R.string.okButtonText, (dInterface, i) -> Log.d("FieldAdapter", "Sort save error dialog dismissed"))
+                    .setMessage(R.string.sort_dialog_error_saving)
+                    .create()
+                    .show();
         }
 
         loadData(database.getAllFieldObjects());

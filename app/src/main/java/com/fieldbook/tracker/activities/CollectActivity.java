@@ -6,14 +6,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -29,12 +27,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
@@ -44,25 +42,27 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
-import com.fieldbook.tracker.interfaces.CollectController;
-import com.fieldbook.tracker.interfaces.CollectRangeController;
-import com.fieldbook.tracker.interfaces.CollectTraitController;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.GeoNavHelper;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.preferences.PreferencesActivity;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
+import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
+import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
+import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
+import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
 import com.getkeepsafe.taptargetview.TapTarget;
@@ -70,6 +70,7 @@ import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 import org.phenoapps.interfaces.usb.camera.UsbCameraInterface;
 import org.phenoapps.security.SecureBluetoothActivityImpl;
 import org.phenoapps.usb.camera.UsbCameraHelper;
@@ -98,12 +99,11 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 @SuppressLint("ClickableViewAccessibility")
-public class CollectActivity extends AppCompatActivity
-        implements UsbCameraInterface,
-        SummaryFragment.SummaryOpenListener,
-        CollectController,
-        CollectRangeController,
-        CollectTraitController {
+public class CollectActivity extends ThemedActivity
+        implements UsbCameraInterface, SummaryFragment.SummaryOpenListener,
+        com.fieldbook.tracker.interfaces.CollectController,
+        com.fieldbook.tracker.interfaces.CollectRangeController,
+        com.fieldbook.tracker.interfaces.CollectTraitController {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int BARCODE_COLLECT_CODE = 99;
@@ -145,8 +145,9 @@ public class CollectActivity extends AppCompatActivity
     /**
      * Trait-related elements
      */
-    private EditText etCurVal;
     private final HandlerThread guiThread = new HandlerThread("ui");
+
+    private CollectInputView collectInputView;
 
     public Handler myGuiHandler;
 
@@ -172,11 +173,17 @@ public class CollectActivity extends AppCompatActivity
      * Usb Camera Helper
      */
     private UsbCameraHelper mUsbCameraHelper = null;
-    
+
     private SecureBluetoothActivityImpl secureBluetooth;
 
     //summary fragment listener
     private boolean isSummaryOpen = false;
+
+    /**
+     * Multi Measure delete dialogs
+     */
+    private AlertDialog dialogMultiMeasureDelete;
+    private AlertDialog dialogMultiMeasureConfirmDelete;
 
     public void triggerTts(String text) {
         if (ep.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
@@ -238,6 +245,10 @@ public class CollectActivity extends AppCompatActivity
 
     }
 
+    public CollectInputView getCollectInputView() {
+        return collectInputView;
+    }
+
     public String getStudyId() {
         return Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
     }
@@ -258,44 +269,20 @@ public class CollectActivity extends AppCompatActivity
         return getCurrentTrait().getFormat();
     }
 
-    private void initCurrentVals() {
-        // Current value display
-        etCurVal = findViewById(R.id.etCurVal);
+    public BaseTraitLayout getTraitLayout() {
+        return traitLayouts.getTraitLayout(getTraitFormat());
+    }
 
-        etCurVal.setOnEditorActionListener((exampleView, actionId, event) -> {
+    private void initCurrentVals() {
+
+        collectInputView = findViewById(R.id.act_collect_input_view);
+        collectInputView.setOnEditorActionListener((exampleView, actionId, event) -> {
             if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_DOWN) {
                 rangeBox.rightClick();
                 return true;
             }
-
             return false;
         });
-
-        // Validates the text entered for text format
-        cvText = new TextWatcher() {
-            public void afterTextChanged(Editable en) {
-                final TraitObject trait = traitBox.getCurrentTrait();
-                if (en.toString().length() > 0) {
-                    if (traitBox.existsNewTraits() & trait != null) {
-                        triggerTts(en.toString());
-                        updateTrait(trait.getTrait(), trait.getFormat(), en.toString());
-                    }
-                } else {
-                    if (traitBox.existsNewTraits() & trait != null)
-                        removeTrait(trait.getTrait());
-                }
-                //tNum.setSelection(tNum.getText().length());
-            }
-
-            public void beforeTextChanged(CharSequence arg0, int arg1,
-                                          int arg2, int arg3) {
-            }
-
-            public void onTextChanged(CharSequence arg0, int arg1, int arg2,
-                                      int arg3) {
-            }
-
-        };
     }
 
     private void loadScreen() {
@@ -321,6 +308,7 @@ public class CollectActivity extends AppCompatActivity
         traitBox = findViewById(R.id.act_collect_trait_box);
         rangeBox = findViewById(R.id.act_collect_range_box);
         initCurrentVals();
+
     }
 
     @Override
@@ -359,7 +347,7 @@ public class CollectActivity extends AppCompatActivity
      */
     @Override
     public boolean validateData() {
-        final String strValue = etCurVal.getText().toString();
+        final String strValue = collectInputView.getText();
         final TraitObject currentTrait = traitBox.getCurrentTrait();
 
         if (currentTrait == null) return false;
@@ -371,7 +359,7 @@ public class CollectActivity extends AppCompatActivity
         if (traitBox.existsNewTraits()
                 && traitBox.getCurrentTrait() != null
                 && strValue.length() > 0
-                && !traitBox.getCurrentTrait().isValidValue(etCurVal.getText().toString())) {
+                && !traitBox.getCurrentTrait().isValidValue(strValue)) {
 
             //checks if the trait is numerical and within the bounds (otherwise returns false)
             if (currentTrait.isOver(strValue)) {
@@ -383,7 +371,7 @@ public class CollectActivity extends AppCompatActivity
             }
 
             removeTrait(trait);
-            etCurVal.getText().clear();
+            collectInputView.clear();
 
             playSound("error");
 
@@ -394,13 +382,13 @@ public class CollectActivity extends AppCompatActivity
     }
 
     private void setNaText() {
-        etCurVal.setText("NA");
+        collectInputView.setText("NA");
 
         traitLayouts.setNaTraitsText(traitBox.getCurrentFormat());
     }
 
     private void setNaTextBrapiEmptyField() {
-        etCurVal.setHint("NA");
+        collectInputView.setHint("NA");
 
         traitLayouts.setNaTraitsText(traitBox.getCurrentFormat());
     }
@@ -410,6 +398,7 @@ public class CollectActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
+        toolbarBottom.setNavigationIcon(null);
 
         String naTts = getString(R.string.act_collect_na_btn_tts);
         String barcodeTts = getString(R.string.act_collect_barcode_btn_tts);
@@ -419,7 +408,7 @@ public class CollectActivity extends AppCompatActivity
         missingValue.setOnClickListener(v -> {
             triggerTts(naTts);
             TraitObject currentTrait = traitBox.getCurrentTrait();
-            updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), "NA");
+            updateObservation(currentTrait.getTrait(), currentTrait.getFormat(), "NA", null);
             setNaText();
         });
 
@@ -435,25 +424,52 @@ public class CollectActivity extends AppCompatActivity
 
         deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
         deleteValue.setOnClickListener(v -> {
+            boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitName(), getRep());
             // if a brapi observation that has been synced, don't allow deleting
-            String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-            TraitObject currentTrait = traitBox.getCurrentTrait();
-            if (database.isBrapiSynced(exp_id, rangeBox.getPlotID(), currentTrait.getTrait())) {
-                if (currentTrait.getFormat().equals("photo")) {
+            if (status) {
+                if (getTraitFormat().equals("photo")) {
                     // I want to use abstract method
                     Map<String, String> newTraits = traitBox.getNewTraits();
                     PhotoTraitLayout traitPhoto = traitLayouts.getPhotoTrait();
                     traitPhoto.brapiDelete(newTraits);
                 } else {
-                    brapiDelete(currentTrait.getTrait(), false);
+                    brapiDelete(getTraitName(), false);
                 }
             } else {
-                traitLayouts.deleteTraitListener(currentTrait.getFormat());
+                traitLayouts.deleteTraitListener(getTraitFormat());
             }
 
             triggerTts(deleteTts);
         });
 
+    }
+
+    /**
+     * Returns the repeated value index as a string depending on settings.
+     * Default setting: always return the first available index (because this is what is viewed),
+     *      the user can delete the first value, this returns the minimum repeated value.
+     * Repeated values setting: return the currently selected repeated value.
+     * @return the repeated value index
+     */
+    @NonNull
+    public String getRep() {
+
+        if (collectInputView.isRepeatEnabled()) {
+
+            return collectInputView.getRep(); //gets the selected repeated value index from view
+
+        } else return database.getDefaultRep(getStudyId(), getObservationUnit(), getTraitName());
+        //gets the minimum default index
+    }
+
+    // This update should only be called after repeating keypress ends
+    private void repeatUpdate() {
+        if (rangeBox.getRangeID() == null)
+            return;
+
+        traitBox.setNewTraits(rangeBox.getPlotID());
+
+        initWidgets(true);
     }
 
     // This is central to the application
@@ -474,9 +490,9 @@ public class CollectActivity extends AppCompatActivity
         String[] traits = database.getVisibleTrait();
         if (traits != null) {
             ArrayAdapter<String> directionArrayAdapter = new ArrayAdapter<>(
-                    this, R.layout.custom_spinnerlayout, traits);
+                    this, R.layout.custom_spinner_layout, traits);
             directionArrayAdapter
-                    .setDropDownViewResource(R.layout.custom_spinnerlayout);
+                    .setDropDownViewResource(R.layout.custom_spinner_layout);
             traitBox.initTraitType(directionArrayAdapter, rangeSuppress);
 
         }
@@ -667,6 +683,8 @@ public class CollectActivity extends AppCompatActivity
 
         mUsbCameraHelper.destroy();
 
+        traitLayoutRefresh();
+
         super.onDestroy();
     }
 
@@ -742,6 +760,8 @@ public class CollectActivity extends AppCompatActivity
         checkLastOpened();
 
         if (!mSkipLastUsedTrait) {
+
+            mSkipLastUsedTrait = false;
 
             navigateToLastOpenedTrait();
 
@@ -849,32 +869,82 @@ public class CollectActivity extends AppCompatActivity
     /**
      * Helper function update user data in the memory based hashmap as well as
      * the database
+     * @param traitName the trait name
+     * @param traitFormat the trait format
+     * @param value the new string value to be saved in the database
+     * @param nullableRep the repeated value to update, could be null to represent the latest rep value
      */
-    public void updateTrait(String parent, String trait, String value) {
+    public void updateObservation(String traitName, String traitFormat, String value, @Nullable String nullableRep) {
 
         if (rangeBox.isEmpty()) {
             return;
         }
 
-        traitBox.update(parent, value);
-        String expId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-        String obsUnit = rangeBox.getPlotID();
+        traitBox.update(traitName, value);
 
-        Observation observation = database.getObservation(expId, obsUnit, parent);
+        String studyId = getStudyId();
+        String obsUnit = getObservationUnit();
+        String person = ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, "");
+
+        String rep = nullableRep;
+
+        //if not updating a repeated value, get the latest repeated value
+        if (nullableRep == null) {
+
+            rep = getRep();
+        }
+
+        Observation observation = database.getObservation(studyId, obsUnit, traitName, rep);
         String observationDbId = observation.getDbId();
         OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
 
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
-        database.deleteTrait(expId, obsUnit, parent);
+        database.deleteTrait(studyId, obsUnit, traitName, rep);
 
-        database.insertUserTraits(rangeBox.getPlotID(), parent, trait, value,
-                ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
-                getLocationByPreferences(), "", expId, observationDbId,
-                lastSyncedTime);
+        if (!value.isEmpty()) {
+
+            //don't update the database if the value is blank or undesirable
+            boolean pass = false;
+
+            if (traitFormat.equals("multicat")
+                || CategoricalTraitLayout.isTraitCategorical(traitFormat)) {
+
+                if (value.equals("[]")) {
+
+                    pass = true;
+                }
+            }
+
+            if (!pass) {
+                database.insertObservation(obsUnit, traitName, traitFormat, value, person,
+                        getLocationByPreferences(), "", studyId, observationDbId,
+                        lastSyncedTime, rep);
+            }
+        }
 
         //update the info bar in case a variable is used
         infoBarAdapter.notifyItemRangeChanged(0, infoBarAdapter.getItemCount());
+
+        refreshRepeatedValuesToolbarIndicator();
+    }
+
+    public void insertRep(String parent, String trait, String value, String rep) {
+
+        String expId = getStudyId();
+        String obsUnit = getObservationUnit();
+        String person = getPerson();
+
+        database.insertObservation(obsUnit, parent, trait, value, person,
+                getLocationByPreferences(), "", expId, null, null, rep);
+    }
+
+    public void deleteRep(String trait, String rep) {
+
+        String expId = getStudyId();
+        String obsUnit = getObservationUnit();
+
+        database.deleteTrait(expId, obsUnit, trait, rep);
     }
 
     public String getLocationByPreferences() {
@@ -889,7 +959,7 @@ public class CollectActivity extends AppCompatActivity
     private void brapiDelete(String parent, Boolean hint) {
         Toast.makeText(getApplicationContext(), getString(R.string.brapi_delete_message), Toast.LENGTH_LONG).show();
         TraitObject trait = traitBox.getCurrentTrait();
-        updateTrait(parent, trait.getFormat(), getString(R.string.brapi_na));
+        updateObservation(parent, trait.getFormat(), getString(R.string.brapi_na), null);
         if (hint) {
             setNaTextBrapiEmptyField();
         } else {
@@ -905,19 +975,19 @@ public class CollectActivity extends AppCompatActivity
 
         String exp_id = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         TraitObject trait = traitBox.getCurrentTrait();
-        if (database.isBrapiSynced(exp_id, rangeBox.getPlotID(), trait.getTrait())) {
+        if (database.isBrapiSynced(exp_id, getObservationUnit(), trait.getTrait(), getRep())) {
             brapiDelete(parent, true);
         } else {
             // Always remove existing trait before inserting again
             // Based on plot_id, prevent duplicate
-            traitBox.remove(parent, rangeBox.getPlotID());
+            traitBox.remove(parent, getObservationUnit(), getRep());
         }
     }
 
     // for format without specific control
     public void removeTrait() {
-        traitBox.remove(traitBox.getCurrentTrait(), rangeBox.getPlotID());
-        etCurVal.setText("");
+        traitBox.remove(getCurrentTrait(), getObservationUnit(), getRep());
+        collectInputView.setText("");
     }
 
     private void customizeToolbarIcons() {
@@ -943,6 +1013,9 @@ public class CollectActivity extends AppCompatActivity
         systemMenu.findItem(R.id.barcodeScan).setVisible(ep.getBoolean(GeneralKeys.UNIQUE_CAMERA, false));
         systemMenu.findItem(R.id.datagrid).setVisible(ep.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
 
+        //toggle repeated values indicator
+        systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator).setVisible(collectInputView.isRepeatEnabled());
+
         //added in geonav 310 only make goenav switch visible if preference is set
         MenuItem geoNavEnable = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
         geoNavEnable.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false));
@@ -967,22 +1040,7 @@ public class CollectActivity extends AppCompatActivity
     }
 
     private TapTarget collectDataTapTargetView(int id, String title, String desc, int color, int targetRadius) {
-        return TapTarget.forView(findViewById(id), title, desc)
-                // All options below are optional
-                .outerCircleColor(color)      // Specify a color for the outer circle
-                .outerCircleAlpha(0.95f)            // Specify the alpha amount for the outer circle
-                .targetCircleColor(R.color.black)   // Specify a color for the target circle
-                .titleTextSize(30)                  // Specify the size (in sp) of the title text
-                .descriptionTextSize(20)            // Specify the size (in sp) of the description text
-                .descriptionTextColor(R.color.black)  // Specify the color of the description text
-                .descriptionTypeface(Typeface.DEFAULT_BOLD)
-                .textColor(R.color.black)            // Specify a color for both the title and description text
-                .dimColor(R.color.black)            // If set, will dim behind the view with 30% opacity of the given color
-                .drawShadow(true)                   // Whether to draw a drop shadow or not
-                .cancelable(false)                  // Whether tapping outside the outer circle dismisses the view
-                .tintTarget(true)                   // Whether to tint the target view's color
-                .transparentTarget(true)           // Specify whether the target is transparent (displays the content underneath)
-                .targetRadius(targetRadius);
+        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), color, targetRadius, title, desc);
     }
 
     @Override
@@ -1003,26 +1061,26 @@ public class CollectActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case helpId:
                 TapTargetSequence sequence = new TapTargetSequence(this)
-                        .targets(collectDataTapTargetView(R.id.selectorList, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), R.color.main_primaryDark,200),
-                                collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), R.color.main_primaryDark,60),
-                                collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), R.color.main_primaryDark,80),
-                                collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), R.color.main_primaryDark,60),
-                                collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), R.color.main_primaryDark,60),
-                                collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), R.color.main_primaryDark,200),
+                        .targets(collectDataTapTargetView(R.id.selectorList, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), R.color.main_primary_dark,200),
+                                collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), R.color.main_primary_dark,60),
+                                collectDataTapTargetView(R.id.traitType, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), R.color.main_primary_dark,80),
+                                collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), R.color.main_primary_dark,60),
+                                collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), R.color.main_primary_dark,60),
+                                collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), R.color.main_primary_dark,200),
                                 collectDataTapTargetView(R.id.missingValue, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), R.color.main_primary,60),
                                 collectDataTapTargetView(R.id.deleteValue, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), R.color.main_primary,60)
                         );
                 if (systemMenu.findItem(R.id.search).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.search, getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.search, getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), R.color.main_primary_dark,60));
                 }
                 if (systemMenu.findItem(R.id.resources).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.resources, getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.resources, getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), R.color.main_primary_dark,60));
                 }
                 if (systemMenu.findItem(R.id.summary).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.summary, getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.summary, getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), R.color.main_primary_dark,60));
                 }
                 if (systemMenu.findItem(R.id.lockData).isVisible()) {
-                    sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), R.color.main_primaryDark,60));
+                    sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), R.color.main_primary_dark,60));
                 }
 
                 sequence.start();
@@ -1104,14 +1162,161 @@ public class CollectActivity extends AppCompatActivity
                 }
 
                 return true;
+
+            case R.id.action_act_collect_repeated_values_indicator:
+
+                showMultiMeasureDeleteDialog();
+
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showMultiMeasureDeleteDialog() {
+
+        String labelValPref = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+
+        ObservationModel[] values = ObservationDao.Companion.getAllRepeatedValues(
+                getStudyId(), getObservationUnit(), getTraitName());
+
+        ArrayList<String> is = new ArrayList<>();
+        for (ObservationModel m: values) {
+            if (!m.getValue().isEmpty()) {
+                is.add(m.getValue());
+            }
+        }
+
+        int size = is.size();
+
+        if (size > 0) {
+
+            String[] items = new String[size];
+            boolean[] checked = new boolean[size];
+
+            for (int n = 0; n < size; n++) {
+
+                ObservationModel model = values[n];
+
+                String value = model.getValue();
+
+                if (!value.isEmpty()) {
+
+                    try {
+
+                        ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(value);
+
+                        value = CategoryJsonUtil.Companion.flattenMultiCategoryValue(CategoryJsonUtil.Companion.decode(value), labelValPref.equals("label"));
+
+                    } catch (Exception ignore) {}
+
+                    items[n] = value;
+                    checked[n] = false;
+                }
+            }
+
+            dialogMultiMeasureDelete = new AlertDialog.Builder(this)
+                    .setTitle(R.string.dialog_multi_measure_delete_title)
+                    .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {})
+                    .setPositiveButton(R.string.dialog_multi_measure_delete, (d, which) -> {
+
+                        List<ObservationModel> deleteItems = new ArrayList<>();
+                        int checkSize = checked.length;
+                        for (int j = 0; j < checkSize; j++) {
+                            if (checked[j]) {
+                                deleteItems.add(values[j]);
+                            }
+                        }
+
+                        if (!deleteItems.isEmpty()) {
+
+                            showConfirmMultiMeasureDeleteDialog(deleteItems);
+
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                        d.dismiss();
+                    })
+                    .setNeutralButton(R.string.dialog_multi_measure_select_all, (d, which) -> {
+                        //Arrays.fill(checked, true);
+                    })
+                    .create();
+
+            dialogMultiMeasureDelete.setOnShowListener((d) -> {
+                AlertDialog ad = (AlertDialog) d;
+                ad.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener((v) -> {
+                    Arrays.fill(checked, true);
+                    ListView lv = ad.getListView();
+                    for (int i = 0; i < checked.length; i++) {
+                        lv.setItemChecked(i, true);
+                    }
+                });
+            });
+
+            if (!dialogMultiMeasureDelete.isShowing()) {
+
+                dialogMultiMeasureDelete.show();
+            }
+        } else {
+
+            Toast.makeText(this, R.string.dialog_multi_measure_delete_no_observations, Toast.LENGTH_SHORT).show();
+
+        }
+    }
+
+    private void showConfirmMultiMeasureDeleteDialog(List<ObservationModel> models) {
+
+        dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
+            .setPositiveButton(android.R.string.ok, (d, which) -> {
+                deleteMultiMeasures(models);
+            })
+            .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                d.dismiss();
+            })
+            .create();
+
+        if (!dialogMultiMeasureConfirmDelete.isShowing()) {
+
+            dialogMultiMeasureConfirmDelete.show();
+        }
+    }
+
+    /**
+     * Called when multi measure delete dialog deletes an item.
+     * @param models the observations to be deleted
+     */
+    public void deleteMultiMeasures(@NonNull List<ObservationModel> models) {
+
+        for (ObservationModel model : models) {
+
+            deleteRep(model.getObservation_variable_name(), model.getRep());
+
+            ObservationModel[] currentModels = ObservationDao.Companion.getAllRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
+
+            if (currentModels.length == 0) {
+
+                collectInputView.setText("");
+
+            } else {
+
+                for (ObservationModel m : currentModels) {
+                    try {
+                        m.setValue(getTraitLayout().decodeValue(m.getValue()));
+                    } catch (Exception ignore) {}
+                }
+
+                collectInputView.prepareObservationsExistMode(Arrays.asList(currentModels));
+
+            }
+
+            traitLayoutRefresh();
+        }
     }
 
     @Override
     public void refreshLock() {
         //refresh lock state
-        etCurVal.postDelayed(this::lockData, 100);
+        collectInputView.postDelayed(this::lockData, 100);
     }
 
     /**
@@ -1127,7 +1332,7 @@ public class CollectActivity extends AppCompatActivity
             enableDataEntry();
         } else {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
-            if (etCurVal.getText().toString().isEmpty()) {
+            if (collectInputView.getText().isEmpty()) {
                 enableDataEntry();
             } else disableDataEntry();
         }
@@ -1147,7 +1352,7 @@ public class CollectActivity extends AppCompatActivity
             enableDataEntry();
         } else {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
-            if (etCurVal.getText().toString().isEmpty()) {
+            if (collectInputView.getText().isEmpty()) {
                 enableDataEntry();
             } else disableDataEntry();
         }
@@ -1428,7 +1633,7 @@ public class CollectActivity extends AppCompatActivity
                     currentTraitLayout.loadLayout();
 
 
-                    updateTrait(currentTrait.getTrait(), currentTrait.getFormat(), scannedBarcode);
+                    updateObservation(currentTrait.getTrait(), currentTrait.getFormat(), scannedBarcode, null);
                     currentTraitLayout.loadLayout();
                     validateData();
                 }
@@ -1444,6 +1649,91 @@ public class CollectActivity extends AppCompatActivity
                     triggerTts(success);
                 } else triggerTts(fail);
                 break;
+        }
+    }
+
+    public boolean isTraitBlocked() {
+        return traitLayouts.getTraitLayout(getCurrentTrait().getFormat()).block();
+    }
+
+    //triggers when pressing the repeated values navigation arrows
+    public void traitLayoutRefresh() {
+        refreshRepeatedValuesToolbarIndicator();
+        traitLayouts.getTraitLayout(getCurrentTrait().getFormat()).refreshLayout(false);
+    }
+
+    //triggers when pressing the repeated values add button
+    public void traitLayoutRefreshNew() {
+        refreshRepeatedValuesToolbarIndicator();
+        traitLayouts.getTraitLayout(getCurrentTrait().getFormat()).refreshLayout(true);
+    }
+
+    public void refreshRepeatedValuesToolbarIndicator() {
+
+        if (systemMenu != null) {
+
+            MenuItem item = systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator);
+
+            if (collectInputView.isRepeatEnabled()) {
+
+                item.setVisible(true);
+
+                ObservationModel[] values = ObservationDao.Companion
+                        .getAllRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
+
+                int n = values.length;
+
+                if (n == 1) {
+                    if (values[0].getValue().isEmpty()) {
+                        n = 0;
+                    }
+                } else if (n > 1) {
+                    if (values[n-1].getValue().isEmpty()) {
+                        n--;
+                    }
+                }
+
+                switch (n) {
+                    case 0:
+                        item.setIcon(R.drawable.numeric_0_box);
+                        break;
+                    case 1:
+                        item.setIcon(R.drawable.numeric_1_box);
+                        break;
+                    case 2:
+                        item.setIcon(R.drawable.numeric_2_box_multiple);
+                        break;
+                    case 3:
+                        item.setIcon(R.drawable.numeric_3_box_multiple);
+                        break;
+                    case 4:
+                        item.setIcon(R.drawable.numeric_4_box_multiple);
+                        break;
+                    case 5:
+                        item.setIcon(R.drawable.numeric_5_box_multiple);
+                        break;
+                    case 6:
+                        item.setIcon(R.drawable.numeric_6_box_multiple);
+                        break;
+                    case 7:
+                        item.setIcon(R.drawable.numeric_7_box_multiple);
+                        break;
+                    case 8:
+                        item.setIcon(R.drawable.numeric_8_box_multiple);
+                        break;
+                    case 9:
+                        item.setIcon(R.drawable.numeric_9_box_multiple);
+                        break;
+                    default:
+                        item.setIcon(R.drawable.numeric_9_plus_box_multiple);
+                        break;
+                }
+
+            } else {
+
+                item.setVisible(false);
+
+            }
         }
     }
 
@@ -1533,13 +1823,13 @@ public class CollectActivity extends AppCompatActivity
     }
 
     @NonNull
-    public EditText getEtCurVal() {
-        return etCurVal;
-    }
-
-    @NonNull
     public TextWatcher getCvText() {
         return cvText;
+    }
+
+    @Override
+    public CollectInputView getInputView() {
+        return collectInputView;
     }
 
     public ImageButton getDeleteValue() {
@@ -1568,7 +1858,7 @@ public class CollectActivity extends AppCompatActivity
      */
     public boolean isDataLocked() {
         return (dataLocked == LOCKED)
-                || (!etCurVal.getText().toString().isEmpty() && dataLocked == FROZEN);
+                || (!collectInputView.getText().isEmpty() && dataLocked == FROZEN);
     }
 
     public boolean isFrozen() {
@@ -1599,10 +1889,10 @@ public class CollectActivity extends AppCompatActivity
 
         String studyId = Integer.toString(ep.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertUserTraits(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
+        database.insertObservation(rangeBox.getPlotID(), trait.getFormat(), trait.getTrait(), size,
                 ep.getString(GeneralKeys.FIRST_NAME, "") + " " + ep.getString(GeneralKeys.LAST_NAME, ""),
                 getLocationByPreferences(), "", studyId, "",
-                null);
+                null, null);
 
     }
 
@@ -1647,11 +1937,6 @@ public class CollectActivity extends AppCompatActivity
     @Override
     public SharedPreferences getPreferences() {
         return ep;
-    }
-
-    @Override
-    public void setEtCurVal(@NonNull EditText editText) {
-        etCurVal = editText;
     }
 
     @NonNull

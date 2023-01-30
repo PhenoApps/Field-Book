@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -44,7 +43,7 @@ import javax.inject.Inject
  * i.putExtra("trait", 1) <- actually a trait index s.a 0 -> "height", 1 -> "lodging"
  **/
 @AndroidEntryPoint
-class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITableViewListener {
+class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITableViewListener {
 
     /***
      * Polymorphism class structure to serve different cell types to the grid.
@@ -232,7 +231,7 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
                             if (uniqueIndex > -1) { //if it doesn't exist skip this row
 
-                                val plotId = cursor.getString(uniqueIndex)
+                                val id = cursor.getString(uniqueIndex)
 
                                 val header = cursor.getString(rowHeaderIndex)
 
@@ -240,7 +239,7 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
                                 mRowHeaders.add(header) //add unique name row header
 
-                                mPlotIds.add(plotId)
+                                mPlotIds.add(id)
 
                                 mTraits.forEachIndexed { _, variable ->
 
@@ -257,16 +256,16 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
                                             try {
 
                                                 dataList.add(CellData(CategoryJsonUtil
-                                                    .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel), plotId))
+                                                    .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel), id))
 
                                             } catch (e: Exception) {
 
-                                                dataList.add(CellData(value, plotId))
+                                                dataList.add(CellData(value, id))
 
                                             }
                                         } else {
                                             //data list is a trait row in the data grid
-                                            dataList.add(CellData(value, plotId))
+                                            dataList.add(CellData(value, id))
                                         }
                                     }
                                 }

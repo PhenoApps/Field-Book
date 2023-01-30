@@ -4,7 +4,7 @@
     android:id="@+id/layout_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="?attr/fb_color_background"
     android:fitsSystemWindows="true"
     app:layout_constraintWidth_default="percent">
 
@@ -12,23 +12,21 @@
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/main_primary"
+        android:fitsSystemWindows="true"
+        android:minHeight="?attr/actionBarSize"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/AppToolbar"
-        app:theme="@style/AppToolbar" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarBottom"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/main_primaryDark"
+        android:fitsSystemWindows="true"
+        android:minHeight="?attr/actionBarSize"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:popupTheme="@style/AppToolbar"
-        app:theme="@style/AppToolbar">
+        app:layout_constraintRight_toRightOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -109,25 +107,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/act_collect_trait_box"
-        app:layout_constraintBottom_toTopOf="@id/etCurVal"/>
+        app:layout_constraintBottom_toTopOf="@id/act_collect_input_view"/>
 
-    <EditText
-        android:id="@+id/etCurVal"
-        android:layout_width="match_parent"
+    <com.fieldbook.tracker.views.CollectInputView
+        android:id="@+id/act_collect_input_view"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:enabled="false"
-        android:gravity="center"
-        android:inputType="textNoSuggestions"
-        android:maxLines="1"
-        android:text=""
-        android:textColor="#000000"
-        android:textSize="@dimen/text_size_xlarge"
-        android:textStyle="bold"
-        android:visibility="gone"
+        android:layout_margin="2dp"
+        android:padding="2dp"
         app:layout_constraintBottom_toTopOf="@id/svTraitContainer"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/act_collect_range_box" />
 
     <ScrollView
@@ -138,7 +128,7 @@
         app:layout_constraintBottom_toTopOf="@id/toolbarBottom"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etCurVal">
+        app:layout_constraintTop_toBottomOf="@id/act_collect_input_view">
 
         <LinearLayout
             android:id="@+id/traitHolder"
@@ -193,7 +183,7 @@
                 android:layout_height="wrap_content" />
 
             <include
-                layout="@layout/trait_diseaserating"
+                layout="@layout/trait_disease_rating"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 

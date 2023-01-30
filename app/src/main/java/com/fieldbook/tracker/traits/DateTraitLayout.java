@@ -3,18 +3,19 @@ package com.fieldbook.tracker.traits;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.view.View;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.dialogs.DatePickerFragment;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.Utils;
 
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -29,9 +30,9 @@ public class DateTraitLayout extends BaseTraitLayout {
     Button addDayBtn;
     Button minusDayBtn;
     ImageButton saveDayBtn;
-    private TextView month;
-    private TextView day;
     private String date;
+    private boolean isBlocked = true; //tracks when multi measures can be navigated
+    private boolean isFirstLoad = true;
 
     public DateTraitLayout(Context context) {
         super(context);
@@ -47,8 +48,7 @@ public class DateTraitLayout extends BaseTraitLayout {
 
     @Override
     public void setNaTraitsText() {
-        month.setText("");
-        day.setText("NA");
+        getCollectInputView().setText("NA");
         //issue 413 apply the date saved preference color to NA values
         forceDataSavedColor();
     }
@@ -58,17 +58,21 @@ public class DateTraitLayout extends BaseTraitLayout {
         return "date";
     }
 
+    @Override
+    public boolean block() {
+        return isBlocked;
+    }
+
     //this will display text color as the preference color
     private void forceDataSavedColor() {
-        month.setTextColor(Color.parseColor(getDisplayColor()));
-        day.setTextColor(Color.parseColor(getDisplayColor()));
+        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
     }
 
     @Override
     public void init() {
         date = getPrefs().getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, "2000-01-01");
-        month = findViewById(R.id.mth);
-        day = findViewById(R.id.day);
+        log();
+
         addDayBtn = findViewById(R.id.addDateBtn);
         minusDayBtn = findViewById(R.id.minusDateBtn);
         saveDayBtn = findViewById(R.id.enterBtn);
@@ -94,10 +98,14 @@ public class DateTraitLayout extends BaseTraitLayout {
                 //this saves the date, so update text to display color
                 forceDataSavedColor();
 
+                String rep = ((CollectActivity) getContext()).getRep();
+
                 //save date to db
-                updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
+                updateObservation(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
 
                 triggerTts(getTtsFromCalendar(calendar));
+
+                isBlocked = false;
 
                 return true;
             });
@@ -126,6 +134,8 @@ public class DateTraitLayout extends BaseTraitLayout {
             calendar.add(Calendar.DATE, 1);
 
             updateViewDate(calendar);
+
+            isBlocked = true;
         });
 
         // Minus day
@@ -147,6 +157,8 @@ public class DateTraitLayout extends BaseTraitLayout {
             calendar.add(Calendar.DATE, -1);
 
             updateViewDate(calendar);
+
+            isBlocked = true;
         });
 
         // Saving date data
@@ -163,16 +175,20 @@ public class DateTraitLayout extends BaseTraitLayout {
                 e.printStackTrace();
             }
 
-            if (!day.getText().equals("NA")) { //issue 413, don't update NA when save button is pressed
+            if (!getCollectInputView().getText().equals("NA")) { //issue 413, don't update NA when save button is pressed
                 if (getPrefs().getBoolean(GeneralKeys.USE_DAY_OF_YEAR, false)) {
-                    updateTrait(getCurrentTrait().getTrait(), "date", String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+                    updateObservation(getCurrentTrait().getTrait(), "date", String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
                 } else {
-                    updateTrait(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
+                    updateObservation(getCurrentTrait().getTrait(), "date", dateFormat.format(calendar.getTime()));
                 }
             }
 
+            parseDateAndView();
+
             // Change the text color accordingly
             forceDataSavedColor();
+
+            isBlocked = false;
         });
     }
 
@@ -186,6 +202,7 @@ public class DateTraitLayout extends BaseTraitLayout {
     private void updateViewDate(Calendar calendar) {
 
         date = dateFormat.format(calendar.getTime());
+        log();
 
         String dayOfMonth = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
         String monthText = Integer.toString(calendar.get(Calendar.MONTH) + 1);
@@ -195,30 +212,61 @@ public class DateTraitLayout extends BaseTraitLayout {
                 .putString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, yearText + "-" + monthText + "-" + dayOfMonth)
                 .apply();
 
-        //Set text
-        day.setText(dayOfMonth);
-        month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
+        getCollectInputView().setText(getMonthForInt(calendar.get(Calendar.MONTH)) + " " + dayOfMonth);
 
         // Change text color
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            month.setTextColor(Color.BLUE);
-            day.setTextColor(Color.BLUE);
+            getCollectInputView().setTextColor(getValueAlteredColor());
         } else {
-            month.setTextColor(Color.BLACK);
-            day.setTextColor(Color.BLACK);
+            getCollectInputView().setTextColor(getTextColor());
         }
+    }
 
+    private void log() {
+        Log.d("DATE", date);
+    }
+
+    private void loadSelectedDate() {
+        try {
+            ObservationModel model = getCurrentObservation();
+            date = model.getValue();
+            log();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void parseDateAndView() {
+
+        Calendar calendar = Calendar.getInstance();
+
+        try {
+            calendar.setTime(dateFormat.parse(date));
+
+            //set month/day text and color
+            setDateText(getMonthForInt(calendar.get(Calendar.MONTH)), String.format(Locale.getDefault(),
+                    "%02d", calendar.get(Calendar.DAY_OF_MONTH)));
+
+        } catch (ParseException | NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void loadLayout() {
         super.loadLayout();
+        isFirstLoad = true;
+    }
 
-        getEtCurVal().setEnabled(false);
-        getEtCurVal().setVisibility(View.GONE);
-
-        final Calendar c = Calendar.getInstance();
-        date = dateFormat.format(c.getTime());
+    @Override
+    public void refreshLayout(Boolean onNew) {
+        if (!block() || isFirstLoad) {
+            isFirstLoad = false;
+            super.refreshLayout(onNew);
+            loadSelectedDate();
+        } else {
+            Utils.makeToast(getContext(), getContext().getString(R.string.view_repeated_values_add_button_fail));
+        }
     }
 
     @Override
@@ -236,80 +284,97 @@ public class DateTraitLayout extends BaseTraitLayout {
 
                 //convert day of year to yyyy-mm-dd string
                 date = value;
+                log();
+
                 calendar.set(Calendar.DAY_OF_YEAR, Integer.parseInt(date));
                 date = dateFormat.format(calendar.getTime());
+                log();
 
-                month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
-                day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
+                setDateText(getMonthForInt(calendar.get(Calendar.MONTH)), String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.DAY_OF_MONTH)));
 
             } else if (value.contains(".")) {
                 //convert from yyyy.mm.dd to yyyy-mm-dd
                 String[] oldDate = value.split("\\.");
-                date = oldDate[0] + "-" + String.format("%02d", Integer.parseInt(oldDate[1])) + "-" + String.format("%02d", Integer.parseInt(oldDate[2]));
+                date = oldDate[0] + "-" + String.format(Locale.getDefault(), "%02d", Integer.parseInt(oldDate[1])) + "-" + String.format(Locale.getDefault(), "%02d", Integer.parseInt(oldDate[2]));
+                log();
 
                 //set month/day text and color
-                month.setText(getMonthForInt(Integer.parseInt(oldDate[1]) - 1));
-                day.setText(oldDate[2]);
+                setDateText(getMonthForInt(Integer.parseInt(oldDate[1]) - 1), oldDate[2]);
 
             } else {
-                Calendar calendar = Calendar.getInstance();
 
                 //new format
-                date = value;
+                if (!value.isEmpty()) {
+                    try {
+                        date = dateFormat.parse(value).toString();
+                        log();
 
-                //Parse date
-                try {
-                    calendar.setTime(dateFormat.parse(date));
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
 
-                //set month/day text and color
-                month.setText(getMonthForInt(calendar.get(Calendar.MONTH)));
-                day.setText(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
+                parseDateAndView();
             }
 
         } else if (value != null) {
 
             //NA is saved as the date
-
-            month.setText("");
-
-            day.setText("NA");
+            getCollectInputView().setText("NA");
 
             forceDataSavedColor();
         }
+
+        isBlocked = false;
     }
 
     @Override
     public void afterLoadNotExists(CollectActivity act) {
         super.afterLoadNotExists(act);
+
+        getCollectInputView().setTextColor(Color.BLACK);
+
+        //if data does not exist, use the current date as a default value
         final Calendar c = Calendar.getInstance();
-        month.setTextColor(Color.BLACK);
-        day.setTextColor(Color.BLACK);
-        month.setText(getMonthForInt(c.get(Calendar.MONTH)));
-        day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
+
+        date = dateFormat.format(c.getTime());
+        log();
+
+        parseDateAndView();
+
+        isBlocked = true;
+
+        setDateText(getMonthForInt(c.get(Calendar.MONTH)), String.format(Locale.getDefault(), "%02d", c.get(Calendar.DAY_OF_MONTH)) );
     }
 
     @Override
     public void deleteTraitListener() {
         removeTrait(getCurrentTrait().getTrait());
 
-        final Calendar c = Calendar.getInstance();
-        date = dateFormat.format(c.getTime());
+        super.deleteTraitListener();
 
-        month.setTextColor(Color.BLACK);
-        day.setTextColor(Color.BLACK);
+        if (getCurrentObservation() != null) {
 
-        //This is used to persist moving between months
-        month.setText(getMonthForInt(c.get(Calendar.MONTH)));
-        day.setText(String.format("%02d", c.get(Calendar.DAY_OF_MONTH)));
+            loadSelectedDate();
+
+            parseDateAndView();
+
+        } else {
+
+            final Calendar c = Calendar.getInstance();
+            date = dateFormat.format(c.getTime());
+
+            getCollectInputView().setTextColor(getTextColor());
+
+            //This is used to persist moving between months
+            setDateText(getMonthForInt(c.get(Calendar.MONTH)), String.format(Locale.getDefault(), "%02d", c.get(Calendar.DAY_OF_MONTH)) );
+        }
     }
 
     /**
      * Get month name based on numeric value
      */
-    String getMonthForInt(int m) {
+    public String getMonthForInt(int m) {
         String month = "invalid";
         DateFormatSymbols dfs = new DateFormatSymbols();
         String[] months = dfs.getShortMonths();
@@ -319,5 +384,23 @@ public class DateTraitLayout extends BaseTraitLayout {
         }
 
         return month;
+    }
+
+    private void setDateText(String month, String day) {
+        getCollectInputView().setText(month + " " + day);
+    }
+
+    @Override
+    public String decodeValue(String value) {
+        Calendar c = Calendar.getInstance();
+        try {
+            Date d = dateFormat.parse(value);
+            if (d != null) {
+                c.setTime(d);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return getMonthForInt(c.get(Calendar.MONTH)) + " " + String.format(Locale.getDefault(), "%02d", c.get(Calendar.DAY_OF_MONTH));
     }
 }

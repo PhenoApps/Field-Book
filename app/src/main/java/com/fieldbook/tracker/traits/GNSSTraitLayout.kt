@@ -353,7 +353,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val newLat = latitude.toDouble()
             val newLng = longitude.toDouble()
 
-            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == cRange.plot_id }
+            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == currentRange.plot_id }
 
             if (units.isNotEmpty()) {
 
@@ -414,7 +414,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                 } else { //no averaging, so check if there is an observations and ask to update or not
 
-                    if (etCurVal.text.isNotBlank()) {
+                    if (collectInputView.text.isNotBlank()) {
 
                         alertLocationUpdate {
 
@@ -443,9 +443,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         ObservationUnitDao.updateObservationUnit(unit, json.toJson().toString())
 
-        etCurVal.setText(coordinates)
+        collectInputView.text = coordinates
 
-        updateTrait(currentTrait.trait, "gnss", coordinates)
+        updateObservation(currentTrait.trait, "gnss", coordinates)
 
     }
 
@@ -672,21 +672,23 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         super.loadLayout()
 
         this.visibility = View.VISIBLE
-        etCurVal.visibility = View.VISIBLE
+        collectInputView.visibility = View.VISIBLE
     }
 
     //delete the obs and the obs.unit geo coord (only if obs exists)
     override fun deleteTraitListener() {
 
+        val rep = (context as CollectActivity).rep
+
         val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-        val observation = ObservationDao.getObservation(studyDbId, cRange.plot_id, currentTrait.trait)
+        val observation = ObservationDao.getObservation(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
 
         if (observation != null) {
 
-            ObservationDao.deleteTrait(studyDbId, cRange.plot_id, currentTrait.trait)
+            ObservationDao.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.trait, rep)
 
-            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == cRange.plot_id }
+            val units = ObservationUnitDao.getAll(studyDbId.toInt()).filter { it.observation_unit_db_id == currentRange.plot_id }
             if (units.isNotEmpty()) {
                 units.first().let { unit ->
                     ObservationUnitDao.updateObservationUnit(unit, "")

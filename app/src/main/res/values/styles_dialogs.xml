@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Generic dialog theme for field creator dialog -->
+
+    <style name="AlertDialogStyle" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/ButtonBarStyle</item>
+        <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/ButtonBarStyle</item>
+    </style>
+
+    <style name="AppAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
+        <item name="android:background">?attr/fb_color_background</item>
+        <item name="android:windowTitleStyle">@style/DialogTitleStyle</item>
+
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowSoftInputMode">stateUnchanged</item>
+        <item name="android:fitsSystemWindows">true</item>
+
+        <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
+        <item name="imageButtonStyle">@style/ImageButtonStyle</item>
+        <item name="radioButtonStyle">@style/RadioButtonStyle</item>
+        <item name="buttonStyle">@style/ButtonStyle</item>
+        <item name="toolbarStyle">@style/AppToolbar</item>
+        <item name="checkboxStyle">@style/CheckBoxStyle</item>
+        <item name="alertDialogTheme">@style/AlertDialogStyle</item>
+        <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
+        <item name="progressBarStyle">@style/ProgressBarStyle</item>
+        <item name="indeterminateProgressStyle">@style/IndeterminateProgressStyle</item>
+        <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
+        <item name="dropDownListViewStyle">@style/DropDownListViewStyle</item>
+    </style>
+
+    <style name="DialogTitleStyle">
+        <item name="android:textColor">?attr/fb_color_text_dark</item>
+        <item name="android:background">?attr/fb_color_background</item>
+        <item name="android:textSize">?attr/fb_title_text_size</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+</resources>

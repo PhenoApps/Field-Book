@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -36,6 +35,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 public class LabelPrintTraitLayout extends BaseTraitLayout {
+
+    static public String type = "zebra label print";
 
     private String[] options;
     private String[] labelCopiesArray;
@@ -168,15 +169,15 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         optionsList.toArray(options);
 
         fieldArrayAdapter = new ArrayAdapter<>(
-                getContext(), R.layout.custom_spinnerlayout, options);
+                getContext(), R.layout.custom_spinner_layout, options);
 
         labelSizeArray = new String[]{"3\" x 2\" simple", "3\" x 2\" detailed", "2\" x 1\" simple", "2\" x 1\" detailed"};
         sizeArrayAdapter = new ArrayAdapter<>(
-                getContext(), R.layout.custom_spinnerlayout, labelSizeArray);
+                getContext(), R.layout.custom_spinner_layout, labelSizeArray);
 
         labelCopiesArray = new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
         copiesArrayAdapter = new ArrayAdapter<>(
-                getContext(), R.layout.custom_spinnerlayout, labelCopiesArray);
+                getContext(), R.layout.custom_spinner_layout, labelCopiesArray);
 
         labelsize = findViewById(R.id.labelsize);
         textfield1 = findViewById(R.id.textfield);
@@ -198,8 +199,6 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
     @Override
     public void loadLayout() {
-
-        getEtCurVal().setVisibility(EditText.GONE);
 
         try {
 
@@ -449,7 +448,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
             } else {
                 int pos = spinner.getSelectedItemPosition();
                 if (pos < options.length) {
-                    String[] v = getDatabase().getDropDownRange(options[pos], getCRange().plot_id);
+                    String[] v = getDatabase().getDropDownRange(options[pos], getCurrentRange().plot_id);
                     if (v.length != 0) {
                         value = v[0];
                     }

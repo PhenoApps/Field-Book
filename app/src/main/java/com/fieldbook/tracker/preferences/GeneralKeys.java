@@ -87,6 +87,7 @@ public class GeneralKeys {
     // @formatter:on
 
     //Beta feature keys
+    public static final String REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values";
 
     public static final String LAST_TIME_OPENED = "LastTimeAppOpened";
     public static final String VERIFY_USER = "VerifyUserEvery24Hours";
@@ -100,7 +101,9 @@ public class GeneralKeys {
 
     //themes
     public static final String SAVED_DATA_COLOR = "SAVED_DATA_COLOR";
-
+    public static final String THEME = "key_preferences_theme_theme";
+    public static final String TEXT_THEME = "key_preferences_theme_text";
+    public static final String THEME_FLAG = "key_preferences_theme_theme_flag";
     public static final String EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT";
     public static final String FIRST_RUN = "FirstRun";
     public static final String UPDATE_VERSION = "UpdateVersion";

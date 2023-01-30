@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.interfaces
 
 import android.os.HandlerThread
+import com.fieldbook.tracker.views.CollectInputView
 import com.fieldbook.tracker.views.RangeBoxView
 import com.fieldbook.tracker.views.TraitBoxView
 import org.phenoapps.security.SecureBluetoothActivityImpl
@@ -8,6 +9,7 @@ import org.phenoapps.security.SecureBluetoothActivityImpl
 interface CollectController: FieldController {
     fun getRangeBox(): RangeBoxView
     fun getTraitBox(): TraitBoxView
+    fun getInputView(): CollectInputView
     fun playSound(sound: String)
     fun resetGeoNavMessages()
     fun getSecurityChecker(): SecureBluetoothActivityImpl

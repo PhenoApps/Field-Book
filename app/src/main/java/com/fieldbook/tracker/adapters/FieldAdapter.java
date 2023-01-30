@@ -25,7 +25,6 @@ import com.fieldbook.tracker.interfaces.FieldController;
 import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
 
@@ -96,9 +95,9 @@ public class FieldAdapter extends BaseAdapter {
         ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
-            convertView = mLayoutInflater.inflate(R.layout.listitem_field, null);
+            convertView = mLayoutInflater.inflate(R.layout.list_item_field, null);
 
-            holder.fieldName = convertView.findViewById(R.id.field_name);
+            holder.fieldName = convertView.findViewById(R.id.list_item_trait_trait_name);
             holder.count = convertView.findViewById(R.id.field_count);
             holder.importDate = convertView.findViewById(R.id.field_import_date);
             holder.editDate = convertView.findViewById(R.id.field_edit_date);
@@ -185,9 +184,7 @@ public class FieldAdapter extends BaseAdapter {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.delete) {
-                    AlertDialog alert = createDeleteItemAlertDialog(position);
-                    alert.show();
-                    DialogUtils.styleDialogs(alert);
+                    createDeleteItemAlertDialog(position).show();
                 } else if (item.getItemId() == R.id.sort) {
                     showSortDialog(position);
                     //DialogUtils.styleDialogs(alert);

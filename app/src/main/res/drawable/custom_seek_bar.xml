@@ -5,13 +5,13 @@
             <corners android:radius="15.0dip" />
             <gradient
                 android:angle="270.0"
-                android:centerColor="#ffffffff"
+                android:centerColor="?attr/fb_trait_percent_background_center_color"
                 android:centerY="0.5"
-                android:endColor="#ffdddddd"
-                android:startColor="#ffdddddd" />
+                android:endColor="?attr/fb_trait_percent_background_start_end_color"
+                android:startColor="?attr/fb_trait_percent_background_start_end_color" />
             <stroke
                 android:width="1.0dip"
-                android:color="#ff689F38" />
+                android:color="?attr/fb_trait_percent_stroke_color" />
         </shape>
     </item>
     <item android:id="@android:id/secondaryProgress">
@@ -20,8 +20,8 @@
                 <corners android:radius="15.0dip" />
                 <gradient
                     android:angle="90.0"
-                    android:endColor="#ff689F38"
-                    android:startColor="#ff8BC34A" />
+                    android:endColor="?attr/fb_trait_percent_stroke_color"
+                    android:startColor="?attr/fb_trait_percent_start_color" />
             </shape>
         </clip>
     </item>
@@ -31,8 +31,8 @@
                 <corners android:radius="15.0dip" />
                 <gradient
                     android:angle="90.0"
-                    android:endColor="#ff689F38"
-                    android:startColor="#ff8BC34A" />
+                    android:endColor="?attr/fb_trait_percent_stroke_color"
+                    android:startColor="?attr/fb_trait_percent_start_color" />
             </shape>
         </clip>
     </item>

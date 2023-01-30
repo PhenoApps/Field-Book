@@ -39,7 +39,7 @@ class DatePickerFragment(val format: SimpleDateFormat,
         val day = c.get(Calendar.DAY_OF_MONTH)
 
         // Create a new instance of DatePickerDialog and return it
-        val dialog = DatePickerDialog(requireContext(), this, year, month, day)
+        val dialog = DatePickerDialog(requireContext(), R.style.DatePickerDialogStyle, this, year, month, day)
 
         //set a 'today' neutral button that resets the calendar to today's date
         dialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.dialog_date_picker_neutral_button)) { _,_ -> }

@@ -1,16 +1,12 @@
 package com.fieldbook.tracker.preferences;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -21,15 +17,12 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.location.GPSTracker;
+import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.utilities.DialogUtils;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
 
 public class ProfilePreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 

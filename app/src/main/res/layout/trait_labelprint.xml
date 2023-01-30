@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.fieldbook.tracker.traits.LabelPrintTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/labelprintLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:visibility="gone">
+    android:visibility="gone"
+    tools:visibility="visible">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -40,83 +42,69 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_margin="8dp">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/labelsizetext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/trait_layout_print_label_size_title"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/trait_layout_print_label_size_title" />
 
         <Spinner
             android:id="@+id/labelsize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp"
-            android:textColor="@color/s_text"
-            android:textSize="@dimen/text_size_xxlarge"
-            android:textStyle="bold" />
+            android:minWidth="200dp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_margin="8dp">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/textfieldtitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/trait_layout_print_text_field_title"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/trait_layout_print_text_field_title" />
 
         <Spinner
             android:id="@+id/textfield"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp"
-            android:textColor="@color/s_text"
-            android:textSize="@dimen/text_size_xxlarge"
-            android:textStyle="bold" />
+            android:minWidth="200dp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_margin="8dp"
         android:visibility="gone">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/textfieldtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/trait_layout_print_text_field_title_2"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/trait_layout_print_text_field_title_2" />
 
         <Spinner
             android:id="@+id/textfield2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp"
-            android:textColor="@color/s_text"
-            android:textSize="@dimen/text_size_xxlarge"
-            android:textStyle="bold" />
+            android:minWidth="200dp" />
     </LinearLayout>
 
-    <LinearLayout
+    <LinearLayout style="@style/TextViewStyle.Bold"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_margin="8dp"
         android:visibility="gone">
 
         <TextView
@@ -124,96 +112,74 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/trait_layout_print_text_field_title_3"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/trait_layout_print_text_field_title_3" />
 
         <Spinner
             android:id="@+id/textfield3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp"
-            android:textColor="@color/s_text"
-            android:textSize="@dimen/text_size_xxlarge"
-            android:textStyle="bold" />
+            android:minWidth="200dp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_margin="8dp"
         android:visibility="gone">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/textfieldtitle4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/trait_layout_print_text_field_title_4"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/trait_layout_print_text_field_title_4" />
 
         <Spinner
             android:id="@+id/textfield4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp"
-            android:textColor="@color/s_text"
-            android:textSize="@dimen/text_size_xxlarge"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/barcodefieldtitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/trait_layout_print_barcode_field_title"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
-
-        <Spinner
-            android:id="@+id/barcodefield"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="200dp"
-            android:textColor="@color/s_text"
-            android:textSize="@dimen/text_size_xxlarge"
-            android:textStyle="bold" />
+            android:minWidth="200dp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingBottom="10dp">
+        android:layout_margin="8dp">
 
-        <TextView
+        <TextView style="@style/TextViewStyle.Bold"
+            android:id="@+id/barcodefieldtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/trait_layout_print_barcode_field_title" />
+
+        <Spinner
+            android:id="@+id/barcodefield"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="200dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="8dp">
+
+        <TextView style="@style/TextViewStyle.Bold"
             android:id="@+id/labelcopiestext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/trait_layout_print_label_copies_title"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold" />
+            android:text="@string/trait_layout_print_label_copies_title" />
 
         <Spinner
             android:id="@+id/labelcopies"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dp"
-            android:textColor="@color/s_text"
-            android:textSize="@dimen/text_size_xxlarge"
-            android:textStyle="bold" />
+            android:minWidth="200dp" />
 
     </LinearLayout>
 

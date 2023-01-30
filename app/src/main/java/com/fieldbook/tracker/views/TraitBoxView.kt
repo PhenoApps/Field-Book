@@ -153,15 +153,15 @@ class TraitBoxView : ConstraintLayout {
                     context.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
                 if (currentTrait!!.format != "text") {
                     try {
-                        imm.hideSoftInputFromWindow(controller.getEtCurVal().windowToken, 0)
+                        imm.hideSoftInputFromWindow(controller.getInputView().windowToken, 0)
                     } catch (ignore: Exception) {
                     }
                 }
                 traitDetails.text = currentTrait!!.details
                 if (!rangeSuppress or (currentTrait!!.format != "numeric")) {
-                    if (controller.getEtCurVal().visibility == VISIBLE) {
-                        controller.getEtCurVal().visibility = GONE
-                        controller.getEtCurVal().isEnabled = false
+                    if (controller.getInputView().visibility == VISIBLE) {
+                        controller.getInputView().visibility = GONE
+                        controller.getInputView().isEnabled = false
                     }
                 }
 
@@ -177,9 +177,9 @@ class TraitBoxView : ConstraintLayout {
                 if (currentTraitLayout != null) {
                     currentTraitLayout.loadLayout()
                 } else {
-                    controller.getEtCurVal().removeTextChangedListener(controller.getCvText())
-                    controller.getEtCurVal().visibility = VISIBLE
-                    controller.getEtCurVal().isEnabled = true
+                    controller.getInputView().editText.removeTextChangedListener(controller.getCvText())
+                    controller.getInputView().visibility = VISIBLE
+                    controller.getInputView().isEnabled = true
                 }
             }
 
@@ -269,15 +269,15 @@ class TraitBoxView : ConstraintLayout {
      * @param traitName the observation variable name
      * @param plotID the unique plot identifier to remove the observations from
      */
-    fun remove(traitName: String?, plotID: String?) {
-        if (newTraits.containsKey(traitName!!)) newTraits.remove(traitName)
+    fun remove(traitName: String, plotID: String, rep: String) {
+        if (newTraits.containsKey(traitName)) newTraits.remove(traitName)
         val studyId =
             controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        controller.getDatabase().deleteTrait(studyId, plotID, traitName)
+        controller.getDatabase().deleteTrait(studyId, plotID, traitName, rep)
     }
 
-    fun remove(trait: TraitObject, plotID: String?) {
-        remove(trait.trait, plotID)
+    fun remove(trait: TraitObject, plotID: String, rep: String) {
+        remove(trait.trait, plotID, rep)
     }
 
     private fun createTraitOnTouchListener(

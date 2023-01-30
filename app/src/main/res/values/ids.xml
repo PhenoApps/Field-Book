@@ -25,7 +25,7 @@
     <item name="data" type="id" />
     <item name="myList" type="id" />
     <item name="text" type="id" />
-    <item name="main" type="id" />
+    <item name="activity_search_linear_layout" type="id" />
     <item name="okBtn" type="id" />
     <item name="row" type="id" />
     <item name="column" type="id" />

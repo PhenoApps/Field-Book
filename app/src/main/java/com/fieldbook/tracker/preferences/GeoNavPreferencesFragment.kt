@@ -1,16 +1,15 @@
 package com.fieldbook.tracker.preferences
 
 import android.app.AlertDialog
-import android.os.Bundle
-import com.fieldbook.tracker.R
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.DialogInterface
 import android.content.Intent
+import android.os.Bundle
 import androidx.preference.*
+import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.PreferencesActivity
 import org.phenoapps.security.Security
-import java.util.ArrayList
-import java.util.HashMap
 
 class GeoNavPreferencesFragment : PreferenceFragmentCompat(),
     Preference.OnPreferenceChangeListener {

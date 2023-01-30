@@ -3,11 +3,10 @@ package com.fieldbook.tracker.activities
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.fieldbook.tracker.R
 import org.phenoapps.utils.TextToSpeechHelper
 
-class LocaleChoiceActivity : AppCompatActivity() {
+class LocaleChoiceActivity : ThemedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

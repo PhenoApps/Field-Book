@@ -41,7 +41,6 @@
             android:gravity="right"
             android:paddingRight="10dp"
             android:text="@string/search_results_dialog_range"
-            android:textColor="@color/s_text"
             android:textSize="@dimen/text_size_xlarge"
             android:textStyle="bold" />
 
@@ -52,7 +51,6 @@
             android:gravity="right"
             android:paddingRight="10dp"
             android:text="@string/search_results_dialog_plot"
-            android:textColor="@color/s_text"
             android:textSize="@dimen/text_size_xlarge"
             android:textStyle="bold" />
 
