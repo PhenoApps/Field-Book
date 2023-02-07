@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AlertDialog
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -13,18 +12,29 @@ import javax.inject.Inject
 
 class VerifyPersonHelper @Inject constructor(@ActivityContext private val context: Context) {
 
-    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    val prefs = context.getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+
+    private fun Int.hourToNano() = this * 3600 * 1e9.toLong()
 
     /**
      * Simple function that checks if the collect activity was opened >24hrs ago.
      * If the condition is met, it asks the user to reenter the collector id.
      */
     fun checkLastOpened() {
+
         val lastOpen: Long = prefs.getLong(GeneralKeys.LAST_TIME_OPENED, 0L)
         val systemTime = System.nanoTime()
-        val nanosInOneDay = 1e9.toLong() * 3600 * 24
-        if (lastOpen != 0L && systemTime - lastOpen > nanosInOneDay) {
-            val verify: Boolean = prefs.getBoolean(GeneralKeys.VERIFY_USER, true)
+
+        //number of hours to wait before asking for user, pref found in profile
+        val interval = when (prefs.getString(GeneralKeys.REQUIRE_USER_INTERVAL, "0")) {
+            "1" -> 0
+            "2" -> 12
+            else -> 24
+        }
+
+        val nanosToWait = 1e9.toLong() * 3600 * interval
+        if (lastOpen != 0L && systemTime - lastOpen > nanosToWait) {
+            val verify: Boolean = prefs.getBoolean(GeneralKeys.REQUIRE_USER_TO_COLLECT, true)
             if (verify) {
                 val firstName: String = prefs.getString(GeneralKeys.FIRST_NAME, "") ?: ""
                 val lastName: String = prefs.getString(GeneralKeys.LAST_NAME, "") ?: ""
@@ -63,7 +73,7 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
             ) { dialog: DialogInterface, _: Int -> dialog.dismiss() } //yes, don't ask again button
             .setNeutralButton(neutral) { dialog: DialogInterface, _: Int ->
                 dialog.dismiss()
-                prefs.edit().putBoolean(GeneralKeys.VERIFY_USER, false).apply()
+                prefs.edit().putBoolean(GeneralKeys.REQUIRE_USER_TO_COLLECT, false).apply()
             } //no (navigates to the person preference)
             .setNegativeButton(negative) { dialog: DialogInterface, _: Int ->
                 dialog.dismiss()

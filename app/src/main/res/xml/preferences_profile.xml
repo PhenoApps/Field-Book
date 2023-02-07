@@ -28,9 +28,9 @@
         <ListPreference
             android:entries="@array/preferences_profile_ask_user_interval_entries"
             android:entryValues="@array/preferences_profile_ask_user_interval_values"
-            android:icon="@drawable/ic_pref_profile_verify"
+            android:icon="@drawable/hours_24"
             android:key="com.tracker.fieldbook.preference.require_user_interval"
-            android:title="@string/pref_profile_title" />
+            android:title="@string/pref_profile_require_interval_title" />
 
     </PreferenceCategory>
 
