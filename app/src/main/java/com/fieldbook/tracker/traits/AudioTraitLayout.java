@@ -50,6 +50,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     @Override
     public void setNaTraitsText() {
+        audioRecordingText.setText("NA");
     }
 
     @Override

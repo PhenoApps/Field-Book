@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities;
 
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,7 +32,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
@@ -57,7 +57,6 @@ import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
-import com.fieldbook.tracker.utilities.DialogUtils;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
@@ -1141,7 +1140,7 @@ public class CollectActivity extends ThemedActivity
 
                         ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(value);
 
-                        value = CategoryJsonUtil.Companion.flattenMultiCategoryValue(CategoryJsonUtil.Companion.decode(value), labelValPref.equals("label"));
+                        value = CategoryJsonUtil.Companion.flattenMultiCategoryValue(c, labelValPref.equals("label"));
 
                     } catch (Exception ignore) {}
 
@@ -1150,7 +1149,7 @@ public class CollectActivity extends ThemedActivity
                 }
             }
 
-            dialogMultiMeasureDelete = new AlertDialog.Builder(this)
+            dialogMultiMeasureDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.dialog_multi_measure_delete_title)
                     .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {})
                     .setPositiveButton(R.string.dialog_multi_measure_delete, (d, which) -> {
@@ -1347,7 +1346,6 @@ public class CollectActivity extends ThemedActivity
 
         goToId = builder.create();
         goToId.show();
-        DialogUtils.styleDialogs(goToId);
 
         android.view.WindowManager.LayoutParams langParams = goToId.getWindow().getAttributes();
         langParams.width = LayoutParams.MATCH_PARENT;

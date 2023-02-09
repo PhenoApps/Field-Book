@@ -2,6 +2,8 @@ package com.fieldbook.tracker.views
 
 import android.content.Context
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
@@ -277,16 +279,20 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         } else {
 
-            submitList()
-
-            //select closest rep
             mValues.minByOrNull { abs(it.model.rep.toInt() - repToDelete.toInt()) }?.let { entry ->
                 pager.currentItem = mValues.indexOf(entry)
             }
 
-            updateButtonVisibility()
+            Handler(Looper.getMainLooper()).postDelayed({
 
-            (context as CollectActivity).traitLayoutRefresh()
+                submitList()
+
+                //select closest rep
+                updateButtonVisibility()
+
+                (context as CollectActivity).traitLayoutRefresh()
+
+            }, 100)
         }
     }
 
