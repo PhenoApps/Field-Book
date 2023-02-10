@@ -18,8 +18,16 @@ import java.util.*
  * The date trait layout sends the observed or current date and format to parse.
  * This class also has an onSet callback which sends back the year, month and day to be saved.
  */
-class DatePickerFragment(val format: SimpleDateFormat,
-                         val onSet: (Int, Int, Int) -> Boolean) : DialogFragment(), DatePickerDialog.OnDateSetListener {
+class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
+
+    private var format: SimpleDateFormat? = null
+    private var onSet: ((Int, Int, Int) -> Boolean)? = null
+
+    fun newInstance(format: SimpleDateFormat, onSet: (Int, Int, Int) -> Boolean): DatePickerFragment {
+        this.format = format
+        this.onSet = onSet
+        return this
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
@@ -30,7 +38,7 @@ class DatePickerFragment(val format: SimpleDateFormat,
         val c = Calendar.getInstance()
 
         //parse the date parameter and set the calendar's time
-        format.parse(date)?.let { savedDate ->
+        this.format?.parse(date)?.let { savedDate ->
             c.time = savedDate
         }
 
@@ -61,6 +69,6 @@ class DatePickerFragment(val format: SimpleDateFormat,
 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
         // Do something with the date chosen by the user
-        onSet(year, month, day)
+        this.onSet?.invoke(year, month, day)
     }
 }

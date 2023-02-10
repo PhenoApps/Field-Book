@@ -87,7 +87,8 @@ public class DateTraitLayout extends BaseTraitLayout {
          * When the calendar view visibility button is pressed it starts the date picker dialog.
          */
         calendarVisibilityBtn.setOnClickListener((View) -> {
-            DialogFragment newFragment = new DatePickerFragment(dateFormat, (y, m, d) -> {
+
+            DialogFragment newFragment = new DatePickerFragment().newInstance(dateFormat, (y, m, d) -> {
 
                 Calendar calendar = Calendar.getInstance();
 
