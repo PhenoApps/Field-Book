@@ -220,7 +220,7 @@ public class FieldBookImage extends BrapiObservation {
 
     public void loadImage(Context ctx) {
 
-        if (file.length() == 0) {
+        if (file == null || file.length() == 0) {
 
             loadMissingImage();
 
