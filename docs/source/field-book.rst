@@ -18,7 +18,7 @@ Structure
 
    Primary Field Book screen
 
-Field Book utilizes a home screen with links to the major portions of the app. To use Field Book, you must first import your :doc:`fields` (|fields|), then create :doc:`traits` (|traits|), optionally modify any :doc:`settings` (|settings|), and then navigate to :doc:`collect` (|collect|). After data has been collected, you can navigate to :doc:`export` (|export|) to write it to a csv (comma separated value) file. The changelog (|changelog|) can be accessed from the top toolbar.
+Field Book utilizes a home screen with links to the major portions of the app. To use Field Book, you must first import your :doc:`fields` (|fields|), then create :doc:`traits` (|traits|), optionally modify any :doc:`settings` (|settings|), and then navigate to :doc:`collect` (|collect|). After data has been collected, you can navigate to :doc:`export` (|export|) to write it to a CSV (comma separated value) file. The changelog (|changelog|) can be accessed from the top toolbar.
 
 
 .. |fields| image:: /_static/icons/home/view-module.png

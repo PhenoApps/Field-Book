@@ -11,21 +11,21 @@ Design
 
    The Fields screen layout with sample data loaded.
 
-Field Book can import CSV, XLS, and XLSX files. Filenames and column headers should exclude the following characters: / ?  < > \ * | ”.
+Field Book can import CSV, XLS, and XLSX files. Filenames and column headers should exclude the following special characters: **/ ?  < > \ * | ”**.
  
-Field Book requires import files to have at least three columns: a unique identifier, a primary identifier, and a secondary identifier. Each entry in the import file should be assigned a unique identifier. This unique ID is used internally to associate data with a specific entry and should be unique across all of your files.
+Field Book requires import files to have at least three columns: a unique identifier, a primary identifier, and a secondary identifier. Each entry in the import file should be assigned a unique identifier. This unique ID is used internally to associate data with a specific entry and must be unique across all of your files.
  
 The primary and secondary identifier are often used for field orientation (e.g., row/plot, row/column, range/plot, etc.), and can be whatever makes the most sense for your specific experiment.
  
-Other columns can be included in the field file and can be displayed in the InfoBars on the main screen.
+Extra columns (e.g. name, pedigree) can optionally be included in the file, they become additional display options in the InfoBars on the main screen.
 
 Transfer
 --------
-To transfer files to Android devices, plug the phone/tablet into the computer and change the USB mode to allow files to be transferred. Each device manufacturer will likely have slight variations for the appearance of this dialog.
+To transfer files to an Android device, plug the device into a computer and change it's USB mode to allow files to be transferred. Each device manufacturer has slight variations for the appearance of this dialog.
 
 Importing
 ---------
-To import files into Field Book, select the Fields and press the add button on the toolbar. Files can be imported via cloud storage (Dropbox, Google Drive, etc.) or locally. If local is chosen, a list of files in the /import_fields/ folder will be displayed. Selecting one of these files will allow you to assign columns as the unique ID, primary order, and secondary order. Field Book uses the same plot order as the imported file.
+To import files into Field Book, select the Fields section, then press the add button in the upper right-hand corner of the the screen in the toolbar. Files can be imported via cloud storage (Dropbox, Google Drive, etc.), a BrAPI connection, or a local file. If local is chosen, a list of files in the /import_fields/ folder will be displayed. Selecting one of these files will allow you to assign columns as the unique ID, primary order, and secondary order. Field Book uses the same plot order as the imported file.
 
 List Item Layout
 ----------------

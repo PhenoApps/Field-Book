@@ -9,12 +9,12 @@ Storage Location Definer
 
    Storage location definer layout
 
-After installing and opening the app, you will be asked to define a 'Storage location' on the device. In Field Book, this step is not optional. The selected 'Storage location' can be changed in the :doc:`/settings-general`.
+After installing and opening the app, you will be asked to define a 'Storage location' on the device. In Field Book this step is required. The selected 'Storage location' can be changed in the :doc:`/settings-general`.
 
 Subdirectories
 --------------
 
-Subdirectories that are created within the 'Storage location' directory include: **field_import**, **field_export**, **plot_data**, **resources**, **database**, **trait**, and **archive**.
+Fieldbook will create the following subdirectories within the 'Storage location' directory: **field_import**, **field_export**, **plot_data**, **resources**, **database**, **trait**, and **archive**.
 
 * **field_import**: contains files that can be imported into Field Book
 
