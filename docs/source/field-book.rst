@@ -7,7 +7,7 @@ Field Book is an open-source Android app that can be used to collect data on fie
 
 Getting Started
 ---------------
-Field Book can be downloaded from `Google Play <https://play.google.com/store/apps/details?id=com.tracker.fieldbook>`_ or can be installed manually from `GitHub <https://github.com/PhenoApps/Field-Book/releases>`_. After installing the app, all permissions should be accepted so that the app is able to read/write data and access device features. Once permissions are accepted, sample data can optionally be loaded. This will import three sample fields and a list of sample traits. All of the images in this manual utilize the sample data included with Field Book.
+Field Book can be downloaded from `Google Play <https://play.google.com/store/apps/details?id=com.tracker.fieldbook>`_ or can be installed manually from the `GitHub releases <https://github.com/PhenoApps/Field-Book/releases>`_ page. After installing the app, all permissions should be accepted so that the app is able to read/write data and access device features. Once permissions are accepted, sample data can optionally be loaded. This will import three sample fields and a list of sample traits. All of the images in this manual utilize the sample data included with Field Book.
 
 Structure
 ---------
