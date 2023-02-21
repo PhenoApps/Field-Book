@@ -17,7 +17,7 @@ Creating
 Traits can be created by pressing the large Add icon (|add|) at the bottom right of the screen, or the same icon in the toolbar. Each trait has a custom creation menu that indicates which fields are required. Traits cannot share the same name.
 
 Managing
--------
+--------
 
 Each trait has options to make data collection easier. The menu icon on each line allows each trait to deleted, copied, or edited. The checkbox allows traits to be active or hidden on the main layout screen. Traits can be reordered by dragging and dropping the icon on the right of each trait line.
 
