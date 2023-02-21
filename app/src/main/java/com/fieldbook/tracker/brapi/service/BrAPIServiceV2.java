@@ -769,12 +769,23 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
                 public void onSuccess(BrAPIObservationListResponse phenotypesResponse, int i, Map<String, List<String>> map) {
-                    List<Observation> newObservations = new ArrayList<>();
-                    for(BrAPIObservation obs: phenotypesResponse.getResult().getData()){
-                        newObservations.add(mapToObservation(obs));
-                    }
 
-                    function.apply(newObservations);
+                    try {
+
+                        List<Observation> newObservations = new ArrayList<>();
+                        for(BrAPIObservation obs: phenotypesResponse.getResult().getData()){
+                            newObservations.add(mapToObservation(obs));
+                        }
+
+                        function.apply(newObservations);
+
+                    } catch (Exception e) {
+
+                        e.printStackTrace();
+
+                        failFunction.apply(ApiErrorCode.FORBIDDEN.ordinal());
+
+                    }
                 }
 
                 @Override
