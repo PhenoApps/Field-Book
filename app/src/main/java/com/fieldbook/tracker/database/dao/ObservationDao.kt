@@ -103,7 +103,7 @@ class ObservationDao {
                 AND vars.observation_variable_field_book_format = 'photo'
                 
         """.trimIndent(), arrayOf(hostUrl)).toTable()
-                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), missingPhoto).apply {
+                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
                         rep = getStringVal(row, "rep")
                         unitDbId = getStringVal(row, "uniqueName")
                         setDescriptiveOntologyTerms(listOf(getStringVal(row, "external_db_id")))
@@ -180,7 +180,7 @@ class ObservationDao {
         fun getWrongSourceImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sRemoteImageObservationsViewName, where = "trait_data_source <> ?", whereArgs = arrayOf(hostUrl)).toTable()
-                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), missingPhoto).apply {
+                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
                         this.fieldBookDbId = getStringVal(row, "id")
                     } }
 
@@ -204,7 +204,7 @@ class ObservationDao {
         fun getUserTraitImageObservations(ctx: Context, expId: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
             db.query(sLocalImageObservationsViewName, where = "${Study.FK} = ?", whereArgs = arrayOf(expId)).toTable()
-                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), missingPhoto).apply {
+                    .map { row -> FieldBookImage(ctx, getStringVal(row, "value"), getStringVal(row, "observation_variable_name"), missingPhoto).apply {
                         this.fieldBookDbId = getStringVal(row, "id")
                     } }
 

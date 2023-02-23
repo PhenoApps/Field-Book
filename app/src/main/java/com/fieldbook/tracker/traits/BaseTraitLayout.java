@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
-import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
@@ -203,7 +202,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public SharedPreferences getPrefs() {
-        return PreferenceManager.getDefaultSharedPreferences(getContext());
+        return getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
     }
 
     public CollectActivity getCollectActivity() {
