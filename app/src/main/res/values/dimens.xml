@@ -26,4 +26,11 @@
 
     <dimen name="default_row_header_width">55dp</dimen>
     <dimen name="default_column_header_height">40dp</dimen>
+
+    <!-- arrow sizes -->
+    <dimen name="arrow_size_small">64dp</dimen>
+    <dimen name="arrow_size_medium">128dp</dimen>
+    <dimen name="arrow_size_large">160dp</dimen>
+    <dimen name="arrow_size_xlarge">200dp</dimen>
+
 </resources>

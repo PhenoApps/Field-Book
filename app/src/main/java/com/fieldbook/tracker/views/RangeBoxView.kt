@@ -91,7 +91,6 @@ class RangeBoxView : ConstraintLayout {
         firstName = controller.getPreferences().getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
         secondName = controller.getPreferences().getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
         uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-        initAndPlot()
     }
 
     constructor(ctx: Context) : super(ctx)
@@ -135,25 +134,20 @@ class RangeBoxView : ConstraintLayout {
         return cRange.plot_id.isEmpty()
     }
 
-    private fun initAndPlot() {
-        rangeEt = findViewById(R.id.range)
-        plotEt = findViewById(R.id.plot)
-        rangeName = findViewById(R.id.rangeName)
-        plotName = findViewById(R.id.plotName)
+    fun connectTraitBox(traitBoxView: TraitBoxView) {
 
         //determine range button function based on user-preferences
         //issues217 introduces the ability to swap trait and plot arrows
         val flipFlopArrows =
             controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
         if (flipFlopArrows) {
-            rangeLeft = findViewById(R.id.traitLeft)
-            rangeRight = findViewById(R.id.traitRight)
+            rangeLeft = traitBoxView.getTraitLeft()
+            rangeRight = traitBoxView.getTraitRight()
         } else {
             rangeLeft = findViewById(R.id.rangeLeft)
             rangeRight = findViewById(R.id.rangeRight)
         }
-        tvRange = findViewById(R.id.tvRange)
-        tvPlot = findViewById(R.id.tvPlot)
+
         rangeLeft.setOnTouchListener(createOnLeftTouchListener())
         rangeRight.setOnTouchListener(createOnRightTouchListener())
 
@@ -300,14 +294,14 @@ class RangeBoxView : ConstraintLayout {
         return if (flipFlopArrows) {
             createOnTouchListener(
                 rangeLeft, actionLeft,
-                R.drawable.main_trait_left_arrow_pressed,
-                R.drawable.main_trait_left_arrow_unpressed
+                R.drawable.trait_chevron_left_pressed,
+                R.drawable.trait_chevron_left
             )
         } else {
             createOnTouchListener(
                 rangeLeft, actionLeft,
-                R.drawable.main_entry_left_pressed,
-                R.drawable.main_entry_left_unpressed
+                R.drawable.chevron_left_pressed,
+                R.drawable.chevron_left
             )
         }
     }
@@ -321,14 +315,14 @@ class RangeBoxView : ConstraintLayout {
         return if (flipFlopArrows) {
             createOnTouchListener(
                 rangeRight, actionRight,
-                R.drawable.main_trait_right_pressed,
-                R.drawable.main_trait_right_unpressed
+                R.drawable.trait_chevron_right_pressed,
+                R.drawable.trait_chevron_right
             )
         } else {
             createOnTouchListener(
                 rangeRight, actionRight,
-                R.drawable.main_entry_right_pressed,
-                R.drawable.main_entry_right_unpressed
+                R.drawable.chevron_right_pressed,
+                R.drawable.chevron_right
             )
         }
     }

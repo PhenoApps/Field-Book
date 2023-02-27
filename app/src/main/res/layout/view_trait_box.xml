@@ -6,26 +6,24 @@
 
     <ImageView
         android:id="@+id/traitLeft"
-        android:layout_width="wrap_content"
+        android:layout_width="?attr/fb_arrow_size"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:paddingEnd="5dp"
         android:paddingStart="0dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/main_trait_left_arrow_unpressed"
+        android:src="@drawable/trait_chevron_left"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:contentDescription="@string/view_trait_box_left_content_description" />
 
     <ImageView
         android:id="@+id/traitRight"
-        android:layout_width="wrap_content"
+        android:layout_width="?attr/fb_arrow_size"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:paddingStart="5dp"
         android:paddingEnd="0dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/main_trait_right_unpressed"
+        android:src="@drawable/trait_chevron_right"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:contentDescription="@string/view_trait_box_right_content_description" />

@@ -208,6 +208,8 @@
     <attr format="dimension" name="fb_body_text_size" />
     <attr format="dimension" name="fb_subheading_text_size"/>
 
+    <attr format="dimension" name="fb_arrow_size"/>
+
     <!-- tutorial lib -->
     <attr format="color" name="fb_tap_target_color"/>
 

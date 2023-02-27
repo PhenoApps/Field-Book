@@ -6,22 +6,24 @@
 
     <ImageView
         android:id="@+id/rangeLeft"
-        android:layout_width="128dp"
+        android:layout_width="?attr/fb_arrow_size"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
-        android:src="@drawable/main_entry_left_unpressed"
+        android:src="@drawable/chevron_left"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/namesPlotRangeHolder"
         android:contentDescription="@string/view_range_box_left_button_content_description" />
 
     <ImageView
         android:id="@+id/rangeRight"
-        android:layout_width="128dp"
+        android:layout_width="?attr/fb_arrow_size"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
-        android:src="@drawable/main_entry_right_unpressed"
+        android:src="@drawable/chevron_right"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/valuesPlotRangeHolder"
         android:contentDescription="@string/view_range_box_right_button_content_description" />
 
     <LinearLayout

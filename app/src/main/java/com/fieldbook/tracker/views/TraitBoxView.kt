@@ -48,59 +48,6 @@ class TraitBoxView : ConstraintLayout {
         prefixTraits = controller.getDatabase().rangeColumnNames
         newTraits = HashMap()
         traitType = findViewById(R.id.traitType)
-
-        //determine trait button function based on user-preferences
-        //issues217 introduces the ability to swap trait and plot arrows
-        val flipFlopArrows: Boolean =
-            controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
-        if (flipFlopArrows) {
-            traitLeft = findViewById(R.id.rangeLeft)
-            traitRight = findViewById(R.id.rangeRight)
-        } else {
-            traitLeft = findViewById(R.id.traitLeft)
-            traitRight = findViewById(R.id.traitRight)
-        }
-        traitDetails = findViewById(R.id.traitDetails)
-
-        //change click-arrow based on preferences
-        if (flipFlopArrows) {
-            traitLeft.setOnTouchListener(
-                createTraitOnTouchListener(
-                    traitLeft, R.drawable.main_entry_left_unpressed,
-                    R.drawable.main_entry_left_pressed
-                )
-            )
-        } else {
-            traitLeft.setOnTouchListener(
-                createTraitOnTouchListener(
-                    traitLeft, R.drawable.main_trait_left_arrow_unpressed,
-                    R.drawable.main_trait_left_arrow_pressed
-                )
-            )
-        }
-
-        // Go to previous trait
-        traitLeft.setOnClickListener { moveTrait("left") }
-
-        //change click-arrow based on preferences
-        if (flipFlopArrows) {
-            traitRight.setOnTouchListener(
-                createTraitOnTouchListener(
-                    traitRight, R.drawable.main_entry_right_unpressed,
-                    R.drawable.main_entry_right_pressed
-                )
-            )
-        } else {
-            traitRight.setOnTouchListener(
-                createTraitOnTouchListener(
-                    traitRight, R.drawable.main_trait_right_unpressed,
-                    R.drawable.main_trait_right_pressed
-                )
-            )
-        }
-
-        // Go to next trait
-        traitRight.setOnClickListener { moveTrait("right") }
     }
 
     constructor(ctx: Context) : super(ctx)
@@ -119,6 +66,66 @@ class TraitBoxView : ConstraintLayout {
         defStyle,
         defStyleRes
     )
+
+    fun connectRangeBox(rangeBoxView: RangeBoxView) {
+
+        //determine trait button function based on user-preferences
+        //issues217 introduces the ability to swap trait and plot arrows
+        val flipFlopArrows: Boolean =
+            controller.getPreferences().getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)
+        if (flipFlopArrows) {
+            traitLeft = rangeBoxView.getRangeLeft()!!
+            traitRight = rangeBoxView.getRangeRight()!!
+        } else {
+            traitLeft = findViewById(R.id.traitLeft)
+            traitRight = findViewById(R.id.traitRight)
+        }
+        traitDetails = findViewById(R.id.traitDetails)
+
+        //change click-arrow based on preferences
+        if (flipFlopArrows) {
+            traitLeft.setImageResource(R.drawable.chevron_left)
+            traitLeft.setOnTouchListener(
+                createTraitOnTouchListener(
+                    traitLeft, R.drawable.chevron_left,
+                    R.drawable.chevron_left_pressed
+                )
+            )
+        } else {
+            traitLeft.setImageResource(R.drawable.trait_chevron_left)
+            traitLeft.setOnTouchListener(
+                createTraitOnTouchListener(
+                    traitLeft, R.drawable.trait_chevron_left,
+                    R.drawable.trait_chevron_left_pressed
+                )
+            )
+        }
+
+        // Go to previous trait
+        traitLeft.setOnClickListener { moveTrait("left") }
+
+        //change click-arrow based on preferences
+        if (flipFlopArrows) {
+            traitRight.setImageResource(R.drawable.chevron_right)
+            traitRight.setOnTouchListener(
+                createTraitOnTouchListener(
+                    traitRight, R.drawable.chevron_right,
+                    R.drawable.chevron_right_pressed
+                )
+            )
+        } else {
+            traitRight.setImageResource(R.drawable.trait_chevron_right)
+            traitRight.setOnTouchListener(
+                createTraitOnTouchListener(
+                    traitRight, R.drawable.trait_chevron_right,
+                    R.drawable.trait_chevron_right_pressed
+                )
+            )
+        }
+
+        // Go to next trait
+        traitRight.setOnClickListener { moveTrait("right") }
+    }
 
     fun initTraitDetails() {
         val traitDetails: TextView = findViewById(R.id.traitDetails)
@@ -209,11 +216,11 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun getTraitLeft(): ImageView {
-        return traitLeft
+        return findViewById(R.id.traitLeft) as ImageView
     }
 
     fun getTraitRight(): ImageView {
-        return traitRight
+        return findViewById(R.id.traitRight) as ImageView
     }
 
     fun existsNewTraits(): Boolean {

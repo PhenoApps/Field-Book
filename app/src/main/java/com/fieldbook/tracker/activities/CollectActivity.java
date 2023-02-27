@@ -306,8 +306,11 @@ public class CollectActivity extends ThemedActivity
         infoBarAdapter = new InfoBarAdapter(this, ep.getInt(GeneralKeys.INFOBAR_NUMBER, 2), (RecyclerView) findViewById(R.id.selectorList));
 
         traitLayouts = new LayoutCollections(this);
-        traitBox = findViewById(R.id.act_collect_trait_box);
         rangeBox = findViewById(R.id.act_collect_range_box);
+        traitBox = findViewById(R.id.act_collect_trait_box);
+        traitBox.connectRangeBox(rangeBox);
+        rangeBox.connectTraitBox(traitBox);
+
         initCurrentVals();
 
     }
