@@ -7,13 +7,13 @@ Settings
    :align: center
    :alt: Settings screen layout
 
-    Settings screen layout
+   Settings screen layout
 
 Fieldbook settings are grouped into eight subcategories.
 
 Use the search bar at the top of the screen to quickly find the setting you are looking for, or
 
-* Change storage locations and turn optional tools on or off in **General** (|general|) settings.
+* Change system defaults and turn optional collection tools on or off in **General** (|general|) settings.
   
 * Set the identity of the person collecting data in **Profile** (|profile|) settings.
 
