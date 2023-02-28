@@ -40,7 +40,6 @@
         <item name="fb_button_color_pressed">@color/main_button_color_pressed</item>
         <item name="fb_subheading_color">@color/main_subheading_color</item>
         <item name="fb_color_text_secondary">@color/main_color_text_secondary</item>
-        <item name="fb_arrow_size">@dimen/arrow_size_medium</item>
 
         <!-- these are used in material design components -->
         <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>

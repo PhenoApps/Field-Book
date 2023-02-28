@@ -6,37 +6,45 @@
 
     <ImageView
         android:id="@+id/traitLeft"
-        android:layout_width="?attr/fb_arrow_size"
-        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
         android:adjustViewBounds="true"
-        android:paddingEnd="5dp"
+        android:contentDescription="@string/view_trait_box_left_content_description"
         android:paddingStart="0dp"
+        android:paddingEnd="5dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:src="@drawable/trait_chevron_left"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="@string/view_trait_box_left_content_description" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/traitRight"
-        android:layout_width="?attr/fb_arrow_size"
-        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
         android:adjustViewBounds="true"
+        android:contentDescription="@string/view_trait_box_right_content_description"
         android:paddingStart="5dp"
+        android:paddingTop="10dp"
         android:paddingEnd="0dp"
+        android:paddingBottom="10dp"
         android:src="@drawable/trait_chevron_right"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="@string/view_trait_box_right_content_description" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
         android:id="@+id/traitType"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:layout_marginBottom="25dp"
         android:gravity="center"
-        app:layout_constraintStart_toEndOf="@id/traitLeft"
+        app:layout_constraintBottom_toTopOf="@id/traitDetails"
         app:layout_constraintEnd_toStartOf="@id/traitRight"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toEndOf="@id/traitLeft"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/traitDetails"
@@ -49,8 +57,8 @@
         android:textColor="#000000"
         android:textSize="@dimen/text_size_small"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/traitRight" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/traitType" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
