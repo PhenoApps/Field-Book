@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.interfaces.CollectController;
 import com.fieldbook.tracker.objects.RangeObject;
@@ -102,7 +101,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
         CollectActivity act = (CollectActivity) getContext();
         isLocked = act.isFrozen() || act.isLocked();
 
-        ObservationModel[] observations = ObservationDao.Companion.getAllRepeatedValues(
+        ObservationModel[] observations = getDatabase().getRepeatedValues(
                 act.getStudyId(),
                 act.getObservationUnit(),
                 act.getTraitName()
@@ -297,8 +296,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     protected List<ObservationModel> getObservations() {
         CollectActivity act = getCollectActivity();
-        return Arrays.asList(ObservationDao.Companion
-                .getAllRepeatedValues(act.getStudyId(), act.getObservationUnit(), act.getTraitName()));
+        return Arrays.asList(getDatabase().getRepeatedValues(act.getStudyId(), act.getObservationUnit(), act.getTraitName()));
     }
 
     protected ObservationModel getCurrentObservation() {

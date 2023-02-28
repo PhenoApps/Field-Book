@@ -44,7 +44,7 @@ class OldPhotosMigrator {
 
                         val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-                        val traitPhotos = ObservationDao.getAll(expId).filter { it.observation_variable_name == t.trait }
+                        val traitPhotos = database.getAllObservations(expId).filter { it.observation_variable_name == t.trait }
 
                         if (t.trait != "photos") { //edge case where trait name is actually photos
 
