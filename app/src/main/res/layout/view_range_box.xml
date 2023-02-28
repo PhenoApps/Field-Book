@@ -6,35 +6,41 @@
 
     <ImageView
         android:id="@+id/rangeLeft"
-        android:layout_width="?attr/fb_arrow_size"
-        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
         android:adjustViewBounds="true"
+        android:contentDescription="@string/view_range_box_left_button_content_description"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:src="@drawable/chevron_left"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/namesPlotRangeHolder"
-        android:contentDescription="@string/view_range_box_left_button_content_description" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/rangeRight"
-        android:layout_width="?attr/fb_arrow_size"
-        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
         android:adjustViewBounds="true"
+        android:contentDescription="@string/view_range_box_right_button_content_description"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:src="@drawable/chevron_right"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/valuesPlotRangeHolder"
-        android:contentDescription="@string/view_range_box_right_button_content_description" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/namesPlotRangeHolder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
         android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/rangeLeft"
-        app:layout_constraintEnd_toStartOf="@id/valuesPlotRangeHolder">
+        app:layout_constraintEnd_toStartOf="@id/valuesPlotRangeHolder"
+        app:layout_constraintStart_toEndOf="@+id/rangeLeft"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/rangeName"
@@ -62,11 +68,13 @@
         android:id="@+id/valuesPlotRangeHolder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/rangeRight"
         app:layout_constraintStart_toEndOf="@id/namesPlotRangeHolder"
-        app:layout_constraintEnd_toStartOf="@id/rangeRight">
+        app:layout_constraintTop_toTopOf="parent">
 
         <EditText
             android:id="@+id/range"
