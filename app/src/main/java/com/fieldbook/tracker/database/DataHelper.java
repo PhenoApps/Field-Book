@@ -27,6 +27,7 @@ import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.VisibleObservationVariableDao;
+import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
@@ -2578,6 +2579,41 @@ public class DataHelper {
 
         return ObservationVariableDao.Companion.getAllTraits();
 
+    }
+
+    public ObservationModel[] getAllObservations() {
+
+        open();
+
+        return ObservationDao.Companion.getAll();
+    }
+
+    public ObservationModel[] getAllObservations(String studyId) {
+
+        open();
+
+        return ObservationDao.Companion.getAll(studyId);
+    }
+
+    public ObservationModel[] getAllObservations(String studyId, String unit) {
+
+        open();
+
+        return ObservationDao.Companion.getAll(studyId, unit);
+    }
+
+    public ObservationModel[] getAllObservations(String studyId, String unit, String trait) {
+
+        open();
+
+        return ObservationDao.Companion.getAll(studyId, unit, trait);
+    }
+
+    public ObservationModel[] getRepeatedValues(String studyId, String unit, String trait) {
+
+        open();
+
+        return ObservationDao.Companion.getAllRepeatedValues(studyId, unit, trait);
     }
 
     /**

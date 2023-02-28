@@ -41,7 +41,6 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.models.ObservationModel;
@@ -891,7 +890,7 @@ public class CollectActivity extends ThemedActivity
         String obsUnit = rangeBox.getPlotID();
 
         return LocationCollectorUtil.Companion
-                .getLocationByCollectMode(this, ep, expId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation());
+                .getLocationByCollectMode(this, ep, expId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
     }
 
     private void brapiDelete(String parent, Boolean hint) {
@@ -1114,7 +1113,7 @@ public class CollectActivity extends ThemedActivity
 
         String labelValPref = ep.getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
 
-        ObservationModel[] values = ObservationDao.Companion.getAllRepeatedValues(
+        ObservationModel[] values = database.getRepeatedValues(
                 getStudyId(), getObservationUnit(), getTraitName());
 
         ArrayList<String> is = new ArrayList<>();
@@ -1229,7 +1228,7 @@ public class CollectActivity extends ThemedActivity
 
             deleteRep(model.getObservation_variable_name(), model.getRep());
 
-            ObservationModel[] currentModels = ObservationDao.Companion.getAllRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
+            ObservationModel[] currentModels = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
 
             if (currentModels.length == 0) {
 
@@ -1615,8 +1614,7 @@ public class CollectActivity extends ThemedActivity
 
                 item.setVisible(true);
 
-                ObservationModel[] values = ObservationDao.Companion
-                        .getAllRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
+                ObservationModel[] values = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitName());
 
                 int n = values.length;
 
