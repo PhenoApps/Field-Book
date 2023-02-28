@@ -11,7 +11,7 @@ Fields
 
 
 Importing a field
-=================
+-----------------
 
 To import a new field into Field Book press the Add icon (|add|) in the upper right-hand corner of the toolbar in the Fields section. Fields can be imported via cloud storage (Dropbox, Google Drive, etc.), a BrAPI connection, or from a local file on the device.
 
@@ -23,7 +23,7 @@ To import a new field into Field Book press the Add icon (|add|) in the upper ri
    Field import source options.
 
 Local storage
--------------
+~~~~~~~~~~~~~
 
 If local is chosen, a list of possible CSV, XLS, and XLSX files in the /import_fields/ folder will be displayed. Add files to this folder by downloading them or transferring them from a computer.
 
@@ -53,7 +53,7 @@ Extra columns (e.g. name, pedigree) can optionally be included in the file, they
 
 
 Cloud storage
--------------
+~~~~~~~~~~~~~
 
 .. figure:: /_static/images/fields/fields_import_cloud.png
    :width: 40%
@@ -65,7 +65,7 @@ Cloud storage
 If Cloud storage is chosen, Fieldbook will open the device file manager, allowing you to navigate to and select any file for import including from synched cloud storage.
 
 BrAPI
------
+~~~~~
 
 .. figure:: /_static/images/brapi/brapi_import_list_framed.png
    :width: 40%
@@ -105,7 +105,7 @@ Importing your field via BrAPI is a prerequiste to later export your collected d
 
 
 Creating a field
-================
+----------------
 
 To create a new field directly within Field Book press the Create icon (|create|) in the center of the toolbar.
 
@@ -132,7 +132,7 @@ To create a new field directly within Field Book press the Create icon (|create|
 
 
 Managing fields
-===============
+---------------
 
 .. figure:: /_static/images/fields/fields_list_menu_framed.png
    :width: 40%
@@ -144,7 +144,7 @@ Managing fields
 Fields are selectable from the list of fields. Each row in the fields list displays the Date imported, Date edited, Date exported, and Number of entries. Fields can be deleted and sorted from the sub menu in each row.
 
 Sort
-----
+~~~~
 
 .. figure:: /_static/images/fields/fields_list_sorting_framed.png
    :width: 40%
