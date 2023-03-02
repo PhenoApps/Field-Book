@@ -1,6 +1,7 @@
 Settings
 ========
 
+Fieldbook settings are grouped into eight subcategories.
 
 .. figure:: /_static/images/settings/settings_framed.png
    :width: 40%
@@ -9,7 +10,6 @@ Settings
 
    Settings screen layout
 
-Fieldbook settings are grouped into eight subcategories.
 
 Use the search bar at the top of the screen to quickly find the setting you are looking for, or
 

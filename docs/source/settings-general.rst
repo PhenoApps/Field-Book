@@ -1,13 +1,6 @@
 General Settings
 ================
 
-.. figure:: /_static/images/settings/settings_general_framed.png
-   :width: 40%
-   :align: center
-   :alt: General settings screen layout
-
-   General settings screen layout
-
 System Defaults
 ---------------
 
@@ -15,9 +8,17 @@ Define storage location (|sd|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Opens the :doc:`storage` dialog for defining a 'Storage location' on the device.
 
-Default import/export source (|import|,|export|)
+Default import(|import|) and export(|export|) sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Sets default field import and export sources so the app doesn't always ask. 
+Set default field import and export sources so the app doesn't always ask. 
+
+.. figure:: /_static/images/settings/settings_general_framed.png
+   :width: 40%
+   :align: center
+   :alt: General settings screen layout
+
+   General settings screen layout
+
 
 Optional Collect Tools
 ----------------------
