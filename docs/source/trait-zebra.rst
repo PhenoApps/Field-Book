@@ -4,7 +4,7 @@ Zebra Label Print Trait
 Creation
 --------
 
-.. figure:: /_static/images/traits/formats/create_zebra_label_print_trait.png
+.. figure:: /_static/images/traits/formats/create_zebra_label_print.png
    :width: 40%
    :align: center
    :alt: Zebra label print trait creation fields

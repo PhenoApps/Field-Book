@@ -27,16 +27,17 @@ Contents
 
    trait-numeric
    trait-categorical
-   trait-percent
    trait-date
+   trait-percent
    trait-boolean
    trait-text
    trait-photo
-   trait-counter
-   trait-multicat
-   trait-disease
    trait-audio
+   trait-counter
+   trait-disease
+   trait-multicat
    trait-location
+   trait-zebra
    trait-gnss
 
 .. toctree::
