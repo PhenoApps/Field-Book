@@ -1,6 +1,12 @@
 GeoNav
 ======
 
+Overview
+--------
+
+Used to supply high-accuracy location data to the device, which can be collected with the GNSS trait and/or used to navigate the field.
+This section provdes specific hardware and field use recommendations. Fieldbook also has a section of specific :doc:`settings-geonav` (|geonav|).
+
 Supplies
 --------
 * Survey tripod
@@ -29,3 +35,8 @@ Cases
 3D Cases for M2 hardware are available for purchase online.
 
 https://cults3d.com/en/3d-model/tool/emlid-reach-m2-case-estuche-gnss-gps-rtk
+
+
+.. |geonav| image:: /_static/icons/settings/main/map-search.png
+  :width: 20
+
