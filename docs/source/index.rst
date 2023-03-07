@@ -18,6 +18,11 @@ Contents
 
    fields
    traits
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Function
+   
    collect
    export
 

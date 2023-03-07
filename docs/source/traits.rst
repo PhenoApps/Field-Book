@@ -7,17 +7,17 @@ Traits
 
    The Traits screen layout with sample data loaded.
 
+Overview
+--------
+
 Data is collected in Field Book via traits. The traits screen lets you create new traits and manage existing traits. Each trait is created by specifying a name, a type, and additional fields such as min, max, or default values. These settings optimize how the trait is formatted in the collect screen.
 
-List Item Layout
+Creating a Trait
 ----------------
-
-Creating
---------
 Traits can be created by pressing the large Add icon (|add|) at the bottom right of the screen, or the same icon in the toolbar. Each trait has a custom creation menu that indicates which fields are required. Traits cannot share the same name.
 
-Managing
---------
+Managing Traits
+---------------
 
 Each trait has options to make data collection easier. The menu icon on each line allows each trait to deleted, copied, or edited. The checkbox allows traits to be active or hidden on the main layout screen. Traits can be reordered by dragging and dropping the icon on the right of each trait line.
 
@@ -30,8 +30,8 @@ Each trait has options to make data collection easier. The menu icon on each lin
 
 Traits can also be sorted by their name, format, or active status using the sort icon on the toolbar. To make all traits active or hidden, use the Double Check icon (|check-all|) on the toolbar.
 
-Importing/Exporting
--------------------
+Importing/Exporting Traits
+--------------------------
 Lists of traits can be created and transferred between different devices using the Import/Export option on the toolbar. Trait lists are stored in the /trait/ folder.
 
 
