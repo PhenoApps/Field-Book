@@ -104,6 +104,9 @@ At the bottom of the screen are three buttons used for data input.
 .. |lock| image:: /_static/icons/collect/lock-open-outline.png
   :width: 20
 
+.. |settings| image:: /_static/icons/settings/main/cog-outline.png
+  :width: 20
+
 .. |scan| image:: /_static/icons/collect/barcode-scan.png
   :width: 20
 
