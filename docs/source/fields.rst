@@ -13,7 +13,9 @@ Fields
 Importing a field
 -----------------
 
-To import a new field into Field Book press the Add icon (|add|) in the upper right-hand corner of the toolbar in the Fields section. Fields can be imported from a local file, from cloud storage (Dropbox, Google Drive, etc.) or via a BrAPI connection (see :doc:`brapi` (|brapi|) for details).
+To import a new field into Field Book press the Add icon (|add|) in the upper right-hand corner of the toolbar in the Fields section. You will then select from a dialog whether to import from a local file, from cloud storage (Dropbox, Google Drive, etc.) or via a BrAPI connection (see :doc:`brapi` (|brapi|) for details).
+
+A default import source can be set in :doc:`settings-general` (|settings|) to skip this dialog.
 
 .. figure:: /_static/images/fields/fields_import_joined.png
    :width: 100%
@@ -49,7 +51,7 @@ Cloud storage
 
 If you choose to import from cloud storage, Fieldbook will open the device file manager, allowing you to navigate to the the file you would like to import.
 
-.. figure:: /_static/images/fields/fields_import_cloud.png
+.. figure:: /_static/images/fields/fields_cloud_import.png
    :width: 40%
    :align: center
    :alt: Field import from drive
@@ -82,6 +84,9 @@ Fields are selectable from the list of fields. Each row in the fields list displ
 
 
 .. |add| image:: /_static/icons/fields/plus-circle.png
+  :width: 20
+
+.. |settings| image:: /_static/icons/settings/main/cog-outline.png
   :width: 20
 
 .. |brapi| image:: /_static/icons/settings/main/server-network.png

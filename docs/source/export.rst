@@ -11,7 +11,7 @@ Options
 -------
 
 File Format
-~~~~~~
+~~~~~~~~~~~
 
 One or both formats must be checked.
 
