@@ -16,9 +16,9 @@ Importing a field
 To import a new field into Field Book press the Add icon (|add|) in the upper right-hand corner of the toolbar in the Fields section. Fields can be imported from a local file, from cloud storage (Dropbox, Google Drive, etc.) or via a BrAPI connection (see :doc:`brapi` (|brapi|) for details).
 
 .. figure:: /_static/images/fields/fields_import_joined.png
-   :width: 40%
+   :width: 100%
    :align: center
-   :alt: Field import option dialog
+   :alt: Field import screens
 
    Field import process.
 
@@ -62,7 +62,7 @@ Creating a field
 .. figure:: /_static/images/fields/fields_create_joined.png
    :width: 100%
    :align: center
-   :alt: Creating a new field
+   :alt: Field creation screens
 
    Field creation process
 
@@ -74,7 +74,7 @@ Managing fields
 .. figure:: /_static/images/fields/fields_list_joined.png
    :width: 80%
    :align: center
-   :alt: Individual field options menu
+   :alt: Field management screens
 
    Managing existing fields
 

@@ -12,7 +12,7 @@ Creation
 Layout
 ------
 
-.. figure:: /_static/images/traits/formats/collect_zebra_framed.png
+.. figure:: /_static/images/traits/formats/collect_label_print_framed.png
    :width: 40%
    :align: center
    :alt: Zebra label print trait layout
