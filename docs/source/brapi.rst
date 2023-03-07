@@ -41,3 +41,9 @@ Once data has been collect for a BrAPI imported field using BrAPI imported trait
 
 .. |brapi| image:: /_static/icons/settings/main/server-network.png
   :width: 20
+
+.. |add| image:: /_static/icons/fields/plus-circle.png
+  :width: 20
+
+.. |settings| image:: /_static/icons/settings/main/server-network.png
+  :width: 20
