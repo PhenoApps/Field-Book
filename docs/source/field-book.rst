@@ -3,11 +3,11 @@ Field Book
 
 Introduction
 ------------
-Field Book is an open-source Android app that can be used to collect data on field research plots. When used in place of paper field books it eliminates the need for transcription and associated errors. It runs on an open platform and with inexpensive hardware, allowing current technology to be used in environments where cost and inflexibility have been limiting factors. The source code for Field Book is available on `GitHub <https://github.com/PhenoApps/Field-Book>`_.
+Field Book is an open-source Android app that can be used to collect data on field research plots. When used in place of paper field books it eliminates the need for data transcription and reduces the risk of errors. It runs on a wide range of inexpensive hardware, allowing current technology to be used in environments where cost and inflexibility have been limiting factors. The source code for Field Book is available on `GitHub <https://github.com/PhenoApps/Field-Book>`_.
 
 Getting Started
 ---------------
-Field Book can be downloaded from `Google Play <https://play.google.com/store/apps/details?id=com.tracker.fieldbook>`_ or can be installed manually using the latest .apk file from the `GitHub releases <https://github.com/PhenoApps/Field-Book/releases>`_ page. After installing the app, all permissions should be accepted so that the app is able to read/write data and access device features. Once permissions are accepted, sample data can optionally be loaded. This will import three sample fields and a list of sample traits. All of the images in this manual utilize the sample data included with Field Book.
+Field Book can be downloaded from the `Google Play Store <https://play.google.com/store/apps/details?id=com.tracker.fieldbook>`_ or can be installed manually using the latest .apk file from the `GitHub releases <https://github.com/PhenoApps/Field-Book/releases>`_ page. After installing the app, all permissions should be accepted so that the app is able to read/write data and access device features. Once permissions are accepted, optional example data can be loaded. The example data consists of three sample fields and a list of sample traits. All of the images in the manual utilize this data.
 
 Structure
 ---------

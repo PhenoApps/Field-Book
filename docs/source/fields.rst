@@ -1,5 +1,9 @@
 Fields
 ======
+Overview
+--------
+
+Experiments are represented in Field Book via fields. Each field must have a unique name, and the entries it contains (the experimental units on which data will be collected such as plots, individual plants, etc) must each have a globally unique id. In addition the entries must have at least two layout identifiers (such as plot, block, rep, row and column numbers) by which the entries can be sorted for navigation. Any further information such as variety name, pedigree, or treatment can be inlcuded for reference as well.
 
 
 .. figure:: /_static/images/fields/fields_framed.png

@@ -1,5 +1,8 @@
-Exporting Data
-==============
+Export
+======
+Overview
+--------
+
 Collected data can be exported to CSV files. The Export dialog allows the user to customize how collected data is exported
 
 .. figure:: /_static/images/export/export_framed.png

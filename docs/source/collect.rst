@@ -1,5 +1,9 @@
-Collecting data
-===============
+Collect
+=======
+Overview
+--------
+
+To collect data, use the black arrows to navigate to the plot for which data should be collected and navigate to the specific trait you want to collect. The input area at the bottom of the screen will adjust to match the layout of the trait that is being collected. Data is saved to an internal database as it is collected. Each trait has a specific layout that helps to rapidly collect organized data.
 
 .. figure:: /_static/images/collect/collect_framed.png
    :width: 40%
@@ -7,12 +11,6 @@ Collecting data
    :alt: Collect layout
 
    Data collection screen
-
-
-Overview
---------
-
-To collect data, use the black arrows to navigate to the plot for which data should be collected and navigate to the specific trait you want to collect. The input area at the bottom of the screen will adjust to match the layout of the trait that is being collected. Data is saved to an internal database as it is collected. Each trait has a specific layout that helps to rapidly collect organized data.
 
 Layout Details
 --------------

@@ -1,16 +1,16 @@
 Traits
 ======
+Overview
+--------
+
+Data is collected in Field Book via traits. The traits screen lets you create new traits and manage existing traits. Each trait is created by specifying a name, a type, and additional fields such as min, max, or default values. These settings optimize how the trait is formatted in the collect screen.
+
 .. figure:: /_static/images/traits/traits_framed.png
    :width: 40%
    :align: center
    :alt: Traits layout with samples imported
 
    The Traits screen layout with sample data loaded.
-
-Overview
---------
-
-Data is collected in Field Book via traits. The traits screen lets you create new traits and manage existing traits. Each trait is created by specifying a name, a type, and additional fields such as min, max, or default values. These settings optimize how the trait is formatted in the collect screen.
 
 Creating a Trait
 ----------------
@@ -19,7 +19,7 @@ Traits can be created by pressing the large Add icon (|add|) at the bottom right
 Managing Traits
 ---------------
 
-Each trait has options to make data collection easier. The menu icon on each line allows each trait to deleted, copied, or edited. The checkbox allows traits to be active or hidden on the main layout screen. Traits can be reordered by dragging and dropping the icon on the right of each trait line.
+Each trait has options to make data collection easier. The menu icon on each line allows each trait to deleted, copied, or edited. The checkbox allows traits to be active or hidden on the :doc:`collect` (|collect|) screen. Traits can be reordered by dragging and dropping the icon on the right of each trait line.
 
 .. figure:: /_static/images/traits/traits_sort_framed.png
    :width: 40%
@@ -36,6 +36,9 @@ Lists of traits can be created and transferred between different devices using t
 
 
 .. |add| image:: /_static/icons/traits/plus-circle.png
+  :width: 20
+
+.. |collect| image:: /_static/icons/home/barley.png
   :width: 20
 
 .. |check-all| image:: /_static/icons/traits/check-all.png
