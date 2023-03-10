@@ -3,12 +3,12 @@ Fields
 Overview
 --------
 
-Experiments are represented in Field Book via *fields*. Fields are either imported from a file or BrAPI enabled database, or created from scratch. Each field has a unique name, import, modification, and export dates, and a set of *entries* which represent the experimental units on which data will be collected (e.g. plots or individual plants).
+Experiments are represented in Field Book via *fields*. Fields are either imported from a file, from a BrAPI-enabled database, or created from scratch. Each field has a unique name, import, modification, and export dates, and a set of *entries* which represent the experimental units on which data will be collected (e.g. plots or individual plants).
 
 Each *entry* within a field must have the following: 
 
-   * A *unique identifier*, which is used internally to associate data with the specific entry. It must be unique across all of your fields.
-   * A *primary identifier*, and a *secondary identifier* which set the order of advancement through the field's entries. These can be whatever makes the most sense for your experiment, but they are generally numbers from the experimental design (e.g., row/plot, row/column, range/plot). They can be reassigned at any time via the field submenu.
+   * A *unique identifier*, which is used internally by Field Book to associate data with the specific entry. It must be unique across all of your fields.
+   * A *primary identifier*, and a *secondary identifier*. These set the order of advancement through the field's entries, and can be whatever makes the most sense for your experiment. MOst often they are numbers from the experimental design (e.g., row/plot, row/column, range/plot). They can be reassigned at any time via the field submenu.
   
 Any further information for the entries such as variety name, pedigree, or treatment is optional, but can be included and viewed in the InfoBars or in the summary dialog on the collect screen if desired.
 
@@ -24,7 +24,7 @@ Any further information for the entries such as variety name, pedigree, or treat
 Importing a new field
 ---------------------
 
-To import a new field into Field Book press the Add icon (|add|) in the upper right-hand corner of the toolbar in the Fields section. Then, in the resulting dialog, select whether to import from a local file, from cloud storage (Dropbox, Google Drive, etc.) or via a BrAPI connection (see :doc:`brapi` (|brapi|) for details).
+To import a new field into Field Book press the Add icon (|add|) in the upper right-hand corner of the toolbar in the Fields section. Then, in the resulting dialog, select whether to import from a local file, from cloud storage (Dropbox, Google Drive, etc.) or via a BrAPI connection. If choosing thelast option see :doc:`brapi` (|brapi|) for more details.
 
 A default import source can be set in :doc:`settings-general` (|settings|) to skip this dialog.
 
@@ -38,7 +38,7 @@ A default import source can be set in :doc:`settings-general` (|settings|) to sk
 If local is chosen, a list of possible files in the **field_import** folder will be displayed. Field import files must be saved in CSV, XLS, or XLSX format, or they will not show up in the import dialog. Filenames and column headers should exclude the following special characters:
 
 .. figure:: /_static/images/fields/fields_illegal_characters.png
-   :width: 80%
+   :width: 40%
    :align: center
    :alt: Field file illegal characters
 

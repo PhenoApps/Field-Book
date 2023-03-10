@@ -12,11 +12,11 @@ To collect data, use the black arrows to navigate to the plot for which data sho
 
    Data collection screen
 
-Layout Details
---------------
+Collect Screen Details
+----------------------
 
 Top toolbar
-~~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 By default, there are four buttons at the top of the screen (in addtion to the back navigation arrow).
 
@@ -44,7 +44,7 @@ The InfoBars display information about the current plot, and can be pressed to c
    :align: center
    :alt: InfoBars dropdown
 
-   Selecting which data field is shown 
+   Selecting which data field is shown in the InfoBars
 
 Trait navigation
 ~~~~~~~~~~~~~~~~
@@ -79,7 +79,7 @@ The large, black arrows will move between different entries. Pressing and holdin
 
 Data input
 ~~~~~~~~~~
-The bottom half of the screen is used to input data. The elements and layout of this area change based on the trait that is currently active.
+The bottom half of the screen is used to input data. The elements and layout of this area change based on the trait that is currently active. Reference the corresponding trait format page in these docs for layout details.
 
 Bottom toolbar
 ~~~~~~~~~~~~~~

@@ -32,7 +32,7 @@ Traits can also be sorted by their name, format, or active status using the sort
 
 Importing/Exporting Traits
 --------------------------
-Lists of traits can be created and transferred between different devices using the Import/Export option on the toolbar. Trait lists are stored in the /trait/ folder.
+Lists of traits can be created and transferred between different devices using the Import/Export option on the toolbar. Trait lists are stored in the **trait** folder and use the CSV format, but with a custom *.trt* extension.
 
 
 .. |add| image:: /_static/icons/traits/plus-circle.png

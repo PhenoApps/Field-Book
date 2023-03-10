@@ -18,9 +18,9 @@ File Format
 
 One or both formats must be checked.
 
-**Database** format exports each individual observation as a row, including all collected metadata such as the person and timestamp of each observation.
+**Database** format exports each individual observation as a spreadsheet row, and includes columns for collected metadata such as the person and timestamp of each observation.
 
-**Table** format exports each entry as a row with each trait as a column.
+**Table** format exports each entry as a spreadsheet row and each trait as a column, creating a matrix of observed values. Metadata such as person and timestamp are excluded.
 
 Included Columns
 ~~~~~~~~~~~~~~~~
