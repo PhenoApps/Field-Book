@@ -2,6 +2,9 @@ Storage
 =======
 Storage Location Definer
 ------------------------
+
+After installing and opening the app, you will be asked to define a 'Storage location' on the device. In Field Book this step is required. The selected 'Storage location' can be changed in the :doc:`/settings-general`.
+
 .. figure:: /_static/images/storage_definer_framed.png
    :width: 40%
    :align: center
@@ -9,12 +12,10 @@ Storage Location Definer
 
    Storage location definer layout
 
-After installing and opening the app, you will be asked to define a 'Storage location' on the device. In Field Book this step is required. The selected 'Storage location' can be changed in the :doc:`/settings-general`.
-
 Subdirectories
 --------------
 
-Fieldbook will create the following subdirectories within the 'Storage location' directory: **field_import**, **field_export**, **plot_data**, **resources**, **database**, **trait**, and **archive**.
+Fieldbook will create the following subdirectories within the selected 'Storage location' directory: **field_import**, **field_export**, **plot_data**, **resources**, **database**, **trait**, and **archive**.
 
 * **field_import**: contains files that can be imported into Field Book
 
@@ -29,3 +30,15 @@ Fieldbook will create the following subdirectories within the 'Storage location'
 * **trait**: contains trait files and the rust rating customizable scale
 
 * **archive**: contains backups when the user chooses to overwrite previously exported fields
+
+File transfer
+-------------
+
+To add your own field, trait, and resource files to the appropriate subdirectories you may need to manually transfer files from a computer. You can do this by connecting your Android device via a usb cable and changing it's USB mode to allow file transfer. Each device manufacturer has slight variations for the appearance of this dialog.
+
+.. figure:: /_static/images/fields/fields_transfer.png
+   :width: 40%
+   :align: center
+   :alt: USB file transfer settings
+
+   Example settings for USB file transfer.
