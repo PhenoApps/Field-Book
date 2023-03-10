@@ -1,11 +1,14 @@
 GeoNav
 ======
-
 Overview
 --------
 
-Used to supply high-accuracy location data to the device, which can be collected with the GNSS trait and/or used to navigate the field.
-This section provdes specific hardware and field use recommendations. Fieldbook also has a section of specific :doc:`settings-geonav` (|geonav|).
+The Geonav feature is used to automatically navigate between entries in the field based on the location of the device.
+It requires field entries to have high-accuracy location data collected via GNSS trait, as well as an an external GPS device.
+
+This section provdes specific hardware recomendations, as well as instuctions for deploying the recommended devices to use the GeoNav feature in the field.
+
+Fieldbook also has a dedicated screen for :doc:`settings-geonav` (|geonav|).
 
 Supplies
 --------
