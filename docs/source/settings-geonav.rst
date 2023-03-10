@@ -38,7 +38,7 @@ Opens bluetooth interface to pair to an external GPS device
 .. |log| image:: /_static/icons/settings/geonav/script-text-outline.png
   :width: 20
 
-.. |interval| image:: /_static/icons/settings/geonav/time-sand-empty.png
+.. |interval| image:: /_static/icons/settings/geonav/timer-sand-empty.png
   :width: 20
 
 .. |bluetooth| image:: /_static/icons/settings/geonav/bluetooth.png
