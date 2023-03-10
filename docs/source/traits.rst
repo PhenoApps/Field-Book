@@ -3,7 +3,7 @@ Traits
 Overview
 --------
 
-Data is collected in Field Book via traits. The traits screen lets you create new traits and manage existing traits. Each trait is created by specifying a name, a type, and additional fields such as min, max, or default values. These settings optimize how the trait is formatted in the collect screen.
+Data is collected in Field Book via traits. The traits screen lets you create new traits and manage existing traits. Each trait is created by specifying a trait type, a trait name, and additional fields such as min, max, or default values. These settings optimize how the trait is formatted in the collect screen.
 
 .. figure:: /_static/images/traits/traits_framed.png
    :width: 40%
@@ -19,7 +19,11 @@ Traits can be created by pressing the large Add icon (|add|) at the bottom right
 Managing Traits
 ---------------
 
-Each trait has options to make data collection easier. The menu icon on each line allows each trait to deleted, copied, or edited. The checkbox allows traits to be active or hidden on the :doc:`collect` (|collect|) screen. Traits can be reordered by dragging and dropping the icon on the right of each trait line.
+Once created, traits can be manipulated on the trait screen using the following features:
+
+  * The stacked line icon on the far left of each trait line can pressed and held to drag and drop the trait and create a new trait ordering.
+  * The menu icon on each trait line opens a menu where the trait can be copied, edited, or deleted.
+  * The checkbox can be checked to make a trait active, or unchecked to prevent it from showing up on the :doc:`collect` (|collect|) screen.
 
 .. figure:: /_static/images/traits/traits_sort_framed.png
    :width: 40%
