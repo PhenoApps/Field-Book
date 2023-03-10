@@ -42,6 +42,8 @@ Allows the user to change which default toolbar buttons are displayed on the Col
    :align: center
    :alt: Customize toolbar layout within appearance settings
 
+   Turn default toolbar options on/off
+
 Number of Infobars (|infobars|)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Allows the user to change the number of Infobars that are displayed on the Collect screen.
