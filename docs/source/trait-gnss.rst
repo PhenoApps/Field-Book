@@ -28,5 +28,5 @@ Collect layout
 .. |gnss| image:: /_static/icons/formats/satellite-variant.png
   :width: 20
 
-.. |geonav| image:: /_static/icons/settings/map-search.png
+.. |geonav| image:: /_static/icons/settings/main/map-search.png
   :width: 20
