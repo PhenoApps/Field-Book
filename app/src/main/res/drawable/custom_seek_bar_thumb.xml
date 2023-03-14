@@ -6,11 +6,11 @@
         android:height="40.0dip" />
     <stroke
         android:width="1.0dip"
-        android:color="#ff689F38" />
+        android:color="?attr/fb_trait_percent_stroke_color" />
     <gradient
         android:angle="270.0"
-        android:centerColor="#ffdddddd"
+        android:centerColor="?attr/fb_trait_percent_background_center_color"
         android:centerY="0.5"
-        android:endColor="#ffffffff"
-        android:startColor="#ffffffff" />
+        android:endColor="?attr/fb_trait_percent_background_center_color"
+        android:startColor="?attr/fb_trait_percent_background_center_color" />
 </shape>

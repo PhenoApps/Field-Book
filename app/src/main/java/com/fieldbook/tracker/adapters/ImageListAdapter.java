@@ -11,13 +11,17 @@ import android.widget.TextView;
 
 import com.fieldbook.tracker.R;
 
+/**
+ * Simple adapter that has an image view and a text view.
+ * This is currently only used in the config activity.
+ */
 public class ImageListAdapter extends ArrayAdapter<String> {
     String[] color_names;
     Integer[] image_id;
     Context context;
 
     public ImageListAdapter(Activity context, Integer[] image_id, String[] text) {
-        super(context, R.layout.listitem_language, text);
+        super(context, R.layout.list_item_config, text);
         this.color_names = text;
         this.image_id = image_id;
         this.context = context;
@@ -27,7 +31,7 @@ public class ImageListAdapter extends ArrayAdapter<String> {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View single_row = inflater.inflate(R.layout.listitem_config, null, true);
+        View single_row = inflater.inflate(R.layout.list_item_config, null, true);
         TextView textView = single_row.findViewById(R.id.config_title);
         ImageView imageView = single_row.findViewById(R.id.config_icon);
 

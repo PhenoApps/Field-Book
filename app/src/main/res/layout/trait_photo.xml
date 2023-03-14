@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.fieldbook.tracker.traits.PhotoTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/photoLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:visibility="gone">
+    android:visibility="gone"
+    tools:visibility="visible">
 
     <LinearLayout
         android:id="@+id/photoArea"
@@ -37,7 +39,8 @@
             android:gravity="center"
             android:padding="10dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_trait_camera" />
+            android:src="@drawable/ic_trait_camera"
+            android:contentDescription="@string/trait_photo_capture_button_content_description" />
 
     </LinearLayout>
 </com.fieldbook.tracker.traits.PhotoTraitLayout>

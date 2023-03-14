@@ -15,22 +15,15 @@
     <string name="startup_sample_data_title">示例数据</string>
     <string name="startup_sample_data_message">加载示例数据？</string>
     <!-- Permissions  -->
-    <string name="permission_rationale_location">定位功能需要访问设备的位置。</string>
-    <string name="permission_rationale_camera">拍照功能需要连接设备的相机。</string>
-    <string name="permission_rationale_microphone">录音功能需要连接设备的麦克风</string>
     <string name="permission_rationale_storage_import">导入文件需要访问设备上的文件</string>
     <string name="permission_rationale_storage_export">导出数据需要访问设备上的文件。</string>
     <string name="permission_rationale_trait_features">采集数据需要访问设备上的文件，麦克风和相机。</string>
     <!-- Miscellaneous  -->
-    <string name="fields_name">地块名称</string>
-    <string name="fields_load">加载</string>
     <!-- Main Activity  -->
     <string name="main_toolbar_search">搜索</string>
     <string name="main_toolbar_resources">资源</string>
     <string name="main_trait_details">性状说明</string>
     <string name="main_infobar_data_missing">无数据</string>
-    <string name="main_toolbar_data_lock">锁定数据</string>
-    <string name="main_toolbar_data_unlock">解锁数据</string>
     <string name="main_toolbar_moveto_no_match">无匹配的数值</string>
     <string name="main_toolbar_next_entry_no_data">下一个空记录</string>
     <string name="main_toolbar_moveto">转到 ID</string>
@@ -42,18 +35,7 @@
     <string name="fields_delete_study">删除地块</string>
     <string name="fields_delete_study_confirmation">你确信要删除这个地块吗？它将删除这个地块的全部数据！</string>
     <string name="fields_study_exists_message">地块已经存在。</string>
-    <string name="fields_select_study">选择或导入地块。</string>
-    <string name="fields_date_imported">导入日期</string>
-    <string name="fields_date_edited">编辑日期</string>
-    <string name="fields_date_exported">导出日期</string>
-    <string name="fields_summary">地块汇总</string>
-    <string name="fields_options">选项</string>
-    <string name="fields_study_statistics">统计量</string>
-    <string name="fields_sort">排序</string>
     <string name="fields_delete">删除</string>
-    <string name="fields_filter">筛选</string>
-    <string name="fields_reimport">重新导入</string>
-    <string name="fields_archive">存档</string>
     <!-- Settings Activity  -->
     <string name="settings_fields">地块</string>
     <string name="settings_traits">性状</string>
@@ -87,10 +69,7 @@
     <string name="traits_format_photo">图片</string>
     <string name="traits_format_audio">音频</string>
     <string name="traits_format_multicategorical">多重分类</string>
-    <string name="traits_format_angle">角度</string>
-    <string name="traits_format_video">视频</string>
     <string name="traits_format_location">位置</string>
-    <string name="traits_format_printer">打印机</string>
     <string name="traits_format_barcode">条形码</string>
     <string name="traits_format_labelprint">斑马标签打印</string>
     <string name="traits_create_trait">性状</string>
@@ -108,18 +87,15 @@
     <string name="traits_create_warning_name_blank">性状名称不能为空</string>
     <string name="traits_create_warning_duplicate">性状已经存在</string>
     <string name="traits_create_warning_numeric_required">默认值、最小值和最大值必须设定为数字</string>
-    <string name="traits_create_warning_categories_required">类别不能为空</string>
     <string name="traits_export_check">导出当前性状列表？</string>
     <string name="traits_warning_delete">删除性状也会删掉上采集的性状数据。确定要删除这个性状吗？</string>
     <!-- Export  -->
-    <string name="export_format_title">格式</string>
     <string name="export_format_database">数据库</string>
     <string name="export_format_table">表格</string>
     <string name="export_file_name">文件名</string>
     <string name="export_content_columns_title">地块列</string>
     <string name="export_content_columns_all">所有导入的列</string>
     <string name="export_content_columns_unique">只要独特的标识</string>
-    <string name="export_content_traits_title">性状</string>
     <string name="export_content_traits_all">所有性状</string>
     <string name="export_content_traits_active">只要活动的性状</string>
     <string name="export_error_general">导出错误</string>
@@ -132,7 +108,6 @@
     <string name="export_overwrite">覆盖此前的导出</string>
     <!-- Preferences Activity  -->
     <string name="preferences_appearance_title">外观</string>
-    <string name="preferences_appearance_tutorial">教程</string>
     <string name="preferences_appearance_tutorial_description">在采集、设置、地块和性状页面上添加”教程“按钮</string>
     <string name="preferences_appearance_infobar_number">信息条数量</string>
     <string name="preferences_appearance_infobar_number_description">调整主屏幕上显示的信息条数量</string>
@@ -151,21 +126,15 @@
     <string name="preferences_behavior_volume_buttons_navigate">用音量键翻动记录</string>
     <string name="preferences_behavior_volume_buttons_navigate_description">按音量键上翻或下翻记录</string>
     <string name="preferences_behavior_return_character">返回键信号</string>
-    <string name="preferences_behavior_return_character_description">调整如何定义返回键信号</string>
     <string name="preferences_behavior_return_character_next_plot">下一个小区</string>
     <string name="preferences_behavior_return_character_next_trait">下一个性状</string>
     <string name="preferences_behavior_return_character_do_nothing">无动作</string>
     <string name="preferences_behavior_cycle_traits">遍历性状然后前进</string>
     <string name="preferences_behavior_cycle_traits_description">采集完所有性状，田间记载本进入下一条记录</string>
-    <string name="preferences_behavior_import_source">选择默认的导入源</string>
-    <string name="preferences_behavior_export_source">选择导出/导入源</string>
     <string name="preferences_behavior_disable_entry_arrow">不显示记录箭头</string>
     <string name="preferences_behavior_disable_entry_arrow_left">向左</string>
     <string name="preferences_behavior_disable_entry_arrow_right">向右</string>
     <string name="preferences_behavior_disable_entry_arrow_both">都是</string>
-    <string name="preferences_naming">命名</string>
-    <string name="preferences_naming_photo">图片名称格式</string>
-    <string name="preferences_naming_export">导出名称格式</string>
     <string name="preferences_sounds">声音</string>
     <string name="preferences_sound_primary_order_sound">主顺序通知音</string>
     <string name="preferences_sound_primary_order_sound_description">主顺序变化时的通知声音</string>
@@ -191,9 +160,6 @@
     <string name="preferences_appearance_collection_category_title">采集页</string>
     <!-- Trait text and errors -->
     <string name="trait_layout_data_stored">已保存</string>
-    <string name="trait_layout_print_title">打印标签</string>
-    <string name="trait_layout_print_status_title">打印机状态</string>
-    <string name="trait_layout_print_status">获取连接状态</string>
     <string name="trait_layout_print_label_size_title">大小：</string>
     <string name="trait_layout_print_text_field_title">文本：</string>
     <string name="trait_layout_print_text_field_title_2">文本2：</string>
@@ -201,10 +167,7 @@
     <string name="trait_layout_print_text_field_title_4">文本4：</string>
     <string name="trait_layout_print_barcode_field_title">条形码：</string>
     <string name="trait_layout_print_label_copies_title">拷贝：</string>
-    <string name="trait_layout_print_clear_settings">清除设置</string>
     <string name="trait_error_hardware_missing">您的设备不包含此功能所必需的硬件</string>
-    <string name="trait_error_photo_missing">照片不存在</string>
-    <string name="trait_error_photo_error">无法读取照片</string>
     <string name="trait_error_minimum_value">数值低于最小值</string>
     <string name="trait_error_maximum_value">数值超过最大值</string>
     <string name="trait_error_disease_severity">严重度数据已存储</string>
@@ -243,8 +206,6 @@
     <string name="tutorial_settings_traits_description">允许添加、导入和管理性状。</string>
     <string name="tutorial_settings_collect_title">采集数据</string>
     <string name="tutorial_settings_collect_description">允许采集表型数据。</string>
-    <string name="tutorial_settings_profile_title">说明</string>
-    <string name="tutorial_settings_profile_description">允许设定采集者和位置。</string>
     <string name="tutorial_settings_settings_title">设置</string>
     <string name="tutorial_settings_settings_description">对数据采集进行其它配置</string>
     <string name="tutorial_settings_export_title">导出</string>
@@ -258,8 +219,6 @@
     <string name="tutorial_fields_delete_description">要删除地块，打开地块名称左侧的菜单然后选择删除。</string>
     <string name="tutorial_traits_add_title">添加性状</string>
     <string name="tutorial_traits_add_description">添加性状会创建一个新性状。不同性状的采集布局不同。</string>
-    <string name="tutorial_traits_import_title">导入性状列表</string>
-    <string name="tutorial_traits_import_description">要导入预设的性状列表，选择工具栏上的导入按钮。</string>
     <string name="tutorial_traits_format_title">性状格式</string>
     <string name="tutorial_traits_format_description">不同的性状格式通过图标来标识。</string>
     <string name="tutorial_traits_visibility_title">性状可见性</string>
@@ -269,27 +228,19 @@
     <string name="about_version_title">版本</string>
     <string name="about_title_other_apps">其它表型软件</string>
     <string name="about_project_lead_title">项目指挥</string>
-    <string name="about_developer_title">开发者</string>
     <string name="about_contributors_title">贡献者</string>
     <string name="about_contributors_developers_title">开发者</string>
     <string name="about_translators_title">翻译着</string>
     <string name="about_contributors_funding_title">经费支持</string>
     <string name="about_rate">评价这个软件</string>
-    <string name="about_licenses_title">许可</string>
     <string name="changelog_title">更改记录</string>
     <string name="libraries_title">函数库</string>
     <!-- Profile dialog -->
     <string name="profile_person">采集者</string>
-    <string name="profile_location">位置</string>
     <string name="profile_reset">清除设置</string>
     <string name="profile_person_title">设定采集者</string>
     <string name="profile_name_first">名</string>
     <string name="profile_name_last">姓</string>
-    <string name="profile_missing">空</string>
-    <string name="profile_location_title">设定位置</string>
-    <string name="profile_location_latitude">纬度</string>
-    <string name="profile_location_longitude">经度</string>
-    <string name="profile_location_get">获取定位</string>
     <!-- Database dialog -->
     <string name="database_dialog_title">数据库</string>
     <string name="database_import">导入数据库</string>
@@ -312,7 +263,6 @@
     <string name="import_error_general">导入错误</string>
     <string name="import_error_unique">唯一标识包含重复项或被另一个文件使用了</string>
     <string name="import_error_unsupported">尚不支持此文件格式</string>
-    <string name="import_error_columns">列名称包含非法字符或词语</string>
     <string name="import_error_column_name">导入文件的列名称不能是：</string>
     <string name="import_error_unique_characters_illegal">所选列含有不能用作唯一标识的字符</string>
     <string name="import_error_column_choice">这些列不能用于同一个事项</string>
@@ -341,14 +291,11 @@
     <string name="brapi_export_images">图像</string>
     <string name="brapi_na">缺失</string>
     <string name="brapi_delete_message">不能删除同步的BrAPI观测值，以缺失代替</string>
-    <string name="images_loading">载入图像中...</string>
     <!-- Warnings/Catches -->
-    <string name="warning_field_before_traits">性状创建前，必须先导入一个地块。</string>
     <string name="warning_field_missing">地块没有载入。请载入地块再采集数据。</string>
     <string name="warning_traits_missing">无性状存在。请先创建性状，再采集数据。</string>
     <string name="warning_traits_missing_modify">先创建性状，才能修改。</string>
     <!-- Search Activity -->
-    <string name="search_dialog_title">搜索</string>
     <string name="search_dialog_add">添加</string>
     <string name="search_dialog_clear">清除</string>
     <string name="search_dialog_query_is_equal_to">等于</string>
@@ -382,7 +329,6 @@
     <string name="brapi_study_name">名称</string>
     <string name="brapi_study_description">描述</string>
     <string name="brapi_study_location">位置</string>
-    <string name="brapi_study_num_plots">小区</string>
     <string name="brapi_study_num_traits">性状</string>
     <string name="brapi_study_detail_error">载入课题细节出错。课题未保存。</string>
     <string name="brapi_plot_detail_error">载入课题小区出错。课题未保存。</string>

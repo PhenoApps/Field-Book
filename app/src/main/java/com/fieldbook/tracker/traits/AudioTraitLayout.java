@@ -15,7 +15,6 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
@@ -51,6 +50,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     @Override
     public void setNaTraitsText() {
+        audioRecordingText.setText("NA");
     }
 
     @Override
@@ -167,7 +167,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         @Override
         public void onClick(View view) {
-            ((CollectActivity) getContext()).setNewTraits(ConfigActivity.dt.getUserDetail(getCurrentRange().plot_id));
+            ((CollectActivity) getContext()).setNewTraits(getDatabase().getUserDetail(getCurrentRange().plot_id));
 
             boolean enableNavigation = true;
             switch (buttonState) {

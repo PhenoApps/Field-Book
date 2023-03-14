@@ -24,7 +24,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.BluetoothUtil;
 import com.fieldbook.tracker.utilities.Constants;
@@ -161,7 +160,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         mBluetoothUtil = new BluetoothUtil();
 
-        String[] prefixTraits = ConfigActivity.dt.getRangeColumnNames();
+        String[] prefixTraits = getDatabase().getRangeColumnNames();
         optionsList = new ArrayList<>(Arrays.asList(prefixTraits));
         optionsList.add("date");
         optionsList.add("trial_name");
@@ -170,15 +169,15 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         optionsList.toArray(options);
 
         fieldArrayAdapter = new ArrayAdapter<>(
-                getContext(), R.layout.custom_spinnerlayout, options);
+                getContext(), R.layout.custom_spinner_layout, options);
 
         labelSizeArray = new String[]{"3\" x 2\" simple", "3\" x 2\" detailed", "2\" x 1\" simple", "2\" x 1\" detailed"};
         sizeArrayAdapter = new ArrayAdapter<>(
-                getContext(), R.layout.custom_spinnerlayout, labelSizeArray);
+                getContext(), R.layout.custom_spinner_layout, labelSizeArray);
 
         labelCopiesArray = new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
         copiesArrayAdapter = new ArrayAdapter<>(
-                getContext(), R.layout.custom_spinnerlayout, labelCopiesArray);
+                getContext(), R.layout.custom_spinner_layout, labelCopiesArray);
 
         labelsize = findViewById(R.id.labelsize);
         textfield1 = findViewById(R.id.textfield);
@@ -448,7 +447,12 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 value = "";
             } else {
                 int pos = spinner.getSelectedItemPosition();
-                value = ConfigActivity.dt.getDropDownRange(options[pos], getCurrentRange().plot_id)[0];
+                if (pos < options.length) {
+                    String[] v = getDatabase().getDropDownRange(options[pos], getCurrentRange().plot_id);
+                    if (v.length != 0) {
+                        value = v[0];
+                    }
+                }
             }
         }
          /*

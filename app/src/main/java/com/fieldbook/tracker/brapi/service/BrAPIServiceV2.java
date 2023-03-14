@@ -17,7 +17,6 @@ import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -77,7 +76,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
@@ -658,21 +656,24 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                     paginationManager.updateTotalPages(response.getMetadata().getPagination().getTotalPages());
 
-                    // Result contains a list of observation variables
-                    List<BrAPIObservation> brapiObservationList = response.getResult().getData();
-                    final List<Observation> observationList = mapObservations(brapiObservationList);
+                    if (response.getResult() != null) {
 
-                    function.apply(observationList);
+                        // Result contains a list of observation variables
+                        List<BrAPIObservation> brapiObservationList = response.getResult().getData();
+                        final List<Observation> observationList = mapObservations(brapiObservationList);
 
-                    System.out.println("TotalNumber of Observation records: "+response.getMetadata().getPagination().getTotalCount());
+                        function.apply(observationList);
 
-                    //Slide pagingation up 1 this is handled within function
-                    paginationManager.moveToNextPage();
+                        System.out.println("TotalNumber of Observation records: "+response.getMetadata().getPagination().getTotalCount());
 
-                    //Check if next recursion is valid
-                    if(paginationManager.getPage() < paginationManager.getTotalPages()) {
-                        //recurse
-                        getObservations(studyDbId,observationVariableDbIds, paginationManager, function, failFunction);
+                        //Slide pagingation up 1 this is handled within function
+                        paginationManager.moveToNextPage();
+
+                        //Check if next recursion is valid
+                        if(paginationManager.getPage() < paginationManager.getTotalPages()) {
+                            //recurse
+                            getObservations(studyDbId, observationVariableDbIds, paginationManager, function, failFunction);
+                        }
                     }
                 }
 
@@ -768,12 +769,23 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
                 public void onSuccess(BrAPIObservationListResponse phenotypesResponse, int i, Map<String, List<String>> map) {
-                    List<Observation> newObservations = new ArrayList<>();
-                    for(BrAPIObservation obs: phenotypesResponse.getResult().getData()){
-                        newObservations.add(mapToObservation(obs));
-                    }
 
-                    function.apply(newObservations);
+                    try {
+
+                        List<Observation> newObservations = new ArrayList<>();
+                        for(BrAPIObservation obs: phenotypesResponse.getResult().getData()){
+                            newObservations.add(mapToObservation(obs));
+                        }
+
+                        function.apply(newObservations);
+
+                    } catch (Exception e) {
+
+                        e.printStackTrace();
+
+                        failFunction.apply(ApiErrorCode.FORBIDDEN.ordinal());
+
+                    }
                 }
 
                 @Override

@@ -14,12 +14,15 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.SummaryAdapter
-import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.google.gson.JsonParseException
+import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.SoftKeyboardUtil
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
     private var recyclerView: RecyclerView? = null
@@ -28,6 +31,9 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
     private var toolbar: Toolbar? = null
     private var filterDialog: AlertDialog? = null
     private var listener: SummaryOpenListener? = null
+
+    @Inject
+    lateinit var database: DataHelper
 
     fun interface SummaryOpenListener {
         fun onSummaryDestroy()
@@ -69,7 +75,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
     override fun onResume() {
         super.onResume()
         view?.let { v ->
-            SoftKeyboardUtil.closeKeyboard(context, v, 0L)
+            SoftKeyboardUtil.closeKeyboard(activity, v, 0L)
         }
     }
 
@@ -105,15 +111,15 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
     private fun setup() {
 
-        with(context as? CollectActivity) {
+        with(activity as? CollectActivity) {
 
             this?.let { collector ->
 
                 val studyId = collector.studyId
 
-                val attributes = ObservationUnitAttributeDao.getAllNames(studyId.toInt())
+                val attributes = database.getAllObservationUnitAttributeNames(studyId.toInt())
 
-                val traits = ConfigActivity.dt.visibleTrait
+                val traits = database.visibleTrait
 
                 loadData(collector, attributes, traits)
 
@@ -121,14 +127,14 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                 prevButton?.setOnClickListener {
 
-                    collector.rangeBox.clickLeft()
+                    collector.getRangeBox().clickLeft()
 
                     loadData(collector, attributes, traits)
                 }
 
                 nextButton?.setOnClickListener {
 
-                    collector.rangeBox.clickRight()
+                    collector.getRangeBox().clickRight()
 
                     loadData(collector, attributes, traits)
                 }
@@ -144,7 +150,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
         val obsUnit = collector.observationUnit
 
-        val data = ConfigActivity.dt.convertDatabaseToTable(attributes, traits, obsUnit)
+        val data = database.convertDatabaseToTable(attributes, traits, obsUnit)
 
         val pairList = arrayListOf<SummaryAdapter.SummaryListModel>()
 
@@ -171,7 +177,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                                     //read the preferences, default to displaying values instead of labels
                                     val labelValPref: String =
-                                        PreferenceManager.getDefaultSharedPreferences(context)
+                                        PreferenceManager.getDefaultSharedPreferences(activity)
                                             .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value")
                                             ?: "value"
 
@@ -227,7 +233,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
         collector: CollectActivity, attributes: Array<String>, traits: Array<String>
     ) {
 
-        context?.let { ctx ->
+        activity?.let { ctx ->
 
             var filter: Set<String>? = getPersistedFilter(ctx)
 
@@ -246,7 +252,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
             }
 
             filterDialog =
-                AlertDialog.Builder(context).setTitle(R.string.fragment_summary_filter_title)
+                AlertDialog.Builder(activity, R.style.AppAlertDialog).setTitle(R.string.fragment_summary_filter_title)
                     .setMultiChoiceItems(keys, checked) { _, which, isChecked ->
                         val item = keys[which]
                         filter = if (isChecked) {
@@ -298,11 +304,11 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
      */
     override fun onAttributeClicked(attribute: String) {
 
-        with(context as? CollectActivity) {
+        with(activity as? CollectActivity) {
 
             this?.let { collector ->
 
-                if (attribute in ConfigActivity.dt.visibleTrait) {
+                if (attribute in database.visibleTrait) {
 
                     collector.navigateToTrait(attribute)
 

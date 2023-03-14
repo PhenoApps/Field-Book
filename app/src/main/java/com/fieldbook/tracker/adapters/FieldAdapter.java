@@ -18,14 +18,13 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.activities.FieldEditorActivity;
 import com.fieldbook.tracker.brapi.BrapiInfoDialog;
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog;
-import com.fieldbook.tracker.dialogs.FieldSortController;
+import com.fieldbook.tracker.interfaces.FieldAdapterController;
+import com.fieldbook.tracker.interfaces.FieldController;
+import com.fieldbook.tracker.interfaces.FieldSortController;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
 
@@ -37,8 +36,8 @@ public class FieldAdapter extends BaseAdapter {
 
     private static final String TAG = "FieldAdapter";
 
-    private LayoutInflater mLayoutInflater;
-    private ArrayList<FieldObject> list;
+    private final LayoutInflater mLayoutInflater;
+    private final ArrayList<FieldObject> list;
     private final Context context;
     private SharedPreferences ep;
 
@@ -96,9 +95,9 @@ public class FieldAdapter extends BaseAdapter {
         ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
-            convertView = mLayoutInflater.inflate(R.layout.listitem_field, null);
+            convertView = mLayoutInflater.inflate(R.layout.list_item_field, null);
 
-            holder.fieldName = convertView.findViewById(R.id.field_name);
+            holder.fieldName = convertView.findViewById(R.id.list_item_trait_trait_name);
             holder.count = convertView.findViewById(R.id.field_count);
             holder.importDate = convertView.findViewById(R.id.field_import_date);
             holder.editDate = convertView.findViewById(R.id.field_edit_date);
@@ -185,9 +184,7 @@ public class FieldAdapter extends BaseAdapter {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.delete) {
-                    AlertDialog alert = createDeleteItemAlertDialog(position);
-                    alert.show();
-                    DialogUtils.styleDialogs(alert);
+                    createDeleteItemAlertDialog(position).show();
                 } else if (item.getItemId() == R.id.sort) {
                     showSortDialog(position);
                     //DialogUtils.styleDialogs(alert);
@@ -210,13 +207,14 @@ public class FieldAdapter extends BaseAdapter {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
 
-                ConfigActivity.dt.deleteField(getItem(position).getExp_id());
+                ((FieldAdapterController) context).getDatabase().deleteField(getItem(position).getExp_id());
 
                 if (getItem(position).getExp_id() == ep.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
                     setEditorItem(ep, null);
                 }
 
-                FieldEditorActivity.loadData();
+                ((FieldAdapterController) context).queryAndLoadFields();
+
                 CollectActivity.reloadData = true;
             }
         };
@@ -254,7 +252,8 @@ public class FieldAdapter extends BaseAdapter {
         ed.putInt(GeneralKeys.SELECTED_FIELD_ID, selectedField.getExp_id());
         ed.apply();
 
-        ConfigActivity.dt.switchField(selectedField.getExp_id());
+        ((FieldController) context).getDatabase().switchField(selectedField.getExp_id());
+
         CollectActivity.reloadData = true;
         notifyDataSetChanged();
 

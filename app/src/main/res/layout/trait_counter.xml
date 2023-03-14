@@ -12,7 +12,6 @@
         android:id="@+id/layout_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/white"
         android:fitsSystemWindows="true">
 
         <Button
@@ -22,10 +21,10 @@
             android:background="@drawable/custom_round_button"
             android:gravity="center|center_vertical"
             android:text="-1"
-            android:textColor="#000000"
             android:textSize="@dimen/text_size_large"
             android:textStyle="bold"
             android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/addBtn"
             app:layout_constraintHorizontal_chainStyle="packed"
@@ -40,9 +39,6 @@
             android:background="@drawable/custom_round_button"
             android:gravity="center"
             android:text="+1"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_xxlarge"
-            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/minusBtn"

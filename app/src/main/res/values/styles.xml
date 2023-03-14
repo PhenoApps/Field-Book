@@ -1,179 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/main_primary</item>
-        <item name="colorPrimaryDark">@color/main_primaryDark</item>
-        <item name="colorAccent">@color/main_colorAccent</item>
-        <item name="buttonStyle">@style/ButtonStyle</item>
-    </style>
+    <!-- v5.4 introduces new themes -->
+    <!-- Default, High-Contrast, Blue -->
 
-    <style name="AppThemeAction" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/main_primary</item>
-        <item name="colorPrimaryDark">@color/main_primaryDark</item>
-        <item name="colorAccent">@color/main_colorAccent</item>
+    <style name="AppTheme" parent="BaseAppTheme"/>
+
+    <!-- all other themes inherit from the default one, but overwrite the colors -->
+    <style name="BaseAppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+
+        <item name="android:windowActivityTransitions">false</item>
+
+        <item name="fb_color_primary">@color/main_primary</item>
+        <item name="fb_color_primary_dark">@color/main_primary_dark</item>
+        <item name="fb_color_accent">@color/main_color_accent</item>
+        <item name="fb_color_background">@color/main_color_background</item>
+        <item name="fb_color_text_light">@color/main_color_text_light</item>
+        <item name="fb_color_text_dark">@color/main_color_text_dark</item>
+        <item name="fb_color_text_button_background">@color/main_color_text_button_background</item>
+        <item name="fb_icon_tint">@color/main_color_icon_tint</item>
+        <item name="fb_icon_fill_tint">@color/main_color_icon_fill_tint</item>
+        <item name="fb_title_text_color">?attr/fb_color_text_light</item>
+        <item name="fb_trait_boolean_false_color">@color/main_trait_boolean_false_color</item>
+        <item name="fb_trait_boolean_true_color">@color/main_trait_boolean_true_color</item>
+        <item name="fb_bluetooth_connected_color">@color/main_bluetooth_connected_color</item>
+        <item name="fb_color_hint_text">@color/main_color_hint_text</item>
+        <item name="fb_color_indeterminate_progress_bar">@color/main_primary_dark</item>
+        <item name="fb_spinner_focused">@color/main_color_accent</item>
+        <item name="fb_spinner_selected">@color/main_primary_transparent</item>
+        <item name="fb_trait_percent_background_center_color">@color/main_trait_percent_background_center_color</item>
+        <item name="fb_trait_percent_background_start_end_color">@color/main_trait_percent_background_start_end_color</item>
+        <item name="fb_trait_percent_start_color">@color/main_trait_percent_start_color</item>
+        <item name="fb_trait_percent_stroke_color">@color/main_trait_percent_stroke_color</item>
+        <item name="fb_value_saved_color">@color/main_value_saved_color</item>
+        <item name="fb_value_altered_color">@color/main_value_altered_color</item>
+        <item name="fb_trait_categorical_button_press_color">@color/main_trait_categorical_button_press_color</item>
+        <item name="fb_button_text_color">@color/main_button_text_color</item>
+        <item name="fb_button_color_normal">@color/main_button_color_normal</item>
+        <item name="fb_button_color_pressed">@color/main_button_color_pressed</item>
+        <item name="fb_subheading_color">@color/main_subheading_color</item>
+        <item name="fb_color_text_secondary">@color/main_color_text_secondary</item>
+
+        <!-- these are used in material design components -->
+        <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>
+        <item name="android:textColorSecondary">?attr/fb_color_text_dark</item>
+
+        <!-- widget style declarations (found in styles_widgets.xml)-->
+        <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
+        <item name="imageButtonStyle">@style/ImageButtonStyle</item>
+        <item name="radioButtonStyle">@style/RadioButtonStyle</item>
         <item name="buttonStyle">@style/ButtonStyle</item>
         <item name="toolbarStyle">@style/AppToolbar</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+        <item name="actionBarTheme">@style/AppToolbar</item>
+        <item name="checkboxStyle">@style/CheckBoxStyle</item>
+        <item name="alertDialogTheme">@style/AlertDialogStyle</item>
+        <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
+        <item name="actionOverflowMenuStyle">@style/OverFlowMenuStyle</item>
+        <item name="progressBarStyle">@style/ProgressBarStyle</item>
+        <item name="indeterminateProgressStyle">@style/IndeterminateProgressStyle</item>
+        <item name="editTextStyle">@style/EditTextStyle</item>
+        <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
+        <item name="spinnerStyle">@style/SpinnerStyle</item>
+        <item name="dropDownListViewStyle">@style/DropDownListViewStyle</item>
+        <item name="android:popupMenuStyle">@style/PopUpMenuStyle</item>
+        <item name="android:spinnerItemStyle">@style/SpinnerItemStyle</item>
+        <item name="android:dropDownSpinnerStyle">@style/DropDownSpinnerStyle</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
+        <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <item name="android:datePickerStyle">@style/DatePickerDialogStyle</item>
+
+        <!-- navigation icon drawable -->
+        <item name="navigationIcon">@drawable/ic_arrow_left</item>
+
+        <!-- typically used in the title bar and other main parts of the app -->
+        <item name="colorPrimary">?attr/fb_color_primary</item>
+
+        <!-- primary dark is used in the status bar -->
+        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
+
+        <item name="colorPrimaryVariant">?attr/fb_color_primary_dark</item>
+
+        <!-- typically the color of ui controls -->
+        <item name="colorAccent">?attr/fb_color_accent</item>
+
+        <item name="android:colorAccent">?attr/fb_color_accent</item>
+
+        <item name="iconTint">?attr/fb_icon_tint</item>
     </style>
 
-    <style name="AppTheme.MaterialAboutActivity" parent="Theme.Mal.Light">
-        <item name="colorPrimary">@color/main_primary</item>
-        <item name="colorPrimaryDark">@color/main_primaryDark</item>
-        <item name="colorAccent">@color/main_colorAccent</item>
+    <!-- Blue Theme -->
+    <style name="BaseAppTheme.Blue">
+        <item name="fb_color_primary">@color/blue_primary</item>
+        <item name="fb_color_primary_dark">@color/blue_primary_dark</item>
+        <item name="fb_color_accent">@color/blue_color_accent</item>
+        <item name="fb_color_background">@color/WHITE</item>
+        <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
+        <item name="fb_color_text_light">@color/WHITE</item>
+        <item name="fb_color_hint_text">@color/BLACK</item>
+        <item name="fb_color_text_dark">@color/BLACK</item>
+        <item name="fb_color_indeterminate_progress_bar">@color/main_primary_dark</item>
+        <item name="fb_spinner_focused">@color/blue_color_accent</item>
+        <item name="fb_spinner_selected">@color/blue_primary_transparent</item>
+        <item name="fb_trait_percent_background_center_color">@color/blue_trait_percent_background_center_color</item>
+        <item name="fb_trait_percent_background_start_end_color">@color/blue_trait_percent_background_start_end_color</item>
+        <item name="fb_trait_percent_start_color">@color/blue_trait_percent_start_color</item>
+        <item name="fb_trait_percent_stroke_color">@color/blue_trait_percent_stroke_color</item>
+        <item name="fb_value_saved_color">#d50000</item>
+        <item name="fb_value_altered_color">#0000d5</item>
+        <item name="fb_color_text_secondary">@color/blue_color_text_secondary</item>
+        <item name="fb_button_color_pressed">@color/blue_button_color_pressed</item>
+
+        <item name="colorPrimary">?attr/fb_color_primary</item>
+        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
+        <item name="colorPrimaryVariant">?attr/fb_color_primary_dark</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+        <item name="android:colorAccent">?attr/fb_color_accent</item>
+
     </style>
 
-    <style name="AppTheme.MaterialAboutActivity.Fragment" parent="Theme.Mal.Light">
-        <item name="colorPrimary">@color/main_primary</item>
-        <item name="colorPrimaryDark">@color/main_primaryDark</item>
-        <item name="colorAccent">@color/main_colorAccent</item>
-    </style>
+    <!-- High Contrast Theme -->
+    <style name="BaseAppTheme.HighContrast">
+        <item name="fb_color_primary">@color/high_contrast_primary</item>
+        <item name="fb_color_primary_dark">@color/high_contrast_primary_dark</item>
+        <item name="fb_color_accent">@color/high_contrast_color_accent</item>
+        <item name="fb_color_text_light">@color/high_contrast_color_text_light</item>
+        <item name="fb_color_text_dark">@color/high_contrast_color_text_dark</item>
+        <item name="fb_color_hint_text">@color/high_contrast_color_hint_text</item>
+        <item name="fb_color_background">@color/high_contrast_color_background</item>
+        <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
+        <item name="fb_color_indeterminate_progress_bar">?attr/fb_color_primary_dark</item>
+        <item name="fb_spinner_focused">@color/high_contrast_color_accent</item>
+        <item name="fb_spinner_selected">@color/high_contrast_primary_transparent</item>
+        <item name="fb_trait_percent_background_center_color">@color/high_contrast_trait_percent_background_center_color</item>
+        <item name="fb_trait_percent_background_start_end_color">@color/high_contrast_trait_percent_background_start_end_color</item>
+        <item name="fb_trait_percent_start_color">@color/high_contrast_trait_percent_start_color</item>
+        <item name="fb_trait_percent_stroke_color">@color/high_contrast_trait_percent_stroke_color</item>
+        <item name="fb_trait_boolean_false_color">@color/high_contrast_primary_dark</item>
+        <item name="fb_trait_boolean_true_color">@color/high_contrast_primary_dark</item>
+        <item name="fb_trait_categorical_button_press_color">@color/high_contrast_trait_categorical_button_press_color</item>
+        <item name="fb_value_saved_color">@color/high_contrast_value_saved_color</item>
+        <item name="fb_value_altered_color">@color/high_contrast_value_altered_color</item>
+        <item name="fb_color_text_secondary">@color/high_contrast_color_text_secondary</item>
+        <item name="fb_button_color_pressed">@color/high_contrast_button_color_pressed</item>
+        <item name="fb_icon_fill_tint">@color/high_contrast_primary_dark</item>
 
-    <style name="AppDialog" parent="Theme.AppCompat.Light.Dialog">
-        <item name="colorPrimary">@color/main_primary</item>
-        <item name="colorPrimaryDark">@color/main_primaryDark</item>
-        <item name="colorAccent">@color/main_colorAccent</item>
+        <item name="colorPrimary">?attr/fb_color_primary</item>
+        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
+        <item name="colorPrimaryVariant">?attr/fb_color_primary_dark</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+        <item name="android:colorAccent">?attr/fb_color_accent</item>
 
-        <item name="android:windowNoTitle">false</item>
-        <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
-        <item name="windowActionBar">false</item>
-        <item name="buttonStyle">@style/ButtonStyle</item>
-        <item name="android:actionMenuTextAppearance">@style/AppMenuText</item>
-        <item name="android:windowTitleStyle">@style/MyTitleTextStyle</item>
-        <item name="android:background">@android:color/white</item>
-    </style>
-
-    <style name="ActivityDialog" parent="Theme.AppCompat.Light.Dialog">
-        <item name="colorPrimary">@color/main_primary</item>
-        <item name="colorPrimaryDark">@color/main_primaryDark</item>
-        <item name="colorAccent">@color/main_colorAccent</item>
-
-        <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
-        <item name="android:windowTitleStyle">@style/MyTitleTextStyle</item>
-        <item name="android:background">@android:color/white</item>
-    </style>
-
-    <style name="AppAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorPrimary">@color/main_primary</item>
-        <item name="colorPrimaryDark">@color/main_primaryDark</item>
-        <item name="colorAccent">@color/main_colorAccent</item>
-
-        <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
-        <item name="android:background">@android:color/white</item>
-        <item name="android:windowTitleStyle">@style/MyTitleTextStyle</item>
-
-        <item name="android:windowFullscreen">false</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowSoftInputMode">stateUnchanged</item>
-    </style>
-
-    <style name="Dialog">
-        <item name="android:windowNoTitle">false</item>
-        <item name="android:windowIsFloating">true</item>
-    </style>
-
-    <style name="MyTitleTextStyle">
-        <item name="android:textColor">#000000</item>
-        <item name="android:background">#FFFFFF</item>
-        <item name="android:textSize">@dimen/text_size_large</item>
-        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
-    </style>
-
-    <style name="AppMenuText" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textSize">@dimen/text_size_large</item>
-    </style>
-
-    <style name="ButtonStyle" parent="Widget.AppCompat.Button">
-        <item name="android:textAllCaps">false</item>
-    </style>
-
-    <style name="AppToolbar" parent="@style/Widget.AppCompat.Toolbar">
-        <item name="titleTextColor">#343434</item>
-        <item name="drawerArrowStyle">@style/MyDrawerArrowToggle</item>
-        <item name="theme">@style/MyToolbarTheme</item>
-    </style>
-
-    <style name="MyDrawerArrowToggle" parent="@style/Widget.AppCompat.DrawerArrowToggle">
-        <item name="color">#343434</item>
-    </style>
-
-    <style name="MyToolbarTheme">
-        <item name="colorControlNormal">#343434</item>
-    </style>
-
-    <style name="TextHeader" parent="TextAppearance.AppCompat">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textSize">18dp</item>
-    </style>
-
-    <style name="TextData" parent="TextAppearance.AppCompat">
-        <item name="android:textSize">18dp</item>
-    </style>
-
-    <style name="FieldCreatorDialog" />
-    <style name="FieldCreatorDialog.TextSummary">
-        <item name="android:textSize">18sp</item>
-    </style>
-    <style name="FieldCreatorDialog.Title">
-        <item name="android:textSize">24sp</item>
-    </style>
-
-    <!-- data grid styles -->
-    <style name="LegendText">
-        <item name="android:gravity">center</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:ellipsize">marquee</item>
-        <item name="android:scrollHorizontally">true</item>
-        <item name="android:marqueeRepeatLimit">marquee_forever</item>
-        <item name="android:focusable">true</item>
-        <item name="android:focusableInTouchMode">true</item>
-    </style>
-
-    <style name="CellText">
-        <item name="android:layout_marginTop">8dp</item>
-        <item name="android:gravity">start</item>
-        <item name="android:maxLines">1</item>
-<!--        <item name="android:textAlignment">viewStart</item>-->
-        <item name="android:textSize">16sp</item>
-        <item name="android:background">@drawable/cell</item>
-        <item name="android:ellipsize">marquee</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:scrollHorizontally">true</item>
-        <item name="android:marqueeRepeatLimit">marquee_forever</item>
-        <item name="android:focusable">true</item>
-        <item name="android:focusableInTouchMode">true</item>
-    </style>
-
-    <style name="CellText.Header">
-        <item name="android:layout_gravity">center_horizontal</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textSize">18sp</item>
-<!--        <item name="android:paddingStart">8dp</item>-->
-<!--        <item name="android:paddingEnd">8dp</item>-->
-        <item name="android:background">@drawable/text_cell</item>
-    </style>
-
-    <style name="CellText.ParentCellText">
-        <item name="android:textSize">16sp</item>
-        <item name="android:background">@drawable/text_cell</item>
-    </style>
-
-    <style name="NumericCellText">
-        <item name="android:layout_marginTop">8dp</item>
-        <item name="android:gravity">start</item>
-        <item name="android:ellipsize">marquee</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:scrollHorizontally">true</item>
-        <item name="android:marqueeRepeatLimit">marquee_forever</item>
-<!--        <item name="android:textAlignment">viewEnd</item>-->
-        <item name="android:textSize">16sp</item>
-        <item name="android:background">@drawable/cell</item>
-    </style>
-
-    <style name="NumericCellText.ParentCellText">
-        <item name="android:textSize">16sp</item>
-        <item name="android:background">@drawable/text_cell</item>
     </style>
 
 </resources>

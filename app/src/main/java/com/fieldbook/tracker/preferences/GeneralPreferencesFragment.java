@@ -7,13 +7,13 @@ import android.os.Bundle;
 
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.ListPreference;
-import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.DefineStorageActivity;
+import com.fieldbook.tracker.activities.PreferencesActivity;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 

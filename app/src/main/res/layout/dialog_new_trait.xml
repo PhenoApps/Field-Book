@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#FFFFFF"
     android:orientation="vertical"
     android:paddingLeft="20dp"
     android:paddingTop="5dp"
@@ -15,7 +15,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
@@ -30,25 +30,21 @@
                 android:paddingRight="10dp"
                 android:paddingBottom="5dp">
 
-                <TextView
+                <TextView style="@style/TextViewStyle.Bold.Title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
                     android:layout_weight=".2"
                     android:paddingRight="10dp"
-                    android:text="@string/traits_create_format"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small"
-                    android:textStyle="bold" />
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text="@string/traits_create_format" />
 
                 <Spinner
                     android:id="@+id/format"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight=".8"
-                    android:textColor="#FFFFFF"
-                    android:textSize="@dimen/text_size_small"
-                    android:textStyle="bold" />
+                    android:layout_weight=".8" />
 
             </LinearLayout>
 
@@ -63,15 +59,14 @@
                 android:paddingTop="5dp"
                 android:paddingRight="10dp">
 
-                <TextView
-                    android:layout_width="100dp"
+                <TextView style="@style/TextViewStyle.Bold.Title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
                     android:paddingRight="10dp"
-                    android:text="@string/traits_create_trait"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small"
-                    android:textStyle="bold" />
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text="@string/traits_create_trait" />
 
                 <EditText
                     android:id="@+id/trait"
@@ -79,9 +74,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
                     android:inputType="textCapWords"
-                    android:paddingRight="10dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small" />
+                    android:paddingRight="10dp" />
 
             </LinearLayout>
 
@@ -96,16 +89,15 @@
                 android:paddingTop="5dp"
                 android:paddingRight="10dp">
 
-                <TextView
+                <TextView style="@style/TextViewStyle.Bold.Title"
                     android:id="@+id/defTv"
-                    android:layout_width="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
                     android:paddingRight="10dp"
-                    android:text="@string/traits_create_value_default"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small"
-                    android:textStyle="bold" />
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text="@string/traits_create_value_default" />
 
                 <EditText
                     android:id="@+id/def"
@@ -114,9 +106,7 @@
                     android:layout_gravity="right"
                     android:imeOptions="actionNext"
                     android:inputType="textCapWords"
-                    android:paddingRight="10dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small" />
+                    android:paddingRight="10dp" />
 
                 <ToggleButton
                     android:id="@+id/boolBtn"
@@ -124,7 +114,6 @@
                     android:layout_height="wrap_content"
                     android:textOff="@string/traits_create_false"
                     android:textOn="@string/traits_create_true"
-                    android:textSize="@dimen/text_size_small"
                     android:visibility="gone" />
             </LinearLayout>
 
@@ -140,15 +129,14 @@
                 android:paddingTop="5dp"
                 android:paddingRight="10dp">
 
-                <TextView
-                    android:layout_width="100dp"
+                <TextView style="@style/TextViewStyle.Bold.Title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
                     android:paddingRight="10dp"
-                    android:text="@string/traits_create_value_minimum"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small"
-                    android:textStyle="bold" />
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text="@string/traits_create_value_minimum" />
 
                 <EditText
                     android:id="@+id/minimum"
@@ -157,9 +145,7 @@
                     android:layout_gravity="right"
                     android:imeOptions="actionNext"
                     android:inputType="textCapWords"
-                    android:paddingRight="10dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small" />
+                    android:paddingRight="10dp" />
 
             </LinearLayout>
 
@@ -174,15 +160,14 @@
                 android:paddingTop="5dp"
                 android:paddingRight="10dp">
 
-                <TextView
-                    android:layout_width="100dp"
+                <TextView style="@style/TextViewStyle.Bold.Title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:paddingRight="10dp"
-                    android:text="@string/traits_create_value_maximum"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small"
-                    android:textStyle="bold" />
+                    android:text="@string/traits_create_value_maximum" />
 
                 <EditText
                     android:id="@+id/maximum"
@@ -191,9 +176,7 @@
                     android:layout_gravity="right"
                     android:imeOptions="actionNext"
                     android:inputType="textCapWords"
-                    android:paddingRight="10dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small" />
+                    android:paddingRight="10dp" />
 
 
             </LinearLayout>
@@ -209,15 +192,14 @@
                 android:paddingTop="5dp"
                 android:paddingRight="10dp">
 
-                <TextView
-                    android:layout_width="100dp"
+                <TextView style="@style/TextViewStyle.Bold.Title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:layout_gravity="left|center_vertical"
                     android:paddingRight="10dp"
-                    android:text="@string/traits_create_details"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small"
-                    android:textStyle="bold" />
+                    android:text="@string/traits_create_details" />
 
                 <EditText
                     android:id="@+id/details"
@@ -226,9 +208,7 @@
                     android:layout_gravity="right"
                     android:imeOptions="actionNext"
                     android:inputType="textCapWords"
-                    android:paddingRight="10dp"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small" />
+                    android:paddingRight="10dp" />
 
             </LinearLayout>
 
@@ -243,15 +223,14 @@
                 android:paddingTop="5dp"
                 android:paddingRight="10dp">
 
-                <TextView
-                    android:layout_width="100dp"
+                <TextView style="@style/TextViewStyle.Bold.Title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:layout_gravity="left|center_vertical"
                     android:paddingRight="10dp"
-                    android:text="@string/traits_create_categories_title"
-                    android:textColor="#000000"
-                    android:textSize="@dimen/text_size_small"
-                    android:textStyle="bold" />
+                    android:text="@string/traits_create_categories_title" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -267,9 +246,6 @@
                         android:imeOptions="actionNext"
                         android:inputType="textCapWords"
                         android:paddingRight="10dp"
-                        android:textColor="#000000"
-                        android:textSize="@dimen/text_size_small"
-                        xmlns:app="http://schemas.android.com/apk/res-auto"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/dialog_new_trait_cat_btn"
@@ -284,7 +260,6 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="4dp"
                         android:text="@string/dialog_new_trait_add_cat_button_text"
-                        xmlns:app="http://schemas.android.com/apk/res-auto"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"

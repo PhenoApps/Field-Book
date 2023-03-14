@@ -8,6 +8,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.utilities.AppLanguageUtil
 
 class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClickListener {

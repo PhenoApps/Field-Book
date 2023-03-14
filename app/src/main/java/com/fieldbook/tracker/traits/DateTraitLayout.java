@@ -87,7 +87,8 @@ public class DateTraitLayout extends BaseTraitLayout {
          * When the calendar view visibility button is pressed it starts the date picker dialog.
          */
         calendarVisibilityBtn.setOnClickListener((View) -> {
-            DialogFragment newFragment = new DatePickerFragment(dateFormat, (y, m, d) -> {
+
+            DialogFragment newFragment = new DatePickerFragment().newInstance(dateFormat, (y, m, d) -> {
 
                 Calendar calendar = Calendar.getInstance();
 
@@ -216,9 +217,9 @@ public class DateTraitLayout extends BaseTraitLayout {
 
         // Change text color
         if (getNewTraits().containsKey(getCurrentTrait().getTrait())) {
-            getCollectInputView().setTextColor(Color.BLUE);
+            getCollectInputView().setTextColor(getValueAlteredColor());
         } else {
-            getCollectInputView().setTextColor(Color.BLACK);
+            getCollectInputView().setTextColor(getTextColor());
         }
     }
 
@@ -364,7 +365,7 @@ public class DateTraitLayout extends BaseTraitLayout {
             final Calendar c = Calendar.getInstance();
             date = dateFormat.format(c.getTime());
 
-            getCollectInputView().setTextColor(Color.BLACK);
+            getCollectInputView().setTextColor(getTextColor());
 
             //This is used to persist moving between months
             setDateText(getMonthForInt(c.get(Calendar.MONTH)), String.format(Locale.getDefault(), "%02d", c.get(Calendar.DAY_OF_MONTH)) );

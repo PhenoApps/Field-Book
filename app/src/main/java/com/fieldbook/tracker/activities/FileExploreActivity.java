@@ -14,11 +14,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
@@ -27,7 +25,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class FileExploreActivity extends AppCompatActivity {
+public class FileExploreActivity extends ThemedActivity {
 
     public static final String EXTRA_RESULT_KEY = "com.fieldbook.tracker.activities.FieldEditorActivity.extras.RESULT";
 

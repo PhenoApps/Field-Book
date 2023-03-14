@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -16,15 +15,17 @@ import com.evrencoskun.tableview.TableView
 import com.evrencoskun.tableview.listener.ITableViewListener
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.DataGridAdapter
-import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.Utils
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * @author Chaney
@@ -41,7 +42,8 @@ import kotlinx.coroutines.launch
  * i.putExtra("result", plotId)
  * i.putExtra("trait", 1) <- actually a trait index s.a 0 -> "height", 1 -> "lodging"
  **/
-class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITableViewListener {
+@AndroidEntryPoint
+class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITableViewListener {
 
     /***
      * Polymorphism class structure to serve different cell types to the grid.
@@ -86,6 +88,9 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
     private lateinit var mRowHeaders: ArrayList<String>
     private lateinit var mPlotIds: ArrayList<String>
     private lateinit var mTraits: Array<String>
+
+    @Inject
+    lateinit var database: DataHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -149,7 +154,7 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
             R.id.menu_data_grid_action_header_view -> {
 
                 //get all available obs. property columns
-                val prefixTraits = ObservationUnitPropertyDao.getRangeColumns()
+                val prefixTraits = database.rangeColumns
 
                 if (prefixTraits.isNotEmpty()) {
 
@@ -187,9 +192,7 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
         //if row header was not chosen, then use the preference unique name
         var rowHeader = prefixTrait ?: ep.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
 
-        ConfigActivity.dt.open()
-
-        if (rowHeader !in ObservationUnitPropertyDao.getRangeColumnNames()) {
+        if (rowHeader !in database.rangeColumnNames) {
             rowHeader = uniqueHeader
         }
 
@@ -202,12 +205,12 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
             scope.launch {
 
                 //query database for visible traits
-                mTraits = ConfigActivity.dt.visibleTrait
+                mTraits = database.visibleTrait
 
-                val traits = ConfigActivity.dt.allTraitObjects;
+                val traits = database.allTraitObjects;
 
                 //expensive database call, only asks for the unique name plot attr and all visible traits
-                val cursor = ConfigActivity.dt.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
+                val cursor = database.convertDatabaseToTable(arrayOf(uniqueHeader, rowHeader), mTraits)
 
                 if (cursor.moveToFirst()) {
 
@@ -217,58 +220,68 @@ class DataGridActivity : AppCompatActivity(), CoroutineScope by MainScope(), ITa
 
                     val dataMap = arrayListOf<List<CellData>>()
 
-                    do { //iterate over cursor results and populate lists of plot ids and related trait values
+                    try {
 
-                        val rowHeaderIndex = cursor.getColumnIndex(rowHeader)
+                        do { //iterate over cursor results and populate lists of plot ids and related trait values
 
-                        //unique name column is always the first column
-                        val uniqueIndex = cursor.getColumnIndex(cursor.getColumnName(0))
+                            val rowHeaderIndex = cursor.getColumnIndex(rowHeader)
 
-                        if (uniqueIndex > -1) { //if it doesn't exist skip this row
+                            //unique name column is always the first column
+                            val uniqueIndex = cursor.getColumnIndex(cursor.getColumnName(0))
 
-                            val plotId = cursor.getString(uniqueIndex)
+                            if (uniqueIndex > -1) { //if it doesn't exist skip this row
 
-                            val header = cursor.getString(rowHeaderIndex)
+                                val id = cursor.getString(uniqueIndex)
 
-                            val dataList = arrayListOf<CellData>()
+                                val header = cursor.getString(rowHeaderIndex)
 
-                            mRowHeaders.add(header) //add unique name row header
+                                val dataList = arrayListOf<CellData>()
 
-                            mPlotIds.add(plotId)
+                                mRowHeaders.add(header) //add unique name row header
 
-                            mTraits.forEachIndexed { _, variable ->
+                                mPlotIds.add(id)
 
-                                val index = cursor.getColumnIndex(variable)
+                                mTraits.forEachIndexed { _, variable ->
 
-                                if (index > -1) {
+                                    val index = cursor.getColumnIndex(variable)
 
-                                    val value = cursor.getString(index) ?: ""
+                                    if (index > -1) {
 
-                                    val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
+                                        val value = cursor.getString(index) ?: ""
 
-                                    if (t != null) {
+                                        val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
 
-                                        try {
+                                        if (t != null) {
 
-                                            dataList.add(CellData(CategoryJsonUtil
-                                                .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel), plotId))
+                                            try {
 
-                                        } catch (e: Exception) {
+                                                dataList.add(CellData(CategoryJsonUtil
+                                                    .flattenMultiCategoryValue(CategoryJsonUtil.decode(value), showLabel), id))
 
-                                            dataList.add(CellData(value, plotId))
+                                            } catch (e: Exception) {
 
+                                                dataList.add(CellData(value, id))
+
+                                            }
+                                        } else {
+                                            //data list is a trait row in the data grid
+                                            dataList.add(CellData(value, id))
                                         }
-                                    } else {
-                                        //data list is a trait row in the data grid
-                                        dataList.add(CellData(value, plotId))
                                     }
                                 }
+
+                                dataMap.add(dataList)
                             }
 
-                            dataMap.add(dataList)
-                        }
+                        } while (cursor.moveToNext())
 
-                    } while (cursor.moveToNext())
+                    } catch (e: java.lang.IllegalStateException) {
+
+                        Utils.makeToast(this@DataGridActivity, getString(R.string.act_data_grid_cursor_failed))
+
+                        e.printStackTrace()
+
+                    }
 
                     //send trait/plot indices to highlight the cell
                     mAdapter = DataGridAdapter((trait ?: 1) - 1, (plotId ?: 1) - 1)

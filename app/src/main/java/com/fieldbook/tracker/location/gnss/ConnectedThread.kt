@@ -59,7 +59,7 @@ class ConnectedThread constructor(private val socket: BluetoothSocket, val handl
             e.printStackTrace()
 
             //if the thread is a daemon and still reading messages, cancel the thread
-            if ("socket closed" in e.message ?: String()) {
+            if ("socket closed" in (e.message ?: String())) {
                 cancel()
             }
         }

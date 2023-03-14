@@ -13,6 +13,24 @@
                 android:summary="@string/preferences_theme_app_color_description"
                 android:title="@string/preferences_theme_app_color_title" />
     -->
+    <ListPreference
+        android:icon="@drawable/theme_light_dark"
+        android:title="@string/preferences_theme_theme_title"
+        android:key="key_preferences_theme_theme"
+        android:entries="@array/preferences_themes_entries"
+        android:entryValues="@array/preferences_themes_entry_values"
+        android:defaultValue="0"
+        android:summary="%s"/>
+
+    <ListPreference
+        android:icon="@drawable/format_size"
+        android:title="@string/preferences_theme_text_size_title"
+        android:key="key_preferences_theme_text"
+        android:entries="@array/preferences_text_size_entries"
+        android:entryValues="@array/preferences_text_size_entry_values"
+        android:defaultValue="2"
+        android:summary="%s"/>
+
     <com.skydoves.colorpickerpreference.ColorPickerPreference
         android:icon="@drawable/ic_pref_theme_saved_data_color"
         android:key="SAVED_DATA_COLOR"

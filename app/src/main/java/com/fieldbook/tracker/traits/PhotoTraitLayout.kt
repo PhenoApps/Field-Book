@@ -20,7 +20,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.adapters.GalleryImageAdapter
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -168,9 +167,11 @@ class PhotoTraitLayout : BaseTraitLayout {
                         photo?.setSelection((photo?.count ?: 1) - 1)
                         photo?.onItemClickListener =
                             OnItemClickListener { _: AdapterView<*>?, _: View?, pos: Int, _: Long ->
-                                displayPlotImage(
-                                    photos[pos].uri
-                                )
+                                if (pos < photos.size) {
+                                    displayPlotImage(
+                                        photos[pos].uri
+                                    )
+                                }
                             }
                     }
 
@@ -333,9 +334,9 @@ class PhotoTraitLayout : BaseTraitLayout {
                 newTraits?.set(traitName, v)
                 val expId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
                 val observation =
-                    ConfigActivity.dt.getObservationByValue(expId, currentRange.plot_id, traitName, v)
-                ConfigActivity.dt.deleteTraitByValue(expId, currentRange.plot_id, traitName, v)
-                ConfigActivity.dt.insertObservation(
+                    database.getObservationByValue(expId, currentRange.plot_id, traitName, v)
+                database.deleteTraitByValue(expId, currentRange.plot_id, traitName, v)
+                database.insertObservation(
                     currentRange.plot_id,
                     traitName,
                     format,
@@ -407,7 +408,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                                 )
                                 loadLayout()
                             } else {
-                                ConfigActivity.dt.deleteTraitByValue(
+                                database.deleteTraitByValue(
                                     expId,
                                     currentRange.plot_id,
                                     currentTrait.trait,
@@ -430,7 +431,7 @@ class PhotoTraitLayout : BaseTraitLayout {
                 } else {
 
                     // If an NA exists, delete it
-                    ConfigActivity.dt.deleteTraitByValue(
+                    database.deleteTraitByValue(
                         expId,
                         currentRange.plot_id,
                         currentTrait.trait,

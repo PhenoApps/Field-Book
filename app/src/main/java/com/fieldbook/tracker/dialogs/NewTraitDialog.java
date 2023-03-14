@@ -1,8 +1,5 @@
 package com.fieldbook.tracker.dialogs;
 
-import static com.fieldbook.tracker.activities.TraitEditorActivity.displayBrapiInfo;
-import static com.fieldbook.tracker.activities.TraitEditorActivity.loadData;
-
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -27,10 +24,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.activities.ConfigActivity;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
 import com.fieldbook.tracker.adapters.CategoryAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapter;
+import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
@@ -86,6 +83,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
     public NewTraitDialog(View layout, TraitEditorActivity activity) {
         // fields
         originActivity = activity;
+
         mAdapter = activity.getAdapter();
         traitFormats = new TraitFormatCollection();
         oldTrait = null;
@@ -143,7 +141,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
 
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(
                 TraitEditorActivity.thisActivity,
-                R.layout.custom_spinnerlayout,
+                R.layout.custom_spinner_layout,
                 traitFormats.getLocalStringList());
         format.setAdapter(itemsAdapter);
 
@@ -268,7 +266,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
             return;
         }
 
-        final int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
+        final int pos = originActivity.getDatabase().getMaxPositionFromTraits() + 1;
         final int booleanIndex = traitFormats.findIndexByEnglishString("Boolean");
         if (format.getSelectedItemPosition() == booleanIndex) {
             def.setText(bool.isChecked() ? "true" : "false");
@@ -281,7 +279,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
 
             // TODO: Add the local trait data_source name into other trait editing/inserting db functions.
             t.setTraitDataSource("local");
-            ConfigActivity.dt.insertTraits(t);
+            originActivity.getDatabase().insertTraits(t);
 
         } else {
             restoreDialogItemsByTraitObject(oldTrait);
@@ -297,13 +295,11 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         // brapiDialogShown = mAdapter.infoDialogShown;
         setBrAPIDialogShown(mAdapter.infoDialogShown);
         if (!brapiDialogShown) {
-            // brapiDialogShown = displayBrapiInfo(originActivity,
-            //                          ConfigActivity.dt, null, true);
-            setBrAPIDialogShown(displayBrapiInfo(originActivity,
-                    ConfigActivity.dt, null, true));
+            setBrAPIDialogShown(((TraitAdapterController) originActivity)
+                            .displayBrapiInfo(originActivity, null, true));
         }
 
-        loadData();
+        ((TraitAdapterController) originActivity).queryAndLoadTraits();
 
         CollectActivity.reloadData = true;
         createDialog.dismiss();
@@ -391,7 +387,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
         // TODO: Add the trait_data_source variable into the edit.
         final int i = format.getSelectedItemPosition();
         final String englishFormat = traitFormats.getEnglishString(i);
-        ConfigActivity.dt.editTraits(t.getId(),
+        originActivity.getDatabase().editTraits(t.getId(),
                 trait.getText().toString().trim(),
                 englishFormat.toLowerCase(),
                 def.getText().toString(),
@@ -671,7 +667,7 @@ public class NewTraitDialog extends DialogFragment implements CategoryAdapter.Ca
 
             // Disallow duplicate traits
             final String traitName = trait.getText().toString().trim();
-            final boolean exists = ConfigActivity.dt.getTraitByName(traitName) != null;
+            final boolean exists = originActivity.getDatabase().getTraitByName(traitName) != null;
             if (!edit) {
                 if (exists) {
                     return getResString(R.string.traits_create_warning_duplicate);

@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.UUID;
 
 import jxl.Workbook;
 import jxl.WorkbookSettings;
@@ -119,13 +120,18 @@ public class FieldFileObject {
         }
 
         public final String getFileStem() {
-            final String path = path_.toString();
-            //uri separated by query param separator %2F, not encoded with keys
-            final String token = "%2F";
-            final int tokenSize = token.length();
-            final int first = path.lastIndexOf(token) + tokenSize;
-            final int last = path.lastIndexOf(".");
-            return path.substring(first, last);
+            try {
+                final String path = path_.toString();
+                //uri separated by query param separator %2F, not encoded with keys
+                final String token = "%2F";
+                final int tokenSize = token.length();
+                final int first = path.lastIndexOf(token) + tokenSize;
+                final int last = path.lastIndexOf(".");
+                return path.substring(first, last);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return UUID.randomUUID().toString();
+            }
         }
 
         public final boolean hasSpecialCharacters() {

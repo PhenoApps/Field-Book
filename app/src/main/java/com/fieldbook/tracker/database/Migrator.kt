@@ -7,9 +7,7 @@ import android.database.sqlite.SQLiteException
 import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
-import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.objects.TraitObject
-import java.util.*
 
 /**
  * this class only handles the upgrade from DBv8 to DBv9
@@ -56,7 +54,8 @@ class Migrator {
             CREATE VIEW IF NOT EXISTS $sLocalImageObservationsViewName     
             AS SELECT obs.${Observation.PK} AS id, 
                 obs.value AS value, 
-                study.${Study.PK} AS ${Study.FK}
+                study.${Study.PK} AS ${Study.FK},
+                vars.observation_variable_name as observation_variable_name
             FROM ${Observation.tableName} AS obs
             JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
             JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK} 
@@ -71,7 +70,8 @@ class Migrator {
                         obs.value AS value, 
                         study.${Study.PK} AS ${Study.FK},
                         vars.trait_data_source AS trait_data_source,
-                        vars.observation_variable_field_book_format
+                        vars.observation_variable_field_book_format,
+                        vars.observation_variable_name
             FROM ${Observation.tableName} AS obs
             JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK} 
             JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK} 

@@ -5,15 +5,18 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
+import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.database.dao.ObservationDao;
+import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
+import com.fieldbook.tracker.interfaces.CollectController;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -30,16 +33,27 @@ public abstract class BaseTraitLayout extends LinearLayout {
     //references the collect activity locked state (locked, unlocked or frozen)
     protected boolean isLocked = false;
 
+    protected CollectController controller;
+
     public BaseTraitLayout(Context context) {
         super(context);
+        initController(context);
     }
 
     public BaseTraitLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        initController(context);
     }
 
     public BaseTraitLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        initController(context);
+    }
+
+    private void initController(Context context) {
+        if (context instanceof CollectController) {
+            this.controller = (CollectController) context;
+        }
     }
 
     public abstract String type();  // return trait type
@@ -87,7 +101,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
         CollectActivity act = (CollectActivity) getContext();
         isLocked = act.isFrozen() || act.isLocked();
 
-        ObservationModel[] observations = ObservationDao.Companion.getAllRepeatedValues(
+        ObservationModel[] observations = getDatabase().getRepeatedValues(
                 act.getStudyId(),
                 act.getObservationUnit(),
                 act.getTraitName()
@@ -187,7 +201,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public SharedPreferences getPrefs() {
-        return getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, 0);
+        return getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
     }
 
     public CollectActivity getCollectActivity() {
@@ -203,8 +217,34 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public String getDisplayColor() {
+        return String.format("#%06X", (0xFFFFFF & getContext().getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE)
+                .getInt(GeneralKeys.SAVED_DATA_COLOR, resolveThemeColor(R.attr.fb_value_saved_color))));
+    }
 
-        return String.format("#%06X", (0xFFFFFF & getPrefs().getInt(GeneralKeys.SAVED_DATA_COLOR, Color.parseColor("#d50000"))));
+    public int getButtonTextColor() {
+        return resolveThemeColor(R.attr.fb_button_text_color);
+    }
+
+    public int getButtonBackgroundColor() {
+        return resolveThemeColor(R.attr.fb_button_color_normal);
+    }
+
+    public int getButtonPressedColor() {
+        return resolveThemeColor(R.attr.fb_trait_categorical_button_press_color);
+    }
+
+    public int getTextColor() {
+        return resolveThemeColor(R.attr.fb_color_text_dark);
+    }
+
+    public int getValueAlteredColor() {
+        return resolveThemeColor(R.attr.fb_value_altered_color);
+    }
+
+    private int resolveThemeColor(int resid) {
+        TypedValue value = new TypedValue();
+        getContext().getTheme().resolveAttribute(resid, value, true);
+        return value.data;
     }
 
     /**
@@ -256,8 +296,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     protected List<ObservationModel> getObservations() {
         CollectActivity act = getCollectActivity();
-        return Arrays.asList(ObservationDao.Companion
-                .getAllRepeatedValues(act.getStudyId(), act.getObservationUnit(), act.getTraitName()));
+        return Arrays.asList(getDatabase().getRepeatedValues(act.getStudyId(), act.getObservationUnit(), act.getTraitName()));
     }
 
     protected ObservationModel getCurrentObservation() {
@@ -270,4 +309,6 @@ public abstract class BaseTraitLayout extends LinearLayout {
         }
         return null;
     }
+
+    protected DataHelper getDatabase() { return controller.getDatabase(); }
 }

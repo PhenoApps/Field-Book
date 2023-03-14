@@ -27,7 +27,11 @@ class RepeatedValuesPagerAdapter(private val mContext: Context) : PagerAdapter()
         val editText = layout.findViewById<EditText>(R.id.list_item_text_et)
         editText.setText(items[position].model.value)
         editText.tag = position
-        editText.isEnabled = false
+        
+        //disable editing but allow scrolling
+        editText.isFocusableInTouchMode = false
+        editText.clearFocus()
+
         editText.setTextColor(items[position].color)
         views.put(position, editText)
 

@@ -47,8 +47,16 @@ public class PercentTraitLayout extends BaseTraitLayout {
         seekListener = new SeekBar.OnSeekBarChangeListener() {
 
             public void onProgressChanged(SeekBar sb, int progress, boolean arg2) {
-                if (sb.getProgress() < Integer.parseInt(getCurrentTrait().getMinimum()))
-                    sb.setProgress(Integer.parseInt(getCurrentTrait().getMinimum()));
+                int minimum = 0;
+                if (getCurrentTrait() != null) {
+                    try {
+                        minimum = Integer.parseInt(getCurrentTrait().getMinimum());
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (sb.getProgress() < minimum)
+                    sb.setProgress(minimum);
 
                 setCurrentValueText(sb.getProgress(), Color.parseColor(getDisplayColor()));
             }

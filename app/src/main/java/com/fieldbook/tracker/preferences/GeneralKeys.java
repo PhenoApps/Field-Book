@@ -15,6 +15,8 @@ public class GeneralKeys {
     public static final String FIRST_NAME = "FirstName";
     public static final String LAST_NAME = "LastName";
     public static final String PERSON_UPDATE = "PersonUpdate";
+    public static final String REQUIRE_USER_TO_COLLECT              = "com.tracker.fieldbook.preference.require_user_to_collect";
+    public static final String REQUIRE_USER_INTERVAL              = "com.tracker.fieldbook.preference.require_user_interval";
 
     // Appearance
     public static final String TOOLBAR_CUSTOMIZE                    = "TOOLBAR_CUSTOMIZE";
@@ -101,7 +103,9 @@ public class GeneralKeys {
 
     //themes
     public static final String SAVED_DATA_COLOR = "SAVED_DATA_COLOR";
-
+    public static final String THEME = "key_preferences_theme_theme";
+    public static final String TEXT_THEME = "key_preferences_theme_text";
+    public static final String THEME_FLAG = "key_preferences_theme_theme_flag";
     public static final String EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT";
     public static final String FIRST_RUN = "FirstRun";
     public static final String UPDATE_VERSION = "UpdateVersion";

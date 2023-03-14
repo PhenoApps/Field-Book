@@ -3,6 +3,7 @@ package com.fieldbook.tracker.brapi.model;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
@@ -44,8 +45,8 @@ public class FieldBookImage extends BrapiObservation {
 
     }
 
-    public FieldBookImage(Context ctx, String filePath, Bitmap missingPhoto) {
-        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(ctx, "photos");
+    public FieldBookImage(Context ctx, String filePath, String traitName, Bitmap missingPhoto) {
+        DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(ctx, traitName);
 
         this.missing = missingPhoto;
         this.location = new GeoJSON();
@@ -54,6 +55,9 @@ public class FieldBookImage extends BrapiObservation {
         if (photosDir != null) {
 
             this.file = photosDir.findFile(filePath);
+
+            Uri filePathUri = Uri.parse(filePath);
+            this.file = DocumentFile.fromSingleUri(ctx, filePathUri);
 
             if (this.file != null) {
 
@@ -220,7 +224,7 @@ public class FieldBookImage extends BrapiObservation {
 
     public void loadImage(Context ctx) {
 
-        if (file.length() == 0) {
+        if (file == null || file.length() == 0) {
 
             loadMissingImage();
 

@@ -273,12 +273,13 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
     private void pressOnButton(Button button) {
         button.setTextColor(Color.parseColor(getDisplayColor()));
-        button.getBackground().setColorFilter(button.getContext().getResources().getColor(R.color.button_pressed), PorterDuff.Mode.MULTIPLY);
+        button.getBackground().setColorFilter(getButtonPressedColor(), PorterDuff.Mode.MULTIPLY);
     }
 
     private void pressOffButton(Button button) {
-        button.setTextColor(Color.BLACK);
-        button.getBackground().setColorFilter(button.getContext().getResources().getColor(R.color.button_normal), PorterDuff.Mode.MULTIPLY);
+        button.setTextColor(getButtonTextColor());
+        button.getBackground().setTint(getButtonBackgroundColor());
+        button.getBackground().setColorFilter(getButtonBackgroundColor(), PorterDuff.Mode.MULTIPLY);
     }
 
     private void addCategory(final BrAPIScaleValidValuesCategories category) {

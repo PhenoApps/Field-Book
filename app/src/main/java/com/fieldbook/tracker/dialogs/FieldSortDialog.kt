@@ -3,6 +3,7 @@ package com.fieldbook.tracker.dialogs
 import android.app.Activity
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.SortAdapter
+import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.objects.FieldObject
 
 /**

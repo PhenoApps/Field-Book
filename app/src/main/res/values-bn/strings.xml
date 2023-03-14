@@ -16,13 +16,9 @@
     <string name="main_trait_details">বৈশিষ্ট্যের বিস্তারিত</string>
     <string name="main_infobar_data_missing">উপাত্তহীন</string>
     <string name="preferences_appearance_theme_title">ধারণা</string>
-    <string name="main_toolbar_data_lock">বন্ধ উপাত্ত</string>
-    <string name="main_toolbar_data_unlock">খোলা উপাত্ত</string>
     <!-- Trait layouts and messages -->
     <string name="trait_layout_data_stored">উপাত্ত সংরক্ষিত হয়েছে</string>
     <string name="trait_error_hardware_missing">এই চরিত্রের জন্য আপনার যন্ত্র প্রয়োজনীয় হার্ডওয়্যার ধারণ করে না</string>
-    <string name="trait_error_photo_missing">ছবি অনুপস্থিত</string>
-    <string name="trait_error_photo_error">ছবি দেখা যাই না</string>
     <string name="trait_error_minimum_value">অনুমোদিত নিম্নমানের চেয়ে ছোট মান</string>
     <string name="trait_error_maximum_value">অনুমোদিত বডমানের চেয়েও বড মান</string>
     <string name="trait_error_disease_severity">প্রকোপতা সংরক্ষিত রয়েছে</string>
@@ -75,9 +71,7 @@
     <string name="traits_options_delete_title">বিশিষ্টটি মুছে ফেলুন</string>
     <string name="traits_toolbar_delete_all">সকল বৈশিষ্ট্যই মুছে ফেলুন</string>
     <string name="traits_create_warning_numeric_required">নির্দিষ্টতা, সর্বনিম্ন, এবং সরবুচ্চ এগুলো অবশ্যই নম্বর হতে হবে</string>
-    <string name="traits_create_warning_categories_required">শ্রেণি/বিভাগ ফাকা থাকতে পারে না</string>
     <!-- Advanced settings -->
-    <string name="preferences_appearance_tutorial">শিক্ষাদান সম্পর্কিত</string>
     <string name="preferences_appearance_quickgoto">দ্রুত গমন করুন</string>
     <string name="preferences_behavior_cycle_traits">পরবর্তী বৈশিষ্ট্যে চক্রাকারে গমন করে</string>
     <string name="preferences_general_use_day_number">বছর এর দিনটি ব্যাবহার করুন</string>
@@ -111,7 +105,6 @@
 
     <string name="about_title">সম্বন্ধে</string>
     <string name="about_version_title">ভার্সন</string>
-    <string name="about_developer_title">উদ্ভাবনকারী</string>
     <string name="about_translators_title">অনুবাদক</string>
 
     <!-- Other Apps -->
@@ -121,7 +114,6 @@
     <string name="export_format_database">ডাটাবেজ</string>
     <string name="export_format_table">ছক</string>
     <string name="export_file_name">নথির নাম</string>
-    <string name="export_format_title">ফরম্যাট</string>
     <string name="export_content_columns_all">সকল ইম্পরটেট কলাম</string>
     <string name="export_content_columns_title">ক্ষেত্র কলাম</string>
     <string name="export_content_columns_unique">শুধুমাত্র একক পরিচায়ক</string>
@@ -138,15 +130,10 @@
     <!-- Update dialog -->
     <!-- Setup dialog -->
     <string name="profile_person">বেক্তি</string>
-    <string name="profile_location">স্থান</string>
     <string name="profile_reset">সেটিং পরিষ্কার করুন</string>
     <string name="profile_person_title">বেক্তি সেট করুন</string>
     <string name="profile_name_first">নামের প্রথম অংশ</string>
     <string name="profile_name_last">নামের শেষ অংশ</string>
-    <string name="profile_location_title">স্থান সেট করুন</string>
-    <string name="profile_location_latitude">অক্ষাংশ</string>
-    <string name="profile_location_longitude">দ্রাঘিমাংশ</string>
-    <string name="profile_location_get">স্থান দেখুন</string>
     <!-- Database dialog -->
     <string name="database_dialog_title">ডাটাবেজ</string>
     <string name="database_reset_message">ডাটাবেজ মুছে ফেলা হয়েছে</string>
@@ -163,10 +150,8 @@
     <string name="import_error_general">পাঠানোর সময় সমস্যা</string>
     <string name="import_error_unique">একক পরিচায়ক ডুপ্লিকেট হয়েছে</string>
     <string name="import_error_unsupported">এই ধরনের নথি বর্তমানে সাপোর্ট করেনা</string>
-    <string name="import_error_columns">কলামের নামে অনাকাঙ্ক্ষিত চরিত্র বা শব্দ আছে</string>
     <string name="import_error_column_choice">একই এসাইনমেনট এর জন্য কলামসমূহ ব্যাবহার করা যায় না</string>
     <!-- Warnings/Catches -->
-    <string name="warning_field_before_traits">কোন বৈশিষ্ট্য তৈরি করতে চাইলে তার পূর্বে অবশ্যই ক্ষেত্র ইম্পরট করতে হবে।</string>
     <string name="warning_field_missing">কোন ক্ষেত্রই বর্তমানে লোড করা নাই। উপাত্ত সংগ্রহের পূর্বে অনুগ্রহপূর্বক ক্ষেত্র লোড করুন।</string>
     <string name="warning_traits_missing">কোন বৈশিষ্ট্যই উপাস্থিত নেই। উপাত্ত সংগ্রহের পূর্বে অনুগ্রহপূর্বক বৈশিষ্ট্য সৃষ্টি করুন।</string>
     <string name="warning_traits_missing_modify">বৈশিষ্ট্য তৈরি করুন তাদেরকে পরিবর্তনের পূর্বেই।</string>
@@ -188,11 +173,6 @@
     <string name="fields_delete_study">ক্ষেত্র মুছে ফেলুন</string>
     <string name="fields_delete_study_confirmation">আপনি কি নিশ্চিত যে আপনি ক্ষেত্রটি মুছে ফেলতে চান? এটি ক্ষেত্রের সাথে সম্পৃক্ত সমস্ত উপাত্তও মুছে দিবে।</string>
     <string name="fields_study_exists_message">এ নামের ক্ষেত্র ইতিমধ্যেই বিদ্যমান। আপনি কি বিদ্যমান ক্ষেত্রের উপরে লিখতে চান?</string>
-    <string name="fields_date_imported">উত্তোলনের তারিখ</string>
-    <string name="fields_date_edited">পরিমার্জনের তারিখ</string>
-    <string name="fields_date_exported">পাঠানোর তারিখ</string>
-    <string name="fields_summary">মাঠ সারাংশ</string>
-    <string name="fields_options">পছন্দ</string>
     <!-- Drawer strings -->
     <!-- Strings below here have not been integrated into the app -->
     <!-- Customization strings TODO -->

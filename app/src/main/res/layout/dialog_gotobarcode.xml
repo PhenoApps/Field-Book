@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
     android:orientation="vertical"
     android:padding="5dp">
 
@@ -18,9 +17,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:maxLength="200"
-            android:singleLine="true"
-            android:textColor="#000000"
-            android:textSize="@dimen/text_size_large" />
+            android:singleLine="true"/>
 
     </LinearLayout>
 

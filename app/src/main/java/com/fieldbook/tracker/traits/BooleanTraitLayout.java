@@ -140,14 +140,10 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
         if (state == ThreeState.OFF) newVal = "FALSE";
         //else if (state == ThreeState.NEUTRAL) newVal = "unset";
 
-        updateObservation(getCurrentTrait().getTrait(), type(), newVal);
-        getCollectInputView().setText(newVal);
-    }
-
-    @Override
-    public void refreshLayout(Boolean onNew) {
-        super.refreshLayout(onNew);
-        if (onNew) resetToDefault();
+        if (getCurrentTrait() != null) {
+            updateObservation(getCurrentTrait().getTrait(), type(), newVal);
+            getCollectInputView().setText(newVal);
+        }
     }
 
     @Override

@@ -20,8 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:orientation="horizontal"
-            android:paddingTop="20dp">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/minusDateBtn"
@@ -31,9 +30,7 @@
                 android:gravity="center|center_vertical"
                 android:minWidth="@dimen/button_default_width"
                 android:text="-1"
-                android:textColor="#000000"
-                android:textSize="@dimen/text_size_xlarge"
-                android:textStyle="bold" />
+                android:textSize="@dimen/text_size_xlarge" />
 
             <ImageButton
                 android:id="@+id/enterBtn"
@@ -45,7 +42,8 @@
                 android:gravity="center"
                 android:padding="10dp"
                 android:scaleType="fitXY"
-                android:src="@drawable/trait_date_save" />
+                android:src="@drawable/trait_date_save"
+                android:contentDescription="@string/trait_date_save_button_content_description" />
 
             <Button
                 android:id="@+id/addDateBtn"
@@ -55,9 +53,7 @@
                 android:gravity="center"
                 android:minWidth="@dimen/button_default_width"
                 android:text="+1"
-                android:textColor="#000000"
-                android:textSize="@dimen/text_size_xlarge"
-                android:textStyle="bold" />
+                android:textSize="@dimen/text_size_xlarge" />
 
         </LinearLayout>
 
@@ -73,5 +69,6 @@
             android:src="@drawable/ic_event_black_24dp" />
 
     </LinearLayout>
+
 </com.fieldbook.tracker.traits.DateTraitLayout>
 

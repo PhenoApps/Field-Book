@@ -1,29 +1,24 @@
 package com.fieldbook.tracker.adapters;
 
-import androidx.appcompat.app.AlertDialog;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.fieldbook.tracker.activities.ConfigActivity;
-import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.activities.CollectActivity;
+import androidx.appcompat.app.AlertDialog;
+
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.TraitEditorActivity;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.DialogUtils;
 
 import java.util.ArrayList;
@@ -37,11 +32,16 @@ public class TraitAdapter extends BaseAdapter {
 
     public Boolean infoDialogShown = false;
     public ArrayList<TraitObject> list;
-    private Context context;
-    private OnItemClickListener listener;
-    private HashMap visibility;
+    private final Context context;
+    private final OnItemClickListener listener;
+    private final HashMap<String, Boolean> visibility;
 
-    public TraitAdapter(Context context, int resource, ArrayList<TraitObject> list, OnItemClickListener listener, HashMap visibility, Boolean dialogShown) {
+    public TraitAdapter(Context context,
+                        int resource,
+                        ArrayList<TraitObject> list,
+                        OnItemClickListener listener,
+                        HashMap<String, Boolean> visibility,
+                        Boolean dialogShown) {
         this.context = context;
         this.list = list;
         this.listener = listener;
@@ -72,10 +72,10 @@ public class TraitAdapter extends BaseAdapter {
 
         if (convertView == null) {
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = vi.inflate(R.layout.listitem_trait, parent, false);
+            convertView = vi.inflate(R.layout.list_item_trait, parent, false);
 
             holder = new ViewHolder();
-            holder.name = convertView.findViewById(R.id.field_name);
+            holder.name = convertView.findViewById(R.id.list_item_trait_trait_name);
             holder.format = convertView.findViewById(R.id.traitType);
             holder.visible = convertView.findViewById(R.id.visible);
             holder.dragSort = convertView.findViewById(R.id.dragSort);
@@ -150,68 +150,56 @@ public class TraitAdapter extends BaseAdapter {
         // Check or uncheck the list items
         if (visibility != null) {
             if (visibility.get(holder.name.getText().toString()) != null) {
-                if (visibility.get(holder.name.getText().toString()).equals("true")) {
-                    holder.visible.setChecked(true);
-                } else {
-                    holder.visible.setChecked(false);
-                }
+                boolean vis = Boolean.TRUE.equals(visibility.get(holder.name.getText().toString()));
+                holder.visible.setChecked(vis);
             }
         }
 
-        holder.visible.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        holder.visible.setOnCheckedChangeListener((arg0, isChecked) -> {
+            String traitName = holder.name.getText().toString();
+            if (holder.visible.isChecked()) {
+                ((TraitAdapterController) context).getDatabase().updateTraitVisibility(traitName, true);
+                if (visibility != null) {
+                    visibility.put(traitName, true);
+                }
+            } else {
+                ((TraitAdapterController) context).getDatabase().updateTraitVisibility(traitName, false);
+                if (visibility != null) {
+                    visibility.put(traitName, false);
+                }
+            }
+        });
 
-            @Override
-            public void onCheckedChanged(CompoundButton arg0, boolean isChecked) {
-                if (holder.visible.isChecked()) {
-                    ConfigActivity.dt.updateTraitVisibility(holder.name.getText().toString(), true);
-                    visibility.put(holder.name.getText().toString(), "true");
+        // We make this separate form the on check changed listener so that we can
+        // separate the difference between user interaction and programmatic checking.
+        holder.visible.setOnClickListener(v -> {
 
+            // Only show dialog if it hasn't been show yet
+            if (!infoDialogShown) {
 
-                } else {
-                    ConfigActivity.dt.updateTraitVisibility(holder.name.getText().toString(), false);
-                    visibility.put(holder.name.getText().toString(), false);
+                // Check if the button is checked or not.
+                CheckBox visibleCheckBox = (CheckBox) v;
+                if (visibleCheckBox.isChecked()) {
+
+                    // Show our BrAPI info box if this is a non-BrAPI trait
+                    String traitName = holder.name.getText().toString();
+                    infoDialogShown = ((TraitAdapterController) context).displayBrapiInfo(context, traitName, false);
+
                 }
 
             }
         });
 
-        holder.visible.setOnClickListener(new OnClickListener() {
-            // We make this separate form the on check changed listener so that we can
-            // separate the difference between user interaction and programmatic checking.
+        holder.menuPopup.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(TraitEditorActivity.thisActivity, v);
+            //Inflating the Popup using xml file
+            popup.getMenuInflater().inflate(R.menu.menu_trait_list_item, popup.getMenu());
 
-            @Override
-            public void onClick(View v) {
+            //registering popup with OnMenuItemClickListener
+            popup.setOnMenuItemClickListener(createTraitListListener(parent, holder, v, position));
 
-                // Only show dialog if it hasn't been show yet
-                if (!infoDialogShown) {
+            popup.show();//showing popup menu
 
-                    // Check if the button is checked or not.
-                    CheckBox visibleCheckBox = (CheckBox) v;
-                    if (visibleCheckBox.isChecked()) {
-
-                        // Show our BrAPI info box if this is a non-BrAPI trait
-                        String traitName = holder.name.getText().toString();
-                        infoDialogShown = TraitEditorActivity.displayBrapiInfo(context, new DataHelper(context), traitName, false);
-
-                    }
-
-                }
-            }
-        });
-
-        holder.menuPopup.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                PopupMenu popup = new PopupMenu(TraitEditorActivity.thisActivity, v);
-                //Inflating the Popup using xml file
-                popup.getMenuInflater().inflate(R.menu.menu_trait_listitem, popup.getMenu());
-
-                //registering popup with OnMenuItemClickListener
-                popup.setOnMenuItemClickListener(createTraitListListener(parent, holder, v, position));
-
-                popup.show();//showing popup menu
-
-            }
         });
 
         return convertView;
@@ -220,23 +208,21 @@ public class TraitAdapter extends BaseAdapter {
     private PopupMenu.OnMenuItemClickListener createTraitListListener(
             final ViewGroup parent, final ViewHolder holder,
             final View v, final int position) {
-        return new PopupMenu.OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_copy))) {
-                    copyTrait(position);
-                } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_delete))) {
-                    deleteTrait(holder);
-                } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_edit))) {
-                    listener.onItemClick((AdapterView) parent, v, position, v.getId());
-                }
-
-                return false;
+        return item -> {
+            if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_copy))) {
+                copyTrait(position);
+            } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_delete))) {
+                deleteTrait(holder);
+            } else if (item.getTitle().equals(TraitEditorActivity.thisActivity.getString(R.string.traits_options_edit))) {
+                listener.onItemClick((AdapterView) parent, v, position, v.getId());
             }
+
+            return false;
         };
     }
 
     private void copyTrait(final int position) {
-        int pos = ConfigActivity.dt.getMaxPositionFromTraits() + 1;
+        int pos = ((TraitAdapterController) context).getDatabase().getMaxPositionFromTraits() + 1;
 
         String traitName = getItem(position).getTrait();
         final String newTraitName = copyTraitName(traitName);
@@ -246,9 +232,9 @@ public class TraitAdapter extends BaseAdapter {
         trait.setVisible(true);
         trait.setRealPosition(pos);
 
-        //MainActivity.dt.insertTraits(newTraitName, getItem(position).format, getItem(position).defaultValue, getItem(position).minimum, getItem(position).maximum, getItem(position).details, getItem(position).categories, "true", String.valueOf(pos));
-        ConfigActivity.dt.insertTraits(trait);
-        TraitEditorActivity.loadData();
+        ((TraitAdapterController) context).getDatabase().insertTraits(trait);
+        ((TraitAdapterController) context).queryAndLoadTraits();
+
         CollectActivity.reloadData = true;
     }
 
@@ -259,10 +245,10 @@ public class TraitAdapter extends BaseAdapter {
 
         String newTraitName = "";
 
-        String[] allTraits = ConfigActivity.dt.getAllTraits();
+        String[] allTraits = ((TraitAdapterController) context).getDatabase().getAllTraitNames();
 
         for (int i = 0; i < allTraits.length; i++) {
-            newTraitName = traitName + "-Copy-(" + Integer.toString(i) + ")";
+            newTraitName = traitName + "-Copy-(" + i + ")";
             if (!Arrays.asList(allTraits).contains(newTraitName)) {
                 return newTraitName;
             }
@@ -278,24 +264,24 @@ public class TraitAdapter extends BaseAdapter {
 
         builder.setPositiveButton(context.getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                ConfigActivity.dt.deleteTrait(holder.id);
-                TraitEditorActivity.loadData();
+                ((TraitAdapterController) context).getDatabase().deleteTrait(holder.id);
+
+                if (context instanceof TraitAdapterController) {
+                    ((TraitAdapterController) context).queryAndLoadTraits();
+                }
+
                 CollectActivity.reloadData = true;
             }
         });
 
-        builder.setNegativeButton(context.getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton(context.getString(R.string.dialog_no), (dialog, which) -> dialog.dismiss());
 
         AlertDialog alert = builder.create();
         alert.show();
         DialogUtils.styleDialogs(alert);
     }
 
-    private class ViewHolder {
+    private static class ViewHolder {
         TextView name;
         ImageView format;
         CheckBox visible;
